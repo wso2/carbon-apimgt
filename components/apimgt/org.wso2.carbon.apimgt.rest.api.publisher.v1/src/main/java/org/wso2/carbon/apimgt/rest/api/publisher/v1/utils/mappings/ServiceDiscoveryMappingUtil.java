@@ -12,29 +12,21 @@ import java.util.Map;
 
 /**
  * Convert list of services to th serviceListDTO
- *  servicesList list of services in the cluster
+ * servicesList list of services in the cluster
+ * Convert the list of types to the typeListDTO
  *
  *  */
 
 public class ServiceDiscoveryMappingUtil {
 
-
-//    public static void ( ServiceDiscoveriesInfoListDTO serviceListDTO,ServiceDiscoveryEndpoints endpointObj) {
-//        String serviceName;  String serviceURL ;
-//        Map properties ;  String proDetails;
-//
-//         List<Services> services;
-//
-//        services = endpointObj.getServices();
-//        List<ServiceDiscoveriesInfoDTO> list = ServiceDiscoveryMappingUtil.fromServiceListToServiceDiscoveriesInfoDTOList(endpointObj);
-//        serviceListDTO.setList(list);
-//        serviceListDTO.setType(endpointObj.getType());
-//        serviceListDTO.setCount(services.size());
-//
-//
-//
-//
-//    }
+    /**
+     * This method  set   pagination parameters
+     *
+     * @param limit max number of services returned
+     * @param offset starting index
+     * @param size total number of services
+     * @param serviceListDTO  DTO object for list of services
+     */
 public static void setPaginationParams(Object serviceListDTO, int offset, int limit, int size) {
 
     //acquiring pagination parameters and setting pagination urls
@@ -49,7 +41,8 @@ public static void setPaginationParams(Object serviceListDTO, int offset, int li
     }
 
     if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-        paginatedNext = RestApiUtil.getServiceDiscoveryPaginatedServices(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+        paginatedNext = RestApiUtil.getServiceDiscoveryPaginatedServices
+                (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                         paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
     }
 
@@ -58,25 +51,34 @@ public static void setPaginationParams(Object serviceListDTO, int offset, int li
     if (serviceListDTO instanceof ServiceDiscoveriesInfoListDTO) {
         ((ServiceDiscoveriesInfoListDTO)serviceListDTO).setPagination(paginationDTO);
     }
-//    else if (serviceListDTO instanceof APIListExpandedDTO) {
-//        ((APIListExpandedDTO)serviceListDTO).setPagination(paginationDTO);
-//    }
 }
-    public static void listToDTO(ServiceDiscoveriesInfoListDTO serviceListDTO, ServiceDiscoveryEndpoints endpointObj) {
-        String serviceName;  String serviceURL ;
-        Map properties ;  String proDetails;
 
+    /**
+     * This method  map endpointObj to serviceListDTO
+     *
+     * @param serviceListDTO  DTO object for list of services
+     * @param endpointObj , all services details as object
+     */
+    public static void listToDTO(ServiceDiscoveriesInfoListDTO serviceListDTO, ServiceDiscoveryEndpoints endpointObj) {
         List<Services> services;
 
         services = endpointObj.getServices();
-        List<ServiceDiscoveriesInfoDTO> list = ServiceDiscoveryMappingUtil.fromServiceListToServiceDiscoveriesInfoDTOList(endpointObj);
+        List<ServiceDiscoveriesInfoDTO> list =
+                ServiceDiscoveryMappingUtil.fromServiceListToServiceDiscoveriesInfoDTOList(endpointObj);
         serviceListDTO.setList(list);
         serviceListDTO.setType(endpointObj.getType());
         serviceListDTO.setCount(services.size());
     }
 
 
-    //fromServiceToServiceDTO
+
+    /**
+     * This method  map single service details to  serviceDTO
+     * fromServiceToServiceDTO
+     *
+     * @param servicesObj service object
+     * @return ServiceDiscoveriesInfoDTO object
+     */
     public static ServiceDiscoveriesInfoDTO fromServicesToServiceDiscoveriesInfoDTO(Services servicesObj){
         ServiceDiscoveriesInfoDTO serviceDTO = new ServiceDiscoveriesInfoDTO();
         serviceDTO.setServiceName(servicesObj.getServiceName());
@@ -85,72 +87,59 @@ public static void setPaginationParams(Object serviceListDTO, int offset, int li
         return serviceDTO;
 
     }
-    //fromServiceListTOServicesListDTO
-    public static List<ServiceDiscoveriesInfoDTO> fromServiceListToServiceDiscoveriesInfoDTOList(ServiceDiscoveryEndpoints endpointsObj){
+
+    /**
+     * This method  map list of  service  to  serviceListDTO list
+     * fromServiceListTOServicesListDTO
+     *
+     * @return list of ServiceDiscoveriesInfoDTO object
+     */
+    public static List<ServiceDiscoveriesInfoDTO> fromServiceListToServiceDiscoveriesInfoDTOList
+    (ServiceDiscoveryEndpoints endpointsObj){
        List< ServiceDiscoveriesInfoDTO> serviceListDTO = new ArrayList<>();
         List<Services> services = endpointsObj.getServices();
-        List<ServiceDiscoveriesInfoDTO> list = new ArrayList<>();
         for(Services s : services){
             ServiceDiscoveriesInfoDTO serviceDTO = fromServicesToServiceDiscoveriesInfoDTO(s);
-            list.add(serviceDTO);
+            serviceListDTO.add(serviceDTO);
         }
-        //serviceListDTO.setList(list);
-        return list;
+        return serviceListDTO;
     }
 
 
-//    public static void setPaginationParamsToTypes(Object typeListDTO, int offset, int limit, int size) {
-//
-//        //acquiring pagination parameters and setting pagination urls
-//        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
-//        String paginatedPrevious = "";
-//        String paginatedNext = "";
-//
-//        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-//            paginatedPrevious = RestApiUtil
-//                    .getServiceDiscoveryPaginatedServices(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-//                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
-//        }
-//
-//        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-//            paginatedNext = RestApiUtil.getServiceDiscoveryPaginatedServices(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-//                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
-//        }
-//
-//        PaginationDTO paginationDTO = CommonMappingUtil
-//                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
-//        if (typeListDTO instanceof ServiceDiscoverySystemTypeListDTO) {
-//            ((ServiceDiscoverySystemTypeListDTO)typeListDTO).setPagination(paginationDTO);
-//        }
-////    else if (serviceListDTO instanceof APIListExpandedDTO) {
-////        ((APIListExpandedDTO)serviceListDTO).setPagination(paginationDTO);
-////    }
-//    }
-
+    /**
+     * This method  map list of  types  to  ServiceDiscoverySystemTypeListDTO list
+     *
+     */
     public static void typeListToDTO(ServiceDiscoverySystemTypeListDTO typeListDTO, List<String> types) {
-
 
         List<TypeInfoDTO> list = ServiceDiscoveryMappingUtil.fromTypeListToServiceDiscoverySystemTypeDTOList(types);
         typeListDTO.setList(list);
         typeListDTO.setCount(list.size());
     }
 
-    //fromServiceToServiceDTO
+    /**
+     * This method  map  type  to  TypeInfoDTO
+     * fromtype to typeDTO
+     *
+     */
     public static TypeInfoDTO fromTypesToTypeInfoDTO(String type){
-//        ServiceDiscoveryEndpoints endpointsObj = new ServiceDiscoveryEndpoints();
         TypeInfoDTO typeDTO = new TypeInfoDTO();
         typeDTO.setName(type);
         return typeDTO;
 
     }
-    //fromServiceListTOServicesListDTO
+
+    /**
+     * This method  map  list of type  to  TypeInfoDTO list
+     * from type list to TypeInfoDTO list
+     *
+     */
     public static List<TypeInfoDTO> fromTypeListToServiceDiscoverySystemTypeDTOList(List<String> types){
         List<TypeInfoDTO> list = new ArrayList<>();
         for(String s : types){
             TypeInfoDTO typeDTO = fromTypesToTypeInfoDTO(s);
             list.add(typeDTO);
         }
-        //serviceListDTO.setList(list);
         return list;
     }
 

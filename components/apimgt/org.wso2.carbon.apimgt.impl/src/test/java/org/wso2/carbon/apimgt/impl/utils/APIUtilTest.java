@@ -1998,7 +1998,8 @@ public class APIUtilTest {
 
 
     @Test
-    public void  testGetServiceDiscoveryConfigurationForSuperTenant () throws APIManagementException, UserStoreException, org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
+    public void  testGetServiceDiscoveryConfigurationForSuperTenant () throws  UserStoreException,
+            org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
         String tenantDomain ="carbon.super";
         String type ="Kubernetes";
         PowerMockito.mockStatic(APIUtil.class);
@@ -2010,17 +2011,19 @@ public class APIUtilTest {
         else {
 
             APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
             JSONParser jsonParser = new JSONParser();
             JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryTypesFromConfig(tenantConf, type);
+            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfigurationFromTenantConfig(tenantConf, type);
 
         }
         Assert.assertNotNull(serviceDiscoveryConfMap);
     }
 
     @Test
-    public void   testGetServiceDiscoveryConfigurationForTenant () throws APIManagementException, UserStoreException, org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
+    public void   testGetServiceDiscoveryConfigurationForTenant () throws  UserStoreException,
+            org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
         String tenantDomain ="wso2user@wso2.com";
         String type ="Kubernetes";
         PowerMockito.mockStatic(APIUtil.class);
@@ -2032,26 +2035,6 @@ public class APIUtilTest {
         }
         else {
             String testContent = "{\n" +
-                    "  \"EnableMonetization\" : false,\n" +
-                    "  \"IsUnlimitedTierPaid\" : false,\n" +
-                    "  \"ContainerMgtInfo\": {\n" +
-                    "    \"Type\": \"Kubernetes\",\n" +
-                    "    \"ClassName\": \"org.wso2.carbon.apimgt.impl.containermgt.K8sManager\",\n" +
-                    "    \"ClusterInfo\": [\n" +
-                    "      {\n" +
-                    "        \"Name\": \"\",\n" +
-                    "        \"Properties\": {\n" +
-                    "          \"MasterURL\": \"\",\n" +
-                    "          \"SAToken\": \"\",\n" +
-                    "          \"Namespace\": \"default\",\n" +
-                    "          \"Replicas\": 1,\n" +
-                    "          \"BasicSecurityCustomResourceName\": \"\",\n" +
-                    "          \"OauthSecurityCustomResourceName\": \"\",\n" +
-                    "          \"JWTSecurityCustomResourceName\": \"\"\n" +
-                    "        }\n" +
-                    "      }\n" +
-                    "    ]\n" +
-                    "  },\n" +
                     "  \"ServiceDiscovery\":{\n" +
                     "    \"enable\":\"true\",\n" +
                     "    \"ServiceDiscoveryTypes\":[\n" +
@@ -2060,7 +2043,16 @@ public class APIUtilTest {
                     "        \"DisplayName\":\"K8s\",\n" +
                     "        \"ImplParameters\":{\n" +
                     "          \"MasterURL\":\"https://192.168.99.104:8443\u200B\",\n" +
-                    "          \"SAToken\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im15c2VydmljZWFjYy10b2tlbi1scTJ6OCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJteXNlcnZpY2VhY2MiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1OTFkM2VlZS01NTNiLTRjZjctYjA3NS01M2RmYzAzMWUxZGQiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpteXNlcnZpY2VhY2MifQ.Ga_LgtM5iUg5LNgJygmCPZh3wBOy42JU3oUjtV6ctbkoFWCVtszNO3c2flnnzlZkFUVVdohMrYUcKxGWqWh_Pt5uAFuUgOWb16qoC-2suugRRXRtqxH21yWiVjoTUDi65JHTC1iIpkKk997ib0WZ5X_aac9txkETgOAF098bcSPWzjTZNEdSpZvwz5iBeNlTLM2lrGg2ofUXYZpQaCuF473ygihHIEgHu8ZQQNJsS54tQ0wXfSq6SI01NdXwo_8DXT6UQU_1iT9ChGXhvPNc0JS-qfbeSEBfVn94PN1Ror8SI_UsXS2oyA7WSVJ3bMylQHV4Hzp8fZGpSAdlvJDYQA\",\n" +
+                    "          \"SAToken\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2" +
+                    "NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pb" +
+                    "y9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im15c2VydmljZWFjYy10b2tlbi1scTJ6OCIsImt1YmVybmV0ZXMuaW8v" +
+                    "c2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJteXNlcnZpY2VhY2MiLCJrdWJlcm5ldGVzLmlvL3NlcnZ" +
+                    "pY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1OTFkM2VlZS01NTNiLTRjZjctYjA3NS01M2RmYzAzMWUxZGQiLC" +
+                    "JzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpteXNlcnZpY2VhY2MifQ.Ga_LgtM5iUg5LNgJygmCPZh3wB" +
+                    "Oy42JU3oUjtV6ctbkoFWCVtszNO3c2flnnzlZkFUVVdohMrYUcKxGWqWh_Pt5uAFuUgOWb16qoC-2suugRRXRtqxH21yWiV" +
+                    "joTUDi65JHTC1iIpkKk997ib0WZ5X_aac9txkETgOAF098bcSPWzjTZNEdSpZvwz5iBeNlTLM2lrGg2ofUXYZpQaCuF473y" +
+                    "gihHIEgHu8ZQQNJsS54tQ0wXfSq6SI01NdXwo_8DXT6UQU_1iT9ChGXhvPNc0JS-qfbeSEBfVn94PN1Ror8SI_UsXS2oyA7" +
+                    "WSVJ3bMylQHV4Hzp8fZGpSAdlvJDYQA\",\n" +
                     "          \"Namespace\":\"default\"\n" +
                     "        }\n" +
                     "      },\n" +
@@ -2074,14 +2066,15 @@ public class APIUtilTest {
             String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
             JSONParser jsonParser = new JSONParser();
             JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryTypesFromConfig(tenantConf, type);
+            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfigurationFromTenantConfig(tenantConf, type);
 
         }
         Assert.assertNotNull(serviceDiscoveryConfMap);
     }
 
     @Test
-    public void   testGetTypesServiceDiscoveryConfigurationForSuperTenant ( ) throws APIManagementException, UserStoreException, org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
+    public void   testGetTypesServiceDiscoveryConfigurationForSuperTenant ( ) throws  UserStoreException,
+            org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
         String tenantDomain ="carbon.super";
         List <String> types = new ArrayList<>();
         PowerMockito.mockStatic(APIUtil.class);
@@ -2091,7 +2084,8 @@ public class APIUtilTest {
         else {
 
             APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
             JSONParser jsonParser = new JSONParser();
             JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
             types = APIUtil.getTypesOfServiceDiscoveryFromConfig(tenantConf);
@@ -2102,7 +2096,8 @@ public class APIUtilTest {
     }
 
     @Test
-    public void  testGetTypesServiceDiscoveryConfigurationForTenant ( ) throws APIManagementException, UserStoreException, org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
+    public void  testGetTypesServiceDiscoveryConfigurationForTenant ( ) throws  UserStoreException,
+            org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
         String tenantDomain ="wso2user@wso2.com";
         List <String> types = new ArrayList<>();
         PowerMockito.mockStatic(APIUtil.class);
@@ -2112,26 +2107,6 @@ public class APIUtilTest {
         }
         else {
             String testContent = "{\n" +
-                    "  \"EnableMonetization\" : false,\n" +
-                    "  \"IsUnlimitedTierPaid\" : false,\n" +
-                    "  \"ContainerMgtInfo\": {\n" +
-                    "    \"Type\": \"Kubernetes\",\n" +
-                    "    \"ClassName\": \"org.wso2.carbon.apimgt.impl.containermgt.K8sManager\",\n" +
-                    "    \"ClusterInfo\": [\n" +
-                    "      {\n" +
-                    "        \"Name\": \"\",\n" +
-                    "        \"Properties\": {\n" +
-                    "          \"MasterURL\": \"\",\n" +
-                    "          \"SAToken\": \"\",\n" +
-                    "          \"Namespace\": \"default\",\n" +
-                    "          \"Replicas\": 1,\n" +
-                    "          \"BasicSecurityCustomResourceName\": \"\",\n" +
-                    "          \"OauthSecurityCustomResourceName\": \"\",\n" +
-                    "          \"JWTSecurityCustomResourceName\": \"\"\n" +
-                    "        }\n" +
-                    "      }\n" +
-                    "    ]\n" +
-                    "  },\n" +
                     "  \"ServiceDiscovery\":{\n" +
                     "    \"enable\":\"true\",\n" +
                     "    \"ServiceDiscoveryTypes\":[\n" +
@@ -2140,7 +2115,16 @@ public class APIUtilTest {
                     "        \"DisplayName\":\"K8s\",\n" +
                     "        \"ImplParameters\":{\n" +
                     "          \"MasterURL\":\"https://192.168.99.104:8443\u200B\",\n" +
-                    "          \"SAToken\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im15c2VydmljZWFjYy10b2tlbi1scTJ6OCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJteXNlcnZpY2VhY2MiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1OTFkM2VlZS01NTNiLTRjZjctYjA3NS01M2RmYzAzMWUxZGQiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpteXNlcnZpY2VhY2MifQ.Ga_LgtM5iUg5LNgJygmCPZh3wBOy42JU3oUjtV6ctbkoFWCVtszNO3c2flnnzlZkFUVVdohMrYUcKxGWqWh_Pt5uAFuUgOWb16qoC-2suugRRXRtqxH21yWiVjoTUDi65JHTC1iIpkKk997ib0WZ5X_aac9txkETgOAF098bcSPWzjTZNEdSpZvwz5iBeNlTLM2lrGg2ofUXYZpQaCuF473ygihHIEgHu8ZQQNJsS54tQ0wXfSq6SI01NdXwo_8DXT6UQU_1iT9ChGXhvPNc0JS-qfbeSEBfVn94PN1Ror8SI_UsXS2oyA7WSVJ3bMylQHV4Hzp8fZGpSAdlvJDYQA\",\n" +
+                    "          \"SAToken\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY" +
+                    "2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5" +
+                    "pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im15c2VydmljZWFjYy10b2tlbi1scTJ6OCIsImt1YmVybmV0ZXMua" +
+                    "W8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJteXNlcnZpY2VhY2MiLCJrdWJlcm5ldGVzLmlvL3N" +
+                    "lcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1OTFkM2VlZS01NTNiLTRjZjctYjA3NS01M2RmYzAzMWUxZ" +
+                    "GQiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpteXNlcnZpY2VhY2MifQ.Ga_LgtM5iUg5LNgJygmC" +
+                    "PZh3wBOy42JU3oUjtV6ctbkoFWCVtszNO3c2flnnzlZkFUVVdohMrYUcKxGWqWh_Pt5uAFuUgOWb16qoC-2suugRRXRtqx" +
+                    "H21yWiVjoTUDi65JHTC1iIpkKk997ib0WZ5X_aac9txkETgOAF098bcSPWzjTZNEdSpZvwz5iBeNlTLM2lrGg2ofUXYZpQ" +
+                    "aCuF473ygihHIEgHu8ZQQNJsS54tQ0wXfSq6SI01NdXwo_8DXT6UQU_1iT9ChGXhvPNc0JS-qfbeSEBfVn94PN1Ror8SI_" +
+                    "UsXS2oyA7WSVJ3bMylQHV4Hzp8fZGpSAdlvJDYQA\",\n" +
                     "          \"Namespace\":\"default\"\n" +
                     "        }\n" +
                     "      },\n" +
@@ -2148,10 +2132,12 @@ public class APIUtilTest {
                     "  }, \n" +
                     "}";
 
-            APIMRegistryService apimRegistryService = Mockito.mock(APIMRegistryServiceImpl.class); //new APIMRegistryServiceImpl();
-            Mockito.when(apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(testContent);
+            APIMRegistryService apimRegistryService = Mockito.mock(APIMRegistryServiceImpl.class);
+            Mockito.when(apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(testContent);
 
-            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
             JSONParser jsonParser = new JSONParser();
             JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
             types = APIUtil.getTypesOfServiceDiscoveryFromConfig(tenantConf);
@@ -2162,7 +2148,9 @@ public class APIUtilTest {
 
 
     @Test
-    public  void testGenerateClassObjectForSuperTenant() throws UserStoreException, org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException, APIManagementException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public  void testGenerateClassObject() throws UserStoreException,
+            org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException, ClassNotFoundException,
+            IllegalAccessException, InstantiationException {
         PowerMockito.mockStatic(APIUtil.class);
         String type = "Kubernetes";
         String testImplCkassName ="org.wso2.carbon.apimgt.impl.containermgt.K8sServiceDiscovery";

@@ -1,5 +1,9 @@
 package org.wso2.carbon.apimgt.api.model;
 
+/**
+ * This class is to handle impl parameters to connect with the clusters
+ *
+ */
 public class ServiceDiscoveryConf {
 
     private String masterURL;

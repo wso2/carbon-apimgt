@@ -1,6 +1,9 @@
 package org.wso2.carbon.apimgt.api.model;
 
-
+/**
+ * This class is to handle configuration details for cluster
+ *
+ */
 public class ServiceDiscoveryConfigurations {
     private boolean enabled = false;
     private String type;

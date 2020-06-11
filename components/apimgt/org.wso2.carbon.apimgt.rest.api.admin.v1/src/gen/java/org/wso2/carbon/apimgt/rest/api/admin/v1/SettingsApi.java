@@ -31,13 +31,13 @@ import javax.validation.constraints.*;
 
 public class SettingsApi  {
 
-    @Context MessageContext securityContext;
+  @Context MessageContext securityContext;
 
-    SettingsApiService delegate = new SettingsApiServiceImpl();
+SettingsApiService delegate = new SettingsApiServiceImpl();
 
 
     @GET
-
+    
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Retreive admin settings", notes = "Retreive admin settings ", response = SettingsDTO.class, authorizations = {
@@ -46,7 +46,7 @@ public class SettingsApi  {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Settings" })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK. Settings returned ", response = SettingsDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
     public Response settingsGet() throws APIManagementException{

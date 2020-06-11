@@ -36,7 +36,10 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
 
 
     private static final Logger log = LoggerFactory.getLogger(ServiceDiscovery.class);
-
+    /**
+     * Initialize the class
+     * @param implParametersDetails Map relating to the cluster information
+     */
     @Override
     public void initManager(Map implParametersDetails){
 
@@ -44,8 +47,12 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
         setClient();
     }
 
+    /**
+     * Sets the openshift client( This supprots both the Openshift and Kubernetes)
+     */
     protected void setClient(){
-        Config serviceConfig = new ConfigBuilder().withMasterUrl(masterURL).withOauthToken(saToken).withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
+        Config serviceConfig = new ConfigBuilder().withMasterUrl(masterURL).withOauthToken(saToken).
+                withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
         this.openShiftClient = new DefaultOpenShiftClient(serviceConfig);
 
     }
@@ -57,15 +64,17 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
     }
 
 
+    /**
+     * List all services in the specified cluster
+     */
     public ServiceDiscoveryEndpoints listServices(){
 
         JSONObject propertiesJson = new JSONObject();
         List<Service> myServices = openShiftClient.services().inAnyNamespace().list().getItems();
-
         for (Service service : myServices) {
             String serviceName = service.getMetadata().getName();
             String namespace = service.getMetadata().getNamespace();
-
+           String creatingTimeStamp = service.getMetadata().getCreationTimestamp();
 
             ServiceSpec serviceSpec = service.getSpec();
 
@@ -74,19 +83,15 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
             List<String> externalIP = serviceSpec.getExternalIPs();
             List<ServicePort> portSpec = serviceSpec.getPorts();
 
-
-
             for(ServicePort portList:portSpec){
                 ContainerBasedConstants.TARGET_PORT = String.valueOf(portList.getTargetPort().getIntVal());
                 PROTOCOL = portList.getProtocol();
-
             }
 
             Services servicesListObj = new Services();
-
             servicesListObj.setServiceName(serviceName);
             servicesListObj.setServiceURL(masterURL);
-
+            servicesListObj.setCreatingTimeStamp(creatingTimeStamp);
 
             propertiesJson.put("Namespace",namespace);
             propertiesJson.put("ServiceType",serviceType);
@@ -96,6 +101,9 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
 
             servicesListObj.setProperties(propertiesJson.toString());
             allServices.add(servicesListObj);
+            allServices.sort(Comparator.comparing(Services::getCreatingTimeStamp));
+//            allServices.sort((e1, e2) -> e1.getCreatingTimeStamp().compareTo(e2.getCreatingTimeStamp()));
+
 
         }
         endpointObj.setType(type);
@@ -104,7 +112,13 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
         return endpointObj ;
     }
 
-    public ServiceDiscoveryEndpoints listSubSetOfServices( int offset, int limit) throws IllegalAccessException, ParseException, InstantiationException, ClassNotFoundException, UserStoreException, APIManagementException, RegistryException {
+    /**
+     * List the subset of the services according to the offset and limit value
+     * @param offset starting index
+     * @param limit max number of services returned
+     *
+     */
+    public ServiceDiscoveryEndpoints listSubSetOfServices( int offset, int limit){
         ServiceDiscoveryEndpoints subEndpointObj = new ServiceDiscoveryEndpoints();
         endpointObj = listServices();
         int length = endpointObj.getServices().size();
@@ -122,6 +136,9 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
 
     }
 
+    /**
+     * @return total number of services
+     */
     public int getNumberOfServices(){
         int totalNumberOfServices = 0;
         endpointObj = listServices();

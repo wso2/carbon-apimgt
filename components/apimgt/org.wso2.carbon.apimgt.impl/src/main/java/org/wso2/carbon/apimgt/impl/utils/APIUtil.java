@@ -11071,15 +11071,22 @@ public final class APIUtil {
 
 
 
+    /**
+     * returns cluster configuration from tenant-conf for a specific type
+     * @param type service discovery system type
+     * @param tenantConf tenant conf content
+     * @return Map of configuration
+     */
+    public static Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryConfigurationFromTenantConfig
+    (JSONObject tenantConf, String type)  {
 
-    public static Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryTypesFromConfig(JSONObject tenantConf, String type)  {
-
-        JSONArray serviceDiscoveryTypes = (JSONArray) ((JSONObject) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY))
-                .get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
+        JSONArray serviceDiscoveryTypes = (JSONArray) ((JSONObject) tenantConf
+                .get(ContainerBasedConstants.SERVICE_DISCOVERY)).get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
         Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
 
         for (Object types : serviceDiscoveryTypes) {
-            JSONObject implParametersJsonObj = (JSONObject) ((JSONObject) types).get(ContainerBasedConstants.IMPL_PARAMETERS);
+            JSONObject implParametersJsonObj = (JSONObject) ((JSONObject) types)
+                    .get(ContainerBasedConstants.IMPL_PARAMETERS);
             String sType = ((JSONObject) types).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
             String displayName = ((JSONObject) types).get(ContainerBasedConstants.DISPLAY_NAME).toString();
             ServiceDiscoveryConfigurations serviceConfObj = new ServiceDiscoveryConfigurations();
@@ -11091,7 +11098,6 @@ public final class APIUtil {
                 Iterator<String> iterator = implParametersJsonObj.keySet().iterator();
                 Map<String, Object> implParametersMap = new HashMap<String, Object>();
                 while (iterator.hasNext()) {
-
                     String key = iterator.next();
                     String value = implParametersJsonObj.get(key).toString();
                     implParametersMap.put(key, value);
@@ -11106,19 +11112,16 @@ public final class APIUtil {
                 serviceConfObj.setImplParameters(implParametersObj);
                 serviceDiscoveryConfMap.put(sType, serviceConfObj);
             }
-
         }
         return serviceDiscoveryConfMap;
     }
 
 
-
-
-
-
-
-
-
+    /**
+     * returns cluster configuration from xml  for a specific type
+     * @param type service discovery system type
+     * @return Map of configuration
+     */
 public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryConfigurationFromXML(String type){
     ServiceDiscoveryConfigurations serviceConfObj = new ServiceDiscoveryConfigurations();
     ServiceDiscoveryConf implParametersObj = new ServiceDiscoveryConf();
@@ -11133,12 +11136,7 @@ public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryCo
     for (int i = 0; i < serviceDiscovery.size(); i++){
         serviceDiscoveryConfig = new ObjectMapper().convertValue(serviceDiscovery.get(i),
                 Map.class);
-
-//        String enabled = (String) serviceDiscoveryConfig.get("enabled");
         String sType = (String)serviceDiscoveryConfig.get("type");
-//        System.out.println("enable\n\n " + enabled);
-//        System.out.println("\n\n" +enable.equalsIgnoreCase("true") );
-//        if(enable.equalsIgnoreCase("true")){
             if(type.equalsIgnoreCase(sType)){
                 String className =(String)serviceDiscoveryConfig.get("ClassName");
                 String displayName = (String)serviceDiscoveryConfig.get("DisplayName");
@@ -11159,15 +11157,18 @@ public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryCo
                 serviceDiscoveryConfMap.put(sType,serviceConfObj);
 
             }
-//        }
-
     }
     return serviceDiscoveryConfMap;
 }
 
-
-
-    public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryConfiguration ( String tenantDomain, String type) throws APIManagementException, UserStoreException, RegistryException, ParseException {
+    /**
+     * returns cluster configuration specific type
+     * @param type service discovery system type
+     * @param tenantDomain tenant domain
+     * @return Map of configuration
+     */
+    public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryConfiguration
+    ( String tenantDomain, String type) throws  UserStoreException, RegistryException, ParseException {
         Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
 
         if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -11176,16 +11177,23 @@ public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryCo
         else {
 
             APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
             JSONParser jsonParser = new JSONParser();
             JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryTypesFromConfig(tenantConf, type);
+            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfigurationFromTenantConfig(tenantConf, type);
 
         }
         return serviceDiscoveryConfMap;
     }
 
-    public static  List<String> getTypesServiceDiscoveryConfiguration ( String tenantDomain) throws APIManagementException, UserStoreException, RegistryException, ParseException {
+    /**
+     * returns service discovery system types
+     * @param tenantDomain tenant domain
+     * @return List of types
+     */
+    public static  List<String> getTypesServiceDiscoveryConfiguration ( String tenantDomain) throws
+            UserStoreException, RegistryException, ParseException {
         List <String> types = new ArrayList<>();
 
         if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -11194,7 +11202,8 @@ public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryCo
         else {
 
             APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
             JSONParser jsonParser = new JSONParser();
             JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
             types = APIUtil.getTypesOfServiceDiscoveryFromConfig(tenantConf);
@@ -11204,7 +11213,14 @@ public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryCo
     }
 
 
-        public static ServiceDiscovery generateClassObject(String type) throws UserStoreException, RegistryException, ParseException, APIManagementException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    /**
+     * generate object of a class that mentiond in configuration
+     * @param type service discovery system type
+     * @return class object
+     */
+    public static ServiceDiscovery generateClassObject(String type) throws UserStoreException, RegistryException,
+            ParseException, APIManagementException, ClassNotFoundException, IllegalAccessException,
+            InstantiationException {
         Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
         serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration("carbon.super",type);
         for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ) {
@@ -11219,6 +11235,10 @@ public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryCo
     }
 
 
+    /**
+     * returns service discovery system types from xml
+     * @return List of types
+     */
     public static  List<String> getTypesOfServiceDiscoveryConfigurationFromXML(){
 
         JSONArray serviceDiscovery;
@@ -11238,10 +11258,14 @@ public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryCo
         return types;
     }
 
+    /**
+     * returns service discovery system types from tenant conf
+     * @return List of types
+     */
     public static List<String> getTypesOfServiceDiscoveryFromConfig(JSONObject tenantConf)  {
 
-        JSONArray serviceDiscoveryTypes = (JSONArray) ((JSONObject) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY))
-                .get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
+        JSONArray serviceDiscoveryTypes = (JSONArray) ((JSONObject) tenantConf
+                .get(ContainerBasedConstants.SERVICE_DISCOVERY)).get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
         List <String> types = new ArrayList<>();
         for (Object config : serviceDiscoveryTypes) {
             String type = ((JSONObject) config).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
@@ -11249,9 +11273,6 @@ public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryCo
         }
         return types;
     }
-
-
-
 
 }
 

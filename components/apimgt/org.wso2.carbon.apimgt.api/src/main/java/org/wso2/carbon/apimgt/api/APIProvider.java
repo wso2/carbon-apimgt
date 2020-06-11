@@ -1500,11 +1500,14 @@ public interface APIProvider extends APIManager {
      */
     List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
 
-    ServiceDiscoveryEndpoints getServiceDiscoveryEndpoints(String type, String username, int offset , int limit) throws UserStoreException,
-            RegistryException, ParseException, APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException;
+    ServiceDiscoveryEndpoints getServiceDiscoveryEndpoints(String type, String username, int offset , int limit) throws
+            UserStoreException, RegistryException, ParseException, APIManagementException, IllegalAccessException,
+            InstantiationException, ClassNotFoundException;
 
-    int getNumberOfAllServices (String type) throws UserStoreException, RegistryException, ParseException, APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException;
+    int getNumberOfAllServices (String type) throws UserStoreException, RegistryException, ParseException,
+            APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException;
 
-     List<String> getServiceDiscoveryTypes(String username) throws UserStoreException, RegistryException, ParseException, APIManagementException ,ClassNotFoundException;
+     List<String> getServiceDiscoveryTypes(String username) throws UserStoreException, RegistryException, ParseException,
+             APIManagementException ,ClassNotFoundException;
 
     }

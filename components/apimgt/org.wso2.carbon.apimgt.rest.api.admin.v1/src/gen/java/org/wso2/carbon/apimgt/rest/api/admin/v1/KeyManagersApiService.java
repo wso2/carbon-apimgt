@@ -23,6 +23,8 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface KeyManagersApiService {
       public Response keyManagersGet(MessageContext messageContext) throws APIManagementException;
+      public Response keyManagersKeyManagerIdDelete(String keyManagerId, MessageContext messageContext) throws APIManagementException;
       public Response keyManagersKeyManagerIdGet(String keyManagerId, MessageContext messageContext) throws APIManagementException;
+      public Response keyManagersKeyManagerIdPut(String keyManagerId, KeyManagerDTO body, MessageContext messageContext) throws APIManagementException;
       public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException;
 }
