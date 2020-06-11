@@ -32,7 +32,7 @@ import Alert from 'AppComponents/Shared/Alert';
  * @returns {JSX} Header AppBar components.
  */
 function FormDialogBase({
-    title, children, icon, triggerButtonText, saveButtonText, formSaveCallback, dialogOpenCallback,
+    title, children, icon, triggerButtonText, saveButtonText, triggerButtonProps, formSaveCallback, dialogOpenCallback,
 }) {
     const [open, setOpen] = React.useState(false);
     const [saving, setSaving] = useState(false);
@@ -48,9 +48,10 @@ function FormDialogBase({
 
     const saveTriggerd = () => {
         const savedPromise = formSaveCallback();
-        if (savedPromise) {
+        if (typeof savedPromise === 'function') {
+            savedPromise(setOpen);
+        } else if (savedPromise) {
             setSaving(true);
-
             savedPromise.then((data) => {
                 Alert.success(data);
             }).catch((e) => {
@@ -70,7 +71,8 @@ function FormDialogBase({
                 </IconButton>
             )}
             {triggerButtonText && (
-                <Button variant='contained' color='primary' onClick={handleClickOpen}>
+                // eslint-disable-next-line react/jsx-props-no-spreading
+                <Button {...triggerButtonProps} onClick={handleClickOpen}>
                     {triggerButtonText}
                 </Button>
             )}
@@ -94,6 +96,10 @@ function FormDialogBase({
 }
 FormDialogBase.defaultProps = {
     dialogOpenCallback: () => {},
+    triggerButtonProps: {
+        variant: 'contained',
+        color: 'primary',
+    },
 };
 
 FormDialogBase.propTypes = {
@@ -102,6 +108,7 @@ FormDialogBase.propTypes = {
     icon: PropTypes.element.isRequired,
     triggerButtonText: PropTypes.string.isRequired,
     saveButtonText: PropTypes.string.isRequired,
+    triggerButtonProps: PropTypes.shape({}),
     formSaveCallback: PropTypes.func.isRequired,
     dialogOpenCallback: PropTypes.func,
 };

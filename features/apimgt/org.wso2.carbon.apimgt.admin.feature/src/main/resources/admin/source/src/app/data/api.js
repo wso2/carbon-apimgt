@@ -128,6 +128,64 @@ class API extends Resource {
         });
         return promisedSettings.then(response => response.body);
     }
+    /**
+     * Get list of advanced throttling policies
+     */
+    getThrottlingPoliciesAdvanced() {
+        return this.client.then((client) => {
+            return client.apis['Advanced Policy (Collection)'].get_throttling_policies_advanced(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get list of api categories
+     */
+    getThrottlingPoliciesAdvancedPolicyId(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Advanced Policy (Individual)'].get_throttling_policies_advanced__policyId_(
+                {policyId: policyId},
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Add new advanced polcy
+     */
+    putThrottlingPoliciesAdvanced(policyId, policy) {
+        return this.client.then((client) => {
+            return client.apis['Advanced Policy (Individual)'].put_throttling_policies_advanced__policyId_(
+                {policyId: policyId, body: policy},
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * update polcy
+     */
+    postThrottlingPoliciesAdvanced(policy) {
+        return this.client.then((client) => {
+            return client.apis['Advanced Policy (Collection)'].post_throttling_policies_advanced(
+                {body: policy},
+                this._requestMetaData(),
+            );
+        });
+    }
+    /**
+     * delete polcy
+     */
+    deleteThrottlingPoliciesAdvanced(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Advanced Policy (Individual)'].delete_throttling_policies_advanced__policyId_(
+                {policyId: policyId},
+                this._requestMetaData(),
+            );
+        });
+    }
+
 
     /**
      * Get list of api categories
