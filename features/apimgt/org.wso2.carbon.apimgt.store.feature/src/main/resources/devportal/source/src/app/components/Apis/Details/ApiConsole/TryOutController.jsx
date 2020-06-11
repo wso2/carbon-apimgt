@@ -17,9 +17,9 @@
  */
 
 import React, {
-    useEffect, useState, useContext,
+    useEffect, useState,
 } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, IntlProvider } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
@@ -37,7 +37,6 @@ import AuthManager from 'AppData/AuthManager';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
-import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
 import Application from '../../../../data/Application';
@@ -104,7 +103,7 @@ function TryOutController(props) {
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
         setSecurityScheme, setUsername, setPassword, username, password,
-        setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey, environmentObject, setURLs,
+        setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey, environmentObject, setURLs, api,
     } = props;
     const classes = styles();
 
@@ -113,30 +112,28 @@ function TryOutController(props) {
     const [notFound, setNotFound] = useState(false);
     const [subscriptions, setSubscriptions] = useState([]);
     const [selectedApplication, setSelectedApplication] = useState([]);
-    const { api } = useContext(ApiContext);
     const apiID = api.id;
     const restApi = new Api();
 
     useEffect(() => {
-        let selectedEnvironments;
-        let subscriptionsList;
-        let selectedApplicationList;
-        let keys;
-        let selectedKeyTypes = 'PRODUCTION';
-        let accessToken;
-        const promiseSubscriptions = restApi.getSubscriptions(apiID);
-        promiseSubscriptions.then((subscriptionsResponse) => {
-            if (subscriptionsResponse !== null) {
-                subscriptionsList = subscriptionsResponse.obj.list.filter((item) => item.status === 'UNBLOCKED'
-                || item.status === 'PROD_ONLY_BLOCKED');
+        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+            let selectedEnvironments;
+            let subscriptionsList;
+            let selectedApplicationList;
+            let keys;
+            let selectedKeyTypes = 'PRODUCTION';
+            let accessToken;
+            const promiseSubscriptions = restApi.getSubscriptions(apiID);
+            promiseSubscriptions.then((subscriptionsResponse) => {
+                if (subscriptionsResponse !== null) {
+                    subscriptionsList = subscriptionsResponse.obj.list.filter((item) => item.status === 'UNBLOCKED'
+                    || item.status === 'PROD_ONLY_BLOCKED');
 
-                if (subscriptionsList && subscriptionsList.length > 0) {
-                    selectedApplicationList = subscriptionsList[0].applicationId;
-                    Application.get(selectedApplicationList)
-                        .then((application) => {
+                    if (subscriptionsList && subscriptionsList.length > 0) {
+                        selectedApplicationList = subscriptionsList[0].applicationId;
+                        Application.get(selectedApplicationList).then((application) => {
                             return application.getKeys();
-                        })
-                        .then((appKeys) => {
+                        }).then((appKeys) => {
                             if (appKeys.get('SANDBOX')) {
                                 selectedKeyTypes = 'SANDBOX';
                                 ({ accessToken } = appKeys.get('SANDBOX').token);
@@ -155,6 +152,18 @@ function TryOutController(props) {
                                 setSandboxAccessToken(accessToken);
                             }
                         });
+                    } else {
+                        setSelectedApplication(selectedApplicationList);
+                        setSubscriptions(subscriptionsList);
+                        setKeys(keys);
+                        setSelectedEnvironment(selectedEnvironment, false);
+                        if (selectedKeyType === 'PRODUCTION') {
+                            setProductionAccessToken(accessToken);
+                        } else {
+                            setSandboxAccessToken(accessToken);
+                        }
+                        setSelectedKeyType(selectedKeyType, false);
+                    }
                 } else {
                     setSelectedApplication(selectedApplicationList);
                     setSubscriptions(subscriptionsList);
@@ -167,87 +176,79 @@ function TryOutController(props) {
                     }
                     setSelectedKeyType(selectedKeyType, false);
                 }
-            } else {
-                setSelectedApplication(selectedApplicationList);
-                setSubscriptions(subscriptionsList);
-                setKeys(keys);
-                setSelectedEnvironment(selectedEnvironment, false);
-                if (selectedKeyType === 'PRODUCTION') {
-                    setProductionAccessToken(accessToken);
-                } else {
-                    setSandboxAccessToken(accessToken);
+            }).catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(error);
                 }
-                setSelectedKeyType(selectedKeyType, false);
-            }
-        }).catch((error) => {
-            if (process.env.NODE_ENV !== 'production') {
-                console.error(error);
-            }
-            const { status } = error;
-            if (status === 404) {
-                setNotFound(true);
-            }
-        });
+                const { status } = error;
+                if (status === 404) {
+                    setNotFound(true);
+                }
+            });
+        }
     }, []);
-
 
     /**
      * Generate access token
      * */
     function generateAccessToken() {
-        setIsUpdating(true);
-        const applicationPromise = Application.get(selectedApplication);
-        applicationPromise
-            .then((application) => application.generateToken(
-                selectedKeyType,
-                3600,
-                scopes,
-            ))
-            .then((response) => {
-                console.log('token generated successfully ' + response);
-                setShowToken(false);
-                if (selectedKeyType === 'PRODUCTION') {
-                    setProductionAccessToken(response.accessToken);
-                } else {
-                    setSandboxAccessToken(response.accessToken);
-                }
-                setIsUpdating(false);
-            })
-            .catch((error) => {
-                console.error(error);
-                const { status } = error;
-                if (status === 404) {
-                    setNotFound(true);
-                }
-                setIsUpdating(false);
-            });
+        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+            setIsUpdating(true);
+            const applicationPromise = Application.get(selectedApplication);
+            applicationPromise
+                .then((application) => application.generateToken(
+                    selectedKeyType,
+                    3600,
+                    scopes,
+                ))
+                .then((response) => {
+                    console.log('token generated successfully ' + response);
+                    setShowToken(false);
+                    if (selectedKeyType === 'PRODUCTION') {
+                        setProductionAccessToken(response.accessToken);
+                    } else {
+                        setSandboxAccessToken(response.accessToken);
+                    }
+                    setIsUpdating(false);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    const { status } = error;
+                    if (status === 404) {
+                        setNotFound(true);
+                    }
+                    setIsUpdating(false);
+                });
+        }
     }
 
     /**
      * Generate api key
      * */
     function generateApiKey() {
-        setIsUpdating(true);
-        const promisedKey = restApi.generateApiKey(selectedApplication, selectedKeyType, -1);
-        promisedKey
-            .then((response) => {
-                console.log('Non empty response received', response);
-                setShowToken(false);
-                if (selectedKeyType === 'PRODUCTION') {
-                    setProductionApiKey(response.body.apikey);
-                } else {
-                    setSandboxApiKey(response.body.apikey);
-                }
-                setIsUpdating(false);
-            })
-            .catch((error) => {
-                console.log(error);
-                const { status } = error;
-                if (status === 404) {
-                    setNotFound(true);
-                }
-                setIsUpdating(false);
-            });
+        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+            setIsUpdating(true);
+            const promisedKey = restApi.generateApiKey(selectedApplication, selectedKeyType, -1);
+            promisedKey
+                .then((response) => {
+                    console.log('Non empty response received', response);
+                    setShowToken(false);
+                    if (selectedKeyType === 'PRODUCTION') {
+                        setProductionApiKey(response.body.apikey);
+                    } else {
+                        setSandboxApiKey(response.body.apikey);
+                    }
+                    setIsUpdating(false);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    const { status } = error;
+                    if (status === 404) {
+                        setNotFound(true);
+                    }
+                    setIsUpdating(false);
+                });
+        }
     }
 
     /**
@@ -264,32 +265,34 @@ function TryOutController(props) {
      * @memberof TryOutController
      */
     function updateApplication() {
-        let accessToken;
-        let keyType;
-        if (subscriptions !== null && subscriptions.length !== 0 && selectedApplication.length !== 0) {
-            if (subscriptions.find((sub) => sub.applicationId
-            === selectedApplication).status === 'PROD_ONLY_BLOCKED') {
-                setSelectedKeyType(selectedKeyType, false);
-                keyType = 'SANDBOX';
-            } else {
-                keyType = selectedKeyType;
-            }
-        }
-        Application.get(selectedApplication)
-            .then((application) => {
-                return application.getKeys();
-            })
-            .then((appKeys) => {
-                if (appKeys.get(keyType)) {
-                    ({ accessToken } = appKeys.get(keyType).token);
-                }
-                if (appKeys.get(keyType) === 'PRODUCTION') {
-                    setProductionAccessToken(accessToken);
+        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+            let accessToken;
+            let keyType;
+            if (subscriptions !== null && subscriptions.length !== 0 && selectedApplication.length !== 0) {
+                if (subscriptions.find((sub) => sub.applicationId
+                    === selectedApplication).status === 'PROD_ONLY_BLOCKED') {
+                    setSelectedKeyType(selectedKeyType, false);
+                    keyType = 'SANDBOX';
                 } else {
-                    setSandboxAccessToken(accessToken);
+                    keyType = selectedKeyType;
                 }
-                setKeys(appKeys);
-            });
+            }
+            Application.get(selectedApplication)
+                .then((application) => {
+                    return application.getKeys();
+                })
+                .then((appKeys) => {
+                    if (appKeys.get(keyType)) {
+                        ({ accessToken } = appKeys.get(keyType).token);
+                    }
+                    if (appKeys.get(keyType) === 'PRODUCTION') {
+                        setProductionAccessToken(accessToken);
+                    } else {
+                        setSandboxAccessToken(accessToken);
+                    }
+                    setKeys(appKeys);
+                });
+        }
     }
 
     useEffect(() => {
@@ -371,7 +374,6 @@ function TryOutController(props) {
             prefix = '';
         }
     }
-    const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
 
     let tokenValue = '';
     if (securitySchemeType === 'API-KEY') {
@@ -381,7 +383,7 @@ function TryOutController(props) {
     }
 
     return (
-        <>
+        <IntlProvider locale='en'>
             <Grid x={12} md={6} className={classes.centerItems}>
                 <Box>
                     <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
@@ -445,148 +447,146 @@ function TryOutController(props) {
                     )}
                 </Box>
             </Grid>
-            {!isPrototypedAPI
-                    && (
-                        <Grid xs={12} md={12} item>
-                            <Box display='block'>
-                                {user && subscriptions
-                                && subscriptions.length > 0 && securitySchemeType !== 'BASIC' && (
-                                    <SelectAppPanel
-                                        subscriptions={subscriptions}
-                                        handleChanges={handleChanges}
-                                        selectedApplication={selectedApplication}
-                                        selectedKeyType={selectedKeyType}
-                                    />
-                                )}
-                                {subscriptions && subscriptions.length === 0 && (
-                                    <Box display='flex' justifyContent='center'>
-                                        <Typography variant='body1' gutterBottom>
-                                            <FormattedMessage
-                                                id='Apis.Details.ApiConsole.ApiConsole.subscribe.to.application'
-                                                defaultMessage='Please subscribe to an application'
-                                            />
-                                        </Typography>
-                                    </Box>
-                                )}
-                                <Box display='block' justifyContent='center'>
-                                    <Grid x={8} md={6} className={classes.tokenType} item>
-                                        {securitySchemeType === 'BASIC' ? (
-                                            <>
-                                                <Grid x={12} md={12} item>
-                                                    <TextField
-                                                        margin='normal'
-                                                        variant='outlined'
-                                                        label={(
-                                                            <FormattedMessage
-                                                                id='username'
-                                                                defaultMessage='Username'
-                                                            />
-                                                        )}
-                                                        name='username'
-                                                        onChange={handleChanges}
-                                                        value={username || ''}
-                                                        fullWidth
-                                                    />
-                                                    <TextField
-                                                        margin='normal'
-                                                        variant='outlined'
-                                                        label={(
-                                                            <FormattedMessage
-                                                                id='password'
-                                                                defaultMessage='Password'
-                                                            />
-                                                        )}
-                                                        name='password'
-                                                        onChange={handleChanges}
-                                                        value={password || ''}
-                                                        fullWidth
-                                                    />
-                                                </Grid>
-                                            </>
-                                        ) : (
-                                            <TextField
-                                                fullWidth
-                                                margin='normal'
-                                                variant='outlined'
-                                                label={(
-                                                    <FormattedMessage
-                                                        id='access.token'
-                                                        sdefaultMessage='Access Token'
-                                                    />
-                                                )}
-                                                name='accessToken'
-                                                onChange={handleChanges}
-                                                type={showToken ? 'text' : 'password'}
-                                                value={tokenValue || ''}
-                                                helperText={(
-                                                    <FormattedMessage
-                                                        id='enter.access.token'
-                                                        defaultMessage='Enter access Token'
-                                                    />
-                                                )}
-                                                InputProps={{
-                                                    endAdornment: (
-                                                        <InputAdornment position='end'>
-                                                            <IconButton
-                                                                edge='end'
-                                                                aria-label='Toggle token visibility'
-                                                                onClick={handleClickShowToken}
-                                                            >
-                                                                {showToken ? <Icon>visibility_off</Icon>
-                                                                    : <Icon>visibility</Icon>}
-                                                            </IconButton>
-                                                        </InputAdornment>
-                                                    ),
-                                                    startAdornment: (
-                                                        <InputAdornment
-                                                            className={classes.inputAdornmentStart}
-                                                            position='start'
-                                                        >
-                                                            {`${authorizationHeader}: ${prefix}`}
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                            />
-                                        )}
-                                        {securitySchemeType !== 'BASIC' && (
-                                            <>
-                                                <Button
-                                                    onClick={securitySchemeType === 'API-KEY' ? generateApiKey
-                                                        : generateAccessToken}
-                                                    color='secondary'
-                                                    variant='outlined'
-                                                    className={classes.genKeyButton}
-                                                    disabled={!user || (subscriptions && subscriptions.length === 0)}
-                                                >
-                                                    {isUpdating && (
-                                                        <CircularProgress size={15} />
-                                                    )}
-                                                    <FormattedMessage
-                                                        id='Apis.Details.ApiCOnsole.generate.test.key'
-                                                        defaultMessage='GET TEST KEY '
-                                                    />
-                                                </Button>
-                                                <Tooltip
-                                                    placement='right'
-                                                    title={(
-                                                        <FormattedMessage
-                                                            id='Apis.Details.TryOutConsole.access.token.tooltip'
-                                                            defaultMessage={
-                                                                'You can use your existing Access Token or '
-                                                + 'you can generate a new Test Key.'
-                                                            }
-                                                        />
-                                                    )}
-                                                >
-                                                    <HelpOutline className={classes.tooltip} />
-                                                </Tooltip>
-                                            </>
-                                        )}
+            <Grid xs={12} md={12} item>
+                <Box display='block'>
+                    {user && subscriptions
+                        && subscriptions.length > 0 && securitySchemeType !== 'BASIC' && (
+                        <SelectAppPanel
+                            subscriptions={subscriptions}
+                            handleChanges={handleChanges}
+                            selectedApplication={selectedApplication}
+                            selectedKeyType={selectedKeyType}
+                        />
+                    )}
+                    {subscriptions && subscriptions.length === 0 && (
+                        <Box display='flex' justifyContent='center'>
+                            <Typography variant='body1' gutterBottom>
+                                <FormattedMessage
+                                    id='Apis.Details.ApiConsole.ApiConsole.subscribe.to.application'
+                                    defaultMessage='Please subscribe to an application'
+                                />
+                            </Typography>
+                        </Box>
+                    )}
+                    <Box display='block' justifyContent='center'>
+                        <Grid x={8} md={6} className={classes.tokenType} item>
+                            {securitySchemeType === 'BASIC' ? (
+                                <>
+                                    <Grid x={12} md={12} item>
+                                        <TextField
+                                            margin='normal'
+                                            variant='outlined'
+                                            label={(
+                                                <FormattedMessage
+                                                    id='username'
+                                                    defaultMessage='Username'
+                                                />
+                                            )}
+                                            name='username'
+                                            onChange={handleChanges}
+                                            value={username || ''}
+                                            fullWidth
+                                        />
+                                        <TextField
+                                            margin='normal'
+                                            variant='outlined'
+                                            label={(
+                                                <FormattedMessage
+                                                    id='password'
+                                                    defaultMessage='Password'
+                                                />
+                                            )}
+                                            name='password'
+                                            onChange={handleChanges}
+                                            value={password || ''}
+                                            fullWidth
+                                        />
                                     </Grid>
-                                </Box>
-                                <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
-                                    <Grid xs={12} md={6} item>
-                                        {((environments && environments.length > 0)
+                                </>
+                            ) : (
+                                <TextField
+                                    fullWidth
+                                    margin='normal'
+                                    variant='outlined'
+                                    label={(
+                                        <FormattedMessage
+                                            id='access.token'
+                                            sdefaultMessage='Access Token'
+                                        />
+                                    )}
+                                    name='accessToken'
+                                    onChange={handleChanges}
+                                    type={showToken ? 'text' : 'password'}
+                                    value={tokenValue || ''}
+                                    helperText={(
+                                        <FormattedMessage
+                                            id='enter.access.token'
+                                            defaultMessage='Enter access Token'
+                                        />
+                                    )}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position='end'>
+                                                <IconButton
+                                                    edge='end'
+                                                    aria-label='Toggle token visibility'
+                                                    onClick={handleClickShowToken}
+                                                >
+                                                    {showToken ? <Icon>visibility_off</Icon>
+                                                        : <Icon>visibility</Icon>}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                        startAdornment: (
+                                            <InputAdornment
+                                                className={classes.inputAdornmentStart}
+                                                position='start'
+                                            >
+                                                {`${authorizationHeader}: ${prefix}`}
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            )}
+                            {securitySchemeType !== 'BASIC' && (
+                                <>
+                                    <Button
+                                        onClick={securitySchemeType === 'API-KEY' ? generateApiKey
+                                            : generateAccessToken}
+                                        color='secondary'
+                                        variant='outlined'
+                                        className={classes.genKeyButton}
+                                        disabled={!user || (subscriptions && subscriptions.length === 0)}
+                                    >
+                                        {isUpdating && (
+                                            <CircularProgress size={15} />
+                                        )}
+                                        <FormattedMessage
+                                            id='Apis.Details.ApiCOnsole.generate.test.key'
+                                            defaultMessage='GET TEST KEY '
+                                        />
+                                    </Button>
+                                    <Tooltip
+                                        placement='right'
+                                        title={(
+                                            <FormattedMessage
+                                                id='Apis.Details.TryOutConsole.access.token.tooltip'
+                                                defaultMessage={
+                                                    'You can use your existing Access Token or '
+                                                + 'you can generate a new Test Key.'
+                                                }
+                                            />
+                                        )}
+                                    >
+                                        <HelpOutline className={classes.tooltip} />
+                                    </Tooltip>
+                                </>
+                            )}
+                        </Grid>
+                    </Box>
+                    <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
+                        <Grid xs={12} md={6} item>
+                            {((environments && environments.length > 0)
                                         || (labels && labels.length > 0))
                                     && (
                                         <>
@@ -666,13 +666,11 @@ function TryOutController(props) {
                                             </TextField>
                                         </>
                                     )}
-
-                                    </Grid>
-                                </Box>
-                            </Box>
                         </Grid>
-                    )}
-        </>
+                    </Box>
+                </Box>
+            </Grid>
+        </IntlProvider>
     );
 }
 

@@ -20,7 +20,7 @@ import React, { Suspense, lazy } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { StylesProvider, jssPreset } from '@material-ui/core/styles';
-import { addLocaleData, IntlProvider } from 'react-intl';
+import { IntlProvider } from 'react-intl';
 import Configurations from 'Config';
 import merge from 'lodash.merge';
 import cloneDeep from 'lodash.clonedeep';
@@ -117,7 +117,6 @@ class DevPortal extends React.Component {
             })
             .then((messages) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
-                addLocaleData(require(`react-intl/locale-data/${locale}`));
                 this.setState({ messages, language: locale });
             });
     }
@@ -293,32 +292,32 @@ class DevPortal extends React.Component {
 
         return (
             settings && theme && messages && language && (
-                <SettingsProvider value={{
-                    settings,
-                    setSettings: this.setSettings,
-                    tenantDomain,
-                    setTenantDomain: this.setTenantDomain,
-                }}
-                >
-                    <Helmet>
-                        <title>{this.getTitle(theme)}</title>
-                    </Helmet>
-                    <MuiThemeProvider theme={createMuiTheme(theme)}>
-                        <StylesProvider jss={jss}>
-                            {this.loadCustomCSS(theme)}
-                            <BrowserRouter basename={context}>
-                                <Suspense fallback={<Progress />}>
-                                    <IntlProvider locale={language} messages={messages}>
-                                        <Switch>
-                                            <Route path='/logout' component={Logout} />
-                                            <Route component={protectedApp} />
-                                        </Switch>
-                                    </IntlProvider>
-                                </Suspense>
-                            </BrowserRouter>
-                        </StylesProvider>
-                    </MuiThemeProvider>
-                </SettingsProvider>
+                <IntlProvider locale={language} messages={messages}>
+                    <SettingsProvider value={{
+                        settings,
+                        setSettings: this.setSettings,
+                        tenantDomain,
+                        setTenantDomain: this.setTenantDomain,
+                    }}
+                    >
+                        <Helmet>
+                            <title>{this.getTitle(theme)}</title>
+                        </Helmet>
+                        <MuiThemeProvider theme={createMuiTheme(theme)}>
+                                <StylesProvider jss={jss}>
+                                    {this.loadCustomCSS(theme)}
+                                    <BrowserRouter basename={context}>
+                                        <Suspense fallback={<Progress />}>
+                                            <Switch>
+                                                <Route path='/logout' component={Logout} />
+                                                <Route component={protectedApp} />
+                                            </Switch>
+                                        </Suspense>
+                                    </BrowserRouter>
+                                </StylesProvider>
+                        </MuiThemeProvider>
+                    </SettingsProvider>
+                </IntlProvider>
             )
         );
     }
