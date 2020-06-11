@@ -116,7 +116,8 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error(e);
+                Alert.error('Unable to fetch data ' + e);
+                console.error('Unable to fetch data ' + e);
             });
     };
 
@@ -124,15 +125,13 @@ function ListLabels() {
         fetchData();
     }, []);
 
-
     const updateStatus = (referenceId, value) => {
         const body = {};
         body.status = value;
         body.attributes = {};
         body.description = 'Approve workflow request.';
 
-        let promisedupdateWorkflow = '';
-        promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
+        const promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
         return promisedupdateWorkflow
             .then(() => {
                 return (
@@ -150,7 +149,7 @@ function ListLabels() {
                 }
                 return null;
             })
-            .finally(() => {
+            .then(() => {
                 fetchData();
             });
     };
@@ -180,11 +179,7 @@ function ListLabels() {
                     </ListItem>
                 </List>
             </HelpBase>),
-        /*
-        pageStyle='half' center part of the screen.
-        pageStyle='full' = Take the full content area.
-        pageStyle='paperLess' = Avoid from displaying background paper. ( For dashbord we need this )
-        */
+
         pageStyle: 'half',
         title: intl.formatMessage({
             id: 'Workflow.ListUserCreation.title.usercreation',
@@ -195,7 +190,10 @@ function ListLabels() {
     const columProps = [
         {
             name: 'description',
-            label: 'Description',
+            label: intl.formatMessage({
+                id: 'Workflow.UserCreation.table.header.Description',
+                defaultMessage: 'Description',
+            }),
             options: {
                 sort: false,
                 display: false,
@@ -203,7 +201,10 @@ function ListLabels() {
         },
         {
             name: 'tenantAwareUserName',
-            label: 'Tenant Name',
+            label: intl.formatMessage({
+                id: 'Workflow.UserCreation.table.header.TenantName',
+                defaultMessage: 'Tenant Name',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -219,7 +220,10 @@ function ListLabels() {
         },
         {
             name: 'tenantDomain',
-            label: 'Tenant Domain',
+            label: intl.formatMessage({
+                id: 'Workflow.UserCreation.table.header.TenantDomain',
+                defaultMessage: 'Tenant Domain',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -235,7 +239,10 @@ function ListLabels() {
         },
         {
             name: 'elapsed time',
-            label: 'Elapsed time',
+            label: intl.formatMessage({
+                id: 'Workflow.UserCreation.table.header.ElapsedTime',
+                defaultMessage: 'Elapsed time',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -259,7 +266,10 @@ function ListLabels() {
         },
         {
             name: 'action',
-            label: 'Actions',
+            label: intl.formatMessage({
+                id: 'Workflow.UserCreation.table.header.Action',
+                defaultMessage: 'Action',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -316,7 +326,6 @@ function ListLabels() {
         setSearchText(event.target.value);
     };
 
-
     const columns = [
         ...columProps,
     ];
@@ -354,8 +363,8 @@ function ListLabels() {
                                     id='Workflow.UserCreation.List.empty.content.usercreations'
                                     defaultMessage={'There are no workflow pending requests for user creation.'
                                     + 'It is possible to approve or reject workflow pending requests of user sign up.'
-                                    + ' Workflow Approval Executor need to be enabled to introduce this approve reject '
-                                    + 'process into system.'}
+                                    + ' Workflow Approval Executor needs to be enabled to approve or reject the '
+                                    + 'requests. '}
                                 />
                             </Typography>
                         </CardContent>
