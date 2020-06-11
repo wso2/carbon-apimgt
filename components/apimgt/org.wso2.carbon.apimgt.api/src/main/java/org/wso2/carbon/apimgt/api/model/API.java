@@ -165,6 +165,11 @@ public class API implements Serializable {
 
     private List<APICategory> apiCategories;
 
+    /**
+     * Property to hold enable/disable status of the store visibility.
+     */
+    private boolean enableStore = true;
+
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -961,6 +966,14 @@ public class API implements Serializable {
     public void setEndpoint(List<APIEndpoint> endpoint) {
 
         this.endpoints = endpoint;
+    }
+
+    public boolean isEnableStore() {
+        return enableStore;
+    }
+
+    public void setEnableStore(boolean enableStore) {
+        this.enableStore = enableStore;
     }
 
     /**

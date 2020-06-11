@@ -36,6 +36,8 @@ const config = {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
             AppTests: path.resolve(__dirname, 'source/Tests/'),
+            react: path.resolve('../../../../../node_modules/react'),
+            reactDom: path.resolve('../../../../../node_modules/react-dom'),
         },
         extensions: ['.mjs','.js', '.jsx'],
     },

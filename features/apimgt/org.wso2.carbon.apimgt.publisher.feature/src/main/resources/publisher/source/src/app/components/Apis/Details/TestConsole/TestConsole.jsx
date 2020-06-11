@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c), WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -17,27 +17,30 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Icon from '@material-ui/core/Icon';
+import PropTypes from 'prop-types';
 import AuthManager from 'AppData/AuthManager';
+import Progress from 'AppComponents/Shared/Progress';
+import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
 import Paper from '@material-ui/core/Paper';
-import Button from '@material-ui/core/Button';
-import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
-import { ApiContext } from '../ApiContext';
-import Progress from '../../../Shared/Progress';
-import Api from '../../../../data/api';
-import SwaggerUI from './SwaggerUI';
-import TryOutController from './TryOutController';
+import 'swagger-ui-react/swagger-ui.css';
+import API from 'AppData/api';
+import { TryOutController, SwaggerUI } from 'developer_portal';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  * @inheritdoc
  * @param {*} theme theme
  */
 const styles = (theme) => ({
+    centerItems: {
+        margin: 'auto',
+    },
+    categoryHeading: {
+        marginBottom: theme.spacing(2),
+        marginLeft: theme.spacing(-5),
+    },
     buttonIcon: {
         marginRight: 10,
     },
@@ -63,27 +66,50 @@ const styles = (theme) => ({
         paddingBottom: theme.spacing(2),
         color: theme.palette.getContrastText(theme.palette.background.default),
     },
+    tryoutHeading: {
+        fontWeight: 400,
+    },
+    noDataMessage: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#888888',
+        width: '100%',
+    },
     swaggerUIPaper: {
-        backgroundColor: theme.custom.apiDetailPages.swaggerUIBackground,
+        showTryout: true,
+        swaggerUIBackground: '#efefef',
+        documentBackground: '#efefef',
+        tokenTextBoxBackground: '#efefef',
+    },
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
+    },
+    emptyBox: {
+        marginTop: theme.spacing(2),
+    },
+    content: {
+        display: 'flex',
+        flex: 1,
+        flexDirection: 'column',
+        marginLeft: theme.custom.leftMenuWidth,
+        paddingBottom: theme.spacing(3),
     },
 });
 
 /**
- *
- *
- * @class ApiConsole
+ * @class TestConsole
  * @extends {React.Component}
  */
-class ApiConsole extends React.Component {
+class TestConsole extends React.Component {
     /**
-     *Creates an instance of ApiConsole.
-     * @param {*} props properties
-     * @memberof ApiConsole
+     *
+     * @param {*} props the props parameters
      */
     constructor(props) {
         super(props);
         this.state = {
-            securitySchemeType: 'OAUTH',
+            securitySchemeType: 'BASIC',
             username: '',
             password: '',
             scopes: [],
@@ -107,9 +133,7 @@ class ApiConsole extends React.Component {
      * @memberof ApiConsole
      */
     componentDidMount() {
-        const { api } = this.context;
-        const apiID = api.id;
-        const user = AuthManager.getUser();
+        const { apiObj } = this.props;
         let apiData;
         let environments;
         let labels;
@@ -117,13 +141,22 @@ class ApiConsole extends React.Component {
         let swagger;
         let productionAccessToken;
         let sandboxAccessToken;
-
-        this.apiClient = new Api();
-        const promiseAPI = this.apiClient.getAPIById(apiID);
-
-        promiseAPI
+        let apiID;
+        let urls;
+        let httpVal;
+        let httpsVal;
+        const user = AuthManager.getUser();
+        const promisedAPI = API.getAPIById(apiObj.id);
+        promisedAPI
             .then((apiResponse) => {
+                apiID = apiResponse.obj.id;
                 apiData = apiResponse.obj;
+                if (apiData.gatewayEnvironments) {
+                    environments = apiData.gatewayEnvironments.map((endpoint) => { return endpoint; });
+                }
+                const securtySchemas = apiData.securityScheme;
+                securtySchemas.push('basic_auth');
+                securtySchemas.shift();
                 if (apiData.endpointURLs) {
                     environments = apiData.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
                 }
@@ -136,27 +169,26 @@ class ApiConsole extends React.Component {
                 }
                 if (environments && environments.length > 0) {
                     [selectedEnvironment] = environments;
-                    return this.apiClient.getSwaggerByAPIIdAndEnvironment(apiID, selectedEnvironment);
+                    return API.getSwaggerByAPIIdAndEnvironment(apiResponse.obj.id, selectedEnvironment);
                 } else if (labels && labels.length > 0) {
                     [selectedEnvironment] = labels;
-                    return this.apiClient.getSwaggerByAPIIdAndLabel(apiID, selectedEnvironment);
+                    return API.getSwaggerByAPIIdAndLabel(apiResponse.obj.id, selectedEnvironment);
                 } else {
-                    return this.apiClient.getSwaggerByAPIId(apiID);
+                    return API.getSwaggerByAPIId(apiResponse.obj.id);
                 }
             })
             .then((swaggerResponse) => {
                 swagger = swaggerResponse.obj;
-                this.setState({
-                    api: apiData,
-                    swagger,
-                    environments,
-                    labels,
-                    productionAccessToken,
-                    sandboxAccessToken,
-
-                });
                 if (user != null) {
-                    return this.apiClient.getSubscriptions(apiID);
+                    this.setState({
+                        api: apiData,
+                        swagger,
+                        environments,
+                        labels,
+                        productionAccessToken,
+                        sandboxAccessToken,
+                    });
+                    return API.getSubscriptions(apiID);
                 } else {
                     return null;
                 }
@@ -165,10 +197,22 @@ class ApiConsole extends React.Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.error(error);
                 }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
+                this.setState({ serverError: `${error.statusCode} - ${error.response.body.description}` });
+            });
+        const settingPromise = API.getSettings();
+        const newServer = [];
+        settingPromise
+            .then((settingsNew) => {
+                if (settingsNew.environment) {
+                    urls = settingsNew.environment.map((endpoints) => { return endpoints.endpoints; });
+                    httpVal = urls.map((val) => { return val.http; });
+                    httpsVal = urls.map((value) => { return value.https; });
+                    newServer.push({ url: httpsVal + apiData.context + '/' + apiData.version });
+                    newServer.push({ url: httpVal + apiData.context + '/' + apiData.version });
                 }
+                this.setState({
+                    settings: newServer,
+                });
             });
     }
 
@@ -232,6 +276,10 @@ class ApiConsole extends React.Component {
         }
     }
 
+    /**
+     * Set Password
+     * @memberof ApiConsole
+     */
     setKeys(keys) {
         this.setState({ keys });
     }
@@ -263,8 +311,7 @@ class ApiConsole extends React.Component {
      */
     accessTokenProvider() {
         const {
-            securitySchemeType, username, password, productionAccessToken,
-            sandboxAccessToken, selectedKeyType,
+            securitySchemeType, username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
         } = this.state;
         if (securitySchemeType === 'BASIC') {
             const credentials = username + ':' + password;
@@ -289,12 +336,12 @@ class ApiConsole extends React.Component {
 
         if (selectedEnvironment) {
             if (environments.includes(selectedEnvironment)) {
-                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(api.id, selectedEnvironment);
+                promiseSwagger = API.getSwaggerByAPIIdAndEnvironment(api.id, selectedEnvironment);
             } else {
-                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndLabel(api.id, selectedEnvironment);
+                promiseSwagger = API.getSwaggerByAPIIdAndLabel(api.id, selectedEnvironment);
             }
         } else {
-            promiseSwagger = this.apiClient.getSwaggerByAPIId(api.id);
+            promiseSwagger = API.getSwaggerByAPIId(api.id);
         }
         promiseSwagger.then((swaggerResponse) => {
             this.setState({ swagger: swaggerResponse.obj });
@@ -308,20 +355,21 @@ class ApiConsole extends React.Component {
     render() {
         const { classes } = this.props;
         const {
-            api, notFound, swagger, securitySchemeType, selectedEnvironment, labels, environments, scopes,
-            username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
+            swagger, api, securitySchemeType, selectedEnvironment, productionAccessToken, sandboxAccessToken,
+            labels, environments, scopes, username, password, selectedKeyType, serverError, settings,
         } = this.state;
-        const user = AuthManager.getUser();
-        const downloadSwagger = JSON.stringify({ ...swagger });
-        const downloadLink = 'data:text/json;charset=utf-8, ' + encodeURIComponent(downloadSwagger);
-        const fileName = 'swagger.json';
+        if (serverError) {
+            return (
+                <Typography variant='h4' className={classes.titleSub}>
+                    {serverError}
+                </Typography>
+            );
+        }
 
         if (api == null || swagger == null) {
             return <Progress />;
         }
-        if (notFound) {
-            return 'API Not found !';
-        }
+
         let isApiKeyEnabled = false;
         let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
         if (api && api.securityScheme) {
@@ -330,35 +378,13 @@ class ApiConsole extends React.Component {
                 authorizationHeader = 'apikey';
             }
         }
-        const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
+        swagger.servers = settings;
         return (
             <>
                 <Typography variant='h4' className={classes.titleSub}>
-                    <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
+                    <FormattedMessage id='Apis.Details.index.Tryout' defaultMessage='Test Console' />
                 </Typography>
                 <Paper className={classes.paper}>
-                    <Grid container className={classes.grid}>
-                        {!isPrototypedAPI && !user && (
-                            <Grid item md={6}>
-                                <Paper className={classes.userNotificationPaper}>
-                                    <Typography variant='h5' component='h3'>
-                                        <Icon>warning</Icon>
-                                        {' '}
-                                        <FormattedMessage id='notice' defaultMessage='Notice' />
-                                    </Typography>
-                                    <Typography component='p'>
-                                        <FormattedMessage
-                                            id='api.console.require.access.token'
-                                            defaultMessage={'You need an access token to try the API. Please log '
-                                            + 'in and subscribe to the API to generate an access token. If you already '
-                                            + 'have an access token, please provide it below.'}
-                                        />
-                                    </Typography>
-                                </Paper>
-                            </Grid>
-                        )}
-                    </Grid>
-
                     <TryOutController
                         setSecurityScheme={this.setSecurityScheme}
                         securitySchemeType={securitySchemeType}
@@ -382,23 +408,6 @@ class ApiConsole extends React.Component {
                         setKeys={this.setKeys}
                         api={this.state.api}
                     />
-
-                    <Grid container>
-                        <Grid xs={10} item />
-                        <Grid xs={2} item>
-                            <a href={downloadLink} download={fileName}>
-                                <Button size='small'>
-                                    <CloudDownloadRounded className={classes.buttonIcon} />
-                                    <FormattedMessage
-                                        id='Apis.Details.APIConsole.APIConsole.download.swagger'
-                                        defaultMessage='Swagger ( /swagger.json )'
-                                    />
-                                </Button>
-                            </a>
-                        </Grid>
-                    </Grid>
-                </Paper>
-                <Paper className={classes.swaggerUIPaper}>
                     <SwaggerUI
                         api={this.state.api}
                         accessTokenProvider={this.accessTokenProvider}
@@ -411,8 +420,7 @@ class ApiConsole extends React.Component {
         );
     }
 }
-
-ApiConsole.propTypes = {
+TestConsole.propTypes = {
     classes: PropTypes.shape({
         paper: PropTypes.string.isRequired,
         titleSub: PropTypes.string.isRequired,
@@ -421,7 +429,4 @@ ApiConsole.propTypes = {
         buttonIcon: PropTypes.string.isRequired,
     }).isRequired,
 };
-
-ApiConsole.contextType = ApiContext;
-
-export default withStyles(styles)(ApiConsole);
+export default withAPI(withStyles(styles)(TestConsole));

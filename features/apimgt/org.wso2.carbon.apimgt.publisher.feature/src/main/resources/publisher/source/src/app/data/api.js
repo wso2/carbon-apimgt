@@ -1867,6 +1867,134 @@ class API extends Resource {
         });
     }
 
+     /**
+     * Get details of a given API
+     * @param id {string} UUID of the api.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getAPIById(id, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promiseGet = apiClient.then((client) => {
+            return client.apis.APIs.get_apis__apiId_({ apiId: id }, this._requestMetaData());
+        });
+        if (callback) {
+            console.log('original object from API1');
+            return promiseGet.then(callback);
+        } else {
+            console.log('original object from API2' + promiseGet.obj);
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param environmentName {String} API environment name
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promiseGet = apiClient.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId, environmentName }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get keys of an application
+     * @param applicationId id of the application that needs to get the keys
+     * @param callback {function} Function which needs to be called upon success
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSubscriptions(apiId, applicationId, callback = null) {
+        const payload = { apiId };
+        if (applicationId) {
+            payload[applicationId] = applicationId;
+        }
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promisedGet = apiClient.then((client) => {
+            return client.apis.Subscriptions.get_subscriptions(payload, this._requestMetaData());
+        });
+        if (callback) {
+            return promisedGet.then(callback);
+        } else {
+            return promisedGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param labelName {String} Micro gateway label
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSwaggerByAPIIdAndLabel(apiId, labelName, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promiseGet = apiClient.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId, labelName }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param environmentName {String} API environment name
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promiseGet = apiClient.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId, environmentName }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSwaggerByAPIId(apiId, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promiseGet = apiClient.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get settings of an API
+     */
+    static getSettings() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promisedSettings = apiClient.then(client => {
+            return client.apis['Settings'].get_settings();
+        });
+        return promisedSettings.then(response => response.body);
+    }
+
     /**
      *
      * Static method to search apis and documents based on content

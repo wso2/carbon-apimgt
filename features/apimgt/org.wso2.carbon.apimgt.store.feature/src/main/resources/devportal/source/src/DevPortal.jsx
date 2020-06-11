@@ -20,7 +20,7 @@ import React, { Suspense, lazy } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { StylesProvider, jssPreset } from '@material-ui/core/styles';
-import { addLocaleData, IntlProvider } from 'react-intl';
+import { IntlProvider } from 'react-intl';
 import Configurations from 'Config';
 import merge from 'lodash.merge';
 import cloneDeep from 'lodash.clonedeep';
@@ -130,7 +130,6 @@ class DevPortal extends React.Component {
             })
             .then((messages) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
-                addLocaleData(require(`react-intl/locale-data/${locale}`));
                 this.setState({ messages, language: locale });
             });
     }

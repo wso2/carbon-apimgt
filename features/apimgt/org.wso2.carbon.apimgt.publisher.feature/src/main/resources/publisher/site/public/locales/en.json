@@ -872,6 +872,7 @@
   "Apis.Details.components.DeleteApiButton.delete": "Delete",
   "Apis.Details.components.DeleteApiButton.text.description": "{type} <b> {name} {version} </b> will be deleted permanently.",
   "Apis.Details.components.DeleteApiButton.title": "Delete {type}",
+  "Apis.Details.index.Tryout": "Test Console",
   "Apis.Details.index.api.definition2": "API definition",
   "Apis.Details.index.api.not.found.body": "Cannot find the API with the given id",
   "Apis.Details.index.api.not.found.title": "API is not found in the {environmentLabel} Environment",

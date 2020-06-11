@@ -191,6 +191,13 @@
                 <value>true</value>
              </values>
      </field>
+     <field type="options">
+             <name label="enableStore">Enable Store</name>
+             <values>
+                <value>false</value>
+                <value>true</value>
+             </values>
+     </field>
     </table>
     <table name="URITemplate" columns="4">
             <subheading>
