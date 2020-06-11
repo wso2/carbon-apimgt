@@ -22,49 +22,12 @@ import {
 import ScopesIcon from '@material-ui/icons/VpnKey';
 import PropTypes from 'prop-types';
 import { Link, withRouter } from 'react-router-dom';
-import NotificationsIcon from '@material-ui/icons/Notifications';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { FormattedMessage } from 'react-intl';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import AuthManager from 'AppData/AuthManager';
-import DnsIcon from '@material-ui/icons/Dns';
 
 const styles = (theme) => ({
-
-    categoryHeader: {
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-    },
-    categoryHeaderPrimary: {
-        color: theme.palette.common.white,
-        fontSize: 16,
-        fontWeight: 200,
-    },
-    item: {
-        paddingTop: 1,
-        paddingBottom: 1,
-        color: 'rgba(255, 255, 255, 0.7)',
-        '&:hover,&:focus': {
-            backgroundColor: 'rgba(255, 255, 255, 0.08)',
-        },
-    },
-    itemActiveItem: {
-        color: '#4fc3f7',
-        '& svg': {
-            color: '#4fc3f7',
-        },
-    },
-    itemPrimary: {
-        fontSize: 13,
-    },
-    itemIcon: {
-        minWidth: 'auto',
-        marginRight: theme.spacing(2),
-        color: '#fff',
-    },
-    divider: {
-        border: 'solid 1px #555',
-        marginTop: theme.spacing(2),
-    },
     listRoot: {
         padding: 0,
     },
@@ -73,6 +36,10 @@ const styles = (theme) => ({
     },
     listTextSmall: {
         color: theme.palette.getContrastText(theme.palette.background.appBar),
+    },
+    smallIcon: {
+        marginRight: 5,
+        minWidth: 'auto',
     },
     links: {
         display: 'flex',
@@ -98,7 +65,7 @@ const styles = (theme) => ({
 function GlobalNavLinks(props) {
     const [selected, setSelected] = useState('apis');
     const {
-        classes, smallView, history,
+        classes, theme, smallView, history,
     } = props;
 
     const publisherUser = !AuthManager.isNotPublisher();
@@ -110,10 +77,6 @@ function GlobalNavLinks(props) {
             setSelected('api-products');
         } else if (/\/scopes$/g.test(pathname) || /\/scopes\//g.test(pathname)) {
             setSelected('scopes');
-        } else if (/\/settings$/g.test(pathname) || /\/settings\//g.test(pathname)) {
-            setSelected('settings');
-        } else if (/\/endpoint-registry$/g.test(pathname) || /\/endpoint-registry\//g.test(pathname)) {
-            setSelected('endpoint-registry');
         }
     };
     useEffect(() => {
@@ -123,32 +86,29 @@ function GlobalNavLinks(props) {
     history.listen((location) => {
         ditectCurrentMenu(location);
     });
+    let strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
+    let iconWidth = 32;
+    if (smallView) {
+        iconWidth = 16;
+        strokeColor = theme.palette.getContrastText(theme.palette.background.appBar);
+    }
     return (
         <List className={classes.listRoot}>
-            <ListItem className={classes.categoryHeader}>
-                <ListItemText
-                    classes={{
-                        primary: classes.categoryHeaderPrimary,
-                    }}
-                >
-                    <FormattedMessage id='Base.Header.navbar.GlobalNavBar.apis' defaultMessage='APIs' />
-                </ListItemText>
-            </ListItem>
-            <Link to='/apis'>
-                <ListItem
-                    button
-                    className={clsx(classes.item, selected === 'apis' && classes.itemActiveItem)}
-                >
-                    <ListItemIcon className={clsx(selected === 'apis' && classes.itemActiveItem, classes.itemIcon)}>
-                        <DnsIcon />
+            <Link to='/apis' className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}>
+                <ListItem button>
+                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                        <CustomIcon width={iconWidth} height={iconWidth} icon='api' strokeColor={strokeColor} />
                     </ListItemIcon>
                     <ListItemText
                         classes={{
-                            primary: classes.itemPrimary,
+                            primary: classNames({
+                                [classes.selectedText]: selected === 'apis',
+                                [classes.listText]: selected !== 'apis' && !smallView,
+                                [classes.listTextSmall]: selected !== 'apis' && smallView,
+                            }),
                         }}
-                    >
-                        <FormattedMessage id='Base.Header.navbar.GlobalNavBar.apis.list' defaultMessage='List' />
-                    </ListItemText>
+                        primary={<FormattedMessage id='Base.Header.navbar.GlobalNavBar.apis' defaultMessage='APIs' />}
+                    />
                 </ListItem>
             </Link>
             <Link
@@ -161,93 +121,51 @@ function GlobalNavLinks(props) {
                     </ListItemIcon>
                     <ListItemText
                         classes={{
-                            primary: classes.itemPrimary,
+                            primary: classNames({
+                                [classes.selectedText]: selected === 'scopes',
+                                [classes.listText]: selected !== 'scopes' && !smallView,
+                                [classes.listTextSmall]: selected !== 'scopes' && smallView,
+                            }),
                         }}
-                    >
-                        <FormattedMessage
-                            id='Base.Header.navbar.GlobalNavBar.endpoint.registry'
-                            defaultMessage='Endpoint Registry'
-                        />
-                    </ListItemText>
+                        primary={
+                            <FormattedMessage id='Base.Header.navbar.GlobalNavBar.scopes' defaultMessage='Scopes' />
+                        }
+                    />
                 </ListItem>
             </Link>
-            <hr className={classes.divider} />
             { publisherUser
             && (
-                <>
-                    <ListItem className={classes.categoryHeader}>
+                <Link
+                    to='/api-products'
+                    className={classNames({ [classes.selected]: selected === 'api-products', [classes.links]: true })}
+                >
+                    <ListItem button>
+                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                            <CustomIcon
+                                width={iconWidth}
+                                height={iconWidth}
+                                icon='api-product'
+                                strokeColor={strokeColor}
+                            />
+                        </ListItemIcon>
                         <ListItemText
                             classes={{
-                                primary: classes.categoryHeaderPrimary,
+                                primary: classNames({
+                                    [classes.selectedText]: selected === 'api-products',
+                                    [classes.listText]: selected !== 'api-products' && !smallView,
+                                    [classes.listTextSmall]: selected !== 'api-products' && smallView,
+                                }),
                             }}
-                        >
-                            <FormattedMessage
-                                id='Base.Header.navbar.GlobalNavBar.api.products'
-                                defaultMessage='API Products'
-                            />
-                        </ListItemText>
-                    </ListItem>
-                    <Link
-                        to='/api-products'
-                    >
-                        <ListItem
-                            button
-                            className={clsx(classes.item, selected === 'api-products' && classes.itemActiveItem)}
-                        >
-                            <ListItemIcon className={clsx(selected === 'api-products'
-                            && classes.itemActiveItem, classes.itemIcon)}
-                            >
-                                <DnsIcon />
-                            </ListItemIcon>
-                            <ListItemText
-                                classes={{
-                                    primary: classes.itemPrimary,
-                                }}
-                                primary={(
-                                    <FormattedMessage
-                                        id='Base.Header.navbar.GlobalNavBar.api.products.list'
-                                        defaultMessage='List'
-                                    />
-                                )}
-                            />
-                        </ListItem>
-                    </Link>
-                    <hr className={classes.divider} />
-                </>
-            )}
-            <ListItem className={classes.categoryHeader}>
-                <ListItemText
-                    classes={{
-                        primary: classes.categoryHeaderPrimary,
-                    }}
-                >
-                    <FormattedMessage
-                        id='Base.Header.navbar.GlobalNavBar.settings'
-                        defaultMessage='Settings'
-                    />
-                </ListItemText>
-            </ListItem>
-            <Link to='/settings'>
-                <ListItem
-                    button
-                    className={clsx(classes.item, selected === 'settings' && classes.itemActiveItem)}
-                >
-                    <ListItemIcon className={clsx(selected === 'settings' && classes.itemActiveItem, classes.itemIcon)}>
-                        <NotificationsIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                        classes={{
-                            primary: classes.itemPrimary,
-                        }}
-                    >
-                        <FormattedMessage
-                            id='Base.Header.navbar.GlobalNavBar.manage.alerts'
-                            defaultMessage='Manage Alerts'
+                            primary={(
+                                <FormattedMessage
+                                    id='Base.Header.navbar.GlobalNavBar.api.products'
+                                    defaultMessage='API Products'
+                                />
+                            )}
                         />
-                    </ListItemText>
-                </ListItem>
-            </Link>
-            <hr className={classes.divider} />
+                    </ListItem>
+                </Link>
+            )}
         </List>
     );
 }

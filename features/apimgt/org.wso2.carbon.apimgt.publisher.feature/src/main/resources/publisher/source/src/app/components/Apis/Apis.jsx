@@ -20,11 +20,12 @@ import React, { Suspense, lazy } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import Progress from 'AppComponents/Shared/Progress';
 import AuthManager from 'AppData/AuthManager';
-import APICreateRoutes from 'AppComponents/Apis/Create/APICreateRoutes';
+import APICreateRoutes from './Create/APICreateRoutes';
 
-import Listing from 'AppComponents/Apis/Listing/Listing';
+import Listing from './Listing/Listing';
 
-const Details = lazy(() => import('AppComponents/Apis/Details/index' /* webpackChunkName: "DeferredDetails" */));
+
+const Details = lazy(() => import('./Details/index' /* webpackChunkName: "DeferredDetails" */));
 const DeferredDetails = (props) => (
     <Suspense fallback={<Progress message='Loading Details component ...' />}>
         <Details {...props} />

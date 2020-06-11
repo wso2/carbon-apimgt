@@ -54,8 +54,6 @@
      }
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
     var scopes = settingsResponse.data.scopes.join(" ");
-    new Log("******").error(stringify(scopes));
-    
     var referer = request.getHeader("Referer");
     var state = "";
     // get the pathname excluding the 'devportal/publisher' segment

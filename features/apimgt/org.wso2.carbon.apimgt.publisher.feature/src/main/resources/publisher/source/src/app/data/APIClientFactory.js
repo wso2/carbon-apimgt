@@ -43,7 +43,7 @@ class APIClientFactory {
      * @param {Object} environment
      * @returns {APIClient} APIClient object for the environment
      */
-    getAPIClient(environment, registryApi = false) {
+    getAPIClient(environment) {
         const {
             label,
         } = environment;
@@ -57,7 +57,7 @@ class APIClientFactory {
             return apiClient;
         }
 
-        apiClient = new APIClient(environment, registryApi);
+        apiClient = new APIClient(environment);
         this._APIClientMap.set(environment.label, apiClient);
         return apiClient;
     }
