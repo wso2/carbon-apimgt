@@ -21,17 +21,8 @@ import PropTypes from 'prop-types';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
-
-/**
- * Mock API call
- * @param {number} id uuid of the item to delete.
- * @returns {Promise}.
- */
-function apiCall(id) {
-    return new Promise(((resolve) => {
-        setTimeout(() => { resolve('Successfully deleted' + id); }, 2000);
-    }));
-}
+import { useIntl, FormattedMessage } from 'react-intl';
+import API from 'AppData/api';
 
 /**
  * Render delete dialog box.
@@ -39,33 +30,44 @@ function apiCall(id) {
  * @returns {JSX} Loading animation.
  */
 function Delete({ updateList, dataRow }) {
-    const { id } = dataRow;
-
+    const { policyId, displayName } = dataRow;
+    const intl = useIntl();
     const formSaveCallback = () => {
         // Do the API call
-        const promiseAPICall = apiCall(id);
-
-        promiseAPICall.then((data) => {
-            updateList();
-            return (data);
-        })
+        const restApi = new API();
+        return restApi
+            .deleteThrottlingPoliciesAdvanced(policyId)
+            .then(() => {
+                updateList();
+                return `${displayName} ${intl.formatMessage({
+                    id: 'Throttling.Advanced.Delete.success',
+                    defaultMessage: 'Policy Deleted Successfully',
+                })}`;
+            })
             .catch((e) => {
                 return (e);
             });
-        return (promiseAPICall);
     };
 
     return (
         <FormDialogBase
-            title='Delete Gateway Label?'
-            saveButtonText='Delete'
+            title={intl.formatMessage({
+                id: 'Throttling.Advanced.Delete.title',
+                defaultMessage: 'Delete Policy',
+            })}
+            saveButtonText={intl.formatMessage({
+                id: 'Throttling.Advanced.Delete.save.text',
+                defaultMessage: 'Delete',
+            })}
             icon={<DeleteForeverIcon />}
             formSaveCallback={formSaveCallback}
         >
             <DialogContentText>
-                This gateway label will be deleted.
-                And some more info about what is going
-                to happen to its hosts etc...
+                <FormattedMessage
+                    id='Throttling.Advanced.Delete.confirm.text'
+                    defaultMessage={'Policy deletion might affect current subscriptions.'
+                    + ' Are you sure you want to delete this policy?'}
+                />
             </DialogContentText>
         </FormDialogBase>
     );
@@ -73,7 +75,8 @@ function Delete({ updateList, dataRow }) {
 Delete.propTypes = {
     updateList: PropTypes.number.isRequired,
     dataRow: PropTypes.shape({
-        id: PropTypes.number.isRequired,
+        policyId: PropTypes.number.isRequired,
+        displayName: PropTypes.string.isRequired,
     }).isRequired,
 };
 export default Delete;
