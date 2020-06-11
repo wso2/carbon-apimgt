@@ -9978,6 +9978,11 @@ definitions:
         description: |
           Is External Stores configuration enabled
         example: true
+      docVisibilityEnabled:
+        type: boolean
+        description: |
+          Is Document Visibility configuration enabled
+        example: false
 
   #-----------------------------------------------------
   # The SecurityAuditAttribute resource

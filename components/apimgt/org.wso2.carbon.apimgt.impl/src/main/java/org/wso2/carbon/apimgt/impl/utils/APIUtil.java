@@ -2537,6 +2537,17 @@ public final class APIUtil {
     }
 
     /**
+     * Check if document visibility levels are enabled
+     * @return True if document visibility levels are enabled
+     */
+    public static boolean isDocVisibilityLevelsEnabled() {
+        // checking if Doc visibility levels enabled in api-manager.xml
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(
+                        APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
+    }
+
+    /**
      * Returns the External API Store Configuration with the given Store Name
      *
      * @param apiStoreName
