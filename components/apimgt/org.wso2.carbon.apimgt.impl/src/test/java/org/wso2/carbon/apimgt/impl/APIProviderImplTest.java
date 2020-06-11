@@ -77,6 +77,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -166,6 +167,7 @@ public class APIProviderImplTest {
     private APIGatewayManager gatewayManager;
     private GenericArtifact artifact;
     private CertificateManagerImpl certificateManager;
+    private APIManagerConfiguration config;
 
     @Before
     public void init() throws Exception {
@@ -217,6 +219,15 @@ public class APIProviderImplTest {
         TestUtils.mockAPICacheClearence();
         TestUtils.mockAPIMConfiguration();
         mockDocumentationCreation();
+
+        config = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = new APIManagerConfigurationServiceImpl(config);
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(apiManagerConfigurationService);
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
+        Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
+
         PowerMockito.when(APIUtil.replaceSystemProperty(Mockito.anyString())).thenAnswer((Answer<String>) invocation -> {
             Object[] args = invocation.getArguments();
             return (String) args[0];
@@ -2417,6 +2428,11 @@ public class APIProviderImplTest {
             }
         }).when(artifactManager).updateGenericArtifact(artifact);
 
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
+        Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
+
         Mockito.when(gatewayManager.isAPIPublished(api, "carbon.super")).thenReturn(false);
         Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
         apiProvider.updateAPI(api);
@@ -2585,6 +2601,10 @@ public class APIProviderImplTest {
         PowerMockito.mockStatic(OASParserUtil.class);
         Mockito.when(OASParserUtil.getAPIDefinition(api.getId(), apiProvider.registry)).thenReturn(
                 "{\"info\": {\"swagger\":\"data\"}}");
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
+        Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
         apiProvider.updateAPI(api);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
@@ -2839,6 +2859,10 @@ public class APIProviderImplTest {
         PowerMockito.mockStatic(OASParserUtil.class);
         Mockito.when(OASParserUtil.getAPIDefinition(api.getId(), apiProvider.registry)).thenReturn(
                 "{\"info\": {\"swagger\":\"data\"}}");
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
+        Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
         apiProvider.updateAPI(api);
     }
 
