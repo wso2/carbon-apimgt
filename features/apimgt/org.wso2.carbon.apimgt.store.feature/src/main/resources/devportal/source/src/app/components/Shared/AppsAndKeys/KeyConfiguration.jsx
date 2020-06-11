@@ -177,8 +177,6 @@ const KeyConfiguration = (props) => {
         id, name, revokeEndpoint, tokenEndpoint, type, userInfoEndpoint,
     } = keyManagerConfig;
 
-    key = keys.size > 0 && keys.get(selectedTab) && (keys.get(selectedTab).keyType === keyType) && keys.get(selectedTab);
-
     if (notFound) {
         return <ResourceNotFound />;
     }
