@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -46,6 +45,7 @@ class APIClient {
              * `__swaggerWorker` is the worker object initialized by
              * `/source/src/app/webWorkers/swaggerWorkerInit.js`
              */
+            /* eslint-disable no-underscore-dangle */
             if (window.__swaggerSpec) {
                 resolve(window.__swaggerSpec);
             } else {
