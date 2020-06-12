@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -38,11 +39,20 @@ class APIClient {
     constructor(environment, args = {}) {
         this.environment = environment || Utils.getCurrentEnvironment();
         SwaggerClient.http.withCredentials = true;
-        const promisedResolve = SwaggerClient.resolve({
-            url: Utils.getSwaggerURL(),
-            requestInterceptor: (request) => {
-                request.headers.Accept = 'text/yaml';
-            },
+        const promisedResolve = new Promise((resolve) => {
+            /**
+             * If `__swaggerSpec` contains the parsed swagger spec , We resolve the promise with that value
+             * else use worker message event handler to get the parsed spec from worker
+             * `__swaggerWorker` is the worker object initialized by
+             * `/source/src/app/webWorkers/swaggerWorkerInit.js`
+             */
+            if (window.__swaggerSpec) {
+                resolve(window.__swaggerSpec);
+            } else {
+                window.__swaggerWorker.addEventListener('message', ({ data }) => {
+                    resolve(data);
+                });
+            }
         });
         APIClient.spec = promisedResolve;
         this._client = promisedResolve.then((resolved) => {

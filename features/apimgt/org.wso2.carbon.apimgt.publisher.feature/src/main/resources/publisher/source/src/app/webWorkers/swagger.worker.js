@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,12 +16,16 @@
  * under the License.
  */
 
-import Base from './Base/index';
-import Logout from './Logout';
-import Endpoints from './Endpoints';
-
-export {
-    Base,
-    Logout,
-    Endpoints,
-};
+import SwaggerClient from 'swagger-client';
+// Parse the swagger definition in the worker thread and
+// pass the parsed plain JS object to main thread via postMessage
+SwaggerClient.resolve({
+    url: '/api/am/publisher/v1/swagger.yaml',
+    requestInterceptor: (request) => {
+        request.headers.Accept = 'text/yaml';
+    },
+}).then((spec) => {
+    // disable following rule because linter is unaware of the worker source
+    // eslint-disable-next-line no-restricted-globals
+    self.postMessage(spec);
+});

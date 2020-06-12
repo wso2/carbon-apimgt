@@ -26,7 +26,7 @@ import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import green from '@material-ui/core/colors/green';
 
-import ThumbnailView from './ThumbnailView';
+import BaseThumbnail from './BaseThumbnail';
 
 const styles = (theme) => ({
     card: {
@@ -93,7 +93,7 @@ class DocThumb extends Component {
                 raised={isHover}
                 className={classes.card}
             >
-                <CardMedia src='None' component={ThumbnailView} height={140} title='Thumbnail' api={doc} />
+                <CardMedia src='None' component={BaseThumbnail} height={140} title='Thumbnail' api={doc} />
                 <CardContent className={classes.docDetails}>
                     <Typography gutterBottom variant='h5' component='h2'>
                         {doc.name}

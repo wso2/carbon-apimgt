@@ -492,6 +492,7 @@
   "Apis.Details.EndpointsNew.Endpoints.endpoints.header": "",
   "Apis.Details.EndpointsNew.Endpoints.save": "",
   "Apis.Details.Environments.Environments.APIGateways": "",
+  "Apis.Details.Environments.Environments.Kubernetes": "",
   "Apis.Details.Environments.Environments.Microgateways": "",
   "Apis.Details.Environments.Environments.cancel": "",
   "Apis.Details.Environments.Environments.save": "",

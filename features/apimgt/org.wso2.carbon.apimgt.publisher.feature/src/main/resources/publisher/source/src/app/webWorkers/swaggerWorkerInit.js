@@ -1,5 +1,7 @@
+/* eslint-disable no-underscore-dangle */
+// Ignored the underscore-dangle rule to define __ private vars in window scope
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,12 +18,12 @@
  * under the License.
  */
 
-import Base from './Base/index';
-import Logout from './Logout';
-import Endpoints from './Endpoints';
-
-export {
-    Base,
-    Logout,
-    Endpoints,
+import Worker from './swagger.worker.js';
+/**
+ * `__swaggerWorker` & `__swaggerSpec` are used to pass the worker object and
+ * parsed swagger object to APIClient constructor
+ */
+window.__swaggerWorker = new Worker();
+window.__swaggerWorker.onmessage = (e) => {
+    window.__swaggerSpec = e.data;
 };
