@@ -35,14 +35,14 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
  * @returns {JSX} Header AppBar components.
  */
 function NavigatorChildren(props) {
-    const { isTenant } = useAppContext();
+    const { isSuperTenant } = useAppContext();
     const [open, setOpen] = React.useState(true);
     const { navChildren, navId, classes } = props;
     const handleClick = () => {
         setOpen(!open);
     };
     let navigationChildren = navChildren;
-    if (!isTenant) {
+    if (isSuperTenant) {
         navigationChildren = navChildren.filter((menu) => menu.id !== 'Tenant Theme');
     }
 
