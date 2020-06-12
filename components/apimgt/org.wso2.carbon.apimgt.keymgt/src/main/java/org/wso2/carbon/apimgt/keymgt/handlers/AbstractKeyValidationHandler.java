@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -236,8 +237,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                                 infoDTO.setAuthorized(false);
                                 return infoDTO;
                             }
-                            infoDTO.setTier(sub.getPolicyId());//// TODO check
-                            infoDTO.setSubscriber(sub.getSubscriptionId()); //// TODO check
+                            infoDTO.setTier(sub.getPolicyId());
+                            infoDTO.setSubscriber(sub.getSubscriptionId()); 
                             infoDTO.setApplicationId(app.getId().toString());
                             infoDTO.setApiName(api.getApiName());
                             infoDTO.setApiPublisher(api.getApiProvider());
@@ -250,42 +251,54 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                                 String apiTier = api.getApiTier();
                                 String subscriberUserId = sub.getSubscriptionId();
                                 String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
-                                int apiId = api.getApiId(); // TODO remove
+                                //int apiId = api.getApiId(); // TODO remove
                                 int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
-                                boolean isContentAware;
-                                int apiTenantId = APIUtil.getTenantId(api.getApiProvider());// TODO remove
-                                //TODO isContentAware
-
-                                //TODO check for api level content aware
+                                
+                                //int apiTenantId = APIUtil.getTenantId(api.getApiProvider());// TODO remove
                                 ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
-                                        subscriberTenantId); // todo check tenant id ////
+                                        subscriberTenantId); // TODO check tenant id ////
                                 
                                 SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId(),
                                         subscriberTenantId);
                                 
-                                isContentAware = false; //appPolicy.isContentAware() && subPolicy.isContentAware(); TODO fix NPE 
+                                boolean isContentAware = false;
+                                //TODO check for api level content aware
+                                if (PolicyConstants.BANDWIDTH_TYPE.equals(appPolicy.getQuotaType())
+                                        || PolicyConstants.BANDWIDTH_TYPE.equals(subPolicy.getQuotaType())) {
+                                    isContentAware = true; 
+                                }
                                 infoDTO.setContentAware(isContentAware);
 
                                 //TODO this must implement as a part of throttling implementation.
                                 int spikeArrest = 0;
-                                String apiLevelThrottlingKey = "api_level_throttling_key"; ////??????? TODO ????
-                                /*
+                                String apiLevelThrottlingKey = "api_level_throttling_key";
+                                
                                 if (subPolicy.getRateLimitCount() > 0) {
-                                    spikeArrest = subPolicy.getRateLimitCount(); TODO fix NPE
-                                } */ 
+                                    spikeArrest = subPolicy.getRateLimitCount(); 
+                                } 
 
                                 String spikeArrestUnit = null;
-                                /*
+                                
                                 if (subPolicy.getRateLimitTimeUnit() != null) {
-                                    spikeArrestUnit = subPolicy.getRateLimitTimeUnit(); TODO fix NPE
-                                } */
-                                boolean stopOnQuotaReach = true; //subPolicy.isStopOnQuotaReach(); TODO fix NPE
+                                    spikeArrestUnit = subPolicy.getRateLimitTimeUnit(); 
+                                } 
+                                boolean stopOnQuotaReach = subPolicy.isStopOnQuotaReach();
+                                int graphQLMaxDepth = 0;
+                                if(subPolicy.getGraphQLMaxDepth() > 0) {
+                                    graphQLMaxDepth = subPolicy.getGraphQLMaxDepth();
+                                }
+                                int graphQLMaxComplexity = 0;
+                                if(subPolicy.getGraphQLMaxComplexity() > 0) {
+                                    graphQLMaxComplexity = subPolicy.getGraphQLMaxComplexity();
+                                }
                                 List<String> list = new ArrayList<String>();
                                 list.add(apiLevelThrottlingKey);
                                 infoDTO.setSpikeArrestLimit(spikeArrest);
                                 infoDTO.setSpikeArrestUnit(spikeArrestUnit);
                                 infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
                                 infoDTO.setSubscriberTenantDomain(subscriberTenant);
+                                infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
+                                infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
                                 if (apiTier != null && apiTier.trim().length() > 0) {
                                     infoDTO.setApiTier(apiTier);
                                 }

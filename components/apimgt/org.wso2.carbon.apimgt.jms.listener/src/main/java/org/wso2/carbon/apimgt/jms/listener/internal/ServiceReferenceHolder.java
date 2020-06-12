@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 
@@ -39,6 +40,7 @@ public class ServiceReferenceHolder {
     private CacheInvalidationService cacheInvalidationService;
     private RevokedTokenService revokedTokenService;
     private KeyManagerConfigurationService keyManagerService;
+    private KeyManagerDataService keyManagerDataService;
 
     public static ServiceReferenceHolder getInstance() {
         return instance;
@@ -98,5 +100,13 @@ public class ServiceReferenceHolder {
     public KeyManagerConfigurationService getKeyManagerService() {
 
         return keyManagerService;
+    }
+
+    public KeyManagerDataService getKeyManagerDataService() {
+        return keyManagerDataService;
+    }
+
+    public void setKeyManagerDataService(KeyManagerDataService keyManagerDataService) {
+        this.keyManagerDataService = keyManagerDataService;
     }
 }

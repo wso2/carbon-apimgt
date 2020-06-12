@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Policy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 
@@ -124,7 +125,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public ApplicationPolicy getApplicationPolicyByName(String policyName, int tenantId) {
 
-        String key = POLICY_TYPE.APPLICATION +
+        String key = POLICY_TYPE.APPLICATION + DELEM_PERIOD + 
                 SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId);
         return appPolicyMap.get(key);
     }
@@ -342,5 +343,74 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 applicationKeysInitialized &&
                 applicationPoliciesInitialized &&
                 subscriptionPoliciesInitialized;
+    }
+
+    @Override
+    public void addOrUpdateSubscription(Subscription subscription) {
+        subscriptionMap.put(subscription.getCacheKey(), subscription);
+    }
+    @Override
+    public void removeSubscription(Subscription subscription) {
+        subscriptionMap.remove(subscription.getCacheKey());
+    }
+
+    @Override
+    public void addOrUpdateAPI(API api) {
+        apiMap.put(api.getCacheKey(), api);
+    }
+
+    @Override
+    public void addOrUpdateAPIWithUrlTemplates(API api) {
+        try {
+            API newAPI = new SubscriptionDataLoaderImpl().getApi(api.getContext(), api.getApiVersion());
+            apiMap.put(api.getCacheKey(), newAPI);
+        } catch (DataLoadingException e) {
+            log.error("Exception while loading api for " + api.getContext() + " " + api.getApiVersion(), e);
+        }
+
+    }
+    @Override
+    public void removeAPI(API api) {
+        apiMap.remove(api.getCacheKey());
+    }
+    
+    @Override
+    public void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping) {
+        applicationKeyMappingMap.put(applicationKeyMapping.getCacheKey(), applicationKeyMapping);
+    }
+    
+    @Override
+    public void removeApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping) {
+        applicationKeyMappingMap.remove(applicationKeyMapping.getCacheKey());
+    }
+    
+    @Override
+    public void addOrUpdateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+        subscriptionPolicyMap.put(subscriptionPolicy.getCacheKey(), subscriptionPolicy);
+    }
+    
+    @Override
+    public void addOrUpdateApplicationPolicy(ApplicationPolicy applicationPolicy) {
+        appPolicyMap.put(applicationPolicy.getCacheKey(), applicationPolicy);
+    }
+    
+    @Override
+    public void removeApplicationPolicy(ApplicationPolicy applicationPolicy) {
+        appPolicyMap.remove(applicationPolicy.getCacheKey());
+    }
+    
+    @Override
+    public void removeSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+        subscriptionPolicyMap.remove(subscriptionPolicy.getCacheKey());
+    }
+    
+    @Override
+    public void addOrUpdateApplication(Application application) {
+        applicationMap.put(application.getId(), application);
+    }
+    
+    @Override
+    public void removeApplication(Application application) {
+        applicationMap.remove(application.getId());
     }
 }
