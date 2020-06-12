@@ -4,41 +4,29 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServiceSpec;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
+
 import io.fabric8.openshift.client.OpenShiftClient;
-import okhttp3.Dispatcher;
-import okhttp3.internal.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ServiceDiscoveryEndpoints;
 import org.wso2.carbon.apimgt.api.model.Services;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.executors.APIExecutor;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants.*;
 
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest({APIProviderImpl.class, APIExecutor.class, APIUtil.class})
+import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
+
 public class K8sServiceDiscoveryTestCase {
     protected String masterURL = "https://192.168.99.104:8443";
     protected String type="Kubernetes";
