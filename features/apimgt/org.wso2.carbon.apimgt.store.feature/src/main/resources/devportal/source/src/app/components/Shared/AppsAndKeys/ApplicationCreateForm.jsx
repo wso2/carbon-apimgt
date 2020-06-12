@@ -150,7 +150,7 @@ const ApplicationCreate = (props) => {
             />
             <TextField
                 classes={{
-                    root: classes.mandatoryStarSelect,
+                    root: classes.mandatoryStarText,
                 }}
                 required
                 fullWidth
@@ -184,7 +184,7 @@ const ApplicationCreate = (props) => {
             </TextField>
             <TextField
                 classes={{
-                    root: classes.mandatoryStarSelect,
+                    root: classes.mandatoryStarText,
                 }}
                 required
                 fullWidth
