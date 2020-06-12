@@ -173,10 +173,13 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                         endpointSecurityModel.setType(endpointSecurityEntry.getValue().getType());
                         endpointSecurityModel
                                 .setAdditionalProperties(endpointSecurityEntry.getValue().getAdditionalProperties());
-                        endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
-                                endpointSecurityModel.getUsername().concat(":")
-                                        .concat(endpointSecurityModel.getPassword())
-                                        .getBytes())));
+                        if (endpointSecurityModel.getUsername() != null &&
+                        endpointSecurityModel.getPassword() != null) {
+                            endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
+                                    endpointSecurityModel.getUsername().concat(":")
+                                            .concat(endpointSecurityModel.getPassword())
+                                            .getBytes())));
+                        }
                         endpointSecurityModel.setAlias(alias.concat("--").concat(endpointSecurityEntry.getKey()));
 
                         if (endpointSecurityEntry.getValue().getType()
