@@ -37,6 +37,8 @@ import PersonAddRoundedIcon from '@material-ui/icons/PersonAddRounded';
 import RssFeedRoundedIcon from '@material-ui/icons/RssFeedRounded';
 import Api from 'AppData/api';
 import Configurations from 'Config';
+import moment from 'moment';
+import Alert from 'AppComponents/Shared/Alert';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -62,82 +64,52 @@ const useStyles = makeStyles((theme) => ({
 export default function TasksWorkflowCard() {
     const classes = useStyles();
     const intl = useIntl();
-    const api = new Api();
+    const restApi = new Api();
+    const [allTasksSet, setAllTasksSet] = useState({});
 
-    const [userCretionTasks, setUserCreationTasks] = useState();
-    const [applicationCreationTasks, setApplicationCreationTasks] = useState();
-    const [subscriptionCreationTasks, setSubscriptionCreationTasks] = useState();
-    const [applicationRegistrationTasks, setApplicationRegistrationTasks] = useState();
-    const [apiStateChangeTasks, setApiStateChangeTasks] = useState();
-    const [allTasksCount, setAllTasksCount] = useState(0);
-
-    const [tasksList, setTasksList] = useState();
-    // const restApi = new API();
-    // todo: delete dev components
-    const mockTasksList = [
-        {
-            name: 'DefaultApplication',
-            createdBy: 'Admin',
-            age: '3 hours ago',
-        },
-        {
-            name: 'DefaultApplication',
-            createdBy: 'Admin',
-            age: '3 hours ago',
-        },
-        {
-            name: 'DefaultApplication',
-            createdBy: 'Admin',
-            age: '3 hours ago',
-        },
-        {
-            name: 'DefaultApplication',
-            createdBy: 'Admin',
-            age: '3 hours ago',
-        },
-        {
-            name: 'DefaultApplication',
-            createdBy: 'Admin',
-            age: '3 hours ago',
-        },
-    ];
+    /**
+    * Calculate total task count
+    * @returns {int} total task count
+    */
+    function getAllTaskCount() {
+        let counter = 0;
+        for (const task in allTasksSet) {
+            if (allTasksSet[task]) {
+                counter += allTasksSet[task].length;
+            }
+        }
+        return counter;
+    }
 
     const fetchAllWorkFlows = () => {
-        let tasksCounter = 0;
-        api.workflowsGet('AM_USER_SIGNUP')
-            .then((result) => {
-                setUserCreationTasks(result.body.list);
-                tasksCounter += result.body.count;
+        const promiseUserSign = restApi.workflowsGet('AM_USER_SIGNUP');
+        const promiseStateChange = restApi.workflowsGet('AM_API_STATE');
+        const promiseAppCreation = restApi.workflowsGet('AM_APPLICATION_CREATION');
+        const promiseSubCreation = restApi.workflowsGet('AM_SUBSCRIPTION_CREATION');
+        const promiseRegProd = restApi.workflowsGet('AM_APPLICATION_REGISTRATION_PRODUCTION');
+        const promiseRegSb = restApi.workflowsGet('AM_APPLICATION_REGISTRATION_SANDBOX');
+        Promise.all([promiseUserSign, promiseStateChange, promiseAppCreation, promiseSubCreation,
+            promiseRegProd, promiseRegSb])
+            .then(([resultUserSign, resultStateChange, resultAppCreation, resultSubCreation,
+                resultRegProd, resultRegSb]) => {
+                const userCreation = resultUserSign.body.list;
+                const stateChange = resultStateChange.body.list;
+                const applicationCreation = resultAppCreation.body.list;
+                const subscriptionCreation = resultSubCreation.body.list;
+                const registration = resultRegProd.body.list + resultRegSb.body.list;
+                setAllTasksSet({
+                    userCreation,
+                    stateChange,
+                    applicationCreation,
+                    subscriptionCreation,
+                    registration,
+                });
             });
-        api.workflowsGet('AM_API_STATE')
-            .then((result) => {
-                setApiStateChangeTasks(result.body.list);
-                tasksCounter += result.body.count;
-            });
-        api.workflowsGet('AM_APPLICATION_CREATION')
-            .then((result) => {
-                setApplicationCreationTasks(result.body.list);
-                tasksCounter += result.body.count;
-            });
-        api.workflowsGet('AM_USER_SIGNUP')
-            .then((result) => {
-                setUserCreationTasks(result.body.list);
-                tasksCounter += result.body.count;
-            });
-        api.workflowsGet('AM_USER_SIGNUP')
-            .then((result) => {
-                setUserCreationTasks(result.body.list);
-                tasksCounter += result.body.count;
-            });
-        setAllTasksCount(tasksCounter);
     };
 
     useEffect(() => {
-        // todo: do api calls and set tasksList
-        setTasksList(mockTasksList);
-        // setTasksList([]);
+        fetchAllWorkFlows();
     }, []);
-
 
     const tasksDisabledCard = (
         <Card className={classes.root}>
@@ -226,11 +198,19 @@ export default function TasksWorkflowCard() {
                         </Typography>
                     </Link>
                     <Typography variant='body2' gutterBottom>
-                        {numberOfTasks}
-                        <FormattedMessage
-                            id='Dashboard.tasksWorkflow.compactTasks.card.numberOfPendingTasks.postFix'
-                            defaultMessage=' Pending tasks'
-                        />
+                        {numberOfTasks + ' '}
+                        {numberOfTasks === 1
+                            ? (
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.compactTasks.card.numberOfPendingTasks.postFix.singular'
+                                    defaultMessage=' Pending task'
+                                />
+                            ) : (
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.compactTasks.card.numberOfPendingTasks.postFix.plural'
+                                    defaultMessage=' Pending tasks'
+                                />
+                            )}
                     </Typography>
                 </Box>
             </Box>
@@ -246,6 +226,7 @@ export default function TasksWorkflowCard() {
                     id: 'Dashboard.tasksWorkflow.compactTasks.userCreation.name',
                     defaultMessage: 'User Creation',
                 }),
+                count: allTasksSet.userCreation.length,
             },
             {
                 icon: AddToQueueRoundedIcon,
@@ -254,6 +235,7 @@ export default function TasksWorkflowCard() {
                     id: 'Dashboard.tasksWorkflow.compactTasks.applicationCreation.name',
                     defaultMessage: 'Application Creation',
                 }),
+                count: allTasksSet.applicationCreation.length,
             },
             {
                 icon: RssFeedRoundedIcon,
@@ -262,6 +244,7 @@ export default function TasksWorkflowCard() {
                     id: 'Dashboard.tasksWorkflow.compactTasks.subscriptionCreation.name',
                     defaultMessage: 'Subscription Creation',
                 }),
+                count: allTasksSet.subscriptionCreation.length,
             },
             {
                 icon: AirplayRoundedIcon,
@@ -270,6 +253,7 @@ export default function TasksWorkflowCard() {
                     id: 'Dashboard.tasksWorkflow.compactTasks.applicationRegistration.name',
                     defaultMessage: 'Application Registration',
                 }),
+                count: allTasksSet.registration.length,
             },
             {
                 icon: FormatShapesRoundedIcon,
@@ -278,6 +262,7 @@ export default function TasksWorkflowCard() {
                     id: 'Dashboard.tasksWorkflow.compactTasks.apiStateChange.name',
                     defaultMessage: 'API State Change',
                 }),
+                count: allTasksSet.stateChange.length,
             },
         ];
         return (
@@ -294,7 +279,7 @@ export default function TasksWorkflowCard() {
                         </Box>
                         <Box>
                             <Typography className={classes.title} gutterBottom>
-                                ##
+                                {getAllTaskCount()}
                             </Typography>
                         </Box>
                     </Box>
@@ -308,13 +293,89 @@ export default function TasksWorkflowCard() {
                         bgcolor='background.paper'
 
                     >
-                        {compactTaskComponentDetails.map((component) => {
-                            return getCompactTaskComponent(component.icon, component.path, component.name, '#');
+                        {compactTaskComponentDetails.map((c) => {
+                            return getCompactTaskComponent(c.icon, c.path, c.name, c.count);
                         })}
                     </Box>
                 </CardContent>
             </Card>
         );
+    };
+
+    const updateStatus = (referenceId, value) => {
+        const body = {
+            status: value,
+            description: 'Approve workflow request',
+        };
+        restApi.updateWorkflow(referenceId, body)
+            .then(() => {
+                Alert.success(
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.ApplicationCreation.update.success'
+                        defaultMessage='Application creation status updated successfully'
+                    />,
+                );
+            })
+            .catch(() => {
+                Alert.error(
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.ApplicationCreation.update.failed'
+                        defaultMessage='Application creation approval failed'
+                    />,
+                );
+            })
+            .finally(() => {
+                fetchAllWorkFlows();
+            });
+    };
+
+    const getApplicationCreationFewerTaskComponent = () => {
+        // Application Creation tasks related component generation
+        return allTasksSet.applicationCreation.map((task) => {
+            return (
+                <Box display='flex' alignItems='center' mt={1}>
+                    <Box flexGrow={1}>
+                        <Typography variant='subtitle2'>
+                            {task.properties.applicationName}
+                        </Typography>
+                        <Box display='flex'>
+                            <Typography variant='body2'>
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.fewerTasks.card.createdBy.prefix'
+                                    defaultMessage='Created by '
+                                />
+                            </Typography>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                &nbsp;
+                                {task.properties.userName}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                {moment(task.createdTime).fromNow()}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    <Box>
+                        <Button
+                            onClick={() => { updateStatus(task.referenceId, 'APPROVED'); }}
+                        >
+                            <FormattedMessage
+                                id='Dashboard.tasksWorkflow.fewerTasks.card.task.accept'
+                                defaultMessage='Accept'
+                            />
+                        </Button>
+                        <Button
+                            onClick={() => { updateStatus(task.referenceId, 'REJECTED'); }}
+                        >
+                            <FormattedMessage
+                                id='Dashboard.tasksWorkflow.fewerTasks.card.task.reject'
+                                defaultMessage='Reject'
+                            />
+                        </Button>
+                    </Box>
+                </Box>
+            );
+        });
     };
 
     const fewerTasksCard = () => {
@@ -332,67 +393,24 @@ export default function TasksWorkflowCard() {
                         </Box>
                         <Box>
                             <Typography className={classes.title} gutterBottom>
-                                #
+                                {getAllTaskCount()}
                             </Typography>
                         </Box>
                     </Box>
 
                     <Divider light />
-
-                    {tasksList.map((task) => {
-                        return (
-                            <Box display='flex' alignItems='center' mt={1}>
-                                <Box flexGrow={1}>
-                                    <Typography variant='subtitle2'>
-                                        {task.name}
-                                    </Typography>
-                                    <Box display='flex'>
-                                        <Typography variant='body2'>
-                                            <FormattedMessage
-                                                id='Dashboard.tasksWorkflow.fewerTasks.card.createdBy.prefix'
-                                                defaultMessage='Created by &nbsp;'
-                                            />
-                                        </Typography>
-                                        <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
-                                            {task.createdBy}
-                                                &nbsp;
-                                        </Typography>
-                                        <Typography variant='body2'>
-                                            {task.age}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                                <Box>
-                                    <Button>
-                                        <FormattedMessage
-                                            id='Dashboard.tasksWorkflow.fewerTasks.card.task.accept'
-                                            defaultMessage='Accept'
-                                        />
-                                    </Button>
-                                    <Button>
-                                        <FormattedMessage
-                                            id='Dashboard.tasksWorkflow.fewerTasks.card.task.reject'
-                                            defaultMessage='Reject'
-                                        />
-                                    </Button>
-                                </Box>
-                            </Box>
-                        );
-                    })}
+                    {getApplicationCreationFewerTaskComponent()}
                 </CardContent>
             </Card>
         );
     };
 
-    if (tasksList) {
-        if (tasksList.length === 0) {
-            return noTasksCard;
-        } else if (tasksList.length <= 4) {
-            return fewerTasksCard();
-        } else {
-            return compactTasksCard();
-        }
+    const cnt = getAllTaskCount();
+    if (cnt > 4) {
+        return compactTasksCard();
+    } else if (cnt > 0) {
+        return fewerTasksCard();
     } else {
-        return tasksDisabledCard;
+        return noTasksCard;
     }
 }
