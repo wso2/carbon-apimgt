@@ -37,7 +37,7 @@ import BaseThumbnail from './BaseThumbnail';
 const styles = (theme) => ({
     card: {
         margin: theme.spacing(3 / 2),
-        maxWidth: theme.spacing(32),
+        maxWidth: theme.custom.thumbnail.width,
         transition: 'box-shadow 0.3s ease-in-out',
     },
     providerText: {
@@ -211,7 +211,9 @@ class APIThumb extends Component {
      * @memberof APIThumb
      */
     render() {
-        const { classes, api, isAPIProduct, theme } = this.props;
+        const {
+            classes, api, isAPIProduct, theme,
+        } = this.props;
         const { isHover, loading } = this.state;
         let overviewPath = '';
         if (api.apiType) {
@@ -238,8 +240,14 @@ class APIThumb extends Component {
                 raised={isHover}
                 className={classes.card}
             >
-                <CardMedia src='None' component={BaseThumbnail} height={theme.custom.thumbnail.height}
-                    width={theme.custom.thumbnail.width} title='Thumbnail' api={api} />
+                <CardMedia
+                    src='None'
+                    component={BaseThumbnail}
+                    height={theme.custom.thumbnail.height}
+                    width={theme.custom.thumbnail.width}
+                    title='Thumbnail'
+                    api={api}
+                />
                 <CardContent className={classes.apiDetails}>
                     <div className={classes.textWrapper}>
                         <Link to={overviewPath}>
