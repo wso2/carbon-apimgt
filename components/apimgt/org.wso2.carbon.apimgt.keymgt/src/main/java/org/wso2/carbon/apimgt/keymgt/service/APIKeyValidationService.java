@@ -41,6 +41,8 @@ import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
+import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataStoreImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
@@ -294,18 +296,32 @@ public class APIKeyValidationService extends AbstractAdmin {
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        
         ArrayList<URITemplate> templates = new ArrayList<URITemplate>();
         //TODO old one had advanced throttling/normal config
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if(store == null) {
             return templates;
         }
-        API api = store.getApiByContextAndVersion(context, version);
+        SubscriptionDataStoreImpl storeImpl = (SubscriptionDataStoreImpl) store; // TODO move to interface
+        API api;
+        if (storeImpl.isApisInitialized()) {
+            log.debug("SubscriptionDataStore Initialized. Reading from SubscriptionDataStore");
+            api = store.getApiByContextAndVersion(context, version);
+        } else {
+            log.debug("SubscriptionDataStore not Initialized. Reading from Rest API");
+            api = new SubscriptionDataLoaderImpl().getApi(context, version);
+            if (api != null) {
+                store.addOrUpdateAPI(api);
+                if(log.isDebugEnabled()) {
+                    log.debug("Update SubscriptionDataStore api for " + api.getCacheKey());
+                }
+            }
+        }
+
         if(api == null) {
             return templates;  ////TODO check this
         }
-        List<URLMapping> mapping = api.getResources("");//TODO fix the api object to not accept value
+        List<URLMapping> mapping = api.getResources();
         if(mapping == null) {
             return templates;
         }

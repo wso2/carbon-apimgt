@@ -30,4 +30,10 @@ public class ApplicationPolicy extends Policy {
 
         return POLICY_TYPE.APPLICATION + DELEM_PERIOD + super.getCacheKey();
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationPolicy [getId()=" + getId() + ", getQuotaType()=" + getQuotaType() + ", isContentAware()="
+                + isContentAware() + ", getTenantId()=" + getTenantId() + ", getName()=" + getName() + "]";
+    }
 }

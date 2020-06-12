@@ -89,6 +89,35 @@ public interface SubscriptionDataStore {
      * @return Application Throttling Policy
      */
     ApplicationPolicy getApplicationPolicyByName(String policyName, int tenantId);
+    
+    void addOrUpdateApplication(Application application);
+
+    void addOrUpdateSubscription(Subscription subscription);
+
+    void addOrUpdateAPI(API api);
+    
+    void addOrUpdateAPIWithUrlTemplates(API api);
+
+    void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping);
+    
+    void addOrUpdateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy);
+
+    void addOrUpdateApplicationPolicy(ApplicationPolicy applicationPolicy);
+    
+    void removeApplication(Application application);
+
+    void removeAPI(API api);
+
+    void removeSubscription(Subscription subscription);
+
+    void removeApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping);
+
+    void removeSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy);
+
+    void removeApplicationPolicy(ApplicationPolicy applicationPolicy);
+
+
+
 
 }
 

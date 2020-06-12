@@ -20,16 +20,18 @@ package org.wso2.carbon.apimgt.impl.notifier.events;
 
 import java.util.Objects;
 
+import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
+
 /**
  * An Event Object which can holds the data related to API Policy which are required
  * for the validation purpose in a gateway.
  */
-public class APIPolicyEvent extends Event {
+public class APIPolicyEvent extends PolicyEvent {
     private int policyId;
     private String policyName;
     private String quotaType;
 
-    public APIPolicyEvent(String eventId, long timestamp, String type, int tenantId, int policyId,
+    public APIPolicyEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, int policyId,
                           String policyName, String quotaType) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
@@ -38,6 +40,8 @@ public class APIPolicyEvent extends Event {
         this.policyId = policyId;
         this.policyName = policyName;
         this.quotaType = quotaType;
+        this.tenantDomain = tenantDomain;
+        this.policyType = PolicyType.API;
     }
 
     @Override
@@ -49,7 +53,8 @@ public class APIPolicyEvent extends Event {
                 ", eventId='" + eventId + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
-                ", tenantId=" + tenantId +
+                ", tenantId=" + tenantId + '\'' +
+                ", tenantDomain=" + tenantDomain +
                 '}';
     }
 
@@ -90,5 +95,5 @@ public class APIPolicyEvent extends Event {
 
     public void setQuotaType(String quotaType) {
         this.quotaType = quotaType;
-    }
+    }    
 }

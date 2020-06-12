@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSListenerStartupShutdownListener;
@@ -170,6 +171,24 @@ public class JMSListenerComponent {
         if (this.registration != null) {
             this.registration.unregister();
         }
+    }
+    
+    @Reference(
+            name = "keymanager.data.service",
+            service = KeyManagerDataService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetKeyManagerDataService")
+    protected void setKeyManagerDataService(KeyManagerDataService keymanagerDataService) {
+
+        log.debug("Setting KeyManagerDataService");
+        ServiceReferenceHolder.getInstance().setKeyManagerDataService(keymanagerDataService);
+    }
+
+    protected void unsetKeyManagerDataService(KeyManagerDataService keymanagerDataService) {
+
+        log.debug("Un-setting KeyManagerDataService");
+        ServiceReferenceHolder.getInstance().setKeyManagerDataService(null);
     }
 
 }

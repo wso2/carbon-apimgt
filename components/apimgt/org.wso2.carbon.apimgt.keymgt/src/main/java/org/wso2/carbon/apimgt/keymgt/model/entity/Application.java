@@ -122,4 +122,11 @@ public class Application implements CacheableEntity<Integer> {
 
         this.attributes.remove(key);
     }
+
+    @Override
+    public String toString() {
+        return "Application [id=" + id + ", name=" + name + ", subId=" + subId + ", policy=" + policy + ", tokenType="
+                + tokenType + ", groupIds=" + groupIds + ", attributes=" + attributes + "]";
+    }
+    
 }

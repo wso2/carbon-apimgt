@@ -20,11 +20,13 @@ package org.wso2.carbon.apimgt.impl.notifier.events;
 
 import java.util.Objects;
 
+import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
+
 /**
  * An Event Object which can holds the data related to Subscription Policy which are required
  * for the validation purpose in a gateway.
  */
-public class SubscriptionPolicyEvent extends Event {
+public class SubscriptionPolicyEvent extends PolicyEvent {
     private int policyId;
     private String policyName;
     private String quotaType;
@@ -34,7 +36,7 @@ public class SubscriptionPolicyEvent extends Event {
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
 
-    public SubscriptionPolicyEvent(String eventId, long timestamp, String type, int tenantId, int policyId,
+    public SubscriptionPolicyEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, int policyId,
                                    String policyName, String quotaType, int rateLimitCount, String rateLimitTimeUnit,
                                    boolean stopOnQuotaReach, int graphQLMaxDepth, int graphQLMaxComplexity) {
         this.eventId = eventId;
@@ -49,6 +51,8 @@ public class SubscriptionPolicyEvent extends Event {
         this.stopOnQuotaReach = stopOnQuotaReach;
         this.graphQLMaxComplexity = graphQLMaxComplexity;
         this.graphQLMaxDepth = graphQLMaxDepth;
+        this.tenantDomain = tenantDomain;
+        this.policyType = PolicyType.SUBSCRIPTION;
     }
 
     @Override
@@ -65,7 +69,8 @@ public class SubscriptionPolicyEvent extends Event {
                 ", eventId='" + eventId + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
-                ", tenantId=" + tenantId +
+                ", tenantId=" + tenantId + '\'' +
+                ", tenantDomain=" + tenantDomain +
                 '}';
     }
 

@@ -117,4 +117,10 @@ public class API implements CacheableEntity<String> {
 
         return context + DELEM_PERIOD + version;
     }
+
+    @Override
+    public String toString() {
+        return "API [apiId=" + apiId + ", provider=" + provider + ", name=" + name + ", version=" + version
+                + ", context=" + context + ", policy=" + policy + ", urlMappings=" + urlMappings + "]";
+    }
 }
