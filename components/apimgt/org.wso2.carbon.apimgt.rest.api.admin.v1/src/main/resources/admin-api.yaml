@@ -4985,6 +4985,11 @@ definitions:
       name:
         type: string
         example: "WSO2 IS"
+      displayName:
+        type: string
+        description: |
+          display name of Key Manager to  show in UI
+        example: KeyManager1
       type:
         type: string
         example: "IS"
