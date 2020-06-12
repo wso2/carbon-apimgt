@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -37,26 +38,11 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIType;
+import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationAttributesDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -189,6 +175,8 @@ public class APIMappingUtil {
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
 
         dto.setEndpointURLs(extractEndpointURLs(model, tenantDomain));
+
+        dto.setIngressURLs(extractIngressURLs(model));
 
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
@@ -426,7 +414,7 @@ public class APIMappingUtil {
     /**
      * Returns an API with minimal info given the uuid.
      *
-     * @param apiUUID                 API uuid
+     * @param apiUUID               API uuid
      * @param requestedTenantDomain tenant domain of the API
      * @return API which represents the given id
      * @throws APIManagementException
@@ -509,7 +497,7 @@ public class APIMappingUtil {
     /**
      * Converts a JSONObject to corresponding RatingDTO
      *
-     * @param  obj JSON Object to be converted
+     * @param obj JSON Object to be converted
      * @return RatingDTO object
      */
     public static RatingDTO fromJsonToRatingDTO(JSONObject obj) {
@@ -525,9 +513,9 @@ public class APIMappingUtil {
     /**
      * Converts a List object of Ratings into a DTO
      *
-     * @param ratings        List of Ratings
-     * @param limit          maximum number of ratings to be returned
-     * @param offset         starting index
+     * @param ratings List of Ratings
+     * @param limit   maximum number of ratings to be returned
+     * @param offset  starting index
      * @return RatingListDTO object containing Rating DTOs
      */
     public static RatingListDTO fromRatingListToDTO(List<RatingDTO> ratings, int offset, int limit) {
@@ -551,13 +539,13 @@ public class APIMappingUtil {
     /**
      * Sets pagination urls for a RatingListDTO object given pagination parameters and url parameters
      *
-     * @param ratingListDTO   a RatingListDTO object
-     * @param limit           max number of objects returned
-     * @param offset          starting index
-     * @param size            max offset
+     * @param ratingListDTO a RatingListDTO object
+     * @param limit         max number of objects returned
+     * @param offset        starting index
+     * @param size          max offset
      */
     public static void setRatingPaginationParams(RatingListDTO ratingListDTO, String apiId, int offset, int limit,
-            int size) {
+                                                 int size) {
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
         String paginatedPrevious = "";
@@ -679,13 +667,13 @@ public class APIMappingUtil {
                 subscriptionAllowedTenants));
         int free = 0, commercial = 0;
         for (Tier tier : throttlingPolicies) {
-            if(tier.getTierPlan().equalsIgnoreCase(RestApiConstants.FREE)) {
+            if (tier.getTierPlan().equalsIgnoreCase(RestApiConstants.FREE)) {
                 free = free + 1;
             } else if (tier.getTierPlan().equalsIgnoreCase(RestApiConstants.COMMERCIAL)) {
                 commercial = commercial + 1;
             }
         }
-        if (free > 0 && commercial == 0){
+        if (free > 0 && commercial == 0) {
             apiInfoDTO.setMonetizationLabel(RestApiConstants.FREE);
         } else if (free == 0 && commercial > 0) {
             apiInfoDTO.setMonetizationLabel(RestApiConstants.PAID);
@@ -747,8 +735,8 @@ public class APIMappingUtil {
 
     /**
      * Extracts the API environment details with access url for each endpoint
-     * 
-     * @param api API object
+     *
+     * @param api          API object
      * @param tenantDomain Tenant domain of the API
      * @return the API environment details
      * @throws APIManagementException error while extracting the information
@@ -839,12 +827,67 @@ public class APIMappingUtil {
         return apiEndpointsList;
     }
 
+    /**
+     * Extracts the API deployment environment details with ingress url for each cluster
+     *
+     * @param api API object
+     * @return the API Deployment environments details
+     * @throws APIManagementException error while extracting the information
+     */
+    private static List<APIIngressURLsDTO> extractIngressURLs(API api)
+            throws APIManagementException {
+        List<APIIngressURLsDTO> apiDeployedIngressURLs = new ArrayList<>();
+        if (api.getDeploymentEnvironments() != null && !api.getDeploymentEnvironments().isEmpty()) {
+            Set<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> selectedDeploymentEnvironments =
+                    new HashSet<>(api.getDeploymentEnvironments());
 
+            if (selectedDeploymentEnvironments != null && !selectedDeploymentEnvironments.isEmpty()) {
+                for (org.wso2.carbon.apimgt.api.model.DeploymentEnvironments
+                        deploymentEnvironment : selectedDeploymentEnvironments) {
+                    APIIngressURLsDTO ingressURLDTO = new APIIngressURLsDTO();
+                    JSONArray clusterConfigs = APIUtil.getAllClustersFromConfig();
+                    for (Object clusterConfig : clusterConfigs) {
+                        JSONObject clusterConf = (JSONObject) clusterConfig;
+                        List<APIDeploymentClusterInfoDTO> clusterInfoArray = new ArrayList<>();
+                        if (clusterConf.get(ContainerBasedConstants.TYPE).toString()
+                                .equalsIgnoreCase(deploymentEnvironment.getType())) {
+                            JSONArray containerMgtInfoArray = (JSONArray) (clusterConf
+                                    .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
+                            for (Object containerMgtInfoObj : containerMgtInfoArray) {
+                                JSONObject containerMgtInfo = (JSONObject) containerMgtInfoObj;
+                                APIDeploymentClusterInfoDTO apiDeploymentClusterInfoDTO =
+                                        new APIDeploymentClusterInfoDTO();
+                                if (deploymentEnvironment.getClusterNames().contains(containerMgtInfo
+                                        .get(ContainerBasedConstants.CLUSTER_ID).toString())) {
+                                    apiDeploymentClusterInfoDTO.setClusterName(containerMgtInfo
+                                            .get(ContainerBasedConstants.CLUSTER_ID).toString());
+                                    apiDeploymentClusterInfoDTO.setIngressURL(((JSONObject) containerMgtInfo
+                                            .get(ContainerBasedConstants.PROPERTIES))
+                                            .get(ContainerBasedConstants.INGRESS_URL).toString());
+                                    clusterInfoArray.add(apiDeploymentClusterInfoDTO);
+                                }
+                            }
+                            if (!clusterInfoArray.isEmpty()) {
+                                ingressURLDTO.setClusterDetails(clusterInfoArray);
+                                ingressURLDTO.setDeploymentEnvironmentName(deploymentEnvironment.getType());
+                            }
+
+                        }
+                    }
+                    if (ingressURLDTO.getDeploymentEnvironmentName() != null && !ingressURLDTO.getClusterDetails()
+                            .isEmpty()) {
+                        apiDeployedIngressURLs.add(ingressURLDTO);
+                    }
+                }
+            }
+        }
+        return apiDeployedIngressURLs;
+    }
 
     /**
      * Extracts the API environment details with access url for each endpoint
      *
-     * @param apiProduct API object
+     * @param apiProduct   API object
      * @param tenantDomain Tenant domain of the API
      * @return the API environment details
      * @throws APIManagementException error while extracting the information
@@ -914,8 +957,8 @@ public class APIMappingUtil {
     /**
      * Returns label details of the API in REST API DTO format.
      *
-     * @param gatewayLabels Gateway label details from the API model object 
-     * @param apiContext API context
+     * @param gatewayLabels Gateway label details from the API model object
+     * @param apiContext    API context
      * @return label details of the API in REST API DTO format
      */
     private static List<LabelDTO> getLabelDetails(List<Label> gatewayLabels, String apiContext) {
@@ -952,8 +995,6 @@ public class APIMappingUtil {
     //        }
     //        return scopeDto;
     //    }
-    
-
 
 
     /**
@@ -979,7 +1020,7 @@ public class APIMappingUtil {
      * @return subscriptionAllowed
      */
     private static boolean isSubscriptionAvailable(String apiTenant, String subscriptionAvailability,
-                                                  String subscriptionAllowedTenants) {
+                                                   String subscriptionAllowedTenants) {
 
         String userTenant = RestApiUtil.getLoggedInUserTenantDomain();
         boolean subscriptionAllowed = false;

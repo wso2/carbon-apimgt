@@ -60,6 +60,40 @@ export default function CustomIcon(props) {
                 </g>
             </svg>
         );
+    } else if (icon === 'test') {
+        return (
+            <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width={width}
+                height={height}
+                viewBox='0 0 11 11'
+                id='svg8'
+                className={className}
+                style={{ padding: 0 }}
+            >
+                <g
+                    sid='layer2'
+                    transform='translate(79.833 -138.905)'
+                >
+                    <g
+                        id='g5708'
+                        transform='matrix(1.19734 0 0 1.0548 -89.665 113.54)'
+                        fill='none'
+                        stroke={strokeColor}
+                        strokeWidth='0.529'
+                    >
+                        <path
+                            id='path5704'
+                            d='m 8.6244111,24.214646 3.2203959,3.9527 -3.439584,3.704167'
+                        />
+                        <path
+                            id='path5706'
+                            d='M 10.944689,31.765172 H 15.2945'
+                        />
+                    </g>
+                </g>
+            </svg>
+        );
     } else if (icon === 'api') {
         return (
             <svg
