@@ -39,6 +39,8 @@ const config = {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
             AppTests: path.resolve(__dirname, 'source/Tests/'),
+            react: path.resolve('../../../../../node_modules/react'),
+            reactDom: path.resolve('../../../../../node_modules/react-dom'),
         },
         extensions: ['.js', '.jsx'],
     },
@@ -84,6 +86,7 @@ const config = {
         Themes: 'AppThemes', // Should use long names for preventing global scope JS variable conflicts
         MaterialIcons: 'MaterialIcons',
         Config: 'AppConfig',
+        Settings: 'Settings',
     },
     plugins: [new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: [] })],
 };
@@ -97,6 +100,7 @@ if (process.env.NODE_ENV === 'development') {
         enforce: 'pre',
         test: /\.(js|jsx)$/,
         loader: 'eslint-loader',
+        exclude: /devportal/,
         options: {
             failOnError: true,
             quiet: true,

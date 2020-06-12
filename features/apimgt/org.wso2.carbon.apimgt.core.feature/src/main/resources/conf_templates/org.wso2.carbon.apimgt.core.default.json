@@ -137,5 +137,6 @@
   "apimgt.mutual_ssl.certificate_header": "X-WSO2-CLIENT-CERTIFICATE",
   "apimgt.mutual_ssl.enable_client_validation": true,
   "database.local.url": "jdbc:h2:./repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE",
-  "apim.key_manager.enable": true
+  "apim.key_manager.enable": true,
+  "ContainerMgtConfig.Kubernetes":"org.wso2.carbon.apimgt.impl.containermgt.K8sManager"
 }

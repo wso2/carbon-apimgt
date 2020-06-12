@@ -33,22 +33,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -56,18 +41,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
@@ -181,6 +155,9 @@ public class APIMappingUtil {
         if (dto.isEnableSchemaValidation() != null) {
             model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
+        if (dto.isEnableStore() != null) {
+            model.setEnableStore(dto.isEnableStore());
+        }
         if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
             model.setResponseCache(APIConstants.ENABLED);
         } else {
@@ -205,6 +182,18 @@ public class APIMappingUtil {
                     model.setFaultSequence(policy.getName());
                 }
             }
+        }
+        if (dto.getDeploymentEnvironments() != null) {
+            Set<DeploymentEnvironmentsDTO> deploymentsFromDTO = new HashSet<DeploymentEnvironmentsDTO>(dto.getDeploymentEnvironments());
+            Set<DeploymentEnvironments> deploymentEnvironments = new HashSet<DeploymentEnvironments>();
+
+            for (DeploymentEnvironmentsDTO deployment : deploymentsFromDTO) {
+                DeploymentEnvironments deploymentEnvironment = new DeploymentEnvironments();
+                deploymentEnvironment.setType(deployment.getType());
+                deploymentEnvironment.setClusterNames(deployment.getClusterName());
+                deploymentEnvironments.add(deploymentEnvironment);
+            }
+            model.setDeploymentEnvironments(deploymentEnvironments);
         }
 
         if (dto.getSubscriptionAvailability() != null) {
@@ -387,6 +376,50 @@ public class APIMappingUtil {
         }
         apiMonetizationInfoDTO.setProperties(monetizationPropertiesMap);
         return apiMonetizationInfoDTO;
+    }
+
+    public static DeploymentStatusListDTO fromDeploymentStatustoDTO ( APIIdentifier apiIdentifier) throws APIManagementException{
+        //create DTO form the model
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API api = apiProvider.getAPI(apiIdentifier);
+
+        DeploymentStatusListDTO deploymentStatusListDTO = new DeploymentStatusListDTO();
+        DeploymentStatusDTO deploymentStatusDTO = new DeploymentStatusDTO();
+        List<DeploymentStatusDTO> deploymentStatuses = new ArrayList<DeploymentStatusDTO>();
+        List<DeploymentClusterStatusDTO> clustersList  = new ArrayList<DeploymentClusterStatusDTO>();
+
+
+        List<DeploymentStatus> deploymentStatusList = apiProvider.getDeploymentStatus(apiIdentifier);
+
+        for(DeploymentStatus status : deploymentStatusList){
+            DeploymentClusterStatusDTO deploymentClusterStatusDTO = new DeploymentClusterStatusDTO();
+            List<PodStatusDTO>  podStatusDTOList = new ArrayList<PodStatusDTO>();
+
+            deploymentClusterStatusDTO.setClusterName(status.getClusterName());
+            deploymentClusterStatusDTO.setPodsRunning(status.getPodsRunning());
+
+            for (Map<String, String> getPodStatus : status.getPodStatus()){
+                PodStatusDTO podStatusDTO = new PodStatusDTO();
+                podStatusDTO.setName(getPodStatus.get("podName"));
+                podStatusDTO.setStatus(getPodStatus.get("status"));
+                podStatusDTO.setReady(getPodStatus.get("ready"));
+                podStatusDTO.setCreationTimestamp(getPodStatus.get("creationTimestamp"));
+
+                podStatusDTOList.add(podStatusDTO);
+            }
+
+            deploymentClusterStatusDTO.setHealthStatus(podStatusDTOList);
+            clustersList.add(deploymentClusterStatusDTO);
+
+        }
+        deploymentStatusDTO.setClusters(clustersList);
+        deploymentStatusDTO.setType("kubernetes");
+        deploymentStatuses.add(deploymentStatusDTO);
+
+        deploymentStatusListDTO.setList(deploymentStatuses);
+        deploymentStatusListDTO.setCount(deploymentStatuses.size());
+
+        return deploymentStatusListDTO;
     }
 
     /**
@@ -767,6 +800,7 @@ public class APIMappingUtil {
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
+        dto.setEnableStore(model.isEnableStore());
         if (APIConstants.ENABLED.equals(model.getResponseCache())) {
             dto.setResponseCachingEnabled(Boolean.TRUE);
         } else {
@@ -1064,6 +1098,18 @@ public class APIMappingUtil {
         }
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
+
+        if (model.getDeploymentEnvironments() != null && !model.getDeploymentEnvironments().isEmpty()) {
+            List<DeploymentEnvironmentsDTO> deploymentEnvironmentsDTOS = new ArrayList<DeploymentEnvironmentsDTO>();
+            for (DeploymentEnvironments deploymentEnvironment : model.getDeploymentEnvironments()) {
+                DeploymentEnvironmentsDTO deploymentEnvironmentsDTO = new DeploymentEnvironmentsDTO();
+                deploymentEnvironmentsDTO.setType(deploymentEnvironment.getType());
+                deploymentEnvironmentsDTO.setClusterName(deploymentEnvironment.getClusterNames());
+
+                deploymentEnvironmentsDTOS.add(deploymentEnvironmentsDTO);
+            }
+            dto.setDeploymentEnvironments(deploymentEnvironmentsDTOS);
+        }
         return dto;
     }
 

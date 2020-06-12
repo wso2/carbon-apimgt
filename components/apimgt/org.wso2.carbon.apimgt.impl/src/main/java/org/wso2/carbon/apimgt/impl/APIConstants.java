@@ -349,6 +349,7 @@ public final class APIConstants {
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
+    public static final String API_OVERVIEW_DEPLOYMENTS = "overview_deployments";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
@@ -375,6 +376,8 @@ public final class APIConstants {
 
     //This constant is used in Json schema validator
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
+
+    public static final String API_OVERVIEW_ENABLE_STORE = "overview_enableStore";
 
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
@@ -1524,6 +1527,7 @@ public final class APIConstants {
     public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
     public static final String DEPRECATE_CHECK_LIST_ITEM = "Deprecate old versions after publishing the API";
     public static final String RESUBSCRIBE_CHECK_LIST_ITEM = "Requires re-subscription when publishing the API";
+    public static final String PUBLISH_IN_PRIVATE_JET_MODE = "Publish In Private-Jet Mode";
 
     public static final String METRICS_PREFIX = "org.wso2.am";
 
@@ -1644,6 +1648,7 @@ public final class APIConstants {
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
+    public static final String ENABLE_STORE_SEARCH_TYPE_KEY = "enableStore=(true OR null)";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
@@ -1660,6 +1665,7 @@ public final class APIConstants {
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
     public static final String LABEL_SEARCH_TYPE_PREFIX = "label";
     public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
+    public static final String ENABLE_STORE = "enableStore";
 
     //api-product related constants
     public static final String API_PRODUCT_VERSION = "1.0.0";
@@ -1879,7 +1885,7 @@ public final class APIConstants {
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
             API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
-            CATEGORY_SEARCH_TYPE_PREFIX };
+            CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase() };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
     /**
@@ -2248,6 +2254,7 @@ public final class APIConstants {
     // Supported Notifier Types
     public enum NotifierType {
         API,
+        GATEWAY_PUBLISHED_API,
         APPLICATION,
         APPLICATION_REGISTRATION,
         POLICY,
@@ -2269,7 +2276,33 @@ public final class APIConstants {
         POLICY_DELETE,
         SUBSCRIPTIONS_CREATE,
         SUBSCRIPTIONS_UPDATE,
-        SUBSCRIPTIONS_DELETE
+        SUBSCRIPTIONS_DELETE,
+        DEPLOY_API_IN_GATEWAY,
+        REMOVE_API_FROM_GATEWAY
+    }
+
+    public static class GatewayArtifactSynchronizer{
+
+        public static final String SYNC_RUNTIME_ARTIFACTS_PUBLISHER_CONFIG  = "SyncRuntimeArtifactsPublisher";
+        public static final String SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG  = "SyncRuntimeArtifactsGateway";
+        public static final String ENABLE_CONFIG = "Enable";
+        public static final String SAVER_CONFIG = "ArtifactSaver";
+        public static final String RETRIEVER_CONFIG = "ArtifactRetriever";
+        public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
+        public static final String GATEWAY_LABELS_CONFIG = "GatewayLabels";
+        public static final String LABEL_CONFIG = "Label";
+        public static final String DB_SAVER_NAME = "DBSaver";
+        public static final String DB_RETRIEVER_NAME = "DBRetriever";
+        public static final String GATEWAY_INSTRUCTION_PUBLISH = "Publish";
+        public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
+
+    }
+
+    public static class ContainerMgtAttributes {
+        public static final String DEPLOYMENTS = "Deployments";
+        public static final String CONTAINER_MANAGEMENT = "ContainerMgt";
+        public static final String CONTAINER_MANAGEMENT_INFO ="ContainerMgtInfo";
+
     }
     
     public enum PolicyType {
