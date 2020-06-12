@@ -154,6 +154,8 @@ export default {
             iconSize: 32,
         },
         thumbnail: {
+            width: 240,
+            height: 140,
             backgrounds: [ // These backgrounds are use to generate the thumbnails.
                 { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
                 { prime: 0xf47f16ff, sub: 0xcddc39ff },
