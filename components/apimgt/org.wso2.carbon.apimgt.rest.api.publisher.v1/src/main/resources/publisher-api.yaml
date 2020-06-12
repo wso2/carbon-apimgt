@@ -7642,10 +7642,15 @@ definitions:
               }
             }
 
-          `Endpoint from Endpoint Registry`
+          `Endpoint from Service Catalog`
             {
-              "endpoint_type": "Registry",
-              "endpoint_id": "{registry-name:entry-name:version}",
+               "endpoint_type":"catalog",
+               "sandbox_endpoints": {
+                       "id":"dev:entry:1.0.0"
+               },
+               "production_endpoints": {
+                       "id":"dev:sand:1.0.0"
+               }
             }
 
         example:
