@@ -266,6 +266,8 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         policy.setStopOnQuotaReach(event.isStopOnQuotaReach());
         policy.setTenantId(event.getTenantId());
         policy.setTierName(event.getPolicyName());
+        policy.setGraphQLMaxComplexity(event.getGraphQLMaxComplexity());
+        policy.setGraphQLMaxDepth(event.getGraphQLMaxDepth());
         if(log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + policy.toString());
