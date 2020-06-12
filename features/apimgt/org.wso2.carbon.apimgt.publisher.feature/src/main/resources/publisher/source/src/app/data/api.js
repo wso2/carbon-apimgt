@@ -653,11 +653,6 @@ class API extends Resource {
         }
     }
 
-    getDeployments() {
-        return this.client.then(client => {
-            return client.apis['Deployments'].deploymentsGet();
-        });
-    }
     /**
      * Get a particular scope
      * @param scopeId {String} UUID of the scope

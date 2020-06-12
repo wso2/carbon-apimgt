@@ -127,7 +127,7 @@ public class OASParserUtil {
     private static ObjectMapper objectMapper = new ObjectMapper();
     private static SwaggerConverter swaggerConverter = new SwaggerConverter();
 
-    public enum SwaggerVersion {
+    enum SwaggerVersion {
         SWAGGER,
         OPEN_API,
     }
@@ -192,7 +192,7 @@ public class OASParserUtil {
         return oas3Parser;
     }
 
-    public static SwaggerVersion getSwaggerVersion(String apiDefinition) throws APIManagementException {
+    private static SwaggerVersion getSwaggerVersion(String apiDefinition) throws APIManagementException {
         ObjectMapper mapper;
         if (apiDefinition.trim().startsWith("{")) {
             mapper = ObjectMapperFactory.createJson();

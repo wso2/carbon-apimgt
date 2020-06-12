@@ -4183,17 +4183,6 @@ definitions:
         example: {}
       monetization:
         $ref: '#/definitions/APIMonetizationInfo'
-      ingressURLs:
-        type: array
-        items:
-          properties:
-            deploymentEnvironmentName:
-              type: string
-              example: kubernetes
-            clusterDetails:
-              type: array
-              items:
-                $ref: '#/definitions/APIDeploymentClusterInfo'
       endpointURLs:
         type: array
         items:
@@ -5416,8 +5405,7 @@ definitions:
             default: false
       IsAnonymousModeEnabled:
         type: boolean
-        default: true
-  #-----------------------------------------------------
+        default: true#-----------------------------------------------------
   # The Application Attribute resource
   #-----------------------------------------------------
   ApplicationAttribute :
@@ -5822,6 +5810,7 @@ definitions:
         items:
           $ref: '#/definitions/KeyManagerInfo'
 
+
   #-----------------------------------------------------
   # The GraphQL Query Complexity Info resource
   #-----------------------------------------------------
@@ -5888,24 +5877,6 @@ definitions:
         items:
           type: string
         example: ["code","name"]
-
-  #-----------------------------------------------------
-  # The API DeploymentClusterInfo resource
-  #-----------------------------------------------------
-  APIDeploymentClusterInfo:
-    title: API Deployments ClusterInfo object
-    required:
-      - clusterName
-      - ingressURL
-    properties:
-      clusterName:
-        type: string
-        description: name of the cluster
-        example: minikube
-      ingressURL:
-        type: string
-        description: ingress URL
-        example: http://wso2.com:9443
 
 #-----------------------------------------------------
 # END-OF-FILE

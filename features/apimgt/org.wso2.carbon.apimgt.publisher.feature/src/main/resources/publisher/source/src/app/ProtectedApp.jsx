@@ -194,7 +194,6 @@ export default class Protected extends Component {
         const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
         + clientId + '&redirect_uri=https://' + window.location.host
         + Configurations.app.context + '/services/auth/callback/login';
-
         if (!user) {
             return (
                 <IntlProvider locale={language} messages={messages}>
@@ -217,10 +216,7 @@ export default class Protected extends Component {
                             height='0px'
                         />
                         {settings ? (
-                            <AppContextProvider value={{
-                                settings, user,
-                            }}
-                            >
+                            <AppContextProvider value={{ settings, user }}>
                                 <Switch>
                                     <Redirect exact from='/' to='/apis' />
                                     <Route path='/apis' component={DeferredAPIs} />

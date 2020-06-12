@@ -4246,19 +4246,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    /**
-     * Retrieve deployment status of APIs in cloud clusters
-     * @return Deployment status response
-     */
-    @Override
-    public Response deploymentsGetStatus(String apiId,MessageContext messageContext) throws APIManagementException{
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-        //APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        DeploymentStatusListDTO deploymentStatusListDTO = APIMappingUtil.fromDeploymentStatustoDTO(apiIdentifier);
-        return Response.ok().entity(deploymentStatusListDTO).build();
-    }
-
     private APIDTO getAPIByID(String apiId) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();

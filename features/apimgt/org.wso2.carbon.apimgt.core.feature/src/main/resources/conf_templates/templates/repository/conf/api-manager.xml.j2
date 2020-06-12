@@ -1106,7 +1106,6 @@
     <CertificateReLoaderConfiguration>
         <Period>{{apim.certificate_reloader.period}}</Period>
     </CertificateReLoaderConfiguration>
-
      <MutualSSL>
         <ClientCertificateHeader>{{apimgt.mutual_ssl.certificate_header}}</ClientCertificateHeader>
         <EnableClientCertificateValidation>{{apimgt.mutual_ssl.enable_client_validation}}</EnableClientCertificateValidation>
@@ -1162,25 +1161,4 @@
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 
-     <ContainerMgt>
-         <DeploymentEnvironments>
-             {% for key,value in ContainerMgtConfig.items() %}
-                 <Property name="{{key}}">{{value}}</Property>
-             {% endfor %}
-         </DeploymentEnvironments>
-
-         {% for cluster in ContainerMgtClusterConfig%}
-         <ContainerMgtInfo>
-             <Type>{{cluster.type}}</Type>
-             <ClassName>{{cluster.class}}</ClassName>
-             <ClusterId>{{cluster.clusterId}}</ClusterId>
-             <DisplayName>{{cluster.displayName}}</DisplayName>
-             <Properties>
-                 {% for key,value in cluster.properties.items() %}
-                     <Property name="{{key}}">{{value}}</Property>
-                 {% endfor %}
-             </Properties>
-         </ContainerMgtInfo>
-         {% endfor %}
-     </ContainerMgt>
 </APIManager>
