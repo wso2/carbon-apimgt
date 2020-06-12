@@ -46,9 +46,7 @@ const styles = theme => ({
         }
     },
     warning: {
-        '& span': {
-            color: theme.palette.warning.dark,
-        }
+        color: theme.palette.warning.dark + '!important',
     },
 });
 
