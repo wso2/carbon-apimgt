@@ -124,6 +124,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                     inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
                 }
                 }
+        }
         if (EventType.APPLICATION_CREATE.toString().equals(eventType)
                 || EventType.APPLICATION_UPDATE.toString().equals(eventType)) {
             ApplicationEvent event = new Gson().fromJson(eventJson, ApplicationEvent.class);
