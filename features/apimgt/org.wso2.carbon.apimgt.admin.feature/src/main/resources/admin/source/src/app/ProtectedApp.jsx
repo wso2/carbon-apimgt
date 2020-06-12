@@ -182,6 +182,7 @@ class Protected extends Component {
             clientId: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_CLIENT_ID),
             sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_SESSION_STATE),
             mobileOpen: false,
+            isTenant: false,
         };
         this.environments = [];
         this.checkSession = this.checkSession.bind(this);
@@ -212,6 +213,18 @@ class Protected extends Component {
         if (user) {
             this.setState({ user });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
+            api.getTenantInformation(user.name)
+                .then((result) => {
+                    const { tenantDomain } = result.body;
+                    if (tenantDomain === 'carbon.super') {
+                        this.setState({ isTenant: false });
+                    } else {
+                        this.setState({ isTenant: true });
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
             this.checkSession();
         } else {
             // If no user data available , Get the user info from existing token information
@@ -261,7 +274,7 @@ class Protected extends Component {
                 }}
             />
         );
-        const { clientId, settings } = this.state;
+        const { clientId, settings, isTenant } = this.state;
         const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
             + clientId + '&redirect_uri=' + Configurations.idp.origin
             + Configurations.app.context + '/services/auth/callback/login';
@@ -274,7 +287,7 @@ class Protected extends Component {
         }
         const leftMenu = (
             settings && (
-                <AppContextProvider value={{ settings, user }}>
+                <AppContextProvider value={{ settings, user, isTenant }}>
                     <>
                         <Hidden smUp implementation='js'>
                             <Navigator
@@ -298,7 +311,7 @@ class Protected extends Component {
                 <AppErrorBoundary>
                     <Base header={header} leftMenu={leftMenu}>
                         {settings ? (
-                            <AppContextProvider value={{ settings, user }}>
+                            <AppContextProvider value={{ settings, user, isTenant }}>
                                 <Route>
                                     <Switch>
                                         <Redirect exact from='/' to='/dashboard' />
