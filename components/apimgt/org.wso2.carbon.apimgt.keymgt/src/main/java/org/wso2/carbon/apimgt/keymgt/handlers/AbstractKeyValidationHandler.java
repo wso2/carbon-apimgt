@@ -283,12 +283,22 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                                     spikeArrestUnit = subPolicy.getRateLimitTimeUnit(); 
                                 } 
                                 boolean stopOnQuotaReach = subPolicy.isStopOnQuotaReach();
+                                int graphQLMaxDepth = 0;
+                                if(subPolicy.getGraphQLMaxDepth() > 0) {
+                                    graphQLMaxDepth = subPolicy.getGraphQLMaxDepth();
+                                }
+                                int graphQLMaxComplexity = 0;
+                                if(subPolicy.getGraphQLMaxComplexity() > 0) {
+                                    graphQLMaxComplexity = subPolicy.getGraphQLMaxComplexity();
+                                }
                                 List<String> list = new ArrayList<String>();
                                 list.add(apiLevelThrottlingKey);
                                 infoDTO.setSpikeArrestLimit(spikeArrest);
                                 infoDTO.setSpikeArrestUnit(spikeArrestUnit);
                                 infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
                                 infoDTO.setSubscriberTenantDomain(subscriberTenant);
+                                infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
+                                infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
                                 if (apiTier != null && apiTier.trim().length() > 0) {
                                     infoDTO.setApiTier(apiTier);
                                 }
