@@ -24,6 +24,7 @@ public class APIDTO   {
     private String version = null;
     private String context = null;
     private String policy = null;
+    private String apiType = null;
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
 
   /**
@@ -134,6 +135,24 @@ public class APIDTO   {
   }
 
   /**
+   * Type of the API.
+   **/
+  public APIDTO apiType(String apiType) {
+    this.apiType = apiType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "APIProduct", value = "Type of the API.")
+  @JsonProperty("apiType")
+  public String getApiType() {
+    return apiType;
+  }
+  public void setApiType(String apiType) {
+    this.apiType = apiType;
+  }
+
+  /**
    **/
   public APIDTO urlMappings(List<URLMappingDTO> urlMappings) {
     this.urlMappings = urlMappings;
@@ -166,12 +185,13 @@ public class APIDTO   {
         Objects.equals(version, API.version) &&
         Objects.equals(context, API.context) &&
         Objects.equals(policy, API.policy) &&
+        Objects.equals(apiType, API.apiType) &&
         Objects.equals(urlMappings, API.urlMappings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, provider, name, version, context, policy, urlMappings);
+    return Objects.hash(apiId, provider, name, version, context, policy, apiType, urlMappings);
   }
 
   @Override
@@ -185,6 +205,7 @@ public class APIDTO   {
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
+    sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("}");
     return sb.toString();

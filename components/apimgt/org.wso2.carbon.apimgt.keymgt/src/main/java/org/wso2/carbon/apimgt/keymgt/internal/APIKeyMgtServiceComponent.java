@@ -50,6 +50,7 @@ import org.wso2.carbon.identity.oauth.event.OAuthEventInterceptor;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -84,8 +85,10 @@ public class APIKeyMgtServiceComponent {
                 // object creation for implemented OAuthEventInterceptor interface in IS
                 APIMOAuthEventInterceptor interceptor = new APIMOAuthEventInterceptor();
                     // registering the interceptor class to the bundle
-                serviceRegistration = ctxt.getBundleContext().registerService(OAuthEventInterceptor.class.getName(), interceptor, null);
-                ctxt.getBundleContext().registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
+                serviceRegistration = ctxt.getBundleContext().registerService(OAuthEventInterceptor.class.getName(),
+                        interceptor, null);
+                ctxt.getBundleContext().registerService(Axis2ConfigurationContextObserver.class.getName(),
+                        new ServerStartupListener(), null);
                 // Creating an event adapter to receive token revocation messages
                 configureTokenRevocationEventPublisher();
                 configureCacheInvalidationEventPublisher();

@@ -522,6 +522,10 @@ definitions:
       policy:
         type: string
         description: API level throttling policy.
+      apiType:
+        type: string
+        description: Type of the API.
+        example: APIProduct
       urlMappings:
         type: array
         items:
