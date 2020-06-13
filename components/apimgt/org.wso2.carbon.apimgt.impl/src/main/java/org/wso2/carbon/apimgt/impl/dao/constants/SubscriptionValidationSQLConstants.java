@@ -294,6 +294,22 @@ public class SubscriptionValidationSQLConstants {
                     "   AM_CONDITION_GROUP AS COND " +
                     " ON " +
                     "   POLICY.POLICY_ID = COND.POLICY_ID";
+    
+    public static final String GET_TENANT_API_POLICY_SQL =
+            "SELECT" +
+                    "   POLICY.POLICY_ID," +
+                    "   POLICY.NAME," +
+                    "   POLICY.TENANT_ID," +
+                    "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   COND.CONDITION_GROUP_ID," +
+                    "   COND.QUOTA_TYPE" +
+                    " FROM" +
+                    "   AM_API_THROTTLE_POLICY AS POLICY " +
+                    " LEFT JOIN " +
+                    "   AM_CONDITION_GROUP AS COND " +
+                    " ON " +
+                    "   POLICY.POLICY_ID = COND.POLICY_ID" +
+                    " WHERE POLICY.TENANT_ID = ? AND POLICY.NAME = ?";
 
     public static final String GET_TENANT_APIS_SQL =
             "SELECT " +

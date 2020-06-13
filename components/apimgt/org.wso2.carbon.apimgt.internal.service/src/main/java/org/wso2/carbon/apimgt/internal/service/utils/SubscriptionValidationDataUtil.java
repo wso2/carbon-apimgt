@@ -18,8 +18,10 @@
 
 package org.wso2.carbon.apimgt.internal.service.utils;
 
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
@@ -28,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationAttributeDTO;
@@ -243,9 +246,33 @@ public class SubscriptionValidationDataUtil {
 
                 apiPolicyListDTO.getList().add(policyDTO);
 
+                List<APIPolicyConditionGroup> retrievedGroups = apiPolicyModel.getConditionGroups();
+                List<ApiPolicyConditionGroupDTO> condGroups = new ArrayList<ApiPolicyConditionGroupDTO>();
+                for (APIPolicyConditionGroup retGroup : retrievedGroups) {
+                    ApiPolicyConditionGroupDTO group = new ApiPolicyConditionGroupDTO();
+                    group.setConditionGroupId(retGroup.getConditionGroupId());
+                    group.setQuotaType(retGroup.getQuotaType());
+                    group.setPolicyId(retGroup.getPolicyId());
+
+                    List<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO> condition = 
+                            new ArrayList<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO>();
+
+                    List<ConditionDTO> retrievedConditions = retGroup.getConditionDTOS();
+                    for (ConditionDTO retrievedCondition : retrievedConditions) {
+                        org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO conditionDTO = 
+                                new org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO();
+                        conditionDTO.setConditionType(retrievedCondition.getConditionType());
+                        conditionDTO.setIsInverted(retrievedCondition.isInverted());
+                        conditionDTO.setName(retrievedCondition.getConditionName());
+                        conditionDTO.setValue(retrievedCondition.getConditionValue());
+                        condition.add(conditionDTO);
+                    }
+                    group.setCondition(condition);
+                    condGroups.add(group);
+                }
+                policyDTO.setConditionGroups(condGroups);
             }
             apiPolicyListDTO.setCount(model.size());
-
         } else {
             apiPolicyListDTO.setCount(0);
         }
