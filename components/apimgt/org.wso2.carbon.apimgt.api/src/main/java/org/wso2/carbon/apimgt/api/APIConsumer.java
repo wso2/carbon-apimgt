@@ -961,4 +961,6 @@ public interface APIConsumer extends APIManager {
 
     void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException;
+
+    void changeUserPassword(String oldPassword, String newPassword) throws APIManagementException;
 }

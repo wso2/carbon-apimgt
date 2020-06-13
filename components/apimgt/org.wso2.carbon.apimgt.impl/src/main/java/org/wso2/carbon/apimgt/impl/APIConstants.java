@@ -2304,4 +2304,6 @@ public final class APIConstants {
         public static final String CONTAINER_MANAGEMENT_INFO ="ContainerMgtInfo";
 
     }
+
+    public static final String ENABLE_CHANGE_PASSWORD = "EnableChangePassword";
 }
