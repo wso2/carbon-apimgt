@@ -21,6 +21,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -41,16 +42,13 @@ public class ServerStartupListener extends AbstractAxis2ConfigurationContextObse
     @Override
     public void createdConfigurationContext(ConfigurationContext configContext) {
         //load subscription data to memory
-        int tenantId = MultitenantUtils.getTenantId(configContext);
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
     }
 
     @Override
     public void terminatedConfigurationContext(ConfigurationContext configCtx) {
-
-        int tenantId = MultitenantUtils.getTenantId(configCtx);
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         SubscriptionDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
     }
 }
