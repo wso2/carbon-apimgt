@@ -32,11 +32,9 @@ import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
@@ -520,10 +518,10 @@ public class APIAdminImpl implements APIAdmin {
         if (StringUtils.isEmpty(keyManagerConfigurationDTO.getName())) {
             throw new APIManagementException("Key Manager Name can't be empty", ExceptionCodes.KEY_MANAGER_NAME_EMPTY);
         }
-        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
-                .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
-        if (keyManagerConnectorConfiguration != null) {
-            if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                    .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
+            if (keyManagerConnectorConfiguration != null) {
                 List<String> missingRequiredConfigurations = new ArrayList<>();
                 for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration
                         .getConnectionConfigurations()) {
@@ -543,11 +541,11 @@ public class APIAdminImpl implements APIAdmin {
                             missingRequiredConfigurations) + " is/are required",
                             ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
                 }
+            } else {
+                throw new APIManagementException(
+                        "Key Manager Type " + keyManagerConfigurationDTO.getType() + " is invalid.",
+                        ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
             }
-        } else {
-            throw new APIManagementException(
-                    "Key Manager Type " + keyManagerConfigurationDTO.getType() + " is invalid.",
-                    ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
         }
     }
 

@@ -146,16 +146,16 @@ class ApiConsole extends React.Component {
             })
             .then((swaggerResponse) => {
                 swagger = swaggerResponse.obj;
-                if (user != null) {
-                    this.setState({
-                        api: apiData,
-                        swagger,
-                        environments,
-                        labels,
-                        productionAccessToken,
-                        sandboxAccessToken,
+                this.setState({
+                    api: apiData,
+                    swagger,
+                    environments,
+                    labels,
+                    productionAccessToken,
+                    sandboxAccessToken,
 
-                    });
+                });
+                if (user != null) {
                     return this.apiClient.getSubscriptions(apiID);
                 } else {
                     return null;
@@ -165,7 +165,10 @@ class ApiConsole extends React.Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.error(error);
                 }
-                this.setState({ serverError: `${error.statusCode} - ${error.response.body.description}` });
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
             });
     }
 
@@ -305,7 +308,7 @@ class ApiConsole extends React.Component {
     render() {
         const { classes } = this.props;
         const {
-            api, serverError, swagger, securitySchemeType, selectedEnvironment, labels, environments, scopes,
+            api, notFound, swagger, securitySchemeType, selectedEnvironment, labels, environments, scopes,
             username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
         } = this.state;
         const user = AuthManager.getUser();
@@ -313,18 +316,12 @@ class ApiConsole extends React.Component {
         const downloadLink = 'data:text/json;charset=utf-8, ' + encodeURIComponent(downloadSwagger);
         const fileName = 'swagger.json';
 
-        if (serverError) {
-            return (
-                <Typography variant='h4' className={classes.titleSub}>
-                    {serverError}
-                </Typography>
-            );
-        }
-
         if (api == null || swagger == null) {
             return <Progress />;
         }
-
+        if (notFound) {
+            return 'API Not found !';
+        }
         let isApiKeyEnabled = false;
         let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
         if (api && api.securityScheme) {
@@ -334,7 +331,6 @@ class ApiConsole extends React.Component {
             }
         }
         const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
-
         return (
             <>
                 <Typography variant='h4' className={classes.titleSub}>
@@ -384,6 +380,7 @@ class ApiConsole extends React.Component {
                         selectedKeyType={selectedKeyType}
                         updateSwagger={this.updateSwagger}
                         setKeys={this.setKeys}
+                        api={this.state.api}
                     />
 
                     <Grid container>

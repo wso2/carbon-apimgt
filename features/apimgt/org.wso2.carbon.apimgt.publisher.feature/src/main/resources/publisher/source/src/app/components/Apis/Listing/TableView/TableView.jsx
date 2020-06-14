@@ -62,11 +62,19 @@ const styles = (theme) => ({
 class TableView extends React.Component {
     constructor(props) {
         super(props);
+        let { defaultApiView } = props.theme.custom;
+        this.showToggle = true;
+        if (typeof defaultApiView === 'object' && defaultApiView.length > 0) {
+            if (defaultApiView.length === 1) { // We will disable toggle buttons
+                this.showToggle = false;
+            }
+            defaultApiView = defaultApiView[defaultApiView.length - 1];
+        }
         this.state = {
             apisAndApiProducts: null,
             notFound: true,
             displayCount: 0,
-            listType: props.theme.custom.defaultApiView,
+            listType: defaultApiView,
         };
         this.page = 0;
         this.count = 100;
@@ -434,7 +442,7 @@ class TableView extends React.Component {
         }
 
         if (!apisAndApiProducts) {
-            return <Progress />;
+            return <Progress per={90} message='Loading APIs ...' />;
         }
         if (notFound) {
             return <ResourceNotFound />;
@@ -448,6 +456,7 @@ class TableView extends React.Component {
                         setListType={this.setListType}
                         isAPIProduct={isAPIProduct}
                         listType={listType}
+                        showToggle={this.showToggle}
                     />
                     <div className={classes.contentInside}>
                         {isAPIProduct ? (
@@ -468,6 +477,7 @@ class TableView extends React.Component {
                     setListType={this.setListType}
                     isAPIProduct={isAPIProduct}
                     listType={listType}
+                    showToggle={this.showToggle}
                     query={query}
                 />
                 <div className={classes.contentInside}>

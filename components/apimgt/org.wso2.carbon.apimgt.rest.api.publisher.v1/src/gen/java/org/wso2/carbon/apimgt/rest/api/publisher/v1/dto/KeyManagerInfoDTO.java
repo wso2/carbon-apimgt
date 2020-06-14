@@ -19,6 +19,7 @@ public class KeyManagerInfoDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String type = null;
     private String description = null;
     private Boolean enabled = null;
@@ -57,6 +58,24 @@ public class KeyManagerInfoDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * display name of Keymanager 
+   **/
+  public KeyManagerInfoDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Keymanager1", value = "display name of Keymanager ")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -140,6 +159,7 @@ public class KeyManagerInfoDTO   {
     KeyManagerInfoDTO keyManagerInfo = (KeyManagerInfoDTO) o;
     return Objects.equals(id, keyManagerInfo.id) &&
         Objects.equals(name, keyManagerInfo.name) &&
+        Objects.equals(displayName, keyManagerInfo.displayName) &&
         Objects.equals(type, keyManagerInfo.type) &&
         Objects.equals(description, keyManagerInfo.description) &&
         Objects.equals(enabled, keyManagerInfo.enabled) &&
@@ -148,7 +168,7 @@ public class KeyManagerInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, description, enabled, additionalProperties);
+    return Objects.hash(id, name, displayName, type, description, enabled, additionalProperties);
   }
 
   @Override
@@ -158,6 +178,7 @@ public class KeyManagerInfoDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");

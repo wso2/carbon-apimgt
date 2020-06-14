@@ -22,23 +22,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMRegistryService;
+import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.IOException;
 import java.security.PrivilegedAction;
@@ -48,6 +51,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
+
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 
 public class SettingsMappingUtil {
@@ -87,6 +92,7 @@ public class SettingsMappingUtil {
             settingsDTO.setSecurityAuditProperties(getSecurityAuditProperties());
             settingsDTO.setExternalStoresEnabled(
                     APIUtil.isExternalStoresEnabled(RestApiUtil.getLoggedInUserTenantDomain()));
+            settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
         }
         settingsDTO.setScopes(GetScopeList());
         return settingsDTO;

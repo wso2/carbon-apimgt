@@ -3159,6 +3159,32 @@ public class SQLConstants {
     public static final String GET_KEY_MAPPING_INFO_FROM_APP_ID = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE," +
             "STATE,APP_INFO FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
 
+    public static final String ADD_GW_PUBLISHED_API_DETAILS = "INSERT INTO AM_GW_PUBLISHED_API_DETAILS (API_ID, " +
+            "API_NAME, API_VERSION, TENANT_DOMAIN) VALUES (?,?,?,?)";
+
+    public static final String ADD_GW_API_ARTIFACT = "INSERT INTO AM_GW_API_ARTIFACTS (ARTIFACT, GATEWAY_INSTRUCTION," +
+            " API_ID, GATEWAY_LABEL) VALUES (?,?,?,?)";
+
+    public static final String UPDATE_API_ARTIFACT = "UPDATE AM_GW_API_ARTIFACTS SET ARTIFACT = ?, GATEWAY_INSTRUCTION = ?" +
+            " WHERE (API_ID = ?) AND (GATEWAY_LABEL = ?)";
+
+    public static final String GET_API_ARTIFACT = "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE API_ID =? AND " +
+            "GATEWAY_LABEL =? AND GATEWAY_INSTRUCTION = ?";
+
+    public static final String GET_ALL_API_ARTIFACT = "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE "
+            + "GATEWAY_LABEL =? AND GATEWAY_INSTRUCTION = ?";
+
+    public static final String GET_PUBLISHED_GATEWAYS_FOR_API = "SELECT COUNT(*) AS COUNT FROM AM_GW_API_ARTIFACTS" +
+            " WHERE API_ID = ? AND GATEWAY_INSTRUCTION = ?";
+
+    public static final String GET_GATEWAY_PUBLISHED_API_DETAILS = "SELECT * FROM AM_GW_PUBLISHED_API_DETAILS" +
+            " WHERE API_ID = ?";
+
+    public static final String CHECK_ARTIFACT_EXISTS = "SELECT COUNT(*) AS COUNT FROM AM_GW_API_ARTIFACTS" +
+            " WHERE API_ID = ? AND GATEWAY_LABEL = ?";
+
+
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{
@@ -3555,8 +3581,8 @@ public class SQLConstants {
             "SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =
-                " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED) VALUES " +
-                        "(?,?,?,?,?,?,?)";
+                " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED," +
+                        "DISPLAY_NAME) VALUES (?,?,?,?,?,?,?,?)";
         public static final String UPDATE_KEY_MANAGER =
                 "UPDATE AM_KEY_MANAGER SET NAME = ?,DESCRIPTION = ?,TYPE = ?,CONFIGURATION = ?,TENANT_DOMAIN = ?," +
                         "ENABLED = ? WHERE UUID = ?";
