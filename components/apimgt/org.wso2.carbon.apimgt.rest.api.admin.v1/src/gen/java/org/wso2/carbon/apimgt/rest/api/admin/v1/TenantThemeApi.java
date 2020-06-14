@@ -36,8 +36,27 @@ public class TenantThemeApi  {
 TenantThemeApiService delegate = new TenantThemeApiServiceImpl();
 
 
-    @POST
-    @Path("/import")
+    @GET
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/zip" })
+    @ApiOperation(value = "Export a DevPortal Tenant Theme", notes = "This operation can be used to export a DevPortal tenant theme as a zip file. ", response = File.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "Tenant Theme",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Tenant Theme Exported Successfully. ", response = File.class),
+        @ApiResponse(code = 403, message = "Forbidden. Not Authorized to export. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested tenant theme does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error. Error in exporting tenant theme. ", response = ErrorDTO.class) })
+    public Response exportTenantTheme() throws APIManagementException{
+        return delegate.exportTenantTheme(securityContext);
+    }
+
+    @PUT
+    
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a DevPortal Tenant Theme", notes = "This operation can be used to import a DevPortal tenant theme. ", response = Void.class, authorizations = {
@@ -45,12 +64,12 @@ TenantThemeApiService delegate = new TenantThemeApiServiceImpl();
             @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
-    }, tags={  })
+    }, tags={ "Tenant Theme" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Ok. Theme Imported Successfully. ", response = Void.class),
+        @ApiResponse(code = 200, message = "Ok. Tenant Theme Imported Successfully. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. Not Authorized to import. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. Error in importing Theme. ", response = ErrorDTO.class) })
-    public Response tenantThemeImportPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) throws APIManagementException{
-        return delegate.tenantThemeImportPost(fileInputStream, fileDetail, securityContext);
+    public Response importTenantTheme( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) throws APIManagementException{
+        return delegate.importTenantTheme(fileInputStream, fileDetail, securityContext);
     }
 }

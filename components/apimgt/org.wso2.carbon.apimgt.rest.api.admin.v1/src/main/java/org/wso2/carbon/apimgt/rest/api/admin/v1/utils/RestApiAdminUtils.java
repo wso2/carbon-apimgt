@@ -162,7 +162,7 @@ public class RestApiAdminUtils {
      * @param tenantDomain tenant to which the theme is imported
      * @throws APIManagementException if an error occurs while importing tenant theme
      */
-    public static void deployTenantTheme(InputStream themeFile, String tenantDomain) throws APIManagementException {
+    public static void importTenantTheme(InputStream themeFile, String tenantDomain) throws APIManagementException {
 
         ZipInputStream zipInputStream = null;
         byte[] buffer = new byte[1024];

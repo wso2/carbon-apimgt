@@ -25,6 +25,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.InputStream;
 
@@ -42,17 +43,27 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
      * @return Theme import response
      */
     @Override
-    public Response tenantThemeImportPost(InputStream fileInputStream, Attachment fileDetail,
-                                          MessageContext messageContext) {
+    public Response importTenantTheme(InputStream fileInputStream, Attachment fileDetail,
+                                   MessageContext messageContext) throws APIManagementException {
 
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        try {
-            RestApiAdminUtils.deployTenantTheme(fileInputStream, tenantDomain);
-            return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while importing tenant theme for tenant " + tenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            throw new APIManagementException("Super Tenant " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME + " " +
+                    "cannot import a tenant theme");
         }
+        RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain);
+        return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
+    }
+
+    /**
+     * Import an Tenant Theme for a particular tenant by uploading an archive file.
+     *
+     * @param messageContext
+     * @return Theme import response
+     */
+    @Override
+    public Response exportTenantTheme(MessageContext messageContext) {
+
         return null;
     }
 }
