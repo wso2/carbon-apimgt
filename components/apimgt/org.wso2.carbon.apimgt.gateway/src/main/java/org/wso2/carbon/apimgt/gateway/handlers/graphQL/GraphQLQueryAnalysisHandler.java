@@ -43,6 +43,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ * This Handler can be used to analyse GraphQL Query. This implementation uses previously set
+ * complexity and depth limitation to block the complex queries before it reaches the backend.
+ */
 public class GraphQLQueryAnalysisHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(GraphQLQueryAnalysisHandler.class);
@@ -59,9 +63,6 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
         }
         return true;
     }
-
-
-
 
     /**
      * This method returns the maximum query complexity value
@@ -131,21 +132,16 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                                 iterator.remove();
                             }
                         }
-
                         if (errorList.size() == 0) {
                             if (log.isDebugEnabled()) {
                                 log.debug("Maximum query depth of " + maxQueryDepth + " was not exceeded");
                             }
                             return true;
                         }
-
                         handleFailure(APISecurityConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
                                 APISecurityConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, errorList.toString());
                         log.error(errorList.toString());
                         return false;
-                    }
-                    if (log.isDebugEnabled()) {
-                        log.debug("Maximum query depth of " + maxQueryDepth + " was not exceeded");
                     }
                     return true;
                 } catch (Throwable e) {
@@ -154,7 +150,6 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             } else {
                 return true; // No depth limitation check
             }
-
         return false;
     }
 
@@ -190,7 +185,6 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                             iterator.remove();
                         }
                     }
-
                     if (errorList.size() == 0) {
                         if (log.isDebugEnabled()) {
                             log.debug("Maximum query complexity was not exceeded");
@@ -201,17 +195,13 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                         errorList.clear();
                         errorList.add("maximum query complexity exceeded");
                     }
-
                     handleFailure(APISecurityConstants.GRAPHQL_QUERY_TOO_COMPLEX, messageContext,
                             APISecurityConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, errorList.toString());
                     return false;
                 }
-                if (log.isDebugEnabled()) {
-                    log.debug("Maximum query complexity was not exceeded");
-                }
                 return true;
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
+            } catch (Throwable e) {
+                log.error(e);
             }
         } else {
             return true; // No complexity limitation check
