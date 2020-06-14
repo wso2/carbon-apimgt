@@ -532,7 +532,11 @@
                 <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.tokenmgt</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.internal.service</artifactId>
@@ -1018,7 +1022,12 @@
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
             </dependency>
-
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.tokenmgt.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.gateway.feature</artifactId>

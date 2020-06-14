@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -15,7 +15,7 @@
 *specific language governing permissions and limitations
 *under the License.
 */
-package org.wso2.carbon.apimgt.keymgt.internal;
+package org.wso2.carbon.apimgt.tokenmgt.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,39 +31,62 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
-import org.wso2.carbon.apimgt.keymgt.handlers.SessionDataPublisherImpl;
-import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+import org.wso2.carbon.apimgt.tokenmgt.ScopesIssuer;
+import org.wso2.carbon.apimgt.tokenmgt.events.APIMOAuthEventInterceptor;
+import org.wso2.carbon.apimgt.tokenmgt.handlers.SessionDataPublisherImpl;
+import org.wso2.carbon.apimgt.tokenmgt.issuers.AbstractScopesIssuer;
+import org.wso2.carbon.apimgt.tokenmgt.issuers.PermissionBasedScopeIssuer;
+import org.wso2.carbon.apimgt.tokenmgt.issuers.RoleBasedScopesIssuer;
+import org.wso2.carbon.apimgt.tokenmgt.listeners.KeyManagerUserOperationListener;
+import org.wso2.carbon.apimgt.tokenmgt.util.TokenMgtDataHolder;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
+import org.wso2.carbon.identity.oauth.event.OAuthEventInterceptor;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component(
-         name = "api.keymgt.component", 
+         name = "api.tokenmgt.component",
          immediate = true)
-public class APIKeyMgtServiceComponent {
+public class APITokenMgtServiceComponent {
 
-    private static Log log = LogFactory.getLog(APIKeyMgtServiceComponent.class);
+    private static Log log = LogFactory.getLog(APITokenMgtServiceComponent.class);
 
+    private static KeyManagerUserOperationListener listener = null;
 
     private ServiceRegistration serviceRegistration = null;
+
+    private boolean tokenRevocationEnabled;
 
     @Activate
     protected void activate(ComponentContext ctxt) {
         try {
-            APIKeyMgtDataHolder.initData();
+            TokenMgtDataHolder.initData();
+            listener = new KeyManagerUserOperationListener();
+            serviceRegistration = ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(), listener, null);
             log.debug("Key Manager User Operation Listener is enabled.");
             // Checking token revocation feature enabled config
+            tokenRevocationEnabled = APIManagerConfiguration.isTokenRevocationEnabled();
+            if (tokenRevocationEnabled) {
+                // object creation for implemented OAuthEventInterceptor interface in IS
+                APIMOAuthEventInterceptor interceptor = new APIMOAuthEventInterceptor();
+                    // registering the interceptor class to the bundle
+                serviceRegistration = ctxt.getBundleContext().registerService(OAuthEventInterceptor.class.getName(), interceptor, null);
+                // Creating an event adapter to receive token revocation messages
+                configureTokenRevocationEventPublisher();
+                configureCacheInvalidationEventPublisher();
+                log.debug("Key Manager OAuth Event Interceptor is enabled.");
+            } else {
+                log.debug("Token Revocation Notifier Feature is disabled.");
+            }
             // registering logout token revoke listener
             try {
                 SessionDataPublisherImpl dataPublisher = new SessionDataPublisherImpl();
@@ -73,6 +96,28 @@ public class APIKeyMgtServiceComponent {
                 log.error("SessionDataPublisherImpl bundle activation Failed", e);
             }
             // loading white listed scopes
+            List<String> whitelist = null;
+            APIManagerConfigurationService configurationService = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+            if (configurationService != null) {
+                // Read scope whitelist from Configuration.
+                whitelist = configurationService.getAPIManagerConfiguration().getProperty(APIConstants.WHITELISTED_SCOPES);
+                // If whitelist is null, default scopes will be put.
+                if (whitelist == null) {
+                    whitelist = new ArrayList<String>();
+                    whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
+                    whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
+                }
+            } else {
+                log.debug("API Manager Configuration couldn't be read successfully. Scopes might not work correctly.");
+            }
+            PermissionBasedScopeIssuer permissionBasedScopeIssuer = new PermissionBasedScopeIssuer();
+            RoleBasedScopesIssuer roleBasedScopesIssuer = new RoleBasedScopesIssuer();
+            TokenMgtDataHolder.addScopesIssuer(permissionBasedScopeIssuer.getPrefix(), permissionBasedScopeIssuer);
+            TokenMgtDataHolder.addScopesIssuer(roleBasedScopesIssuer.getPrefix(), roleBasedScopesIssuer);
+            if (log.isDebugEnabled()) {
+                log.debug("Permission based scope Issuer and Role based scope issuers are loaded.");
+            }
+            ScopesIssuer.loadInstance(whitelist);
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");
             }
@@ -98,14 +143,14 @@ public class APIKeyMgtServiceComponent {
              policy = ReferencePolicy.DYNAMIC, 
              unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
-        APIKeyMgtDataHolder.setRegistryService(registryService);
+        TokenMgtDataHolder.setRegistryService(registryService);
         if (log.isDebugEnabled()) {
             log.debug("Registry Service is set in the API KeyMgt bundle.");
         }
     }
 
     protected void unsetRegistryService(RegistryService registryService) {
-        APIKeyMgtDataHolder.setRegistryService(null);
+        TokenMgtDataHolder.setRegistryService(null);
         if (log.isDebugEnabled()) {
             log.debug("Registry Service is unset in the API KeyMgt bundle.");
         }
@@ -118,14 +163,14 @@ public class APIKeyMgtServiceComponent {
              policy = ReferencePolicy.DYNAMIC, 
              unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
-        APIKeyMgtDataHolder.setRealmService(realmService);
+        TokenMgtDataHolder.setRealmService(realmService);
         if (log.isDebugEnabled()) {
             log.debug("Realm Service is set in the API KeyMgt bundle.");
         }
     }
 
     protected void unsetRealmService(RealmService realmService) {
-        APIKeyMgtDataHolder.setRealmService(null);
+        TokenMgtDataHolder.setRealmService(null);
         if (log.isDebugEnabled()) {
             log.debug("Realm Service is unset in the API KeyMgt bundle.");
         }
@@ -141,7 +186,7 @@ public class APIKeyMgtServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("API manager configuration service bound to the API handlers");
         }
-        APIKeyMgtDataHolder.setAmConfigService(amcService);
+        TokenMgtDataHolder.setAmConfigService(amcService);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
     }
 
@@ -149,49 +194,30 @@ public class APIKeyMgtServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("API manager configuration service unbound from the API handlers");
         }
-        APIKeyMgtDataHolder.setAmConfigService(null);
+        TokenMgtDataHolder.setAmConfigService(null);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 
     /**
-     * Get INetAddress by host name or  IP Address
-     *
-     * @param host name or host IP String
-     * @return InetAddress
-     * @throws java.net.UnknownHostException
+     * Add scope issuer to the map.
+     * @param scopesIssuer scope issuer.
      */
-    private InetAddress getHostAddress(String host) throws UnknownHostException {
-        String[] splittedString = host.split("\\.");
-        boolean value = checkIfIP(splittedString);
-        if (!value) {
-            return InetAddress.getByName(host);
-        }
-        byte[] byteAddress = new byte[4];
-        for (int i = 0; i < splittedString.length; i++) {
-            if (Integer.parseInt(splittedString[i]) > 127) {
-                byteAddress[i] = Integer.valueOf(Integer.parseInt(splittedString[i]) - 256).byteValue();
-            } else {
-                byteAddress[i] = Byte.parseByte(splittedString[i]);
-            }
-        }
-        return InetAddress.getByAddress(byteAddress);
+    @Reference(
+             name = "scope.issuer.service", 
+             service = org.wso2.carbon.apimgt.tokenmgt.issuers.AbstractScopesIssuer.class,
+             cardinality = ReferenceCardinality.MULTIPLE, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "removeScopeIssuers")
+    protected void addScopeIssuer(AbstractScopesIssuer scopesIssuer) {
+        TokenMgtDataHolder.addScopesIssuer(scopesIssuer.getPrefix(), scopesIssuer);
     }
 
     /**
-     * Check the hostname is IP or String
-     *
-     * @param ip IP
-     * @return true/false
+     * unset scope issuer.
+     * @param scopesIssuer
      */
-    private boolean checkIfIP(String[] ip) {
-        for (int i = 0; i < ip.length; i++) {
-            try {
-                Integer.parseInt(ip[i]);
-            } catch (NumberFormatException ex) {
-                return false;
-            }
-        }
-        return true;
+    protected void removeScopeIssuers(AbstractScopesIssuer scopesIssuer) {
+        TokenMgtDataHolder.setScopesIssuers(null);
     }
 
     /**
@@ -271,34 +297,5 @@ public class APIKeyMgtServiceComponent {
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
     }
 
-    /**
-     * Initialize the KeyValidation Handlers Service dependency
-     *
-     * @param keyValidationHandler Key Validation handler reference
-     */
-    @Reference(
-            name = "key.validation.handler.service",
-            service = KeyValidationHandler.class,
-            cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "removeKeyValidationHandler")
-    protected void addKeyValidationHandler(KeyValidationHandler keyValidationHandler, Map<String, Object> properties) {
-        if (properties.containsKey(APIConstants.KeyManager.REGISTERED_TENANT_DOMAIN)){
-            String tenantDomain = (String) properties.get(APIConstants.KeyManager.REGISTERED_TENANT_DOMAIN);
-            ServiceReferenceHolder.getInstance().addKeyValidationHandler(tenantDomain, keyValidationHandler);
-        }
-    }
-
-    /**
-     * De-reference the KeyValidation Handler Dependency
-     *
-     * @param keyValidationHandler keyValidationHandler Reference to Defreference
-     */
-    protected void removeKeyValidationHandler(KeyValidationHandler keyValidationHandler, Map<String, Object> properties) {
-        if (properties.containsKey(APIConstants.KeyManager.REGISTERED_TENANT_DOMAIN)){
-            String tenantDomain = (String) properties.get(APIConstants.KeyManager.REGISTERED_TENANT_DOMAIN);
-            ServiceReferenceHolder.getInstance().removeKeyValidationHandler(tenantDomain);
-        }
-    }
 }
 

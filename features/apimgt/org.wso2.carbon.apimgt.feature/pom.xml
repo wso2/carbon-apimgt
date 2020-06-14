@@ -64,6 +64,11 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.tokenmgt.feature</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.jms.listener.feature</artifactId>
             <type>zip</type>
         </dependency>
@@ -106,6 +111,9 @@
                                 </includedFeatureDef>
                                 <includedFeatureDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymanager.feature:${carbon.apimgt.version}
+                                </includedFeatureDef>
+                                <includedFeatureDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tokenmgt.feature:${carbon.apimgt.version}
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
