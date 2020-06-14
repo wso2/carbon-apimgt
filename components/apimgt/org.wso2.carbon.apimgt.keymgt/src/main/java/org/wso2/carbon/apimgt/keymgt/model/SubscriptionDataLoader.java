@@ -143,4 +143,13 @@ public interface SubscriptionDataLoader {
      */
     public ApplicationPolicy getApplicationPolicy(String policyName) throws DataLoadingException;
 
+    /**
+     * Retrieve API Throttling Policy.
+     * @param policyName name
+     * @param tenantDomain tenant
+     * @return A {@link ApiPolicy}.
+     * @throws DataLoadingException If any error
+     */
+    public ApiPolicy getAPIPolicy(String policyName, String tenantDomain) throws DataLoadingException;
+
 }

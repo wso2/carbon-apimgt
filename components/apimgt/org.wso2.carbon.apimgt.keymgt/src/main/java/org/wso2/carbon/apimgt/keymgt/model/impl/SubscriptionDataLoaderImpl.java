@@ -51,7 +51,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
@@ -325,6 +324,27 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
         }
         return applicationPolicy;
+    }
+    
+    @Override
+    public ApiPolicy getAPIPolicy(String policyName, String tenantDomain) throws DataLoadingException {
+
+        String endPoint = APIConstants.SubscriptionValidationResources.API_POLICIES + "?policyName=" +
+                policyName;
+        ApiPolicy apiPolicy = new ApiPolicy();
+        String responseString;
+        try {
+            responseString = invokeService(endPoint, tenantDomain);
+        } catch (IOException e) {
+            String msg = "Error while executing the http client " + endPoint;
+            log.error(msg, e);
+            throw new DataLoadingException(msg, e);
+        }
+        if (responseString != null && !responseString.isEmpty()) {
+            apiPolicy = (new Gson().fromJson(responseString, APIPolicyList.class)).getList().get(0);
+
+        }
+        return apiPolicy;
     }
 
     private String invokeService(String path, String tenantDomain) throws DataLoadingException, IOException {

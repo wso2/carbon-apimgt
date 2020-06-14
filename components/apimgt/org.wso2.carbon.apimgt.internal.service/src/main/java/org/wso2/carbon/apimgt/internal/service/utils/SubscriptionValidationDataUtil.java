@@ -243,7 +243,7 @@ public class SubscriptionValidationDataUtil {
                 policyDTO.setName(apiPolicyModel.getName());
                 policyDTO.setQuotaType(apiPolicyModel.getQuotaType());
                 policyDTO.setTenantId(apiPolicyModel.getTenantId());
-
+                policyDTO.setApplicableLevel(apiPolicyModel.getApplicableLevel());
                 apiPolicyListDTO.getList().add(policyDTO);
 
                 List<APIPolicyConditionGroup> retrievedGroups = apiPolicyModel.getConditionGroups();

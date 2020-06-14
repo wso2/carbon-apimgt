@@ -240,6 +240,7 @@ public class SubscriptionValidationSQLConstants {
                     "   POLICY.NAME," +
                     "   POLICY.TENANT_ID," +
                     "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   POLICY.APPLICABLE_LEVEL," +
                     "   COND.CONDITION_GROUP_ID," +
                     "   COND.QUOTA_TYPE" +
                     " FROM" +
@@ -301,6 +302,7 @@ public class SubscriptionValidationSQLConstants {
                     "   POLICY.NAME," +
                     "   POLICY.TENANT_ID," +
                     "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   POLICY.APPLICABLE_LEVEL," +
                     "   COND.CONDITION_GROUP_ID," +
                     "   COND.QUOTA_TYPE" +
                     " FROM" +

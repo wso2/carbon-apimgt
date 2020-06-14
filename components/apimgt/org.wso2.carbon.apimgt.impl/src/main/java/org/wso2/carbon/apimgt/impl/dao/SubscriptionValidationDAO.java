@@ -614,6 +614,7 @@ public class SubscriptionValidationDAO {
                     apiPolicy.setName(resultSet.getString("NAME"));
                     apiPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                     apiPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    apiPolicy.setApplicableLevel(resultSet.getString("APPLICABLE_LEVEL"));
                     apiPolicies.add(apiPolicy);
                 }
                 APIPolicyConditionGroup apiPolicyConditionGroup = new APIPolicyConditionGroup();
@@ -865,7 +866,7 @@ public class SubscriptionValidationDAO {
             }
 
         } catch (SQLException e) {
-            log.error("Error in loading Application Key Mappinghsacfrgtghf54trtjkl;{786754w `13457868789[-876re7w4wertyi875 for consumer key : " + consumerKey, e);
+            log.error("Error in loading Application Key Mapping for consumer key : " + consumerKey, e);
         }
         return null;
     }
