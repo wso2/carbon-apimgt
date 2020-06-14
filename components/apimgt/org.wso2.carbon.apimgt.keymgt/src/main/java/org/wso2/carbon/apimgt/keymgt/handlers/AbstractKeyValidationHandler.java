@@ -204,7 +204,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         if (apiTenantDomain == null) {
             apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
         SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(apiTenantDomain);
         //TODO add a check to see whether datastore is initialized an load data using rest api if it is not loaded
@@ -250,15 +250,11 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                                 String subscriberUserId = sub.getSubscriptionId();
                                 String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
 
-                                int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
-
                                 ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
-                                        subscriberTenantId);
-
+                                        tenantId);
                                 SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId(),
-                                        subscriberTenantId);
-                                int apiTenantId = APIUtil.getTenantId(api.getApiProvider());
-                                ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), apiTenantId);
+                                        tenantId);
+                                ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), tenantId);
 
                                 boolean isContentAware = false;
                                 if (appPolicy.isContentAware() || subPolicy.isContentAware()
