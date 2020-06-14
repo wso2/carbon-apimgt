@@ -91,7 +91,7 @@ public class PaginationDTO   {
   }
 
   /**
-   * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned.
+   * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
    **/
   public PaginationDTO previous(String previous) {
     this.previous = previous;
@@ -99,7 +99,7 @@ public class PaginationDTO   {
   }
 
   
-  @ApiModelProperty(value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned.")
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;

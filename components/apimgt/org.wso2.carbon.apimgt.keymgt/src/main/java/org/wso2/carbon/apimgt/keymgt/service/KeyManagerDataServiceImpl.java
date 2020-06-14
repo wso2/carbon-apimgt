@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
@@ -109,17 +110,10 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         if (log.isDebugEnabled()) {
             log.debug("Add or Update API Policy in datastore in tenant " + event.getTenantDomain());
         }
-        SubscriptionDataStore store = SubscriptionDataHolder.getInstance() //TODO 
+        SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
-        //store.addOrUpdateAPIPolicy(getAPIPolicyFromAPIPolicyEvent(event));
+        store.addOrUpdateApiPolicy(getAPIPolicyFromAPIPolicyEvent(event));
     }
-    /*
-    private APIPolicy getAPIPolicyFromAPIPolicyEvent(APIPolicyEvent event) {
-        // TODO Auto-generated method stub
-        return null;
-    } */
-
-
 
     @Override
     public void removeApplication(ApplicationEvent event) {
@@ -188,7 +182,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
-        //store.removeApplicationPolicy(getAPIPolicyFromAPIPolicyEvent(event)); // TODO fix
+        store.removeApiPolicy(getAPIPolicyFromAPIPolicyEvent(event));
     }
 
     private ApplicationKeyMapping getApplicationKeyMappingFromApplicationRegistrationEvent(
@@ -236,7 +230,6 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         api.setApiId(event.getApiId());
         api.setApiName(event.getApiName());
         api.setApiProvider(event.getApiProvider());
-        api.setApiTier(null); // TODO see why null
         api.setApiVersion(event.getApiVersion());
         api.setContext(event.getApiContext());
         if(log.isDebugEnabled()) {
@@ -268,6 +261,18 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         policy.setTierName(event.getPolicyName());
         policy.setGraphQLMaxComplexity(event.getGraphQLMaxComplexity());
         policy.setGraphQLMaxDepth(event.getGraphQLMaxDepth());
+        if(log.isDebugEnabled()) {
+            log.debug("Event: " + event.toString());
+            log.debug("Converted : " + policy.toString());
+        }
+        return policy;
+    }
+    
+    private ApiPolicy getAPIPolicyFromAPIPolicyEvent(APIPolicyEvent event) {
+        ApiPolicy policy = new ApiPolicy();
+        policy.setId(event.getPolicyId());
+        policy.setTierName(event.getPolicyName());
+        policy.setTenantId(event.getTenantId());
         if(log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + policy.toString());

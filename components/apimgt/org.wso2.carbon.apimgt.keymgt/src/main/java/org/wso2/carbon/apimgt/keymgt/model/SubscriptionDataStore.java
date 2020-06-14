@@ -104,6 +104,8 @@ public interface SubscriptionDataStore {
 
     void addOrUpdateApplicationPolicy(ApplicationPolicy applicationPolicy);
     
+    void addOrUpdateApiPolicy(ApiPolicy apiPolicy);
+    
     void removeApplication(Application application);
 
     void removeAPI(API api);
@@ -115,9 +117,8 @@ public interface SubscriptionDataStore {
     void removeSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy);
 
     void removeApplicationPolicy(ApplicationPolicy applicationPolicy);
-
-
-
+    
+    void removeApiPolicy(ApiPolicy apiPolicy);
 
 }
 
