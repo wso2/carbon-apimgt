@@ -2565,7 +2565,7 @@ paths:
 # The Bot Detection Data API resources
 ######################################################
 
-  /botData:
+  /bot-detection-data:
   #-----------------------------------------------------
   # Get all bot detection data
   #-----------------------------------------------------
@@ -2574,6 +2574,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:bot_data
+      operationId: getBotDetectionData
       produces:
         - application/json
       summary: |

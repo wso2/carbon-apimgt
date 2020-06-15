@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EmailDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.BotDataApiService;
@@ -71,23 +70,6 @@ BotDataApiService delegate = new BotDataApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
     public Response botDataDeleteEmailDelete( @NotNull @ApiParam(value = "Pass the uuid to remove the email ",required=true)  @QueryParam("uuid") String uuid) throws APIManagementException{
         return delegate.botDataDeleteEmailDelete(uuid, securityContext);
-    }
-
-    @GET
-    
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get all bot detected data ", notes = "Get all bot detected data ", response = BotDetectionDataListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
-        })
-    }, tags={  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Bot detected data returned. ", response = BotDetectionDataListDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Analytics Not Enabled. ", response = ErrorDTO.class) })
-    public Response botDataGet() throws APIManagementException{
-        return delegate.botDataGet(securityContext);
     }
 
     @GET

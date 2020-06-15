@@ -20,18 +20,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.BotDataApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EmailDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.BotDetectionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -41,6 +37,7 @@ public class BotDataApiServiceImpl implements BotDataApiService {
 
     @Override
     public Response botDataAddEmailPost(EmailDTO body, MessageContext messageContext) {
+
         APIAdminImpl apiAdminImpl = new APIAdminImpl();
         try {
             apiAdminImpl.addBotDataEmailConfiguration(body.getEmail());
@@ -54,6 +51,7 @@ public class BotDataApiServiceImpl implements BotDataApiService {
 
     @Override
     public Response botDataDeleteEmailDelete(String uuid, MessageContext messageContext) {
+
         APIAdminImpl apiAdminImpl = new APIAdminImpl();
         try {
             apiAdminImpl.deleteBotDataEmailList(uuid);
@@ -67,6 +65,7 @@ public class BotDataApiServiceImpl implements BotDataApiService {
 
     @Override
     public Response botDataGetEmailListGet(String tenantDomain, MessageContext messageContext) {
+
         try {
             List<BotDetectionData> emailList = new APIAdminImpl().retrieveSavedBotDataEmailList();
             return Response.ok().entity(emailList).build();
@@ -75,26 +74,5 @@ public class BotDataApiServiceImpl implements BotDataApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-    }
-
-    /**
-     * Get all bot detected data
-     *
-     * @param messageContext
-     * @return list of all bot detected data
-     * @throws APIManagementException
-     */
-    @Override
-    public Response botDataGet(MessageContext messageContext) throws APIManagementException {
-
-        if (APIUtil.isAnalyticsEnabled()) {
-            List<BotDetectionData> botDetectionDataList = new APIAdminImpl().retrieveBotDetectionData();
-            BotDetectionDataListDTO listDTO = BotDetectionMappingUtil.fromBotDetectionModelToDTO(botDetectionDataList);
-            return Response.ok().entity(listDTO).build();
-        } else {
-            throw new APIManagementException("Analytics Not Enabled",
-                    ExceptionCodes.from(ExceptionCodes.ANALYTICS_NOT_ENABLED, "Bot Detection Data is",
-                            "Bot Detection Data"));
-        }
     }
 }
