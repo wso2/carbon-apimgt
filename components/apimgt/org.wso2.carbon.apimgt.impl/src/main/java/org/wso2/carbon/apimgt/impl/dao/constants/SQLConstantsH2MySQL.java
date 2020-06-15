@@ -242,6 +242,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.SERVICE_URL, " +
                     "   E.SERVICE_CATEGORY, " +
                     "   E.SECURITY_TYPE, " +
+                    "   E.MUTUAL_SSL_ENABLED, " +
                     "   E.HEADERS, " +
                     "   E.CREATED_BY, " +
                     "   E.UPDATED_BY, " +
@@ -277,6 +278,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.SERVICE_URL, " +
                     "   E.SERVICE_CATEGORY, " +
                     "   E.SECURITY_TYPE, " +
+                    "   E.MUTUAL_SSL_ENABLED, " +
                     "   E.HEADERS, " +
                     "   E.CREATED_BY, " +
                     "   E.UPDATED_BY, " +
@@ -314,6 +316,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.SERVICE_URL, " +
                     "   E.SERVICE_CATEGORY, " +
                     "   E.SECURITY_TYPE, " +
+                    "   E.MUTUAL_SSL_ENABLED, " +
                     "   E.HEADERS, " +
                     "   E.CREATED_BY, " +
                     "   E.UPDATED_BY, " +
@@ -351,6 +354,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.SERVICE_URL, " +
                     "   E.SERVICE_CATEGORY, " +
                     "   E.SECURITY_TYPE, " +
+                    "   E.MUTUAL_SSL_ENABLED, " +
                     "   E.HEADERS, " +
                     "   E.CREATED_BY, " +
                     "   E.UPDATED_BY, " +
