@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -46,7 +48,12 @@ import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,6 +65,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * This class provides the core API admin functionality.
@@ -458,13 +474,50 @@ public class APIAdminImpl implements APIAdmin {
                     botDetectionData.setMessageID((String) values.get(1));
                     botDetectionData.setApiMethod((String) values.get(2));
                     botDetectionData.setHeaderSet((String) values.get(3));
-                    botDetectionData.setMessageBody((String) values.get(4));
+                    botDetectionData.setMessageBody(extractBotDetectionDataContent((String) values.get(4)));
                     botDetectionData.setClientIp((String) values.get(5));
                     botDetectionDatalist.add(botDetectionData);
                 }
             }
         }
         return botDetectionDatalist;
+    }
+
+    /**
+     * Extract content of the bot detection data
+     *
+     * @param messageBody message body of bot detection data
+     * @return extracted content
+     */
+    public String extractBotDetectionDataContent(String messageBody) {
+
+        String content = "";
+        try {
+            //Parser that produces DOM object trees from XML content
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+            //API to obtain DOM Document instance
+            DocumentBuilder builder = null;
+
+            //Create DocumentBuilder with default configuration
+            builder = factory.newDocumentBuilder();
+
+            //Parse the content to Document object
+            Document document = builder.parse(new InputSource(new StringReader(messageBody)));
+            Node bodyContentNode = document.getFirstChild().getFirstChild();
+
+            //Convert Node object to String
+            StringWriter writer = new StringWriter();
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
+            String output = writer.toString();
+            content = output.substring(output.indexOf("?>") + 2); //remove <?xml version="1.0" encoding="UTF-8"?>
+        } catch (ParserConfigurationException | TransformerException | IOException | SAXException e) {
+            String errorMessage = "Error while extracting content from " + messageBody;
+            log.error(errorMessage, e);
+            content = messageBody;
+        }
+        return content;
     }
 
     public APICategory addCategory(APICategory category, String userName) throws APIManagementException {
