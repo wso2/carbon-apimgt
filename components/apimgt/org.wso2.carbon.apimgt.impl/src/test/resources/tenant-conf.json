@@ -265,6 +265,10 @@
       {
         "Name": "apim:bot_data",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:scope_manage",
+        "Roles": "admin"
       }
     ]
   },

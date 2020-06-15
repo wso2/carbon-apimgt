@@ -37,11 +37,14 @@ import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.security.cert.X509Certificate;
 
 /**
  * This is a factory class.you have to use this when you need to initiate classes by reading config file.
@@ -163,12 +166,12 @@ public class KeyManagerHolder {
                 }
                 Object consumerKeyClaim =
                         keyManagerConfiguration.getParameter(APIConstants.KeyManager.CONSUMER_KEY_CLAIM);
-                if (consumerKeyClaim instanceof String && StringUtils.isNotEmpty((String)consumerKeyClaim)){
+                if (consumerKeyClaim instanceof String && StringUtils.isNotEmpty((String) consumerKeyClaim)) {
                     tokenIssuerDto.setConsumerKeyClaim((String) consumerKeyClaim);
                 }
                 Object scopeClaim =
                         keyManagerConfiguration.getParameter(APIConstants.KeyManager.SCOPES_CLAIM);
-                if (scopeClaim instanceof String && StringUtils.isNotEmpty((String)scopeClaim)){
+                if (scopeClaim instanceof String && StringUtils.isNotEmpty((String) scopeClaim)) {
                     tokenIssuerDto.setScopesClaim((String) scopeClaim);
                 }
                 Object jwksEndpoint = keyManagerConfiguration.getParameter(APIConstants.KeyManager.JWKS_ENDPOINT);
@@ -178,6 +181,24 @@ public class KeyManagerHolder {
                         jwksConfigurationDTO.setEnabled(true);
                         jwksConfigurationDTO.setUrl((String) jwksEndpoint);
                         tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
+                    }
+                }
+                Object certificateType = keyManagerConfiguration.getParameter(APIConstants.KeyManager.CERTIFICATE_TYPE);
+                Object certificateValue =
+                        keyManagerConfiguration.getParameter(APIConstants.KeyManager.CERTIFICATE_VALUE);
+                if (certificateType != null && StringUtils.isNotEmpty((String) certificateType) &&
+                        certificateValue != null && StringUtils.isNotEmpty((String) certificateValue)) {
+                    if (APIConstants.KeyManager.CERTIFICATE_TYPE_JWKS_ENDPOINT.equals(certificateType)) {
+                        JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
+                        jwksConfigurationDTO.setEnabled(true);
+                        jwksConfigurationDTO.setUrl((String) certificateValue);
+                        tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
+                    } else {
+                        X509Certificate x509Certificate =
+                                APIUtil.retrieveCertificateFromContent((String) certificateValue);
+                        if (x509Certificate != null) {
+                            tokenIssuerDto.setCertificate(x509Certificate);
+                        }
                     }
                 }
                 JWTValidator jwtValidator;

@@ -66,7 +66,8 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.*;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -8505,6 +8506,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    keyManagerConfigurationDTO.setDisplayName("DISPLAY_NAME");
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
@@ -8576,6 +8578,7 @@ public class ApiMgtDAO {
                 preparedStatement.setBinaryStream(5, new ByteArrayInputStream(configurationJson.getBytes()));
                 preparedStatement.setString(6, keyManagerConfigurationDTO.getTenantDomain());
                 preparedStatement.setBoolean(7, keyManagerConfigurationDTO.isEnabled());
+                preparedStatement.setString(8, keyManagerConfigurationDTO.getDisplayName());
                 preparedStatement.executeUpdate();
                 conn.commit();
             } catch (SQLException e) {

@@ -32,11 +32,9 @@ import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
@@ -48,6 +46,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -520,10 +519,10 @@ public class APIAdminImpl implements APIAdmin {
         if (StringUtils.isEmpty(keyManagerConfigurationDTO.getName())) {
             throw new APIManagementException("Key Manager Name can't be empty", ExceptionCodes.KEY_MANAGER_NAME_EMPTY);
         }
-        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
-                .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
-        if (keyManagerConnectorConfiguration != null) {
-            if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                    .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
+            if (keyManagerConnectorConfiguration != null) {
                 List<String> missingRequiredConfigurations = new ArrayList<>();
                 for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration
                         .getConnectionConfigurations()) {
@@ -543,11 +542,11 @@ public class APIAdminImpl implements APIAdmin {
                             missingRequiredConfigurations) + " is/are required",
                             ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
                 }
+            } else {
+                throw new APIManagementException(
+                        "Key Manager Type " + keyManagerConfigurationDTO.getType() + " is invalid.",
+                        ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
             }
-        } else {
-            throw new APIManagementException(
-                    "Key Manager Type " + keyManagerConfigurationDTO.getType() + " is invalid.",
-                    ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
         }
     }
 
@@ -584,5 +583,70 @@ public class APIAdminImpl implements APIAdmin {
             throw new APIMgtResourceNotFoundException(msg);
         }
         return workflow;
+    }
+
+    /**
+     * This method used to check the existence of the scope name for the particular user
+     *
+     * @param username      username to be validated
+     * @param scopeName     scope to be validated
+     * @throws APIManagementException
+     */
+    public boolean isScopeExistsForUser(String username, String scopeName) throws APIManagementException {
+        if (APIUtil.isUserExist(username)){
+            Map<String, String> scopeRoleMapping =
+                    APIUtil.getRESTAPIScopesForTenant(MultitenantUtils.getTenantDomain(username));
+            if (scopeRoleMapping.containsKey(scopeName)) {
+                String[] userRoles = APIUtil.getListOfRoles(username);
+                return getRoleScopeList(userRoles,scopeRoleMapping).contains(scopeName);
+            } else {
+                throw new APIManagementException("Scope Not Found.  Scope : " + scopeName + ",",
+                        ExceptionCodes.SCOPE_NOT_FOUND);
+            }
+        } else {
+            throw new APIManagementException("User Not Found. Username :" + username + ",",
+                    ExceptionCodes.USER_NOT_FOUND);
+         }
+    }
+
+    /**
+     * This method used to check the existence of the scope name
+     * @param username      tenant username to get tenant-scope mapping
+     * @param scopeName     scope to be validated
+     * @throws APIManagementException
+     */
+    public boolean isScopeExists(String username, String scopeName)  {
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+                .getTenantDomain(username));
+        return scopeRoleMapping.containsKey(scopeName);
+    }
+
+    /**
+     * This method used to get the list of scopes of a user roles
+     *
+     * @param userRoles             roles of a particular user
+     * @param scopeRoleMapping      scope-role mapping
+     * @return scopeList            scope lost of a particular user
+     * @throws APIManagementException
+     */
+    private List<String> getRoleScopeList(String[] userRoles, Map<String, String> scopeRoleMapping) {
+        List<String> userRoleList;
+        List<String> authorizedScopes = new ArrayList<>();
+
+        if (userRoles == null || userRoles.length == 0) {
+            userRoles = new String[0];
+        }
+
+        userRoleList = Arrays.asList(userRoles);
+        Iterator<Map.Entry<String, String>> iterator = scopeRoleMapping.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            for (String aRole : entry.getValue().split(",")) {
+                if (userRoleList.contains(aRole)) {
+                    authorizedScopes.add(entry.getKey());
+                }
+            }
+        }
+        return authorizedScopes;
     }
 }
