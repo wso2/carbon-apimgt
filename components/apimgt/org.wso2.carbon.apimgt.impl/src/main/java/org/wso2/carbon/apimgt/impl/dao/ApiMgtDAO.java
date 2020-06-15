@@ -10491,20 +10491,14 @@ public class ApiMgtDAO {
 
     private void addGraphQLQueryAnalysisInfo(Connection conn, int maxDepth, int maxComplexity, int policyId)
             throws APIManagementException {
-
-        PreparedStatement ps = null;
-        try{
-            String query = SQLConstants.ADD_QUERY_ANALYSIS_SQL;
-            ps = conn.prepareStatement(query);
+        String query = SQLConstants.ADD_QUERY_ANALYSIS_SQL;
+        try(PreparedStatement ps = conn.prepareStatement(query)){
             ps.setInt(1,policyId);
             ps.setInt(2,maxDepth);
             ps.setInt(3,maxComplexity);
             ps.executeUpdate();
-        } catch (Exception e) {
-            handleException("Failed to add GraphQL Query Analysis Info: " , e);
-
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, null);
+        } catch (SQLException e) {
+            handleException("Failed to add GraphQL Rate Limiting Info: " , e);
         }
     }
 
@@ -11990,7 +11984,6 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
 
-
     public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
         Connection connection = null;
         ResultSet rs = null;
@@ -12128,25 +12121,16 @@ public class ApiMgtDAO {
 
     private void updateGraphQLQueryAnalysisInfo(Connection conn, int maxDepth, int maxComplexity, int policyId)
             throws APIManagementException {
-
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try{
-            String query = SQLConstants.UPDATE_QUERY_ANALYSIS_SQL;
-            ps = conn.prepareStatement(query);
+        String query = SQLConstants.UPDATE_QUERY_ANALYSIS_SQL;
+        try(PreparedStatement ps = conn.prepareStatement(query)){
             ps.setInt(1,maxComplexity);
             ps.setInt(2,maxDepth);
             ps.setInt(3,policyId);
             ps.executeUpdate();
-        } catch (Exception e) {
-            handleException("Failed to update Subscription Policy: " , e);
-
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        } catch (SQLException e) {
+            handleException("Failed to update GraphQL Rate Limiting Info: " , e);
         }
     }
-
-
 
     /**
      * Updates global throttle policy in database

@@ -35,9 +35,12 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.bouncycastle.eac.EACException;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,9 +74,9 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @return maximum query depth value if exists, or -1 to denote no complexity limitation
      */
     private int  getMaxQueryDepth(MessageContext messageContext) {
-        Object maxQueryDepth = messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH);
-        if (maxQueryDepth != null) {
-            return ((Integer) maxQueryDepth).intValue();
+        int maxQueryDepth = ((Integer)messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH)).intValue();
+        if (maxQueryDepth != 0) {
+            return maxQueryDepth;
         } else {
             log.error("Maximum query depth was not allocated");
             return -1;
@@ -96,7 +99,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                 return false;
             }
         } catch (Exception e) {
-            log.error("Policy definition parsing failed. " + e.getMessage(), e);
+            String errorMessage = "Policy definition parsing failed. ";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return false;
     }
@@ -160,7 +164,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @param payload          payload of the request
      * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
      */
-    private boolean analyseQueryComplexity(MessageContext messageContext, String payload) {
+    private boolean analyseQueryComplexity(MessageContext messageContext, String payload){
         FieldComplexityCalculator fieldComplexityCalculator = new FieldComplexityCalculatorImpl(messageContext);
         int maxQueryComplexity = getMaxQueryComplexity(messageContext);
 
@@ -200,8 +204,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                     return false;
                 }
                 return true;
-            } catch (Throwable e) {
-                log.error(e);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         } else {
             return true; // No complexity limitation check
@@ -273,5 +277,4 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     public boolean handleResponse(MessageContext messageContext) {
         return true;
     }
-
 }

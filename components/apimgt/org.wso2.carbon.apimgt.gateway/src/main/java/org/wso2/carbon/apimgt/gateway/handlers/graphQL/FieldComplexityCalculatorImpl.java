@@ -9,19 +9,21 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator {
     private static final Log log = LogFactory.getLog(FieldComplexityCalculatorImpl.class);
     JSONParser jsonParser = new JSONParser();
     JSONObject policyDefinition;
 
-    public FieldComplexityCalculatorImpl(MessageContext messageContext) {
+    public FieldComplexityCalculatorImpl(MessageContext messageContext){
         try {
             String graphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
             JSONObject jsonObject = (JSONObject) jsonParser.parse(graphQLAccessControlPolicy);
             policyDefinition = (JSONObject) jsonObject.get(APIConstants.QUERY_ANALYSIS_COMPLEXITY);
         } catch (ParseException e) {
-            log.error("Policy definition parsing failed. " + e.getMessage(), e);
+            String errorMessage = "Policy definition parsing failed. ";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
     }
 
