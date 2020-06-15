@@ -2942,6 +2942,13 @@ BEGIN
     :NEW.TIME_STAMP := systimestamp;
 END;
 
+-- Tenant Themes Table --
+CREATE TABLE AM_TENANT_THEMES (
+  TENANT_ID INTEGER NOT NULL,
+  THEME BLOB NOT NULL,
+  PRIMARY KEY (TENANT_ID)
+)
+/
 -- End of API-MGT Tables --
 
 --permance indexes start--
