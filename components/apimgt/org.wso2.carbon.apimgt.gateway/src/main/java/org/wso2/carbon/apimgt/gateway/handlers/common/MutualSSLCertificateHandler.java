@@ -28,6 +28,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
 
@@ -51,9 +52,9 @@ public class MutualSSLCertificateHandler extends AbstractHandler {
             if (clientCertificate != null) {
                 byte[] encoded = Base64.encodeBase64(clientCertificate.getEncoded());
                 String base64EncodedString =
-                        APIMgtGatewayConstants.BEGIN_CERTIFICATE_STRING
+                        APIConstants.BEGIN_CERTIFICATE_STRING
                                 .concat(new String(encoded)).concat("\n")
-                                .concat(APIMgtGatewayConstants.END_CERTIFICATE_STRING);
+                                .concat(APIConstants.END_CERTIFICATE_STRING);
                 base64EncodedString = Base64.encodeBase64URLSafeString(base64EncodedString.getBytes());
                 headers.put(Utils.getClientCertificateHeader(), base64EncodedString);
             }
