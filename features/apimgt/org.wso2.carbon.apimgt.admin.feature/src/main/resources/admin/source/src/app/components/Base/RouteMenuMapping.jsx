@@ -56,7 +56,6 @@ import RegistrationCreation from 'AppComponents/Workflow/RegistrationCreation';
 import APIStateChange from 'AppComponents/Workflow/APIStateChange';
 import UserCreation from 'AppComponents/Workflow/UserCreation';
 
-
 const RouteMenuMapping = (intl) => [
     {
         id: intl.formatMessage({

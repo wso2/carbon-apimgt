@@ -54,20 +54,14 @@ import ClearIcon from '@material-ui/icons/Clear';
 import Box from '@material-ui/core/Box';
 
 const useStyles = makeStyles((theme) => ({
-    searchBar: {
-        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-    },
     searchInput: {
         fontSize: theme.typography.fontSize,
     },
     block: {
-        display: 'block',
+        display: theme.spacing(2),
     },
     contentWrapper: {
         margin: '40px 16px',
-    },
-    button: {
-        borderColor: 'rgba(255, 255, 255, 0.7)',
     },
     approveButton: {
         textDecoration: 'none',
@@ -101,6 +95,7 @@ function ListLabels() {
                 return (workflowlist);
             })
             .catch((error) => {
+                Alert.error('Unable to get workflow pending requests for API State Change', error.message);
                 throw (error);
             });
     }
@@ -113,8 +108,8 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error('Unable to fetch data ' + e);
-                console.error('Unable to fetch data ' + e);
+                Alert.error('Unable to fetch data. ', e.message);
+                console.error('Unable to fetch data. ', e.message);
             });
     };
 
@@ -123,10 +118,7 @@ function ListLabels() {
     }, []);
 
     const updateStatus = (referenceId, value) => {
-        const body = {};
-        body.status = value;
-        body.attributes = {};
-        body.description = 'Approve workflow request.';
+        const body = { status: value, attributes: {}, description: 'Approve workflow request.' };
 
         const promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
         return promisedupdateWorkflow
@@ -141,7 +133,7 @@ function ListLabels() {
             .catch((error) => {
                 const { response } = error;
                 if (response.body) {
-                    response.body.description = 'Unable to complete API state change approve/reject process';
+                    Alert.error('Unable to complete API state change approve/reject process. ', error.message);
                     throw (response.body.description);
                 }
                 return null;
@@ -162,16 +154,16 @@ function ListLabels() {
                         <Link
                             target='_blank'
                             href={Configurations.app.docUrl
-                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
+                        + 'learn/design-api/advanced-topics/adding-an-api-'
+                        + 'state-change-workflow/#adding-an-api-state-change-workflow'}
                         >
                             <ListItemText primary={(
                                 <FormattedMessage
                                     id='Workflow.APIStatechange.help.link.one'
-                                    defaultMessage='Create a API State change workflow request'
+                                    defaultMessage='Create a API State change approval workflow request'
                                 />
                             )}
                             />
-
                         </Link>
                     </ListItem>
                 </List>
@@ -200,10 +192,10 @@ function ListLabels() {
             },
         },
         {
-            name: 'api',
+            name: 'properties.apiName',
             label: intl.formatMessage({
-                id: 'Workflow.APIStateChange.table.header.API',
-                defaultMessage: 'API',
+                id: 'Workflow.APIStateChange.table.header.APIName',
+                defaultMessage: 'API Name',
             }),
             options: {
                 sort: false,
@@ -213,7 +205,24 @@ function ListLabels() {
                     return (
                         <div>
                             {properties.apiName}
-                            -
+                        </div>
+                    );
+                },
+            },
+        },
+        {
+            name: 'properties.apiVersion',
+            label: intl.formatMessage({
+                id: 'Workflow.APIStateChange.table.header.APIVersion',
+                defaultMessage: 'API Version',
+            }),
+            options: {
+                sort: false,
+                customBodyRender: (value, tableMeta) => {
+                    const dataRow = data[tableMeta.rowIndex];
+                    const { properties } = dataRow;
+                    return (
+                        <div>
                             {properties.apiVersion}
                         </div>
                     );
@@ -221,7 +230,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'requestState',
+            name: 'properties.action',
             label: intl.formatMessage({
                 id: 'Workflow.APIStateChange.table.header.RequestState',
                 defaultMessage: 'Request State',
@@ -240,7 +249,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'currentState',
+            name: 'properties.currentState',
             label: intl.formatMessage({
                 id: 'Workflow.APIStateChange.table.header.CurrentState',
                 defaultMessage: 'Current State',
@@ -259,7 +268,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'apiProvider',
+            name: 'properties.apiProvider',
             label: intl.formatMessage({
                 id: 'Workflow.APIStateChange.table.header.ApiProvider',
                 defaultMessage: 'Created by',
@@ -338,8 +347,6 @@ function ListLabels() {
         />
     );
 
-    const EditComponent = (() => <span />);
-
     const searchActive = true;
     const searchPlaceholder = intl.formatMessage({
         id: 'Workflow.apistatechange.search.default',
@@ -381,7 +388,6 @@ function ListLabels() {
                                     id='Workflow.APIStateChange.List.empty.title.apistatechange'
                                     defaultMessage='API State Change'
                                 />
-
                             </Typography>
                             <Typography variant='body2' color='textSecondary' component='p'>
                                 <FormattedMessage
@@ -396,7 +402,7 @@ function ListLabels() {
                     </CardActionArea>
                     <CardActions>
                         {addButtonOverride || (
-                            <EditComponent updateList={fetchData} {...addButtonProps} />
+                            <span updateList={fetchData} {...addButtonProps} />
                         )}
                     </CardActions>
                 </Card>
@@ -408,7 +414,6 @@ function ListLabels() {
             <ContentBase pageStyle='paperLess'>
                 <InlineProgress />
             </ContentBase>
-
         );
     }
     return (
@@ -418,7 +423,6 @@ function ListLabels() {
                     <AppBar className={classes.searchBar} position='static' color='default' elevation={0}>
                         <Toolbar>
                             <Grid container spacing={2} alignItems='center'>
-
                                 <Grid item>
                                     {searchActive && (<SearchIcon className={classes.block} color='inherit' />)}
                                 </Grid>
@@ -437,7 +441,7 @@ function ListLabels() {
                                 </Grid>
                                 <Grid item>
                                     {addButtonOverride || (
-                                        <EditComponent
+                                        <span
                                             updateList={fetchData}
                                             {...addButtonProps}
                                         />
@@ -458,7 +462,6 @@ function ListLabels() {
                         </Toolbar>
                     </AppBar>
                 )}
-
                 {data && data.length > 0 && (
                     <MUIDataTable
                         title={null}

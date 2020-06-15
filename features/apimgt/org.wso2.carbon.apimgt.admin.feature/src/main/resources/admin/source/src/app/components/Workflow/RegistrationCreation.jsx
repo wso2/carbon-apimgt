@@ -55,9 +55,6 @@ import ClearIcon from '@material-ui/icons/Clear';
 import Box from '@material-ui/core/Box';
 
 const useStyles = makeStyles((theme) => ({
-    searchBar: {
-        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-    },
     searchInput: {
         fontSize: theme.typography.fontSize,
     },
@@ -65,10 +62,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'block',
     },
     contentWrapper: {
-        margin: '40px 16px',
-    },
-    button: {
-        borderColor: 'rgba(255, 255, 255, 0.7)',
+        margin: theme.spacing(2),
     },
     approveButton: {
         textDecoration: 'none',
@@ -109,6 +103,7 @@ function ListLabels() {
                     resolve(workflowlist);
                 })
                 .catch((error) => {
+                    Alert.error('Unable to get workflow pending requests for Registration Creation', error.message);
                     reject(error);
                 });
         });
@@ -122,8 +117,8 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error('Unable to fetch data ' + e);
-                console.error('Unable to fetch data ' + e);
+                Alert.error('Unable to fetch data. ', e.message);
+                console.error('Unable to fetch data. ', e.message);
             });
     };
 
@@ -132,10 +127,7 @@ function ListLabels() {
     }, []);
 
     const updateStatus = (referenceId, value) => {
-        const body = {};
-        body.status = value;
-        body.attributes = {};
-        body.description = 'Approve workflow request.';
+        const body = { status: value, attributes: {}, description: 'Approve workflow request.' };
 
         const restApi = new API();
         const promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
@@ -151,7 +143,7 @@ function ListLabels() {
             .catch((error) => {
                 const { response } = error;
                 if (response.body) {
-                    response.body.description = 'Unable to complete registration creation approve/reject process';
+                    Alert.error('Unable to complete registration creation approve/reject process. ', error.message);
                     throw (response.body.description);
                 }
                 return null;
@@ -172,7 +164,8 @@ function ListLabels() {
                         <Link
                             target='_blank'
                             href={Configurations.app.docUrl
-                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
+                        + 'learn/consume-api/manage-application/advanced-topics/adding-an-application-'
+                        + 'key-generation-workflow/#adding-an-application-key-generation-workflow'}
                         >
                             <ListItemText primary={(
                                 <FormattedMessage
@@ -181,7 +174,6 @@ function ListLabels() {
                                 />
                             )}
                             />
-
                         </Link>
                     </ListItem>
                 </List>
@@ -207,7 +199,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'application',
+            name: 'properties.applicationName',
             label: intl.formatMessage({
                 id: 'Workflow.RegistrationCreation.table.header.Application',
                 defaultMessage: 'Application',
@@ -226,7 +218,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'applicationTier',
+            name: 'properties.applicationTier',
             label: intl.formatMessage({
                 id: 'Workflow.RegistrationCreation.table.header.ApplicationTier',
                 defaultMessage: 'Throtting Policy',
@@ -245,7 +237,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'keyType',
+            name: 'properties.keyType',
             label: intl.formatMessage({
                 id: 'Workflow.RegistrationCreation.table.header.KeyType',
                 defaultMessage: 'Key Type',
@@ -264,7 +256,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'creater',
+            name: 'properties.userName',
             label: intl.formatMessage({
                 id: 'Workflow.RegistrationCreation.table.header.Creater',
                 defaultMessage: 'Created by',
@@ -343,8 +335,6 @@ function ListLabels() {
         />
     );
 
-    const EditComponent = (() => <span />);
-
     const searchActive = true;
     const searchPlaceholder = intl.formatMessage({
         id: 'Workflow.RegistrationCreation.search.default',
@@ -385,7 +375,6 @@ function ListLabels() {
                                     id='Workflow.ApplicationRegistration.List.empty.title.applicationregistrations'
                                     defaultMessage='Application Registration'
                                 />
-
                             </Typography>
                             <Typography variant='body2' color='textSecondary' component='p'>
                                 <FormattedMessage
@@ -400,7 +389,7 @@ function ListLabels() {
                     </CardActionArea>
                     <CardActions>
                         {addButtonOverride || (
-                            <EditComponent updateList={fetchData} {...addButtonProps} />
+                            <span updateList={fetchData} {...addButtonProps} />
                         )}
                     </CardActions>
                 </Card>
@@ -412,18 +401,15 @@ function ListLabels() {
             <ContentBase pageStyle='paperLess'>
                 <InlineProgress />
             </ContentBase>
-
         );
     }
     return (
-
         <>
             <ContentBase {...pageProps}>
                 {(searchActive || addButtonProps) && (
                     <AppBar className={classes.searchBar} position='static' color='default' elevation={0}>
                         <Toolbar>
                             <Grid container spacing={2} alignItems='center'>
-
                                 <Grid item>
                                     {searchActive && (<SearchIcon className={classes.block} color='inherit' />)}
                                 </Grid>
@@ -442,7 +428,7 @@ function ListLabels() {
                                 </Grid>
                                 <Grid item>
                                     {addButtonOverride || (
-                                        <EditComponent
+                                        <span
                                             updateList={fetchData}
                                             {...addButtonProps}
                                         />
@@ -463,7 +449,6 @@ function ListLabels() {
                         </Toolbar>
                     </AppBar>
                 )}
-
                 {data && data.length > 0 && (
                     <MUIDataTable
                         title={null}
