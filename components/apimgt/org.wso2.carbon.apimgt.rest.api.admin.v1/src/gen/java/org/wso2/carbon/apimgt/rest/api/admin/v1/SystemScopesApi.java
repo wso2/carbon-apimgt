@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.SystemScopesApiServiceImpl;
@@ -35,6 +36,23 @@ public class SystemScopesApi  {
 
 SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
 
+
+    @GET
+    @Path("/")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the list of role scope mapping. ", notes = "This operation is used to get the list of role scope mapping from tenant-conf for the apim admin dashboard ", response = ScopeListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage scope"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "System Scopes",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The list of role scope mappings are returned. ", response = ScopeListDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error. An internal server error occurred while retrieving the role scope mapping. ", response = ErrorDTO.class) })
+    public Response systemScopesGet() throws APIManagementException{
+        return delegate.systemScopesGet(securityContext);
+    }
 
     @GET
     @Path("/{scopeName}")

@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
@@ -1626,5 +1628,28 @@ public class RestApiUtil {
             uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_1);
         }
         return uriTemplates;
+    }
+
+    /**
+     * This method is used to get the scope list from the yaml file
+     *
+     * @return MAP of scope list for a portal
+     */
+    public static synchronized Map<String,String> getScopes(String fileName) throws APIManagementException {
+        String definition = null;
+        try {
+            definition = IOUtils
+                    .toString(RestApiUtil.class.getResourceAsStream(fileName), "UTF-8");
+        } catch (IOException  e) {
+            throw new APIManagementException("Error while reading the swagger definition ,",
+                    ExceptionCodes.DEFINITION_EXCEPTION);
+        }
+        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+        Set<Scope> scopeSet = oasParser.getScopes(definition);
+        Map<String,String> portalScopeList = new HashMap<String, String>();
+        for (Scope entry : scopeSet) {
+            portalScopeList.put(entry.getName(),entry.getDescription());
+        }
+        return portalScopeList;
     }
 }
