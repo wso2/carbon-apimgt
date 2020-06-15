@@ -46,6 +46,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -582,5 +583,70 @@ public class APIAdminImpl implements APIAdmin {
             throw new APIMgtResourceNotFoundException(msg);
         }
         return workflow;
+    }
+
+    /**
+     * This method used to check the existence of the scope name for the particular user
+     *
+     * @param username      username to be validated
+     * @param scopeName     scope to be validated
+     * @throws APIManagementException
+     */
+    public boolean isScopeExistsForUser(String username, String scopeName) throws APIManagementException {
+        if (APIUtil.isUserExist(username)){
+            Map<String, String> scopeRoleMapping =
+                    APIUtil.getRESTAPIScopesForTenant(MultitenantUtils.getTenantDomain(username));
+            if (scopeRoleMapping.containsKey(scopeName)) {
+                String[] userRoles = APIUtil.getListOfRoles(username);
+                return getRoleScopeList(userRoles,scopeRoleMapping).contains(scopeName);
+            } else {
+                throw new APIManagementException("Scope Not Found.  Scope : " + scopeName + ",",
+                        ExceptionCodes.SCOPE_NOT_FOUND);
+            }
+        } else {
+            throw new APIManagementException("User Not Found. Username :" + username + ",",
+                    ExceptionCodes.USER_NOT_FOUND);
+         }
+    }
+
+    /**
+     * This method used to check the existence of the scope name
+     * @param username      tenant username to get tenant-scope mapping
+     * @param scopeName     scope to be validated
+     * @throws APIManagementException
+     */
+    public boolean isScopeExists(String username, String scopeName)  {
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+                .getTenantDomain(username));
+        return scopeRoleMapping.containsKey(scopeName);
+    }
+
+    /**
+     * This method used to get the list of scopes of a user roles
+     *
+     * @param userRoles             roles of a particular user
+     * @param scopeRoleMapping      scope-role mapping
+     * @return scopeList            scope lost of a particular user
+     * @throws APIManagementException
+     */
+    private List<String> getRoleScopeList(String[] userRoles, Map<String, String> scopeRoleMapping) {
+        List<String> userRoleList;
+        List<String> authorizedScopes = new ArrayList<>();
+
+        if (userRoles == null || userRoles.length == 0) {
+            userRoles = new String[0];
+        }
+
+        userRoleList = Arrays.asList(userRoles);
+        Iterator<Map.Entry<String, String>> iterator = scopeRoleMapping.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            for (String aRole : entry.getValue().split(",")) {
+                if (userRoleList.contains(aRole)) {
+                    authorizedScopes.add(entry.getKey());
+                }
+            }
+        }
+        return authorizedScopes;
     }
 }
