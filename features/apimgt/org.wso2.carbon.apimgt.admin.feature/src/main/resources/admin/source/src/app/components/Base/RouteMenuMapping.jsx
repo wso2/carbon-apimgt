@@ -82,6 +82,22 @@ const RouteMenuMapping = (intl) => [
                 path: '/throttling/advanced',
                 component: AdvancedThrottlePolicies,
                 icon: <PolicyIcon />,
+                addEditPageDetails: [
+                    {
+                        id: intl.formatMessage({
+                            id: 'Base.RouteMenuMapping.advanced.throttling.policies.Adding',
+                            defaultMessage: 'Add Advanced Policy',
+                        }),
+                        path: '/throttling/advanced/create',
+                    },
+                    {
+                        id: intl.formatMessage({
+                            id: 'Base.RouteMenuMapping.advanced.throttling.policies.Editing',
+                            defaultMessage: 'Edit Advanced Policy',
+                        }),
+                        path: '/throttling/advanced/(.*?)$',
+                    },
+                ],
             },
             {
                 id: intl.formatMessage({
@@ -100,6 +116,22 @@ const RouteMenuMapping = (intl) => [
                 path: '/throttling/subscription',
                 component: SubscriptionThrottlingPolicies,
                 icon: <ShoppingBasketIcon />,
+                addEditPageDetails: [
+                    {
+                        id: intl.formatMessage({
+                            id: 'Base.RouteMenuMapping.subscription.throttling.policies.Adding',
+                            defaultMessage: 'Add Subscription Policy',
+                        }),
+                        path: '/throttling/subscription/add',
+                    },
+                    {
+                        id: intl.formatMessage({
+                            id: 'Base.RouteMenuMapping.subscription.throttling.policies.Editing',
+                            defaultMessage: 'Edit Subscription Policy',
+                        }),
+                        path: '/throttling/subscription/(.*?)$',
+                    },
+                ],
             },
             {
                 id: intl.formatMessage({
@@ -109,6 +141,22 @@ const RouteMenuMapping = (intl) => [
                 path: '/throttling/custom',
                 component: CustomThrottlingPolicies,
                 icon: <AssignmentIcon />,
+                addEditPageDetails: [
+                    {
+                        id: intl.formatMessage({
+                            id: 'Base.RouteMenuMapping.custom.throttling.policies.items.Adding',
+                            defaultMessage: 'Add Custom Policy',
+                        }),
+                        path: '/throttling/custom/create',
+                    },
+                    {
+                        id: intl.formatMessage({
+                            id: 'Base.RouteMenuMapping.custom.throttling.policies.items.Editing',
+                            defaultMessage: 'Edit Custom Policy',
+                        }),
+                        path: '/throttling/custom/(.*?)$',
+                    },
+                ],
             },
             {
                 id: intl.formatMessage({
@@ -147,6 +195,22 @@ const RouteMenuMapping = (intl) => [
         path: '/settings/key-managers',
         component: KeyManagers,
         icon: <PhonelinkSetupIcon />,
+        addEditPageDetails: [
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.keymanagers.items.Adding',
+                    defaultMessage: 'Add KeyManager',
+                }),
+                path: '/settings/key-managers/create',
+            },
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.keymanagers.items.Editing',
+                    defaultMessage: 'Edit KeyManager',
+                }),
+                path: '/settings/key-managers/(.*?)$',
+            },
+        ],
     },
     {
         id: intl.formatMessage({
