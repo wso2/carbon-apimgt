@@ -916,22 +916,18 @@ public class APIGatewayManager {
                     gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(sandboxEndpointSequence,
                             gatewayAPIDTO.getSequenceToBeAdd()));
                 }
-                if (gatewayAPIDTO == null){
-                    return;
-                } else {
-                    if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()) {
-                        if (!isGatewayDefinedAsALabel) {
-                            client.deployAPI(gatewayAPIDTO);
-                        }
+                if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()) {
+                    if (!isGatewayDefinedAsALabel) {
+                        client.deployAPI(gatewayAPIDTO);
                     }
-
-                    if (saveArtifactsToStorage) {
-                        artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO), environment.getName(),
-                                APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                        publishedGateways.add(environment.getName());
-                    }
-
                 }
+
+                if (saveArtifactsToStorage) {
+                    artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO), environment.getName(),
+                            APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
+                    publishedGateways.add(environment.getName());
+                }
+
             } catch (AxisFault | ArtifactSynchronizerException e) {
                 String msg = "Error while deploying WebsocketSequence";
                 log.error(msg, e);
@@ -963,8 +959,9 @@ public class APIGatewayManager {
                 Environment environment = this.environments.get(environmentName);
                 client = new APIGatewayAdminClient(environment);
                 boolean isGatewayDefinedAsALabel = api.getEnvironments() != null;
+                Set<String> publishedGateways = new HashSet<>();
                 try {
-                    gatewayManager.deployWebsocketAPI(api, client, isGatewayDefinedAsALabel,null,environment);
+                    gatewayManager.deployWebsocketAPI(api, client, isGatewayDefinedAsALabel, publishedGateways, environment);
                 } catch (JSONException ex) {
                     /*
                     didn't throw this exception to handle multiple gateway publishing
