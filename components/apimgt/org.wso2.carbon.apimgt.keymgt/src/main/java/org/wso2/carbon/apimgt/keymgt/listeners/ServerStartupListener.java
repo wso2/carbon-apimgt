@@ -18,15 +18,16 @@
 package org.wso2.carbon.apimgt.keymgt.listeners;
 
 import org.apache.axis2.context.ConfigurationContext;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class ServerStartupListener extends AbstractAxis2ConfigurationContextObserver implements ServerStartupObserver {
+    private static final Log log = LogFactory.getLog(ServerStartupListener.class);
 
     @Override
     public void completingServerStartup() {
@@ -43,6 +44,7 @@ public class ServerStartupListener extends AbstractAxis2ConfigurationContextObse
     public void createdConfigurationContext(ConfigurationContext configContext) {
         //load subscription data to memory
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        log.info("Initializing ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
     }
 

@@ -90,6 +90,8 @@ public class APIKeyMgtServiceComponent {
                 serviceRegistration = ctxt.getBundleContext().registerService(OAuthEventInterceptor.class.getName(), interceptor, null);
                 serviceRegistration = ctxt.getBundleContext().registerService(
                         Axis2ConfigurationContextObserver.class.getName(), new ServerStartupListener(), null);
+                serviceRegistration = ctxt.getBundleContext().registerService(
+                        ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
                 // Creating an event adapter to receive token revocation messages
                 configureTokenRevocationEventPublisher();
                 configureCacheInvalidationEventPublisher();
