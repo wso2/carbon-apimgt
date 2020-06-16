@@ -82,12 +82,12 @@ public class RestApiAdminUtils {
      *
      * @param customRuleDTO custom rule object to check
      * @param httpMethod    HTTP method of the request
+     * @throws APIManagementException if a required property validation fails
      */
     public static void validateCustomRuleRequiredProperties(CustomRuleDTO customRuleDTO, String httpMethod)
             throws APIManagementException {
 
         String propertyName;
-
         //policyName property is validated only for POST request
         if (httpMethod.equalsIgnoreCase(APIConstants.HTTP_POST)) {
             if (StringUtils.isBlank(customRuleDTO.getPolicyName())) {
@@ -96,7 +96,6 @@ public class RestApiAdminUtils {
                         ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
             }
         }
-
         if (StringUtils.isBlank(customRuleDTO.getSiddhiQuery())) {
             propertyName = "siddhiQuery";
             throw new APIManagementException(propertyName + " property value of payload cannot be blank",
