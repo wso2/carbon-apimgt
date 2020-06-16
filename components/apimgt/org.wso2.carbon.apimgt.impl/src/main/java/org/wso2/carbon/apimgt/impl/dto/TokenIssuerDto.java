@@ -19,11 +19,14 @@ package org.wso2.carbon.apimgt.impl.dto;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.security.cert.Certificate;
+
 public class TokenIssuerDto {
     private String issuer;
     private boolean disableDefaultClaimMapping = false;
     private Map<String,ClaimMappingDto> claimConfigurations = new HashMap<>();
     private JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
+    private Certificate certificate;
     private String consumerKeyClaim;
     private String scopesClaim;
 
@@ -95,5 +98,15 @@ public class TokenIssuerDto {
         for (ClaimMappingDto mappingDto : claimMappingDto) {
             addClaimMapping(mappingDto);
         }
+    }
+
+    public Certificate getCertificate() {
+
+        return certificate;
+    }
+
+    public void setCertificate(Certificate certificate) {
+
+        this.certificate = certificate;
     }
 }

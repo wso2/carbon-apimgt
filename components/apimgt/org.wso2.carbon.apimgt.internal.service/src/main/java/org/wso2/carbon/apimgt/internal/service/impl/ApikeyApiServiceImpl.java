@@ -6,11 +6,11 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.service.APIKeyRevokeService;
-import org.wso2.carbon.apimgt.keymgt.service.APIKeyRevokeServiceImpl;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.internal.service.ApikeyApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.RevokeAPIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.tokenmgt.service.APIKeyRevokeService;
+import org.wso2.carbon.apimgt.tokenmgt.service.APIKeyRevokeServiceImpl;
 
 import javax.ws.rs.core.Response;
 
