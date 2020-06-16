@@ -42,6 +42,22 @@
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-slf4j</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -188,6 +204,10 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.apache.velocity:velocity:${velocity.version}</bundleDef>
+                                <bundleDef>io.github.openfeign:feign-core:${openfeign.version}</bundleDef>
+                                <bundleDef>io.github.openfeign:feign-gson:${openfeign.version}</bundleDef>
+                                <bundleDef>io.github.openfeign:feign-okhttp:${openfeign.version}</bundleDef>
+                                <bundleDef>io.github.openfeign:feign-slf4j:${openfeign.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
