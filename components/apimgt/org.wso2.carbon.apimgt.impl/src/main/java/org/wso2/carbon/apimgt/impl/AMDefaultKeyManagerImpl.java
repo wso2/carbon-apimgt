@@ -511,7 +511,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT,
                     String.join(" ", appResponse.getGrantTypes()));
         }
-        //todo: check if this is used anywhere
         oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_NAME, appResponse.getClientName());
         return oAuthApplicationInfo;
     }

@@ -36,9 +36,9 @@ public class ClientInfo {
     @SerializedName("client_secret_expires_at")
     private Long clientSecretExpiredTime;
     @SerializedName("grant_types")
-    private List<String> grantTypes = new ArrayList<>();
+    private List<String> grantTypes;
     @SerializedName("redirect_uris")
-    private List<String> redirectUris = new ArrayList<>();
+    private List<String> redirectUris;
     @SerializedName("ext_param_client_id")
     private String presetClientId;
     @SerializedName("ext_param_client_secret")
