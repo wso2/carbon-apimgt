@@ -1633,6 +1633,7 @@ public class RestApiUtil {
     /**
      * This method is used to get the scope list from the yaml file
      *
+     * @param fileName file name of YAML
      * @return MAP of scope list for a portal
      */
     public static synchronized Map<String,String> getScopes(String fileName) throws APIManagementException {

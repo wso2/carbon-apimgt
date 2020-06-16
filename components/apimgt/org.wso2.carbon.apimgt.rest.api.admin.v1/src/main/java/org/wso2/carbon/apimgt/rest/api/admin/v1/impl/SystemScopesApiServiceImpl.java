@@ -31,7 +31,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public class SystemScopesApiServiceImpl implements SystemScopesApiService {
 
-    private static final Log log = LogFactory.getLog(SystemScopesMappingUtil.class);
+    private static final Log log = LogFactory.getLog(SystemScopesApiServiceImpl.class);
 
     public Response systemScopesScopeNameGet(String scope, String username, MessageContext messageContext) throws APIManagementException{
         ScopeSettingsDTO scopeSettingsDTO = new ScopeSettingsDTO();
@@ -59,7 +59,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
         return Response.ok().entity(scopeSettingsDTO).build();
     }
 
-    public Response systemScopesGet(MessageContext messageContext) throws APIManagementException{
+    public Response systemScopesGet(MessageContext messageContext) throws APIManagementException {
         try {
             Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
                     .getTenantDomain(RestApiUtil.getLoggedInUsername()));

@@ -38,7 +38,8 @@ public class SystemScopesMappingUtil {
      * @param scopeRoleMapping Map of a Role Scope  Mapping
      * @return ScopeListDTO list containing role scope mapping data
      */
-    public static ScopeListDTO fromScopeListToScopeListDTO(Map<String, String>  scopeRoleMapping) throws APIManagementException{
+    public static ScopeListDTO fromScopeListToScopeListDTO(Map<String, String>  scopeRoleMapping)
+            throws APIManagementException{
         ScopeListDTO scopeListDTO = new ScopeListDTO();
         scopeListDTO.setCount(scopeRoleMapping.size());
         scopeListDTO.setList(fromRoleScopeMapToRoleScopeDTOList(scopeRoleMapping));
@@ -63,7 +64,8 @@ public class SystemScopesMappingUtil {
                         roleScopeDTO.setName(mapping.getKey());
                         roleScopeDTO.setRoles(scopeRoleMapping.get(mapping.getKey()));
                         roleScopeDTO.setDescription(mapping.getValue());
-                        roleScopeDTO.setTag((fileName.replaceAll("-api.yaml", "")).replaceAll("/", ""));
+                        roleScopeDTO.setTag((fileName.replaceAll("-api.yaml", ""))
+                                .replaceAll("/", ""));
                         scopeDTOs.add(roleScopeDTO);
                     } else {
                         log.warn("The scope "+ mapping.getKey() +" does not exist in tenant.conf");

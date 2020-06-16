@@ -5024,7 +5024,7 @@ definitions:
           $ref: '#/definitions/Scope'
 
   #-----------------------------------------------------
-  # The Scope Role resource
+  # The Scope resource
   #-----------------------------------------------------
   Scope:
     title: Scope Role
