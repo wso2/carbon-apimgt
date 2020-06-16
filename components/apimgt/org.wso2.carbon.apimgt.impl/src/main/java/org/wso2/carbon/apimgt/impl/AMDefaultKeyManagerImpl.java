@@ -783,7 +783,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      *
      * @return Access Token
      */
-    private String getAccessTokenForKeyMgt() throws APIManagementException {
+    protected String getAccessTokenForKeyMgt() throws APIManagementException {
 
         return accessTokenGenerator.getAccessToken(APIConstants.KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES);
     }
