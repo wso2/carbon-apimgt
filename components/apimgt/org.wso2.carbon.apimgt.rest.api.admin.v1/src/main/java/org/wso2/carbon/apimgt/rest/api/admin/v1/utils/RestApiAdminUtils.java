@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -88,7 +89,7 @@ public class RestApiAdminUtils {
         String propertyName;
 
         //policyName property is validated only for POST request
-        if (httpMethod.equalsIgnoreCase("POST")) {
+        if (httpMethod.equalsIgnoreCase(APIConstants.HTTP_POST)) {
             if (StringUtils.isBlank(customRuleDTO.getPolicyName())) {
                 propertyName = "policyName";
                 throw new APIManagementException(propertyName + " property value of payload cannot be blank",
