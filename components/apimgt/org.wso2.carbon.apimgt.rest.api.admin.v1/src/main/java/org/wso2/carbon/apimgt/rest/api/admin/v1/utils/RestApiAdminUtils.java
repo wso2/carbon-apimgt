@@ -22,9 +22,12 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -72,6 +75,37 @@ public class RestApiAdminUtils {
         String userTenantDomain = MultitenantUtils.getTenantDomain(user);
         return !StringUtils.isBlank(blockCondition.getTenantDomain()) && blockCondition.getTenantDomain()
                 .equals(userTenantDomain);
+    }
+
+    /**
+     * Validate the required properties of Custom Rule Policy
+     *
+     * @param customRuleDTO custom rule object to check
+     * @param httpMethod    HTTP method of the request
+     * @throws APIManagementException if a required property validation fails
+     */
+    public static void validateCustomRuleRequiredProperties(CustomRuleDTO customRuleDTO, String httpMethod)
+            throws APIManagementException {
+
+        String propertyName;
+        //policyName property is validated only for POST request
+        if (httpMethod.equalsIgnoreCase(APIConstants.HTTP_POST)) {
+            if (StringUtils.isBlank(customRuleDTO.getPolicyName())) {
+                propertyName = "policyName";
+                throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+                        ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
+            }
+        }
+        if (StringUtils.isBlank(customRuleDTO.getSiddhiQuery())) {
+            propertyName = "siddhiQuery";
+            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
+        }
+        if (StringUtils.isBlank(customRuleDTO.getKeyTemplate())) {
+            propertyName = "keyTemplate";
+            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
+        }
     }
 
     /**

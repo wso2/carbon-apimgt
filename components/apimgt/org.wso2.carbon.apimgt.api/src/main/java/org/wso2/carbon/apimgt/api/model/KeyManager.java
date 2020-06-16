@@ -115,7 +115,9 @@ public interface KeyManager {
      * @return OAuthApplicationInfo object will return after parsed jsonInput
      * @throws APIManagementException
      */
-    OAuthApplicationInfo buildFromJSON(String jsonInput) throws APIManagementException;
+    default OAuthApplicationInfo buildFromJSON(String jsonInput) throws APIManagementException {
+        return null;
+    }
 
     /**
      * @param authApplicationInfo
