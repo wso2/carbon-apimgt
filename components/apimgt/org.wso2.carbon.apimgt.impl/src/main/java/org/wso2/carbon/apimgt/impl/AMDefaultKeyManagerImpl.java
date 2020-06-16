@@ -99,7 +99,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private DCRClient dcrClient;
     private IntrospectionClient introspectionClient;
     private AuthClient authClient;
-    private AuthClient revokeClient;
     private CloseableHttpClient kmHttpClient;
     private AccessTokenGenerator accessTokenGenerator;
 
@@ -162,7 +161,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             return oAuthApplicationInfo;
 
         } catch (KeyManagerClientException e) {
-            handleException("Can not create OAuth application  : " + applicationName, e);
+            handleException("Cannot create OAuth application  : " + applicationName, e);
             return null;
         }
     }
@@ -334,17 +333,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.warn("No information available to generate Token.");
             return null;
         }
-        try {
-            // Call the /revoke only if there's a token to be revoked.
-            if (tokenRequest.getTokenToRevoke() != null && !tokenRequest.getTokenToRevoke().isEmpty()) {
-                revokeClient.revoke(tokenRequest.getClientId(),
-                        tokenRequest.getClientSecret(), tokenRequest.getTokenToRevoke());
-            }
-        } catch (KeyManagerClientException e) {
-            String errorReason = "Token revocation failed!";
-            // Not throwing exception as this is not a blocker
-            log.error(errorReason, e);
-        }
+
+        //We do not revoke the previously obtained token anymore since we do not possess the access token.
 
         // When validity time set to a negative value, a token is considered never to expire.
         if (tokenRequest.getValidityPeriod() == OAuthConstants.UNASSIGNED_VALIDITY_PERIOD) {
@@ -510,6 +500,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (appResponse.getGrantTypes() != null) {
             oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT,
                     String.join(" ", appResponse.getGrantTypes()));
+        } else if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT) instanceof String) {
+            oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT, ((String) oAuthApplicationInfo.
+                    getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT)).replace(",", " "));
         }
         oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_NAME, appResponse.getClientName());
         return oAuthApplicationInfo;
@@ -572,17 +565,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     .encoder(new GsonEncoder())
                     .decoder(new GsonDecoder())
                     .logger(new Slf4jLogger())
-                    .errorDecoder(new KMClientErrorDecoder()    )
+                    .errorDecoder(new KMClientErrorDecoder())
                     .encoder(new FormEncoder())
                     .target(AuthClient.class, authEndpoint);
-            revokeClient = Feign.builder()
-                    .client(new OkHttpClient())
-                    .encoder(new GsonEncoder())
-                    .decoder(new GsonDecoder())
-                    .logger(new Slf4jLogger())
-                    .errorDecoder(new KMClientErrorDecoder()    )
-                    .encoder(new FormEncoder())
-                    .target(AuthClient.class, revokeEndpoint);
             introspectionClient = Feign.builder()
                     .client(new OkHttpClient())
                     .encoder(new GsonEncoder())
