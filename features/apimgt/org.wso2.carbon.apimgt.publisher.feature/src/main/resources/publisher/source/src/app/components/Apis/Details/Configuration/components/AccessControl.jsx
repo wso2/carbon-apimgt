@@ -60,12 +60,20 @@ export default function AccessControl(props) {
     const classes = useStyles();
 
     const [invalidRoles, setInvalidRoles] = useState([]);
+    const [otherValidSystemRoles, setOtherValidSystemRoles] = useState([]);
     useEffect(() => {
         if (invalidRoles.length === 0) {
             setRoleValidity(true);
-            setUserRoleValidity(true);
         }
     }, [invalidRoles]);
+    useEffect(() => {
+        if (otherValidSystemRoles.length === api.accessControlRoles.length && otherValidSystemRoles.length !== 0
+            && (otherValidSystemRoles.every(val => api.accessControlRoles.includes(val)))) {
+            setUserRoleValidity(false);
+        } else {
+            setUserRoleValidity(true);
+        }
+    }, [otherValidSystemRoles]);
     const handleRoleAddition = (role) => {
         const systemRolePromise = APIValidation.role.validate(base64url.encode(role));
         const userRolePromise = APIValidation.userRole.validate(base64url.encode(role));
@@ -79,8 +87,11 @@ export default function AccessControl(props) {
                 });
             }).catch((error) => {
                 if (error.status === 404) {
-                    setUserRoleValidity(false);
-                    setInvalidRoles([...invalidRoles, role]);
+                    configDispatcher({
+                        action: 'accessControlRoles',
+                        value: [...api.accessControlRoles, role],
+                    });
+                    setOtherValidSystemRoles([...otherValidSystemRoles, role]);
                 } else {
                     Alert.error('Error when validating role: ' + role);
                     console.error('Error when validating user roles ' + error);
@@ -98,6 +109,7 @@ export default function AccessControl(props) {
     };
 
     const handleRoleDeletion = (role) => {
+        setOtherValidSystemRoles(otherValidSystemRoles.filter((existingRole) => existingRole !== role));
         setInvalidRoles(invalidRoles.filter((existingRole) => existingRole !== role));
         configDispatcher({
             action: 'accessControlRoles',
@@ -117,7 +129,7 @@ export default function AccessControl(props) {
             return (
                 <FormattedMessage
                     id='Apis.Details.Scopes.Roles.User.Invalid'
-                    defaultMessage='Role must be associated with the API creator'
+                    defaultMessage='At least one role must be associated with the API creator'
                 />
             );
         } else {
