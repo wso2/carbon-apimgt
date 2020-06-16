@@ -28,8 +28,9 @@ public class CustomRuleDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "FROM RequestStream\\nSELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey\\nINSERT INTO EligibilityStream; \\n\\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) \\nSELECT throttleKey, (count(userId) >= 10) as isThrottled, expiryTimeStamp group by throttleKey \\nINSERT ALL EVENTS into ResultStream; ", value = "Siddhi query which represents the custom throttling policy")
+  @ApiModelProperty(example = "FROM RequestStream\\nSELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey\\nINSERT INTO EligibilityStream; \\n\\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) \\nSELECT throttleKey, (count(userId) >= 10) as isThrottled, expiryTimeStamp group by throttleKey \\nINSERT ALL EVENTS into ResultStream; ", required = true, value = "Siddhi query which represents the custom throttling policy")
   @JsonProperty("siddhiQuery")
+  @NotNull
   public String getSiddhiQuery() {
     return siddhiQuery;
   }
@@ -46,8 +47,9 @@ public class CustomRuleDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "$userId", value = "The specific combination of attributes that are checked in the policy.")
+  @ApiModelProperty(example = "$userId", required = true, value = "The specific combination of attributes that are checked in the policy.")
   @JsonProperty("keyTemplate")
+  @NotNull
   public String getKeyTemplate() {
     return keyTemplate;
   }
