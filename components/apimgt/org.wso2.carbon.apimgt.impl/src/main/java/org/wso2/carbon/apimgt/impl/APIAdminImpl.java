@@ -55,6 +55,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -725,5 +726,38 @@ public class APIAdminImpl implements APIAdmin {
             }
         }
         return authorizedScopes;
+    }
+
+    /**
+     * Adds a tenant theme to the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     */
+    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        apiMgtDAO.addTenantTheme(tenantId, themeContent);
+    }
+
+    /**
+     * Updates a tenant theme in the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     */
+    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        apiMgtDAO.updateTenantTheme(tenantId, themeContent);
+    }
+
+    /**
+     * Retrieves a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @return content of the tenant theme
+     */
+    public InputStream getTenantTheme(int tenantId) throws APIManagementException {
+
+        return apiMgtDAO.getTenantTheme(tenantId);
     }
 }

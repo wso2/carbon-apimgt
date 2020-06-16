@@ -15519,4 +15519,86 @@ public class ApiMgtDAO {
             handleException("Failed to remove resource scopes for: " + apiIdentifier, e);
         }
     }
+
+    /**
+     * Adds a tenant theme to the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     */
+    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.ADD_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            if (connection.getMetaData().getDriverName().contains("PostgreSQL") || connection.getMetaData()
+                    .getDatabaseProductName().contains("DB2")) {
+                statement.setBinaryStream(2, themeContent, IOUtils.toByteArray(themeContent).length);
+            } else {
+                statement.setBinaryStream(2, themeContent);
+            }
+            statement.executeUpdate();
+        } catch (SQLException | IOException e) {
+            handleException("Failed to add tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
+
+    /**
+     * Updates a tenant theme in the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     */
+    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.TenantThemeConstants.UPDATE_TENANT_THEME)) {
+
+            if (connection.getMetaData().getDriverName().contains("PostgreSQL") || connection.getMetaData()
+                    .getDatabaseProductName().contains("DB2")) {
+                statement.setBinaryStream(1, themeContent, IOUtils.toByteArray(themeContent).length);
+            } else {
+                statement.setBinaryStream(1, themeContent);
+            }
+            statement.setInt(2, tenantId);
+            statement.executeUpdate();
+        } catch (SQLException | IOException e) {
+            handleException("Failed to update tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
+
+    /**
+     * Retrieves a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @return content of the tenant theme
+     */
+    public InputStream getTenantTheme(int tenantId) throws APIManagementException {
+
+        InputStream tenantThemeContent = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                //Postgres bytea data doesn't support getBlob operation
+                if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                    tenantThemeContent = resultSet.getBinaryStream("THEME");
+                } else {
+                    Blob content = resultSet.getBlob("THEME");
+                    tenantThemeContent = content.getBinaryStream();
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+        return tenantThemeContent;
+    }
 }
