@@ -124,39 +124,52 @@ function TryOutController(props) {
         let keys;
         let selectedKeyTypes = 'PRODUCTION';
         let accessToken;
-        const promiseSubscriptions = restApi.getSubscriptions(apiID);
-        promiseSubscriptions.then((subscriptionsResponse) => {
-            if (subscriptionsResponse !== null) {
-                subscriptionsList = subscriptionsResponse.obj.list.filter((item) => item.status === 'UNBLOCKED'
-                || item.status === 'PROD_ONLY_BLOCKED');
+        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+            const promiseSubscriptions = restApi.getSubscriptions(apiID);
+            promiseSubscriptions.then((subscriptionsResponse) => {
+                if (subscriptionsResponse !== null) {
+                    subscriptionsList = subscriptionsResponse.obj.list.filter((item) => item.status === 'UNBLOCKED'
+                        || item.status === 'PROD_ONLY_BLOCKED');
 
-                if (subscriptionsList && subscriptionsList.length > 0) {
-                    newSelectedApplication = subscriptionsList[0].applicationId;
-                    Application.get(newSelectedApplication)
-                        .then((application) => {
-                            return application.getKeys();
-                        })
-                        .then((appKeys) => {
-                            if (appKeys.get(selectedKeyManager)
-                                && appKeys.get(selectedKeyManager).keyType === 'SANDBOX') {
-                                selectedKeyTypes = 'SANDBOX';
-                                ({ accessToken } = appKeys.get(selectedKeyManager).token);
-                            } else if (appKeys.get(selectedKeyManager)
-                                && appKeys.get(selectedKeyManager).keyType === 'PRODUCTION') {
-                                selectedKeyTypes = 'PRODUCTION';
-                                ({ accessToken } = appKeys.get(selectedKeyManager).token);
-                            }
-                            setSelectedApplication(newSelectedApplication);
-                            setSubscriptions(subscriptionsList);
-                            setKeys(appKeys);
-                            setSelectedEnvironment(selectedEnvironments, false);
-                            setSelectedKeyType(selectedKeyTypes, false);
-                            if (selectedKeyType === 'PRODUCTION') {
-                                setProductionAccessToken(accessToken);
-                            } else {
-                                setSandboxAccessToken(accessToken);
-                            }
-                        });
+                    if (subscriptionsList && subscriptionsList.length > 0) {
+                        newSelectedApplication = subscriptionsList[0].applicationId;
+                        Application.get(newSelectedApplication)
+                            .then((application) => {
+                                return application.getKeys();
+                            })
+                            .then((appKeys) => {
+                                if (appKeys.get(selectedKeyManager)
+                                    && appKeys.get(selectedKeyManager).keyType === 'SANDBOX') {
+                                    selectedKeyTypes = 'SANDBOX';
+                                    ({ accessToken } = appKeys.get(selectedKeyManager).token);
+                                } else if (appKeys.get(selectedKeyManager)
+                                    && appKeys.get(selectedKeyManager).keyType === 'PRODUCTION') {
+                                    selectedKeyTypes = 'PRODUCTION';
+                                    ({ accessToken } = appKeys.get(selectedKeyManager).token);
+                                }
+                                setSelectedApplication(newSelectedApplication);
+                                setSubscriptions(subscriptionsList);
+                                setKeys(appKeys);
+                                setSelectedEnvironment(selectedEnvironments, false);
+                                setSelectedKeyType(selectedKeyTypes, false);
+                                if (selectedKeyType === 'PRODUCTION') {
+                                    setProductionAccessToken(accessToken);
+                                } else {
+                                    setSandboxAccessToken(accessToken);
+                                }
+                            });
+                    } else {
+                        setSelectedApplication(newSelectedApplication);
+                        setSubscriptions(subscriptionsList);
+                        setKeys(keys);
+                        setSelectedEnvironment(selectedEnvironment, false);
+                        if (selectedKeyType === 'PRODUCTION') {
+                            setProductionAccessToken(accessToken);
+                        } else {
+                            setSandboxAccessToken(accessToken);
+                        }
+                        setSelectedKeyType(selectedKeyType, false);
+                    }
                 } else {
                     setSelectedApplication(newSelectedApplication);
                     setSubscriptions(subscriptionsList);
@@ -169,43 +182,32 @@ function TryOutController(props) {
                     }
                     setSelectedKeyType(selectedKeyType, false);
                 }
-            } else {
-                setSelectedApplication(newSelectedApplication);
-                setSubscriptions(subscriptionsList);
-                setKeys(keys);
-                setSelectedEnvironment(selectedEnvironment, false);
-                if (selectedKeyType === 'PRODUCTION') {
-                    setProductionAccessToken(accessToken);
-                } else {
-                    setSandboxAccessToken(accessToken);
-                }
-                setSelectedKeyType(selectedKeyType, false);
-            }
-        }).catch((error) => {
-            if (process.env.NODE_ENV !== 'production') {
-                console.error(error);
-            }
-            const { status } = error;
-            if (status === 404) {
-                setNotFound(true);
-            }
-        });
-        const promisedKeyManagers = restApi.getKeyManagers();
-        promisedKeyManagers
-            .then((response) => {
-                const responseKeyManagerList = [];
-                response.body.list.map((item) => responseKeyManagerList.push(item));
-                setKeyManagers(responseKeyManagerList);
-            })
-            .catch((error) => {
+            }).catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
+                    console.error(error);
                 }
                 const { status } = error;
                 if (status === 404) {
                     setNotFound(true);
                 }
             });
+            const promisedKeyManagers = restApi.getKeyManagers();
+            promisedKeyManagers
+                .then((response) => {
+                    const responseKeyManagerList = [];
+                    response.body.list.map((item) => responseKeyManagerList.push(item));
+                    setKeyManagers(responseKeyManagerList);
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const { status } = error;
+                    if (status === 404) {
+                        setNotFound(true);
+                    }
+                });
+        }
     }, []);
 
 
@@ -213,33 +215,35 @@ function TryOutController(props) {
      * Generate access token
      * */
     function generateAccessToken() {
-        setIsUpdating(true);
-        const applicationPromise = Application.get(selectedApplication);
-        applicationPromise
-            .then((application) => application.generateToken(
-                selectedKeyManager,
-                selectedKeyType,
-                3600,
-                scopes,
-            ))
-            .then((response) => {
-                console.log('token generated successfully ' + response);
-                setShowToken(false);
-                if (selectedKeyType === 'PRODUCTION') {
-                    setProductionAccessToken(response.accessToken);
-                } else {
-                    setSandboxAccessToken(response.accessToken);
-                }
-                setIsUpdating(false);
-            })
-            .catch((error) => {
-                console.error(error);
-                const { status } = error;
-                if (status === 404) {
-                    setNotFound(true);
-                }
-                setIsUpdating(false);
-            });
+        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+            setIsUpdating(true);
+            const applicationPromise = Application.get(selectedApplication);
+            applicationPromise
+                .then((application) => application.generateToken(
+                    selectedKeyManager,
+                    selectedKeyType,
+                    3600,
+                    scopes,
+                ))
+                .then((response) => {
+                    console.log('token generated successfully ' + response);
+                    setShowToken(false);
+                    if (selectedKeyType === 'PRODUCTION') {
+                        setProductionAccessToken(response.accessToken);
+                    } else {
+                        setSandboxAccessToken(response.accessToken);
+                    }
+                    setIsUpdating(false);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    const { status } = error;
+                    if (status === 404) {
+                        setNotFound(true);
+                    }
+                    setIsUpdating(false);
+                });
+        }
     }
 
     /**
