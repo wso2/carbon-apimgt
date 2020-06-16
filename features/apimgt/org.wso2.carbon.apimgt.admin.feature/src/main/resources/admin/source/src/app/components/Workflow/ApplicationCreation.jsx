@@ -184,7 +184,7 @@ function ListLabels() {
         {
             name: 'description',
             label: intl.formatMessage({
-                id: 'Workflow.ApplicationCreation.table.header.Description',
+                id: 'Workflow.ApplicationCreation.table.header.description',
                 defaultMessage: 'Description',
             }),
             options: {
@@ -201,15 +201,6 @@ function ListLabels() {
             options: {
                 sort: false,
                 filter: true,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.applicationName}
-                        </div>
-                    );
-                },
             },
         },
         {
@@ -220,15 +211,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.applicationTier}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
@@ -239,6 +222,18 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
+                /* customSort: (data1, colIndex, order) => {
+                    return data1.sort((a, b) => {
+                        if (order === 'asc') {
+                            return a.data[colIndex].toString().localeCompare(b.data[colIndex],
+                                undefined, { numeric: true });
+                        } else if (order === 'desc') {
+                            return b.data[colIndex].toString().localeCompare(a.data[colIndex],
+                                undefined, { numeric: true });
+                        }
+                        return null;
+                    });
+                }, */
                 customBodyRender: (value, tableMeta) => {
                     const dataRow = data[tableMeta.rowIndex];
                     const { properties } = dataRow;
@@ -323,6 +318,7 @@ function ListLabels() {
 
     const columns = [
         ...columProps,
+
     ];
 
     const options = {

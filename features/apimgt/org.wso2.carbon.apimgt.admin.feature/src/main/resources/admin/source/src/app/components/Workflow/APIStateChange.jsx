@@ -199,15 +199,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.apiName}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
@@ -218,15 +210,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.apiVersion}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
@@ -237,15 +221,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.action}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
@@ -256,15 +232,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.currentState}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {

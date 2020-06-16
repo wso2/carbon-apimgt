@@ -98,7 +98,7 @@ function ListLabels() {
                 return (workflowlist);
             })
             .catch((error) => {
-                Alert.error('Unable to get workflow pending requests for Application Creation', error.message);
+                Alert.error('Unable to get workflow pending requests for Subscription Creation', error.message);
                 throw (error);
             });
     }
@@ -199,15 +199,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.apiName}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
@@ -218,15 +210,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.apiVersion}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
@@ -237,15 +221,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.applicationName}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {

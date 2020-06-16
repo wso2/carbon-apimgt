@@ -206,15 +206,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.applicationName}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
@@ -225,15 +217,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.applicationTier}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
@@ -244,15 +228,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.keyType}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {

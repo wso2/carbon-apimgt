@@ -198,15 +198,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.tenantAwareUserName}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
@@ -217,15 +209,7 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.tenantDomain}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
