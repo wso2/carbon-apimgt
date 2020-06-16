@@ -394,22 +394,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.apisApiIdGraphqlPoliciesComplexityGet(apiId, securityContext);
     }
 
-    @POST
-    @Path("/{apiId}/graphql-policies/complexity")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Create complexity related details of an API", notes = "This operation can be used to add complexity details belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
-        })
-    }, tags={ "GraphQL Policies",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Created. Complexity details created successfully. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Bad Request. Complexity detail addition failed. ", response = Void.class) })
-    public Response apisApiIdGraphqlPoliciesComplexityPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping that needs to be added " ,required=true) GraphQLQueryComplexityInfoDTO body) throws APIManagementException{
-        return delegate.apisApiIdGraphqlPoliciesComplexityPost(apiId, body, securityContext);
-    }
-
     @PUT
     @Path("/{apiId}/graphql-policies/complexity")
     @Consumes({ "application/json" })

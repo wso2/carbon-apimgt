@@ -14416,7 +14416,7 @@ public class ApiMgtDAO {
      * Add custom complexity details for a particular API
      *
      * @param apiIdentifier         APIIdentifier object to retrieve API ID
-     * @param graphqlComplexityInfo GraphqlComplexityDetails object
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException
      */
 
@@ -14447,11 +14447,12 @@ public class ApiMgtDAO {
      * Update custom complexity details for a particular API
      *
      * @param apiIdentifier         APIIdentifier object to retrieve API ID
-     * @param graphqlComplexityInfo GraphqlComplexityDetails object
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException
      */
     public void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException {
+        GraphqlComplexityInfo get = getComplexityDetails(apiIdentifier);
         String updateCustomComplexityDetails = SQLConstants.UPDATE_CUSTOM_COMPLEXITY_DETAILS_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(updateCustomComplexityDetails)) {
@@ -14470,6 +14471,37 @@ public class ApiMgtDAO {
             handleException("Error while updating custom complexity details: ", e);
         }
     }
+
+
+    /**
+     * Add or Update complexity details
+     *
+     * @param apiIdentifier         APIIdentifier object to retrieve API ID
+     * @param graphqlComplexityInfo GraphqlComplexityDetails object
+     * @throws APIManagementException
+     */
+    public void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+            throws APIManagementException {
+        String getCustomComplexityDetailsQuery = SQLConstants.GET_CUSTOM_COMPLEXITY_DETAILS_SQL;
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement getCustomComplexityDetails = conn.prepareStatement(getCustomComplexityDetailsQuery)) {
+            int apiId = getAPIID(apiIdentifier, conn);
+            getCustomComplexityDetails.setInt(1, apiId);
+            try (ResultSet rs1 = getCustomComplexityDetails.executeQuery()) {
+               if (rs1.next()) {
+                   updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+               }
+               else{
+                   addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+               }
+
+            }
+        } catch (SQLException ex) {
+            handleException("Error while updating custom complexity details: ", ex);
+        }
+    }
+
+
 
 
     /**

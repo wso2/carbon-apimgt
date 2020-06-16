@@ -1567,6 +1567,10 @@ public abstract class AbstractAPIManager implements APIManager {
         apiMgtDAO.updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
     }
 
+    public void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+        apiMgtDAO.addOrUpdateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+    }
+
 
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
         return null;

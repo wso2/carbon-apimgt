@@ -275,6 +275,16 @@ public interface APIManager {
     void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException;
 
+    /**
+     * Add or Updates the complexity details given the GraphqlComplexityInfo object
+     *
+     * @param apiIdentifier         APIIdentifier
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
+     * @throws APIManagementException if failed to update complexity details
+     */
+    void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+            throws APIManagementException;
+
 
     /**
      * Retrieves the subscriber from the given access token

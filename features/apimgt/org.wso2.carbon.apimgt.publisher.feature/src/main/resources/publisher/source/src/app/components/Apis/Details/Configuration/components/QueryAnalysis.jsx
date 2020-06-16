@@ -37,7 +37,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { isRestricted } from 'AppData/AuthManager';
 import { Progress } from 'AppComponents/Shared';
 import UpdateComplexity from '../../QueryAnalysis/UpdateComplexity';
-import AddDefaultComplexity from '../../QueryAnalysis/AddDefaultComplexity';
 
 const useStyles = makeStyles(() => ({
     content: {
@@ -107,7 +106,6 @@ export default function GraphQLQueryAnalysis(props) {
     const { complexity } = props;
     const [complexityAddDisabled, setComplexityAddDisabled] = useState(false);
     const [state, setState] = useState(null);
-    const [editlist, setEditList] = useState([]);
     const [typelist, setTypeList] = useState([]);
 
     /**
@@ -133,6 +131,28 @@ export default function GraphQLQueryAnalysis(props) {
         setTypeList(array);
     }
 
+    function getInitialComplexity() {
+        const apiId = api.id;
+        const apiClient = new Api();
+        const promisedComplexityType = apiClient.getGraphqlPoliciesComplexityTypes(apiId);
+        promisedComplexityType
+            .then((res) => {
+                const array = [];
+                res.typeList.map((respond) => {
+                    respond.fieldList.map((ob) => {
+                        const obj = {};
+                        obj.type = respond.type;
+                        obj.field = ob;
+                        obj.complexityValue = 1;
+                        array.push(obj);
+                        return ob;
+                    });
+                    return array;
+                });
+                setState(array);
+                findSummation(array);
+            });
+    }
 
     useEffect(() => {
         const apiId = api.id;
@@ -142,6 +162,9 @@ export default function GraphQLQueryAnalysis(props) {
             .then((res) => {
                 setState(res.list);
                 findSummation(res.list);
+                if (res.list.length === 0) {
+                    getInitialComplexity();
+                }
             })
             .catch((error) => {
                 const { response } = error;
@@ -161,7 +184,7 @@ export default function GraphQLQueryAnalysis(props) {
         const apiClient = new Api();
         const promisedComplexity = apiClient.updateGraphqlPoliciesComplexity(
             apiId, {
-                list: editlist,
+                list: state,
             },
         );
         updateAPI({ complexity });
@@ -212,30 +235,17 @@ export default function GraphQLQueryAnalysis(props) {
                             />
                         </Typography>
                         <Typography className={classes.heading}>
-                            {state.length === 0 ? (
-                                <span>set default complexity</span>
-                            ) : (
-                                <span>update complexity</span>
-                            )}
+
+                            <span>update complexity</span>
+
                         </Typography>
-                        {state.length === 0 ? (
-
-                            <AddDefaultComplexity
-                                setState={setState}
-                                findSummation={findSummation}
-                            />
-
-
-                        ) : (
-                            <Button
-                                className={classes.editIcon}
-                                size='small'
-                                onClick={handleClickOpen}
-                            >
-                                <EditRounded />
-                            </Button>
-
-                        )}
+                        <Button
+                            className={classes.editIcon}
+                            size='small'
+                            onClick={handleClickOpen}
+                        >
+                            <EditRounded />
+                        </Button>
                     </Grid>
                 </Grid>
             </Paper>
@@ -259,8 +269,6 @@ export default function GraphQLQueryAnalysis(props) {
                                 findSummation={findSummation}
                                 state={state}
                                 setState={setState}
-                                setEditList={setEditList}
-                                editlist={editlist}
                                 typelist={typelist}
                                 api={api}
                                 updateAPI={updateAPI}

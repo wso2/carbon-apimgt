@@ -3479,36 +3479,6 @@ paths:
             Requested API does not contain any complexity details.
 
     #-----------------------------------------------------
-    # Add API specific Custom Complexity Info
-    #-----------------------------------------------------
-    post:
-      summary: Create complexity related details of an API
-      security:
-        - OAuth2Security:
-            - apim:api_create
-      description: |
-        This operation can be used to add complexity details belonging to an API by providing the id of the API.
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            Role-depth mapping that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/GraphQLQueryComplexityInfo'
-      tags:
-        - GraphQL Policies
-      responses:
-        200:
-          description: |
-            Created.
-            Complexity details created successfully.
-        404:
-          description: |
-            Bad Request.
-            Complexity detail addition failed.
-    #-----------------------------------------------------
     # Update API specific Custom Complexity Info
     #-----------------------------------------------------
     put:
