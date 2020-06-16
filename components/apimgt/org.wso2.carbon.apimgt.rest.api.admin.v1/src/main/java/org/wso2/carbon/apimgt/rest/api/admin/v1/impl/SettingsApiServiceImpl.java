@@ -58,40 +58,4 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO(isUserAvailable);
             return Response.ok().entity(settingsDTO).build();
     }
-
-    /**
-     * Get all scopes of a user
-     *
-     * @param username Search query
-     * @return Scope list
-     */
-    @Override
-    public Response settingsScopesScopeGet(String username, String scopeName, MessageContext messageContext) {
-        String[] userRoles;
-        ScopeSettingsDTO scopeSettingsDTO = new ScopeSettingsDTO();
-        ErrorDTO errorDTO = new ErrorDTO();
-        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
-                .getTenantDomain(username));
-        try {
-            if (APIUtil.isUserExist(username) && scopeRoleMapping.containsKey(scopeName)) {
-                userRoles = APIUtil.getListOfRoles(username);
-                SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-
-                if (settingsMappingUtil.GetRoleScopeList(userRoles, scopeRoleMapping).contains(scopeName)) {
-                    scopeSettingsDTO.setName(scopeName);
-                }
-            } else {
-                errorDTO.setCode(404l);
-                errorDTO.description("Username or Scope does not exist. Username: "
-                        + username + ", " + "Scope: " + scopeName);
-                errorDTO.setMessage("Not Found");
-                return Response.ok().entity(errorDTO).build();
-            }
-        } catch (APIManagementException e) {
-            String errorMessage = "Error when getting the list of scopes. Username: " + username + " , "
-                    + "Scope: " + scopeName;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return Response.ok().entity(scopeSettingsDTO).build();
-    }
 }

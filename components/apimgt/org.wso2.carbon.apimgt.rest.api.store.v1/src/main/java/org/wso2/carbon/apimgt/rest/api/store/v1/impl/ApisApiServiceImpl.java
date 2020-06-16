@@ -107,10 +107,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
                             APIConstants.DEPRECATED };
                 }
-
-                String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
-                newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
-
+                
                 String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
                 lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
 

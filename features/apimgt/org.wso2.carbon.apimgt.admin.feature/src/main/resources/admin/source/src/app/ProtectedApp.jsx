@@ -41,6 +41,7 @@ import RouteMenuMapping from 'AppComponents/Base/RouteMenuMapping';
 import Api from 'AppData/api';
 import Progress from 'AppComponents/Shared/Progress';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
+import Alert from 'AppComponents/Shared/Alert';
 
 const drawerWidth = 256;
 
@@ -182,6 +183,7 @@ class Protected extends Component {
             clientId: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_CLIENT_ID),
             sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_SESSION_STATE),
             mobileOpen: false,
+            isSuperTenant: false,
         };
         this.environments = [];
         this.checkSession = this.checkSession.bind(this);
@@ -212,6 +214,19 @@ class Protected extends Component {
         if (user) {
             this.setState({ user });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
+            api.getTenantInformation(user.name)
+                .then((result) => {
+                    const { tenantDomain } = result.body;
+                    if (tenantDomain === 'carbon.super') {
+                        this.setState({ isSuperTenant: true });
+                    } else {
+                        this.setState({ isSuperTenant: false });
+                    }
+                })
+                .catch((error) => {
+                    Alert.error(error.response.body.description);
+                    console.log(error);
+                });
             this.checkSession();
         } else {
             // If no user data available , Get the user info from existing token information
@@ -261,7 +276,7 @@ class Protected extends Component {
                 }}
             />
         );
-        const { clientId, settings } = this.state;
+        const { clientId, settings, isSuperTenant } = this.state;
         const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
             + clientId + '&redirect_uri=' + Configurations.idp.origin
             + Configurations.app.context + '/services/auth/callback/login';
@@ -274,7 +289,7 @@ class Protected extends Component {
         }
         const leftMenu = (
             settings && (
-                <AppContextProvider value={{ settings, user }}>
+                <AppContextProvider value={{ settings, user, isSuperTenant }}>
                     <>
                         <Hidden smUp implementation='js'>
                             <Navigator
@@ -298,7 +313,7 @@ class Protected extends Component {
                 <AppErrorBoundary>
                     <Base header={header} leftMenu={leftMenu}>
                         {settings ? (
-                            <AppContextProvider value={{ settings, user }}>
+                            <AppContextProvider value={{ settings, user, isSuperTenant }}>
                                 <Route>
                                     <Switch>
                                         <Redirect exact from='/' to='/dashboard' />

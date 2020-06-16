@@ -24,16 +24,11 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
 import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class APIKeyMgtDataHolder {
 
@@ -42,11 +37,7 @@ public class APIKeyMgtDataHolder {
     private static APIManagerConfigurationService amConfigService;
     private static Boolean isKeyCacheEnabledKeyMgt = true;
     private static TokenGenerator tokenGenerator;
-    private static Map<String, AbstractScopesIssuer> scopesIssuers = new HashMap<String, AbstractScopesIssuer>();
     private static final Log log = LogFactory.getLog(APIKeyMgtDataHolder.class);
-
-    // Scope used for marking Application Tokens
-    private static String applicationTokenScope;
 
     public static Boolean getKeyCacheEnabledKeyMgt() {
         return isKeyCacheEnabledKeyMgt;
@@ -92,8 +83,6 @@ public class APIKeyMgtDataHolder {
                 log.error("API Manager configuration is not initialized");
             } else {
 
-                applicationTokenScope = configuration.getFirstProperty(APIConstants
-                                                                               .APPLICATION_TOKEN_SCOPE);
                 JWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
                 if (log.isDebugEnabled()) {
                     log.debug("JWTGeneration enabled : " + jwtConfigurationDto.isEnabled());
@@ -147,24 +136,4 @@ public class APIKeyMgtDataHolder {
         return tokenGenerator;
     }
 
-    public static String getApplicationTokenScope() {
-        return applicationTokenScope;
-    }
-
-    /**
-     * Add scope issuers to the map.
-     * @param prefix prefix of the scope issuer.
-     * @param scopesIssuer scope issuer instance.
-     */
-    public static void addScopesIssuer(String prefix, AbstractScopesIssuer scopesIssuer) {
-        scopesIssuers.put(prefix, scopesIssuer);
-    }
-
-    public static void setScopesIssuers(Map<String, AbstractScopesIssuer> scpIssuers) {
-        scopesIssuers = scpIssuers;
-    }
-
-    public static Map<String, AbstractScopesIssuer> getScopesIssuers() {
-        return scopesIssuers;
-    }
 }
