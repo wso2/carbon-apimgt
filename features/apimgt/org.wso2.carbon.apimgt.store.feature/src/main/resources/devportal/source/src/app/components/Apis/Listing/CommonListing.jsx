@@ -332,7 +332,11 @@ class CommonListing extends React.Component {
                             </Typography>
                         </div>
                         {this.showToggle && (<div className={classes.buttonRight} id='listGridWrapper'>
-                            <IconButton className={classes.button} onClick={() => this.setListType('list')}>
+                            <IconButton
+                                aria-label='List View'
+                                className={classes.button}
+                                onClick={() => this.setListType('list')}
+                            >
                                 <Icon
                                     className={classNames(
                                         { [classes.iconSelected]: listType === 'list' },
@@ -342,7 +346,11 @@ class CommonListing extends React.Component {
                                     list
                                 </Icon>
                             </IconButton>
-                            <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
+                            <IconButton
+                                aria-label='Grid view'
+                                className={classes.button}
+                                onClick={() => this.setListType('grid')}
+                            >
                                 <Icon
                                     className={classNames(
                                         { [classes.iconSelected]: listType === 'grid' },
