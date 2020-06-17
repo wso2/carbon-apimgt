@@ -65,7 +65,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
                     .getTenantDomain(RestApiUtil.getLoggedInUsername()));
             ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
             return Response.ok().entity(scopeListDTO).build();
-        } catch (Exception e) {
+        } catch (APIManagementException e) {
             String errorMessage = "Error when getting the list of scopes-role mapping.";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
