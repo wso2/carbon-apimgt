@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EmailDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class BotDataApiServiceImpl implements BotDataApiService {
 
     @Override
     public Response botDataAddEmailPost(EmailDTO body, MessageContext messageContext) {
+
         APIAdminImpl apiAdminImpl = new APIAdminImpl();
         try {
             apiAdminImpl.addBotDataEmailConfiguration(body.getEmail());
@@ -49,6 +51,7 @@ public class BotDataApiServiceImpl implements BotDataApiService {
 
     @Override
     public Response botDataDeleteEmailDelete(String uuid, MessageContext messageContext) {
+
         APIAdminImpl apiAdminImpl = new APIAdminImpl();
         try {
             apiAdminImpl.deleteBotDataEmailList(uuid);
@@ -62,6 +65,7 @@ public class BotDataApiServiceImpl implements BotDataApiService {
 
     @Override
     public Response botDataGetEmailListGet(String tenantDomain, MessageContext messageContext) {
+
         try {
             List<BotDetectionData> emailList = new APIAdminImpl().retrieveSavedBotDataEmailList();
             return Response.ok().entity(emailList).build();
