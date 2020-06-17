@@ -9,7 +9,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
@@ -21,6 +21,16 @@ const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
         color: theme.palette.error.main,
         marginLeft: theme.spacing(0.1),
+    },
+    table: {
+        margin: 10,
+        '& tr td, & tr th': {
+            padding: 5,
+            margin: 0,
+        },
+    },
+    acitonColumn: {
+        width: 50,
     },
 }));
 
@@ -97,111 +107,108 @@ export default function ClaimMappings(props) {
         setClaimMapping(newMapping);
     };
     return (
-        <Box mb={3}>
-            <TableContainer component={Paper}>
-                <Table className={classes.table} aria-label='simple table'>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>
-                                <FormattedMessage id='Keymanager.Remote.Claim' defaultMessage='Remote Claim' />
-                            </TableCell>
-                            <TableCell align='right'>
-                                <FormattedMessage id='Keymanager.Local.Claim' defaultMessage='Local Claim' />
-                            </TableCell>
-                            <TableCell align='right'>
-                                <FormattedMessage id='Keymanager.Claim.Action' defaultMessage='Action' />
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        <TableRow key='Add new'>
+        <Box m={2}>
+            <Table className={classes.table} aria-label='simple table'>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>
+                            <FormattedMessage id='Keymanager.Remote.Claim' defaultMessage='Remote Claim' />
+                        </TableCell>
+                        <TableCell align='right'>
+                            <FormattedMessage id='Keymanager.Local.Claim' defaultMessage='Local Claim' />
+                        </TableCell>
+                        <TableCell align='right' className={classes.acitonColumn}>
+                            <FormattedMessage id='Keymanager.Claim.Action' defaultMessage='Action' />
+                        </TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    <TableRow key='Add new'>
+                        <TableCell component='th' scope='row'>
+                            <TextField
+                                id='remoteClaim'
+                                label={(
+                                    <FormattedMessage
+                                        id='Keymanager.Remote.Claim'
+                                        defaultMessage='Remote Claim'
+                                    />
+                                )}
+                                variant='outlined'
+                                margin='dense'
+                                onChange={onChange}
+                                error={validationError.remoteClaim}
+                                helperText={validationError.remoteClaim && validationError.remoteClaim}
+                                value={newRemoteClaim === null ? '' : newRemoteClaim}
+                                fullWidth
+                            />
+                        </TableCell>
+                        <TableCell align='right'>
+                            <TextField
+                                id='localClaim'
+                                label={(
+                                    <FormattedMessage
+                                        id='Keymanager.Local.Claim'
+                                        defaultMessage='Local Claim'
+                                    />
+                                )}
+                                value={newLocalClaim === null ? '' : newLocalClaim}
+                                onChange={onChange}
+                                error={validationError.localClaim}
+                                helperText={validationError.localClaim && validationError.localClaim}
+                                variant='outlined'
+                                margin='dense'
+                                fullWidth
+                            />
+                        </TableCell>
+                        <TableCell>
+                            <Box display='flex'>
+                                <IconButton
+                                    id='delete'
+                                    aria-label={(
+                                        <FormattedMessage
+                                            id='Keymanager.Local.Claim.remove'
+                                            defaultMessage='Remove'
+                                        />
+                                    )}
+                                    onClick={handleAddToList}
+                                >
+                                    <AddCircleIcon />
+                                </IconButton>
+                                <IconButton
+                                    id='delete'
+                                    aria-label='Clear'
+                                    onClick={clearValues}
+                                >
+                                    <ClearIcon />
+                                </IconButton>
+                            </Box>
+                        </TableCell>
+                    </TableRow>
+                    {claimMappings.map(({ remoteClaim, localClaim }) => (
+                        <TableRow key={localClaim}>
                             <TableCell component='th' scope='row'>
-                                <TextField
-                                    id='remoteClaim'
-                                    label={(
-                                        <FormattedMessage
-                                            id='Keymanager.Remote.Claim'
-                                            defaultMessage='Remote Claim'
-                                        />
-                                    )}
-                                    variant='outlined'
-                                    onChange={onChange}
-                                    error={validationError.remoteClaim}
-                                    helperText={validationError.remoteClaim && validationError.remoteClaim}
-                                    value={newRemoteClaim === null ? '' : newRemoteClaim}
-                                />
+                                <Typography variant='body1' gutterBottom>
+                                    {remoteClaim}
+                                </Typography>
                             </TableCell>
                             <TableCell align='right'>
-                                <TextField
-                                    id='localClaim'
-                                    label={(
-                                        <FormattedMessage
-                                            id='Keymanager.Local.Claim'
-                                            defaultMessage='Local Claim'
-                                        />
-                                    )}
-                                    value={newLocalClaim === null ? '' : newLocalClaim}
-                                    onChange={onChange}
-                                    error={validationError.localClaim}
-                                    helperText={validationError.localClaim && validationError.localClaim}
-                                    variant='outlined'
-                                />
+                                <Typography variant='body1' gutterBottom>
+                                    {localClaim}
+                                </Typography>
                             </TableCell>
-                            <TableCell>
-                                <Grid>
-                                    <Grid item>
-                                        <IconButton
-                                            id='delete'
-                                            aria-label='Remove'
-                                            onClick={handleAddToList}
-                                        >
-                                            <AddCircleIcon />
-                                        </IconButton>
-                                    </Grid>
-                                    <Grid item>
-                                        <IconButton
-                                            id='delete'
-                                            aria-label='Clear'
-                                            onClick={clearValues}
-                                        >
-                                            <ClearIcon />
-                                        </IconButton>
-                                    </Grid>
-                                </Grid>
+                            <TableCell align='right'>
+                                <IconButton
+                                    id='delete'
+                                    aria-label='Remove'
+                                    onClick={() => { onDelete(remoteClaim); }}
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
                             </TableCell>
                         </TableRow>
-                        {claimMappings.map(({ remoteClaim, localClaim }) => (
-                            <TableRow key={localClaim}>
-                                <TableCell component='th' scope='row'>
-                                    <TextField
-                                        id={remoteClaim}
-                                        defaultValue={remoteClaim}
-                                        variant='outlined'
-                                        disabled
-                                    />
-                                </TableCell>
-                                <TableCell align='right'>
-                                    <TextField
-                                        id={localClaim}
-                                        defaultValue={localClaim}
-                                        variant='outlined'
-                                        disabled
-                                    />
-                                </TableCell>
-                                <TableCell align='right'>
-                                    <IconButton
-                                        id='delete'
-                                        aria-label='Remove'
-                                        onClick={() => { onDelete(remoteClaim); }}
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                    ))}
+                </TableBody>
+            </Table>
         </Box>
     );
 }
