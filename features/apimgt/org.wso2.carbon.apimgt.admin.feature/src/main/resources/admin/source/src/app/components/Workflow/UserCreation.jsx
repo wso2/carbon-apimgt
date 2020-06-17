@@ -94,8 +94,17 @@ function ListLabels() {
         return restApi
             .workflowsGet('AM_USER_SIGNUP')
             .then((result) => {
-                const workflowlist = result.body.list;
-                return (workflowlist);
+                const workflowlist = result.body.list.map((obj) => {
+                    return {
+                        description: obj.description,
+                        tenantAwareUserName: obj.properties.tenantAwareUserName,
+                        tenantDomain: obj.properties.tenantDomain,
+                        referenceId: obj.referenceId,
+                        createdTime: obj.createdTime,
+                        properties: obj.properties,
+                    };
+                });
+                return workflowlist;
             })
             .catch((error) => {
                 Alert.error('Unable to get workflow pending requests for User Creation', error.message);
@@ -191,7 +200,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.tenantAwareUserName',
+            name: 'tenantAwareUserName',
             label: intl.formatMessage({
                 id: 'Workflow.UserCreation.table.header.TenantName',
                 defaultMessage: 'Tenant Name',
@@ -202,7 +211,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.tenantDomain',
+            name: 'tenantDomain',
             label: intl.formatMessage({
                 id: 'Workflow.UserCreation.table.header.TenantDomain',
                 defaultMessage: 'Tenant Domain',

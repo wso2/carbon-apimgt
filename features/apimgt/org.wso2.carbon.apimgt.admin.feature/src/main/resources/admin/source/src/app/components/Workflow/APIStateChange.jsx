@@ -91,8 +91,19 @@ function ListLabels() {
         return restApi
             .workflowsGet('AM_API_STATE')
             .then((result) => {
-                const workflowlist = result.body.list;
-                return (workflowlist);
+                const workflowlist = result.body.list.map((obj) => {
+                    return {
+                        description: obj.description,
+                        api: obj.properties.apiName + '-' + obj.properties.apiVersion,
+                        action: obj.properties.action,
+                        currentState: obj.properties.currentState,
+                        apiProvider: obj.properties.currentState,
+                        referenceId: obj.referenceId,
+                        createdTime: obj.createdTime,
+                        properties: obj.properties,
+                    };
+                });
+                return workflowlist;
             })
             .catch((error) => {
                 Alert.error('Unable to get workflow pending requests for API State Change', error.message);
@@ -192,10 +203,10 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.apiName',
+            name: 'api',
             label: intl.formatMessage({
                 id: 'Workflow.APIStateChange.table.header.APIName',
-                defaultMessage: 'API Name',
+                defaultMessage: 'API',
             }),
             options: {
                 sort: false,
@@ -203,18 +214,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.apiVersion',
-            label: intl.formatMessage({
-                id: 'Workflow.APIStateChange.table.header.APIVersion',
-                defaultMessage: 'API Version',
-            }),
-            options: {
-                sort: false,
-                filter: true,
-            },
-        },
-        {
-            name: 'properties.action',
+            name: 'action',
             label: intl.formatMessage({
                 id: 'Workflow.APIStateChange.table.header.RequestState',
                 defaultMessage: 'Request State',
@@ -225,7 +225,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.currentState',
+            name: 'currentState',
             label: intl.formatMessage({
                 id: 'Workflow.APIStateChange.table.header.CurrentState',
                 defaultMessage: 'Current State',
@@ -236,7 +236,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.apiProvider',
+            name: 'apiProvider',
             label: intl.formatMessage({
                 id: 'Workflow.APIStateChange.table.header.ApiProvider',
                 defaultMessage: 'Created by',

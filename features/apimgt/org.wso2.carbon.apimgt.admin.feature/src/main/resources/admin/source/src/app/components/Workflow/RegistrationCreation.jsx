@@ -99,8 +99,19 @@ function ListLabels() {
                     const registrationProduction = result[0].body.list;
                     const registrationSandbox = result[1].body.list;
                     const workflowlist = registrationProduction.concat(registrationSandbox);
-
-                    resolve(workflowlist);
+                    const registrationlist = workflowlist.map((obj) => {
+                        return {
+                            description: obj.description,
+                            applicationName: obj.properties.applicationName,
+                            applicationTier: obj.properties.applicationTier,
+                            keyType: obj.properties.keyType,
+                            userName: obj.properties.userName,
+                            referenceId: obj.referenceId,
+                            createdTime: obj.createdTime,
+                            properties: obj.properties,
+                        };
+                    });
+                    resolve(registrationlist);
                 })
                 .catch((error) => {
                     Alert.error('Unable to get workflow pending requests for Registration Creation', error.message);
@@ -199,7 +210,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.applicationName',
+            name: 'applicationName',
             label: intl.formatMessage({
                 id: 'Workflow.RegistrationCreation.table.header.Application',
                 defaultMessage: 'Application',
@@ -210,7 +221,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.applicationTier',
+            name: 'applicationTier',
             label: intl.formatMessage({
                 id: 'Workflow.RegistrationCreation.table.header.ApplicationTier',
                 defaultMessage: 'Throtting Policy',
@@ -221,7 +232,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.keyType',
+            name: 'keyType',
             label: intl.formatMessage({
                 id: 'Workflow.RegistrationCreation.table.header.KeyType',
                 defaultMessage: 'Key Type',
@@ -232,7 +243,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.userName',
+            name: 'userName',
             label: intl.formatMessage({
                 id: 'Workflow.RegistrationCreation.table.header.Creater',
                 defaultMessage: 'Created by',

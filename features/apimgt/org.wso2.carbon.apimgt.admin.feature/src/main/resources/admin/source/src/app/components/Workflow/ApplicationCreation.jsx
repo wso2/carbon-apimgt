@@ -95,8 +95,18 @@ function ListLabels() {
         return restApi
             .workflowsGet('AM_APPLICATION_CREATION')
             .then((result) => {
-                const workflowlist = result.body.list;
-                return (workflowlist);
+                const workflowlist = result.body.list.map((obj) => {
+                    return {
+                        description: obj.description,
+                        applicationName: obj.properties.applicationName,
+                        applicationTier: obj.properties.applicationTier,
+                        userName: obj.properties.userName,
+                        referenceId: obj.referenceId,
+                        createdTime: obj.createdTime,
+                        properties: obj.properties,
+                    };
+                });
+                return workflowlist;
             })
             .catch((error) => {
                 Alert.error('Unable to get workflow pending requests for Application Creation', error.message);
@@ -193,9 +203,9 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.applicationName',
+            name: 'applicationName',
             label: intl.formatMessage({
-                id: 'Workflow.ApplicationCreation.table.header.Application',
+                id: 'Workflow.ApplicationCreation.table.header.applicationName',
                 defaultMessage: 'Application',
             }),
             options: {
@@ -204,7 +214,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.applicationTier',
+            name: 'applicationTier',
             label: intl.formatMessage({
                 id: 'Workflow.ApplicationCreation.table.header.ApplicationTier',
                 defaultMessage: 'Throtting Policy',
@@ -215,9 +225,9 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.userName',
+            name: 'userName',
             label: intl.formatMessage({
-                id: 'Workflow.ApplicationCreation.table.header.Creater',
+                id: 'Workflow.ApplicationCreation.table.header.userName',
                 defaultMessage: 'Created by',
             }),
             options: {

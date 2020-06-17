@@ -94,8 +94,18 @@ function ListLabels() {
         return restApi
             .workflowsGet('AM_SUBSCRIPTION_CREATION')
             .then((result) => {
-                const workflowlist = result.body.list;
-                return (workflowlist);
+                const workflowlist = result.body.list.map((obj) => {
+                    return {
+                        description: obj.description,
+                        api: obj.properties.apiName + '-' + obj.properties.apiVersion,
+                        applicationName: obj.properties.applicationName,
+                        subscriber: obj.properties.subscriber,
+                        referenceId: obj.referenceId,
+                        createdTime: obj.createdTime,
+                        properties: obj.properties,
+                    };
+                });
+                return workflowlist;
             })
             .catch((error) => {
                 Alert.error('Unable to get workflow pending requests for Subscription Creation', error.message);
@@ -192,7 +202,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.apiName',
+            name: 'api',
             label: intl.formatMessage({
                 id: 'Workflow.SubscriptionCreation.table.header.API',
                 defaultMessage: 'API',
@@ -203,18 +213,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.apiVersion',
-            label: intl.formatMessage({
-                id: 'Workflow.SubscriptionCreation.table.header.API',
-                defaultMessage: 'API',
-            }),
-            options: {
-                sort: false,
-                filter: true,
-            },
-        },
-        {
-            name: 'properties.applicationName',
+            name: 'applicationName',
             label: intl.formatMessage({
                 id: 'Workflow.SubscriptionCreation.table.header.Application',
                 defaultMessage: 'Application',
@@ -225,7 +224,7 @@ function ListLabels() {
             },
         },
         {
-            name: 'properties.subscriber',
+            name: 'subscriber',
             label: intl.formatMessage({
                 id: 'Workflow.SubscriptionCreation.table.header.Subscriber',
                 defaultMessage: 'Subscriber',
