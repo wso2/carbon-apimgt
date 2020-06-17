@@ -8111,6 +8111,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Make the LC status of the API Product published by default
             saveAPIStatus(artifactPath, APIConstants.PUBLISHED);
 
+            Set<String> tagSet = apiProduct.getTags();
+            if (tagSet != null) {
+                for (String tag : tagSet) {
+                    registry.applyTag(artifactPath, tag);
+                }
+            }
+
             String visibleRolesList = apiProduct.getVisibleRoles();
             String[] visibleRoles = new String[0];
             if (visibleRolesList != null) {
