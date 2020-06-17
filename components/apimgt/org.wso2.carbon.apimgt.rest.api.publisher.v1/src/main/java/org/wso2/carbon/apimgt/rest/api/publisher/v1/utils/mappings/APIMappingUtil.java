@@ -1305,6 +1305,30 @@ public class APIMappingUtil {
     }
 
     /**
+     * This method returns graphQL operations with the old data.
+     * @param uriTemplates uriTemplates
+     * @param operations operations
+     * @return operations
+     */
+    public static List<APIOperationsDTO> getOperationListWithOldData(Set<URITemplate> uriTemplates, List<APIOperationsDTO>
+            operations) {
+        for (APIOperationsDTO operation : operations) {
+            for (URITemplate uriTemplate : uriTemplates) {
+                if (operation.getVerb().equalsIgnoreCase(uriTemplate.getHTTPVerb()) &&
+                        operation.getTarget().equalsIgnoreCase(uriTemplate.getUriTemplate())) {
+                    operation.setThrottlingPolicy(uriTemplate.getThrottlingTier());
+                    operation.setAuthType(uriTemplate.getAuthType());
+                    operation.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getKey).collect(
+                            Collectors.toList()));
+                } else {
+                    operation.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
+                }
+            }
+        }
+        return operations;
+    }
+
+    /**
      * This method returns the oauth scopes according to the given list of scopes
      *
      * @param apiDTO list of APIScopes

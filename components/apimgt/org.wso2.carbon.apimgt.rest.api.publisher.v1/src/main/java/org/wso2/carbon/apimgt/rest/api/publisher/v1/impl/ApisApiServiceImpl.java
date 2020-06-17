@@ -554,14 +554,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                     tenantDomain);
 
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schemaDefinition);
-            Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationArray);
+            List<APIOperationsDTO> operationListWithOldData =
+                    APIMappingUtil.getOperationListWithOldData(originalAPI.getUriTemplates(),
+                            extractGraphQLOperationList(schemaDefinition));
+
+            Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationListWithOldData);
             originalAPI.setUriTemplates(uriTemplates);
 
             apiProvider.saveGraphqlSchemaDefinition(originalAPI, schemaDefinition);
             apiProvider.updateAPI(originalAPI);
-            String schema = apiProvider.getGraphqlSchema(apiIdentifier);
-            return Response.ok().entity(schema).build();
+            APIDTO modifiedAPI = APIMappingUtil.fromAPItoDTO(originalAPI);
+            return Response.ok().entity(modifiedAPI.getOperations()).build();
         } catch (APIManagementException | FaultGatewaysException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
