@@ -21,9 +21,13 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -36,6 +40,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -43,6 +48,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class holds the utility methods for certificate management.
@@ -57,6 +63,9 @@ public class CertificateMgtUtils {
     private static InputStream localTrustStoreStream = null;
     private static OutputStream fileOutputStream = null;
     private static ResponseCode responseCode;
+    private static ConcurrentHashMap<Integer, Key> privateKeys = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Integer, Certificate> publicCerts = new ConcurrentHashMap<>();
+
     private static CertificateMgtUtils instance;
 
     private CertificateMgtUtils(){}
@@ -483,5 +492,78 @@ public class CertificateMgtUtils {
             closeStreams(serverCert);
         }
         return uniqueIdentifier;
+    }
+    public Key getPrivateKey(String tenantDomain) throws RegistryException {
+        //get tenantId
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+
+        Key privateKey = null;
+
+        if (!(privateKeys.containsKey(tenantId))) {
+            APIUtil.loadTenantRegistry(tenantId);
+            //get tenant's key store manager
+            KeyStoreManager tenantKSM = KeyStoreManager.getInstance(tenantId);
+
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                //derive key store name
+                String ksName = tenantDomain.trim().replace('.', '-');
+                String jksName = ksName + ".jks";
+                //obtain private key
+                //TODO: maintain a hash map with tenants' private keys after first initialization
+                privateKey = tenantKSM.getPrivateKey(jksName, tenantDomain);
+            } else {
+                try {
+                    privateKey = tenantKSM.getDefaultPrivateKey();
+                } catch (Exception e) {
+                    log.error("Error while obtaining private key for super tenant", e);
+                }
+            }
+            if (privateKey != null) {
+                privateKeys.put(tenantId, privateKey);
+            }
+        } else {
+            privateKey = privateKeys.get(tenantId);
+        }
+        return privateKey;
+    }
+
+    public Certificate getPublicCertificate(String tenantDomain) throws
+            APIManagementException {
+
+        try {
+            //get tenantId
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+            Certificate publicCert;
+
+            if (!(publicCerts.containsKey(tenantId))) {
+                //get tenant's key store manager
+                APIUtil.loadTenantRegistry(tenantId);
+                KeyStoreManager tenantKSM = KeyStoreManager.getInstance(tenantId);
+
+                KeyStore keyStore;
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    //derive key store name
+                    String ksName = tenantDomain.trim().replace('.', '-');
+                    String jksName = ksName + ".jks";
+                    keyStore = tenantKSM.getKeyStore(jksName);
+                    publicCert = keyStore.getCertificate(tenantDomain);
+                } else {
+                    //keyStore = tenantKSM.getPrimaryKeyStore();
+                    publicCert = tenantKSM.getDefaultPrimaryCertificate();
+                }
+                if (publicCert != null) {
+                    publicCerts.put(tenantId, publicCert);
+                }
+            } else {
+                publicCert = publicCerts.get(tenantId);
+            }
+            return publicCert;
+        } catch (KeyStoreException e) {
+            String error = "Error in obtaining tenant's keystore";
+            throw new APIManagementException(error, e);
+        } catch (Exception e) {
+            String error = "Error in obtaining tenant's keystore";
+            throw new APIManagementException(error, e);
+        }
     }
 }

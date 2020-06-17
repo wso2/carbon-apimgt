@@ -20,7 +20,7 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
 
 const config = {
-    entry: { index: './source/index.jsx' },
+    entry: { index: './source/index.jsx', swaggerWorkerInit: './source/src/app/webWorkers/swaggerWorkerInit.js' },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
         filename: '[name].bundle.js',
@@ -46,6 +46,10 @@ const config = {
     },
     module: {
         rules: [
+            {
+                test: /\.worker\.js$/,
+                use: { loader: 'worker-loader' },
+            },
             {
                 test: /\.(js|jsx)$/,
                 exclude: [/node_modules\/(?!(@hapi)\/).*/, /coverage/],

@@ -43,7 +43,7 @@ public class TenantInfoApiServiceImpl extends TenantInfoApiService {
             try {
                 decodedUserName = new String(Base64.getDecoder().decode(username));
             } catch (IllegalArgumentException e) {
-                log.warn("Could not decode the username. Using original username");
+                log.warn("Could not decode the username. Using original username", e);
                 decodedUserName = username;
             }
             if (!APIUtil.isUserExist(decodedUserName)) {

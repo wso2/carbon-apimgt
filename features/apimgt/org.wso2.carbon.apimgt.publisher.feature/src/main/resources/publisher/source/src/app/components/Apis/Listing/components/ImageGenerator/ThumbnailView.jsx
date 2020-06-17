@@ -17,12 +17,10 @@
  */
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import { Link } from 'react-router-dom';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
 import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
-import ButtonBase from '@material-ui/core/ButtonBase';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -34,7 +32,6 @@ import Paper from '@material-ui/core/Paper';
 import Slide from '@material-ui/core/Slide';
 import Select from '@material-ui/core/Select';
 import Typography from '@material-ui/core/Typography';
-import EditIcon from '@material-ui/icons/Edit';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -50,6 +47,7 @@ import Configurations from 'Config';
 
 import ImageGenerator from './ImageGenerator';
 import Background from './Background';
+import BaseThumbnail from './BaseThumbnail';
 
 const windowURL = window.URL || window.webkitURL;
 const dropzoneStyles = {
@@ -88,47 +86,11 @@ const styles = (theme) => ({
             color: theme.palette.primary.main,
         },
     },
-    media: {
-        // ⚠️ object-fit is not supported by IE11.
-        objectFit: 'cover',
-    },
     preview: {
         height: theme.spacing(25),
     },
     rejectDrop: {
         backgroundColor: red[50],
-    },
-    suppressLinkStyles: {
-        textDecoration: 'none',
-        color: theme.palette.text.disabled,
-    },
-    thumb: {
-        '&:hover': {
-            zIndex: 1,
-            '& $thumbBackdrop': {
-                opacity: 0.2,
-            },
-        },
-    },
-    thumbBackdrop: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-        backgroundColor: theme.palette.common.black,
-        opacity: 0.4,
-    },
-    thumbButton: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: theme.palette.common.white,
     },
     group: {
         display: 'flex',
@@ -228,24 +190,9 @@ class ThumbnailView extends Component {
             backgroundIndex: null,
             backgroundIndexUpdate: null,
             uploading: false,
-            imageLoaded: false,
         };
         this.handleClick = this.handleClick.bind(this);
         this.handleClose = this.handleClose.bind(this);
-    }
-
-    /**
-     * Load required data for showing the thumbnail view
-     */
-    componentDidMount() {
-        this.loadImage();
-    }
-
-    componentDidUpdate(prevProps) {
-        // Typical usage (don't forget to compare props):
-        if (this.props.imageUpdate !== prevProps.imageUpdate) {
-            this.loadImage();
-        }
     }
 
     /**
@@ -360,7 +307,6 @@ class ThumbnailView extends Component {
         this.setState({ uploading: true });
         const {
             api: { apiType, id },
-            setImageUpdate,
         } = this.props;
         const promisedThumbnail = apiType === Api.CONSTS.APIProduct
             ? new APIProduct().addAPIProductThumbnail(id, file)
@@ -383,7 +329,6 @@ class ThumbnailView extends Component {
                         backgroundIndex: cState.backgroundIndexUpdate,
                     }));
                 }
-                setImageUpdate();
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -397,45 +342,6 @@ class ThumbnailView extends Component {
             .finally(() => {
                 this.setState({ uploading: false });
             });
-    }
-
-    /**
-     * Load the image from the backend and keeps in the component state
-     *
-     * @memberof ThumbnailView
-     */
-    loadImage() {
-        const {
-            api: { apiType, id, type },
-        } = this.props;
-        if (type !== 'DOC') {
-            const promisedThumbnail = apiType === Api.CONSTS.APIProduct
-                ? new APIProduct().getAPIProductThumbnail(id)
-                : new Api().getAPIThumbnail(id);
-
-            promisedThumbnail.then((response) => {
-                if (response && response.data) {
-                    if (response.headers['content-type'] === 'application/json') {
-                        const iconJson = JSON.parse(response.data);
-                        this.setState({
-                            selectedIcon: iconJson.key,
-                            selectedIconUpdate: iconJson.key,
-                            category: iconJson.category,
-                            color: iconJson.color,
-                            colorUpdate: iconJson.color,
-                            backgroundIndex: iconJson.backgroundIndex,
-                            backgroundIndexUpdate: iconJson.backgroundIndex,
-                            thumbnail: null,
-                        });
-                    } else if (response && response.data.size > 0) {
-                        const url = windowURL.createObjectURL(response.data);
-                        this.setState({ thumbnail: url });
-                    }
-                }
-            }).finally(() => {
-                this.setState({ imageLoaded: true });
-            });
-        }
     }
 
     saveDisableEnable() {
@@ -469,65 +375,24 @@ class ThumbnailView extends Component {
             backgroundIndex,
             backgroundIndexUpdate,
             uploading,
-            imageLoaded,
         } = this.state;
         let { category } = this.state;
         if (!category) category = MaterialIcons.categories[0].name;
-        let overviewPath = '';
-        if (api.apiType) {
-            overviewPath = api.apiType === Api.CONSTS.APIProduct
-                ? `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
-        } else {
-            overviewPath = `/apis/${api.apiUUID}/documents/${api.id}/details`;
-        }
-        let view;
-        if (!imageLoaded) {
-            view = (
-                <div className='image-load-frame'>
-                    <div className='image-load-animation1' />
-                    <div className='image-load-animation2' />
-                </div>
-            );
-        } else if (thumbnail) {
-            view = <img height={height} width={width} src={thumbnail} alt='API Thumbnail' className={classes.media} />;
-        } else {
-            view = (
-                <ImageGenerator
-                    width={width}
-                    height={height}
-                    api={api}
-                    fixedIcon={{
-                        key: selectedIcon,
-                        color,
-                        backgroundIndex,
-                        category,
-                        api,
-                    }}
-                />
-            );
-        }
 
         return (
             <>
-                {isEditable ? (
-                    <ButtonBase
-                        focusRipple
-                        className={classes.thumb}
-                        onClick={this.handleClick('btnEditAPIThumb', intl)}
-                    >
-                        {view}
-                        <span className={classes.thumbBackdrop} />
-                        <span className={classes.thumbButton}>
-                            <Typography component='span' variant='subtitle1' color='inherit'>
-                                <EditIcon />
-                            </Typography>
-                        </span>
-                    </ButtonBase>
-                ) : (
-                    <Link className={classes.suppressLinkStyles} to={overviewPath}>
-                        {view}
-                    </Link>
-                )}
+                <BaseThumbnail
+                    isEditable={isEditable}
+                    onClick={this.handleClick('btnEditAPIThumb', intl)}
+                    thumbnail={thumbnail}
+                    selectedIcon={selectedIcon}
+                    color={color}
+                    backgroundIndex={backgroundIndex}
+                    category={category}
+                    api={api}
+                    width={width}
+                    height={height}
+                />
 
                 <Dialog
                     TransitionComponent={Transition}
@@ -699,7 +564,7 @@ class ThumbnailView extends Component {
                                         <div
                                             className={classes.backgroundSelection}
                                             onClick={() => this.selectBackground(index)}
-                                            onKeyDown={() => {}}
+                                            onKeyDown={() => { }}
                                         >
                                             <Background width={100} height={100} colorPair={colorPair} />
                                         </div>
@@ -776,8 +641,6 @@ ThumbnailView.propTypes = {
     isEditable: PropTypes.bool,
     intl: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    imageUpdate: PropTypes.number.isRequired,
-    setImageUpdate: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withAPI(withStyles(styles, { withTheme: true })(ThumbnailView)));

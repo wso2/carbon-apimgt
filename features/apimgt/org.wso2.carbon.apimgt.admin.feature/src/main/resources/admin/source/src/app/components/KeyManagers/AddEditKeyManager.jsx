@@ -64,48 +64,28 @@ function reducer(state, newValue) {
     const { field, value } = newValue;
     switch (field) {
         case 'name':
-            return { ...state, [field]: value };
         case 'description':
-            return { ...state, [field]: value };
         case 'type':
-            return { ...state, [field]: value };
         case 'introspectionEndpoint':
-            return { ...state, [field]: value };
         case 'clientRegistrationEndpoint':
-            return { ...state, [field]: value };
         case 'tokenEndpoint':
-            return { ...state, [field]: value };
         case 'revokeEndpoint':
-            return { ...state, [field]: value };
         case 'userInfoEndpoint':
-            return { ...state, [field]: value };
         case 'authorizeEndpoint':
-            return { ...state, [field]: value };
         case 'jwksEndpoint':
-            return { ...state, [field]: value };
         case 'issuer':
-            return { ...state, [field]: value };
         case 'scopeManagementEndpoint':
-            return { ...state, [field]: value };
         case 'enableTokenGeneration':
-            return { ...state, [field]: value };
-        case 'enableTokenEncryption':
-            return { ...state, [field]: value };
-        case 'enableTokenHashing':
-            return { ...state, [field]: value };
         case 'enableMapOAuthConsumerApps':
-            return { ...state, [field]: value };
         case 'enableOAuthAppCreation':
-            return { ...state, [field]: value };
         case 'enableSelfValidationJWT':
-            return { ...state, [field]: value };
         case 'claimMapping':
-            return { ...state, [field]: value };
         case 'additionalProperties':
-            return { ...state, [field]: value };
         case 'availableGrantTypes':
-            return { ...state, [field]: value };
         case 'tokenValidation':
+        case 'displayName':
+        case 'consumerKeyClaim':
+        case 'scopesClaim':
             return { ...state, [field]: value };
         case 'all':
             return value;
@@ -126,6 +106,7 @@ function AddEditKeyManager(props) {
     const [initialState] = useState({
         name: '',
         description: '',
+        displayName: '',
         type: '',
         introspectionEndpoint: '',
         clientRegistrationEndpoint: '',
@@ -138,25 +119,25 @@ function AddEditKeyManager(props) {
         scopeManagementEndpoint: '',
         availableGrantTypes: [],
         enableTokenGeneration: true,
-        enableTokenEncryption: false,
-        enableTokenHashing: false,
         enableMapOAuthConsumerApps: true,
         enableOAuthAppCreation: true,
         enableSelfValidationJWT: true,
         claimMapping: [],
         tokenValidation: [],
         enabled: true,
+        scopesClaim: '',
+        consumerKeyClaim: '',
         additionalProperties: {},
     });
     const { settings } = useAppContext();
     const [state, dispatch] = useReducer(reducer, initialState);
     const {
-        name, description, type,
+        name, description, type, displayName,
         introspectionEndpoint, clientRegistrationEndpoint,
         tokenEndpoint, revokeEndpoint,
         userInfoEndpoint, authorizeEndpoint,
-        jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes,
-        enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps,
+        jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes, consumerKeyClaim, scopesClaim,
+        enableTokenGeneration, enableMapOAuthConsumerApps,
         enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, tokenValidation, additionalProperties,
     } = state;
     const [validationError, setValidationError] = useState([]);
@@ -183,6 +164,7 @@ function AddEditKeyManager(props) {
                     name: result.body.name,
                     description: result.body.description,
                     type: result.body.type,
+                    displayName: result.body.displayName,
                     introspectionEndpoint: result.body.introspectionEndpoint,
                     clientRegistrationEndpoint: result.body.clientRegistrationEndpoint,
                     tokenEndpoint: result.body.tokenEndpoint,
@@ -194,14 +176,14 @@ function AddEditKeyManager(props) {
                     scopeManagementEndpoint: result.body.scopeManagementEndpoint,
                     availableGrantTypes: result.body.availableGrantTypes,
                     enableTokenGeneration: result.body.enableTokenGeneration,
-                    enableTokenEncryption: result.body.enableTokenEncryption,
-                    enableTokenHashing: result.body.enableTokenHashing,
                     enableMapOAuthConsumerApps: result.body.enableMapOAuthConsumerApps,
                     enableOAuthAppCreation: result.body.enableOAuthAppCreation,
                     enableSelfValidationJWT: result.body.enableSelfValidationJWT,
                     claimMapping: result.body.claimMapping,
                     tokenValidation: result.body.tokenValidation,
                     enabled: result.body.enabled,
+                    scopesClaim: result.body.scopesClaim,
+                    consumerKeyClaim: result.body.consumerKeyClaim,
                     additionalProperties: result.body.additionalProperties,
                 };
             }
@@ -258,6 +240,7 @@ function AddEditKeyManager(props) {
             name: state.name,
             description: state.description,
             type: state.type,
+            displayName: state.displayName,
             introspectionEndpoint: state.introspectionEndpoint,
             clientRegistrationEndpoint: state.clientRegistrationEndpoint,
             tokenEndpoint: state.tokenEndpoint,
@@ -269,14 +252,14 @@ function AddEditKeyManager(props) {
             scopeManagementEndpoint: state.scopeManagementEndpoint,
             availableGrantTypes: state.availableGrantTypes,
             enableTokenGeneration: state.enableTokenGeneration,
-            enableTokenEncryption: state.enableTokenEncryption,
-            enableTokenHashing: state.enableTokenHashing,
             enableMapOAuthConsumerApps: state.enableMapOAuthConsumerApps,
             enableOAuthAppCreation: state.enableOAuthAppCreation,
             enableSelfValidationJWT: state.enableSelfValidationJWT,
             claimMapping: state.claimMapping,
             tokenValidation: state.tokenValidation,
             enabled: state.enabled,
+            consumerKeyClaim: state.consumerKeyClaim,
+            scopesClaim: state.scopesClaim,
             additionalProperties: state.additionalProperties,
         };
 
@@ -357,8 +340,8 @@ function AddEditKeyManager(props) {
                     <Grid item xs={12} md={12} lg={6}>
                         <Typography color='inherit' variant='subtitle2' component='div'>
                             <FormattedMessage
-                                id='Throttling.Advanced.AddEdit.general.details'
-                                defaultMessage='General Details'
+                                id='Admin.KeyManager.form.details'
+                                defaultMessage='Details'
                             />
                         </Typography>
                         <Box component='div' m={1}>
@@ -366,7 +349,12 @@ function AddEditKeyManager(props) {
                                 autoFocus
                                 margin='dense'
                                 name='name'
-                                label='Name'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Name'
+                                        defaultMessage='Name'
+                                    />
+                                )}
                                 fullWidth
                                 required
                                 variant='outlined'
@@ -384,8 +372,28 @@ function AddEditKeyManager(props) {
                             />
                             <TextField
                                 margin='dense'
+                                name='displayName'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.DisplayName'
+                                        defaultMessage='Display Name'
+                                    />
+                                )}
+                                fullWidth
+                                variant='outlined'
+                                value={displayName}
+                                onChange={onChange}
+                            />
+
+                            <TextField
+                                margin='dense'
                                 name='description'
-                                label='Description'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Description'
+                                        defaultMessage='Description'
+                                    />
+                                )}
                                 fullWidth
                                 variant='outlined'
                                 value={description}
@@ -427,7 +435,12 @@ function AddEditKeyManager(props) {
                             <TextField
                                 margin='dense'
                                 name='clientRegistrationEndpoint'
-                                label='Client Registration Endpoint'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.ClientRegistration.Endpoint'
+                                        defaultMessage='Client Registration Endpoint'
+                                    />
+                                )}
                                 fullWidth
                                 variant='outlined'
                                 value={clientRegistrationEndpoint}
@@ -436,7 +449,12 @@ function AddEditKeyManager(props) {
                             <TextField
                                 margin='dense'
                                 name='introspectionEndpoint'
-                                label='Introspection Endpoint'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Introspection.Endpoint'
+                                        defaultMessage='Introspection Endpoint'
+                                    />
+                                )}
                                 fullWidth
                                 variant='outlined'
                                 value={introspectionEndpoint}
@@ -445,7 +463,12 @@ function AddEditKeyManager(props) {
                             <TextField
                                 margin='dense'
                                 name='tokenEndpoint'
-                                label='Token Endpoint'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Token.Endpoint'
+                                        defaultMessage='Token Endpoint'
+                                    />
+                                )}
                                 fullWidth
                                 variant='outlined'
                                 value={tokenEndpoint}
@@ -454,7 +477,12 @@ function AddEditKeyManager(props) {
                             <TextField
                                 margin='dense'
                                 name='revokeEndpoint'
-                                label='Revoke Endpoint'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Revoke.Endpoint'
+                                        defaultMessage='Revoke Endpoint'
+                                    />
+                                )}
                                 fullWidth
                                 variant='outlined'
                                 value={revokeEndpoint}
@@ -463,7 +491,12 @@ function AddEditKeyManager(props) {
                             <TextField
                                 margin='dense'
                                 name='userInfoEndpoint'
-                                label='UserInfo Endpoint'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.UserInfo.Endpoint'
+                                        defaultMessage='UserInfo Endpoint'
+                                    />
+                                )}
                                 fullWidth
                                 variant='outlined'
                                 value={userInfoEndpoint}
@@ -472,7 +505,12 @@ function AddEditKeyManager(props) {
                             <TextField
                                 margin='dense'
                                 name='authorizeEndpoint'
-                                label='Authorize Endpoint'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Authorize.Endpoint'
+                                        defaultMessage='Authorize Endpoint'
+                                    />
+                                )}
                                 fullWidth
                                 variant='outlined'
                                 value={authorizeEndpoint}
@@ -481,7 +519,12 @@ function AddEditKeyManager(props) {
                             <TextField
                                 margin='dense'
                                 name='jwksEndpoint'
-                                label='JWKS Endpoint'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.JWKS.Endpoint'
+                                        defaultMessage='JWKS Endpoint'
+                                    />
+                                )}
                                 fullWidth
                                 variant='outlined'
                                 value={jwksEndpoint}
@@ -490,7 +533,12 @@ function AddEditKeyManager(props) {
                             <TextField
                                 margin='dense'
                                 name='issuer'
-                                label='Issuer'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Issuer'
+                                        defaultMessage='Issuer'
+                                    />
+                                )}
                                 fullWidth
                                 variant='outlined'
                                 value={issuer}
@@ -500,12 +548,47 @@ function AddEditKeyManager(props) {
                             <TextField
                                 margin='dense'
                                 name='scopeManagementEndpoint'
-                                label='Scope Management Endpoint'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Scope.Endpoint'
+                                        defaultMessage='Scope Management Endpoint'
+                                    />
+                                )}
                                 fullWidth
                                 variant='outlined'
                                 value={scopeManagementEndpoint}
                                 onChange={onChange}
                             />
+                            <TextField
+                                margin='dense'
+                                name='consumerKeyClaim'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.ConsumerKey.Claim'
+                                        defaultMessage='ConsumerKey Claim URI'
+                                    />
+                                )}
+                                fullWidth
+                                variant='outlined'
+                                value={consumerKeyClaim}
+                                onChange={onChange}
+                            />
+                            <TextField
+                                margin='dense'
+                                name='scopesClaim'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Scopes.Claim'
+                                        defaultMessage='Scopes Claim URI'
+                                    />
+                                )}
+
+                                fullWidth
+                                variant='outlined'
+                                value={scopesClaim}
+                                onChange={onChange}
+                            />
+
                             <ChipInput
                                 style={{ marginBottom: 40, display: 'flex' }}
                                 value={availableGrantTypes}
@@ -535,33 +618,12 @@ function AddEditKeyManager(props) {
                                         color='primary'
                                     />
                                 )}
-                                label='Enable Token Generation '
-                                labelPlacement='start'
-                            />
-                            <FormControlLabel
-                                value='enableTokenEncryption'
-                                control={(
-                                    <Checkbox
-                                        checked={enableTokenEncryption}
-                                        onChange={onChange}
-                                        name='enableTokenEncryption'
-                                        color='primary'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Enable.TokenGen'
+                                        defaultMessage='Enable Token Generation'
                                     />
                                 )}
-                                label='Enable Token Encryption '
-                                labelPlacement='start'
-                            />
-                            <FormControlLabel
-                                value='enableTokenHashing'
-                                control={(
-                                    <Checkbox
-                                        checked={enableTokenHashing}
-                                        onChange={onChange}
-                                        name='enableTokenHashing'
-                                        color='primary'
-                                    />
-                                )}
-                                label='Enable Token Hashing '
                                 labelPlacement='start'
                             />
                             <FormControlLabel
@@ -574,7 +636,12 @@ function AddEditKeyManager(props) {
                                         color='primary'
                                     />
                                 )}
-                                label='Enable Out Of Band Provisioning '
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Enable.OutOfBandProvisioning'
+                                        defaultMessage='Enable Out Of Band Provisioning'
+                                    />
+                                )}
                                 labelPlacement='start'
                             />
                             <FormControlLabel
@@ -587,7 +654,13 @@ function AddEditKeyManager(props) {
                                         color='primary'
                                     />
                                 )}
-                                label='Enable Oauth App Creation '
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Enable.EnableOAithAppCreation'
+                                        defaultMessage='Enable Oauth App Creation'
+                                    />
+                                )}
+
                                 labelPlacement='start'
                             />
                             <FormControlLabel
@@ -600,7 +673,12 @@ function AddEditKeyManager(props) {
                                         color='primary'
                                     />
                                 )}
-                                label='Self Validate JWT'
+                                label={(
+                                    <FormattedMessage
+                                        id='Admin.KeyManager.label.Self.Validate.JWT'
+                                        defaultMessage='Self Validate JWT'
+                                    />
+                                )}
                                 labelPlacement='start'
                             />
                             <ExpansionPanel>
@@ -663,7 +741,7 @@ function AddEditKeyManager(props) {
                         <Box component='span' m={1}>
                             <Button variant='contained' color='primary' onClick={formSaveCallback}>
                                 <FormattedMessage
-                                    id='Throttling.Advanced.AddEdit.form.add'
+                                    id='Admin.KeyManager.form.add'
                                     defaultMessage='Add'
                                 />
                             </Button>
@@ -671,7 +749,7 @@ function AddEditKeyManager(props) {
                         <RouterLink to='/settings/key-managers'>
                             <Button variant='contained'>
                                 <FormattedMessage
-                                    id='Throttling.Advanced.AddEdit.form.cancel'
+                                    id='Admin.KeyManager.form.cancel'
                                     defaultMessage='Cancel'
                                 />
                             </Button>

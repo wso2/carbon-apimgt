@@ -94,6 +94,7 @@ securityDefinitions:
       apim:admin_settings: Retrieve admin settings
       apim:admin_alert_manage: Manage admin alerts
       apim:api_workflow_view: Retrive workflow requests
+      apim:scope_manage: Manage scope
 
 ######################################################
 # The "API Collection" resource APIs
@@ -3475,8 +3476,10 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-
-  /settings/scopes/{scope}:
+  ######################################################
+  # System scopes
+  ######################################################
+  /system-scopes/{scopeName}:
     #-----------------------------------------------------
     # Retrieve scope settings
     #-----------------------------------------------------
@@ -3484,9 +3487,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
-            - apim:admin_settings
-      x-wso2-curl: "curl -k -X GET \"https://localhost:9443/api/am/admin/v1/settings/scopes/apim:subscribe?username=john\" -H \"accept: application/json\" -H \"Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
-      x-wso2-request: "GET https://localhost:9443/api/am/admin/v1/settings/scopes/apim:subscribe?username=john Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
+            - apim:scope_manage
+      x-wso2-curl: "curl -k -X GET \"https://localhost:9443/api/am/admin/v1/system-scopes/YXBpbTpzdWJzY3JpYmU?username=john\" -H \"accept: application/json\" -H \"Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
+      x-wso2-request: "GET https://localhost:9443/api/am/admin/v1/system-scopes/Base64urlEncode(apim:subscribe)?username=john Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
       x-wso2-response: "{\n  \"name\":\"apim:subscribe\"  \n}\n"
       summary: Retrieve scopes for a particular user
       description: |
@@ -3496,10 +3499,10 @@ paths:
         - name: username
           in: query
           type: string
-          required: true
-        - $ref : '#/parameters/scope'
+          required: false
+        - $ref : '#/parameters/scopeName'
       tags:
-        - Settings
+        - Syatem Scopes
       responses:
         200:
           description: |
@@ -3760,8 +3763,8 @@ parameters:
     type: string
 
 # Scope Name
-  scope:
-    name: scope
+  scopeName:
+    name: scopeName
     in: path
     description: |
       scope name to be validated
@@ -4985,6 +4988,11 @@ definitions:
       name:
         type: string
         example: "WSO2 IS"
+      displayName:
+        type: string
+        description: |
+          display name of Key Manager to  show in UI
+        example: KeyManager1
       type:
         type: string
         example: "IS"
@@ -5009,9 +5017,16 @@ definitions:
       authorizeEndpoint:
         type: string
         example: ""
-      jwksEndpoint:
-        type: string
-        example: ""
+      certificates:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - JWKS
+              - PEM
+          value:
+            type: string
       issuer:
         type: string
         example: ""

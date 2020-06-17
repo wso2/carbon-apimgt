@@ -350,6 +350,8 @@ public final class APIConstants {
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
     public static final String API_OVERVIEW_DEPLOYMENTS = "overview_deployments";
+    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
+    public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
@@ -2218,7 +2220,10 @@ public final class APIConstants {
                 "]{3}-[0-9a-fA-F]{12}";
         public static final String CONSUMER_KEY_CLAIM = "consumer_key_claim";
         public static final String SCOPES_CLAIM = "scopes_claim";
-
+        public static final String CERTIFICATE_TYPE = "certificate_type";
+        public static final String CERTIFICATE_VALUE = "certificate_value";
+        public static final String CERTIFICATE_TYPE_JWKS_ENDPOINT = "JWKS";
+        public static final String CERTIFICATE_TYPE_PEM_FILE = "PEM";
         public static class KeyManagerEvent {
 
             public static final String EVENT_TYPE = "event_type";
