@@ -512,6 +512,12 @@
                         <groupId>io.fabric8</groupId>
                         <artifactId>kubernetes-server-mock</artifactId>
                         <version>4.6.4</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>io.fabric8</groupId>
+                                <artifactId>mockwebserver</artifactId>
+                            </exclusion>
+                        </exclusions>
                     </dependency>
                     <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
 <!--                    <dependency>-->
@@ -529,12 +535,11 @@
 <!--                        <groupId>io.fabric8</groupId>-->
 <!--                        <artifactId>mockwebserver</artifactId>-->
 <!--                        <version>0.1.8</version>-->
-<!--                    </dependency>-->
-
-<!--                        <groupId>io.fabric8</groupId>-->
-<!--                        <artifactId>mockwebserver</artifactId>-->
-<!--                        <version>0.1.7</version>-->
-<!--                    </dependency>-->
+                    <dependency>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>mockwebserver</artifactId>
+                        <version>0.1.7</version>
+                    </dependency>
 <!--                   ================================================================================================= <>-->
 
                     <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
