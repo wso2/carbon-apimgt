@@ -22,11 +22,11 @@ import ApplicationFormHandler from 'AppComponents/Applications/ApplicationFormHa
 import { PageNotFound, ScopeNotFound } from 'AppComponents/Base/Errors';
 import RedirectToLogin from 'AppComponents/Login/RedirectToLogin';
 import Progress from 'AppComponents/Shared/Progress';
-
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "Apis" */));
 const Landing = lazy(() => import('AppComponents/LandingPage/Landing' /* webpackChunkName: "Landing" */));
 const TagCloudListing = lazy(() => import('AppComponents/Apis/Listing/TagCloudListing' /* webpackChunkName: "TagCloudListing" */));
 const SettingsBase = lazy(() => import('AppComponents/Settings/SettingsBase' /* webpackChunkName: "SettingsBase" */));
+const ChangePassword = lazy(() => import('AppComponents/Settings/ChangePassword'));
 const Listing = lazy(() => import('AppComponents/Applications/Listing/Listing' /* webpackChunkName: "ApiListing" */));
 const Details = lazy(() => import('AppComponents/Applications/Details/index' /* webpackChunkName: "ApplicationDetails" */));
 
@@ -40,8 +40,8 @@ function getRedirectingPath(theme) {
         return '/home';
     } else if (
         theme.custom.landingPage.active === false
-    && theme.custom.tagWise.active
-    && theme.custom.tagWise.style === 'page'
+        && theme.custom.tagWise.active
+        && theme.custom.tagWise.style === 'page'
     ) {
         return '/api-groups';
     } else {
@@ -64,10 +64,20 @@ function AppRouts(props) {
                 <Route path='/api-groups' component={TagCloudListing} />
                 <Route path='/(apis|api-products)' component={Apis} />
                 <Route
-                    path='/settings'
+                    path='/settings/manage-alerts'
                     render={(localProps) => {
                         if (isAuthenticated) {
                             return <SettingsBase {...localProps} />;
+                        } else {
+                            return <RedirectToLogin {...localProps} />;
+                        }
+                    }}
+                />
+                <Route
+                    path='/settings/change-password/:username'
+                    render={(localProps) => {
+                        if (isAuthenticated) {
+                            return <ChangePassword {...localProps} />;
                         } else {
                             return <RedirectToLogin {...localProps} />;
                         }
