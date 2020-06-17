@@ -5489,8 +5489,7 @@ public class ApiMgtDAO {
         return events;
     }
 
-    public void makeKeysForwardCompatible(ApiTypeWrapper apiTypeWrapper, String oldVersion, int tenantId)
-            throws APIManagementException {
+    public void makeKeysForwardCompatible(ApiTypeWrapper apiTypeWrapper, String oldVersion) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         PreparedStatement addSubKeySt = null;
@@ -5502,6 +5501,7 @@ public class ApiMgtDAO {
         String getApplicationDataQuery = SQLConstants.GET_APPLICATION_DATA_SQL;
 
         APIIdentifier apiIdentifier = apiTypeWrapper.getApi().getId();
+        int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
         try {
             // Retrieve all the existing subscription for the old version
             connection = APIMgtDBUtil.getConnection();

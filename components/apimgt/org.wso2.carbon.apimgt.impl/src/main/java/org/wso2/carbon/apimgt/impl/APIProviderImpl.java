@@ -2289,7 +2289,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Collections.sort(sortedAPIs, comparator);
         for (int i = sortedAPIs.size() - 1; i >= 0; i--) {
             String oldVersion = sortedAPIs.get(i).getId().getVersion();
-            apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), oldVersion, tenantId);
+            apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), oldVersion);
         }
     }
 

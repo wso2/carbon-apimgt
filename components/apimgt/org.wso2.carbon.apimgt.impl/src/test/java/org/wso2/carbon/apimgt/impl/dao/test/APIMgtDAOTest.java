@@ -423,7 +423,7 @@ public class APIMgtDAOTest {
 
         apiMgtDAO.addAPI(api, -1234);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, "V1.0.0",-1234);
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, "V1.0.0");
         apiSet = apiMgtDAO.getAPIByConsumerKey("SSDCHEJJ-AWUIS-232");
         assertEquals(2, apiSet.size());
         for (APIIdentifier apiId : apiSet) {
