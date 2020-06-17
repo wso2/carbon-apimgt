@@ -85,9 +85,9 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                     .contains(apiStateWorkFlowDTO.getApiLCAction())) {
 
                 String callBackURL = apiStateWorkFlowDTO.getCallbackUrl();
-                String message = "Approval request for API state change action '" + apiStateWorkFlowDTO.getApiLCAction()
-                        + "' from '" + apiStateWorkFlowDTO.getApiCurrentState() + "' state for the API '"
-                        + apiStateWorkFlowDTO.getApiName() + " : " + apiStateWorkFlowDTO.getApiVersion() + "' by "
+                String message = "Approval request for API state change action " + apiStateWorkFlowDTO.getApiLCAction()
+                        + " from " + apiStateWorkFlowDTO.getApiCurrentState() + " state for the API "
+                        + apiStateWorkFlowDTO.getApiName() + " : " + apiStateWorkFlowDTO.getApiVersion() + " by "
                         + apiStateWorkFlowDTO.getApiProvider() + "";
                 apiStateWorkFlowDTO.setWorkflowDescription(message);
                 apiStateWorkFlowDTO.setMetadata("CurrentState", apiStateWorkFlowDTO.getApiCurrentState());
@@ -98,10 +98,12 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                 apiStateWorkFlowDTO.setMetadata("Invoker", apiStateWorkFlowDTO.getInvoker());
                 apiStateWorkFlowDTO.setMetadata("TenantId", String.valueOf(apiStateWorkFlowDTO.getTenantId()));
 
-                apiStateWorkFlowDTO.setProperties("application", apiStateWorkFlowDTO.getApiLCAction());
+                apiStateWorkFlowDTO.setProperties("action", apiStateWorkFlowDTO.getApiLCAction());
                 apiStateWorkFlowDTO.setProperties("apiName", apiStateWorkFlowDTO.getApiName());
                 apiStateWorkFlowDTO.setProperties("apiVersion", apiStateWorkFlowDTO.getApiVersion());
                 apiStateWorkFlowDTO.setProperties("apiProvider", apiStateWorkFlowDTO.getApiProvider());
+                apiStateWorkFlowDTO.setProperties("currentState", apiStateWorkFlowDTO.getApiCurrentState());
+
                 super.execute(workflowDTO);
             } else {
                 // For any other states, act as simple workflow executor.

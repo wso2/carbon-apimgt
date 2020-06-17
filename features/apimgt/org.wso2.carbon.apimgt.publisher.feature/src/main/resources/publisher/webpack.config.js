@@ -20,7 +20,7 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
 
 const config = {
-    entry: { index: './source/index.jsx' },
+    entry: { index: './source/index.jsx', swaggerWorkerInit: './source/src/app/webWorkers/swaggerWorkerInit.js' },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
         filename: '[name].bundle.js',
@@ -39,11 +39,17 @@ const config = {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
             AppTests: path.resolve(__dirname, 'source/Tests/'),
+            react: path.resolve('../../../../../node_modules/react'),
+            reactDom: path.resolve('../../../../../node_modules/react-dom'),
         },
         extensions: ['.js', '.jsx'],
     },
     module: {
         rules: [
+            {
+                test: /\.worker\.js$/,
+                use: { loader: 'worker-loader' },
+            },
             {
                 test: /\.(js|jsx)$/,
                 exclude: [/node_modules\/(?!(@hapi)\/).*/, /coverage/],
@@ -84,6 +90,7 @@ const config = {
         Themes: 'AppThemes', // Should use long names for preventing global scope JS variable conflicts
         MaterialIcons: 'MaterialIcons',
         Config: 'AppConfig',
+        Settings: 'Settings',
     },
     plugins: [new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: [] })],
 };
@@ -97,6 +104,7 @@ if (process.env.NODE_ENV === 'development') {
         enforce: 'pre',
         test: /\.(js|jsx)$/,
         loader: 'eslint-loader',
+        exclude: /devportal/,
         options: {
             failOnError: true,
             quiet: true,

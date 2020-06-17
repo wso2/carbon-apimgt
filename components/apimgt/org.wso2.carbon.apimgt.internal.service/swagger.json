@@ -879,6 +879,8 @@
       "allOf" : [ {
         "$ref" : "#/definitions/Policy"
       }, {
+        "$ref" : "#/definitions/GraphQLQuery"
+      }, {
         "properties" : {
           "rateLimitCount" : {
             "type" : "integer"
@@ -891,6 +893,21 @@
           }
         }
       } ]
+    },
+    "GraphQLQuery" : {
+      "properties" : {
+        "graphQLMaxComplexity" : {
+          "type" : "integer",
+          "example" : 400,
+          "description" : "Maximum Complexity of the GraphQL query"
+        },
+        "graphQLMaxDepth" : {
+          "type" : "integer",
+          "example" : 10,
+          "description" : "Maximum Depth of the GraphQL query"
+        }
+      },
+      "title" : "GraphQL Query"
     },
     "ApplicationPolicyList" : {
       "properties" : {

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -49,9 +50,12 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.PUBLISH_IN_PRIVATE_JET_MODE;
 
 /**
  * This class is an implementation of the
@@ -90,7 +94,7 @@ public class APIExecutor implements Execution {
         boolean executed = false;
         String user = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-     
+
         String userWithDomain = user;
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)) {
             userWithDomain = user + APIConstants.EMAIL_DOMAIN_SEPARATOR + domain;
@@ -130,30 +134,40 @@ public class APIExecutor implements Execution {
         } catch (RegistryException e) {
             log.error("Failed to get the generic artifact while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
-                                "APIManagementException:" + e.getMessage());
+                    "APIManagementException:" + e.getMessage());
         } catch (APIManagementException e) {
             log.error("Failed to publish service to API store while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
-                                "APIManagementException:" + e.getMessage());
+                    "APIManagementException:" + e.getMessage());
         } catch (FaultGatewaysException e) {
             log.error("Failed to publish service gateway while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
-                                "FaultGatewaysException:" + e.getFaultMap());
+                    "FaultGatewaysException:" + e.getFaultMap());
         } catch (UserStoreException e) {
             log.error("Failed to get tenant Id while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
-                                "APIManagementException:" + e.getMessage());
+                    "APIManagementException:" + e.getMessage());
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
         return executed;
     }
-    
+
     private boolean changeLifeCycle(RequestContext context, API api, Resource apiResource, Registry registry,
                                     APIProvider apiProvider, GenericArtifact apiArtifact, String targetState)
-            throws APIManagementException, FaultGatewaysException, RegistryException {
+            throws APIManagementException, FaultGatewaysException, org.wso2.carbon.registry.api.RegistryException, IllegalAccessException, ParseException, InstantiationException, ClassNotFoundException, UserStoreException {
         boolean executed;
 
         String oldStatus = APIUtil.getLcStateFromArtifact(apiArtifact);
-        String newStatus = (targetState != null)? targetState.toUpperCase(): targetState;
+        String newStatus = (targetState != null) ? targetState.toUpperCase() : targetState;
 
         boolean isCurrentCreatedOrPrototyped = APIConstants.CREATED.equals(oldStatus) ||
                 APIConstants.PROTOTYPED.equals(oldStatus);
@@ -235,7 +249,7 @@ public class APIExecutor implements Execution {
             if (makeKeysForwardCompatible) {
                 apiProvider.makeAPIKeysForwardCompatible(api);
             }
-            if(deprecateOldVersions) {
+            if (deprecateOldVersions) {
                 String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
 
                 List<API> apiList = apiProvider.getAPIsByProvider(provider);
@@ -248,6 +262,10 @@ public class APIExecutor implements Execution {
 
                     }
                 }
+            }
+            //Deploy API in selected cloud clusters
+            if (api.getDeploymentEnvironments() != null && !api.getDeploymentEnvironments().isEmpty()) {
+                apiProvider.publishInPrivateJet(api, api.getId());
             }
         }
 

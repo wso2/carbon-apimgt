@@ -20,7 +20,7 @@ import React, { Suspense, lazy } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { StylesProvider, jssPreset } from '@material-ui/core/styles';
-import { addLocaleData, IntlProvider } from 'react-intl';
+import { IntlProvider } from 'react-intl';
 import Configurations from 'Config';
 import merge from 'lodash.merge';
 import cloneDeep from 'lodash.clonedeep';
@@ -64,6 +64,7 @@ class DevPortal extends React.Component {
             theme: null,
             isNonAnonymous: false,
             lanuage: null,
+            redirecting: false,
         };
         this.systemTheme = merge(cloneDeep(DefaultConfigurations), Configurations);
         this.setTenantTheme = this.setTenantTheme.bind(this);
@@ -95,8 +96,20 @@ class DevPortal extends React.Component {
             });
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('tenant') === null || urlParams.get('tenant') === 'carbon.super') {
-            this.updateLocale();
-            this.setState({ theme: this.systemTheme });
+            const { custom: { publicTenantStore } } = this.systemTheme;
+            if(publicTenantStore) {
+                const { active: publicTenantStoreActive, redirectToIfInactive } = publicTenantStore;
+                if( !publicTenantStoreActive ) {
+                    window.location.href = redirectToIfInactive;
+                    this.setState( { redirecting: true})
+                } else {
+                    this.updateLocale();
+                    this.setState({ theme: this.systemTheme, redirecting: false });
+                }
+            } else {
+                this.updateLocale();
+                this.setState({ theme: this.systemTheme, redirecting: false });
+            }
         } else {
             this.setTenantTheme(urlParams.get('tenant'));
         }
@@ -117,7 +130,6 @@ class DevPortal extends React.Component {
             })
             .then((messages) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
-                addLocaleData(require(`react-intl/locale-data/${locale}`));
                 this.setState({ messages, language: locale });
             });
     }
@@ -286,13 +298,15 @@ class DevPortal extends React.Component {
      * @memberof DevPortal
      */
     render() {
-        const {
-            settings, tenantDomain, theme, messages, language,
-        } = this.state;
+        const { settings, tenantDomain, theme, messages, language, redirecting } = this.state;
         const { app: { context } } = Settings;
-
-        return (
-            settings && theme && messages && language && (
+        if(redirecting) {
+            return (
+                <Progress />
+            )
+        }
+        if (settings && theme && messages && language) {
+            return (
                 <SettingsProvider value={{
                     settings,
                     setSettings: this.setSettings,
@@ -319,8 +333,13 @@ class DevPortal extends React.Component {
                         </StylesProvider>
                     </MuiThemeProvider>
                 </SettingsProvider>
+            );
+        } else {
+            return (
+                <Progress />
             )
-        );
+        }
+
     }
 }
 

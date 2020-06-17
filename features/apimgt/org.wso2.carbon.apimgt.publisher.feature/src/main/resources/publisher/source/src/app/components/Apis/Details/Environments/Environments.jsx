@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import 'react-tagsinput/react-tagsinput.css';
@@ -37,6 +37,8 @@ import Paper from '@material-ui/core/Paper';
 import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
+import Kubernetes from 'AppComponents/Apis/Details/Environments/Kubernetes';
+import API from 'AppData/api';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -59,8 +61,17 @@ export default function Environments() {
     const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
     const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
-
     const [isUpdating, setUpdating] = useState(false);
+    const [selectedDeployments, setSelectedDeployments] = useState([...api.deploymentEnvironments]);
+
+    const restApi = new API();
+    const [allDeployments, setAllDeployments] = useState([]);
+    useEffect(() => {
+        restApi.getDeployments()
+            .then((result) => {
+                setAllDeployments(result.body.list);
+            });
+    }, []);
 
     /**
      *
@@ -71,6 +82,7 @@ export default function Environments() {
         updateAPI({
             gatewayEnvironments,
             labels: selectedMgLabel,
+            deploymentEnvironments: selectedDeployments,
         })
             .then(() => Alert.info('API Update Successfully'))
             .catch((error) => {
@@ -167,6 +179,19 @@ export default function Environments() {
                         api={api}
                     />
                 )}
+            {
+                allDeployments
+                 && (
+                     allDeployments.map((clusters) => (clusters.name === 'kubernetes' && (
+                         <Kubernetes
+                             clusters={clusters}
+                             selectedDeployments={selectedDeployments}
+                             setSelectedDeployments={setSelectedDeployments}
+                             api={api}
+                         />
+                     )))
+                 )
+            }
 
             <Grid
                 container

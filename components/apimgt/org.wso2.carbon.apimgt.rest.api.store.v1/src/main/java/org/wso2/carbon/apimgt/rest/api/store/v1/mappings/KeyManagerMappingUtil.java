@@ -27,6 +27,7 @@ public class KeyManagerMappingUtil {
         keyManagerInfoDTO.setId(keyManagerConfigurationDTO.getUuid());
         keyManagerInfoDTO.setName(keyManagerConfigurationDTO.getName());
         keyManagerInfoDTO.setDescription(keyManagerConfigurationDTO.getDescription());
+        keyManagerInfoDTO.setDisplayName(keyManagerConfigurationDTO.getDisplayName());
         keyManagerInfoDTO.setEnabled(keyManagerConfigurationDTO.isEnabled());
         keyManagerInfoDTO.setType(keyManagerConfigurationDTO.getType());
         JsonObject jsonObject = fromConfigurationMapToJson(keyManagerConfigurationDTO.getAdditionalProperties());
@@ -37,6 +38,10 @@ public class KeyManagerMappingUtil {
         if (jsonObject.has(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION)){
             keyManagerInfoDTO.setEnableOAuthAppCreation(
                     jsonObject.get(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION).getAsBoolean());
+        }
+        if (jsonObject.has(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)){
+            keyManagerInfoDTO.setEnableTokenGeneration(
+                    jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION).getAsBoolean());
         }
         if (jsonObject.has(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS)){
             keyManagerInfoDTO.setEnableMapOAuthConsumerApps(

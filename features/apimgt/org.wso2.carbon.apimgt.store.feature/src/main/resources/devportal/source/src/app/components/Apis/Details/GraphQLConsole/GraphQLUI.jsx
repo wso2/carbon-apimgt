@@ -23,12 +23,14 @@ import GraphiQL from 'graphiql';
 import fetch from 'isomorphic-fetch';
 import 'graphiql/graphiql.css';
 import PropTypes from 'prop-types';
-import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
-import { FormattedMessage } from 'react-intl';
+import TextField from '@material-ui/core/TextField';
 import GraphiQLExplorer from 'graphiql-explorer';
+import { FormattedMessage } from 'react-intl';
+import Collapse from '@material-ui/core/Collapse';
 import { ApiContext } from '../ApiContext';
 import Api from '../../../../data/api';
+import QueryComplexityView from './QueryComplexityView';
 
 import Progress from '../../../Shared/Progress';
 
@@ -51,6 +53,8 @@ export default function GraphQLUI(props) {
     const [query, setQuery] = useState('');
     const [isExplorerOpen, setIsExplorerOpen] = useState(false);
     const graphiqlEl = useRef(null);
+    const [open, setOpen] = React.useState(true);
+
     useEffect(() => {
         const apiID = api.id;
         const apiClient = new Api();
@@ -64,6 +68,11 @@ export default function GraphQLUI(props) {
     }, []);
 
     const parameters = {};
+
+    const handleClick = () => {
+        setOpen(!open);
+    };
+
 
     const handleToggleExplorer = () => {
         const newExplorerIsOpen = !isExplorerOpen;
@@ -117,44 +126,59 @@ export default function GraphQLUI(props) {
                         disabled
                     />
                 </Box>
-                <div styles={{ width: '100%' }}>
+                <div>
                     <Box display='flex'>
                         <Box display='flex'>
-                            <GraphiQLExplorer
-                                schema={schema}
-                                query={query}
-                                onEdit={setQuery}
-                                explorerIsOpen={isExplorerOpen}
-                                onToggleExplorer={handleToggleExplorer}
-                            />
+                            <Collapse in={!open} timeout='auto' unmountOnExit>
+                                <QueryComplexityView
+                                    open={open}
+                                    setOpen={setOpen}
+                                />
+                            </Collapse>
                         </Box>
-                        <Box display='flex' height='800px' flexGrow={1}>
-                            <GraphiQL
-                                ref={graphiqlEl}
-                                fetcher={(graphQLFetcher)}
-                                schema={schema}
-                                query={query}
-                                onEditQuery={setQuery}
-                            >
-                                <GraphiQL.Toolbar>
-                                    <GraphiQL.Button
-                                        onClick={() => graphiqlEl.current.handlePrettifyQuery()}
-                                        label='Prettify'
-                                        title='Prettify Query (Shift-Ctrl-P)'
-                                    />
-                                    <GraphiQL.Button
-                                        onClick={() => graphiqlEl.current.handleToggleHistory()}
-                                        label='History'
-                                        title='Show History'
-                                    />
-                                    <GraphiQL.Button
-                                        onClick={() => setIsExplorerOpen(!isExplorerOpen)}
-                                        label='Explorer'
-                                        title='Toggle Explorer'
-                                    />
-                                </GraphiQL.Toolbar>
+                        <Box display='flex' width={1}>
+                            <Box display='flex'>
+                                <GraphiQLExplorer
+                                    schema={schema}
+                                    query={query}
+                                    onEdit={setQuery}
+                                    explorerIsOpen={isExplorerOpen}
+                                    onToggleExplorer={handleToggleExplorer}
+                                />
+                            </Box>
+                            <Box display='flex' height='800px' flexGrow={1}>
+                                <GraphiQL
+                                    ref={graphiqlEl}
+                                    fetcher={(graphQLFetcher)}
+                                    schema={schema}
+                                    query={query}
+                                    onEditQuery={setQuery}
+                                >
+                                    <GraphiQL.Toolbar>
+                                        <GraphiQL.Button
+                                            onClick={() => graphiqlEl.current.handlePrettifyQuery()}
+                                            label='Prettify'
+                                            title='Prettify Query (Shift-Ctrl-P)'
+                                        />
+                                        <GraphiQL.Button
+                                            onClick={() => graphiqlEl.current.handleToggleHistory()}
+                                            label='History'
+                                            title='Show History'
+                                        />
+                                        <GraphiQL.Button
+                                            onClick={() => setIsExplorerOpen(!isExplorerOpen)}
+                                            label='Explorer'
+                                            title='Toggle Explorer'
+                                        />
+                                        <GraphiQL.Button
+                                            onClick={handleClick}
+                                            label='Complexity Analysis'
+                                            title='View Field`s Complexity Values'
+                                        />
+                                    </GraphiQL.Toolbar>
 
-                            </GraphiQL>
+                                </GraphiQL>
+                            </Box>
                         </Box>
                     </Box>
                 </div>

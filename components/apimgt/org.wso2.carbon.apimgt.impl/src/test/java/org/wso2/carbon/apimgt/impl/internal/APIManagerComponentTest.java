@@ -30,6 +30,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.util.APIManagerComponentWrapper;
@@ -48,8 +49,8 @@ import java.io.FileNotFoundException;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ APIUtil.class, APIManagerComponent.class, ServiceReferenceHolder.class, AuthorizationUtils.class,
-                        RegistryUtils.class, APIMgtDBUtil.class,
-                        SQLConstantManagerFactory.class, ApiMgtDAO.class })
+        RegistryUtils.class, APIMgtDBUtil.class,
+        SQLConstantManagerFactory.class, ApiMgtDAO.class })
 public class APIManagerComponentTest {
 
     @Before
@@ -108,7 +109,11 @@ public class APIManagerComponentTest {
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
 
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
         APIManagerComponent apiManagerComponent = new APIManagerComponentWrapper(registry);
+        GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
+        Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
         try {
             apiManagerComponent.activate(componentContext);
         } catch (FileNotFoundException f) {

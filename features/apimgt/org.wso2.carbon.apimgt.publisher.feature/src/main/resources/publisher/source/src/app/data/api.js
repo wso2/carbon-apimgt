@@ -653,15 +653,41 @@ class API extends Resource {
         }
     }
 
+    getDeployments() {
+        return this.client.then(client => {
+            return client.apis['Deployments'].deploymentsGet();
+        });
+    }
     /**
      * Get a particular scope
      * @param scopeId {String} UUID of the scope
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param callback {function} Function which needs to be called upon success of the scope retrieval
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSharedScopeDetails(scopeId, callback = null) {
         const promise_scopes = this.client.then(client => {
             return client.apis['Scopes'].getSharedScope(
+                { scopeId },
+                this._requestMetaData(),
+            );
+        });
+        if (callback) {
+            return promise_scopes.then(callback);
+        } else {
+            return promise_scopes;
+        }
+    }
+
+    /**
+     * Get usages of a particular scope
+     * @param scopeId {String} UUID of the scope
+     * @param callback {function} Function which needs to be called upon success of the scope usage retrieval
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSharedScopeUsages(scopeId, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promise_scopes = apiClient.then(client => {
+            return client.apis['Scopes'].getSharedScopeUsages(
                 { scopeId },
                 this._requestMetaData(),
             );
@@ -1076,7 +1102,6 @@ class API extends Resource {
             return promise_subscription;
         }
     }
-
     /**
      * Block subscriptions for given subscriptionId
      * @param {String} id Subscription UUID
@@ -1727,6 +1752,75 @@ class API extends Resource {
     }
 
     /**
+     * Get the complexity related details of an API
+     */
+    
+    getGraphqlPoliciesComplexity(id) {
+        const promisePolicies = this.client.then(client => {
+            return client.apis['GraphQL Policies'].get_apis__apiId__graphql_policies_complexity(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promisePolicies.then(response => response.body);
+    }
+    /**
+     * Update complexity related details of an API
+     */
+    addGraphqlPoliciesComplexity(api_id, body) {
+        const promised_updateComplexity = this.client.then(client => {
+            const payload = {
+                apiId: api_id,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['GraphQL Policies'].post_apis__apiId__graphql_policies_complexity(
+                    payload,
+                    this._requestMetaData(),
+            );
+        });
+        return promised_updateComplexity;
+    }
+
+
+    /**
+     * Update complexity related details of an API
+     */
+    updateGraphqlPoliciesComplexity(api_id, body) {
+        const promised_updateComplexity = this.client.then(client => {
+            const payload = {
+                apiId: api_id,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['GraphQL Policies'].put_apis__apiId__graphql_policies_complexity(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+        return promised_updateComplexity;
+    }
+
+    /**
+     * Retrieve all types and fields of a GraphQL Schema
+     */
+    getGraphqlPoliciesComplexityTypes(id) {
+        const promisePolicies = this.client.then(client => {
+            return client.apis['GraphQL Policies'].get_apis__apiId__graphql_policies_complexity_types(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promisePolicies.then(response => response.body);
+    }
+
+    
+
+    /**
      *
      * Static method for get all APIs for current environment user.
      * @static
@@ -1776,6 +1870,134 @@ class API extends Resource {
         return apiClient.then(client => {
             return client.apis['API Products'].get_api_products(params, Resource._requestMetaData());
         });
+    }
+
+     /**
+     * Get details of a given API
+     * @param id {string} UUID of the api.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getAPIById(id, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promiseGet = apiClient.then((client) => {
+            return client.apis.APIs.get_apis__apiId_({ apiId: id }, this._requestMetaData());
+        });
+        if (callback) {
+            console.log('original object from API1');
+            return promiseGet.then(callback);
+        } else {
+            console.log('original object from API2' + promiseGet.obj);
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param environmentName {String} API environment name
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promiseGet = apiClient.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId, environmentName }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get keys of an application
+     * @param applicationId id of the application that needs to get the keys
+     * @param callback {function} Function which needs to be called upon success
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSubscriptions(apiId, applicationId, callback = null) {
+        const payload = { apiId };
+        if (applicationId) {
+            payload[applicationId] = applicationId;
+        }
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promisedGet = apiClient.then((client) => {
+            return client.apis.Subscriptions.get_subscriptions(payload, this._requestMetaData());
+        });
+        if (callback) {
+            return promisedGet.then(callback);
+        } else {
+            return promisedGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param labelName {String} Micro gateway label
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSwaggerByAPIIdAndLabel(apiId, labelName, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promiseGet = apiClient.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId, labelName }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param environmentName {String} API environment name
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promiseGet = apiClient.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId, environmentName }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSwaggerByAPIId(apiId, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promiseGet = apiClient.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get settings of an API
+     */
+    static getSettings() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promisedSettings = apiClient.then(client => {
+            return client.apis['Settings'].get_settings();
+        });
+        return promisedSettings.then(response => response.body);
     }
 
     /**

@@ -83,15 +83,21 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_ALL_SUBSCRIPTION_POLICIES_SQL =
             "SELECT " +
-                    "   POLICY_ID," +
-                    "   NAME," +
-                    "   RATE_LIMIT_COUNT," +
-                    "   RATE_LIMIT_TIME_UNIT," +
-                    "   QUOTA_TYPE," +
-                    "   STOP_ON_QUOTA_REACH, " +
-                    "   TENANT_ID " +
-                    "FROM " +
-                    "   AM_POLICY_SUBSCRIPTION";
+                    "   APS.POLICY_ID," +
+                    "   APS.NAME," +
+                    "   APS.RATE_LIMIT_COUNT," +
+                    "   APS.RATE_LIMIT_TIME_UNIT," +
+                    "   APS.QUOTA_TYPE," +
+                    "   APS.STOP_ON_QUOTA_REACH," +
+                    "   APS.TENANT_ID," +
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_DEPTH," +
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY" +
+                    " FROM " +
+                    "   AM_POLICY_SUBSCRIPTION APS" +
+                    " LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS"+
+                    " ON "+
+                    "   APS.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID";
 
     public static final String GET_ALL_APPLICATION_POLICIES_SQL =
             "SELECT " +
@@ -203,31 +209,45 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_TENANT_SUBSCRIPTION_POLICIES_SQL =
             "SELECT " +
-                    "   POLICY_ID," +
-                    "   NAME," +
-                    "   RATE_LIMIT_COUNT," +
-                    "   RATE_LIMIT_TIME_UNIT," +
-                    "   QUOTA_TYPE," +
-                    "   STOP_ON_QUOTA_REACH, " +
-                    "   TENANT_ID " +
-                    "FROM " +
-                    "   AM_POLICY_SUBSCRIPTION" +
+                    "   APS.POLICY_ID AS POLICY_ID," +
+                    "   APS.NAME AS NAME," +
+                    "   APS.RATE_LIMIT_COUNT AS RATE_LIMIT_COUNT," +
+                    "   APS.RATE_LIMIT_TIME_UNIT AS RATE_LIMIT_TIME_UNIT," +
+                    "   APS.QUOTA_TYPE AS QUOTA_TYPE," +
+                    "   APS.STOP_ON_QUOTA_REACH AS STOP_ON_QUOTA_REACH," +
+                    "   APS.TENANT_ID AS TENANT_ID," +
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_DEPTH AS MAX_DEPTH,"+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY AS MAX_COMPLEXITY" +
+                    " FROM " +
+                    "   AM_POLICY_SUBSCRIPTION AS APS" +
+                    " LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS" +
+                    " ON "+
+                    "   APS.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
                     " WHERE " +
-                    "   TENANT_ID = ? ";
+                    "   APS.TENANT_ID = ? ";
+
     public static final String GET_SUBSCRIPTION_POLICY_SQL =
             "SELECT " +
-                    "   POLICY_ID," +
-                    "   NAME," +
-                    "   RATE_LIMIT_COUNT," +
-                    "   RATE_LIMIT_TIME_UNIT," +
-                    "   QUOTA_TYPE," +
-                    "   STOP_ON_QUOTA_REACH, " +
-                    "   TENANT_ID " +
+                    "   APS.POLICY_ID AS POLICY_ID," +
+                    "   APS.NAME AS APS_NAME," +
+                    "   APS.RATE_LIMIT_COUNT AS RATE_LIMIT_COUNT," +
+                    "   APS.RATE_LIMIT_TIME_UNIT AS RATE_LIMIT_TIME_UNIT," +
+                    "   APS.QUOTA_TYPE AS QUOTA_TYPE," +
+                    "   APS.STOP_ON_QUOTA_REACH AS STOP_ON_QUOTA_REACH, " +
+                    "   APS.TENANT_ID AS TENANT_ID, " +
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_DEPTH AS MAX_DEPTH, " +
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY AS MAX_COMPLEXITY" +
                     "FROM " +
-                    "   AM_POLICY_SUBSCRIPTION" +
+                    "   AM_POLICY_SUBSCRIPTION AS APS" +
+                    "LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
+                    " ON "+
+                    "APS.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
                     " WHERE " +
-                    "   NAME = ? AND " +
-                    "   TENANT_ID = ?";
+                    "   APS.NAME = ? AND " +
+                    "   APS.TENANT_ID = ?";
+
 
     public static final String GET_TENANT_APPLICATION_POLICIES_SQL =
             "SELECT " +

@@ -36,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
 
 const generateAccessTokenStep = (props) => {
     const [keyType, setKeyType] = useState('PRODUCTION');
+    const [selectedTab, setSelectedTab] = useState('Default');
     const [subscriptionScopes, setSubscriptionScopes] = useState([]);
     const [notFound, setNotFound] = useState(false);
 
@@ -45,14 +46,15 @@ const generateAccessTokenStep = (props) => {
         keyType: '',
     });
     const {
-        currentStep, createdApp, setCreatedToken, incrementStep, createdKeyType, intl,
+        currentStep, createdApp, setCreatedToken, incrementStep, createdKeyType, intl, createdSelectedTab
     } = props;
 
     useEffect(() => {
         const newRequest = { ...accessTokenRequest, keyType: createdKeyType };
         setKeyType(createdKeyType);
+        setSelectedTab(createdSelectedTab);
         setAccessTokenRequest(newRequest);
-    }, [createdKeyType]);
+    }, [createdKeyType,createdSelectedTab]);
 
     useEffect(() => {
         Application.get(createdApp.value)
@@ -74,9 +76,11 @@ const generateAccessTokenStep = (props) => {
     }, []);
 
     const generateAccessToken = () => {
+        setSelectedTab(createdSelectedTab);
         Application.get(createdApp.value)
             .then((application) => {
                 return application.generateToken(
+                    selectedTab,
                     accessTokenRequest.keyType,
                     accessTokenRequest.timeout,
                     accessTokenRequest.scopesSelected,

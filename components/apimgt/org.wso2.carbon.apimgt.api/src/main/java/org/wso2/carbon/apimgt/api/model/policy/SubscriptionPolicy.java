@@ -32,6 +32,9 @@ public class SubscriptionPolicy extends Policy {
     private Map<String, String> monetizationPlanProperties = new HashMap<String, String>();
     private String tierQuotaType;
 
+    private int graphQLMaxDepth;
+    private int graphQLMaxComplexity;
+
     public SubscriptionPolicy(String name) {
         super(name);
     }
@@ -100,12 +103,28 @@ public class SubscriptionPolicy extends Policy {
         this.tierQuotaType = tierQuotaType;
     }
 
+    public int getGraphQLMaxDepth() {
+        return graphQLMaxDepth;
+    }
+
+    public void setGraphQLMaxDepth(int graphQLMaxDepth) {
+        this.graphQLMaxDepth = graphQLMaxDepth;
+    }
+    public int getGraphQLMaxComplexity() {
+        return graphQLMaxComplexity;
+    }
+
+    public void setGraphQLMaxComplexity(int graphQLMaxComplexity) {
+        this.graphQLMaxComplexity = graphQLMaxComplexity;
+    }
+
     @Override
     public String toString() {
         return "SubscriptionPolicy [rateLimitCount=" + rateLimitCount + ", rateLimitTimeUnit=" + rateLimitTimeUnit
                 + ", customAttributes=" + Arrays.toString(customAttributes) + ", stopOnQuotaReach=" + stopOnQuotaReach
                 + ", billingPlan=" + billingPlan + ", monetizationPlan=" + monetizationPlan
                 + ", monetizationPlanProperties=" + monetizationPlanProperties + ", tierQuotaType=" + tierQuotaType
+                + ", maxDepth=" + graphQLMaxDepth + ", maxComplexity=" + graphQLMaxComplexity
                 + "]";
     }
 }

@@ -30,6 +30,8 @@
                             </item>
                             <item name="Requires re-subscription when publishing the API" forEvent="">
                             </item>
+<!--                            <item name="Publish In Private-Jet Mode" forEvent="">-->
+<!--                            </item>-->
                         </data>
 
                         <data name="transitionExecution">

@@ -181,6 +181,21 @@ function Certificates(props) {
                 </Typography>
             </Grid>
             <Grid item>
+                <List>
+                    <ListItem
+                        button
+                        disabled={(isRestricted(['apim:api_create'], apiFromContext))}
+                        className={classes.addCertificateBtn}
+                        onClick={() => setUploadCertificateOpen(true)}
+                    >
+                        <ListItemAvatar>
+                            <IconButton>
+                                <Icon>add</Icon>
+                            </IconButton>
+                        </ListItemAvatar>
+                        <ListItemText primary='Add Certificate' />
+                    </ListItem>
+                </List>
                 <List className={classes.certificateList}>
                     {certificateList.length > 0 ? (
                         certificateList.map((cert) => {
@@ -223,21 +238,6 @@ delete
                             <ListItemText>You do not have any certificates uploaded</ListItemText>
                         </ListItem>
                     )}
-                </List>
-                <List>
-                    <ListItem
-                        button
-                        disabled={(isRestricted(['apim:api_create'], apiFromContext))}
-                        className={classes.addCertificateBtn}
-                        onClick={() => setUploadCertificateOpen(true)}
-                    >
-                        <ListItemAvatar>
-                            <IconButton>
-                                <Icon>add</Icon>
-                            </IconButton>
-                        </ListItemAvatar>
-                        <ListItemText primary='Add Certificate' />
-                    </ListItem>
                 </List>
             </Grid>
             <Dialog open={certificateToDelete.open}>

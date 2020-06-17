@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
@@ -77,7 +78,7 @@ public class APIGatewayManagerTest {
     private String provider = "admin";
     private String version = "v1";
     private String apiContext = "/weather";
-    private String prodEnvironmentName = "production";
+    private String prodEnvironmentName = "Production";
     private String sandBoxEnvironmentName = "sandbox";
     private String tenantDomain = "carbon.super";
     private String inSequenceName = "in-sequence";
@@ -111,6 +112,7 @@ public class APIGatewayManagerTest {
         genericArtifact = Mockito.mock(GenericArtifact.class);
         apiGatewayAdminClient = Mockito.mock(APIGatewayAdminClient.class);
         RealmService realmService = Mockito.mock(RealmService.class);
+
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         Mockito.doReturn(tenantManager).when(realmService).getTenantManager();
         Mockito.doReturn(MultitenantConstants.SUPER_TENANT_ID).when(tenantManager).getTenantId(Mockito.anyString());
@@ -139,6 +141,8 @@ public class APIGatewayManagerTest {
         prodEnvironment.setServerURL("https://localhost:9443/services");
         prodEnvironment.setUserName("admin");
         prodEnvironment.setPassword("admin");
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
 
         Environment sandboxEnvironment = new Environment();
         sandboxEnvironment.setApiGatewayEndpoint("http://localhost:8281/");
@@ -149,9 +153,12 @@ public class APIGatewayManagerTest {
         sandboxEnvironment.setPassword("admin");
 
         Map<String, Environment> environments = new HashMap<String, Environment>(0);
+        GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
         environments.put(prodEnvironmentName, prodEnvironment);
         environments.put(sandBoxEnvironmentName, sandboxEnvironment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environments);
+        Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environments);
+        Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
         apiIdentifier = new APIIdentifier(provider, apiName, version);
         TestUtils.initConfigurationContextService(false);
         gatewayManager = APIGatewayManager.getInstance();
@@ -628,7 +635,7 @@ public class APIGatewayManagerTest {
         Map<String, String> failedEnvironmentsMap2 = gatewayManager
                 .publishToGateway(api, apiTemplateBuilder, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap2.size(), 1);
-        Assert.assertTrue(failedEnvironmentsMap2.keySet().contains(prodEnvironmentName));
+        Assert.assertTrue(failedEnvironmentsMap2.keySet().contains(prodEnvironmentName ));
 
         //Test failure to deploy API when fault sequence deployment failed
         api.setFaultSequence(faultSequenceName);

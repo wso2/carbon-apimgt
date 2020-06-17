@@ -85,7 +85,10 @@ const config = {
         MaterialIcons: 'MaterialIcons',
         Config: 'AppConfig',
     },
-    plugins: [new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml', 'sql', 'mysql'], features: [] })],
+    plugins: [new MonacoWebpackPlugin({
+        languages: ['xml', 'json', 'yaml', 'sql', 'mysql'],
+        features: ['!gotoSymbol'],
+    })],
 };
 
 // Note: for more info about monaco plugin: https://github.com/Microsoft/monaco-editor-webpack-plugin

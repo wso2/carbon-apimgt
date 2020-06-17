@@ -1106,6 +1106,7 @@
     <CertificateReLoaderConfiguration>
         <Period>{{apim.certificate_reloader.period}}</Period>
     </CertificateReLoaderConfiguration>
+
      <MutualSSL>
         <ClientCertificateHeader>{{apimgt.mutual_ssl.certificate_header}}</ClientCertificateHeader>
         <EnableClientCertificateValidation>{{apimgt.mutual_ssl.enable_client_validation}}</EnableClientCertificateValidation>
@@ -1133,4 +1134,53 @@
          </ConfigurationRetriever>
      </KeyManagerConfigurations>
 
+    {% if apim.sync_runtime_artifacts.publisher is defined %}
+    <SyncRuntimeArtifactsPublisher>
+        <Enable>true</Enable>
+        {% if apim.sync_runtime_artifacts.publisher.artifact_saver is defined %}
+        <ArtifactSaver>{{apim.sync_runtime_artifacts.publisher.artifact_saver}}</ArtifactSaver>
+        {% endif %}
+        {% if apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway is defined %}
+        <PublishDirectlyToGW>{{apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway}}</PublishDirectlyToGW>
+        {% endif %}
+    </SyncRuntimeArtifactsPublisher>
+    {% endif %}
+
+    {% if apim.sync_runtime_artifacts.gateway is defined %}
+    <SyncRuntimeArtifactsGateway>
+        <Enable>true</Enable>
+        {% if apim.sync_runtime_artifacts.gateway.gateway_labels is defined %}
+        <GatewayLabels>
+            {% for attribute in apim.sync_runtime_artifacts.gateway.gateway_labels %}
+            <Label>{{attribute}}</Label>
+            {% endfor %}
+        </GatewayLabels>
+        {% endif %}
+        {% if apim.sync_runtime_artifacts.gateway.artifact_retriever is defined %}
+        <ArtifactRetriever>{{apim.sync_runtime_artifacts.gateway.artifact_retriever}}</ArtifactRetriever>
+        {% endif %}
+    </SyncRuntimeArtifactsGateway>
+    {% endif %}
+
+     <ContainerMgt>
+         <DeploymentEnvironments>
+             {% for key,value in ContainerMgtConfig.items() %}
+                 <Property name="{{key}}">{{value}}</Property>
+             {% endfor %}
+         </DeploymentEnvironments>
+
+         {% for cluster in ContainerMgtClusterConfig%}
+         <ContainerMgtInfo>
+             <Type>{{cluster.type}}</Type>
+             <ClassName>{{cluster.class}}</ClassName>
+             <ClusterId>{{cluster.clusterId}}</ClusterId>
+             <DisplayName>{{cluster.displayName}}</DisplayName>
+             <Properties>
+                 {% for key,value in cluster.properties.items() %}
+                     <Property name="{{key}}">{{value}}</Property>
+                 {% endfor %}
+             </Properties>
+         </ContainerMgtInfo>
+         {% endfor %}
+     </ContainerMgt>
 </APIManager>

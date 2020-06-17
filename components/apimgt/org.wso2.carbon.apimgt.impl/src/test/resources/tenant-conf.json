@@ -2,6 +2,27 @@
   "EnableMonetization" : false,
   "EnableRecommendation" : false,
   "IsUnlimitedTierPaid" : false,
+  "ContainerMgt": [
+    {
+      "Type": "Kubernetes",
+      "ContainerMgtInfo": [
+        {
+          "ClusterId": "",
+          "DisplayName": "",
+          "Properties": {
+            "MasterURL": "",
+            "IngressURL": "",
+            "SAToken": "",
+            "Namespace": "default",
+            "Replicas": 1,
+            "BasicSecurityCustomResourceName": "",
+            "OauthSecurityCustomResourceName": "",
+            "JWTSecurityCustomResourceName": ""
+          }
+        }
+      ]
+    }
+  ],
   "ExtensionHandlerPosition": "bottom",
   "RESTAPIScopes": {
     "Scope": [
@@ -243,6 +264,10 @@
       },
       {
         "Name": "apim:bot_data",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:scope_manage",
         "Roles": "admin"
       }
     ]

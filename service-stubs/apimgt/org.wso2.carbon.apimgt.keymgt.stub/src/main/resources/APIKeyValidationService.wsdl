@@ -187,6 +187,8 @@
                <xs:element minOccurs="0" name="contentAware" type="xs:boolean"/>
                <xs:element minOccurs="0" name="endUserName" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="endUserToken" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="graphQLMaxComplexity" type="xs:int"/>
+               <xs:element minOccurs="0" name="graphQLMaxDepth" type="xs:int"/>
                <xs:element minOccurs="0" name="issuedTime" type="xs:long"/>
                <xs:element minOccurs="0" name="keyManager" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="productName" nillable="true" type="xs:string"/>

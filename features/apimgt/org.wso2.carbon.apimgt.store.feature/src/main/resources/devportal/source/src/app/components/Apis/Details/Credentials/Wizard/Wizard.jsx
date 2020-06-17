@@ -93,6 +93,7 @@ class Wizard extends Component {
             createdToken: null,
             redirect: false,
             createdKeyType: '',
+            createdSelectedTab: '',
             stepStatus: 'PROCEED',
         };
     }
@@ -128,6 +129,14 @@ class Wizard extends Component {
      */
     setCreatedKeyType = (createdKeyType) => {
         this.setState({ createdKeyType });
+    }
+
+    /**
+     * Set the created selectedTab from step 3
+     * @param {*} selectedTab token created
+     */
+    setCreatedSelectedTab = (createdSelectedTab) => {
+        this.setState({ createdSelectedTab });
     }
 
     /**
@@ -190,6 +199,7 @@ class Wizard extends Component {
                                     classes={classes}
                                     setCreatedApp={this.setCreatedApp}
                                     setCreatedKeyType={this.setCreatedKeyType}
+                                    setCreatedSelectedTab={this.setCreatedSelectedTab}
                                     setCreatedToken={this.setCreatedToken}
                                     handleReset={this.handleReset}
                                 />

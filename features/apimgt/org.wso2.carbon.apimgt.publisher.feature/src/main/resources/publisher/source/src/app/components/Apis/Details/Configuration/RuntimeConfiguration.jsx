@@ -41,6 +41,7 @@ import MaxBackendTps from './components/MaxBackendTps';
 import Flow from './components/Flow';
 import Endpoints from './components/Endpoints';
 import APISecurity from './components/APISecurity/APISecurity';
+import QueryAnalysis from './components/QueryAnalysis';
 import KeyManager from './components/KeyManager';
 import {
     DEFAULT_API_SECURITY_OAUTH2,
@@ -123,6 +124,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Object} Deep copy of an object
  */
 function copyAPIConfig(api) {
+    const keyManagers = api.isAPIProduct() ? ['all'] : [...api.keyManagers];
     return {
         id: api.id,
         name: api.name,
@@ -149,7 +151,7 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
-        keyManagers: [...api.keyManagers],
+        keyManagers,
     };
 }
 /**
@@ -371,6 +373,14 @@ export default function RuntimeConfiguration() {
                                             selectedMediationPolicy={inPolicy}
                                             isRestricted={isRestricted(['apim:api_create'], api)}
                                         />
+                                    )}
+                                    {api.type === 'GRAPHQL' && (
+                                        <Box mt={3}>
+                                            <QueryAnalysis
+                                                api={apiConfig}
+                                                isRestricted={isRestricted(['apim:api_create'], api)}
+                                            />
+                                        </Box>
                                     )}
                                 </Paper>
                                 <ArrowForwardIcon className={classes.arrowForwardIcon} />

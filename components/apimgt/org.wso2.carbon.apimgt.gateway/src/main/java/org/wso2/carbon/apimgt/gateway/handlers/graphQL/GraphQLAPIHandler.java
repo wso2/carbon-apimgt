@@ -119,6 +119,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                         return false;
                     }
                 }
+                messageContext.setProperty(APIConstants.GRAPHQL_PAYLOAD, payload);
             } else {
                 handleFailure(messageContext, "Request path cannot be empty");
                 return false;
@@ -233,6 +234,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         HashMap<String, Boolean> operationAuthSchemeMappingList = new HashMap<>();
         HashMap<String, String> operationScopeMappingList = new HashMap<>();
         HashMap<String, ArrayList<String>> scopeRoleMappingList = new HashMap<>();
+        String graphQLAccessControlPolicy = null;
 
         if (schema != null) {
             Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
@@ -271,6 +273,9 @@ public class GraphQLAPIHandler extends AbstractHandler {
                                 log.debug("Added operation " + base64DecodedAdditionalType + "with security "
                                         + isSecurityEnabled);
                             }
+
+                        } else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
+                            graphQLAccessControlPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
                         }
                     }
                     if (!roleArrayList.isEmpty()) {
@@ -288,7 +293,9 @@ public class GraphQLAPIHandler extends AbstractHandler {
         messageContext.setProperty(APIConstants.SCOPE_OPERATION_MAPPING, operationScopeMappingList);
         messageContext.setProperty(APIConstants.OPERATION_THROTTLING_MAPPING, operationThrottlingMappingList);
         messageContext.setProperty(APIConstants.OPERATION_AUTH_SCHEME_MAPPING, operationAuthSchemeMappingList);
+        messageContext.setProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, graphQLAccessControlPolicy);
         messageContext.setProperty(APIConstants.API_TYPE, GRAPHQL_API);
+        messageContext.setProperty(APIConstants.GRAPHQL_SCHEMA, schema);
     }
 
     /**
@@ -334,11 +341,11 @@ public class GraphQLAPIHandler extends AbstractHandler {
     /**
      * This method handle the failure
      *
-     * @param messageContext message context of the request
-     * @param errorMessage   error message of the failure
+     * @param messageContext   message context of the request
+     * @param errorDescription description of the error
      */
-    private void handleFailure(MessageContext messageContext, String errorMessage) {
-        OMElement payload = getFaultPayload(errorMessage);
+    private void handleFailure(MessageContext messageContext, String errorDescription) {
+        OMElement payload = getFaultPayload(errorDescription);
         Utils.setFaultPayload(messageContext, payload);
         Mediator sequence = messageContext.getSequence(APISecurityConstants.GRAPHQL_API_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
@@ -348,10 +355,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
     }
 
     /**
-     * @param message fault message
+     * @param description description of the error
      * @return the OMElement
      */
-    private OMElement getFaultPayload(String message) {
+    private OMElement getFaultPayload(String description) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
                 APISecurityConstants.API_SECURITY_NS_PREFIX);
@@ -362,7 +369,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         OMElement errorMessage = fac.createOMElement("message", ns);
         errorMessage.setText(APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE);
         OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(message);
+        errorDetail.setText(description);
 
         payload.addChild(errorCode);
         payload.addChild(errorMessage);

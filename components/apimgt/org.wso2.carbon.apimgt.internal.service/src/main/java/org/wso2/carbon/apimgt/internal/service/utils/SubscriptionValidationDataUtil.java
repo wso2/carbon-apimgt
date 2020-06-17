@@ -193,6 +193,8 @@ public class SubscriptionValidationDataUtil {
                 subscriptionPolicyDTO.setId(subscriptionPolicyModel.getId());
                 subscriptionPolicyDTO.setName(subscriptionPolicyModel.getName());
                 subscriptionPolicyDTO.setQuotaType(subscriptionPolicyModel.getQuotaType());
+                subscriptionPolicyDTO.setGraphQLMaxDepth(subscriptionPolicyModel.getGraphQLMaxDepth());
+                subscriptionPolicyDTO.setGraphQLMaxComplexity(subscriptionPolicyModel.getGraphQLMaxComplexity());
                 subscriptionPolicyDTO.setTenantId(subscriptionPolicyModel.getTenantId());
                 subscriptionPolicyDTO.setRateLimitCount(subscriptionPolicyModel.getRateLimitCount());
                 subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicyModel.isStopOnQuotaReach());

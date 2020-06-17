@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /*
  * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -25,39 +26,42 @@ import EditIcon from '@material-ui/icons/Edit';
 import { Link as RouterLink } from 'react-router-dom';
 import HelpLinks from 'AppComponents/Throttling/Advanced/HelpLinks';
 import Button from '@material-ui/core/Button';
+import API from 'AppData/api';
+
 /**
- * Mock API call
+ * Fetch policy list from backend
  * @returns {Promise}.
  */
 function apiCall() {
-    return new Promise(((resolve) => {
-        setTimeout(() => {
-            resolve([
-                {
-                    id: '1', name: '10KPerMin', quotaPolicy: 'requestCount', quota: '10000',
-                },
-                {
-                    id: '2', name: '20KPerMin', quotaPolicy: 'requestCount', quota: '20000',
-                },
-                {
-                    id: '3', name: '50KPerMin', quotaPolicy: 'requestCount', quota: '50000',
-                },
-
-            ]);
-        }, 1000);
-    }));
+    const restApi = new API();
+    return restApi
+        .getThrottlingPoliciesAdvanced()
+        .then((result) => {
+            const { body: { list } } = result;
+            list.forEach((item) => {
+                if (item.defaultLimit.bandwidth) {
+                    item.quotaPolicy = 'Bandwidth Volume';
+                    item.quota = item.defaultLimit.bandwidth.dataAmount
+                    + item.defaultLimit.bandwidth.dataUnit;
+                    item.unitTime = item.defaultLimit.bandwidth.unitTime
+                    + item.defaultLimit.bandwidth.timeUnit;
+                } else {
+                    item.quotaPolicy = 'Request Count';
+                    item.quota = item.defaultLimit.requestCount.requestCount;
+                    item.unitTime = item.defaultLimit.requestCount.unitTime
+                    + item.defaultLimit.requestCount.timeUnit;
+                }
+            });
+            return list;
+        })
+        .catch((error) => {
+            throw error;
+        });
 }
 
 const columProps = [
-    // {
-    //     name: 'data',
-    //     options: {
-    //         display: 'excluded',
-    //         filter: false,
-    //     },
-    // },
     {
-        name: 'name',
+        name: 'policyName',
         options: {
             customBodyRender: (value, tableMeta) => {
                 if (typeof tableMeta.rowData === 'object') {
@@ -79,8 +83,12 @@ const columProps = [
         name: 'quota',
         label: 'Quota',
     },
+    {
+        name: 'unitTime',
+        label: 'Unit Time',
+    },
     { // Id column has to be always the last.
-        name: 'id',
+        name: 'policyId',
         options: {
             display: false,
         },
@@ -201,7 +209,8 @@ export default function ListMG() {
     ]
 
     */
-
+    /* ====================
+    Uncomment following to add an action which can do an action which can perform on a given item
     const addedActions = [
         (props) => {
             const { rowData, updateList } = props;
@@ -219,6 +228,7 @@ export default function ListMG() {
             );
         },
     ];
+    =========== */
     const addButtonOverride = (
         <RouterLink to='/throttling/advanced/create'>
             <Button variant='contained' color='primary' size='small'>
@@ -244,7 +254,7 @@ export default function ListMG() {
             }}
             DeleteComponent={Delete}
             addButtonOverride={addButtonOverride}
-            addedActions={addedActions}
+            // addedActions={addedActions}
         />
     );
 }

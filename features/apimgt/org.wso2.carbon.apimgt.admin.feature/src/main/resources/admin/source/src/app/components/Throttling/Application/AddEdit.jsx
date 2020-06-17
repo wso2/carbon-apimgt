@@ -20,7 +20,7 @@ import React, { useReducer, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import {
@@ -28,6 +28,7 @@ import {
 } from '@material-ui/core';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import Joi from '@hapi/joi';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -107,6 +108,7 @@ function reducer(state, { field, value }) {
  */
 function AddEdit(props) {
     const classes = useStyles();
+    const intl = useIntl();
     const {
         updateList, icon, triggerButtonText, title, dataRow,
     } = props;
@@ -151,27 +153,48 @@ function AddEdit(props) {
 
     const validate = (fieldName, value) => {
         let error = '';
+        const schema = Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/);
         switch (fieldName) {
             case 'policyName':
                 if (value === '') {
-                    error = 'Name is Empty';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Application.Policy.policy.name.empty',
+                        defaultMessage: 'Name is Emptys',
+                    });
                 } else if (value.indexOf(' ') !== -1) {
-                    error = 'Name contains spaces';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Application.Policy.policy.name.space',
+                        defaultMessage: 'Name contains spaces',
+                    });
+                } else if (schema.validate(value).error) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Application.Policy.policy.name.invalid.character',
+                        defaultMessage: 'Name contains one or more illegal characters',
+                    });
                 } else {
                     error = '';
                 }
                 setValidationError({ policyName: error });
                 break;
             case 'requestCount':
-                error = value === '' ? 'Request Count is Empty' : '';
+                error = value === '' ? intl.formatMessage({
+                    id: 'Throttling.Application.Policy.policy.request.count.empty',
+                    defaultMessage: 'Request Count is Empty',
+                }) : '';
                 setValidationError({ requestCount: error });
                 break;
             case 'dataAmount':
-                error = value === '' ? 'Data Amount is Empty' : '';
+                error = value === '' ? intl.formatMessage({
+                    id: 'Throttling.Application.Policy.policy.data.amount.empty',
+                    defaultMessage: 'Data Amount is Empty',
+                }) : '';
                 setValidationError({ dataAmount: error });
                 break;
             case 'unitTime':
-                error = value === '' ? 'Unit Time is Empty' : '';
+                error = value === '' ? intl.formatMessage({
+                    id: 'Throttling.Application.Policy.policy.unit.time.empty',
+                    defaultMessage: 'Unit Time is Empty',
+                }) : '';
                 setValidationError({ unitTime: error });
                 break;
             default:
@@ -515,4 +538,4 @@ AddEdit.propTypes = {
     title: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(AddEdit);
+export default AddEdit;

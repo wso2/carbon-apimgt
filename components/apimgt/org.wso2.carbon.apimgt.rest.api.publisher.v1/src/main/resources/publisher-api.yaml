@@ -3449,6 +3449,136 @@ paths:
             $ref: '#/definitions/Error'
 
   ######################################################
+  # GraphQL "Query Complexity" resource APIs
+  ######################################################
+  /apis/{apiId}/graphql-policies/complexity:
+
+    #-----------------------------------------------------
+    # Retrieve Custom Complexity Info of a given API
+    #-----------------------------------------------------
+    get:
+      summary: Get the complexity related details of an API
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_publish
+      description: |
+        This operation can be used to retrieve complexity related details belonging to an API by providing the API id.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - GraphQL Policies
+      responses:
+        200:
+          description: |
+            OK.
+            Requested complexity details returned.
+        404:
+          description: |
+            Not Found.
+            Requested API does not contain any complexity details.
+
+    #-----------------------------------------------------
+    # Add API specific Custom Complexity Info
+    #-----------------------------------------------------
+    post:
+      summary: Create complexity related details of an API
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      description: |
+        This operation can be used to add complexity details belonging to an API by providing the id of the API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Role-depth mapping that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/GraphQLQueryComplexityInfo'
+      tags:
+        - GraphQL Policies
+      responses:
+        200:
+          description: |
+            Created.
+            Complexity details created successfully.
+        404:
+          description: |
+            Bad Request.
+            Complexity detail addition failed.
+    #-----------------------------------------------------
+    # Update API specific Custom Complexity Info
+    #-----------------------------------------------------
+    put:
+      summary: Update complexity related details of an API
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      description: |
+        This operation can be used to update complexity details belonging to an API by providing the id of the API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Role-depth mapping that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/GraphQLQueryComplexityInfo'
+      tags:
+        - GraphQL Policies
+      responses:
+        200:
+          description: |
+            Created.
+            Complexity details created successfully.
+        404:
+          description: |
+            Bad Request.
+            Complexity detail addition failed.
+
+  ######################################################
+  # GraphQL Schema "Types and Fields" resource API
+  ######################################################
+  /apis/{apiId}/graphql-policies/complexity/types:
+
+    #-----------------------------------------------------
+    # Retrieve all types and fields of a GraphQL Schema
+    #-----------------------------------------------------
+    get:
+      summary: Retrieve types and fields of a GraphQL Schema
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_publish
+      description: |
+        This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - GraphQL Policies
+      responses:
+        200:
+          description: |
+            OK.
+            Types and fields returned successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+          schema:
+            $ref: '#/definitions/GraphQLSchemaTypeList'
+        404:
+          description: |
+            Not Found.
+            Retrieving types and fields failed.
+
+
+  ######################################################
   # The "Resource Paths" resource
   ######################################################
   /apis/{apiId}/resource-paths:
@@ -6982,6 +7112,115 @@ paths:
             $ref: '#/definitions/KeyManagerList'
 
 ######################################################
+# The "Deployments" resource APIs
+######################################################
+
+  /deployments:
+    #----------------------------------------------------------
+    # Retrieving the deployments details from tenant-conf.json
+    #----------------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      produces:
+        - application/json
+      x-wso2-curl: "curl -X GET -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://localhost:9443/api/am/publisher/v1/deployments\""
+      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v1/deployments"
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Retrieve deployment environments details
+      operationId: deploymentsGet
+      description: |
+        This operation can be used to retrieve cloud clusters information defines in tenant-conf.json file.
+
+        With that you can deploy an API to selected cloud environments.
+      tags:
+        - Deployments
+      responses:
+        '200':
+          description: >
+            OK. Successful response with the list of deployment environments
+            information in the body.
+          schema:
+            $ref: '#/definitions/DeploymentList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        '400':
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: |
+            Not Found.
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "deployments status per API" resource APIs
+######################################################
+  /apis/{apiId}/deployments:
+#-----------------------------------------------------
+# Retrieve the deployment details of an API
+#-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      produces:
+        - application/json
+      x-wso2-curl: "curl -X GET -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://localhost:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"
+      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Retrieve deployment status details
+      operationId: deploymentsGetStatus
+      description: |
+        This operation can be used to retrieve the status of deployments in cloud clusters.
+
+        With that you can get the status of the deployed APIs in cloud environments.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - DeploymentStatus
+      responses:
+        '200':
+          description: >
+            OK. Successful response with the list of deployment environments
+            information in the body.
+          schema:
+            $ref: '#/definitions/DeploymentStatusList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        '400':
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: |
+            Not Found.
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -7455,6 +7694,9 @@ definitions:
       enableSchemaValidation:
         type: boolean
         example: false
+      enableStore:
+        type: boolean
+        example: true
       type:
         type: string
         description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
@@ -7539,6 +7781,14 @@ definitions:
         items:
           type: string
         example: ["Production and Sandbox"]
+        x-otherScopes:
+          - apim:api_publish
+      deploymentEnvironments:
+        description: |
+          List of selected deployment environments and clusters
+        type: array
+        items:
+          $ref: '#/definitions/DeploymentEnvironments'
         x-otherScopes:
           - apim:api_publish
       labels:
@@ -7886,6 +8136,9 @@ definitions:
       enableSchemaValidation:
         type: boolean
         example: false
+      enableStore:
+        type: boolean
+        example: true
       responseCachingEnabled:
         type: boolean
         example: true
@@ -8288,6 +8541,72 @@ definitions:
         example: "admin--HackerNewsAPI.graphql"
       schemaDefinition:
         type: string
+  #-----------------------------------------------------
+  # The GraphQL Query Complexity Info resource
+  #-----------------------------------------------------
+  GraphQLQueryComplexityInfo:
+    title: GraphQL Query Complexity Info
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/GraphQLCustomComplexityInfo'
+
+  #-----------------------------------------------------
+  # The GraphQL Custom Complexity Info resource
+  #-----------------------------------------------------
+  GraphQLCustomComplexityInfo:
+    title: GraphQL Custom Complexity Info
+    required:
+      - type
+      - field
+      - complexityValue
+    properties:
+      type:
+        type: string
+        description: |
+          The type found within the schema of the API
+        example: "Country"
+      field:
+        type: string
+        description: |
+          The field which is found under the type within the schema of the API
+        example: "name"
+      complexityValue:
+        type: integer
+        description: |
+          The complexity value allocated for the associated field under the specified type
+        example: 1
+
+  #-----------------------------------------------------
+  # The GraphQL Schema Type List resource
+  #-----------------------------------------------------
+  GraphQLSchemaTypeList:
+    title: List of types and corresponding fields of the GraphQL Schema
+    properties:
+      typeList:
+        type: array
+        items:
+          $ref: '#/definitions/GraphQLSchemaType'
+
+  #-----------------------------------------------------
+  # The GraphQL Schema Type resource
+  #-----------------------------------------------------
+  GraphQLSchemaType:
+    title: Single type and corresponding fields found within the GraphQL Schema
+    properties:
+      type:
+        type: string
+        description: |
+          Type found within the GraphQL Schema
+        example: "Country"
+      fieldList:
+        type: array
+        description: |
+          Array of fields under current type
+        items:
+          type: string
+        example: ["code","name"]
 
 
   #-----------------------------------------------------
@@ -9782,6 +10101,15 @@ definitions:
         description: |
           Is External Stores configuration enabled
         example: true
+      docVisibilityEnabled:
+        type: boolean
+        description: |
+          Is Document Visibility configuration enabled
+        example: false
+      deployments:
+        type: array
+        items:
+          $ref: '#/definitions/Deployments'
 
   #-----------------------------------------------------
   # The SecurityAuditAttribute resource
@@ -10085,6 +10413,11 @@ definitions:
       name:
         type: string
         example: "WSO2 IS"
+      displayName:
+        type: string
+        description: |
+          display name of Keymanager
+        example: Keymanager1
       type:
         type: string
         example: "IS"
@@ -10114,6 +10447,163 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/KeyManagerInfo'
+
+  #-----------------------------------------------------
+  # The Deployment List resource
+  #-----------------------------------------------------
+  DeploymentList:
+    title: Deployment List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of deployment clusters returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Deployments'
+
+  #-----------------------------------------------------
+  # The Deployment resource
+  #-----------------------------------------------------
+  Deployments:
+    title: Deployments
+    required:
+      - name
+      - clusters
+    properties:
+      name:
+        type: string
+        example: Kubernetes
+      clusters:
+        type: array
+        items:
+          $ref: '#/definitions/DeploymentClusterInfo'
+
+  #-----------------------------------------------------
+  # The DeploymentClusterInfo resource
+  #-----------------------------------------------------
+  DeploymentClusterInfo:
+    title: DeploymentClusterInfo
+    required:
+      - clusterId
+      - clusterName
+      - masterURL
+      - namespace
+      - ingressURL
+    properties:
+      clusterName:
+        type: string
+        example: Kubernetes
+      masterURL:
+        type: string
+        example: "https://localhost:9095"
+      namespace:
+        type: string
+        example: "def"
+      ingressURL:
+        type: string
+        example: "https://api.com"
+      clusterId:
+        type: string
+        example: "kubernetes-minikube"
+
+  #-----------------------------------------------------
+  # The DeploymentStatus List resource
+  #-----------------------------------------------------
+  DeploymentStatusList:
+    title: DeploymentStatus List
+    properties:
+      count:
+        type: integer
+        description: |
+          Status of the deployments returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/DeploymentStatus'
+
+  #-----------------------------------------------------
+  # The DeploymentStatus resource
+  #-----------------------------------------------------
+  DeploymentStatus:
+    title: DeploymentStatus
+    required:
+      - type
+      - clusters
+    properties:
+      type:
+        type: string
+        example: Kubernetes
+      clusters:
+        type: array
+        items:
+          $ref: '#/definitions/DeploymentClusterStatus'
+
+  #-----------------------------------------------------
+  # The DeploymentClusterStatus resource
+  #-----------------------------------------------------
+  DeploymentClusterStatus:
+    title: DeploymentClusterStatus
+    required:
+      - clusterName
+      - podsRunning
+      - healthStatus
+    properties:
+      clusterName:
+        type: string
+        example: Minikube
+      podsRunning:
+        type: integer
+        default: 0
+      healthStatus:
+        type: array
+        items:
+          $ref: '#/definitions/PodStatus'
+
+  #-----------------------------------------------------
+  # The DeploymentEnvironments resource
+  #-----------------------------------------------------
+  DeploymentEnvironments:
+    title: DeploymentEnvironments
+    required:
+      - type
+      - clusterName
+    properties:
+      type:
+        type: string
+        example: Kubernetes
+      clusterName:
+        type: array
+        items:
+          type: string
+        example: ["minikube"]
+
+  #-----------------------------------------------------
+  # The PodStatus resource
+  #-----------------------------------------------------
+  PodStatus:
+    title: PodStatus
+    required:
+      - name
+      - ready
+      - status
+      - age
+    properties:
+      name:
+        type: string
+        example: petStore-677bb7cc65-shb2f
+      ready:
+        type: string
+        example: 1/1
+      status:
+        type: string
+        example: running
+      creationTimestamp:
+        type: string
+        example: 2020-05-12T06:12:00Z
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

@@ -1,28 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Icon from '@material-ui/core/Icon';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import { Link } from 'react-router-dom';
-import Divider from '@material-ui/core/Divider';
-import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
 import { app } from 'Settings';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import API from 'AppData/api';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Application from 'AppData/Application';
-import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -263,86 +253,6 @@ function Overview(props) {
                     </TableBody>
                 </Table>
             </div>
-            <Grid container spacing={2}>
-                <Grid item xs={12} lg={6}>
-                    <ExpansionPanel defaultExpanded>
-                        <ExpansionPanelSummary classes={{ content: classes.summaryRoot }}>
-                            <Icon className={classes.iconEven}>vpn_key</Icon>
-                            <Typography className={classes.heading} variant='h6'>
-                                <FormattedMessage
-                                    id='Applications.Details.Overview.prod.keys.title'
-                                    defaultMessage='Production Keys'
-                                />
-                            </Typography>
-                        </ExpansionPanelSummary>
-                        <ExpansionPanelDetails
-                            classes={{ root: classNames({ [classes.noKeysRoot]: true }) }}
-                        >
-                            <TokenManager
-                                keyType='PRODUCTION'
-                                selectedApp={{
-                                    appId: application.applicationId,
-                                    label: application.name,
-                                    tokenType: application.tokenType,
-                                    owner: application.owner,
-                                    hashEnabled: application.hashEnabled,
-                                }}
-                                summary
-                            />
-                        </ExpansionPanelDetails>
-                        <Divider />
-                        <ExpansionPanelActions className={classes.actionPanel}>
-                            <Link to={pathPrefix + '/productionkeys/oauth'} className={classes.button}>
-                                <Button size='small' color='primary'>
-                                    <FormattedMessage
-                                        id='Applications.Details.Overview.show.more'
-                                        defaultMessage='Manage >>'
-                                    />
-                                </Button>
-                            </Link>
-                        </ExpansionPanelActions>
-                    </ExpansionPanel>
-                </Grid>
-                <Grid item xs={12} lg={6}>
-                    <ExpansionPanel defaultExpanded>
-                        <ExpansionPanelSummary classes={{ content: classes.summaryRoot }}>
-                            <Icon className={classes.iconEven}>vpn_key</Icon>
-                            <Typography className={classes.heading} variant='h6'>
-                                <FormattedMessage
-                                    id='Applications.Details.Overview.sand.keys.title'
-                                    defaultMessage='Sandbox Keys'
-                                />
-                            </Typography>
-                        </ExpansionPanelSummary>
-                        <ExpansionPanelDetails
-                            classes={{ root: classNames({ [classes.noKeysRoot]: true }) }}
-                        >
-                            <TokenManager
-                                keyType='SANDBOX'
-                                selectedApp={{
-                                    appId: application.applicationId,
-                                    label: application.name,
-                                    tokenType: application.tokenType,
-                                    owner: application.owner,
-                                    hashEnabled: application.hashEnabled,
-                                }}
-                                summary
-                            />
-                        </ExpansionPanelDetails>
-                        <Divider />
-                        <ExpansionPanelActions className={classes.actionPanel}>
-                            <Link to={pathPrefix + '/sandboxkeys/oauth'} className={classes.button}>
-                                <Button size='small' color='primary'>
-                                    <FormattedMessage
-                                        id='Applications.Details.Overview.show.more'
-                                        defaultMessage='Manage >>'
-                                    />
-                                </Button>
-                            </Link>
-                        </ExpansionPanelActions>
-                    </ExpansionPanel>
-                </Grid>
-            </Grid>
         </>
     );
 }

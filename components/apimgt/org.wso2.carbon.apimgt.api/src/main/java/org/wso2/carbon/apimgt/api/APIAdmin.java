@@ -303,4 +303,24 @@ public interface APIAdmin  {
      */
     Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status, String tenantDomain)
             throws APIManagementException;
+
+    /**
+     * This method used to check the existence of the scope name for the particular user
+     * @param username user to be validated
+     * @param scopeName scope name to be checked
+     * @return true if a scope exists by the given username
+     * @throws APIManagementException
+     */
+    boolean isScopeExistsForUser(String username, String scopeName)
+            throws APIManagementException;
+
+    /**
+     * This method used to check the existence of the scope name
+     * @param username logged in username to get the tenantDomain
+     * @param scopeName scope name to be checked
+     * @return true if a scope exists
+     * @throws APIManagementException
+     */
+    boolean isScopeExists(String username, String scopeName)
+            throws APIManagementException;
 }

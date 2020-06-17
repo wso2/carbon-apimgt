@@ -16,61 +16,33 @@
  * under the License.
  */
 
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import { useIntl, FormattedMessage } from 'react-intl';
+import { Link as RouterLink } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Alert from 'AppComponents/Shared/Alert';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
-import { Link as RouterLink } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
 import ConditionalGroup from 'AppComponents/Throttling/Advanced/ConditionalGroup';
 import cloneDeep from 'lodash.clonedeep';
 import HelpLinks from 'AppComponents/Throttling/Advanced/HelpLinks';
+import API from 'AppData/api';
+import AddEditExecution from 'AppComponents/Throttling/Advanced/AddEditExecution';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles((theme) => ({
     error: {
         color: theme.palette.error.dark,
     },
-    formTitle: {
-        paddingBottom: theme.spacing(4),
-    },
-    radioGroup: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    slectRoot: {
-        padding: '11.5px 14px',
-        width: 100,
-    },
-    formControlSelect: {
-        paddingTop: 7,
-        paddingLeft: 5,
+    hr: {
+        border: 'solid 1px #efefef',
     },
 }));
-
-
-/**
- * Mock API call
- * @returns {Promise}.
- */
-function apiCall() {
-    return new Promise(((resolve) => {
-        setTimeout(() => { resolve('Successfully did something'); }, 2000);
-    }));
-}
 
 
 /**
@@ -81,209 +53,199 @@ function apiCall() {
 function reducer(state, { field, value }) {
     const nextState = cloneDeep(state);
     switch (field) {
+        case 'all': // We set initial state with this.
+            return value;
         case 'policyName':
-        case 'policyDescription':
-        case 'executionFlows':
+        case 'description':
+        case 'conditionalGroups':
             nextState[field] = value;
             return nextState;
-        case 'type':
-            nextState.defaultQuotaPolicy[field] = value;
+        case 'defaultLimit':
+            if (value === 'REQUESTCOUNTLIMIT') {
+                const { defaultLimit: { bandwidth: { timeUnit, unitTime } } } = nextState;
+                nextState.defaultLimit.requestCount = {
+                    type: 'REQUESTCOUNTLIMIT', timeUnit, unitTime, requestCount: 0,
+                };
+                nextState.defaultLimit.bandwidth = null;
+            } else {
+                const { defaultLimit: { requestCount: { timeUnit, unitTime } } } = nextState;
+                nextState.defaultLimit.bandwidth = {
+                    type: 'BANDWIDTHLIMIT', timeUnit, unitTime, dataAmount: 0, dataUnit: 'KB',
+                };
+                nextState.defaultLimit.requestCount = null;
+            }
+            nextState.defaultLimit[field] = value;
             return nextState;
         case 'dataUnit':
         case 'requestCount':
         case 'timeUnit':
         case 'dataAmount':
         case 'unitTime':
-            nextState.defaultQuotaPolicy.limit[field] = value;
+            if (nextState.defaultLimit.requestCount) {
+                nextState.defaultLimit.requestCount[field] = value;
+            } else {
+                nextState.defaultLimit.bandwidth[field] = value;
+            }
             return nextState;
         default:
-            return state;
+            return nextState;
     }
 }
 
 /**
  * Render a list
  * @returns {JSX} Header AppBar components.
+ * @param {JSON} props Props passed from other components.
  */
-function AddEdit() {
+function AddEdit(props) {
     const classes = useStyles();
     const [validating, setValidating] = useState(false);
+    const [saving, setSaving] = useState(false);
     const intl = useIntl();
-
-    const id = '8888lsls'; // This should be null
-    let initialState = {
+    const { match: { params: { id } }, history } = props;
+    const initialState = {
         policyName: '',
-        policyDescription: '',
-        executionFlows: [],
-        defaultQuotaPolicy: {
-            type: 'requestCount',
-            limit: {
-                requestCount: '',
+        description: '',
+        conditionalGroups: [],
+        defaultLimit: {
+            requestCount: {
+                type: 'REQUESTCOUNTLIMIT',
                 timeUnit: 'min',
-                dataAmount: 0,
-                dataUnit: 'KB',
-                unitTime: '',
+                unitTime: 0,
+                requestCount: 0,
             },
+            bandwidth: null,
         },
     };
-    if (id) {
-        initialState = {
-            policyName: 'test1',
-            policyDescription: 'testdesc',
-            executionFlows: [
-                {
-                    id: 0,
-                    enabled: true,
-                    description: 'Sample description about condition group222',
-                    quotaPolicy: {
-                        type: 'requestCount',
-                        limit: {
-                            requestCount: '0',
-                            timeUnit: 'min',
-                            dataAmount: 0,
-                            dataUnit: '',
-                            unitTime: '1',
-                        },
-                    },
-                    conditions: [
-                        {
-                            type: 'IP',
-                            ipType: 'specific',
-                            startingIP: '',
-                            endingIP: '',
-                            specificIP: '10.100.22.33',
-                            invertCondition: true,
-                            enabled: true,
-                        },
-                        {
-                            type: 'Header',
-                            keyValPairs: [
-                                {
-                                    name: 'header1',
-                                    value: 'param1',
-                                },
-                                {
-                                    name: 'header2',
-                                    value: 'param2',
-                                },
-                            ],
-                            invertCondition: true,
-                            enabled: true,
-                        },
-                        {
-                            type: 'QueryParam',
-                            keyValPairs: [
-                                {
-                                    name: 'header1',
-                                    value: 'param1',
-                                },
-                            ],
-                            invertCondition: false,
-                            enabled: true,
-                        },
-                        {
-                            type: 'JWTClaim',
-                            keyValPairs: [
-                                {
-                                    name: 'header1',
-                                    value: 'param1',
-                                },
-                            ],
-                            invertCondition: true,
-                            hasValues: false,
-                            enabled: true,
-                        },
-                    ],
-                },
-            ],
-            defaultQuotaPolicy: {
-                type: 'requestCount',
-                limit: {
-                    requestCount: '23',
-                    timeUnit: 'min',
-                    dataAmount: 0,
-                    dataUnit: '',
-                    unitTime: '1222',
-                },
-            },
-        };
-    }
-
-
     const [state, dispatch] = useReducer(reducer, initialState);
-    const {
-        policyName,
-        policyDescription,
-        defaultQuotaPolicy: {
-            type, limit: {
-                requestCount,
-                timeUnit,
-                dataAmount,
-                dataUnit,
-                unitTime,
-            },
-        },
-        executionFlows,
-    } = state;
+
+    useEffect(() => {
+        const restApi = new API();
+        restApi
+            .getThrottlingPoliciesAdvancedPolicyId(id)
+            .then((result) => {
+                const { body } = result;
+                return body;
+            })
+            .then((data) => {
+                dispatch({ field: 'all', value: data });
+            })
+            .catch((error) => {
+                throw error;
+            });
+    }, []);
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
-    const setExecutionFlow = (updatedExecutionFlow) => {
-        const newExecutionFlows = cloneDeep(executionFlows);
-        let flowId = null;
-        newExecutionFlows.forEach((flow, index) => {
-            if (flow.id === updatedExecutionFlow.id) {
-                flowId = index;
-            }
-        });
-        if (flowId) {
-            newExecutionFlows[flowId] = updatedExecutionFlow;
-        } else {
-            newExecutionFlows.push(updatedExecutionFlow);
-        }
-
-        dispatch({ field: 'executionFlows', value: newExecutionFlows });
-    };
-    const hasErrors = (fieldName, value) => {
-        if (!validating) return '';
+    const hasErrors = (fieldName, fieldValue, validatingActive) => {
         let error = false;
+        if (!validatingActive) {
+            return (false);
+        }
         switch (fieldName) {
             case 'policyName':
-                error = value === '' ? fieldName + ' is Empty' : false;
+                if (fieldValue === '') {
+                    error = `Policy name ${intl.formatMessage({
+                        id: 'Throttling.Advanced.AddEdit.is.empty.error',
+                        defaultMessage: ' is empty',
+                    })}`;
+                } else if (fieldValue !== '' && /\s/g.test(fieldValue)) {
+                    error = `Policy name ${intl.formatMessage({
+                        id: 'Throttling.Advanced.AddEdit.empty.error',
+                        defaultMessage: ' contains white spaces.',
+                    })}`;
+                }
+                break;
+            case 'description':
+            case 'requestCount':
+            case 'dataAmount':
+            case 'unitTime':
+                error = fieldValue === '' ? fieldName + ' is Empty' : false;
                 break;
             default:
                 break;
         }
         return error;
     };
-    const getAllFormErrors = () => {
-        let errorText = '';
-        const policyNameErrors = hasErrors('policyName', policyName);
-        if (policyNameErrors) {
-            errorText += policyNameErrors + '\n';
+    const {
+        policyName,
+        description,
+        defaultLimit,
+        conditionalGroups,
+    } = state;
+
+    const formHasErrors = (validatingActive = false) => {
+        if (hasErrors('policyName', policyName, validatingActive)
+        || hasErrors('description', description, validatingActive)) {
+            return true;
+        } else {
+            return false;
         }
-        return errorText;
+    };
+
+    const newConditionalGroups = cloneDeep(conditionalGroups);
+    const updateGroup = () => {
+        dispatch({ field: 'conditionalGroups', value: newConditionalGroups });
     };
 
     const formSave = () => {
         setValidating(true);
-        const formErrors = getAllFormErrors();
-        if (formErrors !== '') {
-            Alert.error(formErrors);
-            return (false);
+        if (formHasErrors(true)) {
+            Alert.error(intl.formatMessage({
+                id: 'Throttling.Advanced.AddEdit.form.has.errors',
+                defaultMessage: 'One or more fields contain errors.',
+            }));
+            return false;
         }
         // Do the API call
-        const promiseAPICall = apiCall();
+        const restApi = new API();
+        let promiseAPICall = null;
+        const body = {
+            ...state,
+        };
+        setSaving(true);
         if (id) {
-        // assign the update promise to the promiseAPICall
+            promiseAPICall = restApi
+                .putThrottlingPoliciesAdvanced(id, body).then(() => {
+                    return intl.formatMessage({
+                        id: 'Throttling.Advanced.AddEdit.edit.success',
+                        defaultMessage: 'Policy Updated Successfully',
+                    });
+                });
+        } else {
+            promiseAPICall = restApi
+                .postThrottlingPoliciesAdvanced(body).then(() => {
+                    return intl.formatMessage({
+                        id: 'Throttling.Advanced.AddEdit.add.success',
+                        defaultMessage: 'Policy Added Successfully',
+                    });
+                });
         }
-        promiseAPICall.then((data) => {
-            console.info(data);
+        promiseAPICall.then((msg) => {
+            Alert.success(`${policyName} ${msg}`);
+            history.push('/throttling/advanced/');
+        }).catch((e) => {
+            Alert.error(e);
+        }).finaly(() => {
+            setSaving(false);
         });
         return true;
     };
-
+    const addConditionalGroup = () => {
+        const newGroup = {
+            description: 'Sample description about condition group',
+            conditions: [],
+            limit: {
+                requestCount: {
+                    type: 'REQUESTCOUNTLIMIT', timeUnit: 'min', unitTime: 1, requestCount: 1000,
+                },
+                bandwidth: null,
+            },
+        };
+        newConditionalGroups.push(newGroup);
+        updateGroup();
+    };
     return (
 
         <ContentBase
@@ -298,13 +260,22 @@ function AddEdit() {
         >
             <Box component='div' m={2}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12} md={12} lg={6}>
+                    <Grid item xs={12} md={12} lg={3}>
                         <Typography color='inherit' variant='subtitle2' component='div'>
                             <FormattedMessage
                                 id='Throttling.Advanced.AddEdit.general.details'
                                 defaultMessage='General Details'
                             />
                         </Typography>
+                        <Typography color='inherit' variant='caption' component='p'>
+                            <FormattedMessage
+                                id='Throttling.Advanced.AddEdit.general.details.description'
+                                defaultMessage={'Provide name and description of the policy.'
+                            + 'The policy can be refered from the name.'}
+                            />
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
                             <TextField
                                 autoFocus
@@ -323,8 +294,8 @@ function AddEdit() {
                                     </span>
                                 )}
                                 fullWidth
-                                error={hasErrors('policyName', policyName)}
-                                helperText={hasErrors('policyName', policyName) || intl.formatMessage({
+                                error={hasErrors('policyName', policyName, validating)}
+                                helperText={hasErrors('policyName', policyName, validating) || intl.formatMessage({
                                     id: 'Throttling.Advanced.AddEdit.form.name.help',
                                     defaultMessage: 'Name of the throttle policy.',
                                 })}
@@ -332,8 +303,8 @@ function AddEdit() {
                             />
                             <TextField
                                 margin='dense'
-                                name='policyDescription'
-                                value={policyDescription}
+                                name='description'
+                                value={description}
                                 onChange={onChange}
                                 label={intl.formatMessage({
                                     id: 'Throttling.Advanced.AddEdit.form.description',
@@ -348,137 +319,66 @@ function AddEdit() {
                                 variant='outlined'
                             />
                         </Box>
-                        {/* Default limits */}
-                        <Box display='flex' flexDirection='row' alignItems='center'>
-                            <Box flex='1'>
-                                <Typography color='inherit' variant='subtitle2' component='div'>
-                                    <FormattedMessage
-                                        id='Throttling.Advanced.AddEdit.default.limits'
-                                        defaultMessage='Default Limits'
-                                    />
-                                </Typography>
-                            </Box>
-
-                            <RadioGroup
-                                aria-label='Default Limits'
-                                name='type'
-                                value={type}
-                                onChange={onChange}
-                                className={classes.radioGroup}
-                            >
-                                <FormControlLabel
-                                    value='requestCount'
-                                    control={<Radio />}
-                                    label='Request Count'
-                                />
-                                <FormControlLabel
-                                    value='bandwidthVolume'
-                                    control={<Radio />}
-                                    label='Request Bandwidth'
-                                />
-                            </RadioGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
                         </Box>
-
-                        <Box component='div' m={1}>
-                            {type === 'requestCount' && (
-                                <TextField
-                                    autoFocus
-                                    margin='dense'
-                                    name='requestCount'
-                                    value={requestCount}
-                                    onChange={onChange}
-                                    label={(
-                                        <FormattedMessage
-                                            id='Throttling.Advanced.AddEdit.form.requestCount.name'
-                                            defaultMessage='Name'
-                                        />
-                                    )}
-                                    fullWidth
-                                    error={hasErrors('name', requestCount)}
-                                    helperText={hasErrors('name', requestCount) || 'Number of requests allowed'}
-                                    variant='outlined'
-                                />
-                            )}
-                            {type === 'bandwidthVolume' && (
-                                <Box display='flex' flexDirection='row'>
-                                    <TextField
-                                        autoFocus
-                                        margin='dense'
-                                        name='dataAmount'
-                                        value={dataAmount}
-                                        onChange={onChange}
-                                        label={(
-                                            <FormattedMessage
-                                                id='Throttling.Advanced.AddEdit.form.dataAmount.name'
-                                                defaultMessage='Data Bandwidth'
-                                            />
-                                        )}
-                                        fullWidth
-                                        error={hasErrors('name', dataAmount)}
-                                        helperText={hasErrors('name', dataAmount) || 'Bandwidth allowed'}
-                                        variant='outlined'
-                                    />
-                                    <FormControl variant='outlined' className={classes.formControlSelect}>
-                                        <Select
-                                            name='dataUnit'
-                                            value={dataUnit}
-                                            onChange={onChange}
-                                            classes={{ root: classes.slectRoot }}
-                                        >
-                                            <MenuItem value='KB'>KB</MenuItem>
-                                            <MenuItem value='MB'>MB</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Box>
-                            )}
-                            <Box display='flex' flexDirection='row'>
-                                <TextField
-                                    margin='dense'
-                                    name='unitTime'
-                                    value={unitTime}
-                                    onChange={onChange}
-                                    label='Unit Time'
-                                    fullWidth
-                                    multiline
-                                    helperText={intl.formatMessage({
-                                        id: 'Throttling.Advanced.AddEdit.unitTime',
-                                        defaultMessage: 'Unit Time',
-                                    })}
-                                    variant='outlined'
-                                />
-                                <FormControl variant='outlined' className={classes.formControlSelect}>
-                                    <Select
-                                        name='timeUnit'
-                                        value={timeUnit}
-                                        onChange={onChange}
-                                        classes={{ root: classes.slectRoot }}
-                                    >
-                                        <MenuItem value='sec'>Second(s)</MenuItem>
-                                        <MenuItem value='min'>Minutes(s)</MenuItem>
-                                        <MenuItem value='hour'>Hour(s)</MenuItem>
-                                        <MenuItem value='days'>Day(s)</MenuItem>
-                                        <MenuItem value='month'>Month(s)</MenuItem>
-                                        <MenuItem value='year'>Year(s)</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                        </Box>
+                    </Grid>
+                    {/* Default limits */}
+                    <Grid item xs={12} md={12} lg={3}>
+                        <Typography color='inherit' variant='subtitle2' component='div'>
+                            <FormattedMessage
+                                id='Throttling.Advanced.AddEdit.default.limits'
+                                defaultMessage='Default Limits'
+                            />
+                        </Typography>
+                        <Typography color='inherit' variant='caption' component='p'>
+                            <FormattedMessage
+                                id='Throttling.Advanced.AddEdit.default.limits.description'
+                                defaultMessage={'Request Count and Request Bandwidth are the '
+                                + 'two options for default limit. You can use the option according '
+                                + 'to your requirement.'}
+                            />
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
+                        <AddEditExecution
+                            limit={cloneDeep(defaultLimit)}
+                            onChange={onChange}
+                            hasErrors={hasErrors}
+                            validating={validating}
+                        />
                         {/* Conditional groups */}
                     </Grid>
                 </Grid>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={3}>
+                        <Typography color='inherit' variant='subtitle2' component='div'>
+                            <FormattedMessage
+                                id='Throttling.Advanced.AddEdit.add.conditional.group'
+                                defaultMessage='Conditional groups'
+                            />
+                        </Typography>
+                        <Typography color='inherit' variant='caption' component='p'>
+                            <FormattedMessage
+                                id='Throttling.Advanced.AddEdit.conditional.group.description'
+                                defaultMessage={'To add throttling limits with different '
+                                + 'parameters base on IP, Header, Query Param, and JWT '
+                                + 'Claim conditions, click Add Conditional Group. '}
+                            />
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
                         <Box display='flex' flexDirection='row' alignItems='center'>
-                            <Box flex='1'>
-                                <Typography color='inherit' variant='subtitle2' component='div'>
-                                    <FormattedMessage
-                                        id='Throttling.Advanced.AddEdit.add.conditional.group'
-                                        defaultMessage='Conditional groups'
-                                    />
-                                </Typography>
-                            </Box>
+                            <Box flex='1' />
 
-                            <Button variant='contained'>
+                            <Button variant='contained' onClick={addConditionalGroup}>
                                 <FormattedMessage
                                     id='Throttling.Advanced.AddEdit.add.conditional.group.add'
                                     defaultMessage='Add Conditional Group'
@@ -488,26 +388,49 @@ function AddEdit() {
                         </Box>
 
                         <Box component='div' m={1}>
-                            {executionFlows.map((executionFlow) => (
+                            {newConditionalGroups.map((group, index) => (
                                 <ConditionalGroup
-                                    key={executionFlow.id}
-                                    executionFlow={cloneDeep(executionFlow)}
-                                    setExecutionFlow={setExecutionFlow}
+                                    // The API is not providing a unique key for each item.
+                                    // eslint-disable-next-line react/no-array-index-key
+                                    key={index}
+                                    group={group}
+                                    defaultLimit={defaultLimit}
+                                    updateGroup={updateGroup}
+                                    hasErrors={hasErrors}
                                 />
                             ))}
                         </Box>
                         {/* Submit buttons */}
                         <Box m={4} />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12}>
                         <Box component='span' m={1}>
                             <Button variant='contained' color='primary' onClick={formSave}>
-                                <FormattedMessage
-                                    id='Throttling.Advanced.AddEdit.form.add'
-                                    defaultMessage='Add'
-                                />
+                                {saving ? (<CircularProgress size={16} />) : (
+                                    <>
+                                        {id ? (
+                                            <FormattedMessage
+                                                id='Throttling.Advanced.AddEdit.form.update.btn'
+                                                defaultMessage='Update'
+                                            />
+                                        ) : (
+                                            <FormattedMessage
+                                                id='Throttling.Advanced.AddEdit.form.add.btn'
+                                                defaultMessage='Add'
+                                            />
+                                        )}
+                                    </>
+                                )}
+
                             </Button>
                         </Box>
                         <RouterLink to='/throttling/advanced'>
-                            <Button variant='contained' onClick={formSave}>
+                            <Button variant='contained'>
                                 <FormattedMessage
                                     id='Throttling.Advanced.AddEdit.form.cancel'
                                     defaultMessage='Cancel'
@@ -523,6 +446,8 @@ function AddEdit() {
 
 AddEdit.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({}).isRequired,
+    history: PropTypes.shape({}).isRequired,
 };
 
 

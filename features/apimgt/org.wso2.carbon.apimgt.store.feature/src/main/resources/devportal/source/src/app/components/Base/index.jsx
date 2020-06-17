@@ -331,11 +331,12 @@ class Layout extends React.Component {
                     active: footerActive, text: footerText, footerHTML,
                 },
                 languageSwitch: { active: languageSwitchActive },
+                publicTenantStore,
             },
         } = theme;
         const { openNavBar, selected } = this.state;
         const { tenantDomain, setTenantDomain } = this.context;
-        const { customUrl: { enabled: customUrlEnabled, tenantDomain: customUrlEnabledDomain } } = app;
+        const { customUrl: { tenantDomain: customUrlEnabledDomain } } = app;
 
         const user = AuthManager.getUser();
         // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
@@ -351,6 +352,13 @@ class Layout extends React.Component {
 
         const strokeColor = theme.palette.getContrastText(theme.custom.appBar.background);
         const strokeColorSelected = theme.palette.getContrastText(theme.custom.appBar.activeBackground);
+
+        let publicTenantStoreVisible = true;
+        
+        if(publicTenantStore) {
+            const { active: publicTenantStoreActive } = publicTenantStore;
+            publicTenantStoreVisible = publicTenantStoreActive;
+        }
         return (
             <>
                 {active && (
@@ -437,7 +445,8 @@ class Layout extends React.Component {
                                 </Hidden>
                                 <VerticalDivider height={32} />
                                 {showSearch && (<HeaderSearch id='headerSearch' />)}
-                                {tenantDomain && customUrlEnabledDomain === 'null' && tenantDomain !== 'INVALID' && (
+                                {tenantDomain && customUrlEnabledDomain === 'null' && tenantDomain !== 'INVALID'
+                                    && publicTenantStoreVisible && (
                                     <Link
                                         style={{
                                             textDecoration: 'none',
@@ -573,7 +582,7 @@ class Layout extends React.Component {
                                 {footerText && footerText !== '' ? <span>{footerText}</span> : (
                                     <FormattedMessage
                                         id='Base.index.copyright.text'
-                                        defaultMessage='WSO2 API-M v3.1.0 | © 2020 WSO2 Inc'
+                                        defaultMessage='WSO2 API-M v3.2.0 | © 2020 WSO2 Inc'
                                     />
                                 )}
                             </Typography>)}

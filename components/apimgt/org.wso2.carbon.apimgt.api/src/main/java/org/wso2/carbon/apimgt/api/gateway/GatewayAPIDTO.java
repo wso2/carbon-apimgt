@@ -20,10 +20,14 @@
 
 package org.wso2.carbon.apimgt.api.gateway;
 
+import java.io.Serializable;
+
 /**
  * This Contains the API Related data to deploy in Gateway.
  */
-public class GatewayAPIDTO {
+public class GatewayAPIDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String name;
     private String version;
