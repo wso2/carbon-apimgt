@@ -491,22 +491,15 @@ public class APIAdminImpl implements APIAdmin {
      */
     public String extractBotDetectionDataContent(String messageBody) {
 
-        String content = "";
+        String content;
         try {
-            //Parser that produces DOM object trees from XML content
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
-            //API to obtain DOM Document instance
-            DocumentBuilder builder = null;
-
-            //Create DocumentBuilder with default configuration
-            builder = factory.newDocumentBuilder();
-
-            //Parse the content to Document object
+            //Parse the message body and extract the content in XML form
+            DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
+            DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(new InputSource(new StringReader(messageBody)));
             Node bodyContentNode = document.getFirstChild().getFirstChild();
 
-            //Convert Node object to String
+            //Convert XML form to String
             StringWriter writer = new StringWriter();
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
