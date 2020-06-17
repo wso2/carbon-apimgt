@@ -1,8 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertsSubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionSubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionSubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.AlertSubscriptionsApiServiceImpl;
@@ -42,14 +42,14 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Path("/bot-detection")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the list of subscriptions for bot detection ", notes = "Get the list of subscriptions which are subscribed to receive email alerts for bot detection ", response = BotDetectionSubscriptionListDTO.class, authorizations = {
+    @ApiOperation(value = "Get the list of subscriptions for bot detection ", notes = "Get the list of subscriptions which are subscribed to receive email alerts for bot detection ", response = BotDetectionAlertSubscriptionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Bot Detection Alert Subscriptions",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. The list of bot detection alert subscriptions are returned. ", response = BotDetectionSubscriptionListDTO.class),
+        @ApiResponse(code = 200, message = "OK. The list of bot detection alert subscriptions are returned. ", response = BotDetectionAlertSubscriptionListDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. An error occurred while retrieving bot detection alert subscriptions. ", response = ErrorDTO.class) })
     public Response getBotDetectionAlertSubscriptions() throws APIManagementException{
         return delegate.getBotDetectionAlertSubscriptions(securityContext);
@@ -76,17 +76,17 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Path("/bot-detection")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Subscribe for bot detection alerts", notes = "Register a subscription for bot detection alerts ", response = BotDetectionSubscriptionDTO.class, authorizations = {
+    @ApiOperation(value = "Subscribe for bot detection alerts", notes = "Register a subscription for bot detection alerts ", response = BotDetectionAlertSubscriptionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Bot Detection Alert Subscriptions",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Bot detection alert subscription is registered successfully. ", response = BotDetectionSubscriptionDTO.class),
+        @ApiResponse(code = 200, message = "OK. Bot detection alert subscription is registered successfully. ", response = BotDetectionAlertSubscriptionDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. An error occurred while adding a bot detection subscription. ", response = ErrorDTO.class) })
-    public Response subscribeForBotDetectionAlerts(@ApiParam(value = "The email to register to receive bot detection alerts " ,required=true) BotDetectionSubscriptionDTO body) throws APIManagementException{
+    public Response subscribeForBotDetectionAlerts(@ApiParam(value = "The email to register to receive bot detection alerts " ,required=true) BotDetectionAlertSubscriptionDTO body) throws APIManagementException{
         return delegate.subscribeForBotDetectionAlerts(body, securityContext);
     }
 

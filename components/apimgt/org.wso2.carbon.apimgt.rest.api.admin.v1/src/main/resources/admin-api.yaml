@@ -3355,7 +3355,7 @@ paths:
                 The content type of the body.
               type: string
           schema:
-            $ref: '#/definitions/BotDetectionSubscriptionList'
+            $ref: '#/definitions/BotDetectionAlertSubscriptionList'
         500:
           description: |
             Internal Server Error.
@@ -3382,7 +3382,7 @@ paths:
             The email to register to receive bot detection alerts
           required: true
           schema:
-            $ref: '#/definitions/BotDetectionSubscription'
+            $ref: '#/definitions/BotDetectionAlertSubscription'
       tags:
         - Bot Detection Alert Subscriptions
       responses:
@@ -3396,7 +3396,7 @@ paths:
                 The content type of the body.
               type: string
           schema:
-            $ref: '#/definitions/BotDetectionSubscription'
+            $ref: '#/definitions/BotDetectionAlertSubscription'
         400:
           description: |
             Bad Request.
@@ -5283,10 +5283,10 @@ definitions:
           example: "admin@wso2.com"
 
   #-----------------------------------------------------
-  # The Bot Detection Subscription List resource
+  # The Bot Detection Alert Subscription List resource
   #-----------------------------------------------------
-  BotDetectionSubscriptionList:
-    title: Bot Detection Subscription List
+  BotDetectionAlertSubscriptionList:
+    title: Bot Detection Alert Subscription List
     properties:
       count:
         type: integer
@@ -5296,13 +5296,13 @@ definitions:
       list:
         type: array
         items:
-          $ref: '#/definitions/BotDetectionSubscription'
+          $ref: '#/definitions/BotDetectionAlertSubscription'
 
   #-----------------------------------------------------
-  # The Bot Detection Subscription resource
+  # The Bot Detection Alert Subscription resource
   #-----------------------------------------------------
-  BotDetectionSubscription:
-    title: Bot Detection Subscription
+  BotDetectionAlertSubscription:
+    title: Bot Detection Alert Subscription
     required:
       - email
     properties:

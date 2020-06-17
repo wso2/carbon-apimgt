@@ -13,7 +13,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class BotDetectionSubscriptionDTO   {
+public class BotDetectionAlertSubscriptionDTO   {
   
     private String uuid = null;
     private String email = null;
@@ -21,7 +21,7 @@ public class BotDetectionSubscriptionDTO   {
   /**
    * UUID of the subscription
    **/
-  public BotDetectionSubscriptionDTO uuid(String uuid) {
+  public BotDetectionAlertSubscriptionDTO uuid(String uuid) {
     this.uuid = uuid;
     return this;
   }
@@ -39,7 +39,7 @@ public class BotDetectionSubscriptionDTO   {
   /**
    * email
    **/
-  public BotDetectionSubscriptionDTO email(String email) {
+  public BotDetectionAlertSubscriptionDTO email(String email) {
     this.email = email;
     return this;
   }
@@ -64,9 +64,9 @@ public class BotDetectionSubscriptionDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BotDetectionSubscriptionDTO botDetectionSubscription = (BotDetectionSubscriptionDTO) o;
-    return Objects.equals(uuid, botDetectionSubscription.uuid) &&
-        Objects.equals(email, botDetectionSubscription.email);
+    BotDetectionAlertSubscriptionDTO botDetectionAlertSubscription = (BotDetectionAlertSubscriptionDTO) o;
+    return Objects.equals(uuid, botDetectionAlertSubscription.uuid) &&
+        Objects.equals(email, botDetectionAlertSubscription.email);
   }
 
   @Override
@@ -77,7 +77,7 @@ public class BotDetectionSubscriptionDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BotDetectionSubscriptionDTO {\n");
+    sb.append("class BotDetectionAlertSubscriptionDTO {\n");
     
     sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    email: ").append(toIndentedString(email)).append("\n");

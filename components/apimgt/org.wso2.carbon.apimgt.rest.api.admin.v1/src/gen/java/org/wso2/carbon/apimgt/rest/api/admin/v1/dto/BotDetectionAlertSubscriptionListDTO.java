@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionSubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionDTO;
 import javax.validation.constraints.*;
 
 
@@ -16,15 +16,15 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class BotDetectionSubscriptionListDTO   {
+public class BotDetectionAlertSubscriptionListDTO   {
   
     private Integer count = null;
-    private List<BotDetectionSubscriptionDTO> list = new ArrayList<>();
+    private List<BotDetectionAlertSubscriptionDTO> list = new ArrayList<>();
 
   /**
    * Number of Bot Detection Alert Subscriptions returned. 
    **/
-  public BotDetectionSubscriptionListDTO count(Integer count) {
+  public BotDetectionAlertSubscriptionListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -41,7 +41,7 @@ public class BotDetectionSubscriptionListDTO   {
 
   /**
    **/
-  public BotDetectionSubscriptionListDTO list(List<BotDetectionSubscriptionDTO> list) {
+  public BotDetectionAlertSubscriptionListDTO list(List<BotDetectionAlertSubscriptionDTO> list) {
     this.list = list;
     return this;
   }
@@ -49,10 +49,10 @@ public class BotDetectionSubscriptionListDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<BotDetectionSubscriptionDTO> getList() {
+  public List<BotDetectionAlertSubscriptionDTO> getList() {
     return list;
   }
-  public void setList(List<BotDetectionSubscriptionDTO> list) {
+  public void setList(List<BotDetectionAlertSubscriptionDTO> list) {
     this.list = list;
   }
 
@@ -65,9 +65,9 @@ public class BotDetectionSubscriptionListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BotDetectionSubscriptionListDTO botDetectionSubscriptionList = (BotDetectionSubscriptionListDTO) o;
-    return Objects.equals(count, botDetectionSubscriptionList.count) &&
-        Objects.equals(list, botDetectionSubscriptionList.list);
+    BotDetectionAlertSubscriptionListDTO botDetectionAlertSubscriptionList = (BotDetectionAlertSubscriptionListDTO) o;
+    return Objects.equals(count, botDetectionAlertSubscriptionList.count) &&
+        Objects.equals(list, botDetectionAlertSubscriptionList.list);
   }
 
   @Override
@@ -78,7 +78,7 @@ public class BotDetectionSubscriptionListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BotDetectionSubscriptionListDTO {\n");
+    sb.append("class BotDetectionAlertSubscriptionListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
