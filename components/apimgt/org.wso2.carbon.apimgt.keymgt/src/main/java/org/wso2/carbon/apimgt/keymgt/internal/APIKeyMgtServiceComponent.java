@@ -40,6 +40,7 @@ import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterExc
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -63,7 +64,11 @@ public class APIKeyMgtServiceComponent {
         try {
             APIKeyMgtDataHolder.initData();
             log.debug("Key Manager User Operation Listener is enabled.");
-            // Checking token revocation feature enabled config
+            // Register subscription datastore related service
+            serviceRegistration = ctxt.getBundleContext().registerService(
+                    Axis2ConfigurationContextObserver.class.getName(), new ServerStartupListener(), null);
+            serviceRegistration = ctxt.getBundleContext().registerService(
+                    ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
             // registering logout token revoke listener
             try {
                 SessionDataPublisherImpl dataPublisher = new SessionDataPublisherImpl();

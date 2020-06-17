@@ -139,7 +139,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public ApiPolicy getApiPolicyByName(String policyName, int tenantId) {
 
-        String key = POLICY_TYPE.API +
+        String key = POLICY_TYPE.API + DELEM_PERIOD + 
                 SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId);
         return apiPolicyMap.get(key);
     }
@@ -334,6 +334,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         return subscriptionPoliciesInitialized;
     }
+    
+    public boolean isApiPoliciesInitialized() {
+
+        return apiPoliciesInitialized;
+    }
 
     public boolean isSubscriptionValidationDataInitialized() {
 
@@ -342,7 +347,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 subscriptionsInitialized &&
                 applicationKeysInitialized &&
                 applicationPoliciesInitialized &&
-                subscriptionPoliciesInitialized;
+                subscriptionPoliciesInitialized &&
+                apiPoliciesInitialized;
     }
 
     @Override
@@ -412,5 +418,21 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public void removeApplication(Application application) {
         applicationMap.remove(application.getId());
+    }
+
+    @Override
+    public void addOrUpdateApiPolicy(ApiPolicy apiPolicy) {
+        try {
+            ApiPolicy policy = new SubscriptionDataLoaderImpl().getAPIPolicy(apiPolicy.getName(), tenantDomain);
+            apiPolicyMap.put(apiPolicy.getCacheKey(), policy);
+        } catch (DataLoadingException e) {
+            log.error("Exception while loading api policy for " + apiPolicy.getName() + " for domain " + tenantDomain,
+                    e);
+        }
+    }
+
+    @Override
+    public void removeApiPolicy(ApiPolicy apiPolicy) {
+        apiPolicyMap.remove(apiPolicy.getCacheKey());
     }
 }

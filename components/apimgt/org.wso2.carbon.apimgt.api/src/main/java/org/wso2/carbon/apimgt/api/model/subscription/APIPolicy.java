@@ -19,9 +19,7 @@
 package org.wso2.carbon.apimgt.api.model.subscription;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Entity for keeping ApiPolicy related information.
@@ -30,6 +28,8 @@ import java.util.Set;
 public class APIPolicy extends Policy {
 
     private List<APIPolicyConditionGroup> conditionGroups = new ArrayList<>();
+    
+    private String applicableLevel;
 
     public List<APIPolicyConditionGroup> getConditionGroups() {
 
@@ -39,6 +39,14 @@ public class APIPolicy extends Policy {
     public void addConditionGroup(APIPolicyConditionGroup conditionGroup) {
 
         this.conditionGroups.add(conditionGroup);
+    }
+
+    public String getApplicableLevel() {
+        return applicableLevel;
+    }
+
+    public void setApplicableLevel(String applicableLevel) {
+        this.applicableLevel = applicableLevel;
     }
 
 }

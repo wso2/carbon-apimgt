@@ -615,6 +615,7 @@ public class SubscriptionValidationDAO {
                     apiPolicy.setName(resultSet.getString("NAME"));
                     apiPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                     apiPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    apiPolicy.setApplicableLevel(resultSet.getString("APPLICABLE_LEVEL"));
                     apiPolicies.add(apiPolicy);
                 }
                 APIPolicyConditionGroup apiPolicyConditionGroup = new APIPolicyConditionGroup();
@@ -632,6 +633,7 @@ public class SubscriptionValidationDAO {
                 ConditionDTO[] conditionDTOS = conditionGroupDTO.getConditions();
                 apiPolicyConditionGroup.setConditionDTOS(Arrays.asList(conditionDTOS));
                 apiPolicy.addConditionGroup(apiPolicyConditionGroup);
+                temp.put(policyId, apiPolicy);
             }
         }
     }
@@ -735,11 +737,11 @@ public class SubscriptionValidationDAO {
      * @return {@link ApplicationPolicy}
      * */
     public APIPolicy getApiPolicyByNameForTenant(String policyName, String tenantDomain) {
-
+        APIPolicy policy = null;
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_POLICY_SQL);
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICY_SQL);
         ) {
             int tenantId = 0;
             try {
@@ -748,13 +750,21 @@ public class SubscriptionValidationDAO {
             } catch (UserStoreException e) {
                 log.error("Error in loading ApplicationPolicy for tenantDomain : " + tenantDomain, e);
             }
-        //todo
+            ps.setInt(1, tenantId);
+            ps.setString(2, policyName);
+            ResultSet resultSet = ps.executeQuery();
+
+            List<APIPolicy> apiPolicies = new ArrayList<APIPolicy>();
+            populateApiPolicyList(apiPolicies , resultSet);
+            if (!apiPolicies.isEmpty()) {
+                policy = apiPolicies.get(0);
+            }
 
         } catch (SQLException e) {
             log.error("Error in loading application policies by policyId : " + policyName + " of " + policyName, e);
         }
 
-        return null;
+        return policy;
     }
 
     /*
@@ -857,7 +867,7 @@ public class SubscriptionValidationDAO {
             }
 
         } catch (SQLException e) {
-            log.error("Error in loading Application Key Mappinghsacfrgtghf54trtjkl;{786754w `13457868789[-876re7w4wertyi875 for consumer key : " + consumerKey, e);
+            log.error("Error in loading Application Key Mapping for consumer key : " + consumerKey, e);
         }
         return null;
     }

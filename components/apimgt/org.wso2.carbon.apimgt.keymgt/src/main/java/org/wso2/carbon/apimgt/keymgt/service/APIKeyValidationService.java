@@ -26,6 +26,7 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -41,6 +42,9 @@ import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.entity.APIPolicyConditionGroup;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Condition;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataStoreImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -58,8 +62,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -297,7 +303,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         ArrayList<URITemplate> templates = new ArrayList<URITemplate>();
-        //TODO old one had advanced throttling/normal config
+
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if(store == null) {
             return templates;
@@ -319,13 +325,14 @@ public class APIKeyValidationService extends AbstractAdmin {
         }
 
         if(api == null) {
-            return templates;  ////TODO check this
+            return templates;
         }
         List<URLMapping> mapping = api.getResources();
         if(mapping == null) {
             return templates;
         }
-
+        int apiTenantId = APIUtil.getTenantId(api.getApiProvider());
+        ApiPolicy apiPolicy;
         URITemplate template;
         for (URLMapping urlMapping : mapping) {
             template = new URITemplate();
@@ -334,23 +341,52 @@ public class APIKeyValidationService extends AbstractAdmin {
             template.setUriTemplate(urlMapping.getUrlPattern());
             template.setThrottlingTier(urlMapping.getThrottlingPolicy());
             
-            /// TODO Contains Dummy values. need to populate
+            if (storeImpl.isApiPoliciesInitialized()) {
+                log.debug("SubscriptionDataStore Initialized. Reading API Policies from SubscriptionDataStore");
+                apiPolicy = store.getApiPolicyByName(urlMapping.getThrottlingPolicy(), apiTenantId);
+            } else {
+                log.debug("SubscriptionDataStore not Initialized. Reading API Policies from Rest API");
+                apiPolicy = new SubscriptionDataLoaderImpl().getAPIPolicy(urlMapping.getThrottlingPolicy(),
+                        tenantDomain);
+                if (apiPolicy != null) {
+                    store.addOrUpdateApiPolicy(apiPolicy);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Update SubscriptionDataStore API Policu for " + apiPolicy.getCacheKey());
+                    }
+                }
+            }
+            
             List<String> tiers = new ArrayList<String>();
-            tiers.add(urlMapping.getThrottlingPolicy() + ">false"); //TODO fix this
-            template.setThrottlingTiers(tiers );
-            template.setApplicableLevel("apiLevel");//TODO fix this
+            tiers.add(urlMapping.getThrottlingPolicy() + ">" + apiPolicy.isContentAware());
+            template.setThrottlingTiers(tiers);
+            template.setApplicableLevel(apiPolicy.getApplicableLevel());
             
-            ConditionGroupDTO[] conditionGroups = new ConditionGroupDTO[1];
-            ConditionGroupDTO grp = new ConditionGroupDTO();
-            grp.setConditionGroupId("_default");
-            conditionGroups[0] = grp;
-            template.setConditionGroups(conditionGroups);
-
-            List<String> throttlingConditions = new ArrayList<String>();
-            throttlingConditions.add("_default");
-            template.setThrottlingConditions(throttlingConditions);
-            
-            /////////// Dummy values end ////////
+            List<APIPolicyConditionGroup> conditions = apiPolicy.getConditionGroups();
+            List<ConditionGroupDTO> conditionGroupsList = new ArrayList<ConditionGroupDTO>();
+            for (APIPolicyConditionGroup cond : conditions) {
+                Set<Condition> condSet = cond.getCondition();
+                if (condSet.isEmpty()) {
+                    continue;
+                }
+                List<ConditionDTO> conditionDtoList = new ArrayList<ConditionDTO>();
+                for (Condition condition : condSet) {
+                    ConditionDTO item = new ConditionDTO();
+                    item.setConditionName(condition.getName());
+                    item.setConditionType(condition.getConditionType());
+                    item.setConditionValue(condition.getValue());
+                    item.isInverted(condition.isInverted());
+                    conditionDtoList.add(item);
+                }
+                ConditionGroupDTO group = new ConditionGroupDTO();
+                group.setConditionGroupId("_condition_" + cond.getConditionGroupId());
+                group.setConditions(conditionDtoList.toArray(new ConditionDTO[] {}));
+                conditionGroupsList.add(group);
+            }
+            ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+            defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+            conditionGroupsList.add(defaultGroup);
+            template.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
+            template.setConditionGroups(conditionGroupsList.toArray(new ConditionGroupDTO[]{}));
             
             templates.add(template);  
         }

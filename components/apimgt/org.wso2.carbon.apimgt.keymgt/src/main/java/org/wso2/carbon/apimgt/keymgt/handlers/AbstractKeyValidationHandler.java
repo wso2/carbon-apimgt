@@ -25,15 +25,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
@@ -205,9 +204,10 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         if (apiTenantDomain == null) {
             apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
         SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(apiTenantDomain);
+        //TODO add a check to see whether datastore is initialized an load data using rest api if it is not loaded
         if (datastore != null) {
             API api = datastore.getApiByContextAndVersion(context, version);
             if (api != null) {
@@ -218,27 +218,25 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                         Subscription sub = datastore.getSubscriptionById(app.getId(), api.getApiId());
                         if (sub != null) {
                             String subscriptionStatus = sub.getSubscriptionState();
-                            String type = app.getTokenType(); ///////////////// TODO check this //////////
+                            String type = app.getTokenType();
                             if (APIConstants.SubscriptionStatus.BLOCKED.equals(subscriptionStatus)) {
                                 infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
                                 infoDTO.setAuthorized(false);
                                 return infoDTO;
-                            } else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) ||
-                                    APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
-                                infoDTO.setValidationStatus(
-                                        APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
+                            } else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus)
+                                    || APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
+                                infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
                                 infoDTO.setAuthorized(false);
                                 return infoDTO;
-                            } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED
-                                    .equals(subscriptionStatus) &&
-                                    !APIConstants.API_KEY_TYPE_SANDBOX.equals(type )) {
+                            } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subscriptionStatus)
+                                    && !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
                                 infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
                                 infoDTO.setType(type);
                                 infoDTO.setAuthorized(false);
                                 return infoDTO;
                             }
                             infoDTO.setTier(sub.getPolicyId());
-                            infoDTO.setSubscriber(sub.getSubscriptionId()); 
+                            infoDTO.setSubscriber(sub.getSubscriptionId());
                             infoDTO.setApplicationId(app.getId().toString());
                             infoDTO.setApiName(api.getApiName());
                             infoDTO.setApiPublisher(api.getApiProvider());
@@ -246,49 +244,45 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                             infoDTO.setApplicationTier(app.getPolicy());
                             infoDTO.setType(type);
 
-                            //Advanced Level Throttling Related Properties
+                            // Advanced Level Throttling Related Properties
                             if (APIUtil.isAdvanceThrottlingEnabled()) {
                                 String apiTier = api.getApiTier();
                                 String subscriberUserId = sub.getSubscriptionId();
                                 String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
-                                //int apiId = api.getApiId(); // TODO remove
-                                int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
-                                
-                                //int apiTenantId = APIUtil.getTenantId(api.getApiProvider());// TODO remove
+
                                 ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
-                                        subscriberTenantId); // TODO check tenant id ////
-                                
+                                        tenantId);
                                 SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId(),
-                                        subscriberTenantId);
-                                
+                                        tenantId);
+                                ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), tenantId);
+
                                 boolean isContentAware = false;
-                                //TODO check for api level content aware
-                                if (PolicyConstants.BANDWIDTH_TYPE.equals(appPolicy.getQuotaType())
-                                        || PolicyConstants.BANDWIDTH_TYPE.equals(subPolicy.getQuotaType())) {
-                                    isContentAware = true; 
+                                if (appPolicy.isContentAware() || subPolicy.isContentAware()
+                                        || (apiPolicy != null && apiPolicy.isContentAware())) {
+                                    isContentAware = true;
                                 }
                                 infoDTO.setContentAware(isContentAware);
 
-                                //TODO this must implement as a part of throttling implementation.
+                                // TODO this must implement as a part of throttling implementation.
                                 int spikeArrest = 0;
                                 String apiLevelThrottlingKey = "api_level_throttling_key";
-                                
+
                                 if (subPolicy.getRateLimitCount() > 0) {
-                                    spikeArrest = subPolicy.getRateLimitCount(); 
-                                } 
+                                    spikeArrest = subPolicy.getRateLimitCount();
+                                }
 
                                 String spikeArrestUnit = null;
-                                
+
                                 if (subPolicy.getRateLimitTimeUnit() != null) {
-                                    spikeArrestUnit = subPolicy.getRateLimitTimeUnit(); 
-                                } 
+                                    spikeArrestUnit = subPolicy.getRateLimitTimeUnit();
+                                }
                                 boolean stopOnQuotaReach = subPolicy.isStopOnQuotaReach();
                                 int graphQLMaxDepth = 0;
-                                if(subPolicy.getGraphQLMaxDepth() > 0) {
+                                if (subPolicy.getGraphQLMaxDepth() > 0) {
                                     graphQLMaxDepth = subPolicy.getGraphQLMaxDepth();
                                 }
                                 int graphQLMaxComplexity = 0;
-                                if(subPolicy.getGraphQLMaxComplexity() > 0) {
+                                if (subPolicy.getGraphQLMaxComplexity() > 0) {
                                     graphQLMaxComplexity = subPolicy.getGraphQLMaxComplexity();
                                 }
                                 List<String> list = new ArrayList<String>();
@@ -302,7 +296,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                                 if (apiTier != null && apiTier.trim().length() > 0) {
                                     infoDTO.setApiTier(apiTier);
                                 }
-                                //We also need to set throttling data list associated with given API. This need to have policy id and
+                                // We also need to set throttling data list associated with given API. This need to have
+                                // policy id and
                                 // condition id list for all throttling tiers associated with this API.
                                 infoDTO.setThrottlingDataList(list);
                             }
@@ -334,8 +329,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             log.error("Subscription datastore is null for tenant domain " + apiTenantDomain);
         }
         infoDTO.setAuthorized(false);
-        infoDTO.setValidationStatus(
-                APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
+        infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
         return infoDTO;
     }
 }
