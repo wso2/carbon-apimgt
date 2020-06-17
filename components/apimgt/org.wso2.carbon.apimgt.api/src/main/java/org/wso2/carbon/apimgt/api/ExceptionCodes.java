@@ -204,6 +204,8 @@ ExceptionCodes implements ErrorHandler {
     INVALID_DATE_TIME_STAMP(900703, "Invalid timestamp value", 400, "Timestamp should be in ISO8601 format"),
     LENGTH_EXCEEDS(900704, "Character length exceeds the allowable limit", 400,
             "One of the provided input character length exceeds the allowable limit."),
+    BLANK_PROPERTY_VALUE(900705, "Blank value for required property", 400,
+            "%s property of payload value cannot be blank"),
 
 
     //GraphQL API related codes
@@ -335,7 +337,11 @@ ExceptionCodes implements ErrorHandler {
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
     SCOPE_NOT_FOUND(901501, "Scope Not Found", 404, "Scope does not exist"),
-    USER_NOT_FOUND(901502, "User Not Found", 404, "User does not exist");
+    USER_NOT_FOUND(901502, "User Not Found", 404, "User does not exist"),
+
+    //Analytics related codes
+    ANALYTICS_NOT_ENABLED(901600, "%s not accessible", 404,
+            "Analytics should be enabled to access %s");
 
 
     private final long errorCode;

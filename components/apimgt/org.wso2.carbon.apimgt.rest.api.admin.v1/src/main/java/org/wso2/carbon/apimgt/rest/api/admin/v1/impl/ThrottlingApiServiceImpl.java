@@ -20,10 +20,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.message.Message;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -705,12 +707,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingPoliciesCustomPost(CustomRuleDTO body, String contentType,
-                                                 MessageContext messageContext) {
+                                                 MessageContext messageContext) throws APIManagementException {
 
-        if (StringUtils.isBlank(body.getPolicyName())) {
-            String errorMessage = "Policy name of custom rule cannot be blank";
-            RestApiUtil.handleBadRequest(errorMessage, log);
-        }
+        RestApiAdminUtils
+                .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -723,7 +723,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             try {
                 Policy policyIfExists = apiProvider.getGlobalPolicy(globalPolicy.getPolicyName());
                 if (policyIfExists != null) {
-                    RestApiUtil.handleResourceAlreadyExistsError("Custom rule with name " + globalPolicy.getPolicyName() + " already exists", log);
+                    RestApiUtil.handleResourceAlreadyExistsError(
+                            "Custom rule with name " + globalPolicy.getPolicyName() + " already exists", log);
                 }
             } catch (PolicyNotFoundException ignore) {
             }
@@ -733,7 +734,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //retrieve the new policy and send back as the response
             GlobalPolicy newGlobalPolicy = apiProvider.getGlobalPolicy(body.getPolicyName());
             CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
-            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL + "/" + policyDTO.getPolicyId())).entity(policyDTO).build();
+            return Response.created(
+                    new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL + "/" + policyDTO.getPolicyId()))
+                    .entity(policyDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding a custom rule: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -793,7 +796,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     @Override
     public Response throttlingPoliciesCustomRuleIdPut(String ruleId, CustomRuleDTO body, String contentType,
                                                       String ifMatch, String ifUnmodifiedSince,
-                                                      MessageContext messageContext) {
+                                                      MessageContext messageContext) throws APIManagementException {
+
+        RestApiAdminUtils
+                .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();

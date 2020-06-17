@@ -1343,7 +1343,7 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException
      */
     private OpenAPI injectOtherScopesToDefaultScheme(OpenAPI openAPI) throws APIManagementException {
-        Map<String, SecurityScheme> securitySchemes = null;
+        Map<String, SecurityScheme> securitySchemes ;
         Components component = openAPI.getComponents();
         List<String> otherSetOfSchemes = new ArrayList<>();
 
@@ -1395,9 +1395,9 @@ public class OAS3Parser extends APIDefinition {
                     defaultType.setFlows(defaultTypeFlows);
                 }
             }
+            component.setSecuritySchemes(securitySchemes);
+            openAPI.setComponents(component);
         }
-        component.setSecuritySchemes(securitySchemes);
-        openAPI.setComponents(component);
         setOtherSchemes(otherSetOfSchemes);
         return openAPI;
     }

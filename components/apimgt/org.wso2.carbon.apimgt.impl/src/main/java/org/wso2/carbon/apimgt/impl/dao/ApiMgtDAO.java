@@ -7491,46 +7491,32 @@ public class ApiMgtDAO {
         }
     }
 
-    // This should be only used only when Token Partitioning is enabled.
-    public String getConsumerKeyForTokenWhenTokenPartitioningEnabled(String accessToken) throws APIManagementException {
-
-        if (APIUtil.checkAccessTokenPartitioningEnabled() && APIUtil.checkUserNameAssertionEnabled()) {
-            String accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
-            StringBuilder authorizedDomains = new StringBuilder();
-            String getCKFromTokenSQL = "SELECT CONSUMER_KEY " +
-                    " FROM " + accessTokenStoreTable +
-                    " WHERE ACCESS_TOKEN = ? ";
-
-            Connection connection = null;
-            PreparedStatement prepStmt = null;
-            ResultSet rs = null;
-            try {
-                connection = APIMgtDBUtil.getConnection();
-                prepStmt = connection.prepareStatement(getCKFromTokenSQL);
-                prepStmt.setString(1, APIUtil.encryptToken(accessToken));
-                rs = prepStmt.executeQuery();
-                boolean first = true;
-                while (rs.next()) {
-                    String domain = rs.getString(1);
-                    if (first) {
-                        authorizedDomains.append(domain);
-                        first = false;
-                    } else {
-                        authorizedDomains.append(',').append(domain);
-                    }
-                }
-            } catch (SQLException e) {
-                throw new APIManagementException("Error in retrieving access allowing domain list from table.", e);
-            } catch (CryptoException e) {
-                throw new APIManagementException("Error in retrieving access allowing domain list from table.", e);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+    public String findConsumerKeyFromAccessToken(String accessToken) throws APIManagementException {
+        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+        accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(accessToken, accessTokenStoreTable);
+        Connection connection = null;
+        PreparedStatement smt = null;
+        ResultSet rs = null;
+        String consumerKey = null;
+        try {
+            String getConsumerKeySql = SQLConstants.GET_CONSUMER_KEY_BY_ACCESS_TOKEN_PREFIX + accessTokenStoreTable +
+                    SQLConstants.GET_CONSUMER_KEY_BY_ACCESS_TOKEN_SUFFIX;
+            connection = APIMgtDBUtil.getConnection();
+            smt = connection.prepareStatement(getConsumerKeySql);
+            smt.setString(1, APIUtil.encryptToken(accessToken));
+            rs = smt.executeQuery();
+            while (rs.next()) {
+                consumerKey = rs.getString(1);
             }
-            return authorizedDomains.toString();
+        } catch (SQLException e) {
+            handleException("Error while getting authorized domians.", e);
+        } catch (CryptoException e) {
+            handleException("Error while getting authorized domians.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(smt, connection, rs);
         }
-        return null;
+        return consumerKey;
     }
-
 
     /**
      * Adds a comment for an API

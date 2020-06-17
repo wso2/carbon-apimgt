@@ -2562,8 +2562,43 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
-# The BotDetectedData API resources
+# The Bot Detection Data API resources
 ######################################################
+
+  /bot-detection-data:
+  #-----------------------------------------------------
+  # Get all bot detection data
+  #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:bot_data
+      operationId: getBotDetectionData
+      produces:
+        - application/json
+      summary: |
+        Get all bot detected data
+      description: |
+        Get all bot detected data
+      responses:
+        200:
+          description: |
+            OK.
+            Bot detected data returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/BotDetectionDataList'
+        404:
+          description: |
+            Not Found.
+            Analytics Not Enabled.
+          schema:
+            $ref: '#/definitions/Error'
 
   #-----------------------------------------------------
   # Get configured email list
@@ -4196,12 +4231,12 @@ definitions:
 #-----------------------------------------------------
   CustomRule:
     title: Custom Rule
-    required:
-      - siddhiQuery
-      - keyTemplate
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
-      - properties:
+      - required:
+        - siddhiQuery
+        - keyTemplate
+        properties:
           siddhiQuery:
             type: string
             description: Siddhi query which represents the custom throttling policy
@@ -5325,6 +5360,54 @@ definitions:
         example: 'Approve application [APP1] creation request from application creator - admin with throttling tier - 10MinPer'
         description: |
           description is a message with basic details about the workflow request.
+
+  #-----------------------------------------------------
+  # The Bot Detection Data List resource
+  #-----------------------------------------------------
+  BotDetectionDataList:
+    title: Bot Detection Data List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Bot Detection Data returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/BotDetectionData'
+
+  #-----------------------------------------------------
+  # The Bot Detection Data resource
+  #-----------------------------------------------------
+  BotDetectionData:
+    title: Bot Detection Data
+    properties:
+      recordedTime:
+        type: integer
+        format: int64
+        description: The time of detection
+        example: 1591734138413
+      messageID:
+        type: string
+        description: The message ID
+        example: urn:uuid:1ed6d2de-29df-4fed-a96a-46d2329dce65
+      apiMethod:
+        type: string
+        description: The api method
+        example: GET
+      headerSet:
+        type: string
+        description: The header set
+        example: [Accept=*/*, Host=localhost:8243, User-Agent=curl/7.58.0]
+      messageBody:
+        type: string
+        description: The content of the message body
+        example: <soapenv:Body xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"/>
+      clientIp:
+        type: string
+        description: The IP of the client
+        example: 127.0.0.1
 
 #-----------------------------------------------------
 # END-OF-FILE
