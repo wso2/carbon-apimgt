@@ -18,28 +18,17 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import feign.Feign;
+import feign.Response;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -58,32 +47,28 @@ import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.kmclient.FormEncoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
+import org.wso2.carbon.apimgt.impl.kmclient.model.AuthClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.BearerInterceptor;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
-import org.wso2.carbon.apimgt.impl.kmclient.model.AuthClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ScopeClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.MalformedURLException;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -99,8 +84,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private DCRClient dcrClient;
     private IntrospectionClient introspectionClient;
     private AuthClient authClient;
-    private CloseableHttpClient kmHttpClient;
+    private AuthClient revokeClient;
     private AccessTokenGenerator accessTokenGenerator;
+    private ScopeClient scopeClient;
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
@@ -115,13 +101,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (StringUtils.isEmpty(userId)) {
             throw new APIManagementException("Missing user ID for OAuth application creation.");
         }
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
-        if (StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        }
-        String accessToken = getAccessTokenForKeyMgt();
-        String authorizationHeader = getBearerAuthorizationHeader(accessToken);
 
         String applicationName = oAuthApplicationInfo.getClientName();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
@@ -148,11 +127,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         ClientInfo createdClient;
 
         try {
-            if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
-                createdClient = dcrClient.createApplication(authorizationHeader, request);
-            } else {
-                createdClient = dcrClient.createApplicationForTenant(tenantDomain, authorizationHeader, request);
-            }
+            createdClient = dcrClient.createApplication(request);
             buildDTOFromClientInfo(createdClient, oAuthApplicationInfo);
 
             oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
@@ -183,7 +158,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (infoJson.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
             // this is done as there are instances where the grant string begins with a comma character.
             String grantString = infoJson.getString(ApplicationConstants.OAUTH_CLIENT_GRANT);
-            if(grantString.startsWith(",")) {
+            if (grantString.startsWith(",")) {
                 grantString = grantString.substring(1);
             }
             String[] grantTypes = grantString.split(",");
@@ -225,13 +200,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         // First we attempt to get the tenant domain from the userID and if it is not possible, we fetch it
         // from the ThreadLocalCarbonContext
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
-        if (StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        }
-
-        String accessToken = getAccessTokenForKeyMgt();
-        String authorizationHeader = getBearerAuthorizationHeader(accessToken);
 
         if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
             // Replace the domain name separator with an underscore for secondary user stores
@@ -256,13 +224,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         ClientInfo request = createClientInfo(oAuthApplicationInfo, applicationName, true);
         ClientInfo createdClient;
         try {
-            if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
-                createdClient = dcrClient.updateApplication(authorizationHeader,
-                        oAuthApplicationInfo.getClientId(), request);
-            } else {
-                createdClient = dcrClient.updateApplicationForTenant(tenantDomain, authorizationHeader,
-                        oAuthApplicationInfo.getClientId(), request);
-            }
+            createdClient = dcrClient.updateApplication(oAuthApplicationInfo.getClientId(), request);
             return buildDTOFromClientInfo(createdClient, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);
@@ -284,16 +246,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (log.isDebugEnabled()) {
             log.debug("Trying to delete OAuth application for consumer key :" + consumerKey);
         }
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String accessToken = getAccessTokenForKeyMgt();
-        String authorizationHeader = getBearerAuthorizationHeader(accessToken);
 
         try {
-            if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
-                dcrClient.deleteApplication(authorizationHeader, consumerKey);
-            } else {
-                dcrClient.deleteApplicationForTenant(tenantDomain, authorizationHeader, consumerKey);
-            }
+            dcrClient.deleteApplication(consumerKey);
         } catch (KeyManagerClientException e) {
             handleException("Cannot remove service provider for the given consumer key : " + consumerKey, e);
         }
@@ -306,17 +261,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.debug("Trying to retrieve OAuth application for consumer key :" + consumerKey);
         }
 
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String accessToken = getAccessTokenForKeyMgt();
-        String authorizationHeader = getBearerAuthorizationHeader(accessToken);
-
-        ClientInfo clientInfo;
         try {
-            if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
-                clientInfo = dcrClient.getApplication(authorizationHeader, consumerKey);
-            } else {
-                clientInfo = dcrClient.getApplicationForTenant(tenantDomain, authorizationHeader, consumerKey);
-            }
+            ClientInfo clientInfo = dcrClient.getApplication(consumerKey);
             return buildDTOFromClientInfo(clientInfo, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             handleException("Cannot retrieve service provider for the given consumer key : " + consumerKey, e);
@@ -382,11 +328,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
 
-        String clientAccessToken = getAccessTokenForKeyMgt();
-        String authorizationHeader = getBearerAuthorizationHeader(clientAccessToken);
-
         try {
-            IntrospectInfo introspectInfo = introspectionClient.introspect(authorizationHeader, accessToken);
+            IntrospectInfo introspectInfo = introspectionClient.introspect(accessToken);
             tokenInfo.setAccessToken(accessToken);
             boolean isActive = introspectInfo.isActive();
             if (!isActive) {
@@ -443,23 +386,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 getConfigurationParamValue(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD));
 
         String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
-        String tenantDomain;
-        if (StringUtils.isNotEmpty(userId)) {
-            tenantDomain = MultitenantUtils.getTenantDomain(userId);
-        } else {
-            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        }
-        String accessToken = getAccessTokenForKeyMgt();
-        String authorizationHeader = getBearerAuthorizationHeader(accessToken);
 
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
         ClientInfo clientInfo;
         try {
-            if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
-                clientInfo = dcrClient.getApplication(authorizationHeader, consumerKey);
-            } else {
-                clientInfo = dcrClient.getApplicationForTenant(tenantDomain, authorizationHeader, consumerKey);
-            }
+            clientInfo = dcrClient.getApplication(consumerKey);
             buildDTOFromClientInfo(clientInfo, oAuthApplicationInfo);
         } catch (KeyManagerClientException e) {
             handleException("Some thing went wrong while getting OAuth application for given consumer key " +
@@ -508,78 +439,87 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         return oAuthApplicationInfo;
     }
 
-    /**
-     * This method initialize the HTTP Client and Connection Manager to call services in KeyManager.
-     *
-     * @throws APIManagementException if an error occurs while initializing HttpClient
-     */
-    protected void initializeHttpClient() throws APIManagementException {
-
-        try {
-            String authServerURL = (String) configuration.getParameter(APIConstants.AUTHSERVER_URL);
-            java.net.URL keyManagerURL = new java.net.URL(authServerURL);
-            int keyManagerPort = keyManagerURL.getPort();
-            String keyManagerProtocol = keyManagerURL.getProtocol();
-            this.kmHttpClient = (CloseableHttpClient) APIUtil.getHttpClient(keyManagerPort, keyManagerProtocol);
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Error while initializing HttpClient due to malformed URL", e);
-        }
-    }
-
     @Override
     public void loadConfiguration(KeyManagerConfiguration configuration) throws APIManagementException {
+
         this.configuration = configuration;
-        //Initialize a Http Client and Connection Manager using the ServerURL of KM
-        initializeHttpClient();
 
         String consumerKey = (String) configuration.getParameter(APIConstants.KEY_MANAGER_CONSUMER_KEY);
         String consumerSecret = (String) configuration.getParameter(APIConstants.KEY_MANAGER_CONSUMER_SECRET);
         String keyManagerServiceUrl = (String) configuration.getParameter(APIConstants.AUTHSERVER_URL);
-        String tokenEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(
-                "/oauth2/token");
-        String revokeEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(
-                "/oauth2/revoke");
-        accessTokenGenerator = new AccessTokenGenerator(tokenEndpoint,revokeEndpoint,consumerKey,consumerSecret);
 
-        try {
-            java.net.URL keyManagerServicesURL = new java.net.URL(keyManagerServiceUrl);
-            int keyManagerPort = keyManagerServicesURL.getPort();
-            String keyManagerProtocol = keyManagerServicesURL.getProtocol();
-            String keyManagerHost = keyManagerServicesURL.getHost();
-            String keyManagerURL = keyManagerProtocol.concat("://").concat(keyManagerHost);
-            if (keyManagerPort != 0) {
-                keyManagerURL = keyManagerURL.concat(":").concat(Integer.toString(keyManagerPort));
-            }
-            String authEndpoint = tokenEndpoint.replace("/token", "");
-            revokeEndpoint = revokeEndpoint.replace("/revoke", "");
-
-            dcrClient = Feign.builder()
-                    .client(new OkHttpClient())
-                    .encoder(new GsonEncoder())
-                    .decoder(new GsonDecoder())
-                    .logger(new Slf4jLogger())
-                    .errorDecoder(new KMClientErrorDecoder())
-                    .target(DCRClient.class, keyManagerURL);
-            authClient = Feign.builder()
-                    .client(new OkHttpClient())
-                    .encoder(new GsonEncoder())
-                    .decoder(new GsonDecoder())
-                    .logger(new Slf4jLogger())
-                    .errorDecoder(new KMClientErrorDecoder())
-                    .encoder(new FormEncoder())
-                    .target(AuthClient.class, authEndpoint);
-            introspectionClient = Feign.builder()
-                    .client(new OkHttpClient())
-                    .encoder(new GsonEncoder())
-                    .decoder(new GsonDecoder())
-                    .logger(new Slf4jLogger())
-                    .errorDecoder(new KMClientErrorDecoder())
-                    .encoder(new FormEncoder())
-                    .target(IntrospectionClient.class, keyManagerURL.concat("/oauth2/introspect"));
-
-        } catch (MalformedURLException e) {
-            log.error("Error in parsing the Key Validator URL provided: " + keyManagerServiceUrl, e);
+        String dcrEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT) != null) {
+            dcrEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
+        } else {
+            dcrEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext().trim()).concat("/api/identity/oauth2/dcr/v1.1/register");
         }
+        String tokenEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.TOKEN_ENDPOINT) != null) {
+            tokenEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.TOKEN_ENDPOINT);
+        } else {
+            tokenEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(
+                    "/oauth2/token");
+        }
+        String revokeEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.REVOKE_ENDPOINT) != null) {
+            revokeEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.REVOKE_ENDPOINT);
+        } else {
+            revokeEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(
+                    "/oauth2/revoke");
+        }
+        String scopeEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT) != null) {
+            scopeEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT);
+        } else {
+            scopeEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext().trim())
+                    .concat(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH);
+        }
+        String introspectionEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.INTROSPECTION_ENDPOINT) != null) {
+            introspectionEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.INTROSPECTION_ENDPOINT);
+        } else {
+            introspectionEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat("/oauth2/introspect");
+        }
+        accessTokenGenerator = new AccessTokenGenerator(tokenEndpoint, revokeEndpoint, consumerKey, consumerSecret);
+
+        dcrClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(DCRClient.class, dcrEndpoint);
+        authClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .errorDecoder(new KMClientErrorDecoder())
+                .encoder(new FormEncoder())
+                .target(AuthClient.class, tokenEndpoint);
+
+        introspectionClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .encoder(new FormEncoder())
+                .target(IntrospectionClient.class, introspectionEndpoint);
+        scopeClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(ScopeClient.class, scopeEndpoint);
     }
 
     @Override
@@ -679,26 +619,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Get scope management service tenant URL for given KM endpoint.
-     *
-     * @return Scope Management Service host URL (Eg:https://localhost:9444/api/identity/oauth2/v1.0/scopes)
-     * @throws APIManagementException If a malformed km endpoint is provided
-     */
-    private String getScopeManagementServiceEndpoint() throws APIManagementException {
-
-        String authServerURL = (String) configuration.getParameter(APIConstants.AUTHSERVER_URL);
-        if (StringUtils.isEmpty(authServerURL)) {
-            throw new APIManagementException("API Key Validator Server URL cannot be empty or null");
-        }
-        String scopeMgtTenantEndpoint = authServerURL.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0];
-        if (StringUtils.isNoneEmpty(tenantDomain) && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            scopeMgtTenantEndpoint += "/t/" + tenantDomain;
-        }
-        scopeMgtTenantEndpoint += APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH;
-        return scopeMgtTenantEndpoint;
-    }
-
-    /**
      * This method will be used to register a Scope in the authorization server.
      *
      * @param scope        Scope to register
@@ -707,37 +627,22 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void registerScope(Scope scope) throws APIManagementException {
 
-        String accessToken = getAccessTokenForKeyMgt();
-        String scopeEndpoint = getScopeManagementServiceEndpoint();
         String scopeKey = scope.getKey();
-        try {
-            HttpPost httpPost = new HttpPost(scopeEndpoint);
-            httpPost.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            ScopeDTO scopeDTO = new ScopeDTO();
-            scopeDTO.setName(scopeKey);
-            scopeDTO.setDisplayName(scope.getName());
-            scopeDTO.setDescription(scope.getDescription());
-            if (scope.getRoles() != null) {
-                scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
+        ScopeDTO scopeDTO = new ScopeDTO();
+        scopeDTO.setName(scopeKey);
+        scopeDTO.setDisplayName(scope.getName());
+        scopeDTO.setDescription(scope.getDescription());
+        if (scope.getRoles() != null) {
+            scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
+        }
+        try (Response response = scopeClient.registerScope(scopeDTO)) {
+            if (response.status() != HttpStatus.SC_CREATED) {
+                String responseString = readHttpResponseAsString(response.body());
+                throw new APIManagementException("Error occurred while registering scope: " + scopeKey + ". Error" +
+                        " Status: " + response.status() + " . Error Response: " + responseString);
             }
-            StringEntity payload = new StringEntity(new Gson().toJson(scopeDTO));
-            httpPost.setEntity(payload);
-            if (log.isDebugEnabled()) {
-                log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to register scope "
-                        + scopeKey);
-            }
-            try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpPost)) {
-                int statusCode = httpResponse.getStatusLine().getStatusCode();
-                if (statusCode != HttpStatus.SC_CREATED) {
-                    String responseString = readHttpResponseAsString(httpResponse);
-                    throw new APIManagementException("Error occurred while registering scope: " + scopeKey + " via "
-                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: " + responseString);
-                }
-            }
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while registering scope: " + scopeKey + " via " + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
+        } catch (KeyManagerClientException e) {
+            handleException("Can not scope : " + scopeKey, e);
         }
     }
 
@@ -748,40 +653,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @return Response Body String
      * @throws APIManagementException If an error occurs while reading the response
      */
-    protected String readHttpResponseAsString(CloseableHttpResponse httpResponse) throws APIManagementException {
+    protected String readHttpResponseAsString(Response.Body httpResponse) throws APIManagementException {
 
-        try {
-            HttpEntity entity = httpResponse.getEntity();
-            String responseString = entity != null ? EntityUtils.toString(entity, StandardCharsets.UTF_8) : null;
-            //release all resources held by the responseHttpEntity
-            EntityUtils.consume(entity);
-            return responseString;
+        try (InputStream inputStream = httpResponse.asInputStream()) {
+            return IOUtils.toString(inputStream);
         } catch (IOException e) {
             String errorMessage = "Error occurred while reading response body as string";
             throw new APIManagementException(errorMessage, e);
         }
-    }
-
-
-    /**
-     * Get access token with key management scopes for the tenant using the KM Mgt OAuth Application.
-     *
-     * @return Access Token
-     */
-    protected String getAccessTokenForKeyMgt() throws APIManagementException {
-
-        return accessTokenGenerator.getAccessToken(APIConstants.KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES);
-    }
-
-    /**
-     * Construct Bearer Authorization header for AccessTokenInfo.
-     *
-     * @param accessToken Access Token
-     * @return Bearer Authorization header
-     */
-    private String getBearerAuthorizationHeader(String accessToken) {
-
-        return APIConstants.AUTHORIZATION_BEARER + accessToken;
     }
 
     /**
@@ -794,29 +673,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Scope getScopeByName(String name) throws APIManagementException {
 
-        ScopeDTO scopeDTO;
-        String accessToken = getAccessTokenForKeyMgt();
-        String scopeEndpoint = getScopeManagementServiceEndpoint()
-                + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
-                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, name));
-        HttpGet httpGet = new HttpGet(scopeEndpoint);
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-        if (log.isDebugEnabled()) {
-            log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to get scope "
-                    + name);
-        }
-        try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpGet)) {
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            String responseString = readHttpResponseAsString(httpResponse);
-            if (statusCode == HttpStatus.SC_OK && StringUtils.isNoneEmpty(responseString)) {
-                scopeDTO = new Gson().fromJson(responseString, ScopeDTO.class);
-            } else {
-                throw new APIManagementException("Error occurred while retrieving scope: " + name + " via "
-                        + scopeEndpoint + ". Error Status: " + statusCode + ". Error Response: " + responseString);
-            }
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while retrieving scope: " + name + " via " + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
+        ScopeDTO scopeDTO = null;
+        try {
+            scopeDTO = scopeClient.getScopeByName(name);
+        } catch (KeyManagerClientException ex) {
+            handleException("Can read scope : " + name, ex);
         }
         return fromDTOToScope(scopeDTO);
     }
@@ -840,13 +701,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * Get Scope object list from ScopeDTO List response received from authorization server.
      *
-     * @param scopeDTOList Scope DTO List
+     * @param scopeDTOS Scope DTO Array
      * @return Scope Object to Scope Name Mappings
      */
-    private Map<String, Scope> fromDTOListToScopeListMapping(List<ScopeDTO> scopeDTOList) {
+    private Map<String, Scope> fromDTOListToScopeListMapping(ScopeDTO[] scopeDTOS) {
 
         Map<String, Scope> scopeListMapping = new HashMap<>();
-        for (ScopeDTO scopeDTO : scopeDTOList) {
+        for (ScopeDTO scopeDTO : scopeDTOS) {
             scopeListMapping.put(scopeDTO.getName(), fromDTOToScope(scopeDTO));
         }
         return scopeListMapping;
@@ -862,32 +723,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Map<String, Scope> getAllScopes() throws APIManagementException {
 
-        List<ScopeDTO> allScopeDTOS;
-        // Get access token
-        String accessToken = getAccessTokenForKeyMgt();
-        String scopeEndpoint = getScopeManagementServiceEndpoint();
-        HttpGet httpGet = new HttpGet(scopeEndpoint);
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-        if (log.isDebugEnabled()) {
-            log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to get scopes");
+        ScopeDTO[] scopes = new ScopeDTO[0];
+        try {
+            scopes = scopeClient.getScopes();
+        } catch (KeyManagerClientException ex) {
+            handleException("Error while retrieving scopes", ex);
         }
-        try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpGet)) {
-            String responseString = readHttpResponseAsString(httpResponse);
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            if (statusCode == HttpStatus.SC_OK && StringUtils.isNoneEmpty(responseString)) {
-                Type scopeListType =
-                        new TypeToken<ArrayList<ScopeDTO>>() {
-                        }.getType();
-                allScopeDTOS = new Gson().fromJson(responseString, scopeListType);
-            } else {
-                throw new APIManagementException("Error occurred while retrieving scopes via: " + scopeEndpoint
-                        + ". Error Status: " + statusCode + " . Error Response: " + responseString);
-            }
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while getting retrieving via " + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
-        }
-        return fromDTOListToScopeListMapping(allScopeDTOS);
+        return fromDTOListToScopeListMapping(scopes);
     }
 
     /**
@@ -967,29 +809,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void deleteScope(String scopeName) throws APIManagementException {
 
-        // Get access token
-        String accessToken = getAccessTokenForKeyMgt();
-        String scopeEndpoint = getScopeManagementServiceEndpoint()
-                + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
-                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeName));
-
-        HttpDelete httpDelete = new HttpDelete(scopeEndpoint);
-        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-        if (log.isDebugEnabled()) {
-            log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to delete scope "
-                    + scopeName);
-        }
-        try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpDelete)) {
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            if (statusCode != HttpStatus.SC_OK) {
-                String responseString = readHttpResponseAsString(httpResponse);
-                String errorMessage = "Error occurred while deleting scope: " + scopeName + " via: " + scopeEndpoint
-                        + ". Error Status: " + statusCode + " . Error Response: " + responseString;
+        try {
+            Response response = scopeClient.deleteScope(scopeName);
+            if (response.status() != HttpStatus.SC_OK) {
+                String responseString = readHttpResponseAsString(response.body());
+                String errorMessage =
+                        "Error occurred while deleting scope: " + scopeName + ". Error Status: " + response.status() +
+                                " . Error Response: " + responseString;
                 throw new APIManagementException(errorMessage);
             }
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while deleting scope: " + scopeName + " via " + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
+        } catch (KeyManagerClientException ex) {
+            handleException("Error occurred while deleting scope", ex);
         }
     }
 
@@ -1002,39 +832,18 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void updateScope(Scope scope) throws APIManagementException {
 
-        // Get access token
-        String accessToken = getAccessTokenForKeyMgt();
         String scopeKey = scope.getKey();
-        String scopeEndpoint = getScopeManagementServiceEndpoint()
-                + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
-                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeKey));
         try {
-            HttpPut httpPut = new HttpPut(scopeEndpoint);
-            httpPut.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-            httpPut.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             ScopeDTO scopeDTO = new ScopeDTO();
             scopeDTO.setDisplayName(scope.getName());
             scopeDTO.setDescription(scope.getDescription());
             if (scope.getRoles() != null) {
                 scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
             }
-            StringEntity payload = new StringEntity(new Gson().toJson(scopeDTO));
-            httpPut.setEntity(payload);
-            if (log.isDebugEnabled()) {
-                log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to update scope "
-                        + scopeKey);
-            }
-            try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpPut)) {
-                int statusCode = httpResponse.getStatusLine().getStatusCode();
-                if (statusCode != HttpStatus.SC_OK) {
-                    String responseString = readHttpResponseAsString(httpResponse);
-                    throw new APIManagementException("Error occurred while updating scope: " + scopeKey + " via: "
-                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: " + responseString);
-                }
-            }
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while updating scope: " + scopeKey + " via " + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
+            scopeClient.updateScope(scopeDTO, scope.getName());
+        } catch (KeyManagerClientException e) {
+            String errorMessage = "Error occurred while updating scope: " + scopeKey;
+            handleException(errorMessage, e);
         }
     }
 
@@ -1049,42 +858,19 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public boolean isScopeExists(String scopeName) throws APIManagementException {
 
-        // Get access token
-        String accessToken = getAccessTokenForKeyMgt();
-        String scopeEndpoint = getScopeManagementServiceEndpoint()
-                + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
-                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeName));
-
-        HttpHead httpHead = new HttpHead(scopeEndpoint);
-        httpHead.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-        if (log.isDebugEnabled()) {
-            log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to check scope existence of "
-                    + scopeName);
-        }
-        try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpHead)) {
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            if (statusCode != HttpStatus.SC_OK) {
-                if (statusCode != HttpStatus.SC_NOT_FOUND) {
-                    String responseString = readHttpResponseAsString(httpResponse);
-                    String errorMessage = "Error occurred while checking existence of scope: " + scopeName + " via: "
-                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: " + responseString;
-                    throw new APIManagementException(errorMessage);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Scope " + scopeName + " not found in authorization server " + scopeEndpoint);
-                    }
-                    return false;
-                }
+        try (Response response = scopeClient.isScopeExist(scopeName)) {
+            if (response.status() == HttpStatus.SC_OK) {
+                return true;
+            } else if (response.status() != HttpStatus.SC_NOT_FOUND) {
+                String responseString = readHttpResponseAsString(response.body());
+                String errorMessage = "Error occurred while checking existence of scope: " + scopeName + ". Error " +
+                        "Status: " + response.status() + " . Error Response: " + responseString;
+                throw new APIManagementException(errorMessage);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Scope " + scopeName + " found in authorization server " + scopeEndpoint);
-            }
-            return true;
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while checking existence of scope: " + scopeName + " via "
-                    + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
+        } catch (KeyManagerClientException e) {
+            handleException("Error while check scope exist", e);
         }
+        return false;
     }
 
     /**
@@ -1140,6 +926,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     protected boolean checkUserNameAssertionEnabled() {
 
         return APIUtil.checkUserNameAssertionEnabled();
+    }
+
+    private String getTenantAwareContext() {
+
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            return "/t/".concat(tenantDomain);
+        }
+        return "";
     }
 
 }

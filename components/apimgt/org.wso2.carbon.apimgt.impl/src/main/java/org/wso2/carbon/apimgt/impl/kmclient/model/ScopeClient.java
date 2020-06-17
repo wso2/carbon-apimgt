@@ -19,27 +19,30 @@ package org.wso2.carbon.apimgt.impl.kmclient.model;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+import feign.Response;
+import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 
-public interface DCRClient {
+public interface ScopeClient {
 
+    @Headers("Content-Type: application/json")
     @RequestLine("POST ")
-    @Headers("Content-Type: application/json")
-    ClientInfo createApplication(ClientInfo clientInfo)
-            throws KeyManagerClientException;
+    Response registerScope(ScopeDTO scopeDTO) throws KeyManagerClientException;
 
-    @RequestLine("GET /{clientId}")
-    @Headers("Content-Type: application/json")
-    ClientInfo getApplication(@Param("clientId") String clientId)
-            throws KeyManagerClientException;
+    @RequestLine("GET ")
+    ScopeDTO[] getScopes() throws KeyManagerClientException;
 
-    @RequestLine("PUT /{clientId}")
-    @Headers("Content-Type: application/json")
-    ClientInfo updateApplication(@Param("clientId") String clientId, ClientInfo clientInfo)
-            throws KeyManagerClientException;
+    @RequestLine("GET /name/{name}")
+    ScopeDTO getScopeByName(@Param("name") String name) throws KeyManagerClientException;
 
-    @RequestLine("DELETE /{clientId}")
     @Headers("Content-Type: application/json")
-    void deleteApplication(@Param("clientId") String clientId) throws KeyManagerClientException;
+    @RequestLine("PUT /name/{name}")
+    Response updateScope(ScopeDTO scopeDTO, @Param("name") String name) throws KeyManagerClientException;
 
+    @Headers("Content-Type: application/json")
+    @RequestLine("DELETE /{name}")
+    Response deleteScope(@Param("name") String name) throws KeyManagerClientException;
+
+    @RequestLine("HEAD /name/{name}")
+    Response isScopeExist(@Param("name") String name) throws KeyManagerClientException;
 }
