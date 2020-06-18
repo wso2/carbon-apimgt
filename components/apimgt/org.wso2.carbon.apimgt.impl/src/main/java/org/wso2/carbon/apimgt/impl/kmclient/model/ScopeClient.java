@@ -40,7 +40,7 @@ public interface ScopeClient {
     Response updateScope(ScopeDTO scopeDTO, @Param("name") String name) throws KeyManagerClientException;
 
     @Headers("Content-Type: application/json")
-    @RequestLine("DELETE /{name}")
+    @RequestLine("DELETE /name/{name}")
     Response deleteScope(@Param("name") String name) throws KeyManagerClientException;
 
     @RequestLine("HEAD /name/{name}")

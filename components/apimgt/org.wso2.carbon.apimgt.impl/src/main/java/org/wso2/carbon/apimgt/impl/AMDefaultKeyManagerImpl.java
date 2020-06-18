@@ -482,7 +482,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             introspectionEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.INTROSPECTION_ENDPOINT);
         } else {
             introspectionEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                    .concat("/oauth2/introspect");
+                    .concat(getTenantAwareContext().trim()).concat("/oauth2/introspect");
         }
         accessTokenGenerator = new AccessTokenGenerator(tokenEndpoint, revokeEndpoint, consumerKey, consumerSecret);
 

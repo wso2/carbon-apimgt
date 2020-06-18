@@ -18,6 +18,7 @@ public class BearerInterceptor implements RequestInterceptor {
     public void apply(RequestTemplate requestTemplate) {
 
         String accessToken = accessTokenGenerator.getAccessToken(APIConstants.KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES);
-        requestTemplate.header("Authorization", "Bearer " + accessToken);
+        requestTemplate
+                .header(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BEARER + accessToken);
     }
 }
