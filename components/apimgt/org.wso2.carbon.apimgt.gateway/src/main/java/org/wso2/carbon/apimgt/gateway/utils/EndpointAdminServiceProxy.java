@@ -30,6 +30,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class EndpointAdminServiceProxy {
 
@@ -139,6 +140,25 @@ public class EndpointAdminServiceProxy {
 
         this.endpointAdmin = endpointAdmin;
     }
+
+    public List<String> getEndpoints(String endpointName)
+            throws EndpointAdminException {
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            String[] endPointsNames = endpointAdmin.getEndPointsNames();
+            if (endPointsNames != null) {
+                return Arrays.asList(endPointsNames);
+            }
+
+        } else {
+            String[] endPointsNames = endpointAdmin.getEndPointsNamesForTenant(tenantDomain);
+            if (endPointsNames != null) {
+                return Arrays.asList(endPointsNames);
+            }
+        }
+        return null;
+    }
+
+
 
     public boolean isEndpointExist(String endpointName)
             throws EndpointAdminException {

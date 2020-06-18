@@ -23,8 +23,10 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.endpoint.EndpointAdminException;
 
 import javax.ws.rs.core.Response;
 
@@ -34,13 +36,21 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
+        EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy
+                (gatewayAPIDTO.getTenantDomain());
 
         JSONObject responseObj = new JSONObject();
         JSONArray endPointArray = new JSONArray();
         if (gatewayAPIDTO != null) {
             if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
                 for (GatewayContentDTO gatewayEndpoint : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
-                    endPointArray.put(gatewayEndpoint.getContent());
+                    try {
+                        if (endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()) != null) {
+                            endPointArray.put(gatewayEndpoint.getContent());
+                        }
+                    } catch (EndpointAdminException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             responseObj.put("Endpoints", endPointArray);

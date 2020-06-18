@@ -18,11 +18,16 @@
 
 package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
+import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
@@ -30,17 +35,26 @@ import javax.ws.rs.core.Response;
 
 public class LocalEntryApiServiceImpl implements LocalEntryApiService {
 
-    public Response localEntryGet(String apiName, String label, String apiId, MessageContext messageContext) {
+    private static final Log log = LogFactory.getLog(LocalEntryApiServiceImpl.class);
+
+    public Response localEntryGet(String apiName, String label, String apiId, MessageContext messageContext){
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
+        LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
 
         JSONObject responseObj = new JSONObject();
         JSONArray localEntryArray = new JSONArray();
         if (gatewayAPIDTO != null) {
             if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
                 for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
-                    localEntryArray.put(localEntry.getContent());
+                    try {
+                        if (localEntryServiceProxy.getEntry(localEntry.getName()) != null){
+                            localEntryArray.put(localEntry.getContent());
+                        }
+                    } catch (AxisFault axisFault) {
+                        log.error(axisFault);
+                    }
                 }
             }
             responseObj.put("LocalEntry", localEntryArray);

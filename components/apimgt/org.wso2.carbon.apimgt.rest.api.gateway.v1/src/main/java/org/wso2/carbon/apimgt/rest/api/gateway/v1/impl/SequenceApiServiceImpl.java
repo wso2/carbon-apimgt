@@ -18,11 +18,13 @@
 
 package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
+import org.apache.axis2.AxisFault;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
@@ -34,13 +36,21 @@ public class SequenceApiServiceImpl implements SequenceApiService {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
+        SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
 
         JSONObject responseObj = new JSONObject();
         JSONArray sequencesArray = new JSONArray();
         if (gatewayAPIDTO != null) {
             if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
                 for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
-                    sequencesArray.put(sequence.getContent());
+                    try {
+                        if(sequenceAdminServiceProxy.getSequence(sequence.getName()) != null){
+                            sequencesArray.put(sequence.getContent());
+                        }
+                    } catch (AxisFault axisFault) {
+                        axisFault.printStackTrace();
+                    }
                 }
             }
             responseObj.put("Sequence", sequencesArray);
