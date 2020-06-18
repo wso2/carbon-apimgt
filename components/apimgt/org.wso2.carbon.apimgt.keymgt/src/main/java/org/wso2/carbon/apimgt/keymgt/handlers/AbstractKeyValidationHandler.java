@@ -254,7 +254,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
                                 ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
                                         tenantId);
-                                if(appPolicy == null) {
+                                if (appPolicy == null) {
                                     try {
                                         appPolicy = new SubscriptionDataLoaderImpl()
                                                 .getApplicationPolicy(app.getPolicy(), apiTenantDomain);
@@ -265,7 +265,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                                 }
                                 SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId(),
                                         tenantId);
-                                if(subPolicy == null) {
+                                if (subPolicy == null) {
                                     try {
                                         subPolicy = new SubscriptionDataLoaderImpl()
                                                 .getSubscriptionPolicy(sub.getPolicyId(), apiTenantDomain);

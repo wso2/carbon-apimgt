@@ -347,7 +347,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             if (storeImpl.isApiPoliciesInitialized()) {
                 log.debug("SubscriptionDataStore Initialized. Reading API Policies from SubscriptionDataStore");
                 apiPolicy = store.getApiPolicyByName(urlMapping.getThrottlingPolicy(), apiTenantId);
-                if(apiPolicy == null) {
+                if (apiPolicy == null) {
                     //could be null for situations where invoke before map is updated
                     log.debug("API Policies not found in the SubscriptionDataStore. Retrieving from the Rest API");
                     apiPolicy = new SubscriptionDataLoaderImpl().getAPIPolicy(urlMapping.getThrottlingPolicy(),
