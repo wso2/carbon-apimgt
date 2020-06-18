@@ -284,44 +284,53 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     }
 
     @Override
-    public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws DataLoadingException {
+    public SubscriptionPolicy getSubscriptionPolicy(String policyName, String tenantDomain) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES + "?policyName=" +
                 policyName;
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
+        if (log.isDebugEnabled()) {
+            log.debug("getSubscriptionPolicy for " + policyName + " for tenant " + tenantDomain);
+        }
         String responseString;
         try {
-            responseString = invokeService(endPoint, null);
+            responseString = invokeService(endPoint, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-
-            subscriptionPolicy = (new Gson().fromJson(responseString, SubscriptionPolicyList.class)).getList().get(0);
-
+            SubscriptionPolicyList list = new Gson().fromJson(responseString, SubscriptionPolicyList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                subscriptionPolicy = list.getList().get(0);
+            }
         }
         return subscriptionPolicy;
     }
 
     @Override
-    public ApplicationPolicy getApplicationPolicy(String policyName) throws DataLoadingException {
+    public ApplicationPolicy getApplicationPolicy(String policyName, String tenantDomain) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES + "?policyName=" +
                 policyName;
         ApplicationPolicy applicationPolicy = new ApplicationPolicy();
+        if (log.isDebugEnabled()) {
+            log.debug("getApplicationPolicy for " + policyName + " for tenant " + tenantDomain);
+        }
         String responseString;
         try {
-            responseString = invokeService(endPoint, null);
+            responseString = invokeService(endPoint, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            applicationPolicy = (new Gson().fromJson(responseString, ApplicationPolicyList.class)).getList().get(0);
-
+            ApplicationPolicyList list = new Gson().fromJson(responseString, ApplicationPolicyList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                applicationPolicy = list.getList().get(0);
+            }
         }
         return applicationPolicy;
     }
@@ -333,6 +342,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 policyName;
         ApiPolicy apiPolicy = new ApiPolicy();
         String responseString;
+        if (log.isDebugEnabled()) {
+            log.debug("getAPIPolicy for " + policyName + " for tenant " + tenantDomain);
+        }
         try {
             responseString = invokeService(endPoint, tenantDomain);
         } catch (IOException e) {
@@ -392,7 +404,11 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 log.error("Could not retrieve subscriptions for tenantDomain : " + tenantDomain);
                 throw new DataLoadingException("Error while retrieving subscription from " + path);
             }
-            return EntityUtils.toString(httpResponse.getEntity(), UTF8);
+            String responseString = EntityUtils.toString(httpResponse.getEntity(), UTF8);
+            if (log.isDebugEnabled()) {
+                log.debug("Response : " + responseString);
+            }
+            return responseString;
 
     }
 

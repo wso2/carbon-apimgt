@@ -38,6 +38,8 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
+import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -252,8 +254,26 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
                                 ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
                                         tenantId);
+                                if (appPolicy == null) {
+                                    try {
+                                        appPolicy = new SubscriptionDataLoaderImpl()
+                                                .getApplicationPolicy(app.getPolicy(), apiTenantDomain);
+                                        datastore.addOrUpdateApplicationPolicy(appPolicy);
+                                    } catch (DataLoadingException e) {
+                                        log.error("Error while loading ApplicationPolicy");
+                                    }
+                                }
                                 SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId(),
                                         tenantId);
+                                if (subPolicy == null) {
+                                    try {
+                                        subPolicy = new SubscriptionDataLoaderImpl()
+                                                .getSubscriptionPolicy(sub.getPolicyId(), apiTenantDomain);
+                                        datastore.addOrUpdateSubscriptionPolicy(subPolicy);
+                                    } catch (DataLoadingException e) {
+                                        log.error("Error while loading SubscriptionPolicy");
+                                    }
+                                }
                                 ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), tenantId);
 
                                 boolean isContentAware = false;
