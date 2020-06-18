@@ -26,7 +26,7 @@ const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "A
 const Landing = lazy(() => import('AppComponents/LandingPage/Landing' /* webpackChunkName: "Landing" */));
 const TagCloudListing = lazy(() => import('AppComponents/Apis/Listing/TagCloudListing' /* webpackChunkName: "TagCloudListing" */));
 const SettingsBase = lazy(() => import('AppComponents/Settings/SettingsBase' /* webpackChunkName: "SettingsBase" */));
-const ChangePassword = lazy(() => import('AppComponents/Settings/ChangePassword'));
+const ChangePassword = lazy(() => import('AppComponents/Settings/ChangePassword/ChangePassword'));
 const Listing = lazy(() => import('AppComponents/Applications/Listing/Listing' /* webpackChunkName: "ApiListing" */));
 const Details = lazy(() => import('AppComponents/Applications/Details/index' /* webpackChunkName: "ApplicationDetails" */));
 
