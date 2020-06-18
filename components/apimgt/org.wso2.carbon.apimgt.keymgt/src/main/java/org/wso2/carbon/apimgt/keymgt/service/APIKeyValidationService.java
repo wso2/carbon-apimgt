@@ -331,7 +331,10 @@ public class APIKeyValidationService extends AbstractAdmin {
         if(mapping == null) {
             return templates;
         }
-        int apiTenantId = APIUtil.getTenantId(api.getApiProvider());
+        int apiTenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(api.getApiProvider()));
+        if (log.isDebugEnabled()) {
+            log.debug("Tenant domain: " + tenantDomain + " tenantId: " + apiTenantId);
+        }
         ApiPolicy apiPolicy;
         URITemplate template;
         for (URLMapping urlMapping : mapping) {
@@ -344,6 +347,19 @@ public class APIKeyValidationService extends AbstractAdmin {
             if (storeImpl.isApiPoliciesInitialized()) {
                 log.debug("SubscriptionDataStore Initialized. Reading API Policies from SubscriptionDataStore");
                 apiPolicy = store.getApiPolicyByName(urlMapping.getThrottlingPolicy(), apiTenantId);
+                if(apiPolicy == null) {
+                    //could be null for situations where invoke before map is updated
+                    log.debug("API Policies not found in the SubscriptionDataStore. Retrieving from the Rest API");
+                    apiPolicy = new SubscriptionDataLoaderImpl().getAPIPolicy(urlMapping.getThrottlingPolicy(),
+                            tenantDomain);
+                    if (apiPolicy != null) {
+                        store.addOrUpdateApiPolicy(apiPolicy);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
+                        }
+                    }
+                    
+                }
             } else {
                 log.debug("SubscriptionDataStore not Initialized. Reading API Policies from Rest API");
                 apiPolicy = new SubscriptionDataLoaderImpl().getAPIPolicy(urlMapping.getThrottlingPolicy(),
