@@ -158,8 +158,6 @@ public class EndpointAdminServiceProxy {
         return null;
     }
 
-
-
     public boolean isEndpointExist(String endpointName)
             throws EndpointAdminException {
 
