@@ -466,10 +466,7 @@ class TableView extends React.Component {
             options.download = true;
             options.viewColumns = true;
         }
-        if (loading) {
-            return <Progress per={90} message='Loading APIs ...' />;
-        }
-        if (!apisAndApiProducts) {
+        if (loading || !apisAndApiProducts) {
             return <Progress per={90} message='Loading APIs ...' />;
         }
         if (notFound) {
