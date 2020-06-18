@@ -49,7 +49,7 @@ public class SequenceApiServiceImpl implements SequenceApiService {
             if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
                 for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
                     try {
-                        if(sequenceAdminServiceProxy.getSequence(sequence.getName()) != null){
+                        if(sequenceAdminServiceProxy.getSequence(sequence.getName()) != null) {
                             sequencesArray.put(sequence.getContent());
                         }
                     } catch (AxisFault axisFault) {

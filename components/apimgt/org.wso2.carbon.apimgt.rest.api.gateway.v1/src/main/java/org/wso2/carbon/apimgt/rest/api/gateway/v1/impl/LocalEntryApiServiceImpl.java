@@ -49,7 +49,7 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
             if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
                 for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
                     try {
-                        if (localEntryServiceProxy.getEntry(localEntry.getName()) != null){
+                        if (localEntryServiceProxy.getEntry(localEntry.getName()) != null) {
                             localEntryArray.put(localEntry.getContent());
                         }
                     } catch (AxisFault axisFault) {
