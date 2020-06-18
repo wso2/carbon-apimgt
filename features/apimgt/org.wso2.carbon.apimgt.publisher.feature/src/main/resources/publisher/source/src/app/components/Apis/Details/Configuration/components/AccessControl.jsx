@@ -68,7 +68,7 @@ export default function AccessControl(props) {
     }, [invalidRoles]);
     useEffect(() => {
         if (otherValidSystemRoles.length === api.accessControlRoles.length && otherValidSystemRoles.length !== 0
-            && (otherValidSystemRoles.every(val => api.accessControlRoles.includes(val)))) {
+            && (otherValidSystemRoles.every((val) => api.accessControlRoles.includes(val)))) {
             setUserRoleValidity(false);
         } else {
             setUserRoleValidity(true);
