@@ -98,6 +98,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
@@ -5500,6 +5501,7 @@ public class ApiMgtDAO {
         String getApplicationDataQuery = SQLConstants.GET_APPLICATION_DATA_SQL;
 
         APIIdentifier apiIdentifier = apiTypeWrapper.getApi().getId();
+        int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
         try {
             // Retrieve all the existing subscription for the old version
             connection = APIMgtDBUtil.getConnection();
@@ -5550,6 +5552,11 @@ public class ApiMgtDAO {
                             throw new APIManagementException(msg);
                         }
                         subscriptionIdMap.put(info.subscriptionId, subscriptionId);
+                        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
+                                tenantId, info.subscriptionId,apiIdentifier.getUUID(), info.applicationId, info.tierId,
+                                info.subscriptionStatus);
+                        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                     }
                     int subscriptionId = subscriptionIdMap.get(info.subscriptionId);
                     connection.setAutoCommit(false);
@@ -5594,9 +5601,14 @@ public class ApiMgtDAO {
                             subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
                         }
                         apiTypeWrapper.setTier(rs.getString("TIER_ID"));
-                        addSubscription(apiTypeWrapper, applicationId, subscriptionStatus, apiIdentifier.getProviderName());
+                        int subscriptionId = addSubscription(apiTypeWrapper, applicationId, subscriptionStatus, apiIdentifier.getProviderName());
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
+                        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
+                                tenantId, subscriptionId, apiIdentifier.getUUID(), applicationId,
+                                rs.getString("TIER_ID"), subscriptionStatus);
+                        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                     } catch (SubscriptionAlreadyExistingException e) {
                         //Not handled as an error because same subscription can be there in many previous versions.
                         //Ex: if previous version was created by another older version and if the subscriptions are
