@@ -41,11 +41,11 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
-        LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
 
         JSONObject responseObj = new JSONObject();
         JSONArray localEntryArray = new JSONArray();
         if (gatewayAPIDTO != null) {
+            LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
             if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
                 for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
                     try {

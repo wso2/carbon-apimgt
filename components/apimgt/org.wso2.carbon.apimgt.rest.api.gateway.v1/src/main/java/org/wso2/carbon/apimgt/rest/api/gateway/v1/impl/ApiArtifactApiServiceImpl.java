@@ -18,24 +18,43 @@
 
 package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
+import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminServiceProxy;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.rest.api.APIData;
 
 import javax.ws.rs.core.Response;
 
 public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
 
+    private static final Log log = LogFactory.getLog(ApiArtifactApiServiceImpl.class);
+
     public Response apiArtifactGet(String apiName, String label, String apiId, MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
-        String definition;
+        String definition = null;
         JSONObject responseObj = new JSONObject();
+
         if (gatewayAPIDTO != null) {
-            definition = gatewayAPIDTO.getApiDefinition();
+            RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy
+                    (gatewayAPIDTO.getTenantDomain());
+            String qualifiedName = GatewayUtils.getQualifiedApiName(gatewayAPIDTO.getProvider(), gatewayAPIDTO.getName(),
+                    gatewayAPIDTO.getVersion());
+            try {
+                if (restapiAdminServiceProxy.getApi(qualifiedName) != null) {
+                    definition = gatewayAPIDTO.getApiDefinition();
+                }
+            } catch (AxisFault axisFault) {
+                log.error("Error in fetching deployed API artifacts from Synapse Configuration." , axisFault);
+            }
             responseObj.put("Definition", definition);
             String responseStringObj = String.valueOf(responseObj);
             return Response.ok().entity(responseStringObj).build();

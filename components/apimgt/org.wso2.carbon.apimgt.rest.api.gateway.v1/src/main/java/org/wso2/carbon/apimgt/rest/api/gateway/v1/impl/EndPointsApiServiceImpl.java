@@ -40,12 +40,12 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
-        EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy
-                (gatewayAPIDTO.getTenantDomain());
 
         JSONObject responseObj = new JSONObject();
         JSONArray endPointArray = new JSONArray();
         if (gatewayAPIDTO != null) {
+            EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy
+                    (gatewayAPIDTO.getTenantDomain());
             if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
                 for (GatewayContentDTO gatewayEndpoint : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
                     try {

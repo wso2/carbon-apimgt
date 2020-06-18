@@ -40,12 +40,12 @@ public class SequenceApiServiceImpl implements SequenceApiService {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
-        SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
 
         JSONObject responseObj = new JSONObject();
         JSONArray sequencesArray = new JSONArray();
         if (gatewayAPIDTO != null) {
+            SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                    new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
             if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
                 for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
                     try {
