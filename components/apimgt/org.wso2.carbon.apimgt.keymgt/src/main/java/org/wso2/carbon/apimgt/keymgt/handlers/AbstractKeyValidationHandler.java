@@ -218,7 +218,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                         Subscription sub = datastore.getSubscriptionById(app.getId(), api.getApiId());
                         if (sub != null) {
                             String subscriptionStatus = sub.getSubscriptionState();
-                            String type = app.getTokenType();
+                            String type = key.getKeyType();
                             if (APIConstants.SubscriptionStatus.BLOCKED.equals(subscriptionStatus)) {
                                 infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
                                 infoDTO.setAuthorized(false);
