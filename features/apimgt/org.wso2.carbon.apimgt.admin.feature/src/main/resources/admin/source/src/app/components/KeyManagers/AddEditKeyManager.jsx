@@ -43,8 +43,10 @@ import isEmpty from 'lodash.isempty';
 import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
-import KeyManagerConfiguration from './KeyManagerConfiguration';
-import ClaimMappings from './ClaimMapping';
+import KeyManagerConfiguration from 'AppComponents/KeyManagers/KeyManagerConfiguration';
+import ClaimMappings from 'AppComponents/KeyManagers/ClaimMapping';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import FormHelperText from '@material-ui/core/FormHelperText';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -103,7 +105,6 @@ function reducer(state, newValue) {
         case 'revokeEndpoint':
         case 'userInfoEndpoint':
         case 'authorizeEndpoint':
-        case 'jwksEndpoint':
         case 'issuer':
         case 'scopeManagementEndpoint':
         case 'enableTokenGeneration':
@@ -134,20 +135,20 @@ function reducer(state, newValue) {
 function AddEditKeyManager(props) {
     const classes = useStyles();
     const intl = useIntl();
-    const { match: { params: { id } } } = props;
+    const [saving, setSaving] = useState(false);
+    const { match: { params: { id } }, history } = props;
 
     const [initialState] = useState({
         name: '',
         description: '',
         displayName: '',
-        type: '',
+        type: 'select',
         introspectionEndpoint: '',
         clientRegistrationEndpoint: '',
         tokenEndpoint: '',
         revokeEndpoint: '',
         userInfoEndpoint: '',
         authorizeEndpoint: '',
-        jwksEndpoint: '',
         issuer: '',
         scopeManagementEndpoint: '',
         availableGrantTypes: [],
@@ -169,12 +170,11 @@ function AddEditKeyManager(props) {
         introspectionEndpoint, clientRegistrationEndpoint,
         tokenEndpoint, revokeEndpoint,
         userInfoEndpoint, authorizeEndpoint,
-        jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes, consumerKeyClaim, scopesClaim,
+        issuer, scopeManagementEndpoint, availableGrantTypes, consumerKeyClaim, scopesClaim,
         enableTokenGeneration, enableMapOAuthConsumerApps,
         enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, tokenValidation, additionalProperties,
     } = state;
     const [validating, setValidating] = useState(false);
-    const [editMode, setIsEditMode] = useState(false);
     const [keymanagerConnectorConfigurations, setKeyManagerConfiguration] = useState([]);
     const restApi = new API();
     const updateKeyManagerConnectorConfiguration = (keyManagerType) => {
@@ -199,7 +199,6 @@ function AddEditKeyManager(props) {
             }
             dispatch({ field: 'all', value: editState });
             updateKeyManagerConnectorConfiguration(editState.type);
-            setIsEditMode(true);
         });
     }, []);
 
@@ -208,7 +207,7 @@ function AddEditKeyManager(props) {
         if (!validatingActive) {
             return (false);
         }
-        switch (name) {
+        switch (fieldName) {
             case 'name':
                 if (fieldValue === '') {
                     error = `Key manager name ${intl.formatMessage({
@@ -222,8 +221,18 @@ function AddEditKeyManager(props) {
                     });
                 }
                 break;
-            case 'description':
-                error = fieldValue === '' ? fieldName + ' is Empty' : false;
+            case 'type':
+                error = fieldValue === 'select'
+                    ? 'Select a key manager type. If the list is empty please refer the documentation.'
+                    : false;
+                break;
+            case 'keyconfig':
+                if (fieldValue === '') {
+                    error = intl.formatMessage({
+                        id: 'KeyManagers.AddEditKeyManager.is.empty.error.key.config',
+                        defaultMessage: 'Required field is empty.',
+                    });
+                }
                 break;
             default:
                 break;
@@ -244,7 +253,7 @@ function AddEditKeyManager(props) {
 
     const formHasErrors = (validatingActive = false) => {
         if (hasErrors('name', name, validatingActive)
-        || hasErrors('description', description, validatingActive)) {
+            || hasErrors('type', type, validatingActive)) {
             return true;
         } else {
             return false;
@@ -259,75 +268,48 @@ function AddEditKeyManager(props) {
             }));
             return false;
         }
+        setSaving(true);
+
         let promisedAddKeyManager;
 
         const keymanager = {
-            name: state.name,
-            description: state.description,
-            type: state.type,
-            displayName: state.displayName,
-            introspectionEndpoint: state.introspectionEndpoint,
-            clientRegistrationEndpoint: state.clientRegistrationEndpoint,
-            tokenEndpoint: state.tokenEndpoint,
-            revokeEndpoint: state.revokeEndpoint,
-            userInfoEndpoint: state.userInfoEndpoint,
-            authorizeEndpoint: state.authorizeEndpoint,
-            jwksEndpoint: state.jwksEndpoint,
-            issuer: state.issuer,
-            scopeManagementEndpoint: state.scopeManagementEndpoint,
-            availableGrantTypes: state.availableGrantTypes,
-            enableTokenGeneration: state.enableTokenGeneration,
-            enableMapOAuthConsumerApps: state.enableMapOAuthConsumerApps,
-            enableOAuthAppCreation: state.enableOAuthAppCreation,
-            enableSelfValidationJWT: state.enableSelfValidationJWT,
-            claimMapping: state.claimMapping,
-            tokenValidation: state.tokenValidation,
-            enabled: state.enabled,
-            consumerKeyClaim: state.consumerKeyClaim,
-            scopesClaim: state.scopesClaim,
-            additionalProperties: state.additionalProperties,
+            ...state,
         };
 
-        if (editMode) {
-            promisedAddKeyManager = restApi.updateKeyManager(id,
-                keymanager);
-            return promisedAddKeyManager
-                .then(() => {
-                    return (
-                        <FormattedMessage
-                            id='KeyManager.edit.success'
-                            defaultMessage='Key Manager edited successfully.'
-                        />
-                    );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    if (response.body) {
-                        throw (response.body.description);
-                    }
-                    return null;
-                });
+        if (id) {
+            promisedAddKeyManager = restApi.updateKeyManager(id, keymanager);
         } else {
             promisedAddKeyManager = restApi.addKeyManager(keymanager);
-            return promisedAddKeyManager
+            promisedAddKeyManager
                 .then(() => {
-                    return true;
-
-                    // return (
-                    //     <FormattedMessage
-                    //         id='KeyManager.add.success'
-                    //         defaultMessage='Key Manager added successfully.'
-                    //     />
-                    // );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    if (response.body) {
-                        throw (response.body.description);
-                    }
-                    return null;
+                    return (intl.formatMessage({
+                        id: 'KeyManager.add.success',
+                        defaultMessage: 'Key Manager added successfully.',
+                    }));
                 });
         }
+        promisedAddKeyManager.then(() => {
+            if (id) {
+                Alert.success(`${displayName} ${intl.formatMessage({
+                    id: 'KeyManager.edit.success',
+                    defaultMessage: ' - Key Manager edited successfully.',
+                })}`);
+            } else {
+                Alert.success(`${displayName} ${intl.formatMessage({
+                    id: 'KeyManager.add.success.msg',
+                    defaultMessage: ' - Key Manager added successfully.',
+                })}`);
+            }
+            setSaving(false);
+            history.push('/settings/key-managers/');
+        }).catch((e) => {
+            const { response } = e;
+            if (response.body) {
+                Alert.error(response.body.description);
+            }
+            setSaving(false);
+        });
+        return true;
     };
     const setClaimMapping = (updatedClaimMappings) => {
         dispatch({ field: 'claimMapping', value: updatedClaimMappings });
@@ -398,10 +380,10 @@ function AddEditKeyManager(props) {
                                 fullWidth
                                 variant='outlined'
                                 value={name}
-                                disabled={editMode}
+                                disabled={!!id}
                                 onChange={onChange}
-                                error={hasErrors('policyName', name, validating)}
-                                helperText={hasErrors('policyName', name, validating) || intl.formatMessage({
+                                error={hasErrors('name', name, validating)}
+                                helperText={hasErrors('name', name, validating) || intl.formatMessage({
                                     id: 'Throttling.Advanced.AddEdit.form.name.help',
                                     defaultMessage: 'Name of the key manager.',
                                 })}
@@ -439,12 +421,17 @@ function AddEditKeyManager(props) {
                                     defaultMessage: 'Description of the key manager.',
                                 })}
                             />
-                            <FormControl variant='outlined' className={classes.FormControlRoot}>
+                            <FormControl
+                                variant='outlined'
+                                className={classes.FormControlRoot}
+                                error={hasErrors('type', type, validating)}
+                            >
                                 <InputLabel classes={{ root: classes.labelRoot }}>
                                     <FormattedMessage
-                                        defaultMessage='KeyManager Type'
+                                        defaultMessage='Key Manager Type'
                                         id='Admin.KeyManager.form.type'
                                     />
+                                    <span className={classes.error}>*</span>
                                 </InputLabel>
                                 <Select
                                     name='type'
@@ -452,12 +439,26 @@ function AddEditKeyManager(props) {
                                     onChange={onChange}
                                     classes={{ select: classes.select }}
                                 >
+                                    <MenuItem value='select'>
+                                        <FormattedMessage
+                                            defaultMessage='Select Key Manager Type'
+                                            id='Admin.KeyManager.form.type.select'
+                                        />
+                                    </MenuItem>
                                     {settings.keyManagerConfiguration.map((keymanager) => (
                                         <MenuItem key={keymanager.type} value={keymanager.type}>
                                             {keymanager.type}
                                         </MenuItem>
                                     ))}
                                 </Select>
+                                <FormHelperText>
+                                    {hasErrors('type', type, validating) || (
+                                        <FormattedMessage
+                                            defaultMessage='Select Key Manager Type'
+                                            id='Throttling.Advanced.AddEdit.form.type.help'
+                                        />
+                                    )}
+                                </FormHelperText>
                             </FormControl>
                             <TextField
                                 margin='dense'
@@ -495,7 +496,7 @@ function AddEditKeyManager(props) {
                             <FormattedMessage
                                 id='KeyManagers.AddEditKeyManager.endpoints.description'
                                 defaultMessage={'Configure endpoints such as client registration endpoint, '
-                                + 'the token endpoint for this key manager.'}
+                                    + 'the token endpoint for this key manager.'}
                             />
                         </Typography>
                     </Grid>
@@ -587,21 +588,6 @@ function AddEditKeyManager(props) {
                             />
                             <TextField
                                 margin='dense'
-                                name='jwksEndpoint'
-                                label={(
-                                    <FormattedMessage
-                                        id='KeyManagers.AddEditKeyManager.form.jwksEndpoint'
-                                        defaultMessage='JWKS Endpoint'
-                                    />
-                                )}
-                                fullWidth
-                                variant='outlined'
-                                value={jwksEndpoint}
-                                onChange={onChange}
-                            />
-
-                            <TextField
-                                margin='dense'
                                 name='scopeManagementEndpoint'
                                 label={(
                                     <FormattedMessage
@@ -659,7 +645,7 @@ function AddEditKeyManager(props) {
                                 helperText={(
                                     <div className={classes.chipHelper}>
                                         {intl.formatMessage({
-                                            id: 'Throttling.Advanced.AddEdit.form.issuer.help',
+                                            id: 'Throttling.Advanced.AddEdit.form.claim.help',
                                             // eslint-disable-next-line max-len
                                             defaultMessage: 'Type Available Grant Types and press Enter/Return to add them.',
                                         })}
@@ -774,7 +760,7 @@ function AddEditKeyManager(props) {
                             </Grid>
                         </Box>
                         <Box component='div' m={1}>
-                            <ExpansionPanel>
+                            <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary
                                     expandIcon={<ExpandMoreIcon />}
                                     aria-controls='panel1a-content'
@@ -792,6 +778,8 @@ function AddEditKeyManager(props) {
                                         keymanagerConnectorConfigurations={keymanagerConnectorConfigurations}
                                         additionalProperties={cloneDeep(additionalProperties)}
                                         setAdditionalProperties={setAdditionalProperties}
+                                        hasErrors={hasErrors}
+                                        validating={validating}
                                     />
                                 </Box>
                             </ExpansionPanel>
@@ -835,12 +823,12 @@ function AddEditKeyManager(props) {
                             </Box>
                             <Box>
                                 {(isEmpty(tokenValidation)
-                                || (
-                                    <KeyValidations
-                                        tokenValidations={tokenValidation}
-                                        setTokenValidations={setTokenValidations}
-                                    />
-                                ))}
+                                    || (
+                                        <KeyValidations
+                                            tokenValidations={tokenValidation}
+                                            setTokenValidations={setTokenValidations}
+                                        />
+                                    ))}
                             </Box>
                         </Box>
                     </Grid>
@@ -852,10 +840,21 @@ function AddEditKeyManager(props) {
                     <Grid item xs={12}>
                         <Box component='span' m={1}>
                             <Button variant='contained' color='primary' onClick={formSaveCallback}>
-                                <FormattedMessage
-                                    id='KeyManagers.AddEditKeyManager.form.add'
-                                    defaultMessage='Add'
-                                />
+                                {saving ? (<CircularProgress size={16} />) : (
+                                    <>
+                                        {id ? (
+                                            <FormattedMessage
+                                                id='KeyManagers.AddEditKeyManager.form.update.btn'
+                                                defaultMessage='Update'
+                                            />
+                                        ) : (
+                                            <FormattedMessage
+                                                id='KeyManagers.AddEditKeyManager.form.add'
+                                                defaultMessage='Add'
+                                            />
+                                        )}
+                                    </>
+                                )}
                             </Button>
                         </Box>
                         <RouterLink to='/settings/key-managers'>
