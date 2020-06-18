@@ -53,7 +53,7 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
                             localEntryArray.put(localEntry.getContent());
                         }
                     } catch (AxisFault axisFault) {
-                        log.error(axisFault);
+                        log.error("Error in fetching deployed Local entries from Synapse Configuration." , axisFault);
                     }
                 }
             }

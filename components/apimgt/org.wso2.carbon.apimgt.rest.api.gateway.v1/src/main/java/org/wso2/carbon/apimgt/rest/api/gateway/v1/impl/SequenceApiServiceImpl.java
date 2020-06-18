@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
 import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
@@ -31,6 +33,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import javax.ws.rs.core.Response;
 
 public class SequenceApiServiceImpl implements SequenceApiService {
+
+    private static final Log log = LogFactory.getLog(SequenceApiServiceImpl.class);
 
     public Response sequenceGet(String apiName, String label, String apiId, MessageContext messageContext) {
 
@@ -49,7 +53,7 @@ public class SequenceApiServiceImpl implements SequenceApiService {
                             sequencesArray.put(sequence.getContent());
                         }
                     } catch (AxisFault axisFault) {
-                        axisFault.printStackTrace();
+                        log.error("Error in fetching deployed sequences from Synapse Configuration." , axisFault);
                     }
                 }
             }

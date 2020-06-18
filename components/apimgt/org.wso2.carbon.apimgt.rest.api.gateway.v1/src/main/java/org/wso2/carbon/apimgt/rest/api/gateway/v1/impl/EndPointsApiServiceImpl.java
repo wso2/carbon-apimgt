@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
@@ -31,6 +33,8 @@ import org.wso2.carbon.endpoint.EndpointAdminException;
 import javax.ws.rs.core.Response;
 
 public class EndPointsApiServiceImpl implements EndPointsApiService {
+
+    private static final Log log = LogFactory.getLog(EndPointsApiServiceImpl.class);
 
     public Response endPointsGet(String apiName, String label, String apiId, MessageContext messageContext) {
 
@@ -49,7 +53,7 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
                             endPointArray.put(gatewayEndpoint.getContent());
                         }
                     } catch (EndpointAdminException e) {
-                        e.printStackTrace();
+                        log.error("Error in fetching deployed Endpoints from Synapse Configuration." , e);
                     }
                 }
             }
