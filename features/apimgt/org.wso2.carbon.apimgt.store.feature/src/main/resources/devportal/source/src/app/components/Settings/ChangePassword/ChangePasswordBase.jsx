@@ -17,17 +17,17 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
 
 const useStyles = makeStyles((theme) => ({
     createTitle: {
         color: theme.palette.getContrastText(theme.palette.background.default),
     },
-    applicationContent: {
+    formContent: {
         '& span, & div, & p, & input': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
         }
@@ -51,7 +51,7 @@ function ApplicationCreateBase(props) {
                         <Grid item md={12} className={classes.createTitle}>
                             {title}
                         </Grid>
-                        <Grid item md={12} className={classes.applicationContent}>
+                        <Grid item md={12} className={classes.formContent}>
                             <Paper elevation={0}>{children}</Paper>
                         </Grid>
                     </Grid>
