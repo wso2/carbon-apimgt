@@ -919,6 +919,7 @@
   "Apis.Listing.TableView.APITableToolBar.filter.list": "",
   "Apis.Listing.TableView.APITableToolBar.selected.number": "",
   "Apis.Listing.TableView.TableView.doc.flag": "",
+  "Apis.Listing.TableView.TableView.error.loading": "",
   "Apis.Listing.components.APICreateMenu.primary.graphql": "",
   "Apis.Listing.components.APICreateMenu.primary.rest": "",
   "Apis.Listing.components.APICreateMenu.primary.soap": "",

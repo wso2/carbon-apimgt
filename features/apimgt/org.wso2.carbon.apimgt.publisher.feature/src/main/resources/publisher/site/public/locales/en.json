@@ -919,6 +919,7 @@
   "Apis.Listing.TableView.APITableToolBar.filter.list": "Filter List",
   "Apis.Listing.TableView.APITableToolBar.selected.number": "selected",
   "Apis.Listing.TableView.TableView.doc.flag": "[Doc]",
+  "Apis.Listing.TableView.TableView.error.loading": "Error While Loading APIs",
   "Apis.Listing.components.APICreateMenu.primary.graphql": "I Have a GraphQL SDL schema",
   "Apis.Listing.components.APICreateMenu.primary.rest": "Design a New REST API",
   "Apis.Listing.components.APICreateMenu.primary.soap": "I Have a SOAP Endpoint",
