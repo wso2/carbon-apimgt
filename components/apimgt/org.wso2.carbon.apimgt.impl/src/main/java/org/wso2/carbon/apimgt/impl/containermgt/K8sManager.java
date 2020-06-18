@@ -169,6 +169,9 @@ public class K8sManager implements ContainerManager {
 
         String apiName = apiId.getApiName();
         JSONObject propreties = (JSONObject) containerMgtInfoDetails.get(PROPERTIES);
+        String jwtSecurity ="";
+        String basicSecurity = "";
+        String oauthSecurity = "";
 
         if (propreties.get(MASTER_URL) != null && propreties.get(SATOKEN) != null && propreties.get(NAMESPACE) != null) {
             Config config = new ConfigBuilder()
@@ -179,11 +182,17 @@ public class K8sManager implements ContainerManager {
 
             OpenShiftClient client = new DefaultOpenShiftClient(config);
 
+            if(propreties.get(JWT_SECURITY_CR_NAME) != null){
+                jwtSecurity = propreties.get(JWT_SECURITY_CR_NAME).toString();
+            }
+            if(propreties.get(OAUTH2_SECURITY_CR_NAME) != null){
+                oauthSecurity = propreties.get(OAUTH2_SECURITY_CR_NAME).toString();
+            }
+            if(propreties.get(BASICAUTH_SECURITY_CR_NAME) != null){
+                basicSecurity = propreties.get(BASICAUTH_SECURITY_CR_NAME).toString();
+            }
             String[] configMapNames = deployConfigMap(api, apiId, registry, client,
-                    propreties.get(JWT_SECURITY_CR_NAME).toString(),
-                    propreties.get(OAUTH2_SECURITY_CR_NAME).toString(),
-                    propreties.get(BASICAUTH_SECURITY_CR_NAME).toString(),
-                    true);
+                    jwtSecurity, oauthSecurity, basicSecurity, true);
 
             CustomResourceDefinition crd = client.customResourceDefinitions().withName(API_CRD_NAME).get();
 
@@ -195,6 +204,11 @@ public class K8sManager implements ContainerManager {
 
             apiCustomResourceDefinition.getSpec().setUpdateTimeStamp(getTimeStamp());
             apiCustomResourceDefinition.getSpec().getDefinition().setSwaggerConfigmapNames(configMapNames);
+            //update with interceptors
+            Interceptors interceptors = new Interceptors();
+            interceptors.setBallerina(new String[]{});
+            interceptors.setJava(new String[]{});
+            apiCustomResourceDefinition.getSpec().getDefinition().setInterceptors(interceptors);
 
             crdClient.createOrReplace(apiCustomResourceDefinition);
             log.info("Successfully Re-deployed the [API] " + apiName);
