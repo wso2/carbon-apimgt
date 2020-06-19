@@ -90,8 +90,7 @@ public class AMDefaultKeyManagerImplTest {
         response.setRedirectUris(Arrays.asList(REDIRECT_URIS));
         response.setGrantTypes(Arrays.asList(GRANT_TYPES));
 
-        Mockito.when(dcrClient.createApplication(Mockito.anyString(),Mockito.any(ClientInfo.class)))
-                .thenReturn(response);
+        Mockito.when(dcrClient.createApplication(Mockito.any(ClientInfo.class))).thenReturn(response);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
         Mockito.when(privilegedCarbonContext.getTenantDomain()).
                 thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
