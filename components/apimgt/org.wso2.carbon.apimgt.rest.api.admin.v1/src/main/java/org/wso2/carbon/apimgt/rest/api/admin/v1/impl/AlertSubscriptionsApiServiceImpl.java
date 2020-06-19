@@ -1,9 +1,30 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.alertmgt.AdminAlertConfigurator;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigManager;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
@@ -11,12 +32,16 @@ import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertTypeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertsSubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.AlertsMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.BotDetectionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
+
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -136,6 +161,88 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
             return Response.status(Response.Status.BAD_REQUEST).entity("Analytics not Enabled").build();
         }
         return Response.status(Response.Status.OK).build();
+    }
+
+    /**
+     * Retrieve a list of bot detection alert subscriptions
+     *
+     * @param messageContext
+     * @return list of bot detection alert subscriptions
+     * @throws APIManagementException
+     */
+    @Override
+    public Response getBotDetectionAlertSubscriptions(MessageContext messageContext) throws APIManagementException {
+
+        List<BotDetectionData> botDetectionDataList = new APIAdminImpl().retrieveSavedBotDataEmailList();
+        BotDetectionAlertSubscriptionListDTO listDTO =
+                BotDetectionMappingUtil.fromAlertSubscriptionListToListDTO(botDetectionDataList);
+        return Response.ok().entity(listDTO).build();
+    }
+
+    /**
+     * Subscribe for bot detection alerts
+     *
+     * @param body           email to be registered for the subscription
+     * @param messageContext
+     * @return alert subscription DTO containin the uuid of the subscription and the registered email
+     * @throws APIManagementException
+     */
+    @Override
+    public Response subscribeForBotDetectionAlerts(BotDetectionAlertSubscriptionDTO body, MessageContext messageContext)
+            throws APIManagementException {
+
+        String email = body.getEmail();
+        if (StringUtils.isBlank(email)) {
+            String propertyName = AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD;
+            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
+        }
+
+        try {
+            APIAdminImpl apiAdmin = new APIAdminImpl();
+            BotDetectionData alertSubscription =
+                    apiAdmin.getBotDetectionAlertSubscription(AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD, email);
+            if (alertSubscription != null) {
+                RestApiUtil.handleResourceAlreadyExistsError(
+                        "Email: " + email + " has already been subscribed for bot detection alerts", log);
+            }
+            apiAdmin.addBotDataEmailConfiguration(email);
+            BotDetectionData newAlertSubscription =
+                    apiAdmin.getBotDetectionAlertSubscription(AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD, email);
+            BotDetectionAlertSubscriptionDTO alertSubscriptionDTO =
+                    BotDetectionMappingUtil.fromAlertSubscriptionToDTO(newAlertSubscription);
+            return Response.ok(alertSubscriptionDTO).build();
+        } catch (APIManagementException | SQLException e) {
+            String errorMessage = "Error when subscribing for bot detection alerts with email: " + email;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Unsubscribe from bot detection alerts
+     *
+     * @param uuid           uuid of the subscription
+     * @param messageContext
+     * @return 200 OK response if the subscription is deleted successfully
+     */
+    @Override
+    public Response unsubscribeFromBotDetectionAlerts(String uuid, MessageContext messageContext) {
+
+        try {
+            APIAdminImpl apiAdmin = new APIAdminImpl();
+            BotDetectionData alertSubscription = apiAdmin.getBotDetectionAlertSubscription("uuid", uuid);
+            if (alertSubscription == null) {
+                RestApiUtil.handleResourceNotFoundError(
+                        "Bot detection alert subscription with uuid: " + uuid + " does not exist.", log);
+            }
+            apiAdmin.deleteBotDataEmailList(uuid);
+            return Response.ok().build();
+        } catch (APIManagementException | SQLException e) {
+            String errorMessage = "Error when deleting bot detection alert subscription with uuid: " + uuid;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     /**
