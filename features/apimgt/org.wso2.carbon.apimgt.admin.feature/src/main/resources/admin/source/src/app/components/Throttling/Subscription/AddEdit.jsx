@@ -197,13 +197,13 @@ function AddEdit(props) {
                     requestCountEdit = result.body.defaultLimit.requestCount.requestCount;
                     timeUnitEdit = result.body.defaultLimit.requestCount.timeUnit;
                     unitTimeEdit = result.body.defaultLimit.requestCount.unitTime;
-                    typeEdit = result.body.defaultLimit.requestCount.type;
+                    typeEdit = result.body.defaultLimit.type;
                 } else if (result.body.defaultLimit.bandwidth != null) {
                     dataAmountEdit = result.body.defaultLimit.bandwidth.dataAmount;
                     dataUnitEdit = result.body.defaultLimit.bandwidth.dataUnit;
                     timeUnitEdit = result.body.defaultLimit.bandwidth.timeUnit;
                     unitTimeEdit = result.body.defaultLimit.bandwidth.unitTime;
-                    typeEdit = result.body.defaultLimit.bandwidth.type;
+                    typeEdit = result.body.defaultLimit.type;
                 }
                 const editState = {
                     policyName: result.body.policyName,
@@ -397,8 +397,8 @@ function AddEdit(props) {
                 policyName: state.policyName,
                 description: state.description,
                 defaultLimit: {
+                    type: state.defaultLimit.type,
                     requestCount: {
-                        type: state.defaultLimit.type,
                         requestCount: state.defaultLimit.requestCount,
                         timeUnit: state.defaultLimit.timeUnit,
                         unitTime: state.defaultLimit.unitTime,
@@ -426,8 +426,8 @@ function AddEdit(props) {
                 policyName: state.policyName,
                 description: state.description,
                 defaultLimit: {
+                    type: state.defaultLimit.type,
                     bandwidth: {
-                        type: state.defaultLimit.type,
                         dataAmount: state.defaultLimit.dataAmount,
                         dataUnit: state.defaultLimit.dataUnit,
                         timeUnit: state.defaultLimit.timeUnit,
