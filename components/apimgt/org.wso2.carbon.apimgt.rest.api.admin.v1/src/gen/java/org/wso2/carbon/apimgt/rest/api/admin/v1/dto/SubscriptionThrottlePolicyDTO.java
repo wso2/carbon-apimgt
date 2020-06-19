@@ -7,7 +7,7 @@ import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GraphQLQueryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitTypeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
 import javax.validation.constraints.*;
 
@@ -24,7 +24,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   
     private Integer graphQLMaxComplexity = null;
     private Integer graphQLMaxDepth = null;
-    private ThrottleLimitTypeDTO defaultLimit = null;
+    private ThrottleLimitDTO defaultLimit = null;
     private MonetizationInfoDTO monetization = null;
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
@@ -70,18 +70,19 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
 
   /**
    **/
-  public SubscriptionThrottlePolicyDTO defaultLimit(ThrottleLimitTypeDTO defaultLimit) {
+  public SubscriptionThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("defaultLimit")
-  public ThrottleLimitTypeDTO getDefaultLimit() {
+  @NotNull
+  public ThrottleLimitDTO getDefaultLimit() {
     return defaultLimit;
   }
-  public void setDefaultLimit(ThrottleLimitTypeDTO defaultLimit) {
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
   }
 

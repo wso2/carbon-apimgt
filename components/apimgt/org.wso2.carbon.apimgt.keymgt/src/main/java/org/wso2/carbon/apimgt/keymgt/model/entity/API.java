@@ -35,6 +35,7 @@ public class API implements CacheableEntity<String> {
     private String version = null;
     private String context = null;
     private String policy = null;
+    private String apiType = null;
 
     private List<URLMapping> urlMappings = new ArrayList<>();
 
@@ -118,9 +119,20 @@ public class API implements CacheableEntity<String> {
         return context + DELEM_PERIOD + version;
     }
 
+    public String getApiType() {
+
+        return apiType;
+    }
+
+    public void setApiType(String apiType) {
+
+        this.apiType = apiType;
+    }
+
     @Override
     public String toString() {
         return "API [apiId=" + apiId + ", provider=" + provider + ", name=" + name + ", version=" + version
-                + ", context=" + context + ", policy=" + policy + ", urlMappings=" + urlMappings + "]";
+                + ", context=" + context + ", policy=" + policy + ", apiType=" + apiType + ", urlMappings="
+                + urlMappings + "]";
     }
 }

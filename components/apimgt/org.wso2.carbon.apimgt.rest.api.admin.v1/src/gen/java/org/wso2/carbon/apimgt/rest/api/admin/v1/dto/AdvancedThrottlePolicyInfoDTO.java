@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitTypeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
 import javax.validation.constraints.*;
 
@@ -17,11 +17,11 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class AdvancedThrottlePolicyInfoDTO extends ThrottlePolicyDTO  {
   
-    private ThrottleLimitTypeDTO defaultLimit = null;
+    private ThrottleLimitDTO defaultLimit = null;
 
   /**
    **/
-  public AdvancedThrottlePolicyInfoDTO defaultLimit(ThrottleLimitTypeDTO defaultLimit) {
+  public AdvancedThrottlePolicyInfoDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
     return this;
   }
@@ -29,10 +29,10 @@ public class AdvancedThrottlePolicyInfoDTO extends ThrottlePolicyDTO  {
   
   @ApiModelProperty(value = "")
   @JsonProperty("defaultLimit")
-  public ThrottleLimitTypeDTO getDefaultLimit() {
+  public ThrottleLimitDTO getDefaultLimit() {
     return defaultLimit;
   }
-  public void setDefaultLimit(ThrottleLimitTypeDTO defaultLimit) {
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
   }
 
