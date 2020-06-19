@@ -3523,7 +3523,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /system-scopes/:
+  /system-scopes:
     #--------------------------------------------------
     # Retrieve the list of role scope mapping
     #--------------------------------------------------
