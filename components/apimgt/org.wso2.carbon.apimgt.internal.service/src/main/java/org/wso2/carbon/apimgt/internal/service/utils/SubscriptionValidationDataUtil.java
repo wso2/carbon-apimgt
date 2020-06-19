@@ -65,6 +65,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setPolicy(model.getPolicy());
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
+            apidto.setName(model.getName());
             List<URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings) {
@@ -91,6 +92,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setPolicy(model.getPolicy());
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
+            apidto.setName(model.getName());
             List<URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings) {
