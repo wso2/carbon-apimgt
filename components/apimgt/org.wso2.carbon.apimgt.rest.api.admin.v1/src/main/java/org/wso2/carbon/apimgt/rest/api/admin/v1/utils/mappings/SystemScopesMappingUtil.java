@@ -25,12 +25,15 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class SystemScopesMappingUtil {
 
     private static final Log log = LogFactory.getLog(SystemScopesMappingUtil.class);
+    private static final Object lock = new Object();
+    private static volatile Map<String, List<String>>  portalScopeList = new HashMap<>();
 
     /**
      * Convert list of API Scope to ScopeListDTO
@@ -55,23 +58,27 @@ public class SystemScopesMappingUtil {
     private static List<ScopeDTO> fromRoleScopeMapToRoleScopeDTOList(Map<String, String>  scopeRoleMapping)
             throws APIManagementException {
         List<ScopeDTO> scopeDTOs = new ArrayList<>(scopeRoleMapping.size());
-        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/store-api.yaml"};
-            for (String fileName : fileNameArray) {
-                Map<String, String> portalScopeList = RestApiUtil.getScopes(fileName);
-                for (Map.Entry<String, String>  mapping : portalScopeList.entrySet()) {
-                    if (scopeRoleMapping.containsKey(mapping.getKey())) {
-                        ScopeDTO roleScopeDTO = new ScopeDTO();
-                        roleScopeDTO.setName(mapping.getKey());
-                        roleScopeDTO.setRoles(scopeRoleMapping.get(mapping.getKey()));
-                        roleScopeDTO.setDescription(mapping.getValue());
-                        roleScopeDTO.setTag((fileName.replaceAll("-api.yaml", ""))
-                                .replaceAll("/", ""));
-                        scopeDTOs.add(roleScopeDTO);
-                    } else {
-                        log.warn("The scope "+ mapping.getKey() +" does not exist in tenant.conf");
-                    }
+
+        if (portalScopeList.isEmpty()) {
+            synchronized (lock) {
+                if (portalScopeList.isEmpty()) {
+                    portalScopeList = RestApiUtil.getScopesRole();
                 }
             }
+        }
+
+        for (Map.Entry<String, List<String>>  mapping : portalScopeList.entrySet()) {
+            if (scopeRoleMapping.containsKey(mapping.getKey())) {
+                ScopeDTO roleScopeDTO = new ScopeDTO();
+                roleScopeDTO.setName(mapping.getKey());
+                roleScopeDTO.setRoles(scopeRoleMapping.get(mapping.getKey()));
+                roleScopeDTO.setDescription(mapping.getValue().get(0));
+                roleScopeDTO.setTag(mapping.getValue().get(1));
+                scopeDTOs.add(roleScopeDTO);
+            } else {
+                log.warn("The scope "+ mapping.getKey() +" does not exist in tenant.conf");
+            }
+        }
         return scopeDTOs;
     }
 

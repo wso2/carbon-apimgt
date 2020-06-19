@@ -1633,23 +1633,29 @@ public class RestApiUtil {
     /**
      * This method is used to get the scope list from the yaml file
      *
-     * @param fileName file name of YAML
-     * @return MAP of scope list for a portal
+     * @return MAP of scope list for all portal
      */
-    public static synchronized Map<String,String> getScopes(String fileName) throws APIManagementException {
-        String definition = null;
-        try {
-            definition = IOUtils
-                    .toString(RestApiUtil.class.getResourceAsStream(fileName), "UTF-8");
-        } catch (IOException  e) {
-            throw new APIManagementException("Error while reading the swagger definition ,",
-                    ExceptionCodes.DEFINITION_EXCEPTION);
-        }
-        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-        Set<Scope> scopeSet = oasParser.getScopes(definition);
-        Map<String,String> portalScopeList = new HashMap<String, String>();
-        for (Scope entry : scopeSet) {
-            portalScopeList.put(entry.getName(),entry.getDescription());
+    public static  Map<String, List<String>> getScopesRole() throws APIManagementException {
+
+        Map<String, List<String>>   portalScopeList = new HashMap<>();
+        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/store-api.yaml"};
+        for (String fileName : fileNameArray) {
+            String definition = null;
+            try {
+                definition = IOUtils
+                        .toString(RestApiUtil.class.getResourceAsStream(fileName), "UTF-8");
+            } catch (IOException  e) {
+                throw new APIManagementException("Error while reading the swagger definition ,",
+                        ExceptionCodes.DEFINITION_EXCEPTION);
+            }
+            APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+            Set<Scope> scopeSet = oasParser.getScopes(definition);
+            for (Scope entry : scopeSet) {
+                List <String> list = new ArrayList<>();
+                list.add(entry.getDescription());
+                list.add((fileName.replaceAll("-api.yaml", "").replace("/","")));
+                portalScopeList.put(entry.getName(), list);
+            }
         }
         return portalScopeList;
     }
