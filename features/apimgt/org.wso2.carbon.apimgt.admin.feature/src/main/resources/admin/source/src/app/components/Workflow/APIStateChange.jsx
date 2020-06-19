@@ -129,7 +129,13 @@ function ListLabels() {
     }, []);
 
     const updateStatus = (referenceId, value) => {
-        const body = { status: value, attributes: {}, description: 'Approve workflow request.' };
+        const body = { status: value, attributes: {}, description: '' };
+        if (value === 'APPROVED') {
+            body.description = 'Approve workflow request.';
+        }
+        if (value === 'REJECTED') {
+            body.description = 'Reject workflow request.';
+        }
 
         const promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
         return promisedupdateWorkflow
