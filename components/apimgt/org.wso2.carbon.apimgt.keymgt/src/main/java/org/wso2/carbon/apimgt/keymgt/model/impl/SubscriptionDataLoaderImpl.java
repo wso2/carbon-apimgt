@@ -218,7 +218,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            subscription = (new Gson().fromJson(responseString, SubscriptionList.class)).getList().get(0);
+            SubscriptionList list = new Gson().fromJson(responseString, SubscriptionList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                subscription = list.getList().get(0);
+            }
         }
         return subscription;
     }
@@ -237,7 +240,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            application = (new Gson().fromJson(responseString, ApplicationList.class)).getList().get(0);
+            ApplicationList list = new Gson().fromJson(responseString, ApplicationList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                application = list.getList().get(0);
+            }
         }
         return application;
     }
@@ -257,7 +263,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            application = (new Gson().fromJson(responseString, ApplicationKeyMappingList.class)).getList().get(0);
+            ApplicationKeyMappingList list = new Gson().fromJson(responseString, ApplicationKeyMappingList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                application = list.getList().get(0); 
+            }
         }
         return application;
     }
@@ -277,8 +286,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            api = (new Gson().fromJson(responseString, APIList.class)).getList().get(0);
-
+            APIList list = new Gson().fromJson(responseString, APIList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                api = list.getList().get(0);
+            }
         }
         return api;
     }
@@ -353,8 +364,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            apiPolicy = (new Gson().fromJson(responseString, APIPolicyList.class)).getList().get(0);
-
+            APIPolicyList list = new Gson().fromJson(responseString, APIPolicyList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                apiPolicy = list.getList().get(0);
+            }
         }
         return apiPolicy;
     }
