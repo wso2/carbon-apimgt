@@ -530,6 +530,7 @@ class Layout extends React.Component {
                                                     vertical: 'top',
                                                     horizontal: 'center',
                                                 }}
+                                                placement='bottom-end'
                                             >
                                                 {({ TransitionProps, placement }) => (
                                                     <Grow
