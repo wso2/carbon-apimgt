@@ -3009,14 +3009,22 @@ public class APIProviderImplTest {
     @Test
     public void testAddPolicy_APPType() throws RegistryException, UserStoreException, APIManagementException {
         ApplicationPolicy policy = getPolicyAppLevel();
+        ApplicationPolicy returndPolicy = new ApplicationPolicy(policy.getPolicyName());
+        returndPolicy.setPolicyId(1);
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+        Mockito.when(apimgtDAO.getApplicationPolicy(policy.getPolicyName(), apiProvider.getTenantId()))
+                .thenReturn(returndPolicy);
         apiProvider.addPolicy(policy);
     }
 
     @Test
     public void testAddPolicy_SubsType() throws RegistryException, UserStoreException, APIManagementException {
         SubscriptionPolicy policy = getPolicySubscriptionLevelperUser();
+        SubscriptionPolicy returndPolicy = new SubscriptionPolicy(policy.getPolicyName());
+        returndPolicy.setPolicyId(2);
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+        Mockito.when(apimgtDAO.getSubscriptionPolicy(policy.getPolicyName(), apiProvider.getTenantId()))
+                .thenReturn(returndPolicy);
         apiProvider.addPolicy(policy);
     }
 
