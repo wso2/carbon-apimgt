@@ -54,10 +54,10 @@ const SettingsBase = (props) => {
         }
     };
 
-    const validatePasswordChange = (pwd) => {
+    const validatePasswordChange = () => {
         // todo: update password validation policy
-        const schema = Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).empty();
-        const validationError = schema.validate(pwd).error;
+        const schema = Joi.string().empty();
+        const validationError = schema.validate(newPassword).error;
         if (validationError) {
             const errorType = validationError.details[0].type;
             if (errorType === 'string.empty') {
@@ -65,14 +65,6 @@ const SettingsBase = (props) => {
                     < FormattedMessage
                         id='Change.Password.password.empty'
                         defaultMessage='Password is empty'
-                    />
-                );
-            }
-            if (errorType === 'string.pattern.base') {
-                return (
-                    < FormattedMessage
-                        id='Change.Password.password.invalid'
-                        defaultMessage='Invalid Password'
                     />
                 );
             }
@@ -107,8 +99,7 @@ const SettingsBase = (props) => {
     };
 
     const handleSave = () => {
-        console.log('TAG', oldPassword, newPassword, repeatedNewPassword);
-
+        alert(oldPassword + ' ' + newPassword + ' ' + repeatedNewPassword);
     };
 
     const title = (
@@ -120,11 +111,10 @@ const SettingsBase = (props) => {
                 />{': ' + username}
             </Typography>
             <Typography variant='caption'>
-                {/* todo: update password validation policy */}
+                {/* todo: mention password validation policy */}
                 <FormattedMessage
                     id='Change.Password.description'
                     defaultMessage={'Change your own password.'
-                        + ' Password should be length of 3-30, no special characters.'
                         + ' Required fields are marked with an asterisk ( * )'}
                 />
             </Typography>
@@ -155,7 +145,7 @@ const SettingsBase = (props) => {
                                     onChange={handleChange}
                                     label={<FormattedMessage id='Settings.ChangePasswordForm.old.password' defaultMessage='Old Password' />}
                                     fullWidth
-                                    error={validateOldPasswordChange(oldPassword)}
+                                    error={validateOldPasswordChange()}
                                     helperText={<FormattedMessage id='Settings.ChangePasswordForm.enter.old.password' defaultMessage='Enter Old Password' />}
                                     variant='outlined'
                                     type='password'
@@ -173,8 +163,8 @@ const SettingsBase = (props) => {
                                     }
                                     required
                                     fullWidth
-                                    error={validatePasswordChange(newPassword)}
-                                    helperText={validatePasswordChange(newPassword)
+                                    error={validatePasswordChange()}
+                                    helperText={validatePasswordChange()
                                         || <FormattedMessage id='Settings.ChangePasswordForm.enter.new.password' defaultMessage='Enter a New Password' />}
                                     variant='outlined'
                                     type='password'
@@ -192,8 +182,8 @@ const SettingsBase = (props) => {
                                     }
                                     required
                                     fullWidth
-                                    error={validateRepeatedPassword(repeatedNewPassword)}
-                                    helperText={validateRepeatedPassword(repeatedNewPassword)
+                                    error={validateRepeatedPassword()}
+                                    helperText={validateRepeatedPassword()
                                         || <FormattedMessage id='Settings.ChangePasswordForm.confirmationOf.new.password' defaultMessage='Confirmation of new Password' />}
                                     variant='outlined'
                                     type='password'
