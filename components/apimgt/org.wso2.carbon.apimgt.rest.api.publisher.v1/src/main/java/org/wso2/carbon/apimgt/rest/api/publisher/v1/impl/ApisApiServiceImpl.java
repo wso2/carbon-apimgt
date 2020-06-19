@@ -713,7 +713,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             JSONParser parser = new JSONParser();
             String oldEndpointConfigString = originalAPI.getEndpointConfig();
             JSONObject oldEndpointConfig = null;
-            if (!oldEndpointConfigString.isEmpty()) {
+            if (StringUtils.isNotBlank(oldEndpointConfigString)) {
                 oldEndpointConfig = (JSONObject) parser.parse(oldEndpointConfigString);
             }
             String oldProductionApiSecret = null;
