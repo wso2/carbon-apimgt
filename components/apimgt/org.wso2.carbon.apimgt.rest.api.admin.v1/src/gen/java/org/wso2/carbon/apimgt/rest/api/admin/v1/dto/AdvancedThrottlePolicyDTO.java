@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConditionalGroupDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitTypeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
 import javax.validation.constraints.*;
 
@@ -20,23 +20,24 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class AdvancedThrottlePolicyDTO extends ThrottlePolicyDTO  {
   
-    private ThrottleLimitTypeDTO defaultLimit = null;
+    private ThrottleLimitDTO defaultLimit = null;
     private List<ConditionalGroupDTO> conditionalGroups = new ArrayList<>();
 
   /**
    **/
-  public AdvancedThrottlePolicyDTO defaultLimit(ThrottleLimitTypeDTO defaultLimit) {
+  public AdvancedThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("defaultLimit")
-  public ThrottleLimitTypeDTO getDefaultLimit() {
+  @NotNull
+  public ThrottleLimitDTO getDefaultLimit() {
     return defaultLimit;
   }
-  public void setDefaultLimit(ThrottleLimitTypeDTO defaultLimit) {
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
   }
 
