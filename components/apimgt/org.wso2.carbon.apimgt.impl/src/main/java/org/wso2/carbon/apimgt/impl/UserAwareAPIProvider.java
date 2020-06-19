@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
@@ -49,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
@@ -321,7 +323,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     @Override
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
         checkPublishPermission();
-        apiMgtDAO.updateSubscription(subscribedAPI);
+        super.updateSubscription(subscribedAPI);
     }
 
     @Override

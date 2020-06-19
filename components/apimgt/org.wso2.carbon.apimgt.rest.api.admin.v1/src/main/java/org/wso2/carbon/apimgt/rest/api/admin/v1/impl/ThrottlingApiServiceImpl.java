@@ -106,12 +106,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingPoliciesAdvancedPost(AdvancedThrottlePolicyDTO body, String contentType,
-                                                   MessageContext messageContext) {
+                                                   MessageContext messageContext) throws APIManagementException {
 
-        if (StringUtils.isBlank(body.getPolicyName())) {
-            String errorMessage = "Policy name of advanced throttle policy cannot be blank";
-            RestApiUtil.handleBadRequest(errorMessage, log);
-        }
+        RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -301,12 +298,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingPoliciesApplicationPost(ApplicationThrottlePolicyDTO body, String contentType,
-                                                      MessageContext messageContext) {
+                                                      MessageContext messageContext) throws APIManagementException {
 
-        if (StringUtils.isBlank(body.getPolicyName())) {
-            String errorMessage = "Policy name of application throttle policy cannot be blank";
-            RestApiUtil.handleBadRequest(errorMessage, log);
-        }
+        RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -500,12 +494,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingPoliciesSubscriptionPost(SubscriptionThrottlePolicyDTO body, String contentType,
-                                                       MessageContext messageContext) {
+                                                       MessageContext messageContext) throws APIManagementException {
 
-        if (StringUtils.isBlank(body.getPolicyName())) {
-            String errorMessage = "Policy name of subscription throttle policy cannot be blank";
-            RestApiUtil.handleBadRequest(errorMessage, log);
-        }
+        RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();

@@ -98,6 +98,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
@@ -824,7 +825,7 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         int subscriptionId = -1;
         int id = -1;
-
+        
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -845,7 +846,7 @@ public class ApiMgtDAO {
             ps.setInt(2, applicationId);
 
             resultSet = ps.executeQuery();
-
+            int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             //If the subscription already exists
             if (resultSet.next()) {
                 String subStatus = resultSet.getString("SUB_STATUS");
@@ -889,13 +890,15 @@ public class ApiMgtDAO {
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
                 preparedStForInsert = conn.prepareStatement(sqlQuery, new String[]{"subscription_id"});
             }
-
+            String tier;
             if (!isProduct) {
-                preparedStForInsert.setString(1, apiTypeWrapper.getApi().getId().getTier());
-                preparedStForInsert.setString(10, apiTypeWrapper.getApi().getId().getTier());
+                tier = apiTypeWrapper.getApi().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
             } else {
-                preparedStForInsert.setString(1, apiTypeWrapper.getApiProduct().getId().getTier());
-                preparedStForInsert.setString(10, apiTypeWrapper.getApiProduct().getId().getTier());
+                tier = apiTypeWrapper.getApiProduct().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
             }
             preparedStForInsert.setInt(2, id);
             preparedStForInsert.setInt(3, applicationId);
@@ -917,6 +920,13 @@ public class ApiMgtDAO {
 
             // finally commit transaction
             conn.commit();
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
+                    tenantId, tenantDomain , subscriptionId,id, applicationId, tier,
+                    (status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED));
+            APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -5500,6 +5510,7 @@ public class ApiMgtDAO {
         String getApplicationDataQuery = SQLConstants.GET_APPLICATION_DATA_SQL;
 
         APIIdentifier apiIdentifier = apiTypeWrapper.getApi().getId();
+        int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
         try {
             // Retrieve all the existing subscription for the old version
             connection = APIMgtDBUtil.getConnection();
@@ -5594,7 +5605,7 @@ public class ApiMgtDAO {
                             subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
                         }
                         apiTypeWrapper.setTier(rs.getString("TIER_ID"));
-                        addSubscription(apiTypeWrapper, applicationId, subscriptionStatus, apiIdentifier.getProviderName());
+                        int subscriptionId = addSubscription(apiTypeWrapper, applicationId, subscriptionStatus, apiIdentifier.getProviderName());
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
                     } catch (SubscriptionAlreadyExistingException e) {

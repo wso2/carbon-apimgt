@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionBaseDTO;
 import javax.validation.constraints.*;
 
 
@@ -16,27 +15,8 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class QueryParameterConditionDTO   {
   
-    private Boolean invertCondition = false;
     private String parameterName = null;
     private String parameterValue = null;
-
-  /**
-   * Specifies whether inversion of the condition to be matched against the request.  **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value (&#39;true&#39; or &#39;false&#39;) for the same type of conditional group. 
-   **/
-  public QueryParameterConditionDTO invertCondition(Boolean invertCondition) {
-    this.invertCondition = invertCondition;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Specifies whether inversion of the condition to be matched against the request.  **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value ('true' or 'false') for the same type of conditional group. ")
-  @JsonProperty("invertCondition")
-  public Boolean isInvertCondition() {
-    return invertCondition;
-  }
-  public void setInvertCondition(Boolean invertCondition) {
-    this.invertCondition = invertCondition;
-  }
 
   /**
    * Name of the query parameter
@@ -47,8 +27,9 @@ public class QueryParameterConditionDTO   {
   }
 
   
-  @ApiModelProperty(value = "Name of the query parameter")
+  @ApiModelProperty(required = true, value = "Name of the query parameter")
   @JsonProperty("parameterName")
+  @NotNull
   public String getParameterName() {
     return parameterName;
   }
@@ -65,8 +46,9 @@ public class QueryParameterConditionDTO   {
   }
 
   
-  @ApiModelProperty(value = "Value of the query parameter to be matched")
+  @ApiModelProperty(required = true, value = "Value of the query parameter to be matched")
   @JsonProperty("parameterValue")
+  @NotNull
   public String getParameterValue() {
     return parameterValue;
   }
@@ -84,14 +66,13 @@ public class QueryParameterConditionDTO   {
       return false;
     }
     QueryParameterConditionDTO queryParameterCondition = (QueryParameterConditionDTO) o;
-    return Objects.equals(invertCondition, queryParameterCondition.invertCondition) &&
-        Objects.equals(parameterName, queryParameterCondition.parameterName) &&
+    return Objects.equals(parameterName, queryParameterCondition.parameterName) &&
         Objects.equals(parameterValue, queryParameterCondition.parameterValue);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(invertCondition, parameterName, parameterValue);
+    return Objects.hash(parameterName, parameterValue);
   }
 
   @Override
@@ -99,7 +80,6 @@ public class QueryParameterConditionDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class QueryParameterConditionDTO {\n");
     
-    sb.append("    invertCondition: ").append(toIndentedString(invertCondition)).append("\n");
     sb.append("    parameterName: ").append(toIndentedString(parameterName)).append("\n");
     sb.append("    parameterValue: ").append(toIndentedString(parameterValue)).append("\n");
     sb.append("}");
