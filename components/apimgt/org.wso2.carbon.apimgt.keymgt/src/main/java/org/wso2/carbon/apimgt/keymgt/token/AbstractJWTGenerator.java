@@ -32,9 +32,9 @@ import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -45,8 +45,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -267,36 +265,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         try {
             //get tenant domain
             tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
-            //get tenantId
-            int tenantId = APIUtil.getTenantId(endUserName);
-
-            Key privateKey = null;
-
-            if (!(privateKeys.containsKey(tenantId))) {
-                APIUtil.loadTenantRegistry(tenantId);
-                //get tenant's key store manager
-                KeyStoreManager tenantKSM = KeyStoreManager.getInstance(tenantId);
-
-                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    //derive key store name
-                    String ksName = tenantDomain.trim().replace('.', '-');
-                    String jksName = ksName + ".jks";
-                    //obtain private key
-                    //TODO: maintain a hash map with tenants' private keys after first initialization
-                    privateKey = tenantKSM.getPrivateKey(jksName, tenantDomain);
-                } else {
-                    try {
-                        privateKey = tenantKSM.getDefaultPrivateKey();
-                    } catch (Exception e) {
-                        log.error("Error while obtaining private key for super tenant", e);
-                    }
-                }
-                if (privateKey != null) {
-                    privateKeys.put(tenantId, privateKey);
-                }
-            } else {
-                privateKey = privateKeys.get(tenantId);
-            }
+            Key privateKey = CertificateMgtUtils.getInstance().getPrivateKey(tenantDomain);
             return APIUtil.signJwt(assertion, (PrivateKey) privateKey, signatureAlgorithm);
         } catch (RegistryException e) {
             String error = "Error in loading tenant registry for " + tenantDomain;
@@ -355,32 +324,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         try {
             //get tenant domain
             String tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
-            //get tenantId
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-            Certificate publicCert;
-
-            if (!(publicCerts.containsKey(tenantId))) {
-                //get tenant's key store manager
-                APIUtil.loadTenantRegistry(tenantId);
-                KeyStoreManager tenantKSM = KeyStoreManager.getInstance(tenantId);
-
-                KeyStore keyStore;
-                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    //derive key store name
-                    String ksName = tenantDomain.trim().replace('.', '-');
-                    String jksName = ksName + ".jks";
-                    keyStore = tenantKSM.getKeyStore(jksName);
-                    publicCert = keyStore.getCertificate(tenantDomain);
-                } else {
-                    //keyStore = tenantKSM.getPrimaryKeyStore();
-                    publicCert = tenantKSM.getDefaultPrimaryCertificate();
-                }
-                if (publicCert != null) {
-                    publicCerts.put(tenantId, publicCert);
-                }
-            } else {
-                publicCert = publicCerts.get(tenantId);
-            }
+            Certificate publicCert = CertificateMgtUtils.getInstance().getPublicCertificate(tenantDomain);
 
             //TODO: maintain a hashmap with tenants' pubkey thumbprints after first initialization
             if (publicCert == null) {
@@ -388,10 +332,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             } else {
                 return APIUtil.generateHeader(publicCert, signatureAlgorithm);
             }
-        } catch (KeyStoreException e) {
-            String error = "Error in obtaining tenant's keystore";
-            throw new APIManagementException(error, e);
-        } catch (Exception e) {
+        } catch (APIManagementException e) {
             String error = "Error in obtaining tenant's keystore";
             throw new APIManagementException(error, e);
         }

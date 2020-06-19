@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitBaseDTO;
 import javax.validation.constraints.*;
 
 
@@ -14,10 +14,50 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class BandwidthLimitDTO extends ThrottleLimitDTO  {
+public class BandwidthLimitDTO   {
   
+    private String timeUnit = null;
+    private Integer unitTime = null;
     private Long dataAmount = null;
     private String dataUnit = null;
+
+  /**
+   * Unit of the time. Allowed values are \&quot;sec\&quot;, \&quot;min\&quot;, \&quot;hour\&quot;, \&quot;day\&quot;
+   **/
+  public BandwidthLimitDTO timeUnit(String timeUnit) {
+    this.timeUnit = timeUnit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "min", required = true, value = "Unit of the time. Allowed values are \"sec\", \"min\", \"hour\", \"day\"")
+  @JsonProperty("timeUnit")
+  @NotNull
+  public String getTimeUnit() {
+    return timeUnit;
+  }
+  public void setTimeUnit(String timeUnit) {
+    this.timeUnit = timeUnit;
+  }
+
+  /**
+   * Time limit that the throttling limit applies.
+   **/
+  public BandwidthLimitDTO unitTime(Integer unitTime) {
+    this.unitTime = unitTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "10", required = true, value = "Time limit that the throttling limit applies.")
+  @JsonProperty("unitTime")
+  @NotNull
+  public Integer getUnitTime() {
+    return unitTime;
+  }
+  public void setUnitTime(Integer unitTime) {
+    this.unitTime = unitTime;
+  }
 
   /**
    * Amount of data allowed to be transfered
@@ -28,8 +68,9 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO  {
   }
 
   
-  @ApiModelProperty(example = "1000", value = "Amount of data allowed to be transfered")
+  @ApiModelProperty(example = "1000", required = true, value = "Amount of data allowed to be transfered")
   @JsonProperty("dataAmount")
+  @NotNull
   public Long getDataAmount() {
     return dataAmount;
   }
@@ -46,8 +87,9 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO  {
   }
 
   
-  @ApiModelProperty(example = "KB", value = "Unit of data allowed to be transfered. Allowed values are \"KB\", \"MB\" and \"GB\"")
+  @ApiModelProperty(example = "KB", required = true, value = "Unit of data allowed to be transfered. Allowed values are \"KB\", \"MB\" and \"GB\"")
   @JsonProperty("dataUnit")
+  @NotNull
   public String getDataUnit() {
     return dataUnit;
   }
@@ -65,20 +107,24 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO  {
       return false;
     }
     BandwidthLimitDTO bandwidthLimit = (BandwidthLimitDTO) o;
-    return Objects.equals(dataAmount, bandwidthLimit.dataAmount) &&
+    return Objects.equals(timeUnit, bandwidthLimit.timeUnit) &&
+        Objects.equals(unitTime, bandwidthLimit.unitTime) &&
+        Objects.equals(dataAmount, bandwidthLimit.dataAmount) &&
         Objects.equals(dataUnit, bandwidthLimit.dataUnit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(dataAmount, dataUnit);
+    return Objects.hash(timeUnit, unitTime, dataAmount, dataUnit);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class BandwidthLimitDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    
+    sb.append("    timeUnit: ").append(toIndentedString(timeUnit)).append("\n");
+    sb.append("    unitTime: ").append(toIndentedString(unitTime)).append("\n");
     sb.append("    dataAmount: ").append(toIndentedString(dataAmount)).append("\n");
     sb.append("    dataUnit: ").append(toIndentedString(dataUnit)).append("\n");
     sb.append("}");

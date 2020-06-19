@@ -505,6 +505,7 @@ public class JWTValidator {
                     // Add token to tenant token cache
                     if (jwtValidationInfo.isValid()) {
                         getGatewayTokenCache().put(tokenSignature, tenantDomain);
+                        getGatewayKeyCache().put(cacheKey, jwtValidationInfo);
                     } else {
                         getInvalidTokenCache().put(tokenSignature, tenantDomain);
                     }

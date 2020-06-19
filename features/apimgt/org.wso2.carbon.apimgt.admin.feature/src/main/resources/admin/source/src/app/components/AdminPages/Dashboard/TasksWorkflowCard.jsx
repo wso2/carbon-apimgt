@@ -28,13 +28,13 @@ import Divider from '@material-ui/core/Divider';
 import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import AddToQueueRoundedIcon from '@material-ui/icons/AddToQueueRounded';
-import AirplayRoundedIcon from '@material-ui/icons/AirplayRounded';
 import DeviceHubIcon from '@material-ui/icons/DeviceHub';
-import FormatShapesRoundedIcon from '@material-ui/icons/FormatShapesRounded';
+import DnsRoundedIcon from '@material-ui/icons/DnsRounded';
 import LaunchIcon from '@material-ui/icons/Launch';
-import PersonAddRoundedIcon from '@material-ui/icons/PersonAddRounded';
-import RssFeedRoundedIcon from '@material-ui/icons/RssFeedRounded';
+import PeopleIcon from '@material-ui/icons/People';
+import PermMediaOutlinedIcon from '@material-ui/icons/PhotoSizeSelectActual';
+import PublicIcon from '@material-ui/icons/Public';
+import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
 import Configurations from 'Config';
 
 const useStyles = makeStyles((theme) => ({
@@ -199,7 +199,7 @@ export default function TasksWorkflowCard() {
     const compactTasksCard = () => {
         const compactTaskComponentDetails = [
             {
-                icon: PersonAddRoundedIcon,
+                icon: PeopleIcon,
                 path: '/tasks/user-creation',
                 name: intl.formatMessage({
                     id: 'Dashboard.tasksWorkflow.compactTasks.userCreation.name',
@@ -207,7 +207,7 @@ export default function TasksWorkflowCard() {
                 }),
             },
             {
-                icon: AddToQueueRoundedIcon,
+                icon: DnsRoundedIcon,
                 path: '/tasks/application-creation',
                 name: intl.formatMessage({
                     id: 'Dashboard.tasksWorkflow.compactTasks.applicationCreation.name',
@@ -215,7 +215,7 @@ export default function TasksWorkflowCard() {
                 }),
             },
             {
-                icon: RssFeedRoundedIcon,
+                icon: PermMediaOutlinedIcon,
                 path: '/tasks/subscription-creation',
                 name: intl.formatMessage({
                     id: 'Dashboard.tasksWorkflow.compactTasks.subscriptionCreation.name',
@@ -223,7 +223,7 @@ export default function TasksWorkflowCard() {
                 }),
             },
             {
-                icon: AirplayRoundedIcon,
+                icon: PublicIcon,
                 path: '/tasks/application-registration',
                 name: intl.formatMessage({
                     id: 'Dashboard.tasksWorkflow.compactTasks.applicationRegistration.name',
@@ -231,7 +231,7 @@ export default function TasksWorkflowCard() {
                 }),
             },
             {
-                icon: FormatShapesRoundedIcon,
+                icon: SettingsEthernetIcon,
                 path: '/tasks/api-state-change',
                 name: intl.formatMessage({
                     id: 'Dashboard.tasksWorkflow.compactTasks.apiStateChange.name',

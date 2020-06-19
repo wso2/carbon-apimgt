@@ -42,7 +42,7 @@ import Scopes from 'AppComponents/Scopes/Scopes';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
-    <Suspense fallback={<Progress message='Loading components ...' />}>
+    <Suspense fallback={<Progress per={50} message='Loading components ...' />}>
         <Apis />
     </Suspense>
 );
@@ -231,7 +231,7 @@ export default class Protected extends Component {
                                 </Switch>
                             </AppContextProvider>
                         ) : (
-                            <Progress message='Loading Settings ...' />
+                            <Progress per={20} message='Loading Settings ...' />
                         )}
                     </Base>
                 </AppErrorBoundary>

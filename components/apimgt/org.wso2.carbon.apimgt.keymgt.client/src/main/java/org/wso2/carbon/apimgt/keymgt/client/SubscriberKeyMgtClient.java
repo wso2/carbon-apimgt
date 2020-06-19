@@ -26,11 +26,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.keymgt.client.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceAPIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceIdentityException;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceStub;
-import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceTokenMgtException;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.rmi.RemoteException;
@@ -96,7 +95,7 @@ public class SubscriberKeyMgtClient {
     public OAuthApplicationInfo updateOAuthApplication(String userId, String applicationName, String callbackUrl,
                                                        String consumerKey, String[] grantTypes)
             throws RemoteException, APIKeyMgtSubscriberServiceAPIManagementException,
-                   APIKeyMgtSubscriberServiceAPIKeyMgtException, APIKeyMgtSubscriberServiceIdentityException {
+            APIKeyMgtSubscriberServiceIdentityException, APIKeyMgtSubscriberServiceTokenMgtException {
         return subscriberServiceStub.updateOAuthApplication(userId, applicationName, callbackUrl, consumerKey, 
                                                             grantTypes);
     }
@@ -104,7 +103,7 @@ public class SubscriberKeyMgtClient {
     public OAuthApplicationInfo updateOAuthApplicationOwner(String userId, String owner, String applicationName,
                                                             String callbackUrl, String consumerKey, String[] grantTypes)
             throws RemoteException, APIKeyMgtSubscriberServiceAPIManagementException,
-            APIKeyMgtSubscriberServiceAPIKeyMgtException, APIKeyMgtSubscriberServiceIdentityException {
+            APIKeyMgtSubscriberServiceIdentityException, APIKeyMgtSubscriberServiceTokenMgtException {
         return subscriberServiceStub.updateOAuthApplicationOwner(userId, owner, applicationName, callbackUrl, consumerKey,
                 grantTypes);
     }

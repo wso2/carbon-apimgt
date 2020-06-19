@@ -442,7 +442,7 @@ class TableView extends React.Component {
         }
 
         if (!apisAndApiProducts) {
-            return <Progress />;
+            return <Progress per={90} message='Loading APIs ...' />;
         }
         if (notFound) {
             return <ResourceNotFound />;

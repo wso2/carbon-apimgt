@@ -10413,6 +10413,11 @@ definitions:
       name:
         type: string
         example: "WSO2 IS"
+      displayName:
+        type: string
+        description: |
+          display name of Keymanager
+        example: Keymanager1
       type:
         type: string
         example: "IS"

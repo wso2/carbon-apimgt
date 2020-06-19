@@ -112,9 +112,7 @@ class APIProduct extends Resource {
     }
 
     getMonetizationInvoice(id, callback = null) {
-        debugger;
         const promiseInvoice = this.client.then(client => {
-            debugger;
             return client.apis['API Monetization'].get_subscriptions__subscriptionId__usage(
                 {
                     subscriptionId: id

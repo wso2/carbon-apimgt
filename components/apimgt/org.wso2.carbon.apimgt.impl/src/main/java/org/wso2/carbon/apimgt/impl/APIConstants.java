@@ -350,6 +350,8 @@ public final class APIConstants {
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
     public static final String API_OVERVIEW_DEPLOYMENTS = "overview_deployments";
+    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
+    public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
@@ -444,7 +446,7 @@ public final class APIConstants {
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
     public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "ExcludedClaims";
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
-    public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + "ConvertClaimsToConsumerDialect";
+    public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + ".ConvertClaimsToConsumerDialect";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
@@ -670,7 +672,7 @@ public final class APIConstants {
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
             + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
-    public static final String[] KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
+    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
             "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
     public static final String API_KEY_MANAGER_CONFIGURATION = "Configuration.";
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
@@ -2219,7 +2221,10 @@ public final class APIConstants {
                 "]{3}-[0-9a-fA-F]{12}";
         public static final String CONSUMER_KEY_CLAIM = "consumer_key_claim";
         public static final String SCOPES_CLAIM = "scopes_claim";
-
+        public static final String CERTIFICATE_TYPE = "certificate_type";
+        public static final String CERTIFICATE_VALUE = "certificate_value";
+        public static final String CERTIFICATE_TYPE_JWKS_ENDPOINT = "JWKS";
+        public static final String CERTIFICATE_TYPE_PEM_FILE = "PEM";
         public static class KeyManagerEvent {
 
             public static final String EVENT_TYPE = "event_type";

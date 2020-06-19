@@ -8,7 +8,7 @@
         "test:coverage": "jest --coverage",
         "build:prod": "rm -R site/public/dist/; npm rum i18n && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack -d --watch ",
-        "analysis": "NODE_ENV=development NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
+        "analysis": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
         "lint": "eslint source",
         "i18n": "extract-messages -l=en,fr -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'"
     },
@@ -108,6 +108,7 @@
         "swagger-parser": "^7.0.0",
         "webpack": "v4.28.4",
         "webpack-bundle-analyzer": "^2.9.1",
-        "webpack-cli": "^3.3.2"
+        "webpack-cli": "^3.3.2",
+        "worker-loader": "^2.0.0"
     }
 }

@@ -444,7 +444,7 @@ class TokenManager extends React.Component {
      */
     render() {
         const {
-            classes, selectedApp, keyType, summary,
+            classes, selectedApp, keyType, summary, selectedApp: { hashEnabled },
         } = this.props;
         const {
             keys, keyRequest, isLoading, isKeyJWT, providedConsumerKey,
@@ -524,7 +524,7 @@ class TokenManager extends React.Component {
                         aria-label="key manager tabs"
                     >
                         {keyManagers.map(keymanager => (
-                            <Tab label={keymanager.name} value={keymanager.name} disabled={!keymanager.enabled}/>
+                            <Tab label={keymanager.displayName || keymanager.name} value={keymanager.name} disabled={!keymanager.enabled}/>
                         ))}
                         
                     </Tabs>
@@ -568,7 +568,7 @@ class TokenManager extends React.Component {
                                             isKeyJWT={isKeyJWT}
                                             selectedGrantTypes={keyGrantTypes}
                                             isUserOwner={isUserOwner}
-                                            hashEnabled={keymanager.enableTokenHashing}
+                                            hashEnabled={keymanager.enableTokenHashing || hashEnabled}
                                         />
                                     </div>
                                     <KeyConfiguration
