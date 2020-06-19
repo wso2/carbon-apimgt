@@ -44,7 +44,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the list of subscriptions for bot detection ", notes = "Get the list of subscriptions which are subscribed to receive email alerts for bot detection ", response = BotDetectionAlertSubscriptionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
+            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Bot Detection Alert Subscriptions",  })
@@ -78,7 +78,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Subscribe for bot detection alerts", notes = "Register a subscription for bot detection alerts ", response = BotDetectionAlertSubscriptionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
+            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Bot Detection Alert Subscriptions",  })
@@ -131,7 +131,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Unsubscribe from bot detection alerts.", notes = "Delete a subscription from bot detection alerts. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
+            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Bot Detection Alert Subscriptions" })

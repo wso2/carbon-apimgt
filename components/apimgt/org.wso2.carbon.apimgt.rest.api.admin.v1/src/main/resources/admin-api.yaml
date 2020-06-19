@@ -3334,7 +3334,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
-            - apim:bot_data
+            - apim:admin_alert_manage
       operationId: getBotDetectionAlertSubscriptions
       produces:
         - application/json
@@ -3370,7 +3370,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
-            - apim:bot_data
+            - apim:admin_alert_manage
       operationId: subscribeForBotDetectionAlerts
       summary: Subscribe for bot detection alerts
       description: |
@@ -3418,7 +3418,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
-            - apim:bot_data
+            - apim:admin_alert_manage
       operationId: unsubscribeFromBotDetectionAlerts
       summary: Unsubscribe from bot detection alerts.
       description: |
