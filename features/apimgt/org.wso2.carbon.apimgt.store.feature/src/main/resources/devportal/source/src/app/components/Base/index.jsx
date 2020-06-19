@@ -50,7 +50,6 @@ import AuthManager from '../../data/AuthManager';
 import LanuageSelector from './Header/LanuageSelector';
 import GlobalNavBar from './Header/GlobalNavbar';
 import VerticalDivider from '../Shared/VerticalDivider';
-import Alert from 'AppComponents/Shared/Alert';
 
 const styles = (theme) => {
     const pageMaxWidth = theme.custom.page.style === 'fluid' ? 'none' : theme.custom.page.width;
@@ -231,7 +230,6 @@ class Layout extends React.Component {
         left: false,
         openNavBar: false,
         openUserMenu: false,
-        openSettingsMenu: false,
         selected: 'home',
     };
     ditectCurrentMenu = (location) => {
@@ -290,24 +288,12 @@ class Layout extends React.Component {
         this.setState((state) => ({ openUserMenu: !state.openUserMenu }));
     };
 
-    handleToggleSettingsMenu = () => {
-        this.setState((state) => ({ openSettingsMenu: !state.openSettingsMenu }));
-    };
-
     handleCloseUserMenu = (event) => {
         if (this.anchorEl.contains(event.target)) {
             return;
         }
 
         this.setState({ openUserMenu: false });
-    };
-
-    handleCloseSettingsMenu = (event) => {
-        if (this.anchorEl.contains(event.target)) {
-            return;
-        }
-
-        this.setState({ openSettingsMenu: false });
     };
 
     getLogoPath = () => {
@@ -499,7 +485,7 @@ class Layout extends React.Component {
                                                                 }}>settings</Icon>
                                                         </ListItemIcon>
                                                         <Hidden mdDown>
-                                                             <ListItemText
+                                                            <ListItemText
                                                                 classes={{
                                                                     root: classes.listItemTextRoot,
                                                                     primary: classNames({
@@ -517,19 +503,6 @@ class Layout extends React.Component {
                                                     {selected === 'settings' && (<div className={classes.triangleDown}></div>)}
                                                 </Link>
                                             </List> */}
-                                            <Button
-                                                buttonRef={(node) => {
-                                                    this.anchorEl = node;
-                                                }}
-                                                aria-owns={open ? 'menu-list-grow-settings' : null}
-                                                aria-haspopup='true'
-                                                onClick={this.handleToggleSettingsMenu}
-                                                className={classes.userLink}
-                                                id='settingsToggleButton'
-                                            >
-                                                <Icon className={classes.icons}>settings</Icon>
-                                                Settings
-                                            </Button>
                                             <Button
                                                 buttonRef={(node) => {
                                                     this.anchorEl = node;
@@ -576,41 +549,11 @@ class Layout extends React.Component {
                                                                             defaultMessage='Logout'
                                                                         />
                                                                     </MenuItem>
-                                                                </MenuList>
-                                                            </ClickAwayListener>
-                                                        </Paper>
-                                                    </Grow>
-                                                )}
-                                            </Popper>
-                                            <Popper
-                                                id='settingsPopup'
-                                                open={this.state.openSettingsMenu}
-                                                anchorEl={this.anchorEl}
-                                                transition
-                                                disablePortal
-                                                anchorOrigin={{
-                                                    vertical: 'bottom',
-                                                    horizontal: 'center',
-                                                }}
-                                                transformOrigin={{
-                                                    vertical: 'top',
-                                                    horizontal: 'center',
-                                                }}
-                                            >
-                                                {({ TransitionProps, placement }) => (
-                                                    <Grow
-                                                        {...TransitionProps}
-                                                        id='menu-list-grow-settings'
-                                                        style={{
-                                                            transformOrigin:
-                                                                placement === 'bottom' ? 'center top' : 'center bottom',
-                                                        }}
-                                                    >
-                                                        <Paper>
-                                                            <ClickAwayListener onClickAway={this.handleCloseSettingsMenu}>
-                                                                <MenuList>
                                                                     <MenuItem className={classes.logoutLink}>
-                                                                        <Link to='/settings/manage-alerts' onClick={this.handleCloseSettingsMenu}>
+                                                                        <Link
+                                                                            to='/settings/manage-alerts'
+                                                                            onClick={this.handleCloseUserMenu}
+                                                                        >
                                                                             <FormattedMessage
                                                                                 id='Base.index.settingsMenu.alertConfiguration'
                                                                                 defaultMessage='Alert configure'
@@ -620,7 +563,8 @@ class Layout extends React.Component {
                                                                     <MenuItem className={classes.logoutLink}>
                                                                         <Link
                                                                             to={'/settings/change-password/' + user.name}
-                                                                            onClick={this.handleCloseSettingsMenu}>
+                                                                            onClick={this.handleCloseUserMenu}
+                                                                        >
                                                                             <FormattedMessage
                                                                                 id='Base.index.settingsMenu.changePassword'
                                                                                 defaultMessage='Change Password'
