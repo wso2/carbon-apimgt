@@ -135,6 +135,7 @@ public class SubscriptionValidationDAO {
                     application.setId(appId);
                     application.setPolicy(resultSet.getString("TIER"));
                     application.setSubName(resultSet.getString("SUB_NAME"));
+                    application.setName(resultSet.getString("NAME"));
                     application.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     temp.put(appId, application);
                 }
@@ -308,7 +309,8 @@ public class SubscriptionValidationDAO {
         API api = null;
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL + " UNION " + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
+                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL + " UNION "
+                        + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
             ps.setString(1, version);
             ps.setString(2, context);
             ps.setString(3, version);

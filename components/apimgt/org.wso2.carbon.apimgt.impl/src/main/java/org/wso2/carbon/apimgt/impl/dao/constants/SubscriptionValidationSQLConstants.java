@@ -24,6 +24,7 @@ public class SubscriptionValidationSQLConstants {
             " SELECT " +
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.APPLICATION_TIER AS TIER," +
+                    "   APP.NAME AS NAME," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME" +
                     " FROM " +
@@ -35,6 +36,7 @@ public class SubscriptionValidationSQLConstants {
     public static final String GET_TENANT_APPLICATIONS_SQL =
             " SELECT " +
                     "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.NAME AS NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME" +
@@ -48,6 +50,7 @@ public class SubscriptionValidationSQLConstants {
     public static final String GET_APPLICATION_BY_ID_SQL =
             " SELECT " +
                     "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.NAME AS NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME" +
