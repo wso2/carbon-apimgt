@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import Joi from '@hapi/joi';
 import { Box, Grid } from '@material-ui/core';
@@ -39,32 +39,12 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-/**
- * Perform a task repeatedly with a given interval
- * @param {function} callback function to be called
- * @param {Integer} delay interval
- */
-function useInterval(callback, delay) {
-    const savedCallback = useRef();
-    savedCallback.current = callback;
-    useEffect(() => {
-        const id = setInterval(() => {
-            savedCallback.current();
-        }, delay);
-        return () => clearInterval(id);
-    }, []);
-}
-
 const SettingsBase = (props) => {
     const classes = useStyles();
     const { username } = props.match.params;
     const [oldPassword, setOldPassword] = useState();
     const [newPassword, setNewPassword] = useState();
     const [repeatedNewPassword, setRepeatedNewPassword] = useState();
-
-    const [validationRes, setValidationRes] = useState({ newPassword: '', repeatedPassword: '' });
-    const [elt, setElt] = useState({ newPassword: 0, repeatedPassword: 0 });
-    const [isValidated, setIsValidated] = useState({ newPassword: true, repeatedPassword: true });
 
     const validateOldPasswordChange = () => {
         if (oldPassword === '') {
@@ -74,15 +54,14 @@ const SettingsBase = (props) => {
         }
     };
 
-    const validatePasswordChange = () => {
+    const validatePasswordChange = (pwd) => {
         // todo: update password validation policy
         const schema = Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).empty();
-        const validationError = schema.validate(newPassword).error;
-        let validationText = false;
+        const validationError = schema.validate(pwd).error;
         if (validationError) {
             const errorType = validationError.details[0].type;
             if (errorType === 'string.empty') {
-                validationText = (
+                return (
                     < FormattedMessage
                         id='Change.Password.password.empty'
                         defaultMessage='Password is empty'
@@ -90,7 +69,7 @@ const SettingsBase = (props) => {
                 );
             }
             if (errorType === 'string.pattern.base') {
-                validationText = (
+                return (
                     < FormattedMessage
                         id='Change.Password.password.invalid'
                         defaultMessage='Invalid Password'
@@ -98,23 +77,17 @@ const SettingsBase = (props) => {
                 );
             }
         }
-        setValidationRes({ ...validationRes, newPassword: validationText });
-        setIsValidated({ ...isValidated, newPassword: true });
-        return validationText;
+        return false;
     };
 
     const validateRepeatedPassword = () => {
-        let validationText = false;
         if (repeatedNewPassword && newPassword !== repeatedNewPassword) {
-            validationText = (
+            return (
                 < FormattedMessage
                     id='Change.Password.password.mismatch'
                     defaultMessage={'Password doesn\'t match'}
                 />);
         }
-        setValidationRes({ ...validationRes, repeatedPassword: validationText });
-        setIsValidated({ ...isValidated, repeatedPassword: true });
-        return validationText;
     };
 
     const handleChange = ({ target: { name: field, value } }) => {
@@ -124,34 +97,18 @@ const SettingsBase = (props) => {
                 break;
             case 'newPassword':
                 setNewPassword(value);
-                setIsValidated({ ...isValidated, newPassword: false });
-                setElt({ ...elt, newPassword: 0 });
                 break;
             case 'repeatedNewPassword':
                 setRepeatedNewPassword(value);
-                setIsValidated({ ...isValidated, repeatedPassword: false });
-                setElt({ ...elt, repeatedPassword: 0 });
                 break;
             default:
                 break;
         }
     };
 
-    useInterval(() => {
-        if (!isValidated.newPassword && elt.newPassword >= 800) {
-            validatePasswordChange();
-            setElt({ ...elt, newPassword: elt.newPassword + 200 });
-        }
-        if (!isValidated.repeatedPassword && elt.repeatedPassword >= 800) {
-            validateRepeatedPassword();
-            setElt({ ...elt, repeatedPassword: elt.repeatedPassword + 200 });
-        }
-        setElt({ newPassword: elt.newPassword + 200, repeatedPassword: elt.repeatedPassword + 200 });
-    }, 200);
-
     const handleSave = () => {
-        // todo: call api to perform task
-        alert('old pwd: ' + oldPassword + 'new pwd: ' + newPassword + 'repeated pwd' + repeatedNewPassword);
+        console.log('TAG', oldPassword, newPassword, repeatedNewPassword);
+
     };
 
     const title = (
@@ -216,8 +173,8 @@ const SettingsBase = (props) => {
                                     }
                                     required
                                     fullWidth
-                                    error={validationRes.newPassword}
-                                    helperText={validationRes.newPassword
+                                    error={validatePasswordChange(newPassword)}
+                                    helperText={validatePasswordChange(newPassword)
                                         || <FormattedMessage id='Settings.ChangePasswordForm.enter.new.password' defaultMessage='Enter a New Password' />}
                                     variant='outlined'
                                     type='password'
@@ -235,8 +192,8 @@ const SettingsBase = (props) => {
                                     }
                                     required
                                     fullWidth
-                                    error={validationRes.repeatedPassword}
-                                    helperText={validationRes.repeatedPassword
+                                    error={validateRepeatedPassword(repeatedNewPassword)}
+                                    helperText={validateRepeatedPassword(repeatedNewPassword)
                                         || <FormattedMessage id='Settings.ChangePasswordForm.confirmationOf.new.password' defaultMessage='Confirmation of new Password' />}
                                     variant='outlined'
                                     type='password'
