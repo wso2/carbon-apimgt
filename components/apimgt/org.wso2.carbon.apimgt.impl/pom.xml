@@ -363,7 +363,7 @@
         <dependency>
             <groupId>org.wso2.orbit.com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
-            <version>${org.wso2.orbit.com.squareup.okio.version}</version>
+            <version>${okio.wso2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.apache.commons</groupId>
@@ -373,7 +373,7 @@
         <dependency>
             <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
             <artifactId>okhttp</artifactId>
-            <version>${org.wso2.orbit.com.squareup.okhttp.version}</version>
+            <version>${okhttp.wso2.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
@@ -584,9 +584,9 @@
                             io.fabric8.kubernetes.api.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
                             io.fabric8.kubernetes.internal.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
                             io.fabric8.openshift.client.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
-                            okio.*;version="${org.wso2.orbit.com.squareup.okio.version}",
+                            okio.*;version="${okio.wso2.version}",
                             org.apache.commons.compress.*;version="${org.wso2.orbit.org.apache.commons.compress.version}",
-                            okhttp3.*;version="${org.wso2.orbit.com.squareup.okhttp.version}"
+                            okhttp3.*;version="${okhttp.wso2.version}"
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>

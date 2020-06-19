@@ -250,6 +250,7 @@
                             !org.wso2.carbon.apimgt.keymgt.stub.useradmin,
                             org.wso2.carbon.apimgt.tokenmgt.*
                         </Export-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

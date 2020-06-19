@@ -3139,7 +3139,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
                         apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
                         apiKey.setGrantTypes(
-                                oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+                                (String) oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
                         if (oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES) != null) {
                             apiKey.setAdditionalProperties(
                                     oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES));

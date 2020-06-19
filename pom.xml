@@ -1634,19 +1634,9 @@
                 <version>${org.wso2.orbit.io.fabric8.kubernetes.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.com.squareup.okio</groupId>
-                <artifactId>okio</artifactId>
-                <version>${org.wso2.orbit.com.squareup.okio.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.orbit.org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${org.wso2.orbit.org.apache.commons.compress.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
-                <artifactId>okhttp</artifactId>
-                <version>${org.wso2.orbit.com.squareup.okhttp.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
@@ -1937,9 +1927,7 @@
         <okio.wso2.version>2.4.0.wso2v1</okio.wso2.version>
 
         <org.wso2.orbit.io.fabric8.kubernetes.version>4.6.4.wso2v1</org.wso2.orbit.io.fabric8.kubernetes.version>
-        <org.wso2.orbit.com.squareup.okio.version>2.4.0.wso2v1</org.wso2.orbit.com.squareup.okio.version>
         <org.wso2.orbit.org.apache.commons.compress.version>1.18.0.wso2v1</org.wso2.orbit.org.apache.commons.compress.version>
-        <org.wso2.orbit.com.squareup.okhttp.version>4.2.0.wso2v1</org.wso2.orbit.com.squareup.okhttp.version>
         <openfeign.version>11.0</openfeign.version>
     </properties>
 </project>
