@@ -43,16 +43,18 @@ function AddEmail(props) {
         updateList, icon, triggerButtonText, title, emailList,
     } = props;
     const classes = useStyles();
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState();
 
     const onChange = (e) => {
         setEmail(e.target.value);
     };
 
-    const validateEmail = (value) => {
+    const validateEmail = () => {
+        if (email === undefined) {
+            return false;
+        }
         const schema = Joi.string().email().empty();
-        const validationError = schema.validate(value).error;
-
+        const validationError = schema.validate(email).error;
         if (validationError) {
             const errorType = validationError.details[0].type;
             if (errorType === 'any.empty') {
@@ -127,8 +129,8 @@ function AddEmail(props) {
                     </span>
                 )}
                 fullWidth
-                error={validateEmail(email)}
-                helperText={validateEmail(email) || 'Enter Email address'}
+                error={validateEmail()}
+                helperText={validateEmail() || 'Enter Email address'}
                 variant='outlined'
             />
         </FormDialogBase>
