@@ -324,11 +324,11 @@ public class APIKeyValidationService extends AbstractAdmin {
             }
         }
 
-        if(api == null) {
+        if(api == null || api.getApiId() == 0) {
             return templates;
         }
         List<URLMapping> mapping = api.getResources();
-        if(mapping == null) {
+        if(mapping == null || mapping.isEmpty()) {
             return templates;
         }
         int apiTenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(api.getApiProvider()));

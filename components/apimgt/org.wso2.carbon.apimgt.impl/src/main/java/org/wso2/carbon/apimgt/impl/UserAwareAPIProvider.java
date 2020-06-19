@@ -323,13 +323,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     @Override
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
         checkPublishPermission();
-        apiMgtDAO.updateSubscription(subscribedAPI);
-        subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
-        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                subscribedAPI.getSubscriptionId(), subscribedAPI.getApiId().getUUID(),
-                subscribedAPI.getApplication().getId(), subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
-        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+        super.updateSubscription(subscribedAPI);
     }
 
     @Override

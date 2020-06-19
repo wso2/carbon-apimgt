@@ -825,7 +825,7 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         int subscriptionId = -1;
         int id = -1;
-
+        
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -846,7 +846,7 @@ public class ApiMgtDAO {
             ps.setInt(2, applicationId);
 
             resultSet = ps.executeQuery();
-
+            int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             //If the subscription already exists
             if (resultSet.next()) {
                 String subStatus = resultSet.getString("SUB_STATUS");
@@ -890,13 +890,15 @@ public class ApiMgtDAO {
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
                 preparedStForInsert = conn.prepareStatement(sqlQuery, new String[]{"subscription_id"});
             }
-
+            String tier;
             if (!isProduct) {
-                preparedStForInsert.setString(1, apiTypeWrapper.getApi().getId().getTier());
-                preparedStForInsert.setString(10, apiTypeWrapper.getApi().getId().getTier());
+                tier = apiTypeWrapper.getApi().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
             } else {
-                preparedStForInsert.setString(1, apiTypeWrapper.getApiProduct().getId().getTier());
-                preparedStForInsert.setString(10, apiTypeWrapper.getApiProduct().getId().getTier());
+                tier = apiTypeWrapper.getApiProduct().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
             }
             preparedStForInsert.setInt(2, id);
             preparedStForInsert.setInt(3, applicationId);
@@ -918,6 +920,13 @@ public class ApiMgtDAO {
 
             // finally commit transaction
             conn.commit();
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
+                    tenantId, tenantDomain , subscriptionId,id, applicationId, tier,
+                    (status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED));
+            APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -5552,11 +5561,6 @@ public class ApiMgtDAO {
                             throw new APIManagementException(msg);
                         }
                         subscriptionIdMap.put(info.subscriptionId, subscriptionId);
-                        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                                tenantId, info.subscriptionId,apiIdentifier.getUUID(), info.applicationId, info.tierId,
-                                info.subscriptionStatus);
-                        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                     }
                     int subscriptionId = subscriptionIdMap.get(info.subscriptionId);
                     connection.setAutoCommit(false);
@@ -5604,11 +5608,6 @@ public class ApiMgtDAO {
                         int subscriptionId = addSubscription(apiTypeWrapper, applicationId, subscriptionStatus, apiIdentifier.getProviderName());
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
-                        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                                tenantId, subscriptionId, apiIdentifier.getUUID(), applicationId,
-                                rs.getString("TIER_ID"), subscriptionStatus);
-                        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                     } catch (SubscriptionAlreadyExistingException e) {
                         //Not handled as an error because same subscription can be there in many previous versions.
                         //Ex: if previous version was created by another older version and if the subscriptions are

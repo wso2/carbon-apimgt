@@ -308,7 +308,7 @@ public class SubscriptionValidationDAO {
         API api = null;
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL);) {
+                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL + " UNION " + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
             ps.setString(1, version);
             ps.setString(2, context);
             ps.setString(3, version);
