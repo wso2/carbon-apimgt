@@ -452,6 +452,19 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     /**
+     * Retrieve a bot detection alert subscription by querying a particular field (uuid or email)
+     *
+     * @param field field to be queried to obtain the bot detection alert subscription. Can be uuid or email
+     * @param value value corresponding to the field (uuid or email value)
+     * @return if subscription exist, returns the bot detection alert subscription, else returns a null object
+     * @throws APIManagementException
+     */
+    public BotDetectionData getBotDetectionAlertSubscription(String field, String value) throws APIManagementException {
+
+        return apiMgtDAO.getBotDetectionAlertSubscription(field, value);
+    }
+
+    /**
      * Retrieve all bot detected data
      *
      * @return list of bot detected data

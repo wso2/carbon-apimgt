@@ -86,6 +86,7 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
+import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
@@ -14651,6 +14652,40 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
         }
+    }
+
+    /**
+     * Retrieve a bot detection alert subscription by querying a particular field (uuid or email)
+     *
+     * @param field field to be queried to obtain the bot detection alert subscription. Can be uuid or email
+     * @param value value corresponding to the field (uuid or email value)
+     * @return if subscription exist, returns the bot detection alert subscription, else returns a null object
+     * @throws APIManagementException
+     */
+    public BotDetectionData getBotDetectionAlertSubscription(String field, String value)
+            throws APIManagementException {
+
+        BotDetectionData alertSubscription = null;
+        String query = "";
+        if (AlertMgtConstants.BOT_DETECTION_UUID_FIELD.equals(field)) {
+            query = SQLConstants.BotDataConstants.GET_ALERT_SUBSCRIPTION_BY_UUID;
+        }
+        if (AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD.equals(field)) {
+            query = SQLConstants.BotDataConstants.GET_ALERT_SUBSCRIPTION_BY_EMAIL;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, value);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                alertSubscription = new BotDetectionData();
+                alertSubscription.setUuid(resultSet.getString("UUID"));
+                alertSubscription.setEmail(resultSet.getString("SUBSCRIBER_ADDRESS"));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve bot detection alert subscription of " + field + ": " + value, e);
+        }
+        return alertSubscription;
     }
 
     /**
