@@ -837,6 +837,9 @@
         },
         "keyType" : {
           "type" : "string"
+        },
+        "keyManager" : {
+          "type" : "string"
         }
       }
     },

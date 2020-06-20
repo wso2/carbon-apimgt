@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,6 +43,9 @@ import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractKeyValidationHandler implements KeyValidationHandler {
 
@@ -202,7 +202,6 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
     
     private APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO, String context,
             String version, String consumerKey, String keyManager, boolean defaultVersionInvoked) {
-        /////////////////////TODO ///////////////// handle keyManager property
         String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
         if (apiTenantDomain == null) {
             apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -219,7 +218,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         if (datastore != null) {
             api = datastore.getApiByContextAndVersion(context, version);
             if (api != null) {
-                key = datastore.getKeyMappingByKey(consumerKey);
+                key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager);
                 if (key != null) {
                     app = datastore.getApplicationById(key.getApplicationId());
                     if (app != null) {
