@@ -49,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SubscriptionValidationDAO {
@@ -511,6 +510,7 @@ public class SubscriptionValidationDAO {
                 keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                 keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                 keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
+                keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
                 keyMappings.add(keyMapping);
             }
 
@@ -884,6 +884,7 @@ public class SubscriptionValidationDAO {
                 keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                 keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                 keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
+                keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
                 return keyMapping;
             }
 

@@ -42,9 +42,10 @@ public interface SubscriptionDataStore {
      * Gets the {@link ApplicationKeyMapping} entry by Key
      *
      * @param key <ApplicationIs>.<keyType>
+     * @param keyManager Keymanager Name
      * @return {@link ApplicationKeyMapping} entry
      */
-    ApplicationKeyMapping getKeyMappingByKey(String key);
+    ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager);
 
     /**
      * Get API by Context and Version

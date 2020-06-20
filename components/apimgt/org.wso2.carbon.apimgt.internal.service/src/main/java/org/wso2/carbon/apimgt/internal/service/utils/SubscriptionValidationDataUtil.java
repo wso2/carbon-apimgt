@@ -288,12 +288,12 @@ public class SubscriptionValidationDataUtil {
 
         ApplicationKeyMappingListDTO applicationKeyMappingListDTO = new ApplicationKeyMappingListDTO();
         if (model != null) {
-            for (ApplicationKeyMapping applicationPolicyModel : model) {
+            for (ApplicationKeyMapping applicationKeyMapping : model) {
                 ApplicationKeyMappingDTO applicationKeyMappingDTO = new ApplicationKeyMappingDTO();
-                applicationKeyMappingDTO.setApplicationId(applicationPolicyModel.getApplicationId());
-                applicationKeyMappingDTO.setConsumerKey(applicationPolicyModel.getConsumerKey());
-                applicationKeyMappingDTO.setKeyType(applicationPolicyModel.getKeyType());
-
+                applicationKeyMappingDTO.setApplicationId(applicationKeyMapping.getApplicationId());
+                applicationKeyMappingDTO.setConsumerKey(applicationKeyMapping.getConsumerKey());
+                applicationKeyMappingDTO.setKeyType(applicationKeyMapping.getKeyType());
+                applicationKeyMappingDTO.setKeyManager(applicationKeyMapping.getKeyManager());
                 applicationKeyMappingListDTO.getList().add(applicationKeyMappingDTO);
 
             }

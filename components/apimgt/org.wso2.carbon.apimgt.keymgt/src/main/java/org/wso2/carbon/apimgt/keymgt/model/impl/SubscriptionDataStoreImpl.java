@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMappingCacheKey;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Policy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
@@ -54,7 +55,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     public static final String DELEM_PERIOD = ".";
 
     // Maps for keeping Subscription related details.
-    private Map<String, ApplicationKeyMapping> applicationKeyMappingMap;
+    private Map<ApplicationKeyMappingCacheKey, ApplicationKeyMapping> applicationKeyMappingMap;
     private Map<Integer, Application> applicationMap;
     private Map<String, API> apiMap;
     private Map<String, ApiPolicy> apiPolicyMap;
@@ -102,9 +103,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public ApplicationKeyMapping getKeyMappingByKey(String key) {
+    public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager) {
 
-        return applicationKeyMappingMap.get(key);
+        return applicationKeyMappingMap.get(new ApplicationKeyMappingCacheKey(key, keyManager));
     }
 
     @Override
@@ -194,7 +195,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         executorService.schedule(applicationLoadingTask, 0, TimeUnit.SECONDS);
 
         Runnable keyMappingsTask =
-                new PopulateTask<String, ApplicationKeyMapping>(applicationKeyMappingMap,
+                new PopulateTask<ApplicationKeyMappingCacheKey, ApplicationKeyMapping>(applicationKeyMappingMap,
                         () -> {
                             try {
                                 log.debug("Calling loadAllKeyMappings.");

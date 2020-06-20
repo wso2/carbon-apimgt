@@ -680,6 +680,8 @@ definitions:
         type: string
       keyType:
         type: string
+      keyManager:
+        type: string
 
   #---------------------  --------------------------------
   # The Throttle Policy resource

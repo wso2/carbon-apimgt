@@ -187,6 +187,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APPLICATION_ID," +
                     "   CONSUMER_KEY," +
                     "   KEY_TYPE," +
+                    "   KEY_MANAGER," +
                     "   STATE " +
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING" +
@@ -505,6 +506,7 @@ public class SubscriptionValidationSQLConstants {
                     "   MAPPING.APPLICATION_ID," +
                     "   MAPPING.CONSUMER_KEY," +
                     "   MAPPING.KEY_TYPE," +
+                    "   MAPPING.KEY_MANAGER," +
                     "   MAPPING.STATE" +
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING AS MAPPING," +
