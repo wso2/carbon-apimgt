@@ -115,6 +115,10 @@
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-inflector-oas3</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger.v3</groupId>
+            <artifactId>swagger-parser</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -176,16 +180,12 @@
                             </importFeatures>
                             <importBundles>
                                 <importBundleDef>commons-io.wso2:commons-io:${commons-io.version}</importBundleDef>
-                                <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}
-                                </importBundleDef>
                                 <importBundleDef>org.apache.commons:commons-lang3:${apache.commons.lang3.version}
                                 </importBundleDef>
                                 <importBundleDef>
                                     org.wso2.orbit.org.openapitools:openapi-generator:${openapi.generator.version}
                                 </importBundleDef>
-                                <importBundleDef>
-                                    org.wso2.orbit.org.openapitools.swagger.parser:swagger-parser:${openapitools.swagger.parser.version}
-                                </importBundleDef>
+                                <importBundleDef>org.wso2.orbit.io.swagger.v3:swagger-parser:${swagger.parser.v3.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso
                                 </importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
