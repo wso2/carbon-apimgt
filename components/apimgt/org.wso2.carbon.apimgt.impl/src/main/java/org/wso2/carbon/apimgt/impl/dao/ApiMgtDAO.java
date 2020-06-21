@@ -1214,6 +1214,7 @@ public class ApiMgtDAO {
                     APIIdentifier apiIdentifier = new APIIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
+                    apiIdentifier.setId(resultSet.getInt("API_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
                 subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
@@ -1267,6 +1268,7 @@ public class ApiMgtDAO {
                     APIIdentifier apiIdentifier = new APIIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
+                    apiIdentifier.setId(resultSet.getInt("API_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
                 
