@@ -28,12 +28,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
 import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.user.core.service.RealmService;
 
 public class APIKeyMgtDataHolder {
 
     private static RegistryService registryService;
-    private static RealmService realmService;
     private static APIManagerConfigurationService amConfigService;
     private static Boolean isKeyCacheEnabledKeyMgt = true;
     private static TokenGenerator tokenGenerator;
@@ -62,14 +60,6 @@ public class APIKeyMgtDataHolder {
 
     public static void setRegistryService(RegistryService registryService) {
         APIKeyMgtDataHolder.registryService = registryService;
-    }
-
-    public static RealmService getRealmService() {
-        return realmService;
-    }
-
-    public static void setRealmService(RealmService realmService) {
-        APIKeyMgtDataHolder.realmService = realmService;
     }
 
     public static void initData() {

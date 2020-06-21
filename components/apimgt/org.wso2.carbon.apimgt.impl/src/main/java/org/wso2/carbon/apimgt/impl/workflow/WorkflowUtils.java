@@ -50,16 +50,20 @@ public class WorkflowUtils {
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(),
                     appWFDto.getTenantId(), appWFDto.getTenantDomain(), appWFDto.getApplication().getId(),
+                    appWFDto.getApplication().getUUID(),
                     appWFDto.getApplication().getName(), appWFDto.getApplication().getTokenType(),
-                    appWFDto.getApplication().getTier(), appWFDto.getApplication().getGroupId());
+                    appWFDto.getApplication().getTier(), appWFDto.getApplication().getGroupId(),
+                    appWFDto.getApplication().getApplicationAttributes());
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equalsIgnoreCase(wfType)) {
             ApplicationWorkflowDTO appWFDto = (ApplicationWorkflowDTO) workflowDTO;
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(),
                     appWFDto.getTenantId(), appWFDto.getTenantDomain(), appWFDto.getApplication().getId(),
+                    appWFDto.getApplication().getUUID(),
                     appWFDto.getApplication().getName(), appWFDto.getApplication().getTokenType(),
-                    appWFDto.getApplication().getTier(), appWFDto.getApplication().getGroupId());
+                    appWFDto.getApplication().getTier(), appWFDto.getApplication().getGroupId(),
+                    appWFDto.getApplication().getApplicationAttributes());
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equalsIgnoreCase(wfType)) {
             SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO; 

@@ -552,6 +552,8 @@ definitions:
   #-----------------------------------------------------
   Application:
     properties:
+      uuid:
+        type: string
       id:
         type: integer
       name:

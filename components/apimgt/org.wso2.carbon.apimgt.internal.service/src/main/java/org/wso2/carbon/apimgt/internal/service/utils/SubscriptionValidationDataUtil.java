@@ -149,7 +149,7 @@ public class SubscriptionValidationDataUtil {
                     applicationDTO.getGroupIds().add(groupIdDTO);
                 }
 
-                Map<String, String> attributes = appModel.getAttributesMap();
+                Map<String, String> attributes = appModel.getAttributes();
                 for (String attrib : attributes.keySet()) {
                     ApplicationAttributeDTO applicationAttributeDTO = new ApplicationAttributeDTO();
                     applicationAttributeDTO.setName(attrib);
