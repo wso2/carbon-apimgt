@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -61,28 +62,34 @@ public class WorkflowUtils {
                     appWFDto.getApplication().getTier(), appWFDto.getApplication().getGroupId());
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equalsIgnoreCase(wfType)) {
-            SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO; //TODO fix apiid
+            SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO; 
+            SubscribedAPI sub = ApiMgtDAO.getInstance()
+                    .getSubscriptionById(Integer.valueOf(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
                     subWFDto.getTenantId(), subWFDto.getTenantDomain(),
-                    Integer.valueOf(subWFDto.getWorkflowReference()), 0,
-                    subWFDto.getApplicationId(), subWFDto.getTierName(), subWFDto.getStatus().toString());
+                    Integer.valueOf(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
+                    sub.getApplication().getId(), sub.getTier().getName(), sub.getSubCreatedStatus());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equalsIgnoreCase(wfType)) {
             SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO;
+            SubscribedAPI sub = ApiMgtDAO.getInstance()
+                    .getSubscriptionById(Integer.valueOf(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(),
                     subWFDto.getTenantId(), subWFDto.getTenantDomain(),
-                    Integer.valueOf(subWFDto.getWorkflowReference()), 0,
-                    subWFDto.getApplicationId(), subWFDto.getTierName(), subWFDto.getStatus().toString());
+                    Integer.valueOf(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
+                    sub.getApplication().getId(), sub.getTier().getName(), sub.getSubCreatedStatus());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equalsIgnoreCase(wfType)) {
             SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO;
+            SubscribedAPI sub = ApiMgtDAO.getInstance()
+                    .getSubscriptionById(Integer.valueOf(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(),
                     subWFDto.getTenantId(), subWFDto.getTenantDomain(),
-                    Integer.valueOf(subWFDto.getWorkflowReference()), 0,
-                    subWFDto.getApplicationId(), subWFDto.getTierName(), subWFDto.getStatus().toString());
+                    Integer.valueOf(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
+                    sub.getApplication().getId(), sub.getTier().getName(), sub.getSubCreatedStatus());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equalsIgnoreCase(wfType)) {
             APIStateWorkflowDTO apiStateWFDto = (APIStateWorkflowDTO) workflowDTO;

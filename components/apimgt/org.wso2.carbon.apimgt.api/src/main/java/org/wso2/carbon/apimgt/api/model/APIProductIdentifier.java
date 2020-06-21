@@ -118,4 +118,9 @@ public class APIProductIdentifier implements Serializable, Identifier {
     public String getProviderName() {
         return providerName;
     }
+    
+    @Override
+    public int getId() {
+        return productId;
+    }
 }
