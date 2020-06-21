@@ -19,6 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class ApplicationDTO   {
   
+    private String uuid = null;
     private Integer id = null;
     private String name = null;
     private String subName = null;
@@ -26,6 +27,23 @@ public class ApplicationDTO   {
     private String tokenType = null;
     private List<GroupIdDTO> groupIds = new ArrayList<>();
     private List<ApplicationAttributeDTO> attributes = new ArrayList<>();
+
+  /**
+   **/
+  public ApplicationDTO uuid(String uuid) {
+    this.uuid = uuid;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("uuid")
+  public String getUuid() {
+    return uuid;
+  }
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
 
   /**
    **/
@@ -159,7 +177,8 @@ public class ApplicationDTO   {
       return false;
     }
     ApplicationDTO application = (ApplicationDTO) o;
-    return Objects.equals(id, application.id) &&
+    return Objects.equals(uuid, application.uuid) &&
+        Objects.equals(id, application.id) &&
         Objects.equals(name, application.name) &&
         Objects.equals(subName, application.subName) &&
         Objects.equals(policy, application.policy) &&
@@ -170,7 +189,7 @@ public class ApplicationDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, subName, policy, tokenType, groupIds, attributes);
+    return Objects.hash(uuid, id, name, subName, policy, tokenType, groupIds, attributes);
   }
 
   @Override
@@ -178,6 +197,7 @@ public class ApplicationDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationDTO {\n");
     
+    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    subName: ").append(toIndentedString(subName)).append("\n");

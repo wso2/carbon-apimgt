@@ -131,14 +131,14 @@ public class APIKeyMgtServiceComponent {
              policy = ReferencePolicy.DYNAMIC, 
              unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
-        APIKeyMgtDataHolder.setRealmService(realmService);
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
         if (log.isDebugEnabled()) {
             log.debug("Realm Service is set in the API KeyMgt bundle.");
         }
     }
 
     protected void unsetRealmService(RealmService realmService) {
-        APIKeyMgtDataHolder.setRealmService(null);
+        ServiceReferenceHolder.getInstance().setRealmService(null);
         if (log.isDebugEnabled()) {
             log.debug("Realm Service is unset in the API KeyMgt bundle.");
         }
