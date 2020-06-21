@@ -398,6 +398,7 @@
                             org.apache.synapse.mediators.base,
                             org.apache.axis2.transport.base,
                             io.swagger.parser.*; version="${swagger.parser.v3.version}",
+                            io.swagger.v3.*; version="${swagger.parser.v3.version}",
                             org.wso2.carbon.core; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.api; version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
