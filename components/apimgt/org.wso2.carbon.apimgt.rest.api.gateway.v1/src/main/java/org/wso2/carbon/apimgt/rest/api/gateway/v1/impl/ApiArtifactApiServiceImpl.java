@@ -21,13 +21,15 @@ package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminServiceProxy;
+import org.wso2.carbon.apimgt.gateway.utils.*;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.endpoint.EndpointAdminException;
 import org.wso2.carbon.rest.api.APIData;
 
 import javax.ws.rs.core.Response;
@@ -42,19 +44,50 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
         String definition = null;
         JSONObject responseObj = new JSONObject();
+        JSONArray endPointArray = new JSONArray();
+        JSONArray localEntryArray = new JSONArray();
+        JSONArray sequencesArray = new JSONArray();
 
         if (gatewayAPIDTO != null) {
-            RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy
-                    (gatewayAPIDTO.getTenantDomain());
-            String qualifiedName = GatewayUtils.getQualifiedApiName(gatewayAPIDTO.getProvider(),
-                    gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion());
             try {
-                if (restapiAdminServiceProxy.getApi(qualifiedName) != null) {
-                    definition = gatewayAPIDTO.getApiDefinition();
+                EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy
+                        (gatewayAPIDTO.getTenantDomain());
+                for (GatewayContentDTO gatewayEndpoint : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
+                    if (endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()) != null) {
+                        endPointArray.put(endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()));
+                    } else {
+                        log.error(gatewayEndpoint.getName() + " was not deployed in the gateway");
+                    }
                 }
+                responseObj.put("Endpoints", endPointArray);
+
+                LocalEntryServiceProxy localEntryServiceProxy = new
+                        LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
+                for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
+                    if (localEntryServiceProxy.getEntry(localEntry.getName()) != null) {
+                        localEntryArray.put(localEntryServiceProxy.getEntry(localEntry.getName()));
+                    } else {
+                        log.error(localEntry.getName() + " was not deployed in the gateway");
+                    }
+                }
+                responseObj.put("Local Entries", localEntryArray);
+
+                SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                        new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
+                for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
+                    if(sequenceAdminServiceProxy.getSequence(sequence.getName()) != null) {
+                        sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
+                    } else {
+                        log.error(sequence.getName() + " was not deployed in the gateway");
+                    }
+                }
+                responseObj.put("Sequences", sequencesArray);
+            } catch (EndpointAdminException e) {
+                log.error("Error in fetching deployed Endpoints from Synapse Configuration." , e);
             } catch (AxisFault axisFault) {
-                log.error("Error in fetching deployed API artifacts from Synapse Configuration." , axisFault);
+                log.error("Error in fetching deployed Local entries from Synapse Configuration." , axisFault);
             }
+
             responseObj.put("Definition", definition);
             String responseStringObj = String.valueOf(responseObj);
             return Response.ok().entity(responseStringObj).build();
