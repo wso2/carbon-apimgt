@@ -446,7 +446,7 @@ public final class APIConstants {
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
     public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "ExcludedClaims";
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
-    public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + "ConvertClaimsToConsumerDialect";
+    public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + ".ConvertClaimsToConsumerDialect";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
@@ -672,7 +672,7 @@ public final class APIConstants {
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
             + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
-    public static final String[] KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
+    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
             "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
     public static final String API_KEY_MANAGER_CONFIGURATION = "Configuration.";
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
