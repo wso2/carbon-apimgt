@@ -44,13 +44,15 @@ public class SequenceApiServiceImpl implements SequenceApiService {
         JSONObject responseObj = new JSONObject();
         JSONArray sequencesArray = new JSONArray();
         if (gatewayAPIDTO != null) {
-            SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                    new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-            if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
+            if (gatewayAPIDTO.getSequenceToBeAdd() != null ) {
+                SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                        new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
                 for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
                     try {
-                        if(sequenceAdminServiceProxy.getSequence(sequence.getName()) != null) {
+                        if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
                             sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
+                        } else {
+                            log.error(sequence.getName() + " was not deployed in the gateway");
                         }
                     } catch (AxisFault axisFault) {
                         log.error("Error in fetching deployed sequences from Synapse Configuration." , axisFault);

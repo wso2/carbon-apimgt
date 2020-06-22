@@ -46,48 +46,54 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
         String definition = null;
         JSONObject responseObj = new JSONObject();
-        JSONArray endPointArray = new JSONArray();
-        JSONArray localEntryArray = new JSONArray();
-        JSONArray sequencesArray = new JSONArray();
 
         if (gatewayAPIDTO != null) {
             try {
-                EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy
-                        (gatewayAPIDTO.getTenantDomain());
-                for (GatewayContentDTO gatewayEndpoint : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
-                    if (endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()) != null) {
-                        endPointArray.put(endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()));
-                    } else {
-                        log.error(gatewayEndpoint.getName() + " was not deployed in the gateway");
+                if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null ) {
+                    JSONArray endPointArray = new JSONArray();
+                    EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy
+                            (gatewayAPIDTO.getTenantDomain());
+                    for (GatewayContentDTO gatewayEndpoint : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
+                        if (endpointAdminServiceProxy.isEndpointExist(gatewayEndpoint.getName())) {
+                            endPointArray.put(endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()));
+                        } else {
+                            log.error(gatewayEndpoint.getName() + " was not deployed in the gateway");
+                        }
                     }
+                    responseObj.put("Endpoints", endPointArray);
                 }
-                responseObj.put("Endpoints", endPointArray);
 
-                LocalEntryServiceProxy localEntryServiceProxy = new
-                        LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
-                for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
-                    if (localEntryServiceProxy.getEntry(localEntry.getName()) != null) {
-                        localEntryArray.put(localEntryServiceProxy.getEntry(localEntry.getName()));
-                    } else {
-                        log.error(localEntry.getName() + " was not deployed in the gateway");
+                if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
+                    JSONArray localEntryArray = new JSONArray();
+                    LocalEntryServiceProxy localEntryServiceProxy = new
+                            LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
+                    for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
+                        if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
+                            localEntryArray.put(localEntryServiceProxy.getEntry(localEntry.getName()));
+                        } else {
+                            log.error(localEntry.getName() + " was not deployed in the gateway");
+                        }
                     }
+                    responseObj.put("Local Entries", localEntryArray);
                 }
-                responseObj.put("Local Entries", localEntryArray);
 
-                SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                        new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-                for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
-                    if(sequenceAdminServiceProxy.getSequence(sequence.getName()) != null) {
-                        sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
-                    } else {
-                        log.error(sequence.getName() + " was not deployed in the gateway");
+                if (gatewayAPIDTO.getSequenceToBeAdd() != null ) {
+                    JSONArray sequencesArray = new JSONArray();
+                    SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                            new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
+                    for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
+                        if(sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
+                            sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
+                        } else {
+                            log.error(sequence.getName() + " was not deployed in the gateway");
+                        }
                     }
+                    responseObj.put("Sequences", sequencesArray);
                 }
-                responseObj.put("Sequences", sequencesArray);
             } catch (EndpointAdminException e) {
                 log.error("Error in fetching deployed Endpoints from Synapse Configuration." , e);
             } catch (AxisFault axisFault) {
-                log.error("Error in fetching deployed Local entries from Synapse Configuration." , axisFault);
+                log.error("Error in fetching deployed artifacts from Synapse Configuration." , axisFault);
             }
 
             responseObj.put("Definition", definition);
