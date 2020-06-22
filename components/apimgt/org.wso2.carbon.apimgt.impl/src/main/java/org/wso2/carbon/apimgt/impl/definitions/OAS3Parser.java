@@ -124,7 +124,7 @@ public class OAS3Parser extends APIDefinition {
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
             int minResponseCode = 0;
-            String minResponseType = "";
+//            String minResponseType = "";
             int responseCode = 0;
             String path = entry.getKey();
             //initializing apiResourceMediationPolicyObject
@@ -141,7 +141,7 @@ public class OAS3Parser extends APIDefinition {
                 ArrayList<Integer> responseCodes = new ArrayList<Integer>();
                 //for each HTTP method get the verb
                 StringBuilder genCode = new StringBuilder();
-                StringBuilder responseSection = new StringBuilder();
+//                StringBuilder responseSection = new StringBuilder();
                 boolean hasJsonPayload = false;
                 boolean hasXmlPayload = false;
 
@@ -153,10 +153,10 @@ public class OAS3Parser extends APIDefinition {
 
                 for (String responseEntry : op.getResponses().keySet()) {
                     //for setting only one setPayload response
-                    boolean setPayloadResponse = false;
+//                    boolean setPayloadResponse = false;
                     boolean respCodeInitialized = false;
                     //to set string of mc.SetProperty and mc.SetPayload for each condition
-                    String mcPropertyAndPayloadSection = "";
+//                    String mcPropertyAndPayloadSection = "";
 
                     if (!responseEntry.equals("default")) {
                         responseCode = Integer.parseInt(responseEntry);
@@ -228,7 +228,7 @@ public class OAS3Parser extends APIDefinition {
 //                String finalResponseSection = getMandatoryScript(minResponseCode, minResponseType, responseSection.toString());
 
 
-                String finalGenCode = getMandatoryScriptSection(minResponseCode,genCode.toString());
+                String finalGenCode = getMandatoryScriptSection(minResponseCode,genCode);
 //                genCode.append(finalScript);
 //                String finalGenCode = genCode.toString();
 
@@ -295,8 +295,12 @@ public class OAS3Parser extends APIDefinition {
      * @return XmlExample
      */
     private String getXmlExample(Schema model, Map<String, Schema> definitions) {
-        Example example = ExampleBuilder.fromSchema(model, definitions);
-        return new XmlExampleSerializer().serialize(example);
+//        Example example = ExampleBuilder.fromSchema(model, definitions);
+//        return new XmlExampleSerializer().serialize(example);
+
+        Example example = ExampleBuilder.fromSchema(model,  definitions);
+        String rawXmlExample = new XmlExampleSerializer().serialize(example);
+        return rawXmlExample.replace("<?xml version='1.1' encoding='UTF-8'?>","");
     }
 
     /**
@@ -365,25 +369,25 @@ public class OAS3Parser extends APIDefinition {
     /**
      * Generates Mock payload and set response for 501 response and null response code
      * also includes getGeneratedIFsforCodes string of all included response codes
-     *
+
      * @param minResponseCode minimum response code
-     * @param responseSectionString String of IF conditions of all response codes
+//     * @param responseSectionString String of IF conditions of all response codes
      * @return response section string with IF conditions and responses
      */
-    private String getMandatoryScriptSection(int minResponseCode, String responseSectionString) {
+    private String getMandatoryScriptSection(int minResponseCode, StringBuilder responseSection) {
 
-        return "\nvar accept = mc.getProperty('AcceptHeader');" +
+        return "\nvar accept = \"\\\"\"+mc.getProperty('AcceptHeader')+\"\\\"\"" +
                 "\nvar responseCode = mc.getProperty('query.param.responseCode');" +
                 "\nvar responses = [];"+
 
-                responseSectionString+
+                responseSection+
 
                 "\n responses[501] = []" +
                 "\n responses[501][\"application/json\"] = {"+
                 "\n \"code\" : 501,"+
                 "\n \"description\" : \"Not Implemented\""+
                 "}\n\n"+
-                "responses[501][\"application/xml\"] = <response><code>501</code><description>Not Implemented</description></response>;\n\n"+
+                "responses[501][\"application/xml\"] = <response><code>501</code><description>Not Implemented</description></response>\n\n"+
                 "if (responseCode == null) {\n"+
                 "responseCode = "+minResponseCode+";\n"+   //assign lowest code
                 "}\n\n" +
@@ -434,6 +438,7 @@ public class OAS3Parser extends APIDefinition {
 //                " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n"+
 //                "}";
         String responseSection = "";
+
         if (hasJsonPayload && hasXmlPayload) {
 
             responseSection = "if (accept == null || !responses[responseCode][accept]) {\n" +
