@@ -62,7 +62,7 @@ public class SystemScopesMappingUtil {
         if (portalScopeList.isEmpty()) {
             synchronized (lock) {
                 if (portalScopeList.isEmpty()) {
-                    portalScopeList = RestApiUtil.getScopesRole();
+                    portalScopeList = RestApiUtil.getScopesInfoFromAPIYamlDefinitions();
                 }
             }
         }

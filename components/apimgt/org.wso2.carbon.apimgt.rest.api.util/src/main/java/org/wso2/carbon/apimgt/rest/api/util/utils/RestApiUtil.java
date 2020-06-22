@@ -1635,7 +1635,7 @@ public class RestApiUtil {
      *
      * @return MAP of scope list for all portal
      */
-    public static  Map<String, List<String>> getScopesRole() throws APIManagementException {
+    public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
 
         Map<String, List<String>>   portalScopeList = new HashMap<>();
         String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/store-api.yaml"};
