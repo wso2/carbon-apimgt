@@ -28,10 +28,11 @@ const Settings = {
         'urn:ietf:params:oauth:grant-type:device_code': 'Device Code',
     },
     passwordChange: {
-        guidelinesEnabled: true,
-        guidelines: [
-            'Password should be 5-30 characters long',
+        guidelinesEnabled: false,
+        policyList: [
+            'Policy 1',
+            'Policy 2',
+            'Policy 3',
         ],
     },
-
 };

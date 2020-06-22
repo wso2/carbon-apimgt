@@ -66,7 +66,7 @@ const ChangePassword = () => {
     const passwordChangeGuideEnabled = false || Settings.passwordChange.guidelinesEnabled;
     let passwordChangeGuide = [];
     if (passwordChangeGuideEnabled) {
-        passwordChangeGuide = Settings.passwordChange.guidelines;
+        passwordChangeGuide = Settings.passwordChange.policyList;
     }
 
     const validateOldPasswordChange = () => {
@@ -131,7 +131,7 @@ const ChangePassword = () => {
                         + ' Required fields are marked with an asterisk ( * )'}
                 />
             </Typography>
-            {passwordChangeGuide.length > 0
+            {passwordChangeGuideEnabled && passwordChangeGuide.length > 0
                 ? (
                     <Typography variant='body2'>
                         <FormattedMessage
@@ -142,7 +142,6 @@ const ChangePassword = () => {
                             {passwordChangeGuide.map((rule) => {
                                 return (
                                     <li>
-                                        Rule
                                         {rule}
                                     </li>
                                 );
