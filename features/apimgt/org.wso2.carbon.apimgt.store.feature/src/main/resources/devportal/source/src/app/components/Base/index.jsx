@@ -472,37 +472,6 @@ class Layout extends React.Component {
                                 {user ? (
                                     <>
                                         <div className={classes.linkWrapper}>
-                                            {/* <List className={classes.listRoot}>
-                                                <Link to='/settings' id='settingsLink' className={classNames({ [classes.selected]: selected === 'settings', [classes.links]: true })}>
-                                                    <ListItem button>
-                                                        <ListItemIcon classes={{ root: classes.listIconRoot }}>
-                                                            <Icon
-                                                                className={classes.icons}
-                                                                style={{
-                                                                    color: selected === 'settings'
-                                                                        ? strokeColorSelected
-                                                                        : strokeColor
-                                                                }}>settings</Icon>
-                                                        </ListItemIcon>
-                                                        <Hidden mdDown>
-                                                            <ListItemText
-                                                                classes={{
-                                                                    root: classes.listItemTextRoot,
-                                                                    primary: classNames({
-                                                                        [classes.selectedText]: selected === 'settings',
-                                                                        [classes.listText]: selected !== 'settings',
-                                                                    }),
-                                                                }}
-                                                                primary={intl.formatMessage({
-                                                                    id: 'Base.Header.GlobalNavbar.menu.settings',
-                                                                    defaultMessage: 'Settings',
-                                                                })}
-                                                            />
-                                                        </Hidden>
-                                                    </ListItem>
-                                                    {selected === 'settings' && (<div className={classes.triangleDown}></div>)}
-                                                </Link>
-                                            </List> */}
                                             <Button
                                                 buttonRef={(node) => {
                                                     this.anchorEl = node;
@@ -544,12 +513,6 @@ class Layout extends React.Component {
                                                         <Paper>
                                                             <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
                                                                 <MenuList>
-                                                                    <MenuItem onClick={this.doOIDCLogout} className={classes.logoutLink}>
-                                                                        <FormattedMessage
-                                                                            id='Base.index.logout'
-                                                                            defaultMessage='Logout'
-                                                                        />
-                                                                    </MenuItem>
                                                                     <MenuItem className={classes.logoutLink}>
                                                                         <Link
                                                                             to='/settings/manage-alerts'
@@ -571,6 +534,12 @@ class Layout extends React.Component {
                                                                                 defaultMessage='Change Password'
                                                                             />
                                                                         </Link>
+                                                                    </MenuItem>
+                                                                    <MenuItem onClick={this.doOIDCLogout} className={classes.logoutLink}>
+                                                                        <FormattedMessage
+                                                                            id='Base.index.logout'
+                                                                            defaultMessage='Logout'
+                                                                        />
                                                                     </MenuItem>
                                                                 </MenuList>
                                                             </ClickAwayListener>
