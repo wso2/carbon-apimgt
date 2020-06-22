@@ -70,7 +70,7 @@ import java.util.Set;
 /**
  *
  */
-public class APIKeyValidationService extends AbstractAdmin {
+public class APIKeyValidationService {
     private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
     private static KeyValidationHandler keyValidationHandler;
 
@@ -86,7 +86,7 @@ public class APIKeyValidationService extends AbstractAdmin {
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
                                                String requiredAuthenticationLevel, String clientDomain,
                                                String matchingResource, String httpVerb,String tenantDomain,
-                                               String[] keyManagers)
+                                               List keyManagers)
             throws APIKeyMgtException, APIManagementException {
 
         TracingSpan validateMainSpan = null;
@@ -154,7 +154,7 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
         validationContext.setVersion(version);
         validationContext.setTenantDomain(tenantDomain);
-        validationContext.setKeyManagers(Arrays.asList(keyManagers));
+        validationContext.setKeyManagers(keyManagers);
 
         if (Util.tracingEnabled()) {
             getAccessTokenCacheSpan =
@@ -472,7 +472,7 @@ public class APIKeyValidationService extends AbstractAdmin {
      */
     public APIKeyValidationInfoDTO validateKeyforHandshake(String context, String version,
                                                            String accessToken, String tenantDomain,
-                                                           String[] keyManagers)
+                                                           List<String> keyManagers)
             throws APIKeyMgtException, APIManagementException {
         boolean defaultVersionInvoked = false;
         APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
@@ -484,7 +484,7 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setVersion(version);
         validationContext.setTenantDomain(tenantDomain);
         validationContext.setRequiredAuthenticationLevel("Any");
-        validationContext.setKeyManagers(Arrays.asList(keyManagers));
+        validationContext.setKeyManagers(keyManagers);
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
@@ -553,7 +553,6 @@ public class APIKeyValidationService extends AbstractAdmin {
      * @param consumerKey Consumer Key
      * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
      * authorized, tier information will be <pre>null</pre>
-     * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
     public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
                                                         String tenantDomain,String keyManager)
