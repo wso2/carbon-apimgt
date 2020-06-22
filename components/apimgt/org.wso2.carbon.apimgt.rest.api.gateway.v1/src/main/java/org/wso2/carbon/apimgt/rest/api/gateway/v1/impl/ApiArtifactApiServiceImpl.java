@@ -26,11 +26,13 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
-import org.wso2.carbon.apimgt.gateway.utils.*;
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
+import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
+import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
+import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.ApiArtifactApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.endpoint.EndpointAdminException;
-import org.wso2.carbon.rest.api.APIData;
+
 
 import javax.ws.rs.core.Response;
 
