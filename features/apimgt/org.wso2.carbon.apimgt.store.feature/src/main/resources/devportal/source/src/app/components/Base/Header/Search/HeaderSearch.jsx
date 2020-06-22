@@ -102,6 +102,10 @@ const styles = theme => ({
         borderRadius: '5px',
         padding: '15px 10px 0 18px',
     },
+    ariaLabel: {
+        width: 0,
+        height: 0,
+    }
 });
 
 /**

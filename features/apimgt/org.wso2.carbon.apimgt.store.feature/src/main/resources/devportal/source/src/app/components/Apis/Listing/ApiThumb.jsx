@@ -331,14 +331,14 @@ class ApiThumb extends React.Component {
                     <div className={classes.textblock}>{api.monetizationLabel}</div>
                 )}
                 <CardMedia>
-                    <Link to={detailsLink} aria-label='View API details' className={classes.suppressLinkStyles}>
+                    <Link to={detailsLink} aria-hidden='true' className={classes.suppressLinkStyles}>
                         {!defaultImage && ImageView}
                         {defaultImage && <img src={app.context + defaultImage} alt='img' />}
                     </Link>
                 </CardMedia>
                 {showInfo && (
                     <CardContent classes={{ root: classes.apiDetails }}>
-                        <Link to={detailsLink} aria-label='View API details' className={classes.textWrapper}>
+                        <Link to={detailsLink} className={classes.textWrapper}>
                             <Typography
                                 className={classes.thumbHeader}
                                 variant='h5'

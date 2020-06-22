@@ -152,6 +152,10 @@ const styles = (theme) => {
         listRoot: {
             padding: 0,
         },
+        listRootInline: {
+            padding: 0,
+            display: 'flex',
+        },
         listItemTextRoot: {
             padding: 0,
         },
@@ -472,7 +476,7 @@ class Layout extends React.Component {
                                 {user ? (
                                     <>
                                         <div className={classes.linkWrapper}>
-                                            <List className={classes.listRoot}>
+                                            <List className={classes.listRootInline} component='nav'>
                                                 <Link to='/settings' id='settingsLink' className={classNames({ [classes.selected]: selected === 'settings', [classes.links]: true })}>
                                                     <ListItem button>
                                                         <ListItemIcon classes={{ root: classes.listIconRoot }}>
