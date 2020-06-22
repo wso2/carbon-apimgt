@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -13,6 +15,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SystemScopesMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -28,6 +31,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public class SystemScopesApiServiceImpl implements SystemScopesApiService {
 
+    private static final Log log = LogFactory.getLog(SystemScopesApiServiceImpl.class);
 
     public Response systemScopesScopeNameGet(String scope, String username, MessageContext messageContext) throws APIManagementException{
         ScopeSettingsDTO scopeSettingsDTO = new ScopeSettingsDTO();
@@ -53,5 +57,18 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
                 }
             }
         return Response.ok().entity(scopeSettingsDTO).build();
+    }
+
+    public Response systemScopesGet(MessageContext messageContext) throws APIManagementException {
+        try {
+            Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+                    .getTenantDomain(RestApiUtil.getLoggedInUsername()));
+            ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
+            return Response.ok().entity(scopeListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error when getting the list of scopes-role mapping.";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 }
