@@ -158,100 +158,97 @@ const ChangePassword = () => {
         <ChangePasswordBase title={title}>
             <Box py={2} display='flex' justifyContent='center'>
                 <Grid item xs={10} md={9}>
-                    {/* replace with mui component */}
-                    <form noValidate autoComplete='off' className={classes.passwordChangeForm}>
-                        <Box component='div' m={2}>
-                            <Grid
-                                container
-                                mt={2}
-                                spacing={2}
-                                direction='column'
-                                justify='center'
-                                alignItems='flex-start'
-                            >
-                                <TextField
-                                    classes={{
-                                        root: classes.mandatoryStarText,
-                                    }}
-                                    required
-                                    autoFocus
-                                    margin='dense'
-                                    name='oldPassword'
-                                    value={oldPassword}
-                                    onChange={handleChange}
-                                    label={<FormattedMessage id='Settings.ChangePasswordForm.old.password' defaultMessage='Old Password' />}
-                                    fullWidth
-                                    error={validateOldPasswordChange()}
-                                    helperText={<FormattedMessage id='Settings.ChangePasswordForm.enter.old.password' defaultMessage='Enter Old Password' />}
-                                    variant='outlined'
-                                    type='password'
-                                />
-                                <TextField
-                                    classes={{
-                                        root: classes.mandatoryStarText,
-                                    }}
-                                    margin='dense'
-                                    name='newPassword'
-                                    value={newPassword}
-                                    onChange={handleChange}
-                                    label={
-                                        <FormattedMessage id='Settings.ChangePasswordForm.new.password' defaultMessage='New Password' />
-                                    }
-                                    required
-                                    fullWidth
-                                    error={validatePasswordChange()}
-                                    helperText={validatePasswordChange()
-                                        || <FormattedMessage id='Settings.ChangePasswordForm.enter.new.password' defaultMessage='Enter a New Password' />}
-                                    variant='outlined'
-                                    type='password'
-                                />
-                                <TextField
-                                    classes={{
-                                        root: classes.mandatoryStarText,
-                                    }}
-                                    margin='dense'
-                                    name='repeatedNewPassword'
-                                    value={repeatedNewPassword}
-                                    onChange={handleChange}
-                                    label={
-                                        <FormattedMessage id='Settings.ChangePasswordForm.confirm.new.password' defaultMessage='Confirm new Password' />
-                                    }
-                                    required
-                                    fullWidth
-                                    error={validateRepeatedPassword()}
-                                    helperText={validateRepeatedPassword()
-                                        || <FormattedMessage id='Settings.ChangePasswordForm.confirmationOf.new.password' defaultMessage='Confirmation of new Password' />}
-                                    variant='outlined'
-                                    type='password'
-                                />
+                    <Box component='div' m={2}>
+                        <Grid
+                            container
+                            mt={2}
+                            spacing={2}
+                            direction='column'
+                            justify='center'
+                            alignItems='flex-start'
+                        >
+                            <TextField
+                                classes={{
+                                    root: classes.mandatoryStarText,
+                                }}
+                                required
+                                autoFocus
+                                margin='dense'
+                                name='oldPassword'
+                                value={oldPassword}
+                                onChange={handleChange}
+                                label={<FormattedMessage id='Settings.ChangePasswordForm.old.password' defaultMessage='Old Password' />}
+                                fullWidth
+                                error={validateOldPasswordChange()}
+                                helperText={<FormattedMessage id='Settings.ChangePasswordForm.enter.old.password' defaultMessage='Enter Old Password' />}
+                                variant='outlined'
+                                type='password'
+                            />
+                            <TextField
+                                classes={{
+                                    root: classes.mandatoryStarText,
+                                }}
+                                margin='dense'
+                                name='newPassword'
+                                value={newPassword}
+                                onChange={handleChange}
+                                label={
+                                    <FormattedMessage id='Settings.ChangePasswordForm.new.password' defaultMessage='New Password' />
+                                }
+                                required
+                                fullWidth
+                                error={validatePasswordChange()}
+                                helperText={validatePasswordChange()
+                                    || <FormattedMessage id='Settings.ChangePasswordForm.enter.new.password' defaultMessage='Enter a New Password' />}
+                                variant='outlined'
+                                type='password'
+                            />
+                            <TextField
+                                classes={{
+                                    root: classes.mandatoryStarText,
+                                }}
+                                margin='dense'
+                                name='repeatedNewPassword'
+                                value={repeatedNewPassword}
+                                onChange={handleChange}
+                                label={
+                                    <FormattedMessage id='Settings.ChangePasswordForm.confirm.new.password' defaultMessage='Confirm new Password' />
+                                }
+                                required
+                                fullWidth
+                                error={validateRepeatedPassword()}
+                                helperText={validateRepeatedPassword()
+                                    || <FormattedMessage id='Settings.ChangePasswordForm.confirmationOf.new.password' defaultMessage='Confirmation of new Password' />}
+                                variant='outlined'
+                                type='password'
+                            />
 
-                                <Box my={2} display='flex' flexDirection='row'>
-                                    <Box mr={1}>
-                                        <Button
-                                            color='primary'
-                                            variant='contained'
-                                            onClick={handleSave}
-                                        >
-                                            <FormattedMessage
-                                                id='Settings.ChangePasswordForm.Save.Button.text'
-                                                defaultMessage='Save'
-                                            />
-                                        </Button>
-                                    </Box>
-                                    <Box mx={1}>
-                                        <Button
-                                            onClick={() => window.history.back()}
-                                        >
-                                            <FormattedMessage
-                                                id='Settings.ChangePasswordForm.Cancel.Button.text'
-                                                defaultMessage='Cancel'
-                                            />
-                                        </Button>
-                                    </Box>
+                            <Box my={2} display='flex' flexDirection='row'>
+                                <Box mr={1}>
+                                    <Button
+                                        color='primary'
+                                        variant='contained'
+                                        onClick={handleSave}
+                                    >
+                                        <FormattedMessage
+                                            id='Settings.ChangePasswordForm.Save.Button.text'
+                                            defaultMessage='Save'
+                                        />
+                                    </Button>
                                 </Box>
-                            </Grid>
-                        </Box>
-                    </form>
+                                <Box mx={1}>
+                                    <Button
+                                        onClick={() => window.history.back()}
+                                    >
+                                        <FormattedMessage
+                                            id='Settings.ChangePasswordForm.Cancel.Button.text'
+                                            defaultMessage='Cancel'
+                                        />
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </Grid>
+                    </Box>
                 </Grid>
             </Box>
         </ChangePasswordBase>
