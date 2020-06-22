@@ -70,11 +70,11 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     /**
      * This method returns the maximum query complexity value
      *
-     * @param messageContext   message context of the request
+     * @param messageContext message context of the request
      * @return maximum query depth value if exists, or -1 to denote no complexity limitation
      */
-    private int  getMaxQueryDepth(MessageContext messageContext) {
-        int maxQueryDepth = ((Integer)messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH)).intValue();
+    private int getMaxQueryDepth(MessageContext messageContext) {
+        int maxQueryDepth = ((Integer) messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH)).intValue();
         if (maxQueryDepth != 0) {
             return maxQueryDepth;
         } else {
@@ -108,63 +108,63 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     /**
      * This method analyses the query depth
      *
-     * @param messageContext   message context of the request
-     * @param payload          payload of the request
+     * @param messageContext message context of the request
+     * @param payload        payload of the request
      * @return true, if the query depth does not exceed the maximum value or false, if query depth exceeds the maximum
      */
     private boolean analyseQueryDepth(MessageContext messageContext, String payload) {
         int maxQueryDepth = getMaxQueryDepth(messageContext);
 
-            if (maxQueryDepth > 0) {
-                MaxQueryDepthInstrumentation maxQueryDepthInstrumentation =
-                        new MaxQueryDepthInstrumentation(maxQueryDepth);
-                GraphQL runtime = GraphQL.newGraphQL(schema).instrumentation(maxQueryDepthInstrumentation).build();
+        if (maxQueryDepth > 0) {
+            MaxQueryDepthInstrumentation maxQueryDepthInstrumentation =
+                    new MaxQueryDepthInstrumentation(maxQueryDepth);
+            GraphQL runtime = GraphQL.newGraphQL(schema).instrumentation(maxQueryDepthInstrumentation).build();
 
-                try {
-                    ExecutionResult executionResult = runtime.execute(payload);
-                    List<GraphQLError> errors = executionResult.getErrors();
-                    if (errors.size() > 0) {
-                        List<String> errorList = new ArrayList<>();
-                        for (GraphQLError error : errors) {
-                            errorList.add(error.getMessage());
-                        }
-
-                        // TODO: https://github.com/wso2/carbon-apimgt/issues/8147
-                        ListIterator<String> iterator = errorList.listIterator();
-                        while (iterator.hasNext()) {
-                            if (iterator.next().contains("non-nullable")) {
-                                iterator.remove();
-                            }
-                        }
-                        if (errorList.size() == 0) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Maximum query depth of " + maxQueryDepth + " was not exceeded");
-                            }
-                            return true;
-                        }
-                        handleFailure(APISecurityConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
-                                APISecurityConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, errorList.toString());
-                        log.error(errorList.toString());
-                        return false;
+            try {
+                ExecutionResult executionResult = runtime.execute(payload);
+                List<GraphQLError> errors = executionResult.getErrors();
+                if (errors.size() > 0) {
+                    List<String> errorList = new ArrayList<>();
+                    for (GraphQLError error : errors) {
+                        errorList.add(error.getMessage());
                     }
-                    return true;
-                } catch (Throwable e) {
-                    log.error(e);
+
+                    // TODO: https://github.com/wso2/carbon-apimgt/issues/8147
+                    ListIterator<String> iterator = errorList.listIterator();
+                    while (iterator.hasNext()) {
+                        if (iterator.next().contains("non-nullable")) {
+                            iterator.remove();
+                        }
+                    }
+                    if (errorList.size() == 0) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Maximum query depth of " + maxQueryDepth + " was not exceeded");
+                        }
+                        return true;
+                    }
+                    handleFailure(APISecurityConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
+                            APISecurityConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, errorList.toString());
+                    log.error(errorList.toString());
+                    return false;
                 }
-            } else {
-                return true; // No depth limitation check
+                return true;
+            } catch (Throwable e) {
+                log.error(e);
             }
+        } else {
+            return true; // No depth limitation check
+        }
         return false;
     }
 
     /**
      * This method analyses the query complexity
      *
-     * @param messageContext   message context of the request
-     * @param payload          payload of the request
+     * @param messageContext message context of the request
+     * @param payload        payload of the request
      * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
      */
-    private boolean analyseQueryComplexity(MessageContext messageContext, String payload){
+    private boolean analyseQueryComplexity(MessageContext messageContext, String payload) {
         FieldComplexityCalculator fieldComplexityCalculator = new FieldComplexityCalculatorImpl(messageContext);
         int maxQueryComplexity = getMaxQueryComplexity(messageContext);
 
@@ -216,7 +216,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     /**
      * This method returns the maximum query complexity value
      *
-     * @param messageContext   message context of the request
+     * @param messageContext message context of the request
      * @return maximum query complexity value if exists, or -1 to denote no complexity limitation
      */
     private int getMaxQueryComplexity(MessageContext messageContext) {

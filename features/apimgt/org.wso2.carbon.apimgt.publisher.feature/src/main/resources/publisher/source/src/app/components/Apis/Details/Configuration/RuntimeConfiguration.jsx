@@ -377,6 +377,7 @@ export default function RuntimeConfiguration() {
                                         <Box mt={3}>
                                             <QueryAnalysis
                                                 api={apiConfig}
+                                                configDispatcher={configDispatcher}
                                                 isRestricted={isRestricted(['apim:api_create'], api)}
                                             />
                                         </Box>

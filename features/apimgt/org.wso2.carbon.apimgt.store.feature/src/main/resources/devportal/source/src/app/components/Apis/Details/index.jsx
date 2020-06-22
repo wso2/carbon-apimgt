@@ -121,12 +121,20 @@ const styles = (theme) => {
             top: 0,
             left: 0,
             overflowY: 'auto',
+            marginTop: 64,
+            marginBottom: theme.custom.footer.height || 50,
+            position: 'fixed',
+            height: 'calc(100vh - 64px)',
         },
         leftMenuVerticalLeftMinView: {
             width: 45,
             top: 0,
             left: 0,
             overflowY: 'auto',
+            marginTop: 64,
+            marginBottom: theme.custom.footer.height || 50,
+            position: 'fixed',
+            height: 'calc(100vh - 64px)',
         },
         leftMenuVerticalRight: {
             width: theme.custom.leftMenu.width,
@@ -165,6 +173,7 @@ const styles = (theme) => {
             marginRight: shiftToRight,
             paddingBottom: theme.spacing(3),
             overflowX: 'hidden',
+            minHeight: 'calc(100vh - 114px)',
         },
         contentExpandView: {
             display: 'flex',
@@ -174,7 +183,8 @@ const styles = (theme) => {
             marginLeft: shiftToLeftMinView,
             marginRight: shiftToRightMinView,
             paddingBottom: theme.spacing(3),
-            overflowX: 'hidden',
+            overflowX: 'hidden', 
+            minHeight: 'calc(100vh - 114px)',
         },
         shiftLeft: {
             marginLeft: 0,
@@ -298,7 +308,7 @@ class Details extends React.Component {
             applicationsAvailable: [],
             item: 1,
             xo: null,
-            open: false,
+            open: true,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
@@ -415,7 +425,7 @@ class Details extends React.Component {
                         <>
                             {user && showCredentials && (
                                 <>
-                                    <div onClick={this.handleDrawerClose}>
+                                   
                                         <LeftMenuItem
                                             text={
                                                 <FormattedMessage
@@ -428,11 +438,11 @@ class Details extends React.Component {
                                             to={pathPrefix + 'credentials'}
                                             open={open}
                                         />
-                                    </div>
+                                    
                                 </>
                             )}
                             {api.type !== 'WS' && showTryout && (
-                                <div onClick={this.handleDrawerClose}>
+                               
                                     <LeftMenuItem
                                         text={<FormattedMessage id='Apis.Details.index.try.out'
                                             defaultMessage='Try out' />}
@@ -441,10 +451,10 @@ class Details extends React.Component {
                                         to={pathPrefix + 'test'}
                                         open={open}
                                     />
-                                </div>
+                                
                             )}
                             {showComments && (
-                                <div onClick={this.handleDrawerClose}>
+                                
                                     <LeftMenuItem
                                         text={
                                             <FormattedMessage id='Apis.Details.index.comments'
@@ -455,12 +465,12 @@ class Details extends React.Component {
                                         to={pathPrefix + 'comments'}
                                         open={open}
                                     />
-                                </div>
+                               
                             )}
                         </>
                     )}
                     {showDocuments && (
-                        <div onClick={this.handleDrawerClose}>
+                       
                             <LeftMenuItem
                                 text={<FormattedMessage id='Apis.Details.index.documentation'
                                     defaultMessage='Documentation' />}
@@ -469,10 +479,10 @@ class Details extends React.Component {
                                 to={pathPrefix + 'documents'}
                                 open={open}
                             />
-                        </div>
+                       
                     )}
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && showSdks && (
-                        <div onClick={this.handleDrawerClose}>
+                        
                             <LeftMenuItem
                                 text={<FormattedMessage id='Apis.Details.index.sdk' defaultMessage='SDKs' />}
                                 route='sdk'
@@ -480,17 +490,17 @@ class Details extends React.Component {
                                 to={pathPrefix + 'sdk'}
                                 open={open}
                             />
-                        </div>
+                       
                     )}
                     {open ? (
                         <div onClick={this.handleDrawerClose}
-                            style={{ paddingLeft: '15px', position: 'absolute', bottom: 0 }}
+                            style={{ width:100, paddingLeft: '15px', position: 'absolute',bottom: 0, cursor:'pointer'}}
                         >
                             <ArrowBackIosIcon fontSize='medium' style={{ color: 'white' }} />
                         </div>
                     ) : (
                         <div onClick={this.handleDrawerOpen}
-                            style={{ paddingLeft: '15px', position: 'absolute', bottom: 0 }}
+                            style={{ paddingLeft: '15px', position: 'absolute', bottom: 0, cursor:'pointer'}}
                         >
                             <ArrowForwardIosIcon fontSize='medium' style={{ color: 'white' }} />
                         </div>

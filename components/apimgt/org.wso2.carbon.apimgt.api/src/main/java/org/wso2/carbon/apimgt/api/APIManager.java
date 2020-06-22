@@ -255,25 +255,6 @@ public interface APIManager {
      */
     GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
 
-    /**
-     * Add the complexity details given the GraphqlComplexityInfo object
-     *
-     * @param apiIdentifier         APIIdentifier
-     * @param graphqlComplexityInfo GraphqlComplexityInfo object
-     * @throws APIManagementException if failed to update complexity details
-     */
-    void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
-            throws APIManagementException;
-
-    /**
-     * Updates the complexity details given the GraphqlComplexityInfo object
-     *
-     * @param apiIdentifier         APIIdentifier
-     * @param graphqlComplexityInfo GraphqlComplexityInfo object
-     * @throws APIManagementException if failed to update complexity details
-     */
-    void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
-            throws APIManagementException;
 
     /**
      * Add or Updates the complexity details given the GraphqlComplexityInfo object
