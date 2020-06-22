@@ -16,8 +16,10 @@
  *  under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import { FormattedMessage } from 'react-intl';
+import AuthManager from 'AppData/AuthManager';
+import Settings from 'Settings';
 import Joi from '@hapi/joi';
 import { Box, Grid } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
@@ -25,8 +27,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import ChangePasswordBase from './ChangePasswordBase';
-import AuthManager from 'AppData/AuthManager';
-import Settings from 'Settings';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStarText: {
@@ -37,16 +37,32 @@ const useStyles = makeStyles((theme) => ({
     passwordChangeForm: {
         '& span, & div, & p, & input': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
-        }
-    }
+        },
+    },
 }));
+
+/**
+ * Reducer
+ * @param {JSON} state State
+ * @returns {Promise}.
+ */
+function reducer(state, { field, value }) {
+    return {
+        ...state,
+        [field]: value,
+    };
+}
 
 const ChangePassword = () => {
     const classes = useStyles();
     const username = AuthManager.getUser().name;
-    const [oldPassword, setOldPassword] = useState();
-    const [newPassword, setNewPassword] = useState();
-    const [repeatedNewPassword, setRepeatedNewPassword] = useState();
+    const initialState = {
+        oldPassword: undefined,
+        newPassword: undefined,
+        repeatedNewPassword: undefined,
+    };
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const { oldPassword, newPassword, repeatedNewPassword } = state;
     const passwordChangeGuideEnabled = false || Settings.passwordChange.guidelinesEnabled;
     let passwordChangeGuide = [];
     if (passwordChangeGuideEnabled) {
@@ -69,7 +85,7 @@ const ChangePassword = () => {
             const errorType = validationError.details[0].type;
             if (errorType === 'string.empty') {
                 return (
-                    < FormattedMessage
+                    <FormattedMessage
                         id='Change.Password.password.empty'
                         defaultMessage='Password is empty'
                     />
@@ -82,28 +98,16 @@ const ChangePassword = () => {
     const validateRepeatedPassword = () => {
         if (repeatedNewPassword && newPassword !== repeatedNewPassword) {
             return (
-                < FormattedMessage
+                <FormattedMessage
                     id='Change.Password.password.mismatch'
                     defaultMessage={'Password doesn\'t match'}
-                />);
+                />
+            );
         }
     };
 
-    // todo: move to reducers
     const handleChange = ({ target: { name: field, value } }) => {
-        switch (field) {
-            case 'oldPassword':
-                setOldPassword(value);
-                break;
-            case 'newPassword':
-                setNewPassword(value);
-                break;
-            case 'repeatedNewPassword':
-                setRepeatedNewPassword(value);
-                break;
-            default:
-                break;
-        }
+        dispatch({ field, value });
     };
 
     const handleSave = () => {
@@ -116,7 +120,9 @@ const ChangePassword = () => {
                 <FormattedMessage
                     id='Change.Password.title'
                     defaultMessage='Change Password'
-                />{': ' + username}
+                />
+                {': '
+                    + username}
             </Typography>
             <Typography variant='caption'>
                 <FormattedMessage
@@ -125,26 +131,28 @@ const ChangePassword = () => {
                         + ' Required fields are marked with an asterisk ( * )'}
                 />
             </Typography>
-            {passwordChangeGuide.length > 0 ?
-                <Typography variant='body2'>
-                    <FormattedMessage
-                        id='Change.Password.password.policy'
-                        defaultMessage={'Password policy:'}
-                    />
-                    <ul style={{ marginTop: '-4px', marginBottom: '-8px' }}>
-                        {passwordChangeGuide.map(rule => {
-                            return (
-                                <li>
-                                    Rule {rule}
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </Typography> :
-                null
-            }
+            {passwordChangeGuide.length > 0
+                ? (
+                    <Typography variant='body2'>
+                        <FormattedMessage
+                            id='Change.Password.password.policy'
+                            defaultMessage='Password policy:'
+                        />
+                        <ul style={{ marginTop: '-4px', marginBottom: '-8px' }}>
+                            {passwordChangeGuide.map((rule) => {
+                                return (
+                                    <li>
+                                        Rule
+                                        {rule}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </Typography>
+                )
+                : null}
         </>
-    )
+    );
 
     return (
         <ChangePasswordBase title={title}>
@@ -153,12 +161,14 @@ const ChangePassword = () => {
                     {/* replace with mui component */}
                     <form noValidate autoComplete='off' className={classes.passwordChangeForm}>
                         <Box component='div' m={2}>
-                            <Grid container
+                            <Grid
+                                container
                                 mt={2}
                                 spacing={2}
-                                direction="column"
-                                justify="center"
-                                alignItems="flex-start">
+                                direction='column'
+                                justify='center'
+                                alignItems='flex-start'
+                            >
                                 <TextField
                                     classes={{
                                         root: classes.mandatoryStarText,
