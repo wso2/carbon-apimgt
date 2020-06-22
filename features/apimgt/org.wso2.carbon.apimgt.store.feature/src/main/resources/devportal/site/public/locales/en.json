@@ -355,6 +355,7 @@
   "Change.Password.description": "Change your own password. Required fields are marked with an asterisk ( * )",
   "Change.Password.password.empty": "Password is empty",
   "Change.Password.password.mismatch": "Password doesn't match",
+  "Change.Password.password.policy": "Password policy:",
   "Change.Password.title": "Change Password",
   "LandingPage.ApisWithTag.invalid.tenant.domain": "Invalid tenant domain",
   "Login.RedirectToLogin.you.will.be.redirected.to": "You will be redirected to {page}",

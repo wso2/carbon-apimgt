@@ -26,6 +26,7 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import ChangePasswordBase from './ChangePasswordBase';
 import AuthManager from 'AppData/AuthManager';
+import Settings from 'Settings';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStarText: {
@@ -40,12 +41,17 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const SettingsBase = () => {
+const ChangePassword = () => {
     const classes = useStyles();
     const username = AuthManager.getUser().name;
     const [oldPassword, setOldPassword] = useState();
     const [newPassword, setNewPassword] = useState();
     const [repeatedNewPassword, setRepeatedNewPassword] = useState();
+    const passwordChangeGuideEnabled = false || Settings.passwordChange.guidelinesEnabled;
+    let passwordChangeGuide = [];
+    if (passwordChangeGuideEnabled) {
+        passwordChangeGuide = Settings.passwordChange.guidelines;
+    }
 
     const validateOldPasswordChange = () => {
         if (oldPassword === '') {
@@ -113,19 +119,36 @@ const SettingsBase = () => {
                 />{': ' + username}
             </Typography>
             <Typography variant='caption'>
-                {/* todo: mention password validation policy */}
                 <FormattedMessage
                     id='Change.Password.description'
                     defaultMessage={'Change your own password.'
                         + ' Required fields are marked with an asterisk ( * )'}
                 />
             </Typography>
+            {passwordChangeGuide.length > 0 ?
+                <Typography variant='body2'>
+                    <FormattedMessage
+                        id='Change.Password.password.policy'
+                        defaultMessage={'Password policy:'}
+                    />
+                    <ul style={{ marginTop: '-4px', marginBottom: '-8px' }}>
+                        {passwordChangeGuide.map(rule => {
+                            return (
+                                <li>
+                                    Rule {rule}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </Typography> :
+                null
+            }
         </>
     )
 
     return (
         <ChangePasswordBase title={title}>
-            <Box py={4} mb={2} display='flex' justifyContent='center'>
+            <Box py={2} display='flex' justifyContent='center'>
                 <Grid item xs={10} md={9}>
                     {/* replace with mui component */}
                     <form noValidate autoComplete='off' className={classes.passwordChangeForm}>
@@ -225,4 +248,4 @@ const SettingsBase = () => {
     );
 };
 
-export default SettingsBase;
+export default ChangePassword;

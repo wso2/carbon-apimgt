@@ -27,4 +27,11 @@ const Settings = {
         kerberos: 'Kerberos',
         'urn:ietf:params:oauth:grant-type:device_code': 'Device Code',
     },
+    passwordChange: {
+        guidelinesEnabled: true,
+        guidelines: [
+            'Password should be 5-30 characters long',
+        ],
+    },
+
 };
