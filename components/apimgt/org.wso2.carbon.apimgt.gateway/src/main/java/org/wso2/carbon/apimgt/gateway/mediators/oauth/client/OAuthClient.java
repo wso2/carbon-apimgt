@@ -38,6 +38,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+/**
+ * This class represents the client used to request and retrieve OAuth tokens
+ * from an OAuth-protected backend
+ */
 public class OAuthClient {
     private static final Log log = LogFactory.getLog(OAuthClient.class);
     private static final String AUTHORIZATION_HEADER = "Authorization";
@@ -47,6 +51,20 @@ public class OAuthClient {
     private static final String PASSWORD_GRANT_TYPE = "grant_type=password";
     private static final String REFRESH_TOKEN_GRANT_TYPE = "grant_type=refresh_token";
 
+    /**
+     * Method to generate the access token for an OAuth backend
+     * @param url The token url of the backend
+     * @param clientId The Client ID
+     * @param clientSecret The Client Secret
+     * @param username The username
+     * @param password The password
+     * @param grantType The grant type
+     * @param customParameters The custom parameters JSON Object
+     * @param refreshToken The refresh token
+     * @return TokenResponse object
+     * @throws IOException In the event of a problem parsing the response from the backend
+     * @throws APIManagementException In the event of an unexpected HTTP status code from the backend
+     */
     public static TokenResponse generateToken(String url, String clientId, String clientSecret,
             String username, String password, String grantType, JSONObject customParameters, String refreshToken)
             throws IOException, APIManagementException {
@@ -88,6 +106,12 @@ public class OAuthClient {
         }
     }
 
+    /**
+     * Method to append the properties from the Custom Parameters JSONObject to the payload
+     * @param customParameters Custom Parameters JSONObject
+     * @param string StringBuilder object containing the existing payload
+     * @return The StringBuilder object with the updated payload
+     */
     private static StringBuilder appendCustomParameters(JSONObject customParameters, StringBuilder string) {
         if (customParameters != null) {
             for(Object keyStr : customParameters.keySet()) {
@@ -98,6 +122,13 @@ public class OAuthClient {
         return string;
     }
 
+    /**
+     * Method to retrieve the token response sent from the backend
+     * @param response CloseableHttpResponse object
+     * @return TokenResponse object containing the details retrieved from the backend
+     * @throws APIManagementException In the event of an unexpected HTTP status code from the backend
+     * @throws IOException In the event of a problem parsing the response from the backend
+     */
     private static TokenResponse getTokenResponse(CloseableHttpResponse response)
             throws APIManagementException, IOException {
         int responseCode = response.getStatusLine().getStatusCode();

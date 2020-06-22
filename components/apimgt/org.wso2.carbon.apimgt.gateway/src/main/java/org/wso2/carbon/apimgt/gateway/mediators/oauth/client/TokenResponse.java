@@ -20,6 +20,13 @@ package org.wso2.carbon.apimgt.gateway.mediators.oauth.client;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * This class represents the Token Response data object designed to store and transfer
+ * the essential data returned from an OAuth-protected backend
+ */
 public class TokenResponse {
 
     @SerializedName("access_token")
@@ -84,5 +91,43 @@ public class TokenResponse {
 
     public void setValidTill(Long validTill) {
         this.validTill = validTill;
+    }
+
+    public TokenResponse(Map<String, String> tokenMap) {
+        this.setAccessToken(tokenMap.get("access_token"));
+        this.setRefreshToken(tokenMap.get("refresh_token"));
+        this.setScope(tokenMap.get("scope"));
+        this.setTokenType(tokenMap.get("token_type"));
+        this.setExpiresIn(tokenMap.get("expires_in"));
+        this.setValidTill(Long.valueOf(tokenMap.get("valid_till")));
+    }
+
+    /**
+     * Method to convert TokenResponse Object to a HashMap
+     * @return HashMap with TokenResponse properties
+     */
+    public Map<String, String> toMap() {
+        // TODO - Convert string properties to constants
+        Map<String, String> map = new HashMap<>();
+        //        map.put("uuid", getUuid());
+        map.put("access_token", getAccessToken());
+        map.put("refresh_token", getRefreshToken());
+        map.put("scope", getScope());
+        map.put("token_type", getTokenType());
+        map.put("expires_in", getExpiresIn());
+        if (getValidTill() != null) {
+            map.put("valid_till", String.valueOf(getValidTill()));
+        }
+        return map;
+    }
+
+    /**
+     * toString method for TokenResponse object
+     * @return String of TokenResponse object
+     */
+    @Override public String toString() {
+        return "TokenResponse{" + "accessToken='" + accessToken + '\'' + ", refreshToken='" + refreshToken + '\''
+                + ", scope='" + scope + '\'' + ", tokenType='" + tokenType + '\'' + ", expiresIn='" + expiresIn + '\''
+                + ", validTill=" + validTill + '}';
     }
 }

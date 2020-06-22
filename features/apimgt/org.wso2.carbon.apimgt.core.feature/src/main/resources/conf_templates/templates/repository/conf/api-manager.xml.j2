@@ -1014,6 +1014,15 @@
         </APISecurityAudit>
     {% endif %}
 
+    {% if oauth_endpoint_security is defined %}
+        <OAuthEndpointSecurity>
+            <IsRedisEnabled>{{oauth_endpoint_security.is_redis_enabled}}</IsRedisEnabled>
+            <RedisHost>{{oauth_endpoint_security.redis_host}}</RedisHost>
+            <RedisPort>{{oauth_endpoint_security.redis_port}}</RedisPort>
+            <RedisPassword>{{oauth_endpoint_security.redis_password}}</RedisPassword>
+        </OAuthEndpointSecurity>
+    {% endif %}
+
     {% if apim.devportal.application_attributes is defined %}
     <ApplicationConfiguration>
         <ApplicationAttributes>

@@ -159,6 +159,11 @@
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-inflector-oas3</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jedis</artifactId>
+            <version>3.3.0_1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -291,6 +296,7 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
+                                <bundleDef>org.apache.servicemix.bundles:org.apache.servicemix.bundles.jedis:3.3.0_1</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>

@@ -1251,8 +1251,16 @@ public final class APIConstants {
         // For configs
         public static final String OAUTH_ENDPOINT_SECURITY = "OAuthEndpointSecurity.";
         public static final String OAUTH_TOKEN_REFRESH_INTERVAL = OAUTH_ENDPOINT_SECURITY + "TokenRefreshInterval";
+        public static final String OAUTH_IS_REDIS_ENABLED = OAUTH_ENDPOINT_SECURITY + "IsRedisEnabled";
+        public static final String OAUTH_REDIS_HOST = OAUTH_ENDPOINT_SECURITY + "RedisHost";
+        public static final String OAUTH_REDIS_PORT = OAUTH_ENDPOINT_SECURITY + "RedisPort";
+        public static final String OAUTH_REDIS_PASSWORD = OAUTH_ENDPOINT_SECURITY + "RedisPassword";
 
         public static final String TOKEN_REFRESH_INTERVAL = "tokenRefreshInterval";
+        public static final String IS_REDIS_ENABLED = "isRedisEnabled";
+        public static final String REDIS_HOST = "redisHost";
+        public static final String REDIS_PORT = "redisPort";
+        public static final String REDIS_PASSWORD = "redisPassword";
 
         private OAuthConstants() {
         }
