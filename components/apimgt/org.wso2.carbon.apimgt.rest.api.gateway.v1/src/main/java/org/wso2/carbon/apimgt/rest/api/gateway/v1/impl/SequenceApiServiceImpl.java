@@ -50,7 +50,7 @@ public class SequenceApiServiceImpl implements SequenceApiService {
                 for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
                     try {
                         if(sequenceAdminServiceProxy.getSequence(sequence.getName()) != null) {
-                            sequencesArray.put(sequence.getContent());
+                            sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
                         }
                     } catch (AxisFault axisFault) {
                         log.error("Error in fetching deployed sequences from Synapse Configuration." , axisFault);

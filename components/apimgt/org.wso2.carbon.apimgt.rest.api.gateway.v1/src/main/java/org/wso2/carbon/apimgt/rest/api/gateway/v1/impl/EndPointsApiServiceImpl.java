@@ -50,7 +50,7 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
                 for (GatewayContentDTO gatewayEndpoint : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
                     try {
                         if (endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()) != null) {
-                            endPointArray.put(gatewayEndpoint.getContent());
+                            endPointArray.put(endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()));
                         }
                     } catch (EndpointAdminException e) {
                         log.error("Error in fetching deployed Endpoints from Synapse Configuration." , e);

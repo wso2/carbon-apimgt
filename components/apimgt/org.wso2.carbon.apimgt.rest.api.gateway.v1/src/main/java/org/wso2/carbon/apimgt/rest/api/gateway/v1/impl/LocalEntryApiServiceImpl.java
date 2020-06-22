@@ -50,7 +50,7 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
                 for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
                     try {
                         if (localEntryServiceProxy.getEntry(localEntry.getName()) != null) {
-                            localEntryArray.put(localEntry.getContent());
+                            localEntryArray.put(localEntryServiceProxy.getEntry(localEntry.getName()));
                         }
                     } catch (AxisFault axisFault) {
                         log.error("Error in fetching deployed Local entries from Synapse Configuration." , axisFault);

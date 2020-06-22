@@ -46,8 +46,8 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
         if (gatewayAPIDTO != null) {
             RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy
                     (gatewayAPIDTO.getTenantDomain());
-            String qualifiedName = GatewayUtils.getQualifiedApiName(gatewayAPIDTO.getProvider(), gatewayAPIDTO.getName(),
-                    gatewayAPIDTO.getVersion());
+            String qualifiedName = GatewayUtils.getQualifiedApiName(gatewayAPIDTO.getProvider(),
+                    gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion());
             try {
                 if (restapiAdminServiceProxy.getApi(qualifiedName) != null) {
                     definition = gatewayAPIDTO.getApiDefinition();
