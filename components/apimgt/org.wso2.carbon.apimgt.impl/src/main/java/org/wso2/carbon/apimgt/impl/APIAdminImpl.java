@@ -734,20 +734,13 @@ public class APIAdminImpl implements APIAdmin {
      * @param tenantId     tenant ID of user
      * @param themeContent content of the tenant theme
      */
-    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+    public void importTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
-        apiMgtDAO.addTenantTheme(tenantId, themeContent);
-    }
-
-    /**
-     * Updates a tenant theme in the database
-     *
-     * @param tenantId     tenant ID of user
-     * @param themeContent content of the tenant theme
-     */
-    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
-
-        apiMgtDAO.updateTenantTheme(tenantId, themeContent);
+        if (apiMgtDAO.isTenantThemeExist(tenantId)) {
+            apiMgtDAO.updateTenantTheme(tenantId, themeContent);
+        } else {
+            apiMgtDAO.addTenantTheme(tenantId, themeContent);
+        }
     }
 
     /**
@@ -759,5 +752,16 @@ public class APIAdminImpl implements APIAdmin {
     public InputStream getTenantTheme(int tenantId) throws APIManagementException {
 
         return apiMgtDAO.getTenantTheme(tenantId);
+    }
+
+    /**
+     * Retrieves a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @return content of the tenant theme
+     */
+    public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
+
+        return apiMgtDAO.isTenantThemeExist(tenantId);
     }
 }

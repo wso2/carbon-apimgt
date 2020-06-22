@@ -15525,6 +15525,7 @@ public class ApiMgtDAO {
      *
      * @param tenantId     tenant ID of user
      * @param themeContent content of the tenant theme
+     * @throws APIManagementException
      */
     public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
@@ -15550,13 +15551,13 @@ public class ApiMgtDAO {
      *
      * @param tenantId     tenant ID of user
      * @param themeContent content of the tenant theme
+     * @throws APIManagementException
      */
     public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(SQLConstants.TenantThemeConstants.UPDATE_TENANT_THEME)) {
-
             if (connection.getMetaData().getDriverName().contains("PostgreSQL") || connection.getMetaData()
                     .getDatabaseProductName().contains("DB2")) {
                 statement.setBinaryStream(1, themeContent, IOUtils.toByteArray(themeContent).length);
@@ -15576,6 +15577,7 @@ public class ApiMgtDAO {
      *
      * @param tenantId tenant ID of user
      * @return content of the tenant theme
+     * @throws APIManagementException
      */
     public InputStream getTenantTheme(int tenantId) throws APIManagementException {
 
@@ -15584,7 +15586,6 @@ public class ApiMgtDAO {
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
             statement.setInt(1, tenantId);
-
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 //Postgres bytea data doesn't support getBlob operation
@@ -15600,5 +15601,27 @@ public class ApiMgtDAO {
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
         return tenantThemeContent;
+    }
+
+    /**
+     * Checks whether a tenant theme exist for a particular tenant
+     *
+     * @param tenantId tenant ID of user
+     * @return true if a tenant theme exist for a particular tenant ID, false otherwise
+     * @throws APIManagementException
+     */
+    public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            ResultSet resultSet = statement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            handleException("Failed to check whether tenant theme exist for tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+        return false;
     }
 }
