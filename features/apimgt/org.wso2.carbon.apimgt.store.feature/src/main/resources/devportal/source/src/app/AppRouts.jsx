@@ -74,7 +74,7 @@ function AppRouts(props) {
                     }}
                 />
                 <Route
-                    path='/settings/change-password/:username'
+                    path='/settings/change-password/'
                     render={(localProps) => {
                         if (isAuthenticated) {
                             return <ChangePassword {...localProps} />;

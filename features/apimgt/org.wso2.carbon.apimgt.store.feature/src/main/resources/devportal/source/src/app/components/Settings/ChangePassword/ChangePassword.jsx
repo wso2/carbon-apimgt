@@ -25,6 +25,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import ChangePasswordBase from './ChangePasswordBase';
+import AuthManager from 'AppData/AuthManager';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStarText: {
@@ -39,9 +40,9 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const SettingsBase = (props) => {
+const SettingsBase = () => {
     const classes = useStyles();
-    const { username } = props.match.params;
+    const username = AuthManager.getUser().name;
     const [oldPassword, setOldPassword] = useState();
     const [newPassword, setNewPassword] = useState();
     const [repeatedNewPassword, setRepeatedNewPassword] = useState();
@@ -82,6 +83,7 @@ const SettingsBase = (props) => {
         }
     };
 
+    // todo: move to reducers
     const handleChange = ({ target: { name: field, value } }) => {
         switch (field) {
             case 'oldPassword':
@@ -125,6 +127,7 @@ const SettingsBase = (props) => {
         <ChangePasswordBase title={title}>
             <Box py={4} mb={2} display='flex' justifyContent='center'>
                 <Grid item xs={10} md={9}>
+                    {/* replace with mui component */}
                     <form noValidate autoComplete='off' className={classes.passwordChangeForm}>
                         <Box component='div' m={2}>
                             <Grid container

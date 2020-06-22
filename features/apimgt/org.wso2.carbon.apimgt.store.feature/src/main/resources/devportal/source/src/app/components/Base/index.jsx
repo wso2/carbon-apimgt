@@ -527,7 +527,7 @@ class Layout extends React.Component {
                                                                     {user.name !== 'admin' ?
                                                                         <MenuItem className={classes.logoutLink}>
                                                                             <Link
-                                                                                to={'/settings/change-password/' + user.name}
+                                                                                to={'/settings/change-password/'}
                                                                                 onClick={this.handleCloseUserMenu}
                                                                             >
                                                                                 <FormattedMessage
