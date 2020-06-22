@@ -61,6 +61,7 @@ public class SubscriptionValidationDataUtil {
             apidto = new APIDTO();
             apidto.setApiId(model.getApiId());
             apidto.setVersion(model.getVersion());
+            apidto.setName(model.getName());
             apidto.setContext(model.getContext());
             apidto.setPolicy(model.getPolicy());
             apidto.setProvider(model.getProvider());
