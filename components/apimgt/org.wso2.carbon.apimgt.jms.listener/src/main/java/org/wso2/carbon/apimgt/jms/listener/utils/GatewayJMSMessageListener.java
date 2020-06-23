@@ -193,9 +193,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService()
                             .removeApplicationPolicy(policyEvent);
                 }
-            } else {
-                log.error("Unrecognized policy type :" + event.getPolicyType());
-            }
+            } 
         }
     }
 }
