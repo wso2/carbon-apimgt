@@ -1014,13 +1014,13 @@
         </APISecurityAudit>
     {% endif %}
 
-    {% if oauth_endpoint_security is defined %}
-        <OAuthEndpointSecurity>
-            <IsRedisEnabled>{{oauth_endpoint_security.is_redis_enabled}}</IsRedisEnabled>
-            <RedisHost>{{oauth_endpoint_security.redis_host}}</RedisHost>
-            <RedisPort>{{oauth_endpoint_security.redis_port}}</RedisPort>
-            <RedisPassword>{{oauth_endpoint_security.redis_password}}</RedisPassword>
-        </OAuthEndpointSecurity>
+    {% if redis_config is defined %}
+        <RedisConfig>
+            <IsRedisEnabled>{{redis_config.is_redis_enabled}}</IsRedisEnabled>
+            <RedisHost>{{redis_config.redis_host}}</RedisHost>
+            <RedisPort>{{redis_config.redis_port}}</RedisPort>
+            <RedisPassword>{{redis_config.redis_password}}</RedisPassword>
+        </RedisConfig>
     {% endif %}
 
     {% if apim.devportal.application_attributes is defined %}

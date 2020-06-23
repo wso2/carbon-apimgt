@@ -44,12 +44,6 @@ import java.util.Base64;
  */
 public class OAuthClient {
     private static final Log log = LogFactory.getLog(OAuthClient.class);
-    private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String CONTENT_TYPE_HEADER = "Content-Type";
-    private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
-    private static final String CLIENT_CRED_GRANT_TYPE = "grant_type=client_credentials";
-    private static final String PASSWORD_GRANT_TYPE = "grant_type=password";
-    private static final String REFRESH_TOKEN_GRANT_TYPE = "grant_type=refresh_token";
 
     /**
      * Method to generate the access token for an OAuth backend
@@ -81,15 +75,15 @@ public class OAuthClient {
                 .getHttpClient(urlObject.getPort(), urlObject.getProtocol())) {
             HttpPost httpPost = new HttpPost(url);
             // Set authorization header
-            httpPost.setHeader(AUTHORIZATION_HEADER, "Basic " + credentials);
-            httpPost.setHeader(CONTENT_TYPE_HEADER, APPLICATION_X_WWW_FORM_URLENCODED);
+            httpPost.setHeader(APIConstants.OAuthConstants.AUTHORIZATION_HEADER, "Basic " + credentials);
+            httpPost.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.OAuthConstants.APPLICATION_X_WWW_FORM_URLENCODED);
             if (refreshToken != null) {
-                payload.append(REFRESH_TOKEN_GRANT_TYPE)
+                payload.append(APIConstants.OAuthConstants.REFRESH_TOKEN_GRANT_TYPE)
                         .append("&refresh_token=").append(refreshToken);
             } else if (grantType.equals(APIConstants.OAuthConstants.CLIENT_CREDENTIALS)) {
-                payload.append(CLIENT_CRED_GRANT_TYPE);
+                payload.append(APIConstants.OAuthConstants.CLIENT_CRED_GRANT_TYPE);
             } else if (grantType.equals(APIConstants.OAuthConstants.PASSWORD)) {
-                payload.append(PASSWORD_GRANT_TYPE + "&username=")
+                payload.append(APIConstants.OAuthConstants.PASSWORD_GRANT_TYPE + "&username=")
                         .append(username).append("&password=")
                         .append(password);
             }

@@ -1234,6 +1234,13 @@ public final class APIConstants {
         public static final String CLIENT_CREDENTIALS = "CLIENT_CREDENTIALS";
         public static final String PASSWORD = "PASSWORD";
 
+        public static final String AUTHORIZATION_HEADER = "Authorization";
+        public static final String CONTENT_TYPE_HEADER = "Content-Type";
+        public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+        public static final String CLIENT_CRED_GRANT_TYPE = "grant_type=client_credentials";
+        public static final String PASSWORD_GRANT_TYPE = "grant_type=password";
+        public static final String REFRESH_TOKEN_GRANT_TYPE = "grant_type=refresh_token";
+
         public static final String ACCESS_TOKEN = "access_token";
         public static final String REFRESH_TOKEN = "refresh_token";
         public static final String SCOPE = "scope";
@@ -1248,23 +1255,21 @@ public final class APIConstants {
         public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
         public static final String ENDPOINT_SECURITY_USERNAME = "username";
 
-        // For configs
-        public static final String OAUTH_ENDPOINT_SECURITY = "OAuthEndpointSecurity.";
-        public static final String OAUTH_TOKEN_REFRESH_INTERVAL = OAUTH_ENDPOINT_SECURITY + "TokenRefreshInterval";
-        public static final String OAUTH_IS_REDIS_ENABLED = OAUTH_ENDPOINT_SECURITY + "IsRedisEnabled";
-        public static final String OAUTH_REDIS_HOST = OAUTH_ENDPOINT_SECURITY + "RedisHost";
-        public static final String OAUTH_REDIS_PORT = OAUTH_ENDPOINT_SECURITY + "RedisPort";
-        public static final String OAUTH_REDIS_PASSWORD = OAUTH_ENDPOINT_SECURITY + "RedisPassword";
-
-        public static final String TOKEN_REFRESH_INTERVAL = "tokenRefreshInterval";
-        public static final String IS_REDIS_ENABLED = "isRedisEnabled";
-        public static final String REDIS_HOST = "redisHost";
-        public static final String REDIS_PORT = "redisPort";
-        public static final String REDIS_PASSWORD = "redisPassword";
-
         private OAuthConstants() {
         }
     }
+
+    // For Redis Configuration
+    public static final String REDIS_CONFIG = "RedisConfig.";
+    public static final String CONFIG_IS_REDIS_ENABLED = REDIS_CONFIG + "IsRedisEnabled";
+    public static final String CONFIG_REDIS_HOST = REDIS_CONFIG + "RedisHost";
+    public static final String CONFIG_REDIS_PORT = REDIS_CONFIG + "RedisPort";
+    public static final String CONFIG_REDIS_PASSWORD = REDIS_CONFIG + "RedisPassword";
+
+    public static final String IS_REDIS_ENABLED = "isRedisEnabled";
+    public static final String REDIS_HOST = "redisHost";
+    public static final String REDIS_PORT = "redisPort";
+    public static final String REDIS_PASSWORD = "redisPassword";
 
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.mediators.oauth;
+package org.wso2.carbon.apimgt.gateway.utils;
 
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.TokenResponse;
@@ -27,20 +27,20 @@ import redis.clients.jedis.JedisPoolConfig;
 import java.util.Map;
 
 /**
- * Redis Token Cache class to connect to Redis Server, add and get Token Response objects
+ * Redis Cache utility class to connect to Redis Server, add and get items
  */
-public class RedisTokenCache {
+public class RedisCache {
     private static JedisPool jedisPool;
     private static Jedis jedis;
 
     /**
-     * RedisTokenCache constructor to create new Jedis and JedisPool instances
+     * RedisCache constructor to create new Jedis and JedisPool instances
      * with the given credentials
      * @param host Host name of the Redis server
      * @param port Port used by the Redis server
      * @param password Password for the Redis Server
      */
-    public RedisTokenCache(String host, Integer port, String password) {
+    public RedisCache(String host, Integer port, String password) {
         if (StringUtils.isNotBlank(password)) {
             jedisPool = new JedisPool(new JedisPoolConfig(), host, port);
         } else {
@@ -85,6 +85,7 @@ public class RedisTokenCache {
      * Drop the Redis Cache connection
      */
     public void stopRedisCacheSession() {
+//        jedis.flushDB();
         jedisPool.destroy();
         jedis.close();
     }

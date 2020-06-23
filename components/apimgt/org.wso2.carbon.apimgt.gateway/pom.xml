@@ -302,7 +302,6 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.jedis</artifactId>
-            <version>3.3.0_1</version>
         </dependency>
     </dependencies>
 
@@ -436,6 +435,7 @@
                             org.wso2.orbit.re2j.*; version="${re2j.version}",
                             graphql.*; version="${graphql.java.version}",
                             com.amazonaws.*; version="${com.amazonaws.version}",
+                            org.apache.servicemix.bundles.jedis.*; version="${servicemix.bundles.jedis.version}",
                             com.nimbusds.jwt.*,
                             org.apache.commons.codec.*,
                             *;resolution:=optional
