@@ -18,16 +18,37 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.h2.engine.Constants.UTF8;
 
 public class DBSaver implements ArtifactSaver {
 
@@ -42,37 +63,54 @@ public class DBSaver implements ArtifactSaver {
     @Override
     public void saveArtifact(String gatewayRuntimeArtifacts, String gatewayLabel, String gatewayInstruction)
             throws ArtifactSynchronizerException {
-
+        String baseUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+                System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
+        String synapsePost = baseUrl + APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ARTIFACTS;
+        HttpPost method = new HttpPost(synapsePost);
+        URL synapsePostURL = null;
         try {
-            JSONObject artifactObject = new JSONObject(gatewayRuntimeArtifacts);
-            String apiId = (String) artifactObject.get("apiId");
-            String apiName = (String) artifactObject.get("name");
-            String version = (String) artifactObject.get("version");
-            String tenantDomain = (String) artifactObject.get("tenantDomain");
+            synapsePostURL = new URL(synapsePost);
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+            String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+            byte[] credentials = Base64.encodeBase64((username + ":" + password).getBytes
+                    (StandardCharsets.UTF_8));
+            int keyMgtPort = synapsePostURL.getPort();
+            String keyMgtProtocol = synapsePostURL.getProtocol();
+            method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
+            HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
 
-            byte[] gatewayRuntimeArtifactsAsBytes = gatewayRuntimeArtifacts.getBytes();
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayRuntimeArtifactsAsBytes);
-            if (!apiMgtDAO.isAPIDetailsExists(apiId)) {
-                apiMgtDAO.addGatewayPublishedAPIDetails(apiId, apiName,
-                        version, tenantDomain);
-            }
+//            List<NameValuePair> urlParameters = new ArrayList<>();
+//            urlParameters.add(new BasicNameValuePair("gatewayRuntimeArtifacts", gatewayRuntimeArtifacts));
+//            urlParameters.add(new BasicNameValuePair("gatewayLabel", gatewayLabel));
+//            urlParameters.add(new BasicNameValuePair("gatewayInstruction", gatewayInstruction));
+//            method.setEntity(new UrlEncodedFormEntity(urlParameters, "UTF-8"));
 
-            String dbQuery;
-            if (apiMgtDAO.isAPIArtifactExists(apiId, gatewayLabel)) {
-                dbQuery = SQLConstants.UPDATE_API_ARTIFACT;
-            } else {
-                dbQuery = SQLConstants.ADD_GW_API_ARTIFACT;
-            }
-            apiMgtDAO.addGatewayPublishedAPIArtifacts(apiId, gatewayLabel,
-                    byteArrayInputStream, gatewayRuntimeArtifactsAsBytes.length, gatewayInstruction, dbQuery);
+            String endcodedGatewayArtifacts= URLEncoder.encode(gatewayRuntimeArtifacts,UTF8);
+            JSONObject revokeRequestPayload = new JSONObject();
+            revokeRequestPayload.put("gatewayRuntimeArtifacts", endcodedGatewayArtifacts);
+            revokeRequestPayload.put("gatewayLabel", gatewayLabel);
+            revokeRequestPayload.put("gatewayInstruction", gatewayInstruction);
+            StringEntity requestEntity = new StringEntity(revokeRequestPayload.toString());
+            method.addHeader("content-type", "application/x-www-form-urlencoded");
+            method.setEntity(requestEntity);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully saved Artifacts of " + apiName);
+            HttpResponse httpResponse = null;
+            httpResponse = httpClient.execute(method);
+            if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
+                log.error("Error in storing files to the DB");
+                throw new ArtifactSynchronizerException("Error in storing files to the DB");
             }
-        } catch (APIManagementException e) {
-            throw new ArtifactSynchronizerException("Error saving Artifacts to the DB", e);
+        } catch (MalformedURLException e) {
+            String msg = "Error while constructing key manager URL ";
+            log.error(msg, e);
+            throw new ArtifactSynchronizerException(msg, e);
+        } catch (IOException e) {
+            String msg = "Error while executing the http client ";
+            log.error(msg, e);
+            throw new ArtifactSynchronizerException(msg, e);
         }
-
     }
 
     @Override

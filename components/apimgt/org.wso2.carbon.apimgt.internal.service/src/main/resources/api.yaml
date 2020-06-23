@@ -208,7 +208,7 @@ paths:
           type: string
         - $ref: "#/parameters/Accept"
       tags:
-      - Subscription Validation
+        - Subscription Validation
       responses:
         200:
           description: An array of APIs in the database
@@ -232,7 +232,7 @@ paths:
              Application ID of the application
           type: integer
       tags:
-      - Subscription Validation
+        - Subscription Validation
       responses:
         200:
           description: An array of applications in the database
@@ -246,7 +246,7 @@ paths:
     get:
       summary: Get all subscriptions
       description: |
-         This will provide access to subscriptions in database.
+        This will provide access to subscriptions in database.
       parameters:
         - $ref: '#/parameters/requestedTenant'
         - name: apiId
@@ -350,20 +350,86 @@ paths:
       description: |
         This will provide access to application vs key mappings in database.
       parameters:
-      - $ref: '#/parameters/requestedTenant'
-      - name: consumerKey
-        in: query
-        description: |
-          **Search condition**.
-           Consumer Key of the application
-        type: string
+        - $ref: '#/parameters/requestedTenant'
+        - name: consumerKey
+          in: query
+          description: |
+            **Search condition**.
+             Consumer Key of the application
+          type: string
       tags:
-      - Subscription Validation
+        - Subscription Validation
       responses:
         200:
           description: An array of application key mappings in the database
           schema:
             $ref: '#/definitions/ApplicationKeyMappingList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /synapse-artifacts:
+    get:
+      summary: Get all synapse artifacts for a given API UUID and gateway label
+      description: |
+        This will provide access to synapse artifacts in database.
+      parameters:
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the API
+          type: string
+        - name: gatewayInstruction
+          in: query
+          description: |
+            **Search condition**.
+             Publish/Remove
+          type: string
+      tags:
+        - Retrieving Synapse artifacts
+      responses:
+        200:
+          description: String of gatewayRuntimeArtifacts
+          schema:
+            type: string
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Save the given API Artifacts in database
+      description: This will provide access to synapse artifacts in database.
+      parameters:
+        - name: gatewayRuntimeArtifacts
+          in: query
+          description: |
+            **Search condition**.
+              Gateway runtime artifacts
+          type: string
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+              Label of the gateway
+          type: string
+        - name: gatewayInstruction
+          in: query
+          description: |
+            **Search condition**.
+              Publish/Remove
+          type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Synapse Artifacts saved in database Successfully
         default:
           description: Unexpected error
           schema:
@@ -716,15 +782,15 @@ definitions:
   #-----------------------------------------------------
   SubscriptionPolicy:
     allOf:
-    - $ref: '#/definitions/Policy'
-    - $ref: '#/definitions/GraphQLQuery'
-    - properties:
-        rateLimitCount:
-          type: integer
-        rateLimitTimeUnit:
-          type: string
-        stopOnQuotaReach:
-          type: boolean
+      - $ref: '#/definitions/Policy'
+      - $ref: '#/definitions/GraphQLQuery'
+      - properties:
+          rateLimitCount:
+            type: integer
+          rateLimitTimeUnit:
+            type: string
+          stopOnQuotaReach:
+            type: boolean
 
   #-----------------------------------------------------
   # The GraphQL Query resource
@@ -762,7 +828,7 @@ definitions:
   #-----------------------------------------------------
   ApplicationPolicy:
     allOf:
-    - $ref: '#/definitions/Policy'
+      - $ref: '#/definitions/Policy'
   #-----------------------------------------------------
   # The Api Policy List resource
   #-----------------------------------------------------
@@ -786,12 +852,12 @@ definitions:
   #-----------------------------------------------------
   ApiPolicy:
     allOf:
-    - $ref: '#/definitions/Policy'
-    - properties:
-       conditionGroups:
-        type: array
-        items:
-          $ref: '#/definitions/ApiPolicyConditionGroup'
+      - $ref: '#/definitions/Policy'
+      - properties:
+          conditionGroups:
+            type: array
+            items:
+              $ref: '#/definitions/ApiPolicyConditionGroup'
 
   #-----------------------------------------------------
   # The API Policy Condition  Group resource

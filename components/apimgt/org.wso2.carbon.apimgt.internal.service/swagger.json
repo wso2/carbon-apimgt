@@ -470,6 +470,80 @@
           }
         }
       }
+    },
+    "/synapse-artifacts" : {
+      "get" : {
+        "tags" : [ "Retrieving Synapse artifacts" ],
+        "summary" : "Get all synapse artifacts for a given API UUID and gateway label",
+        "description" : "This will provide access to synapse artifacts in database.\n",
+        "parameters" : [ {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Api ID\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "gatewayLabel",
+          "in" : "query",
+          "description" : "**Search condition**.\n label associated with the API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "gatewayInstruction",
+          "in" : "query",
+          "description" : "**Search condition**.\n Publish/Remove\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "String of gatewayRuntimeArtifacts",
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post" : {
+        "summary" : "Save the given API Artifacts in database",
+        "description" : "This will provide access to synapse artifacts in database.",
+        "parameters" : [ {
+          "name" : "gatewayRuntimeArtifacts",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Gateway runtime artifacts\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "gatewayLabel",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Label of the gateway\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "gatewayInstruction",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Publish/Remove\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nSynapse Artifacts saved in database Successfully\n"
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions" : {

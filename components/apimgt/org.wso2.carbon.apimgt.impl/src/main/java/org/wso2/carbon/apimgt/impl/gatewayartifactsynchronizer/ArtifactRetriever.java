@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 
 import java.util.List;
@@ -44,7 +45,7 @@ public interface ArtifactRetriever {
      * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
      */
     String retrieveArtifact(String APIId, String gatewayLabel, String gatewayInstruction)
-            throws ArtifactSynchronizerException;
+            throws ArtifactSynchronizerException, APIManagementException;
 
     /**
      * This method is used to retrieve data from the storage
