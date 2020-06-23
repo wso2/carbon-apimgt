@@ -45,8 +45,16 @@
     var erroLogin = serverUrl + app.context +"/error-pages?code="
 
     var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
-    var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
-    var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
+    var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
+    if (loginCallbackUrl == null) {
+	        loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+    }
+
+    var logoutCallbackUrl = appUtils.getTenantBasedLogoutCallBack();
+    if (logoutCallbackUrl == null) {
+         logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
+     }
+
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
     if (settingsResponse.data) {
          var scopes = settingsResponse.data.scopes.join(" ");
@@ -69,9 +77,11 @@
     var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId;
-    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
+    var serviceProviderTenantDomain = appUtils.getServiceProviderTenantDomain();
+
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME, serviceProviderTenantDomain);
     if (systemApplicationDTO === null) {
-        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD, serviceProviderTenantDomain);
     }
     var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO !== null) {
@@ -79,15 +89,15 @@
     } else {
         try {
             lock.acquire();
-            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME, serviceProviderTenantDomain);
             if (systemApplicationDTO === null) {
-                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
+                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD, serviceProviderTenantDomain);
             }
             if (systemApplicationDTO == null) {
                 var dcrRequestData = {
                     "callbackUrl": callbackUrl,
                     "clientName": PUBLISHER_CLIENT_APP_NAME,
-                    "owner": String(utils.getAdminUsername()),
+                    "owner": String(utils.getTenantAdminUserName(serviceProviderTenantDomain)),
                     "grantType": "authorization_code refresh_token",
                     "saasApp": true
                 };
@@ -100,7 +110,7 @@
                 var clientSecret = result.data.clientSecret;
 
                 var addApplicationKey = systemApplicationDAO
-                                                .addApplicationKey(PUBLISHER_CLIENT_APP_NAME, clientId, clientSecret, SUPER_TENANT_DOMAIN);
+                                                .addApplicationKey(PUBLISHER_CLIENT_APP_NAME, clientId, clientSecret, serviceProviderTenantDomain);
                 if (!addApplicationKey) {
                     log.error("Error while persisting application information in system application DB table!!");
                     log.error("Client ID = " + clientId);

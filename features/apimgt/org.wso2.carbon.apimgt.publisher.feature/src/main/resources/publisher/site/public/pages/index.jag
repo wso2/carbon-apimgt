@@ -25,6 +25,8 @@
     var swaggerKey = 'swaggerWorkerInit.js';
     var indexBundle = manifest[indexKey].split("dist/")[1];
     var swaggerBundle = manifest[swaggerKey].split("dist/")[1];
+    var appUtils = require("/services/utils.js");
+    app.context = appUtils.getTenantBasePublisherContext();
 %>
 
 <head>
