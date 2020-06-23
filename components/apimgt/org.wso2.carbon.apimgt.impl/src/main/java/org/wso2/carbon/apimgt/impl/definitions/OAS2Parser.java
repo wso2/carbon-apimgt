@@ -123,7 +123,6 @@ public class OAS2Parser extends APIDefinition {
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
             int responseCode = 0;
-//            String minResponseType = "";
             int minResponseCode = 0;
             String path = entry.getKey();
             //initializing apiResourceMediationPolicyObject
@@ -142,16 +141,11 @@ public class OAS2Parser extends APIDefinition {
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
                 }
                 StringBuilder genCode = new StringBuilder();
-//                StringBuilder responseSection = new StringBuilder();
                 boolean hasJsonPayload = false;
                 boolean hasXmlPayload = false;
-
                 for (String responseEntry : op.getResponses().keySet()) {
-                    //for setting only one setPayload response
-//                    boolean setPayloadResponse = false;
+                    //for setting only one initializing if condition per response code
                     boolean respCodeInitialized = false;
-                    //to set string of mc.SetProperty and mc.SetPayload for each condition
-//                    String mcPropertyAndPayloadSection = "";
                     if (!responseEntry.equals("default")) {
                         responseCode = Integer.parseInt(responseEntry);
                         responseCodes.add(responseCode);
@@ -160,81 +154,43 @@ public class OAS2Parser extends APIDefinition {
                     if (op.getResponses().get(responseEntry).getExamples() != null) {
                         Object applicationJson = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_JSON_MEDIA_TYPE);
                         Object applicationXml = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_XML_MEDIA_TYPE);
-
-
-
                         if (applicationJson != null) {
                             String jsonExample = Json.pretty(applicationJson);
                             genCode.append(getGenRespPayloads(responseEntry, jsonExample, "json",false));
                             respCodeInitialized = true;
                             hasJsonPayload = true;
-
-
-//                            mcPropertyAndPayloadSection = getGeneratedSetResponse(responseEntry, "json");
-//                            responseSection.append(getGeneratedConditionsForResponseCodes(responseEntry, mcPropertyAndPayloadSection));
-//                            if (responseCode == minResponseCode) {
-//                                minResponseType = "json";
-//                            }
-//                            setPayloadResponse = true;
                         }
-
-
-
                         if (applicationXml != null) {
                             String xmlExample = applicationXml.toString();
                             genCode.append(getGenRespPayloads(responseEntry, xmlExample, "xml", respCodeInitialized));
                             hasXmlPayload = true;
-
-
-
-
-
-//                            if (responseCode == minResponseCode && !setPayloadResponse) {
-//                                if (applicationJson == null) {
-//                                    mcPropertyAndPayloadSection = getGeneratedSetResponse(responseEntry, "xml");
-//                                    responseSection.append(getGeneratedConditionsForResponseCodes(responseEntry, mcPropertyAndPayloadSection));
-//                                    minResponseType = "xml";
-//                                }
-//                            }
                         }
-
-
-
-                        if (applicationJson == null && applicationXml == null) {
-                            setDefaultGeneratedResponse(genCode);
-                        }
-
-
-
+//                        if (applicationJson == null && applicationXml == null) {
+//                            setDefaultGeneratedResponse(genCode);
+//                        }
                     } else if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
                         Model model = op.getResponses().get(responseEntry).getResponseSchema();
                         String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
-                        genCode.append(getGenRespPayloads(responseEntry, schemaExample, "json",respCodeInitialized));
+                        genCode.append(getGenRespPayloads(responseEntry, schemaExample, "json", respCodeInitialized));
                         hasJsonPayload = true;
 
+                    } else if (op.getResponses().get(responseEntry).getExamples() == null
+                            && op.getResponses().get(responseEntry).getResponseSchema() == null){
+                        setDefaultGeneratedResponse(genCode,responseEntry);
+                        hasJsonPayload=true;
+                        hasXmlPayload=true;
+//                        getGenRespPayloads("","","",false);
 
-//                        if (responseCode == minResponseCode) {
-//                            mcPropertyAndPayloadSection = getGeneratedSetResponse(responseEntry, "json");
-//                            responseSection.append(getGeneratedConditionsForResponseCodes(responseEntry, mcPropertyAndPayloadSection));
-//                            minResponseType = "json";
-//                        }
                     }
                 }
-
-
-
-                //generated var payloads set to static script structure
-//                String finalResponseSection = getGeneratedSetResponseForCodes(minResponseCode, minResponseType, responseSection.toString());
-//                genCode.append(finalResponseSection);
-//                String finalGenCode = genCode.toString();
-
-                String responseConditions = getResponseCondtionsSection(hasJsonPayload,hasXmlPayload);
+                //inserts minimum response code and mock payload variables to static script
                 String finalGenCode = getMandatoryScriptSection(minResponseCode,genCode);
-
+                //gets response section string depending on availability of json/xml payloads
+                String responseConditions = getResponseCondtionsSection(hasJsonPayload,hasXmlPayload);
                 String finalScript = finalGenCode+responseConditions;
-
                 apiResourceMediationPolicyObject.setContent(finalScript);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
+                //sets script to each resource in the swagger
                 op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
             }
             returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
@@ -257,18 +213,19 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
-     *Sets default script
+     * Sets default script
      *
      * @param genCode String builder
      */
-    private void setDefaultGeneratedResponse(StringBuilder genCode) {
-        genCode.append("/* mc.setProperty('CONTENT_TYPE', 'application/json');\n\t" +
-                "mc.setPayloadJSON('{ \"data\" : \"sample JSON\"}');*/\n" +
-                "/*Uncomment the above comment block to send a sample response.*/");
+    private void setDefaultGeneratedResponse(StringBuilder genCode, String responseCode) {
+        genCode.append("\n/*if (!responses[").append(responseCode).append("]) {\n").append("  responses[")
+                .append(responseCode).append("] = [];\n").append("}\n").append("responses[")
+                .append(responseCode).append("][\"application/(json or xml)\"] = {}*/\n");
+
     }
 
     /**
-     * Generates string for variables in Payload Generation
+     * Generates string for initializing response code arrays and Payload variables
      *
      * @param responseCode response Entry Code
      * @param example generated Example Json/Xml
@@ -276,48 +233,13 @@ public class OAS2Parser extends APIDefinition {
      * @return generatedString
      */
     private String getGenRespPayloads(String responseCode, String example, String type, boolean initialized) {
-//        return "\nvar response" + responseCode + type + " = " + example + "\n\n";
-
-
-//        return "\nif (!responses["+responseCode+"]) {" +
-//                "\n responses ["+responseCode+"] = [];"+
-//                "\n}"+
-//                "\nresponses["+responseCode+"][\""+type+"\"] = \n"
-//                +example;
         StringBuilder genRespPayload = new StringBuilder();
-
         if (!initialized) {
             genRespPayload.append("\nif (!responses[").append(responseCode).append("]) {").append("\n responses [").append(responseCode).append("] = [];").append("\n}");
         }
-        genRespPayload.append("\nresponses[").append(responseCode).append("][\"application/").append(type).append("\"] = \n").append(example);
+        genRespPayload.append("\nresponses[").append(responseCode).append("][\"application/").append(type).append("\"] = \n").append(example).append("\n");
         return genRespPayload.toString();
     }
-
-//    /**
-//     * Generates string for methods in Payload Generation
-//     *
-//     * @param responseCode response Entry Code
-//     * @param type mediaType (Json/Xml)
-//     * @return manualCode
-//     */
-//    private String getGeneratedSetResponse(String responseCode, String type) {
-//        return "  mc.setProperty('HTTP_SC', \"" + responseCode + "\");\n" +
-//                "  mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
-//                "  mc.setPayload" + type.toUpperCase() + "(response" + responseCode + type + ");";
-//    }
-
-//    /**
-//     * Generates conditions for setting response code of mock payloads
-//     *
-//     * @param responseCode responseCode response code of payload
-//     * @param getGeneratedSetResponseString string returned from "getGeneratedSetResponse"
-//     * @return if conditions with "getGeneratedSetResponse" included
-//     */
-//    private String getGeneratedConditionsForResponseCodes(String responseCode, String getGeneratedSetResponseString) {
-//        return "if (responseCode == " + responseCode + ") {\n\n" +
-//                getGeneratedSetResponseString +
-//                "\n\n} else ";
-//    }
 
     /**
      * Generates Mock payload and set response for 501 response and null response code
@@ -327,74 +249,30 @@ public class OAS2Parser extends APIDefinition {
     //     * @param responseSectionString String of IF conditions of all response codes
      * @return response section string with IF conditions and responses
      */
-    private String getMandatoryScriptSection(int minResponseCode, StringBuilder responseSection) {
-
-        return "\nvar accept = \"\\\"\"+mc.getProperty('AcceptHeader')+\"\\\"\"" +
+    private String getMandatoryScriptSection(int minResponseCode, StringBuilder payloadVariables) {
+        return "var accept = \"\\\"\"+mc.getProperty('AcceptHeader')+\"\\\"\";" +
                 "\nvar responseCode = mc.getProperty('query.param.responseCode');" +
-                "\nvar responses = [];"+
-
-                responseSection+
-
-                "\n responses[501] = []" +
-                "\n responses[501][\"application/json\"] = {"+
-                "\n \"code\" : 501,"+
-                "\n \"description\" : \"Not Implemented\""+
-                "}\n\n"+
-                "responses[501][\"application/xml\"] = <response><code>501</code><description>Not Implemented</description></response>\n\n"+
+                "\nvar responses = [];\n"+
+                payloadVariables+
+                "\nresponses[501] = [];" +
+                "\nresponses[501][\"application/json\"] = {"+
+                "\n\"code\" : 501,"+
+                "\n\"description\" : \"Not Implemented\""+
+                "}\n"+
+                "responses[501][\"application/xml\"] = <response><code>501</code><description>Not Implemented</description></response>;\n\n"+
                 "if (responseCode == null) {\n"+
-                "responseCode = "+minResponseCode+";\n"+   //assign lowest code
-                "}\n\n" +
-                "if (!responses[responseCode]) {\n\n"+
-                " responseCode = 501;\n\n"+
+                " responseCode = "+minResponseCode+";\n"+   //assign lowest code
+                "}\n" +
+                "if (!responses[responseCode]) {\n"+
+                " responseCode = 501;\n"+
                 "}\n\n";
-
-
-//                "if (accept == null || !responses[responseCode][accept]) {\n"+
-//                " accept = \"application/json\"; // assign whatever available\n"+
-//                "}\n\n"+
-//                "if (accept === \"application/json\") {\n"+
-//                " mc.setProperty('CONTENT_TYPE', 'application/json');\n"+
-//                " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n"+
-//                "} else if (accept === \"application/xml\") {\n"+
-//                " mc.setProperty('CONTENT_TYPE', 'application/xml');\n"+
-//                " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n"+
-//                "}";
-
-
-
-//        return "\nvar response501json = {\n" +
-//                "\"code\" : 501," +
-//                "\n\"description\" : " + "\"Not Implemented\"\n" +
-//                "}\n\n" +
-//                "var responseCode = mc.getProperty('query.param.responseCode');\n\n" +
-//                responseSectionString +
-//                " if (responseCode == null) {\n\n" +
-//                "  mc.setProperty('HTTP_SC', \"" + minResponseCode + "\");\n" +
-//                "  mc.setProperty('CONTENT_TYPE', 'application/" + minResponseType + "');\n" +
-//                "  mc.setPayload" + minResponseType.toUpperCase() + "(response" + minResponseCode + minResponseType + ");\n\n" +
-//                "} else {\n\n" +
-//                "  mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
-//                "  mc.setPayloadJSON(response501json);\n\n" +
-//                "}";
     }
 
     private String getResponseCondtionsSection(boolean hasJsonPayload, boolean hasXmlPayload) {
-
-//        return "if (accept == null || !responses[responseCode][accept]) {\n"+
-//                " accept = \"application/json\"; // assign whatever available\n"+
-//                "}\n\n"+
-//                "if (accept === \"application/json\") {\n"+
-//                " mc.setProperty('CONTENT_TYPE', 'application/json');\n"+
-//                " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n"+
-//                "} else if (accept === \"application/xml\") {\n"+
-//                " mc.setProperty('CONTENT_TYPE', 'application/xml');\n"+
-//                " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n"+
-//                "}";
         String responseSection = "";
         if (hasJsonPayload && hasXmlPayload) {
-
-            responseSection = "if (accept == null || !responses[responseCode][accept]) {\n" +
-                    " accept = \"application/json\"; // assign whatever available\n" +
+            responseSection = "if (accept == null || !responses[responseCode][accept]) {\n"+
+                    " accept = \"application/json\";\n" +
                     "}\n\n" +
                     "if (accept === \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
@@ -403,20 +281,16 @@ public class OAS2Parser extends APIDefinition {
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
-
         } else if (hasJsonPayload) {
-
-            responseSection = "if (accept == null || !responses[responseCode][accept]) {\n" +
+            responseSection = "if (accept == null || !responses[responseCode][accept]) {\n"+
                     " accept = \"application/json\"; // assign whatever available\n" +
                     "}\n\n" +
                     "if (accept === \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
                     "}";
-
         } else if (hasXmlPayload) {
-
-            responseSection = "if (accept == null || !responses[responseCode][accept]) {\n" +
+            responseSection = "if (accept == null || !responses[responseCode][accept]) {\n"+
                     " accept = \"application/xml\"; // assign whatever available\n" +
                     "}\n\n" +
                     "if (accept === \"application/xml\") {\n" +
@@ -424,75 +298,8 @@ public class OAS2Parser extends APIDefinition {
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
         }
-
         return responseSection;
-
     }
-
-
-//    /**
-//     * Generates string for variables in Payload Generation
-//     *
-//     * @param responseCode response Entry Code
-//     * @param example generated Example Json/Xml
-//     * @param type  mediaType (Json/Xml)
-//     * @return generatedString
-//     */
-//    private String getGeneratedResponseVar(String responseCode, String example, String type) {
-//        return "\nvar response" + responseCode + type + " = "+ example+"\n\n";
-//    }
-//
-//    /**
-//     * Generates string for methods in Payload Generation
-//     *
-//     * @param responseCode response Entry Code
-//     * @param type mediaType (Json/Xml)
-//     * @return manualCode
-//     */
-//    private String getGeneratedSetResponse(String responseCode, String type) {
-//        return "  mc.setProperty('HTTP_SC', \"" + responseCode + "\");\n" +
-//                "  mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
-//                "  mc.setPayload" + type.toUpperCase() + "(response" + responseCode + type + ");";
-//    }
-//
-//    /**
-//     * Generates conditions for setting response code of mock payloads
-//     *
-//     * @param responseCode response code of payload
-//     * @param getGeneratedSetResponseString string returned from "getGeneratedSetResponse"
-//     * @return if condition with "getGeneratedSetResponse" included
-//     */
-//    private String getGeneratedConditionsForResponseCodes(String responseCode, String getGeneratedSetResponseString) {
-//        return "if (responseCode == " + responseCode + ") {\n\n" +
-//                getGeneratedSetResponseString +
-//                "\n\n} else ";
-//    }
-//
-//    /**
-//     * Generates Mock payload and set response for 501 response and null response code
-//     * also includes getGeneratedIFsforCodes string of all included response codes
-//     *
-//     * @param minResponseCode minimum response code
-//     * @param minResponseType type of minimum response code (json/xml)
-//     * @param responseSectionString String of IF conditions of all response codes
-//     * @return response section string with IF conditions and responses
-//     */
-//    private String getGeneratedSetResponseForCodes(int minResponseCode, String minResponseType, String responseSectionString) {
-//        return "\nvar response501json = {\n" +
-//                "\"code\" : 501," +
-//                "\n\"description\" : " + "\"Not Implemented\"\n" +
-//                "}\n\n" +
-//                "var responseCode = mc.getProperty('query.param.responseCode');\n\n" +
-//                responseSectionString +
-//                " if (responseCode == null) {\n\n" +
-//                "  mc.setProperty('HTTP_SC', \"" + minResponseCode + "\");\n" +
-//                "  mc.setProperty('CONTENT_TYPE', 'application/" + minResponseType + "');\n" +
-//                "  mc.setPayload" + minResponseType.toUpperCase() + "(response" + minResponseCode + minResponseType + ");\n\n" +
-//                "} else {\n\n" +
-//                "  mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
-//                "  mc.setPayloadJSON(response501json);\n\n" +
-//                "}";
-//    }
 
     /**
      * This method returns URI templates according to the given swagger file
