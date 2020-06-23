@@ -110,6 +110,7 @@ export default function EditParameter(props) {
      */
     function handelDone() {
         operationsDispatcher({ action: 'parameter', data: { target, verb, value: parameter } });
+        handleClose();
     }
     const isEditing = parameter !== null;
     if (!isEditing) {
@@ -297,8 +298,8 @@ export default function EditParameter(props) {
                                     <Checkbox
                                         checked={parameter.required}
                                         onChange={(
-                                            { target: { name, value } },
-                                        ) => parameterActionDispatcher({ action: name, value: !value })}
+                                            { target: { name, checked } },
+                                        ) => parameterActionDispatcher({ action: name, value: checked })}
                                         value={parameter.required}
                                         inputProps={{
                                             name: 'required',
