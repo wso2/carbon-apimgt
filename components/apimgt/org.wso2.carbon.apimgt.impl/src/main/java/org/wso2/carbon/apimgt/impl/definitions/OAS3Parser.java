@@ -313,7 +313,7 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     *Sets default script
+     *Sets default script for response codes without defined payloads
      *
      * @param genCode String builder
      */
@@ -324,11 +324,12 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     * Generates string for variables in Payload Generation
+     * Generates string for initializing response code arrays and payload variables
      *
      * @param responseCode response Entry Code
      * @param example generated Example Json/Xml
      * @param type  mediaType (Json/Xml)
+     * @param initialized response code array
      * @return generatedString
      */
     private String getGenRespPayloads(String responseCode, String example, String type, boolean initialized) {
@@ -374,12 +375,12 @@ public class OAS3Parser extends APIDefinition {
 //    }
 
     /**
-     * Generates Mock payload and set response for 501 response and null response code
-     * also includes getGeneratedIFsforCodes string of all included response codes
-
+     * Generates variables for setting accept-header type and response code specified by user
+     * and sets generated payloads and minimum response code in case specified response code is null
+     *
      * @param minResponseCode minimum response code
-    //     * @param responseSectionString String of IF conditions of all response codes
-     * @return response section string with IF conditions and responses
+     * @param payloadVariables generated payloads
+     * @return script with mock payloads and conditions to handle not implemented
      */
     private String getMandatoryScriptSection(int minResponseCode, StringBuilder payloadVariables) {
 
@@ -416,8 +417,8 @@ public class OAS3Parser extends APIDefinition {
                 "}\n" +
                 "if (!responses[responseCode]) {\n"+
                 " responseCode = 501;\n"+
-                "}\n\n";
-
+                "}\n\n"+
+                "if (accept == null || !responses[responseCode][accept]) {\n";
 
 
 
@@ -450,11 +451,17 @@ public class OAS3Parser extends APIDefinition {
 //                "}";
     }
 
+    /**
+     * Conditions for setting responses at end of inline script of each resource
+     *
+     * @param hasJsonPayload contains JSON payload
+     * @param hasXmlPayload contains XML payload
+     * @return
+     */
     private String getResponseCondtionsSection(boolean hasJsonPayload, boolean hasXmlPayload) {
         String responseSection = "";
         if (hasJsonPayload && hasXmlPayload) {
-            responseSection = "if (accept == null || !responses[responseCode][accept]) {\n"+
-                    " accept = \"application/json\";\n" +
+            responseSection = " accept = \"application/json\";\n" +
                     "}\n\n" +
                     "if (accept === \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
@@ -464,16 +471,14 @@ public class OAS3Parser extends APIDefinition {
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
         } else if (hasJsonPayload) {
-            responseSection = "if (accept == null || !responses[responseCode][accept]) {\n"+
-                    " accept = \"application/json\"; // assign whatever available\n" +
+            responseSection = " accept = \"application/json\"; // assign whatever available\n" +
                     "}\n\n" +
                     "if (accept === \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
                     "}";
         } else if (hasXmlPayload) {
-            responseSection = "if (accept == null || !responses[responseCode][accept]) {\n"+
-                    " accept = \"application/xml\"; // assign whatever available\n" +
+            responseSection = " accept = \"application/xml\"; // assign whatever available\n" +
                     "}\n\n" +
                     "if (accept === \"application/xml\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
