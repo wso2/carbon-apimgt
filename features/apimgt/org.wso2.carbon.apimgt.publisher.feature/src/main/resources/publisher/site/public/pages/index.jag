@@ -27,6 +27,8 @@
     var swaggerBundle = manifest[swaggerKey].split("dist/")[1];
     var appUtils = require("/services/utils.js");
     app.context = appUtils.getTenantBasePublisherContext();
+    var appUtils = require("/services/utils.js");
+    app.context = appUtils.getTenantBasePublisherContext();
 %>
 
 <head>

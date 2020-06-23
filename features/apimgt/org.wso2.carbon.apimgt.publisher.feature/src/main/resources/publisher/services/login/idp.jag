@@ -68,7 +68,7 @@
     // get the pathname from query param 'referrer'
     if (referer !== null) {
         var context = app.context.charAt(0) === '/' ? app.context.substring(1) : app.context;
-        var hostnamePattern = "(https?:\/\/.*):?(\\d*)\/?(" + context + ")";
+        var hostnamePattern = "(https?:\/\/.*):?(\\d*)(\/" + context + ")";
         var re = new RegExp(hostnamePattern);
         state = encodeURI(referer.replace(re, ''));
     }
