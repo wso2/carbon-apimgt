@@ -298,6 +298,16 @@ public class APIKeyValidationService {
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date())
                     + " ,for:" + context);
         }
+        ArrayList<URITemplate> templates = getTemplates(context, version);
+        if (log.isDebugEnabled()) {
+            log.debug("getAllURITemplates response from keyManager to gateway for:" + context + " at "
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+        }
+        timerContext6.stop();
+        return templates;
+    }
+
+    private ArrayList<URITemplate> getTemplates(String context, String version) throws APIManagementException {
         String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -406,11 +416,6 @@ public class APIKeyValidationService {
             
             templates.add(template);  
         }
-        if (log.isDebugEnabled()) {
-            log.debug("getAllURITemplates response from keyManager to gateway for:" + context + " at "
-                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
-        }
-        timerContext6.stop();
         return templates;
     }
 
@@ -424,7 +429,7 @@ public class APIKeyValidationService {
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date())
                     + " ,for:" + context);
         }
-        ArrayList<URITemplate> templates = ApiMgtDAO.getInstance().getAPIProductURITemplates(context, version);
+        ArrayList<URITemplate> templates = getTemplates(context, version);
         if (log.isDebugEnabled()) {
             log.debug("getAllURITemplates response from keyManager to gateway for:" + context + " at "
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
