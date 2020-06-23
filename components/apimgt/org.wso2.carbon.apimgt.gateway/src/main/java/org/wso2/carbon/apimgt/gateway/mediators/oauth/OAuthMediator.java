@@ -50,13 +50,12 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
 
     private static final Log log = LogFactory.getLog(OAuthMediator.class);
     private JSONObject oAuthEndpointSecurityProperties;
-    private RedisCache redisCache;
+    private RedisTokenCache redisTokenCache;
     private boolean isRedisEnabled = false;
 
     // Interface methods are being implemented here
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
-        // Ignore
         oAuthEndpointSecurityProperties = getOAuthEndpointSecurityProperties();
         if (oAuthEndpointSecurityProperties != null) {
             isRedisEnabled = Boolean.parseBoolean((String) oAuthEndpointSecurityProperties
@@ -67,9 +66,9 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
                 if (oAuthEndpointSecurityProperties.containsKey(APIConstants.OAuthConstants.REDIS_PASSWORD)) {
                     String redisPassword = (String) oAuthEndpointSecurityProperties
                             .get(APIConstants.OAuthConstants.REDIS_PASSWORD);
-                    redisCache = new RedisCache(redisHost, Integer.valueOf(redisPort), redisPassword);
+                    redisTokenCache = new RedisTokenCache(redisHost, Integer.valueOf(redisPort), redisPassword);
                 } else {
-                    redisCache = new RedisCache(redisHost, Integer.valueOf(redisPort), "");
+                    redisTokenCache = new RedisTokenCache(redisHost, Integer.valueOf(redisPort), "");
                 }
             }
         }
@@ -77,9 +76,8 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
 
     @Override
     public void destroy() {
-        //Ignore
         if (isRedisEnabled) {
-            redisCache.stopRedisCacheSession();
+            redisTokenCache.stopRedisCacheSession();
         }
     }
 
@@ -137,7 +135,7 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
                 try {
                     OAuthTokenGenerator tokenGenerator = new OAuthTokenGenerator();
                     if (isRedisEnabled) {
-                        tokenGenerator.checkTokenValidity(oAuthEndpoint, latch, true, redisCache);
+                        tokenGenerator.checkTokenValidity(oAuthEndpoint, latch, true, redisTokenCache);
                     } else {
                         tokenGenerator.checkTokenValidity(oAuthEndpoint, latch, false, null);
                     }
@@ -149,7 +147,7 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
 
             TokenResponse tokenResponse;
             if (isRedisEnabled) {
-                tokenResponse = redisCache.getTokenResponseById(oAuthEndpoint.getId());
+                tokenResponse = redisTokenCache.getTokenResponseById(oAuthEndpoint.getId());
             } else {
                 tokenResponse = TokenCache.getInstance().getTokenMap().get(oAuthEndpoint.getId());
             }
@@ -184,7 +182,8 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
 
         JSONObject configProperties = new JSONObject();
 
-        if (StringUtils.isNotBlank(isRedisEnabled) && "true".equals(isRedisEnabled) && StringUtils.isNotBlank(redisHost)
+        if (StringUtils.isNotBlank(isRedisEnabled) && "true".equals(isRedisEnabled)
+                && StringUtils.isNotBlank(redisHost)
                 && StringUtils.isNotBlank(redisPort)) {
             configProperties.put(OAuthConstants.IS_REDIS_ENABLED, isRedisEnabled);
             configProperties.put(OAuthConstants.REDIS_HOST, redisHost);

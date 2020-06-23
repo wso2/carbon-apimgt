@@ -93,6 +93,10 @@ public class TokenResponse {
         this.validTill = validTill;
     }
 
+    /**
+     * TokenResponse constructor to set properties from Map
+     * @param tokenMap Map containing the TokenResponse properties
+     */
     public TokenResponse(Map<String, String> tokenMap) {
         this.setAccessToken(tokenMap.get("access_token"));
         this.setRefreshToken(tokenMap.get("refresh_token"));
@@ -107,9 +111,7 @@ public class TokenResponse {
      * @return HashMap with TokenResponse properties
      */
     public Map<String, String> toMap() {
-        // TODO - Convert string properties to constants
         Map<String, String> map = new HashMap<>();
-        //        map.put("uuid", getUuid());
         map.put("access_token", getAccessToken());
         map.put("refresh_token", getRefreshToken());
         map.put("scope", getScope());

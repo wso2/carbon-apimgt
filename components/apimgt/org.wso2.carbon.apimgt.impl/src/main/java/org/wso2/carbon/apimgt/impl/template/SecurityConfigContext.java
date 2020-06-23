@@ -128,7 +128,7 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                                         endpointSecurityModel.getUsername().concat(":")
                                                 .concat(endpointSecurityModel.getPassword()).getBytes())));
                             }
-                            endpointSecurityModel.setUniqueIdentifier(api.getId().getUUID() + UUID.randomUUID().toString());
+                            endpointSecurityModel.setUniqueIdentifier(api.getId() + "-" + UUID.randomUUID().toString());
                             endpointSecurityModel.setAlias(
                                     alias.concat("--").concat(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
                             endpointSecurityModelMap
@@ -145,7 +145,7 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                                         endpointSecurityModel.getUsername().concat(":")
                                                 .concat(endpointSecurityModel.getPassword()).getBytes())));
                             }
-                            endpointSecurityModel.setUniqueIdentifier(api.getId().getUUID() + UUID.randomUUID().toString());
+                            endpointSecurityModel.setUniqueIdentifier(api.getId() + "-" + UUID.randomUUID().toString());
                             endpointSecurityModel.setAlias(
                                     alias.concat("--").concat(APIConstants.ENDPOINT_SECURITY_SANDBOX));
                             endpointSecurityModelMap
