@@ -263,10 +263,7 @@ export default function ListSubscriptionThrottlingPolicies() {
             });
 
             subscriptionThrottlingvalues = subscriptionPolicies
-                .filter((policy) => policy.policyName !== 'Unlimited')
-                .map((obj) => {
-                    return Object.values(obj);
-                });
+                .map(Object.values);
             return (subscriptionThrottlingvalues);
         }).catch((error) => {
             const { response } = error;
