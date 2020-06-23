@@ -282,7 +282,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.openapitools.swagger.parser</groupId>
+            <groupId>org.wso2.orbit.io.swagger.v3</groupId>
             <artifactId>swagger-parser</artifactId>
         </dependency>
         <dependency>
@@ -397,7 +397,8 @@
                             org.apache.synapse.endpoints.*,
                             org.apache.synapse.mediators.base,
                             org.apache.axis2.transport.base,
-                            io.swagger.parser.*; version="${imp.pkg.version.openapitools.swagger.parser}",
+                            io.swagger.parser.*; version="${swagger.parser.v3.version}",
+                            io.swagger.v3.*; version="${swagger.parser.v3.version}",
                             org.wso2.carbon.core; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.api; version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",

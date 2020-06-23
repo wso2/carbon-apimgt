@@ -246,9 +246,6 @@
                                 <importBundleDef>
                                     org.wso2.orbit.org.openapitools:openapi-generator:${openapi.generator.version}
                                 </importBundleDef>
-                                <importBundleDef>
-                                    org.wso2.orbit.org.openapitools.swagger.parser:swagger-parser:${openapitools.swagger.parser.version}
-                                </importBundleDef>
                                 <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso
                                 </importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
