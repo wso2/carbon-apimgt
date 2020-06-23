@@ -135,7 +135,7 @@ public class K8sManager implements ContainerManager {
                     DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
                     DoneableAPICustomResourceDefinition>> crdClient = getCRDClient(client, apiCRD);
 
-            crdClient.withName(apiName.toLowerCase()).delete();
+            crdClient.withName(apiName.toLowerCase()).cascading(true).delete();
 
             log.info("Successfully deleted the [API] " + apiName);
         } else {
