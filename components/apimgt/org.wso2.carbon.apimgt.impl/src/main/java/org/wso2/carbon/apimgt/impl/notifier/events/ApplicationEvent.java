@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -25,24 +26,29 @@ import java.util.Objects;
  * for the validation purpose in a gateway.
  */
 public class ApplicationEvent extends Event {
+    private String uuid;
     private int applicationId;
     private String applicationName;
     private String tokenType;
     private String applicationPolicy;
     private String groupId;
+    private Map<String,String> attributes;
 
     public ApplicationEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
-            int applicationId, String applicationName, String tokenType, String applicationPolicy, String groupId) {
+                            int applicationId, String uuid, String applicationName, String tokenType,
+                            String applicationPolicy, String groupId, Map<String, String> attributes) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
         this.tenantId = tenantId;
         this.applicationId = applicationId;
+        this.uuid = uuid;
         this.applicationName = applicationName;
         this.tokenType = tokenType;
         this.applicationPolicy = applicationPolicy;
         this.groupId = groupId;
         this.tenantDomain = tenantDomain;
+        this.attributes = attributes;
     }
 
     @Override
@@ -116,5 +122,25 @@ public class ApplicationEvent extends Event {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public Map<String, String> getAttributes() {
+
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+
+        this.attributes = attributes;
+    }
+
+    public String getUuid() {
+
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+
+        this.uuid = uuid;
     }
 }

@@ -132,18 +132,20 @@ public class SubscriptionValidationDAO {
                 if (application == null) {
                     application = new Application();
                     application.setId(appId);
+                    application.setUuid(resultSet.getString("APP_UUID"));
                     application.setPolicy(resultSet.getString("TIER"));
                     application.setSubName(resultSet.getString("SUB_NAME"));
                     application.setName(resultSet.getString("NAME"));
                     application.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     temp.put(appId, application);
                 }
+                String attributeName = resultSet.getString("ATTRIBUTE_NAME");
+                String attributeValue = resultSet.getString("ATTRIBUTE_VALUE");
+                if (StringUtils.isNotEmpty(attributeName) && StringUtils.isNotEmpty(attributeValue)) {
+                    application.addAttribute(attributeName, attributeValue);
+                }
                 // todo read from the aplication_group_mapping table and make it a set
 //                application.addGroupId(resultSet.getString("GROUP_ID"));
-                // todo read attributes from the aplication_attributes table and make it a map
-//                String attributeName = resultSet.getString("NAME");
-//                String attributeValue = resultSet.getString("VALUE");
-//                application.addAttribute(attributeName, attributeValue);
 
                 list.add(application);
             }

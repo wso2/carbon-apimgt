@@ -3672,15 +3672,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                 ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                        tenantDomain, applicationId, application.getName(), application.getTokenType(),
-                        application.getTier(), application.getGroupId());
+                        tenantDomain, applicationId, application.getUUID(), application.getName(),
+                        application.getTokenType(),
+                        application.getTier(), application.getGroupId(), application.getApplicationAttributes());
                 APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
             }
         } else {
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                    tenantDomain, applicationId, application.getName(), application.getTokenType(),
-                    application.getTier(), application.getGroupId());
+                    tenantDomain, applicationId, application.getUUID(), application.getName(),
+                    application.getTokenType(), application.getTier(), application.getGroupId(),
+                    application.getApplicationAttributes());
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         return applicationId;
@@ -3834,8 +3836,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId, tenantDomain,
-                application.getId(), application.getName(), application.getTokenType(), application.getTier(),
-                application.getGroupId());
+                application.getId(), application.getUUID(), application.getName(), application.getTokenType(),
+                application.getTier(), application.getGroupId(), application.getApplicationAttributes());
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
@@ -4022,15 +4024,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus()) || wfDTO.getStatus() == null) {
                 ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(), tenantId,
-                        tenantDomain, applicationId, application.getName(), application.getTokenType(),
-                        application.getTier(), application.getGroupId());
+                        tenantDomain, applicationId, application.getUUID(), application.getName(),
+                        application.getTokenType(),
+                        application.getTier(), application.getGroupId(), Collections.EMPTY_MAP);
                 APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
             }
         } else {
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(), tenantId,
-                    tenantDomain, applicationId, application.getName(), application.getTokenType(),
-                    application.getTier(), application.getGroupId());
+                    tenantDomain, applicationId, application.getUUID(), application.getName(),
+                    application.getTokenType(),
+                    application.getTier(), application.getGroupId(), Collections.EMPTY_MAP);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
     }

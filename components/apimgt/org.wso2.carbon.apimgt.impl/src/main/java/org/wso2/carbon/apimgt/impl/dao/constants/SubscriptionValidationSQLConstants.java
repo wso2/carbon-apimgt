@@ -22,41 +22,56 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_ALL_APPLICATIONS_SQL =
             " SELECT " +
+                    "   APP.UUID AS APP_UUID," +
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.NAME AS NAME," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
-                    "   SUB.USER_ID AS SUB_NAME" +
+                    "   SUB.USER_ID AS SUB_NAME," +
+                    "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
+                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE"+
                     " FROM " +
-                    "   AM_APPLICATION AS APP," +
-                    "   AM_SUBSCRIBER AS SUB" +
+                    "   AM_SUBSCRIBER AS SUB," +
+                    "   AM_APPLICATION AS APP" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES AS ATTRIBUTES  " +
+                    "ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID ";
 
     public static final String GET_TENANT_APPLICATIONS_SQL =
             " SELECT " +
+                    "   APP.UUID AS APP_UUID," +
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.NAME AS NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
-                    "   SUB.USER_ID AS SUB_NAME" +
+                    "   SUB.USER_ID AS SUB_NAME," +
+                    "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
+                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE"+
                     " FROM " +
-                    "   AM_APPLICATION AS APP," +
-                    "   AM_SUBSCRIBER AS SUB" +
+                    "   AM_SUBSCRIBER AS SUB," +
+                    "   AM_APPLICATION AS APP" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES AS ATTRIBUTES" +
+                    "  ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   SUB.TENANT_ID = ? ";
 
     public static final String GET_APPLICATION_BY_ID_SQL =
             " SELECT " +
+                    "   APP.UUID AS APP_UUID," +
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.NAME AS NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
-                    "   SUB.USER_ID AS SUB_NAME" +
+                    "   SUB.USER_ID AS SUB_NAME," +
+                    "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
+                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE"+
                     " FROM " +
-                    "   AM_APPLICATION AS APP," +
-                    "   AM_SUBSCRIBER AS SUB" +
+                    "   AM_SUBSCRIBER AS SUB," +
+                    "   AM_APPLICATION AS APP" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES AS ATTRIBUTES  " +
+                    "ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   APP.APPLICATION_ID = ? ";
