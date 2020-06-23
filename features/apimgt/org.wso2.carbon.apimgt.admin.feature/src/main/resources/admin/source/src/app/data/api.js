@@ -607,37 +607,14 @@ class API extends Resource {
     }
 
     /**
-     * Get detected bot data -- Mock api call.
-     * todo: replace with actual api when available.
+     * Get Detected bot data
      */
     getDetectedBotData() {
-        const mockBotData = {
-            body: [
-                {
-                    recordtime: '5:08 PM Friday, May 22, 2020',
-                    messageID: '12345678902345678', 
-                    apiMethod: 'GET',
-                    headersSet: ['header1','header2','header3'],
-                    messageBody: null,
-                    clientIP: '127.0.0.1'
-                },
-                {
-                    recordtime: '5:10 PM Friday, May 22, 2020',
-                    messageID: '123456876502345678', 
-                    apiMethod: 'POST',
-                    headersSet: ['header1','header2','header3'],
-                    messageBody: '{name:johndoe@gmail.com, password:psw}',
-                    clientIP: '127.0.0.1'
-                }
-            ]
-        };
-        const promiseBotData = new Promise((resolve) => {
-            setTimeout(() => {
-                // resolve({body:[]});
-                resolve(mockBotData);
-            }, 100);
+        return this.client.then((client) => {
+            return client.apis['default'].getBotDetectionData(
+                this._requestMetaData(),
+            );
         });
-        return promiseBotData;
     }
 
     /**
