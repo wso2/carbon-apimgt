@@ -26,7 +26,8 @@
         "async-react-component": "^0.7.0",
         "autosuggest-highlight": "^3.1.1",
         "base64url": "3.0.1",
-        "caniuse-api": "^1.6.1",
+        "caniuse-api": "^3.0.0",
+        "developer_portal": "^1.0.0",
         "downshift": "^3.1.0",
         "draft-js": "^0.10.5",
         "draftjs-to-html": "^0.8.4",
@@ -68,8 +69,7 @@
         "swagger-ui": "^3.25.0",
         "swagger-ui-react": "^3.25.0",
         "typeface-roboto": "0.0.35",
-        "url-loader": "^0.5.9",
-        "developer_portal": "^1.0.0"
+        "url-loader": "^0.5.9"
     },
     "devDependencies": {
         "@babel/core": "^7.6.4",
