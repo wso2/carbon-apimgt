@@ -2060,10 +2060,12 @@ public class APIUtilTest {
                     "  }, \n" +
                     "}";
 
-            APIMRegistryService apimRegistryService = Mockito.mock(APIMRegistryServiceImpl.class); //new APIMRegistryServiceImpl();
-            Mockito.when(apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(testContent);
+            APIMRegistryService apimRegistryService = Mockito.mock(APIMRegistryServiceImpl.class);
+            Mockito.when(apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(testContent);
 
-            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
             JSONParser jsonParser = new JSONParser();
             JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
             serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfigurationFromTenantConfig(tenantConf, type);

@@ -1507,7 +1507,6 @@ public interface APIProvider extends APIManager {
     int getNumberOfAllServices (String type) throws UserStoreException, RegistryException, ParseException,
             APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException;
 
-     List<String> getServiceDiscoveryTypes(String username) throws UserStoreException, RegistryException, ParseException,
-             APIManagementException ,ClassNotFoundException;
+     List<String> getServiceDiscoveryTypes(String username) throws UserStoreException, RegistryException, ParseException;
 
     }

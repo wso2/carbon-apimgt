@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Map;
+
 /**
  * This class is to handle configuration details for cluster
  *
@@ -9,13 +11,13 @@ public class ServiceDiscoveryConfigurations {
     private String type;
     private String className;
     private String displayName;
-    private ServiceDiscoveryConf implParameters;
+    private Map<String,Object>  implParameters;
 
-    public ServiceDiscoveryConf getImplParameters() {
+    public Map<String, Object> getImplParameters() {
         return implParameters;
     }
 
-    public void setImplParameters(ServiceDiscoveryConf implParameters) {
+    public void setImplParameters(Map<String, Object> implParameters) {
         this.implParameters = implParameters;
     }
 

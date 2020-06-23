@@ -76,11 +76,7 @@ public class ServiceDiscoveryApiServiceImpl implements ServiceDiscoveryApiServic
         String username = RestApiUtil.getLoggedInUsername();
         List<String> types = new ArrayList<>();
         try {
-            try {
-                types = apiProvider.getServiceDiscoveryTypes(username);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            types = apiProvider.getServiceDiscoveryTypes(username);
         } catch (UserStoreException e) {
             String errorMessage = "Error occured while retriving the user name";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -89,9 +85,6 @@ public class ServiceDiscoveryApiServiceImpl implements ServiceDiscoveryApiServic
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (ParseException e) {
             String errorMessage = "Error occured while parsing the value";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (APIManagementException e) {
-            String errorMessage = "Error occured while reading the API configuration";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         ServiceDiscoveryMappingUtil.typeListToDTO(typeListDTO,types);

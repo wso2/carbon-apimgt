@@ -8,16 +8,12 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ServiceDiscoveryEndpoints;
 import org.wso2.carbon.apimgt.api.model.Services;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -35,55 +31,45 @@ public class K8sServiceDiscoveryTestCase {
 
 
 
-@Rule
-public KubernetesServer server = new KubernetesServer(false,true);
+    @Rule
+    public KubernetesServer server = new KubernetesServer(true,true);
 
     @Test
     public void listServices(){
+
         server.before();
         Mockito.mock(OpenShiftClient.class);
         JSONObject propertiesJson = new JSONObject();
-       ServiceSpec testServiceSpec = new ServiceSpec();
-       testServiceSpec.setType("ClusterIP");
+        ServiceSpec testServiceSpec = new ServiceSpec();
+        testServiceSpec.setType("ClusterIP");
         List<String> testExternalIP = new ArrayList<>();
         testServiceSpec.setExternalIPs(testExternalIP);
 
 
-        Service service1 = new ServiceBuilder().withNewMetadata().withName("myservice1").withNamespace("default").endMetadata().
-                withNewSpec().withExternalIPs("102.435.232").withType("ClusterIP").withPorts().endSpec().build();
+        Service service1 = new ServiceBuilder().withNewMetadata().withName("myservice1").withNamespace("default").
+                endMetadata().withNewSpec().withExternalIPs("102.435.232").withType("ClusterIP").withPorts().endSpec().
+                build();
 
-List<Service> expextedServices = new ArrayList<>();  expextedServices.add(service1);
-server.expect().get().withPath("/api/v1/namespaces/default/services").andReturn(HttpURLConnection.HTTP_OK, expextedServices)
-                .once();
-//Service resService = openShiftClient.services().inNamespace("default").create(service1);
-//        openShiftClient = (OpenShiftClient) server.getClient();
+        List<Service> expextedServices = new ArrayList<>();  expextedServices.add(service1);
+        server.expect().get().withPath("/api/v1/namespaces/default/services").andReturn(HttpURLConnection.HTTP_OK,
+                expextedServices).once();
         KubernetesClient client = server.getClient();
 
-//        openShiftClient.services().inAnyNamespace().create(new ServiceBuilder().withNewMetadata().withName("pod1").endMetadata().build());
         List<Service> myServices = client.services().inAnyNamespace().list().getItems();
-//myServices.add(service1);
         for (Service service : myServices) {
             String serviceName = service.getMetadata().getName();
             String namespace = service.getMetadata().getNamespace();
-
-
             ServiceSpec serviceSpec = service.getSpec();
-
             String serviceType = serviceSpec.getType();
-
             List<String> externalIP = serviceSpec.getExternalIPs();
             List<ServicePort> portSpec = serviceSpec.getPorts();
-
-
 
             for(ServicePort portList:portSpec){
                 ContainerBasedConstants.TARGET_PORT = String.valueOf(portList.getTargetPort().getIntVal());
                 PROTOCOL = portList.getProtocol();
-
             }
 
             Services servicesListObj = new Services();
-
             servicesListObj.setServiceName(serviceName);
             servicesListObj.setServiceURL(masterURL);
 
@@ -96,19 +82,16 @@ server.expect().get().withPath("/api/v1/namespaces/default/services").andReturn(
 
             servicesListObj.setProperties(propertiesJson.toString());
             allServices.add(servicesListObj);
-
         }
         endpointObj.setType(type);
         endpointObj.setServices(allServices);
         Assert.assertNotNull(service1.getMetadata());
         Assert.assertNotNull(endpointObj.getServices());
-
-
     }
 
 
     @Test
-    public void testlistSubSetOfServices() throws IllegalAccessException, ParseException, InstantiationException, ClassNotFoundException, UserStoreException, APIManagementException, RegistryException {
+    public void testlistSubSetOfServices(){
         K8sServiceDiscovery k8Object =Mockito.mock(K8sServiceDiscovery.class);
 
         int offset = 0;
@@ -131,8 +114,6 @@ server.expect().get().withPath("/api/v1/namespaces/default/services").andReturn(
         Mockito.mock(ServiceDiscovery.class);
         Mockito.when(k8Object.listServices()).thenReturn(testsubEndpointObj);
 
-
-
         endpointObj = k8Object.listServices();
         int length = endpointObj.getServices().size();
         subEndpointObj.setType(endpointObj.getType());
@@ -144,15 +125,12 @@ server.expect().get().withPath("/api/v1/namespaces/default/services").andReturn(
         }
         subEndpointObj.setServices(subServices);
         Assert.assertEquals(testsubEndpointObj.getServices(),subEndpointObj.getServices());
-
-
     }
 
     @Test
     public void testgetNumberOfServices(){
         K8sServiceDiscovery k8Object = Mockito.mock(K8sServiceDiscovery.class);
         int totalNumberOfServices = 0;
-        int testNoOfServices = 8;
         Mockito.mock(ServiceDiscovery.class);
         ServiceDiscoveryEndpoints testsubEndpointObj = new ServiceDiscoveryEndpoints();
         List<Services> testServices = new ArrayList<>();
@@ -176,9 +154,4 @@ server.expect().get().withPath("/api/v1/namespaces/default/services").andReturn(
         totalNumberOfServices = endpointObj.getServices().size();
         Assert.assertEquals(1,totalNumberOfServices);
     }
-
-
-
-
-
 }

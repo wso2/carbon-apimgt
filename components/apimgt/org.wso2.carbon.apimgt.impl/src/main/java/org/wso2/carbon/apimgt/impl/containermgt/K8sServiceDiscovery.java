@@ -8,17 +8,10 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.ServiceDiscoveryConf;
-import org.wso2.carbon.apimgt.api.model.ServiceDiscoveryConfigurations;
 import org.wso2.carbon.apimgt.api.model.ServiceDiscoveryEndpoints;
 import org.wso2.carbon.apimgt.api.model.Services;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.*;
 
@@ -31,8 +24,6 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
     protected OpenShiftClient openShiftClient;
     List<Services> allServices = new ArrayList<>();
     ServiceDiscoveryEndpoints endpointObj = new ServiceDiscoveryEndpoints();
-
-
 
 
     private static final Logger log = LoggerFactory.getLogger(ServiceDiscovery.class);
@@ -77,10 +68,9 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
            String creatingTimeStamp = service.getMetadata().getCreationTimestamp();
 
             ServiceSpec serviceSpec = service.getSpec();
-
             String serviceType = serviceSpec.getType();
-
             List<String> externalIP = serviceSpec.getExternalIPs();
+
             List<ServicePort> portSpec = serviceSpec.getPorts();
 
             for(ServicePort portList:portSpec){
@@ -102,13 +92,9 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
             servicesListObj.setProperties(propertiesJson.toString());
             allServices.add(servicesListObj);
             allServices.sort(Comparator.comparing(Services::getCreatingTimeStamp));
-//            allServices.sort((e1, e2) -> e1.getCreatingTimeStamp().compareTo(e2.getCreatingTimeStamp()));
-
-
         }
         endpointObj.setType(type);
         endpointObj.setServices(allServices);
-
         return endpointObj ;
     }
 
@@ -130,10 +116,7 @@ public class K8sServiceDiscovery  implements ServiceDiscovery {
             subServices.add(services.get(j));
         }
         subEndpointObj.setServices(subServices);
-
-
         return subEndpointObj;
-
     }
 
     /**

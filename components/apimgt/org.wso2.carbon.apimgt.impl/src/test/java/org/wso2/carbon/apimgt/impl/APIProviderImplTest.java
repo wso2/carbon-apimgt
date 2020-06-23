@@ -4890,32 +4890,25 @@ public class APIProviderImplTest {
 
     @Test
     public void testGetServiceDiscoveryEndpointsForSuperTenant() throws UserStoreException, RegistryException,
-            ParseException, APIManagementException, IllegalAccessException, InstantiationException,
+            ParseException,  IllegalAccessException, InstantiationException,
             ClassNotFoundException {
         String type = "Kubernetes";
         String username = "admin";
         int offset = 0;
         int limit = 25;
         ServiceDiscoveryEndpoints subEndpointObj =Mockito.mock(ServiceDiscoveryEndpoints.class);
-
-        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration(tenantDomain, type);
+
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = APIUtil.
+                getServiceDiscoveryConfiguration(tenantDomain, type);
 
         for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ){
             ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
             ServiceDiscovery serviceDiscovery ;
             serviceDiscovery = APIUtil.generateClassObject(type);
-            ServiceDiscoveryConf implParameters = confi.getImplParameters();
+            Map<String,Object>  implParameters = confi.getImplParameters();
 
-            Map<String,String> implParametersDetails = new HashMap<>();
-
-            String masterURL =implParameters.getMasterURL();
-            String saToken = implParameters.getSaToken();
-            implParametersDetails.put("MasterURL", masterURL);
-            implParametersDetails.put("SAToken" , saToken);
-
-            serviceDiscovery.initManager(implParametersDetails);
+            serviceDiscovery.initManager(implParameters);
             subEndpointObj = serviceDiscovery.listSubSetOfServices( offset,  limit);
             Assert.assertNotNull(implParameters);
         }
@@ -4924,32 +4917,26 @@ public class APIProviderImplTest {
     }
 
     @Test
-    public void testGetServiceDiscoveryEndpointsForTenant() throws UserStoreException, RegistryException, ParseException,
-            APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException {
+    public void testGetServiceDiscoveryEndpointsForTenant() throws UserStoreException, RegistryException, ParseException
+            ,  IllegalAccessException, InstantiationException, ClassNotFoundException {
         String type = "Kubernetes";
         String username = "tenantuser@wso2.com";
         int offset = 0;
         int limit = 25;
         ServiceDiscoveryEndpoints subEndpointObj =Mockito.mock(ServiceDiscoveryEndpoints.class);
 
-        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration(tenantDomain, type);
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = APIUtil.
+                getServiceDiscoveryConfiguration(tenantDomain, type);
+
 
         for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ){
             ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
             ServiceDiscovery serviceDiscovery ;
             serviceDiscovery = APIUtil.generateClassObject(type);
-            ServiceDiscoveryConf implParameters = confi.getImplParameters();
+            Map<String,Object> implParameters = confi.getImplParameters();
 
-            Map<String,String> implParametersDetails = new HashMap<>();
-
-            String masterURL =implParameters.getMasterURL();
-            String saToken = implParameters.getSaToken();
-            implParametersDetails.put("MasterURL", masterURL);
-            implParametersDetails.put("SAToken" , saToken);
-
-            serviceDiscovery.initManager(implParametersDetails);
+            serviceDiscovery.initManager(implParameters);
             subEndpointObj = serviceDiscovery.listSubSetOfServices( offset,  limit);
             Assert.assertNotNull(implParameters);
         }
@@ -4959,28 +4946,23 @@ public class APIProviderImplTest {
 
     @Test
     public void getNumberOfAllServicesForSuperTenant( ) throws UserStoreException, RegistryException, ParseException,
-            APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException {
+             IllegalAccessException, InstantiationException, ClassNotFoundException {
         String type = "Kubernetes";
         String username = "admin";
 
         int totalNumberOfServices = 0;
         ServiceDiscovery serviceDiscovery ;
         serviceDiscovery = APIUtil.generateClassObject(type);
-        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
-
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration(tenantDomain, type);
+
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = APIUtil.
+                getServiceDiscoveryConfiguration(tenantDomain, type);
 
         for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ){
             ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
-            ServiceDiscoveryConf implParameters = confi.getImplParameters();
-            String masterURL =implParameters.getMasterURL();
-            String saToken = implParameters.getSaToken();
-            Map<String,String> implParametersDetails = new HashMap<>();
-            implParametersDetails.put("MasterURL", masterURL);
-            implParametersDetails.put("SAToken" , saToken);
+            Map<String,Object> implParameters = confi.getImplParameters();
 
-            serviceDiscovery.initManager(implParametersDetails);
+            serviceDiscovery.initManager(implParameters);
             totalNumberOfServices = serviceDiscovery.getNumberOfServices();
         }
         Assert.assertNotNull(serviceDiscoveryConfMap);
@@ -4990,28 +4972,23 @@ public class APIProviderImplTest {
 
     @Test
     public void getNumberOfAllServicesForTenant( ) throws UserStoreException, RegistryException, ParseException,
-            APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException {
+             IllegalAccessException, InstantiationException, ClassNotFoundException {
         String type = "Kubernetes";
         String username = "tenantuser@wso2.com";
 
         int totalNumberOfServices = 0;
         ServiceDiscovery serviceDiscovery ;
         serviceDiscovery = APIUtil.generateClassObject(type);
-        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
 
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration(tenantDomain, type);
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = APIUtil.
+                getServiceDiscoveryConfiguration(tenantDomain, type);
 
         for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ){
             ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
-            ServiceDiscoveryConf implParameters = confi.getImplParameters();
-            String masterURL =implParameters.getMasterURL();
-            String saToken = implParameters.getSaToken();
-            Map<String,String> implParametersDetails = new HashMap<>();
-            implParametersDetails.put("MasterURL", masterURL);
-            implParametersDetails.put("SAToken" , saToken);
+            Map<String,Object>  implParameters = confi.getImplParameters();
 
-            serviceDiscovery.initManager(implParametersDetails);
+            serviceDiscovery.initManager(implParameters);
             totalNumberOfServices = serviceDiscovery.getNumberOfServices();
         }
         Assert.assertNotNull(serviceDiscoveryConfMap);
@@ -5022,7 +4999,7 @@ public class APIProviderImplTest {
 
     @Test
     public void testGetServiceDiscoveryTypesForSuperTenant() throws UserStoreException, RegistryException,
-            ParseException,  APIManagementException {
+            ParseException {
         String username = "admin";
         List<String> testTypes = new ArrayList<>();
         testTypes.add("Kubernets"); testTypes.add("ETCD"); testTypes.add("EETTC");
@@ -5030,14 +5007,12 @@ public class APIProviderImplTest {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
 
         Mockito.when(APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain)).thenReturn(testTypes);
-        List <String> types = new ArrayList<>();
-        types= APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain);
+        List <String> types = APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain);
         Assert.assertEquals(testTypes,types);
     }
 
     @Test
-    public void testGetServiceDiscoveryTypesForTenant() throws UserStoreException, RegistryException, ParseException,
-            APIManagementException {
+    public void testGetServiceDiscoveryTypesForTenant() throws UserStoreException, RegistryException, ParseException{
         String username = "wso2user@wso2.com";
         List<String> testTypes = new ArrayList<>();
         testTypes.add("Kubernets"); testTypes.add("ETCD"); testTypes.add("EETTC");
@@ -5045,8 +5020,7 @@ public class APIProviderImplTest {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
 
         Mockito.when(APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain)).thenReturn(testTypes);
-        List <String> types = new ArrayList<>();
-        types= APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain);
+        List <String> types = APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain);
         Assert.assertEquals(testTypes,types);
     }
 }

@@ -8886,24 +8886,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             IllegalAccessException, InstantiationException, ClassNotFoundException {
 
         ServiceDiscoveryEndpoints subEndpointObj = new ServiceDiscoveryEndpoints();
-        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration(tenantDomain, type);
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = APIUtil.
+                getServiceDiscoveryConfiguration(tenantDomain, type);
 
         for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ){
             ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
             ServiceDiscovery serviceDiscovery ;
             serviceDiscovery = APIUtil.generateClassObject(type);
-            ServiceDiscoveryConf implParameters = confi.getImplParameters();
+            Map<String,Object> implParameters = confi.getImplParameters();
 
-            Map<String,String> implParametersDetails = new HashMap<>();
-
-            String masterURL = implParameters.getMasterURL();
-            String saToken = implParameters.getSaToken();
-            implParametersDetails.put("MasterURL", masterURL);
-            implParametersDetails.put("SAToken" , saToken);
-
-            serviceDiscovery.initManager(implParametersDetails);
+            serviceDiscovery.initManager(implParameters);
             subEndpointObj = serviceDiscovery.listSubSetOfServices( offset,  limit);
             subEndpointObj.setType(type);
         }
@@ -8922,21 +8915,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int totalNumberOfServices = 0;
         ServiceDiscovery serviceDiscovery ;
         serviceDiscovery = APIUtil.generateClassObject(type);
-        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
 
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration(tenantDomain, type);
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = APIUtil.
+                getServiceDiscoveryConfiguration(tenantDomain, type);
 
         for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ){
             ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
-            ServiceDiscoveryConf implParameters = confi.getImplParameters();
-            String masterURL = implParameters.getMasterURL();
-            String saToken = implParameters.getSaToken();
-            Map<String,String> implParametersDetails = new HashMap<>();
-            implParametersDetails.put("MasterURL", masterURL);
-            implParametersDetails.put("SAToken" , saToken);
+            Map<String,Object> implParameters = confi.getImplParameters();
 
-            serviceDiscovery.initManager(implParametersDetails);
+            serviceDiscovery.initManager(implParameters);
             totalNumberOfServices = serviceDiscovery.getNumberOfServices();
 
         }
@@ -8951,10 +8939,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public List<String> getServiceDiscoveryTypes(String username) throws UserStoreException, RegistryException,
-            ParseException, APIManagementException {
+            ParseException {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-         List <String> types = new ArrayList<>();
-        types = APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain);
+         List <String> types = APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain);
         return types;
     }
 
