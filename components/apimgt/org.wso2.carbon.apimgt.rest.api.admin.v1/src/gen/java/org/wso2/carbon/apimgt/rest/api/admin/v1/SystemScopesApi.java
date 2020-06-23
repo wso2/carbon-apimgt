@@ -38,7 +38,7 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
 
 
     @GET
-    @Path("/")
+    
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the list of role scope mapping. ", notes = "This operation is used to get the list of role scope mapping from tenant-conf for the apim admin dashboard ", response = ScopeListDTO.class, authorizations = {
