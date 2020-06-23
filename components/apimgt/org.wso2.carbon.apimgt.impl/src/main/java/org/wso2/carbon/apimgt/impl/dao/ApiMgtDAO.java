@@ -15588,13 +15588,7 @@ public class ApiMgtDAO {
             statement.setInt(1, tenantId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                //Postgres bytea data doesn't support getBlob operation
-                if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
-                    tenantThemeContent = resultSet.getBinaryStream("THEME");
-                } else {
-                    Blob content = resultSet.getBlob("THEME");
-                    tenantThemeContent = content.getBinaryStream();
-                }
+                tenantThemeContent = resultSet.getBinaryStream("THEME");
             }
         } catch (SQLException e) {
             handleException("Failed to fetch tenant theme of tenant "

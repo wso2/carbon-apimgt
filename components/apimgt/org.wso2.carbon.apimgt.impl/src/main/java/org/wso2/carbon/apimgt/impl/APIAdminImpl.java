@@ -729,10 +729,11 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     /**
-     * Adds a tenant theme to the database
+     * Adds or Updates a tenant theme to the database
      *
      * @param tenantId     tenant ID of user
      * @param themeContent content of the tenant theme
+     * @throws APIManagementException
      */
     public void importTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
@@ -748,6 +749,7 @@ public class APIAdminImpl implements APIAdmin {
      *
      * @param tenantId tenant ID of user
      * @return content of the tenant theme
+     * @throws APIManagementException
      */
     public InputStream getTenantTheme(int tenantId) throws APIManagementException {
 
@@ -755,10 +757,11 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     /**
-     * Retrieves a tenant theme from the database
+     * Checks whether a tenant theme exist for a particular tenant
      *
      * @param tenantId tenant ID of user
-     * @return content of the tenant theme
+     * @return true if a tenant theme exist for a particular tenant ID, false otherwise
+     * @throws APIManagementException
      */
     public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
 
