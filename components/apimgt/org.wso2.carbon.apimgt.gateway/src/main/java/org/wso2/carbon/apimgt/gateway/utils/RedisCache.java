@@ -85,7 +85,7 @@ public class RedisCache {
      * Drop the Redis Cache connection
      */
     public void stopRedisCacheSession() {
-//        jedis.flushDB();
+        jedis.flushDB();
         jedisPool.destroy();
         jedis.close();
     }
