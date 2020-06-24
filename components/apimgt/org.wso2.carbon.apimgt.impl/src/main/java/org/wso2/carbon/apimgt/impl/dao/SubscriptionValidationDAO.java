@@ -636,7 +636,7 @@ public class SubscriptionValidationDAO {
                     apiPolicy = new APIPolicy();
                     apiPolicy.setId(policyId);
                     apiPolicy.setName(resultSet.getString("NAME"));
-                    apiPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                    apiPolicy.setQuotaType(resultSet.getString("DEFAULT_QUOTA_TYPE"));
                     apiPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
                     apiPolicy.setApplicableLevel(resultSet.getString("APPLICABLE_LEVEL"));
                     apiPolicies.add(apiPolicy);
