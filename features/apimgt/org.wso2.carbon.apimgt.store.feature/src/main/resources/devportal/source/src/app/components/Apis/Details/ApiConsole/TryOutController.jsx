@@ -246,7 +246,7 @@ function TryOutController(props) {
      * Generate api key
      * */
     function generateApiKey() {
-        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+        if (api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() !== 'prototyped') {
             setIsUpdating(true);
             const promisedKey = restApi.generateApiKey(selectedApplication, selectedKeyType, -1);
             promisedKey
@@ -285,7 +285,7 @@ function TryOutController(props) {
      * @memberof TryOutController
      */
     function updateApplication() {
-        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+        if (api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() !== 'prototyped') {
             let accessToken;
             let keyType;
             if (subscriptions !== null && subscriptions.length !== 0 && selectedApplication.length !== 0) {
@@ -338,6 +338,8 @@ function TryOutController(props) {
             case 'selectedApplication':
                 setProductionAccessToken('');
                 setSandboxAccessToken('');
+                setProductionApiKey('');
+                setSandboxApiKey('');
                 setSelectedApplication(value);
                 break;
             case 'selectedKeyManager':
