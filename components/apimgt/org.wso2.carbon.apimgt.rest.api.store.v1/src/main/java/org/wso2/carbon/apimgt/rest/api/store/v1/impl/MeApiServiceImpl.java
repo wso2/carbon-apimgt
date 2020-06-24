@@ -8,6 +8,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.MeApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.OldAndNewPasswordsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.user.mgt.common.UserAdminException;
 
 import javax.ws.rs.core.Response;
 
@@ -22,8 +23,9 @@ public class MeApiServiceImpl implements MeApiService {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             apiConsumer.changeUserPassword(body.getOldPassword(), body.getNewPassword());
             return Response.ok().build();
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("", log);
+        } catch (APIManagementException | UserAdminException e) {
+            String errorMessage = "Error occurred while changing the user password"; // log the user name or not ? security concern of revealing username from a stolen token
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

@@ -77,7 +77,6 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.clients.UserAdminClient;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -135,6 +134,8 @@ import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.mgt.UserAdmin;
+import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -5761,14 +5762,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return null;
     }
 
+    /**
+     * Change user's password
+     *
+     * @param currentPassword Current password of the user
+     * @param newPassword     New password of the user
+     */
     @Override
-    public void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException {
-
-        //validate current password
-        if (!APIUtil.isUserCredentialsValid(userNameWithoutChange, currentPassword)) {
-            throw new APIManagementException("The provided old password is invalid");
-        }
-
+    public void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException, UserAdminException {
         //check whether EnablePasswordChange configuration is set to 'true'
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -5778,8 +5779,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException("Password change operation is disabled");
         }
 
-        UserAdminClient userAdminClient = new UserAdminClient();
-        //change the password
-        userAdminClient.changePassword(userNameWithoutChange, newPassword);
+        UserAdmin userAdmin = new UserAdmin();
+        userAdmin.changePasswordByUser(userNameWithoutChange, currentPassword, newPassword);
     }
 }

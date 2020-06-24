@@ -3703,6 +3703,15 @@ paths:
         - OAuth2Security:
             - apim:subscribe
       operationId: changeUserPassword
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d -d @data.json \"https://localhost:9443/api/am/store/v1/me/change-password\""
+      x-wso2-request: |
+        POST https://localhost:9443/api/am/store/v1/me/change-password
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+        {
+          "oldPassword": "12345",
+          "newPassword": "54321"
+        }
+      x-wso2-response: "HTTP/1.1 200 OK"
       summary:
         Change the password of the user
       description: |

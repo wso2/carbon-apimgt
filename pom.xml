@@ -1660,6 +1660,11 @@
                 <scope>provided</scope>
                 <version>${javax.enterprise.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.user.mgt.common</artifactId>
+                <version>${carbon.identity.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

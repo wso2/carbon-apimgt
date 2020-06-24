@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.user.mgt.common.UserAdminException;
 
 import java.util.List;
 import java.util.Map;
@@ -962,5 +963,5 @@ public interface APIConsumer extends APIManager {
     void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException;
 
-    void changeUserPassword(String oldPassword, String newPassword) throws APIManagementException;
+    void changeUserPassword(String oldPassword, String newPassword) throws APIManagementException, UserAdminException;
 }
