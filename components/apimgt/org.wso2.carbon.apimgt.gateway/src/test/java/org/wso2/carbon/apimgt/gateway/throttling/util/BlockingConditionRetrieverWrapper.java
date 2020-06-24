@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 public class BlockingConditionRetrieverWrapper extends BlockingConditionRetriever {
@@ -32,7 +33,7 @@ public class BlockingConditionRetrieverWrapper extends BlockingConditionRetrieve
     }
 
     @Override
-    protected ThrottleProperties getThrottleProperties() {
+    protected EventHubConfigurationDto getThrottleProperties() {
         return throttleProperties;
     }
 

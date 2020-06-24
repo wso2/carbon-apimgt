@@ -367,14 +367,8 @@
        {% if apim.jwt.expiry_time is defined %}
         <JWTExpiryTime>{{apim.jwt.expiry_time}}</JWTExpiryTime>
        {% endif %}
-        {% if apim.key_manager.inmemory_sub_validation is defined %}
-        <InMemorySubscriptionValidation>
-            <Enabled>{{apim.key_manager.inmemory_sub_validation.enable}}</Enabled>
-            <ServiceURL>{{apim.key_manager.inmemory_sub_validation.service_url}}</ServiceURL>
-            <username>{{apim.key_manager.inmemory_sub_validation.username}}</username>
-            <password>{{apim.key_manager.inmemory_sub_validation.password}}</password>
-        </InMemorySubscriptionValidation>
-        {% endif %}
+     <EnableDefaultKeyManagerRegistration>{{apim.key_manager.enable_registration}}</EnableKeyManagerRegistration>
+     <EnableKeyManagerConfigurationRetriever>{{apim.key_manager.enable_retriever}}</EnableKeyManagerConfigurationRetriever>
     </APIKeyValidator>
 
 

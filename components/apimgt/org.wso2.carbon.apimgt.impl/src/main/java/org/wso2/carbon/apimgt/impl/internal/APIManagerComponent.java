@@ -46,23 +46,28 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBSaver;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.AbstractKeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.Notifier;
-import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
-import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
@@ -70,10 +75,6 @@ import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBSaver;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
@@ -925,20 +926,26 @@ public class APIManagerComponent {
      * Method to configure wso2event type event adapter to be used for event notification.
      */
     private void configureNotificationEventPublisher() {
+
         OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
         adapterConfiguration.setName(APIConstants.NOTIFICATION_EVENT_PUBLISHER);
         adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
         Map<String, String> adapterParameters = new HashMap<>();
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
-            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            if (configuration.getThrottleProperties().getTrafficManager() != null && configuration.getThrottleProperties().getPolicyDeployer().isEnabled()) {
-                ThrottleProperties.TrafficManager trafficManager = configuration.getThrottleProperties().getTrafficManager();
-                adapterParameters.put(APIConstants.RECEIVER_URL, trafficManager.getReceiverUrlGroup());
-                adapterParameters.put(APIConstants.AUTHENTICATOR_URL, trafficManager.getAuthUrlGroup());
-                adapterParameters.put(APIConstants.USERNAME, trafficManager.getUsername());
-                adapterParameters.put(APIConstants.PASSWORD, trafficManager.getPassword());
-                adapterParameters.put(APIConstants.PROTOCOL, trafficManager.getType());
+            APIManagerConfiguration configuration =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration();
+            if (configuration.getEventHubConfigurationDto().getEventHubPublisherConfiguration() != null &&
+                    configuration.getEventHubConfigurationDto().isEnabled()) {
+                EventHubConfigurationDto eventHubConfigurationDto = configuration.getEventHubConfigurationDto();
+                EventHubConfigurationDto.EventHubPublisherConfiguration eventHubPublisherConfiguration =
+                        eventHubConfigurationDto.getEventHubPublisherConfiguration();
+                adapterParameters.put(APIConstants.RECEIVER_URL, eventHubPublisherConfiguration.getReceiverUrlGroup());
+                adapterParameters.put(APIConstants.AUTHENTICATOR_URL, eventHubPublisherConfiguration.getAuthUrlGroup());
+                adapterParameters.put(APIConstants.USERNAME, eventHubConfigurationDto.getUsername());
+                adapterParameters.put(APIConstants.PASSWORD, eventHubConfigurationDto.getPassword());
+                adapterParameters.put(APIConstants.PROTOCOL, eventHubPublisherConfiguration.getType());
                 adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
                 adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
                 adapterConfiguration.setStaticProperties(adapterParameters);

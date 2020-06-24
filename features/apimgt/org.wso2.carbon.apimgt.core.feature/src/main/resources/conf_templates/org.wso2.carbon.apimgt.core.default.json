@@ -51,7 +51,7 @@
   "apim.monetization.monetization_impl": "org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl",
   "apim.oauth_config.enable_outbound_auth_header": false,
   "apim.oauth_config.default_app_scope": "am_application_scope",
-  "apim.oauth_config.revoke_endpoint": "https://localhost:${https.nio.port}/revoke",
+  "apim.oauth_config.revoke_endpoint": "https://localhost:${mgt.transport.https.port}/oauth2/revoke",
   "apim.oauth_config.enable_token_encryption": false,
   "apim.oauth_config.enable_token_hashing": false,
   "apim.oauth_config.white_listed_scopes": [
@@ -144,5 +144,7 @@
   "apim.event_hub.service_url": "https://localhost:${mgt.transport.https.port}",
   "apim.event_hub.init_delay": "0",
   "apim.event_hub.event_type": "Binary",
-  "apim.event_hub.java_naming_factory_initial": "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
+  "apim.event_hub.java_naming_factory_initial": "org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
+  "apim.key_manager.enable_registration": true,
+  "apim.key_manager.enable_retriever": true
 }

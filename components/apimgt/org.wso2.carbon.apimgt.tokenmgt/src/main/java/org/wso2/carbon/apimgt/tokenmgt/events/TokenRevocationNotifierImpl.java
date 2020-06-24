@@ -66,8 +66,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         Object[] objects = new Object[]{revokedToken, realtimeNotifierTTL, expiryTimeForJWT};
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
-        APIUtil.publishEvent(APIConstants.TOKEN_REVOCATION_EVENT_PUBLISHER, Collections.EMPTY_MAP,
-                tokenRevocationMessage);
+        APIUtil.publishEventToEventHub(Collections.EMPTY_MAP, tokenRevocationMessage);
         log.debug("Successfully sent the revoked token notification on realtime");
     }
 
