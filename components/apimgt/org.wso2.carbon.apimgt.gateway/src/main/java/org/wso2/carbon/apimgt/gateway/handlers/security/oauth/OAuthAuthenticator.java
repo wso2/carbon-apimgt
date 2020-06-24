@@ -223,6 +223,8 @@ public class OAuthAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_GENERAL_ERROR,APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
                 }
             }
+            //TODO temporarily added. remove this once scope validation is moved to use inmemory maps
+            openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
             // Find the resource authentication scheme based on the token type
 
             authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
