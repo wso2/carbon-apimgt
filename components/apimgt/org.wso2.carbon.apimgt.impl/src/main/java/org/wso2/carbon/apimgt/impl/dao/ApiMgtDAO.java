@@ -15216,7 +15216,7 @@ public class ApiMgtDAO {
                         usedApi.setUriTemplates(usedUriTemplates);
                         usedApiList.add(usedApi);
                     } catch (SQLException e) {
-                        handleException("Failed to retrieve Resource usages of shared scope with scope ID" + uuid, e);
+                        handleException("Failed to retrieve Resource usages of shared scope with scope ID " + uuid, e);
                     }
                 }
             }
@@ -15306,7 +15306,7 @@ public class ApiMgtDAO {
                     Scope scope = new Scope();
                     scope.setId(rs.getString("UUID"));
                     scope.setKey(rs.getString("NAME"));
-                    scope.setUsageCount(rs.getInt("usage"));
+                    scope.setUsageCount(rs.getInt("usages"));
                     scopeList.add(scope);
                 }
             }
