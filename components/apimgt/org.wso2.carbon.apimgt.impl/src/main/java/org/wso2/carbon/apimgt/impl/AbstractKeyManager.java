@@ -33,6 +33,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
@@ -111,6 +112,13 @@ public abstract class AbstractKeyManager implements KeyManager {
      */
     public OAuthApplicationInfo buildFromJSON(OAuthApplicationInfo oAuthApplicationInfo, String jsonInput) throws
             APIManagementException {
+
+        if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL()) &&
+                StringUtils.isNotEmpty(jsonInput) &&
+                (jsonInput.contains("implicit") || jsonInput.contains("authorization_code"))) {
+            throw new EmptyCallbackURLForCodeGrantsException("The callback url must have at least one URI value when" +
+                    " using Authorization code or implicit grant types.");
+        }
         //initiate json parser.
         JSONParser parser = new JSONParser();
         JSONObject jsonObject;

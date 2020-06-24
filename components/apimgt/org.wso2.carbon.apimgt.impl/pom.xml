@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.7.20-SNAPSHOT</version>
+        <version>6.7.25-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -268,10 +268,6 @@
             <artifactId>org.wso2.carbon.event.processor.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.io.swagger</groupId>
-            <artifactId>swagger-codegen</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-models</artifactId>
         </dependency>
@@ -288,12 +284,28 @@
             <artifactId>swagger-parser</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.openapitools</groupId>
-            <artifactId>openapi-generator</artifactId>
+            <groupId>org.wso2.orbit.io.swagger.v3</groupId>
+            <artifactId>swagger-parser</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.openapitools.swagger.parser</groupId>
-            <artifactId>swagger-parser</artifactId>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-ext</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.openapitools</groupId>
+            <artifactId>openapi-generator</artifactId>
         </dependency>
         <dependency>
             <groupId>xerces.wso2</groupId>
@@ -553,9 +565,17 @@
                             org.json.simple.*,
                             org.json.*;version="${org.json.version.range}",
                             org.slf4j,
+                            org.slf4j.ext,
                             org.w3c.dom,
                             com.ibm.wsdl.*; version="${wsdl4j.version.range}";resolution:=optional,
                             net.sf.saxon.*,
+                            io.swagger.v3.core.*,
+                            io.swagger.v3.oas.models.*,
+                            io.swagger.v3.parser,
+                            io.swagger.v3.parser.converter,
+                            com.fasterxml.jackson.datatype.guava,
+                            com.github.benmanes.caffeine.cache;version="${caffeine.version}",
+                            org.openapitools.codegen.*,
                             org.wso2.carbon.identity.oauth.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
                             org.wso2.carbon.identity.oauth2.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
                             org.wso2.carbon.identity.recovery.*;version="${carbon.identity.recovery.pkg.version}",
