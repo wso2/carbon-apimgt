@@ -324,6 +324,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>org.wso2.orbit.com.fasterxml.jackson.core:jackson-core</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
                     <systemProperties>
                         <property>
                             <name>org.opensaml.httpclient.https.disableHostnameVerification</name>
