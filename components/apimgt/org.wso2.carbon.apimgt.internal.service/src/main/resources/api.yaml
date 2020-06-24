@@ -368,6 +368,29 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /isAPIpublished:
+    get:
+      summary: Check whether the API is published or not
+      description: |
+        This will provide access to synapse artifacts in database.
+      parameters:
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
+      tags:
+        - Checking for APIs
+      responses:
+        200:
+          description: Whether the API Published or not
+          schema:
+            type: boolean
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /synapse-artifacts:
     get:
       summary: Get all synapse artifacts for a given API UUID and gateway label

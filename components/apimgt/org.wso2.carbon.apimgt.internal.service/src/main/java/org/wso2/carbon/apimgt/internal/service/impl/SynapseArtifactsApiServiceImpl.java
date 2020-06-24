@@ -75,7 +75,7 @@ public class SynapseArtifactsApiServiceImpl implements SynapseArtifactsApiServic
             String dbQuery;
             String decodedGatewaylabel = URLDecoder.decode(gatewayLabel,
                     APIConstants.DigestAuthConstants.CHARSET);
-            if (apiMgtDAO.isAPIArtifactExists(apiId, gatewayLabel)) {
+            if (apiMgtDAO.isAPIArtifactExists(apiId, decodedGatewaylabel)) {
                 dbQuery = SQLConstants.UPDATE_API_ARTIFACT;
             } else {
                 dbQuery = SQLConstants.ADD_GW_API_ARTIFACT;

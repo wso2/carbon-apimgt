@@ -471,6 +471,34 @@
         }
       }
     },
+    "/isAPIpublished" : {
+      "get" : {
+        "tags" : [ "Checking for APIs" ],
+        "summary" : "Check whether the API is published or not",
+        "description" : "This will provide access to synapse artifacts in database.\n",
+        "parameters" : [ {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Api ID\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Whether the API Published or not",
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/synapse-artifacts" : {
       "get" : {
         "tags" : [ "Retrieving Synapse artifacts" ],

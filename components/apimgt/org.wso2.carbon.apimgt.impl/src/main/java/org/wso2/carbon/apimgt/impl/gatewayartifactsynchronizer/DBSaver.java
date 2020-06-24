@@ -24,8 +24,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -97,8 +101,7 @@ public class DBSaver implements ArtifactSaver {
 
     private HttpResponse invokeService(String endpoint, JSONObject revokeRequestPayload) throws
             IOException {
-        HttpPost method = new HttpPost(endpoint);
-        URL  synapsePostURL = new URL(endpoint);
+        URL synapsePostURL = new URL(endpoint);
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
@@ -107,12 +110,26 @@ public class DBSaver implements ArtifactSaver {
                 (APIConstants.DigestAuthConstants.CHARSET));
         int synapsePort = synapsePostURL.getPort();
         String synapseProtocol = synapsePostURL.getProtocol();
-        method.setHeader("Authorization", "Basic " + new String(credentials,
-                APIConstants.DigestAuthConstants.CHARSET));
-        StringEntity requestEntity = new StringEntity(revokeRequestPayload.toString());
-        requestEntity.setContentType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-        method.setEntity(requestEntity);
         HttpClient httpClient = APIUtil.getHttpClient(synapsePort, synapseProtocol);
+
+        if (revokeRequestPayload != null) {
+             HttpPost method = new HttpPost(endpoint);
+             method.setHeader("Authorization", "Basic " + new String(credentials,
+                    APIConstants.DigestAuthConstants.CHARSET));
+             StringEntity requestEntity = new StringEntity(revokeRequestPayload.toString());
+             requestEntity.setContentType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+             method.setEntity(requestEntity);
+             return executeHTTPRequest(method, httpClient);
+
+        } else {
+             HttpGet method = new HttpGet(endpoint);
+             method.setHeader("Authorization", "Basic " + new String(credentials,
+                    APIConstants.DigestAuthConstants.CHARSET));
+             return executeHTTPRequest(method, httpClient);
+        }
+    }
+
+    private HttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient ) throws IOException {
         HttpResponse httpResponse = null;
         int retryCount = 0;
         boolean retry;
@@ -124,7 +141,7 @@ public class DBSaver implements ArtifactSaver {
                 retryCount++;
                 if (retryCount < saveRetries) {
                     retry = true;
-                    log.warn("Failed retrieving " + endpoint + " from remote endpoint: " + ex.getMessage()
+                    log.warn("Failed retrieving from remote endpoint: " + ex.getMessage()
                             + ". Retrying after " + saverTimeoutInSeconds +
                             " seconds.");
                     try {
@@ -141,11 +158,23 @@ public class DBSaver implements ArtifactSaver {
     }
 
     @Override
-    public boolean isAPIPublished(String apiId) {
+    public boolean isAPIPublished(String apiId){
         try {
-            return apiMgtDAO.isAPIPublishedInAnyGateway(apiId);
-        } catch (APIManagementException e) {
-            log.error("Error checking API with ID " + apiId + " is published in any gateway", e);
+            String baseURL = APIConstants.HTTPS_PROTOCOL_URL_PREFIX +
+                    System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+                    System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
+            String path  = APIConstants.GatewayArtifactSynchronizer.IS_API_PUBLISHED + "?apiId=" + apiId;
+            String endpoint = baseURL + path;
+            HttpResponse httpResponse = invokeService(endpoint,null);
+            String responseString = EntityUtils.toString(httpResponse.getEntity(),
+                    APIConstants.DigestAuthConstants.CHARSET);
+            if (responseString.equals("true")) {
+                return true;
+            }
+            return false;
+        } catch (IOException e) {
+            String msg = "Error while executing the http client " ;
+            log.error(msg, e);
         }
         return false;
     }
