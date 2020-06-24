@@ -44,8 +44,6 @@ function APICategories(props) {
     const { api, configDispatcher } = props;
     const classes = useStyles();
 
-    console.log(api.selectedCategories);
-
     useEffect(() => {
         API.apiCategories().then((response) => setCategories(response.body));
     }, []);

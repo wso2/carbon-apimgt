@@ -32,6 +32,11 @@ const config = {
         net: 'empty', // To fix joi issue: https://github.com/hapijs/joi/issues/665#issuecomment-113713020
     },
     watch: false,
+    watchOptions: {
+        aggregateTimeout: 200,
+        poll: true,
+        ignored: ['files/**/*.js', 'node_modules/**'],
+    },
     devtool: 'source-map', // todo: Commented out the source
     // mapping in case need to speed up the build time & reduce size
     resolve: {

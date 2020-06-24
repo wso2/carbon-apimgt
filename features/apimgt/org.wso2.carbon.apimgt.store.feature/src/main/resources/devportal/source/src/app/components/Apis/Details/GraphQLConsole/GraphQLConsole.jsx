@@ -230,6 +230,7 @@ export default function GraphQLConsole() {
                     productionApiKey={productionApiKey}
                     sandboxApiKey={sandboxApiKey}
                     environmentObject={environmentObject}
+                    api={api}
                 />
                 <Paper />
 

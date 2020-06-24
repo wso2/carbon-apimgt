@@ -286,6 +286,22 @@ class InfoBar extends React.Component {
         return mail;
     }
 
+    getKeyManagers(api) {
+        let keyManagers;
+        let response;
+        if (api.keyManagers) {
+            keyManagers = api.keyManagers;
+            keyManagers.map(name => {
+                if (name === 'all'){
+                    response = 'All Applicable';
+                } else {
+                    response = keyManagers;
+                }
+            });
+        }
+        return response;
+    }
+
     getSchema() {
         const newAPI = new API();
         const { api } = this.context;
@@ -452,6 +468,20 @@ class InfoBar extends React.Component {
                                                 </div>
                                             </TableCell>
                                             <TableCell>{this.getTechnical(api)} {this.getTechnicalMail(api)}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component='th' scope='row'>
+                                                <div className={classes.iconAligner}>
+                                                    <Icon className={classes.iconOdd}>vpn_key</Icon>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.keyManagers'
+                                                            defaultMessage='Key Managers'
+                                                        />
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{this.getKeyManagers(api)}</TableCell>
                                         </TableRow>
                                         {/* <TableRow>
                                                     <TableCell component='th' scope='row'>

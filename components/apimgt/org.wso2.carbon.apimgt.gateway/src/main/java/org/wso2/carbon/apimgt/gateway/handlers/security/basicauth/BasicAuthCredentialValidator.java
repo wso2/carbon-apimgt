@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtService;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceStub;
@@ -113,42 +114,72 @@ public class BasicAuthCredentialValidator {
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
     @MethodStats
-    public boolean validate(String username, String password) throws APISecurityException {
+    public BasicAuthValidationInfoDTO validate(String username, String password) throws APISecurityException {
+        boolean isAuthenticated;
+        String cachedPasswordHash = null;
         String providedPasswordHash = null;
+        String invalidCachedPasswordHash;
         if (gatewayKeyCacheEnabled) {
             providedPasswordHash = hashString(password);
-            String cachedPasswordHash = (String) getGatewayUsernameCache().get(username);
+            BasicAuthValidationInfoDTO cachedValidationInfoObj = (BasicAuthValidationInfoDTO) getGatewayUsernameCache()
+                    .get(username);
+            if (cachedValidationInfoObj != null) {
+                cachedPasswordHash = cachedValidationInfoObj.getHashedPassword();
+            }
             if (cachedPasswordHash != null && cachedPasswordHash.equals(providedPasswordHash)) {
                 log.debug("Basic Authentication: <Valid Username Cache> Username & password authenticated");
-                return true; //If (username->password) is in the valid cache
+                return cachedValidationInfoObj;
             } else {
-                String invalidCachedPasswordHash = (String) getInvalidUsernameCache().get(username);
-                if (invalidCachedPasswordHash != null && invalidCachedPasswordHash.equals(providedPasswordHash)) {
-                    log.debug("Basic Authentication: <Invalid Username Cache> Username & password authentication failed");
-                    return false; //If (username->password) is in the invalid cache
+                BasicAuthValidationInfoDTO invalidCacheValidationInfoObj = (BasicAuthValidationInfoDTO) getInvalidUsernameCache()
+                        .get(username);
+                if (invalidCacheValidationInfoObj != null) {
+                    invalidCachedPasswordHash = invalidCacheValidationInfoObj.getHashedPassword();
+                    if (invalidCachedPasswordHash != null && invalidCachedPasswordHash.equals(providedPasswordHash)) {
+                        log.debug(
+                                "Basic Authentication: <Invalid Username Cache> Username & password authentication failed");
+                        invalidCacheValidationInfoObj
+                                .setAuthenticated(false); //If (username->password) is in the invalid cache
+                        return invalidCacheValidationInfoObj;
+                    }
                 }
             }
         }
 
-        boolean authenticated;
+        BasicAuthValidationInfoDTO basicAuthValidationInfoDTO;
         try {
-            authenticated = apiKeyMgtRemoteUserStoreMgtServiceStub.authenticate(username, password);
+            org.wso2.carbon.apimgt.impl.dto.xsd.BasicAuthValidationInfoDTO generatedInfoDTO = apiKeyMgtRemoteUserStoreMgtServiceStub
+                    .getUserAuthenticationInfo(username, password);
+            basicAuthValidationInfoDTO = convertToDTO(generatedInfoDTO);
+            isAuthenticated = basicAuthValidationInfoDTO.isAuthenticated();
         } catch (APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException | RemoteException e) {
-            log.debug("Basic Authentication: Username and Password authentication failure");
+            log.error(
+                    "Basic Authentication: Error while accessing backend services to validate user authentication for user : "
+                            + username);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
 
         if (gatewayKeyCacheEnabled) {
-            if (authenticated) {
+            basicAuthValidationInfoDTO.setHashedPassword(providedPasswordHash);
+            if (isAuthenticated) {
                 // put (username->password) into the valid cache
-                getGatewayUsernameCache().put(username, providedPasswordHash);
+                getGatewayUsernameCache().put(username, basicAuthValidationInfoDTO);
             } else {
                 // put (username->password) into the invalid cache
-                getInvalidUsernameCache().put(username, providedPasswordHash);
+                getInvalidUsernameCache().put(username, basicAuthValidationInfoDTO);
             }
         }
 
-        return authenticated;
+        return basicAuthValidationInfoDTO;
+    }
+
+    private BasicAuthValidationInfoDTO convertToDTO(
+            org.wso2.carbon.apimgt.impl.dto.xsd.BasicAuthValidationInfoDTO generatedDto) {
+        BasicAuthValidationInfoDTO dto = new BasicAuthValidationInfoDTO();
+        dto.setAuthenticated(generatedDto.getAuthenticated());
+        dto.setHashedPassword(generatedDto.getHashedPassword());
+        dto.setDomainQualifiedUsername(generatedDto.getDomainQualifiedUsername());
+        dto.setUserRoleList(generatedDto.getUserRoleList());
+        return dto;
     }
 
     /**
@@ -257,6 +288,115 @@ public class BasicAuthCredentialValidator {
         }
         if (log.isDebugEnabled()) {
             log.debug("Basic Authentication: Scope validation failed for the API resource: ".concat(apiElectedResource));
+        }
+        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+    }
+
+    /**
+     * Validates the roles of the given user against the roles of the scopes of the API resource.
+     *
+     * @param username     given username
+     * @param openAPI      OpenAPI of the API
+     * @param synCtx       The message to be authenticated
+     * @param userRoleList The list of roles of the user
+     * @return true if the validation passed
+     * @throws APISecurityException If an authentication failure or some other error occurs
+     */
+    @MethodStats public boolean validateScopes(String username, OpenAPI openAPI, MessageContext synCtx,
+            String[] userRoleList) throws APISecurityException {
+        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
+        String[] userRoles = userRoleList;
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx)
+                .getAxis2MessageContext();
+        String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
+        String resourceKey = apiContext + ":" + apiVersion + ":" + apiElectedResource + ":" + httpMethod;
+        String resourceCacheKey = resourceKey + ":" + username;
+
+        if (gatewayKeyCacheEnabled && getGatewayBasicAuthResourceCache().get(resourceCacheKey) != null) {
+            return true;
+        }
+
+        if (openAPI != null) {
+            // retrieve the user roles related to the scope of the API resource
+            String resourceRoles = null;
+            String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
+            if (resourceScope != null) {
+                resourceRoles = OpenAPIUtils.getRolesOfScope(openAPI, synCtx, resourceScope);
+            }
+
+            if (StringUtils.isNotBlank(resourceRoles)) {
+                //check if the roles related to the API resource contains internal role which matches
+                // any of the role of the user
+                if (validateInternalUserRoles(resourceRoles, userRoles)) {
+                    if (gatewayKeyCacheEnabled) {
+                        getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                    }
+                    return true;
+                }
+
+                // check if the roles related to the API resource contains any of the role of the user
+                for (String role : userRoles) {
+                    if (resourceRoles.contains(role)) {
+                        if (gatewayKeyCacheEnabled) {
+                            getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                        }
+                        return true;
+                    }
+                }
+            } else {
+                // No scopes for the requested resource
+                if (gatewayKeyCacheEnabled) {
+                    getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Basic Authentication: No scopes for the API resource: ".concat(resourceKey));
+                }
+                return true;
+            }
+        } else if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+            HashMap<String, String> operationScopeMappingList = (HashMap<String, String>) synCtx
+                    .getProperty(APIConstants.SCOPE_OPERATION_MAPPING);
+            HashMap<String, ArrayList<String>> scopeRoleMappingList = (HashMap<String, ArrayList<String>>) synCtx
+                    .getProperty(APIConstants.SCOPE_ROLE_MAPPING);
+            String[] operationList = ((String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).split(",");
+            for (String operation : operationList) {
+                String operationScope = operationScopeMappingList.get(operation);
+                if (operationScope != null) {
+                    ArrayList<String> operationRoles = scopeRoleMappingList.get(operationScope);
+                    boolean userHasOperationRole = false;
+                    for (String role : userRoles) {
+                        for (String operationRole : operationRoles) {
+                            if (operationRole.equals(role)) {
+                                userHasOperationRole = true;
+                                break;
+                            }
+                        }
+                        if (userHasOperationRole) {
+                            break;
+                        }
+                    }
+                    if (!userHasOperationRole) {
+                        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+                    }
+                }
+            }
+            if (gatewayKeyCacheEnabled) {
+                getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+            }
+            return true;
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Basic Authentication: No OpenAPI found in the gateway for the API: ".concat(apiContext)
+                        .concat(":").concat(apiVersion));
+            }
+            return true;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Basic Authentication: Scope validation failed for the API resource: ".concat(apiElectedResource));
         }
         throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
     }

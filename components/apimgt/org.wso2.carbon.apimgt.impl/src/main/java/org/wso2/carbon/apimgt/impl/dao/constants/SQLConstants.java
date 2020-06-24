@@ -326,8 +326,8 @@ public class SQLConstants {
                     "   APS.RATE_LIMIT_TIME_UNIT," +
                     "   APS.STOP_ON_QUOTA_REACH," +
                     "   API.API_ID," +
-                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_DEPTH,"+
-                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY" +
+                    "   APS.MAX_DEPTH,"+
+                    "   APS.MAX_COMPLEXITY" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
@@ -335,10 +335,6 @@ public class SQLConstants {
                     "   AM_APPLICATION_KEY_MAPPING AKM," +
                     "   AM_API API," +
                     "   AM_POLICY_SUBSCRIPTION APS" +
-                    " LEFT OUTER JOIN "+
-                    "   AM_GRAPHQL_QUERY_ANALYSIS"+
-                    " ON "+
-                    "   APS.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID "+
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
@@ -367,8 +363,8 @@ public class SQLConstants {
                     "   APS.RATE_LIMIT_TIME_UNIT," +
                     "   APS.STOP_ON_QUOTA_REACH," +
                     "   API.API_ID," +
-                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_DEPTH,"+
-                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY" +
+                    "   APS.MAX_DEPTH,"+
+                    "   APS.MAX_COMPLEXITY" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
@@ -376,10 +372,6 @@ public class SQLConstants {
                     "   AM_APPLICATION_KEY_MAPPING AKM," +
                     "   AM_API API," +
                     "   AM_POLICY_SUBSCRIPTION APS" +
-                    " LEFT OUTER JOIN "+
-                    "   AM_GRAPHQL_QUERY_ANALYSIS"+
-                    " ON "+
-                    "   APS.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID "+
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
@@ -1778,9 +1770,6 @@ public class SQLConstants {
     public static final String REMOVE_SECURITY_AUDIT_MAP_SQL =
             "DELETE FROM AM_SECURITY_AUDIT_UUID_MAPPING WHERE API_ID = ?";
 
-    public static final String ADD_QUERY_ANALYSIS_SQL =
-            "INSERT INTO AM_GRAPHQL_QUERY_ANALYSIS (POLICY_ID, MAX_COMPLEXITY, MAX_DEPTH) VALUES (?,?,?)";
-
     public static final String ADD_CUSTOM_COMPLEXITY_DETAILS_SQL =
             "INSERT INTO AM_GRAPHQL_COMPLEXITY (UUID, API_ID, TYPE, FIELD, COMPLEXITY_VALUE) VALUES (?,?,?,?,?)";
 
@@ -1803,14 +1792,6 @@ public class SQLConstants {
             "    API_ID = ?" +
             "    AND TYPE = ? " +
             "    AND FIELD = ?";
-
-    public static final String UPDATE_QUERY_ANALYSIS_SQL =
-            " UPDATE AM_GRAPHQL_QUERY_ANALYSIS " +
-            " SET " +
-            "   MAX_COMPLEXITY = ?," +
-            "   MAX_DEPTH = ?" +
-            " WHERE " +
-            "   POLICY_ID = ?";
 
     public static final String REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL =
             "DELETE FROM AM_GRAPHQL_COMPLEXITY WHERE API_ID = ?";
@@ -2702,15 +2683,17 @@ public class SQLConstants {
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, \n" +
-                    " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH,BILLING_PLAN,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
+                    " BILLING_PLAN,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY) \n" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,  RATE_LIMIT_COUNT, \n" +
-                    " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, BILLING_PLAN, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
+                    " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
+                    " BILLING_PLAN, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
                     " FIXED_RATE, BILLING_CYCLE, PRICE_PER_REQUEST, CURRENCY) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
@@ -2772,10 +2755,6 @@ public class SQLConstants {
                     "   * " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
-                    "LEFT OUTER JOIN "+
-                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
-                    " ON "+
-                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
                     " WHERE" +
                     "   TENANT_ID =?";
 
@@ -2784,10 +2763,6 @@ public class SQLConstants {
                     "   * " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
-                    "LEFT OUTER JOIN "+
-                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
-                    " ON "+
-                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
                     " WHERE" +
                     "  NAME IN (";
 
@@ -2840,10 +2815,6 @@ public class SQLConstants {
                     "* " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
-                    "LEFT OUTER JOIN "+
-                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
-                    " ON "+
-                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
             "WHERE " +
                     "NAME = ? AND " +
                     "TENANT_ID =?";
@@ -2861,10 +2832,6 @@ public class SQLConstants {
                     "* " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
-                    "LEFT OUTER JOIN "+
-                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
-                    " ON "+
-                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
             "WHERE " +
                     "UUID = ?";
 
@@ -2931,6 +2898,8 @@ public class SQLConstants {
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ?, " +
                     "STOP_ON_QUOTA_REACH = ?, " +
+                    "MAX_DEPTH = ?, " +
+                    "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
@@ -2952,6 +2921,8 @@ public class SQLConstants {
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ?, " +
                     "STOP_ON_QUOTA_REACH = ?, " +
+                    "MAX_DEPTH = ?, " +
+                    "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, "+
                     "CUSTOM_ATTRIBUTES = ?, "+
                     "MONETIZATION_PLAN = ?," +
@@ -2974,6 +2945,8 @@ public class SQLConstants {
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ?, " +
                     "STOP_ON_QUOTA_REACH = ?, " +
+                    "MAX_DEPTH = ?, " +
+                    "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, "+
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
@@ -2995,6 +2968,8 @@ public class SQLConstants {
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ?, " +
                     "STOP_ON_QUOTA_REACH = ?, " +
+                    "MAX_DEPTH = ?, " +
+                    "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, "+
                     "CUSTOM_ATTRIBUTES = ?, "+
                     "MONETIZATION_PLAN = ?," +
@@ -3474,7 +3449,7 @@ public class SQLConstants {
             "WHERE TENANT_ID = ?";
     public static final String GET_SHARED_SCOPE_USAGE_COUNT_BY_TENANT =
             "SELECT SS.NAME, SS.UUID, "
-                    + "(SELECT COUNT(*) FROM AM_API_RESOURCE_SCOPE_MAPPING RSM WHERE RSM.SCOPE_NAME=SS.NAME ) usage "
+                    + "(SELECT COUNT(*) FROM AM_API_RESOURCE_SCOPE_MAPPING RSM WHERE RSM.SCOPE_NAME=SS.NAME ) usages "
                     + "FROM AM_SHARED_SCOPE SS "
                     + "WHERE SS.TENANT_ID = ?";
     public static final String GET_SHARED_SCOPE_API_USAGE_BY_TENANT =
@@ -3486,7 +3461,7 @@ public class SQLConstants {
                     + "AAUM.API_ID=AA.API_ID AND "
                     + "ASSC.UUID=? AND "
                     + "ASSC.TENANT_ID=? "
-                    + "GROUP BY AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER";
+                    + "GROUP BY AA.API_ID, AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER";
 
     public static final String GET_SHARED_SCOPE_URI_USAGE_BY_TENANT =
             "SELECT AAUM.URL_PATTERN, AAUM.HTTP_METHOD "
@@ -3588,7 +3563,7 @@ public class SQLConstants {
                         "DISPLAY_NAME) VALUES (?,?,?,?,?,?,?,?)";
         public static final String UPDATE_KEY_MANAGER =
                 "UPDATE AM_KEY_MANAGER SET NAME = ?,DESCRIPTION = ?,TYPE = ?,CONFIGURATION = ?,TENANT_DOMAIN = ?," +
-                        "ENABLED = ? WHERE UUID = ?";
+                        "ENABLED = ?,DISPLAY_NAME = ? WHERE UUID = ?";
 
         public static final String DELETE_KEY_MANAGER =
                 "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";
