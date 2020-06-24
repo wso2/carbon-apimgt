@@ -109,6 +109,7 @@
   "Apis.Details.InfoBar.gateway.urls": "Gateway URLs",
   "Apis.Details.InfoBar.graphQL.schema": "GraphQL Schema",
   "Apis.Details.InfoBar.ingress.urls": "Kubernetes Ingress URLs",
+  "Apis.Details.InfoBar.keyManagers": "Key Managers",
   "Apis.Details.InfoBar.less": "LESS",
   "Apis.Details.InfoBar.list.context": "Context",
   "Apis.Details.InfoBar.list.context.rating": "Rating",
