@@ -51,7 +51,7 @@ export default function UpdateComplexity(props) {
     const classes = useStyles();
     const [filterKeyWord, setFilter] = useState('');
     const {
-        setList, typelist, list, configDispatcher,
+        setList, typelist, list,
     } = props;
 
     /**
