@@ -16,12 +16,17 @@ import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 
 import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
+import static org.h2.engine.Constants.UTF8;
 
 
 public class SynapseArtifactsApiServiceImpl implements SynapseArtifactsApiService {
@@ -44,13 +49,59 @@ public class SynapseArtifactsApiServiceImpl implements SynapseArtifactsApiServic
     }
 
     @Override
+    public Response synapseArtifactsPost(SynapseArtifactDTO body, MessageContext messageContext)
+            throws APIManagementException {
+
+
+        String bytesEncodedAsString = body.getBytesEncodedAsString();
+        String apiId = body.getApiId();
+        String apiName = body.getApiName();
+        String gatewayInstruction = body.getGatewayInstruction();
+        String gatewayLabel= body.getGatewayLabel();
+        String tenantDomain = body.getTenantDomain();
+        String version = body.getVersion();
+
+        try {
+            boolean status =false;
+            byte[] gatewayRuntimeArtifactsAsBytes = bytesEncodedAsString.getBytes();
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayRuntimeArtifactsAsBytes);
+            if (!apiMgtDAO.isAPIDetailsExists(apiId)) {
+                apiMgtDAO.addGatewayPublishedAPIDetails(apiId, apiName,
+                        version, tenantDomain);
+            }
+            String dbQuery;
+            if (apiMgtDAO.isAPIArtifactExists(apiId, gatewayLabel)) {
+                dbQuery = SQLConstants.UPDATE_API_ARTIFACT;
+            } else {
+                dbQuery = SQLConstants.ADD_GW_API_ARTIFACT;
+            }
+            apiMgtDAO.addGatewayPublishedAPIArtifacts(apiId, gatewayLabel,
+                    byteArrayInputStream, gatewayRuntimeArtifactsAsBytes.length, gatewayInstruction, dbQuery);
+            status = true;
+            JSONObject responseObj = new JSONObject();
+            if (status) {
+                responseObj.put("Message", "Success");
+                String responseStringObj = String.valueOf(responseObj);
+                return Response.ok().entity(responseStringObj).build();
+            } else {
+                responseObj.put("Message", "Error");
+                String responseStringObj = String.valueOf(responseObj);
+                return Response.serverError().entity(responseStringObj).build();
+            }
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error saving Artifacts to the DB", e);
+        }
+    }
+
+
     public Response synapseArtifactsPost(String gatewayRuntimeArtifacts, String gatewayLabel,
                                          String gatewayInstruction, MessageContext messageContext)
             throws APIManagementException {
 
         try {
+            String decodedGatewayRuntimeArtifacts = URLDecoder.decode(gatewayRuntimeArtifacts,UTF8);
             boolean status = false;
-            JSONObject artifactObject = new JSONObject(gatewayRuntimeArtifacts);
+            JSONObject artifactObject = new JSONObject(decodedGatewayRuntimeArtifacts);
             String apiId = (String) artifactObject.get("apiId");
             String apiName = (String) artifactObject.get("name");
             String version = (String) artifactObject.get("version");
@@ -82,7 +133,7 @@ public class SynapseArtifactsApiServiceImpl implements SynapseArtifactsApiServic
                 String responseStringObj = String.valueOf(responseObj);
                 return Response.serverError().entity(responseStringObj).build();
             }
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | UnsupportedEncodingException e) {
             throw new APIManagementException("Error saving Artifacts to the DB", e);
         }
     }

@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.internal.service;
 
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactDTO;
 import org.wso2.carbon.apimgt.internal.service.SynapseArtifactsApiService;
 import org.wso2.carbon.apimgt.internal.service.impl.SynapseArtifactsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -55,7 +56,7 @@ SynapseArtifactsApiService delegate = new SynapseArtifactsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Synapse Artifacts saved in database Successfully ", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response synapseArtifactsPost( @ApiParam(value = "**Search condition**.   Gateway runtime artifacts ")  @QueryParam("gatewayRuntimeArtifacts") String gatewayRuntimeArtifacts,  @ApiParam(value = "**Search condition**.   Label of the gateway ")  @QueryParam("gatewayLabel") String gatewayLabel,  @ApiParam(value = "**Search condition**.   Publish/Remove ")  @QueryParam("gatewayInstruction") String gatewayInstruction) throws APIManagementException{
-        return delegate.synapseArtifactsPost(gatewayRuntimeArtifacts, gatewayLabel, gatewayInstruction, securityContext);
+    public Response synapseArtifactsPost(@ApiParam(value = "gateway Artifacts which need to be saved " ,required=true) SynapseArtifactDTO body) throws APIManagementException{
+        return delegate.synapseArtifactsPost(body, securityContext);
     }
 }
