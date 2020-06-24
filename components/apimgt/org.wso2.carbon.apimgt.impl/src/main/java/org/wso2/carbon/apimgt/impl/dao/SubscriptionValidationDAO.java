@@ -212,6 +212,8 @@ public class SubscriptionValidationDAO {
                 subscriptionPolicyDTO.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
                 subscriptionPolicyDTO.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
                 subscriptionPolicyDTO.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
+                subscriptionPolicyDTO.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
+                subscriptionPolicyDTO.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
 
                 subscriptionPolicies.add(subscriptionPolicyDTO);
             }
@@ -807,6 +809,8 @@ public class SubscriptionValidationDAO {
                     subscriptionPolicy.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
                     subscriptionPolicy.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
                     subscriptionPolicy.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
+                    subscriptionPolicy.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
+                    subscriptionPolicy.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
                     return subscriptionPolicy;
                 }
 

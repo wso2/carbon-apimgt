@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
  */
 export default function TokenManagerSummary(props) {
     const classes = useStyles();
-    const { keys, keyStates, key, selectedApp, keyType, isKeyJWT, isUserOwner } = props;
+    const { keys, keyStates, key, selectedApp, keyType, isKeyJWT, isUserOwner, selectedTab } = props;
     if (keys.size > 0 && key && key.keyState === 'APPROVED' && !key.consumerKey) {
         return (
             <div className={classes.emptyBox}>
@@ -60,6 +60,7 @@ export default function TokenManagerSummary(props) {
     return (
         <ViewKeys
             selectedApp={selectedApp}
+            selectedTab={selectedTab}
             keyType={keyType}
             keys={keys}
             isKeyJWT={isKeyJWT}

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import javax.validation.constraints.*;
@@ -25,6 +26,8 @@ public class SettingsDTO   {
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<>();
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
+    private Boolean docVisibilityEnabled = null;
+    private List<DeploymentsDTO> deployments = new ArrayList<>();
 
   /**
    * Store URL
@@ -130,6 +133,41 @@ public class SettingsDTO   {
     this.externalStoresEnabled = externalStoresEnabled;
   }
 
+  /**
+   * Is Document Visibility configuration enabled 
+   **/
+  public SettingsDTO docVisibilityEnabled(Boolean docVisibilityEnabled) {
+    this.docVisibilityEnabled = docVisibilityEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Is Document Visibility configuration enabled ")
+  @JsonProperty("docVisibilityEnabled")
+  public Boolean isDocVisibilityEnabled() {
+    return docVisibilityEnabled;
+  }
+  public void setDocVisibilityEnabled(Boolean docVisibilityEnabled) {
+    this.docVisibilityEnabled = docVisibilityEnabled;
+  }
+
+  /**
+   **/
+  public SettingsDTO deployments(List<DeploymentsDTO> deployments) {
+    this.deployments = deployments;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("deployments")
+  public List<DeploymentsDTO> getDeployments() {
+    return deployments;
+  }
+  public void setDeployments(List<DeploymentsDTO> deployments) {
+    this.deployments = deployments;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -145,12 +183,14 @@ public class SettingsDTO   {
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
-        Objects.equals(externalStoresEnabled, settings.externalStoresEnabled);
+        Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
+        Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
+        Objects.equals(deployments, settings.deployments);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled);
+    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, deployments);
   }
 
   @Override
@@ -164,6 +204,8 @@ public class SettingsDTO   {
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
     sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
+    sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
+    sb.append("    deployments: ").append(toIndentedString(deployments)).append("\n");
     sb.append("}");
     return sb.toString();
   }

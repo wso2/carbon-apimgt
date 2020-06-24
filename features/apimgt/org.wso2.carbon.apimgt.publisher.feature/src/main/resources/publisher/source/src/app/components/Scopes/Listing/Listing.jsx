@@ -37,9 +37,11 @@ import MUIDataTable from 'mui-datatables';
 import Icon from '@material-ui/core/Icon';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Grid from '@material-ui/core/Grid';
+import { isRestricted } from 'AppData/AuthManager';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Alert from 'AppComponents/Shared/Alert';
 import Delete from '../Delete/Delete';
+import Usage from '../Usage/Usage';
 
 const styles = (theme) => ({
     root: {
@@ -304,9 +306,17 @@ class Listing extends React.Component {
                         if (tableMeta.rowData) {
                             const scopeId = tableMeta.rowData[0];
                             const scopeName = tableMeta.rowData[1];
+                            const usageCount = tableMeta.rowData[5];
                             return (
                                 <table className={classes.actionTable}>
                                     <tr>
+                                        <td>
+                                            <Usage
+                                                scopeName={scopeName}
+                                                scopeId={scopeId}
+                                                usageCount={usageCount}
+                                            />
+                                        </td>
                                         <td>
                                             <Link
                                                 to={
@@ -451,10 +461,11 @@ class Listing extends React.Component {
                             defaultMessage='Scopes'
                         />
                     </Typography>
-                    <Link to={url}>
+                    <Link to={!isRestricted(['apim:shared_scope_manage']) && url}>
                         <Button
                             size='small'
                             className={classes.button}
+                            disabled={isRestricted(['apim:shared_scope_manage'])}
                         >
                             <AddCircle className={classes.buttonIcon} />
                             <FormattedMessage
@@ -463,17 +474,19 @@ class Listing extends React.Component {
                             />
                         </Button>
                     </Link>
-                    <Grid item>
-                        <Typography variant='body2' color='primary'>
-                            <FormattedMessage
-                                id='Scopes.Listing.Listing.update.not.allowed'
-                                defaultMessage={
-                                    '*You are not authorized to update scopes of'
+                    {isRestricted(['apim:shared_scope_manage']) && (
+                        <Grid item>
+                            <Typography variant='body2' color='primary'>
+                                <FormattedMessage
+                                    id='Scopes.Listing.Listing.update.not.allowed'
+                                    defaultMessage={
+                                        '*You are not authorized to update scopes of'
                                         + ' the API due to insufficient permissions'
-                                }
-                            />
-                        </Typography>
-                    </Grid>
+                                    }
+                                />
+                            </Typography>
+                        </Grid>
+                    )}
                 </div>
 
                 <MUIDataTable title={false} data={scopesList} columns={columns} options={options} />

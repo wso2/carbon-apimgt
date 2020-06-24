@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
-import { injectIntl, FormattedMessage } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 
 /**
@@ -85,4 +85,4 @@ Delete.propTypes = {
         policyId: PropTypes.number.isRequired,
     }).isRequired,
 };
-export default injectIntl(Delete);
+export default Delete;

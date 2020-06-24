@@ -38,9 +38,10 @@ import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import Configurations from 'Config';
 import Navigator from 'AppComponents/Base/Navigator';
 import RouteMenuMapping from 'AppComponents/Base/RouteMenuMapping';
-import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
 import Api from 'AppData/api';
 import Progress from 'AppComponents/Shared/Progress';
+import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
+import Alert from 'AppComponents/Shared/Alert';
 
 const drawerWidth = 256;
 
@@ -182,6 +183,7 @@ class Protected extends Component {
             clientId: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_CLIENT_ID),
             sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_SESSION_STATE),
             mobileOpen: false,
+            isSuperTenant: false,
         };
         this.environments = [];
         this.checkSession = this.checkSession.bind(this);
@@ -212,6 +214,19 @@ class Protected extends Component {
         if (user) {
             this.setState({ user });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
+            api.getTenantInformation(user.name)
+                .then((result) => {
+                    const { tenantDomain } = result.body;
+                    if (tenantDomain === 'carbon.super') {
+                        this.setState({ isSuperTenant: true });
+                    } else {
+                        this.setState({ isSuperTenant: false });
+                    }
+                })
+                .catch((error) => {
+                    Alert.error(error.response.body.description);
+                    console.log(error);
+                });
             this.checkSession();
         } else {
             // If no user data available , Get the user info from existing token information
@@ -261,7 +276,7 @@ class Protected extends Component {
                 }}
             />
         );
-        const { clientId, settings } = this.state;
+        const { clientId, settings, isSuperTenant } = this.state;
         const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
             + clientId + '&redirect_uri=' + Configurations.idp.origin
             + Configurations.app.context + '/services/auth/callback/login';
@@ -273,36 +288,38 @@ class Protected extends Component {
             );
         }
         const leftMenu = (
-            <AppContextProvider value={{ user }}>
-                <>
-                    <Hidden smUp implementation='js'>
-                        <Navigator
-                            PaperProps={{ style: { width: drawerWidth } }}
-                            variant='temporary'
-                            open={mobileOpen}
-                            onClose={() => {
-                                this.setState((oldState) => ({ mobileOpen: !oldState.mobileOpen }));
-                            }}
-                        />
-                    </Hidden>
-                    <Hidden xsDown implementation='css'>
-                        <Navigator PaperProps={{ style: { width: drawerWidth } }} />
-                    </Hidden>
-                </>
-            </AppContextProvider>
+            settings && (
+                <AppContextProvider value={{ settings, user, isSuperTenant }}>
+                    <>
+                        <Hidden smUp implementation='js'>
+                            <Navigator
+                                PaperProps={{ style: { width: drawerWidth } }}
+                                variant='temporary'
+                                open={mobileOpen}
+                                onClose={() => {
+                                    this.setState((oldState) => ({ mobileOpen: !oldState.mobileOpen }));
+                                }}
+                            />
+                        </Hidden>
+                        <Hidden xsDown implementation='css'>
+                            <Navigator PaperProps={{ style: { width: drawerWidth } }} />
+                        </Hidden>
+                    </>
+                </AppContextProvider>
+            )
         );
         return (
             <MuiThemeProvider theme={theme}>
                 <AppErrorBoundary>
                     <Base header={header} leftMenu={leftMenu}>
                         {settings ? (
-                            <AppContextProvider value={{ settings, user }}>
+                            <AppContextProvider value={{ settings, user, isSuperTenant }}>
                                 <Route>
                                     <Switch>
-                                        <Redirect exact from='/' to='/throttling/application' />
+                                        <Redirect exact from='/' to='/dashboard' />
                                         <Route
-                                            path='/throttling/application'
-                                            component={ApplicationThrottlingPolicies}
+                                            path='/dashboard'
+                                            component={Dashboard}
                                         />
                                         {allRoutes.map((r) => {
                                             return <Route path={r.path} component={r.component} />;
@@ -319,9 +336,9 @@ class Protected extends Component {
                         title='iframeOP'
                         id='iframeOP'
                         src={checkSessionURL}
-                        width='0px'
-                        height='0px'
-                        style={{ color: 'red', position: 'absolute' }}
+                        width={0}
+                        height={0}
+                        style={{ position: 'absolute', bottom: 0 }}
                     />
                 </AppErrorBoundary>
             </MuiThemeProvider>

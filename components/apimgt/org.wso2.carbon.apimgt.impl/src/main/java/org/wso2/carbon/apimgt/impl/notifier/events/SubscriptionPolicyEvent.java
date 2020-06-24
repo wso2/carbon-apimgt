@@ -31,10 +31,12 @@ public class SubscriptionPolicyEvent extends Event {
     private int rateLimitCount;
     private String rateLimitTimeUnit;
     private boolean stopOnQuotaReach;
+    private int graphQLMaxDepth;
+    private int graphQLMaxComplexity;
 
     public SubscriptionPolicyEvent(String eventId, long timestamp, String type, int tenantId, int policyId,
                                    String policyName, String quotaType, int rateLimitCount, String rateLimitTimeUnit,
-                                   boolean stopOnQuotaReach) {
+                                   boolean stopOnQuotaReach, int graphQLMaxDepth, int graphQLMaxComplexity) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -45,6 +47,8 @@ public class SubscriptionPolicyEvent extends Event {
         this.rateLimitCount = rateLimitCount;
         this.rateLimitTimeUnit = rateLimitTimeUnit;
         this.stopOnQuotaReach = stopOnQuotaReach;
+        this.graphQLMaxComplexity = graphQLMaxComplexity;
+        this.graphQLMaxDepth = graphQLMaxDepth;
     }
 
     @Override
@@ -56,6 +60,8 @@ public class SubscriptionPolicyEvent extends Event {
                 ", rateLimitCount=" + rateLimitCount +
                 ", rateLimitTimeUnit='" + rateLimitTimeUnit + '\'' +
                 ", stopOnQuotaReach=" + stopOnQuotaReach +
+                ", graphQLMaxDepth=" + graphQLMaxDepth +
+                ", graphQLMaxComplexity=" + graphQLMaxComplexity +
                 ", eventId='" + eventId + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
@@ -73,12 +79,15 @@ public class SubscriptionPolicyEvent extends Event {
                 isStopOnQuotaReach() == that.isStopOnQuotaReach() &&
                 getPolicyName().equals(that.getPolicyName()) &&
                 getQuotaType().equals(that.getQuotaType()) &&
-                getRateLimitTimeUnit().equals(that.getRateLimitTimeUnit());
+                getRateLimitTimeUnit().equals(that.getRateLimitTimeUnit()) &&
+                getGraphQLMaxDepth() == that.getGraphQLMaxDepth() &&
+                getGraphQLMaxComplexity() == that.getGraphQLMaxComplexity();
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPolicyId(), getPolicyName(), getQuotaType(), getRateLimitCount(), getRateLimitTimeUnit(), isStopOnQuotaReach());
+        return Objects.hash(getPolicyId(), getPolicyName(), getQuotaType(), getRateLimitCount(), getRateLimitTimeUnit(), isStopOnQuotaReach(), getGraphQLMaxDepth(),getGraphQLMaxComplexity());
     }
 
     public int getPolicyId() {
@@ -128,4 +137,12 @@ public class SubscriptionPolicyEvent extends Event {
     public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
         this.stopOnQuotaReach = stopOnQuotaReach;
     }
+
+    public int getGraphQLMaxDepth() { return graphQLMaxDepth; }
+
+    public void setGraphQLMaxDepth(int graphQLMaxDepth) { this.graphQLMaxDepth = graphQLMaxDepth; }
+
+    public int getGraphQLMaxComplexity() { return graphQLMaxComplexity; }
+
+    public void setGraphQLMaxComplexity(int graphQLMaxComplexity) { this.graphQLMaxComplexity = graphQLMaxComplexity; }
 }

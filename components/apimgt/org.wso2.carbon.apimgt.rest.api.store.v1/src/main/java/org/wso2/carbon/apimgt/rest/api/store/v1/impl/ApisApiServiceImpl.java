@@ -26,6 +26,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -36,9 +37,12 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
@@ -52,20 +56,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -112,7 +107,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
                             APIConstants.DEPRECATED };
                 }
-
+                
                 String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
                 lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
 
@@ -158,6 +153,79 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         return Response.ok().entity(getAPIByAPIId(apiId, xWSO2Tenant)).build();
     }
+
+
+    /**
+     * Get complexity details of a given API
+     *
+     * @param apiId          apiId
+     * @param messageContext message context
+     * @return Response with complexity details of the GraphQL API
+     */
+    @Override
+    public Response apisApiIdGraphqlPoliciesComplexityGet(String apiId, MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
+                GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
+                        GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
+                return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
+            } else {
+                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving complexity details of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while retrieving complexity details of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdGraphqlPoliciesComplexityTypesGet(String apiId, MessageContext messageContext) throws APIManagementException {
+        GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
+                List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
+                GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO =
+                        GraphqlQueryAnalysisMappingUtil.fromGraphqlSchemaTypeListtoDTO(typeList);
+                return Response.ok().entity(graphQLSchemaTypeListDTO).build();
+            } else {
+                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving types and fields of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while retrieving types and fields of the schema of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
+        return null;
+    }
+
 
     @Override
     public Response apisApiIdGraphqlSchemaGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
@@ -932,5 +1000,16 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * To check whether a particular exception is due to access control restriction.
+     *
+     * @param e Exception object.
+     * @return true if the the exception is caused due to authorization failure.
+     */
+    private boolean isAuthorizationFailure(Exception e) {
+        String errorMessage = e.getMessage();
+        return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
     }
 }

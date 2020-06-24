@@ -75,6 +75,7 @@ import Monetization from './Monetization';
 import ExternalStores from './ExternalStores/ExternalStores';
 import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
+import TestConsole from './TestConsole/TestConsole';
 
 const styles = (theme) => ({
     LeftMenu: {
@@ -519,7 +520,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.overview',
                                 defaultMessage: 'overview',
                             })}
-                            to={pathPrefix + 'overview'}
+                            iconText='overview'
                         />
                         <LeftMenuItem
                             text={intl.formatMessage({
@@ -615,6 +616,14 @@ class Details extends Component {
                             })}
                             to={pathPrefix + 'documents'}
                             Icon={<DocumentsIcon />}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.Tryout',
+                                defaultMessage: 'test console',
+                            })}
+                            to={pathPrefix + 'test-console'}
+                            iconText='test'
                         />
                         {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
@@ -746,6 +755,10 @@ class Details extends Component {
                                     path={Details.subPaths.MONETIZATION_PRODUCT}
                                     component={() => <Monetization api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.TRYOUT}
+                                    component={() => <TestConsole apiObj={api} />}
+                                />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
                             </Switch>
                         </div>
@@ -795,6 +808,8 @@ Details.subPaths = {
     MONETIZATION: '/apis/:api_uuid/monetization',
     MONETIZATION_PRODUCT: '/api-products/:apiprod_uuid/monetization',
     EXTERNAL_STORES: '/apis/:api_uuid/external-devportals',
+    TRYOUT: '/apis/:api_uuid/test-console',
+    QUERYANALYSIS: '/apis/:api_uuid/queryanalysis',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

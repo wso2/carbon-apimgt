@@ -5,6 +5,54 @@
  */
 const AppThemes = {
     light: {
+        overrides: {
+            MuiDrawer: {
+                paper: {
+                    backgroundColor: '#18202c',
+                },
+            },
+            MuiButton: {
+                label: {
+                    textTransform: 'none',
+                },
+                contained: {
+                    boxShadow: 'none',
+                    '&:active': {
+                        boxShadow: 'none',
+                    },
+                },
+            },
+            MuiIconButton: {
+                root: {
+                    padding: 8,
+                },
+            },
+            MuiTooltip: {
+                tooltip: {
+                    borderRadius: 4,
+                },
+            },
+            MuiDivider: {
+                root: {
+                    backgroundColor: '#404854',
+                },
+            },
+            MuiListItemIcon: {
+                root: {
+                    color: 'inherit',
+                    marginRight: 0,
+                    '& svg': {
+                        fontSize: 20,
+                    },
+                },
+            },
+            MuiAvatar: {
+                root: {
+                    width: 32,
+                    height: 32,
+                },
+            },
+        },
         palette: {
             primary: {
                 // light: will be calculated from palette.primary.main,
@@ -52,11 +100,12 @@ const AppThemes = {
             disableColor: '#D3D3D3',
             leftMenuWidth: 210,
             contentAreaWidth: 1240,
-            drawerWidth: 200,
+            drawerWidth: 250,
             logo: '/site/public/images/logo.svg',
             logoHeight: 40,
             logoWidth: 222,
-            defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
+            defaultApiView: 'grid', /* Sets the default view for the api listing page ( Other values available = 'list' )
+                                        To disable one option for an example if you want to disable grid completely and get rid of the toggle buttons use ['list']. */
             showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
             leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
             leftMenuIconSize: 24,

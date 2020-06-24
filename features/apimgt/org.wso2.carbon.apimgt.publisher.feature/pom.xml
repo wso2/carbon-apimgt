@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.265-SNAPSHOT</version>
+        <version>6.7.25-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -171,11 +171,22 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}
                                 </bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}
+                                </bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
+
+                                <bundleDef>org.wso2.orbit.io.fabric8:kubernetes-client:${org.wso2.orbit.io.fabric8.kubernetes.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.squareup.okio:okio:${okio.wso2.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.apache.commons:commons-compress:${org.wso2.orbit.org.apache.commons.compress.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp:${okhttp.wso2.version}</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}
+                                <importFeatureDef>
+                                    org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}
                                 </importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.registry.core:${carbon.registry.version}
                                 </importFeatureDef>
@@ -205,22 +216,60 @@
                 <version>1.5.0</version>
                 <executions>
                     <execution>
-                        <id>npm install (initialize)</id>
+                        <id>npm install(mvn)</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
-                            <environmentVariables>
-                                <PUPPETEER_SKIP_CHROMIUM_DOWNLOAD>
-                                    true
-                                </PUPPETEER_SKIP_CHROMIUM_DOWNLOAD>
-                            </environmentVariables>
-                            <workingDirectory>src/main/resources/publisher</workingDirectory>
+                            <workingDirectory>../</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>ci</argument>
-                                <argument>--silent</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>lerna clean</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <workingDirectory>../</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>clean</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>lerna bootstrap</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <workingDirectory>../</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>bootstrap</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm install</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <workingDirectory>../</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>ci</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -236,22 +285,6 @@
                             <arguments>
                                 <argument>run</argument>
                                 <argument>${npm.build.command}</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>node test</id>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <phase>test</phase>
-                        <configuration>
-                            <skip>${maven.test.skip}</skip>
-                            <workingDirectory>src/main/resources/publisher</workingDirectory>
-                            <executable>${npm.executable}</executable>
-                            <arguments>
-                                <argument>run</argument>
-                                <argument>test</argument>
                             </arguments>
                         </configuration>
                     </execution>

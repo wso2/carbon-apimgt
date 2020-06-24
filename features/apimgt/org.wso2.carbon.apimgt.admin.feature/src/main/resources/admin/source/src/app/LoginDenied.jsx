@@ -72,15 +72,32 @@ function onLogout() {
     window.location = Configurations.app.context + '/services/logout';
 }
 
+/**
+ *
+ * Handle LoginDenied action from APP
+ * @class LoginDenied
+ * @extends {Component}
+ */
 class LoginDenied extends Component {
+    /**
+     * @memberof LoginDenied
+     */
     componentDidMount() {
         document.body.style.backgroundColor = '#dfdfdf';
     }
 
+    /**
+     * @memberof LoginDenied
+     */
     componentWillUnmount() {
         document.body.style.backgroundColor = null;
     }
 
+    /**
+     *
+     * @returns {React.Component} Render LoginDenied
+     * @memberof LoginDenied
+     */
     render() {
         return (
             <div style={messageStyles}>

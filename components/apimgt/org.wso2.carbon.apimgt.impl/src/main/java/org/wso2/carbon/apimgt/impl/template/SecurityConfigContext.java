@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Set the parameters for secured endpoints
@@ -105,10 +106,10 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                 endpointSecurityModel.setEnabled(true);
                 endpointSecurityModel.setUsername(api.getEndpointUTUsername());
                 endpointSecurityModel.setPassword(api.getEndpointUTPassword());
-                if (!api.isEndpointAuthDigest()) {
-                    endpointSecurityModel.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
-                } else {
+                if (api.isEndpointAuthDigest()) {
                     endpointSecurityModel.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                } else {
+                    endpointSecurityModel.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
                 }
                 endpointSecurityModel.setAlias(alias);
                 String unpw = api.getEndpointUTUsername() + ":" + api.getEndpointUTPassword();
@@ -121,9 +122,13 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                         EndpointSecurityModel endpointSecurityModel = new ObjectMapper()
                                 .convertValue(productionEndpointSecurity, EndpointSecurityModel.class);
                         if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
-                            endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
-                                    endpointSecurityModel.getUsername().concat(":")
-                                            .concat(endpointSecurityModel.getPassword()).getBytes())));
+                            if (endpointSecurityModel.getUsername() != null
+                                    && endpointSecurityModel.getPassword() != null) {
+                                endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
+                                        endpointSecurityModel.getUsername().concat(":")
+                                                .concat(endpointSecurityModel.getPassword()).getBytes())));
+                            }
+                            endpointSecurityModel.setUniqueIdentifier(api.getId().getUUID() + UUID.randomUUID().toString());
                             endpointSecurityModel.setAlias(
                                     alias.concat("--").concat(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
                             endpointSecurityModelMap
@@ -134,9 +139,13 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                         EndpointSecurityModel endpointSecurityModel = new ObjectMapper()
                                 .convertValue(sandboxEndpointSecurity, EndpointSecurityModel.class);
                         if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
-                            endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
-                                    endpointSecurityModel.getUsername().concat(":")
-                                            .concat(endpointSecurityModel.getPassword()).getBytes())));
+                            if (endpointSecurityModel.getUsername() != null &&
+                                    endpointSecurityModel.getPassword() != null) {
+                                endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
+                                        endpointSecurityModel.getUsername().concat(":")
+                                                .concat(endpointSecurityModel.getPassword()).getBytes())));
+                            }
+                            endpointSecurityModel.setUniqueIdentifier(api.getId().getUUID() + UUID.randomUUID().toString());
                             endpointSecurityModel.setAlias(
                                     alias.concat("--").concat(APIConstants.ENDPOINT_SECURITY_SANDBOX));
                             endpointSecurityModelMap
@@ -169,6 +178,19 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                                         .concat(endpointSecurityModel.getPassword())
                                         .getBytes())));
                         endpointSecurityModel.setAlias(alias.concat("--").concat(endpointSecurityEntry.getKey()));
+
+                        if (endpointSecurityEntry.getValue().getType()
+                                .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                            endpointSecurityModel.setUniqueIdentifier(endpointSecurityEntry.getValue().getUniqueIdentifier());
+                            endpointSecurityModel.setGrantType(endpointSecurityEntry.getValue().getGrantType());
+                            endpointSecurityModel.setTokenUrl(endpointSecurityEntry.getValue().getTokenUrl());
+                            endpointSecurityModel.setClientId(endpointSecurityEntry.getValue().getClientId());
+                            endpointSecurityModel.setClientSecret(endpointSecurityEntry.getValue().getClientSecret());
+                            if (endpointSecurityEntry.getValue().getCustomParameters() != null) {
+                                endpointSecurityModel.setCustomParameters(
+                                        endpointSecurityEntry.getValue().getCustomParameters());
+                            }
+                        }
                     }
                     stringEndpointSecurityModelMap.put(endpointSecurityEntry.getKey(), endpointSecurityModel);
                 }

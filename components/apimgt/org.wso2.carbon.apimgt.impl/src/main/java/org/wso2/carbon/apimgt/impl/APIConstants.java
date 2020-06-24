@@ -327,6 +327,13 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
+    public static final String API_OVERVIEW_ENDPOINT_OAUTH = "overview_endpointOAuth";
+    public static final String API_OVERVIEW_ENDPOINT_GRANT_TYPE = "overview_grantType";
+    public static final String API_OVERVIEW_ENDPOINT_HTTP_METHOD = "overview_httpMethod";
+    public static final String API_OVERVIEW_ENDPOINT_TOKEN_URL = "overview_endpointTokenUrl";
+    public static final String API_OVERVIEW_ENDPOINT_CLIENT_ID = "overview_clientId";
+    public static final String API_OVERVIEW_ENDPOINT_CLIENT_SECRET = "overview_clientSecret";
+    public static final String API_OVERVIEW_ENDPOINT_CUSTOM_PARAMETERS = "overview_customParameters";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
     public static final String API_OVERVIEW_INSEQUENCE = "overview_inSequence";
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
@@ -342,6 +349,9 @@ public final class APIConstants {
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
+    public static final String API_OVERVIEW_DEPLOYMENTS = "overview_deployments";
+    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
+    public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
@@ -368,6 +378,8 @@ public final class APIConstants {
 
     //This constant is used in Json schema validator
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
+
+    public static final String API_OVERVIEW_ENABLE_STORE = "overview_enableStore";
 
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
@@ -434,7 +446,7 @@ public final class APIConstants {
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
     public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "ExcludedClaims";
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
-    public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + "ConvertClaimsToConsumerDialect";
+    public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + ".ConvertClaimsToConsumerDialect";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
@@ -660,7 +672,7 @@ public final class APIConstants {
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
             + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
-    public static final String[] KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
+    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
             "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
     public static final String API_KEY_MANAGER_CONFIGURATION = "Configuration.";
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
@@ -1161,6 +1173,15 @@ public final class APIConstants {
     public static final String OPERATION_AUTH_SCHEME_MAPPING = "OperationAuthSchemeMapping";
     public static final String OPERATION_SECURITY_ENABLED = "Enabled";
     public static final String OPERATION_SECURITY_DISABLED = "Disabled";
+    public static final String GRAPHQL_PAYLOAD = "GRAPHQL_PAYLOAD";
+    public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
+    public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "GraphQLAccessControlPolicy";
+    public static final String QUERY_ANALYSIS_DEPTH = "depth";
+    public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
+    public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
+    public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
+    public static final String CHECK_ENABLED = "enabled";
+    public static final String DEFAULT_DEPTH_ROLE = "default";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
@@ -1197,6 +1218,43 @@ public final class APIConstants {
         public static final String CHARSET = "UTF-8";
 
         private DigestAuthConstants() {
+        }
+    }
+
+    public static class OAuthConstants {
+        public static final String OAUTH = "OAUTH";
+        public static final String OAUTH_ID = "id";
+        public static final String UNIQUE_IDENTIFIER = "uniqueIdentifier";
+        public static final String TOKEN_API_URL = "tokenUrl";
+        public static final String OAUTH_CLIENT_ID = "clientId";
+        public static final String OAUTH_CLIENT_SECRET = "clientSecret";
+        public static final String OAUTH_USERNAMEPASSWORD = "usernamePassword";
+        public static final String GRANT_TYPE = "grantType";
+        public static final String OAUTH_CUSTOM_PARAMETERS = "customParameters";
+        public static final String CLIENT_CREDENTIALS = "CLIENT_CREDENTIALS";
+        public static final String PASSWORD = "PASSWORD";
+
+        public static final String ACCESS_TOKEN = "access_token";
+        public static final String REFRESH_TOKEN = "refresh_token";
+        public static final String SCOPE = "scope";
+        public static final String TOKEN_TYPE = "token_type";
+        public static final String EXPIRES_IN = "expires_in";
+
+        // Properties in Endpoint Config
+        public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
+        public static final String ENDPOINT_SECURITY_SANDBOX = "sandbox";
+        public static final String ENDPOINT_SECURITY_PASSWORD = "password";
+        public static final String ENDPOINT_SECURITY_TYPE = "type";
+        public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
+        public static final String ENDPOINT_SECURITY_USERNAME = "username";
+
+        // For configs
+        public static final String OAUTH_ENDPOINT_SECURITY = "OAuthEndpointSecurity.";
+        public static final String OAUTH_TOKEN_REFRESH_INTERVAL = OAUTH_ENDPOINT_SECURITY + "TokenRefreshInterval";
+
+        public static final String TOKEN_REFRESH_INTERVAL = "tokenRefreshInterval";
+
+        private OAuthConstants() {
         }
     }
 
@@ -1425,12 +1483,15 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE = "type";
     public static final String ENDPOINT_SECURITY_TYPE_BASIC = "basic";
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
+    public static final String ENDPOINT_SECURITY_TYPE_OAUTH = "oauth";
     public static final String ENDPOINT_SECURITY_USERNAME = "username";
     public static final String ENDPOINT_SECURITY_CONFIG = "securityConfig";
     public static final String ENDPOINT_SECURITY = "endpoint_security";
     public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
     public static final String ENDPOINT_SECURITY_SANDBOX = "sandbox";
     public static final String ENDPOINT_SECURITY_PASSWORD = "password";
+    public static final String ENDPOINT_SECURITY_CLIENT_ID = "clientId";
+    public static final String ENDPOINT_SECURITY_CLIENT_SECRET = "clientSecret";
     public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
@@ -1468,6 +1529,7 @@ public final class APIConstants {
     public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
     public static final String DEPRECATE_CHECK_LIST_ITEM = "Deprecate old versions after publishing the API";
     public static final String RESUBSCRIBE_CHECK_LIST_ITEM = "Requires re-subscription when publishing the API";
+    public static final String PUBLISH_IN_PRIVATE_JET_MODE = "Publish In Private-Jet Mode";
 
     public static final String METRICS_PREFIX = "org.wso2.am";
 
@@ -1588,6 +1650,7 @@ public final class APIConstants {
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
+    public static final String ENABLE_STORE_SEARCH_TYPE_KEY = "enableStore=(true OR null)";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
@@ -1604,6 +1667,7 @@ public final class APIConstants {
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
     public static final String LABEL_SEARCH_TYPE_PREFIX = "label";
     public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
+    public static final String ENABLE_STORE = "enableStore";
 
     //api-product related constants
     public static final String API_PRODUCT_VERSION = "1.0.0";
@@ -1763,6 +1827,8 @@ public final class APIConstants {
         public static final String QUOTA_TYPE_BANDWIDTH = "bandwidthVolume";
         public static final String PERMITTED_IP = "permittedIP";
         public static final String PERMITTED_REFERER = "permittedReferer";
+        public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
+        public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
@@ -1771,6 +1837,7 @@ public final class APIConstants {
     public static class APIEndpointSecurityConstants {
         public static final String BASIC_AUTH = "BasicAuth";
         public static final String DIGEST_AUTH = "DigestAuth";
+        public static final String OAUTH = "OAuth";
     }
 
     public enum APITransportType {
@@ -1820,7 +1887,7 @@ public final class APIConstants {
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
             API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
-            CATEGORY_SEARCH_TYPE_PREFIX };
+            CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase() };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
     /**
@@ -2151,9 +2218,12 @@ public final class APIConstants {
         public static final String KEY_MANAGER_TYPE = "type";
         public static final String UUID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F" +
                 "]{3}-[0-9a-fA-F]{12}";
-        public static final String CONSUMER_KEY_CLAIM = "consumer_key";
+        public static final String CONSUMER_KEY_CLAIM = "consumer_key_claim";
         public static final String SCOPES_CLAIM = "scopes_claim";
-
+        public static final String CERTIFICATE_TYPE = "certificate_type";
+        public static final String CERTIFICATE_VALUE = "certificate_value";
+        public static final String CERTIFICATE_TYPE_JWKS_ENDPOINT = "JWKS";
+        public static final String CERTIFICATE_TYPE_PEM_FILE = "PEM";
         public static class KeyManagerEvent {
 
             public static final String EVENT_TYPE = "event_type";
@@ -2189,6 +2259,7 @@ public final class APIConstants {
     // Supported Notifier Types
     public enum NotifierType {
         API,
+        GATEWAY_PUBLISHED_API,
         APPLICATION,
         APPLICATION_REGISTRATION,
         POLICY,
@@ -2210,6 +2281,32 @@ public final class APIConstants {
         POLICY_DELETE,
         SUBSCRIPTIONS_CREATE,
         SUBSCRIPTIONS_UPDATE,
-        SUBSCRIPTIONS_DELETE
+        SUBSCRIPTIONS_DELETE,
+        DEPLOY_API_IN_GATEWAY,
+        REMOVE_API_FROM_GATEWAY
+    }
+
+    public static class GatewayArtifactSynchronizer{
+
+        public static final String SYNC_RUNTIME_ARTIFACTS_PUBLISHER_CONFIG  = "SyncRuntimeArtifactsPublisher";
+        public static final String SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG  = "SyncRuntimeArtifactsGateway";
+        public static final String ENABLE_CONFIG = "Enable";
+        public static final String SAVER_CONFIG = "ArtifactSaver";
+        public static final String RETRIEVER_CONFIG = "ArtifactRetriever";
+        public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
+        public static final String GATEWAY_LABELS_CONFIG = "GatewayLabels";
+        public static final String LABEL_CONFIG = "Label";
+        public static final String DB_SAVER_NAME = "DBSaver";
+        public static final String DB_RETRIEVER_NAME = "DBRetriever";
+        public static final String GATEWAY_INSTRUCTION_PUBLISH = "Publish";
+        public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
+
+    }
+
+    public static class ContainerMgtAttributes {
+        public static final String DEPLOYMENTS = "Deployments";
+        public static final String CONTAINER_MANAGEMENT = "ContainerMgt";
+        public static final String CONTAINER_MANAGEMENT_INFO ="ContainerMgtInfo";
+
     }
 }

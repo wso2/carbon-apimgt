@@ -22,6 +22,8 @@ import java.util.Map;
 
 public class EndpointSecurity {
 
+    private String uniqueIdentifier = null;
+
     private String password = null;
 
     private String type = null;
@@ -30,7 +32,25 @@ public class EndpointSecurity {
 
     private String username = null;
 
+    private String grantType = null;
+
+    private String tokenUrl = null;
+
+    private String clientId = null;
+
+    private String clientSecret = null;
+
+    private String customParameters = null;
+
     private Map additionalProperties = new HashMap();
+
+    public String getUniqueIdentifier() {
+        return uniqueIdentifier;
+    }
+
+    public void setUniqueIdentifier(String uniqueIdentifier) {
+        this.uniqueIdentifier = uniqueIdentifier;
+    }
 
     public String getPassword() {
 
@@ -72,6 +92,46 @@ public class EndpointSecurity {
         this.username = username;
     }
 
+    public String getGrantType() {
+        return grantType;
+    }
+
+    public void setGrantType(String grantType) {
+        this.grantType = grantType;
+    }
+
+    public String getTokenUrl() {
+        return tokenUrl;
+    }
+
+    public void setTokenUrl(String tokenUrl) {
+        this.tokenUrl = tokenUrl;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+    }
+
+    public String getCustomParameters() {
+        return customParameters;
+    }
+
+    public void setCustomParameters(String customParameters) {
+        this.customParameters = customParameters;
+    }
+
     public Map getAdditionalProperties() {
 
         return additionalProperties;
@@ -82,13 +142,11 @@ public class EndpointSecurity {
         this.additionalProperties = additionalProperties;
     }
 
-    @Override
-    public String toString() {
-
-        return "EndpointSecurity{" +
-                "type='" + type + '\'' +
-                ", enabled=" + enabled +
-                ", username='" + username + '\'' +
-                '}';
+    @Override public String toString() {
+        return "EndpointSecurity{" + "uniqueIdentifier='" + uniqueIdentifier + '\'' + ", password='" + password + '\''
+                + ", type='" + type + '\'' + ", enabled=" + enabled + ", username='" + username + '\'' + ", grantType='"
+                + grantType + '\'' + ", tokenUrl='" + tokenUrl + '\'' + ", clientId='" + clientId + '\''
+                + ", clientSecret='" + clientSecret + '\'' + ", customParameters='" + customParameters + '\''
+                + ", additionalProperties=" + additionalProperties + '}';
     }
 }

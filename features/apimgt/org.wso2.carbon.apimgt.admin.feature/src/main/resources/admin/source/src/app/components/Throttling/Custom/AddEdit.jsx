@@ -34,6 +34,7 @@ import { Progress } from 'AppComponents/Shared';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import { Link as RouterLink } from 'react-router-dom';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import Joi from '@hapi/joi';
 
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "CustomPolicyAddMonacoEditor" */));
 
@@ -161,14 +162,26 @@ function AddEdit(props) {
     const validate = (fieldName, value) => {
         let error = '';
         let keys;
+        const schema = Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/);
         const validateKeyTemplates = ['$userId', '$apiContext', '$apiVersion', '$resourceKey',
             '$appTenant', '$apiTenant', '$appId', '$clientIp'];
         switch (fieldName) {
             case 'policyName':
                 if (value === '') {
-                    error = 'Name is Empty';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Custom.Policy.policy.name.empty',
+                        defaultMessage: 'Name is Empty',
+                    });
                 } else if (value.indexOf(' ') !== -1) {
-                    error = 'Name contains spaces';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Custom.Policy.policy.name.space',
+                        defaultMessage: 'Name contains spaces',
+                    });
+                } else if (schema.validate(value).error) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Custom.Policy.policy.name.invalid.character',
+                        defaultMessage: 'Name contains one or more illegal characters',
+                    });
                 } else {
                     error = false;
                 }
@@ -180,7 +193,10 @@ function AddEdit(props) {
                     error = (fieldName + ' is Empty');
                 } else if (value.indexOf(' ') !== -1
                 || keys.map((obj) => validateKeyTemplates.includes(obj)).includes(false)) {
-                    error = 'Invalid Key Template';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Custom.Policy.policy.invalid.key.template',
+                        defaultMessage: 'Invalid Key Template',
+                    });
                 } else {
                     error = false;
                 }
@@ -228,7 +244,7 @@ function AddEdit(props) {
                 .then(() => {
                     Alert.success(
                         <FormattedMessage
-                            id='Throttling.Application.Policy.policy.edit.success'
+                            id='Throttling.Custom.Policy.policy.edit.success'
                             defaultMessage='Custom Policy edited successfully'
                         />,
                     );
@@ -252,7 +268,7 @@ function AddEdit(props) {
                 .then(() => {
                     Alert.success(
                         <FormattedMessage
-                            id='Throttling.Application.Policy.policy.add.success'
+                            id='Throttling.Custom.Policy.policy.add.success'
                             defaultMessage='Custom Policy added successfully.'
                         />,
                     );
@@ -352,7 +368,8 @@ function AddEdit(props) {
                             )}
                         />
                         <FormHelperText className={classes.helperText}>
-                        Eg: $userId, $apiContext, $apiVersion, $resourceKey, $appTenant, $apiTenant, $appId, $clientIp
+                            Eg: $userId, $apiContext, $apiVersion, $resourceKey, $appTenant, $apiTenant,
+                            $appId, $clientIp
                         </FormHelperText>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>

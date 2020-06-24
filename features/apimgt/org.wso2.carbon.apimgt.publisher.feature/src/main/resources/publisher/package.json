@@ -8,7 +8,7 @@
         "test:coverage": "jest --coverage",
         "build:prod": "rm -R site/public/dist/; npm rum i18n && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack -d --watch ",
-        "analysis": "NODE_ENV=development NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
+        "analysis": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
         "lint": "eslint source",
         "i18n": "extract-messages -l=en,fr -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'"
     },
@@ -26,7 +26,8 @@
         "async-react-component": "^0.7.0",
         "autosuggest-highlight": "^3.1.1",
         "base64url": "3.0.1",
-        "caniuse-api": "^1.6.1",
+        "caniuse-api": "^3.0.0",
+        "developer_portal": "^1.0.0",
         "downshift": "^3.1.0",
         "draft-js": "^0.10.5",
         "draftjs-to-html": "^0.8.4",
@@ -44,12 +45,10 @@
         "query-string": "6.8.2",
         "rc-notification": "^3.0.1",
         "rc-progress": "^2.5.2",
-        "react": "^16.10.2",
         "react-app-polyfill": "^1.0.4",
         "react-autosuggest": "^9.3.4",
         "react-circular-progressbar": "^2.0.2",
         "react-color": "^2.17.3",
-        "react-dom": "^16.10.2",
         "react-draft-wysiwyg": "^1.13.2",
         "react-dropzone": "^v10.1.7",
         "react-intl": "v3.1.6",
@@ -109,6 +108,7 @@
         "swagger-parser": "^7.0.0",
         "webpack": "v4.28.4",
         "webpack-bundle-analyzer": "^2.9.1",
-        "webpack-cli": "^3.3.2"
+        "webpack-cli": "^3.3.2",
+        "worker-loader": "^2.0.0"
     }
 }

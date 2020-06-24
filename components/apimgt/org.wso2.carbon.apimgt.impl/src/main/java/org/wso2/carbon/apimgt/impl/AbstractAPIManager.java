@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -63,6 +64,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -1551,6 +1553,20 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return null;
     }
+
+    public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+        return apiMgtDAO.getComplexityDetails(apiIdentifier);
+    }
+
+    public void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+        apiMgtDAO.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+    }
+
+
+    public void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+        apiMgtDAO.updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+    }
+
 
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
         return null;
@@ -3094,12 +3110,36 @@ public abstract class AbstractAPIManager implements APIManager {
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
                 if (keyManager != null) {
                     OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                    if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
+                        OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetaData()
+                                , OAuthApplicationInfo.class);
+                        if (storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES)
+                                instanceof String) {
+                            oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                    ((String) storedOAuthApplicationInfo
+                                            .getParameter(APIConstants.JSON_GRANT_TYPES))
+                                            .replace(",", " "));
+                        }
+                        if (oAuthApplicationInfo == null) {
+                            oAuthApplicationInfo = storedOAuthApplicationInfo;
+                        } else {
+
+                            if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL())) {
+                                oAuthApplicationInfo.setCallBackURL(storedOAuthApplicationInfo.getCallBackURL());
+                            }
+                            if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&
+                                    storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
+                                oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                        storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                            }
+                        }
+                    }
                     AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
                     if (oAuthApplicationInfo != null) {
                         apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
                         apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
                         apiKey.setGrantTypes(
-                                oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+                                (String) oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
                         if (oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES) != null) {
                             apiKey.setAdditionalProperties(
                                     oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES));

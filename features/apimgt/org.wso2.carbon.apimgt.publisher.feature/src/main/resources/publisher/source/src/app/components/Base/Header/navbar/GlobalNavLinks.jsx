@@ -117,12 +117,7 @@ function GlobalNavLinks(props) {
             >
                 <ListItem button>
                     <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                        <CustomIcon
-                            width={iconWidth}
-                            height={iconWidth}
-                            icon={<ScopesIcon />}
-                            strokeColor={strokeColor}
-                        />
+                        <ScopesIcon />
                     </ListItemIcon>
                     <ListItemText
                         classes={{

@@ -204,6 +204,13 @@ ExceptionCodes implements ErrorHandler {
     INVALID_DATE_TIME_STAMP(900703, "Invalid timestamp value", 400, "Timestamp should be in ISO8601 format"),
     LENGTH_EXCEEDS(900704, "Character length exceeds the allowable limit", 400,
             "One of the provided input character length exceeds the allowable limit."),
+    BLANK_PROPERTY_VALUE(900705, "Blank value for required property", 400,
+            "%s property value of payload cannot be blank"),
+
+
+    //GraphQL API related codes
+    API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
+
 
     // Oauth related codes
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
@@ -319,13 +326,23 @@ ExceptionCodes implements ErrorHandler {
             "Key Manager name cannot be empty", 400,"Key Manager name cannot be empty"),
     KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION(901405, "Key Manager doesn't support generating OAuth applications", 400,
             "Key Manager doesn't support generating OAuth applications"),
-    KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION(901406, "Key Manager doesn't support token generation", 400,
+    KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION(901405, "Key Manager doesn't support token generation", 400,
             "Key Manager doesn't support token generation"),
-    KEY_MANAGER_NOT_ENABLED(901407, "Key Manager is not enabled in the system", 400,
+    KEY_MANAGER_NOT_ENABLED(901406, "Key Manager is not enabled in the system", 400,
             "Key Manager is not enabled in the system"),
-    KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901408, "Required application properties are missing", 400,
+    KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
             "Required application properties are missing"),
-    KEY_MAPPING_ALREADY_EXIST(901409, "Application already Registered", 409, "Application already Registered");
+    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
+
+    //Scope related
+    SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
+    SCOPE_NOT_FOUND(901501, "Scope Not Found", 404, "Scope does not exist"),
+    USER_NOT_FOUND(901502, "User Not Found", 404, "User does not exist"),
+    DEFINITION_EXCEPTION(901503, "Internal server error.", 500, " Error occurred while retrieving swagger definition"),
+
+    //Analytics related codes
+    ANALYTICS_NOT_ENABLED(901600, "%s not accessible", 404,
+            "Analytics should be enabled to access %s");
 
 
     private final long errorCode;

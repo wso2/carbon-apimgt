@@ -32,7 +32,7 @@ import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import DeleteApiButton from 'AppComponents/Apis/Details/components/DeleteApiButton';
 
-import ThumbnailView from './ThumbnailView';
+import BaseThumbnail from './BaseThumbnail';
 
 const styles = (theme) => ({
     card: {
@@ -238,7 +238,7 @@ class APIThumb extends Component {
                 raised={isHover}
                 className={classes.card}
             >
-                <CardMedia src='None' component={ThumbnailView} height={140} title='Thumbnail' api={api} />
+                <CardMedia src='None' component={BaseThumbnail} height={140} title='Thumbnail' api={api} />
                 <CardContent className={classes.apiDetails}>
                     <div className={classes.textWrapper}>
                         <Link to={overviewPath}>

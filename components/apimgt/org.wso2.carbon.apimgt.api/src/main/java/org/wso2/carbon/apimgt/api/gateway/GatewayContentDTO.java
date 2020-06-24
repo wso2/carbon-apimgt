@@ -20,9 +20,12 @@
 
 package org.wso2.carbon.apimgt.api.gateway;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class GatewayContentDTO {
+public class GatewayContentDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String name;
 

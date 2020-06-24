@@ -486,7 +486,7 @@ const ManageAlerts = (props) => {
                                                         color='primary'
                                                     >
                                                         {isInProgress.subscribing && <CircularProgress size={15} />}
-                                            Save
+                                                        Save
                                                     </Button>
                                                 </Grid>
                                                 <Grid item>
@@ -497,7 +497,7 @@ const ManageAlerts = (props) => {
                                                         onClick={() => setUnsubscribeAll(true)}
                                                     >
                                                         {isInProgress.unSubscribing && <CircularProgress size={15} />}
-                                            Unsubscribe All
+                                                        Unsubscribe All
                                                     </Button>
                                                 </Grid>
                                                 <Grid item>
@@ -509,7 +509,7 @@ const ManageAlerts = (props) => {
                                                         >
                                                             {isInProgress.unSubscribing
                                                             && <CircularProgress size={15} />}
-                                                    Cancel
+                                                            Cancel
                                                         </Button>
                                                     </Link>
                                                 </Grid>

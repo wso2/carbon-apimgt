@@ -325,7 +325,9 @@ public class SQLConstants {
                     "   APS.RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT," +
                     "   APS.STOP_ON_QUOTA_REACH," +
-                    "   API.API_ID" +
+                    "   API.API_ID," +
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_DEPTH,"+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
@@ -333,6 +335,10 @@ public class SQLConstants {
                     "   AM_APPLICATION_KEY_MAPPING AKM," +
                     "   AM_API API," +
                     "   AM_POLICY_SUBSCRIPTION APS" +
+                    " LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS"+
+                    " ON "+
+                    "   APS.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID "+
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
@@ -360,7 +366,9 @@ public class SQLConstants {
                     "   APS.RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT," +
                     "   APS.STOP_ON_QUOTA_REACH," +
-                    "   API.API_ID" +
+                    "   API.API_ID," +
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_DEPTH,"+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
@@ -368,6 +376,10 @@ public class SQLConstants {
                     "   AM_APPLICATION_KEY_MAPPING AKM," +
                     "   AM_API API," +
                     "   AM_POLICY_SUBSCRIPTION APS" +
+                    " LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS"+
+                    " ON "+
+                    "   APS.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID "+
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
@@ -378,7 +390,7 @@ public class SQLConstants {
                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
                     "   AND API.API_ID = SUB.API_ID" +
                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-                    "   AND APS.NAME = SUB.TIER_ID" ;
+                    "   AND APS.NAME = SUB.TIER_ID";
 
     public static final String ADD_SUBSCRIBER_SQL =
             " INSERT" +
@@ -1123,25 +1135,16 @@ public class SQLConstants {
     public static final String DELETE_ACCSS_ALLOWED_DOMAINS_SQL =
             " DELETE FROM AM_APP_KEY_DOMAIN_MAPPING WHERE CONSUMER_KEY=?";
 
-    public static final String ADD_ACCESS_ALLOWED_DOMAINS_SQL =
-            " INSERT INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY, AUTHZ_DOMAIN) " +
-            " VALUES (?,?)";
-
-    public static final String DELETE_ACCESS_ALLOWED_DOMAIN_SQL =
-            " DELETE " +
-            " FROM AM_APP_KEY_DOMAIN_MAPPING " +
-            " WHERE CONSUMER_KEY=?";
-
-    public static final String ADD_ACCESS_ALLOWED_DAMOIN_SQL =
-            " INSERT INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY,AUTHZ_DOMAIN) " +
-            " VALUES (?,?)";
-
     public static final String GET_REGISTRATION_APPROVAL_STATUS_SQL =
             " SELECT KEY_MANAGER,STATE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE =?";
 
     public static final String UPDATE_APPLICAITON_KEY_TYPE_MAPPINGS_SQL =
-            " UPDATE AM_APPLICATION_KEY_MAPPING SET CONSUMER_KEY = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
-                    "KEY_MANAGER = ?";
+            " UPDATE AM_APPLICATION_KEY_MAPPING SET CONSUMER_KEY = ? , APP_INFO = ? WHERE APPLICATION_ID = ? AND " +
+                    "KEY_TYPE = ? AND KEY_MANAGER = ?";
+
+    public static final String UPDATE_APPLICATION_KEY_TYPE_MAPPINGS_METADATA_SQL =
+            " UPDATE AM_APPLICATION_KEY_MAPPING SET APP_INFO = ? WHERE APPLICATION_ID = ? AND " +
+                    "KEY_TYPE = ? AND KEY_MANAGER = ?";
 
     public static final String ADD_APPLICATION_KEY_TYPE_MAPPING_SQL =
             " INSERT INTO " +
@@ -1774,6 +1777,43 @@ public class SQLConstants {
 
     public static final String REMOVE_SECURITY_AUDIT_MAP_SQL =
             "DELETE FROM AM_SECURITY_AUDIT_UUID_MAPPING WHERE API_ID = ?";
+
+    public static final String ADD_QUERY_ANALYSIS_SQL =
+            "INSERT INTO AM_GRAPHQL_QUERY_ANALYSIS (POLICY_ID, MAX_COMPLEXITY, MAX_DEPTH) VALUES (?,?,?)";
+
+    public static final String ADD_CUSTOM_COMPLEXITY_DETAILS_SQL =
+            "INSERT INTO AM_GRAPHQL_COMPLEXITY (UUID, API_ID, TYPE, FIELD, COMPLEXITY_VALUE) VALUES (?,?,?,?,?)";
+
+    public static final String GET_CUSTOM_COMPLEXITY_DETAILS_SQL =
+            " SELECT" +
+            "   TYPE," +
+            "   FIELD," +
+            "   COMPLEXITY_VALUE" +
+            " FROM" +
+            "   AM_GRAPHQL_COMPLEXITY " +
+            " WHERE" +
+            "   API_ID = ?";
+
+
+    public static final String UPDATE_CUSTOM_COMPLEXITY_DETAILS_SQL =
+            " UPDATE AM_GRAPHQL_COMPLEXITY " +
+            " SET " +
+            "   COMPLEXITY_VALUE = ? " +
+            " WHERE " +
+            "    API_ID = ?" +
+            "    AND TYPE = ? " +
+            "    AND FIELD = ?";
+
+    public static final String UPDATE_QUERY_ANALYSIS_SQL =
+            " UPDATE AM_GRAPHQL_QUERY_ANALYSIS " +
+            " SET " +
+            "   MAX_COMPLEXITY = ?," +
+            "   MAX_DEPTH = ?" +
+            " WHERE " +
+            "   POLICY_ID = ?";
+
+    public static final String REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL =
+            "DELETE FROM AM_GRAPHQL_COMPLEXITY WHERE API_ID = ?";
 
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
@@ -2732,6 +2772,10 @@ public class SQLConstants {
                     "   * " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
+                    "LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
+                    " ON "+
+                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
                     " WHERE" +
                     "   TENANT_ID =?";
 
@@ -2740,6 +2784,10 @@ public class SQLConstants {
                     "   * " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
+                    "LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
+                    " ON "+
+                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
                     " WHERE" +
                     "  NAME IN (";
 
@@ -2790,8 +2838,12 @@ public class SQLConstants {
     public static final String GET_SUBSCRIPTION_POLICY_SQL =
             "SELECT "+
                     "* " +
-            "FROM " +
-                    "AM_POLICY_SUBSCRIPTION " +
+                    "FROM " +
+                    "   AM_POLICY_SUBSCRIPTION " +
+                    "LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
+                    " ON "+
+                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
             "WHERE " +
                     "NAME = ? AND " +
                     "TENANT_ID =?";
@@ -2807,8 +2859,12 @@ public class SQLConstants {
     public static final String GET_SUBSCRIPTION_POLICY_BY_UUID_SQL =
             "SELECT "+
                     "* " +
-            "FROM " +
-                    "AM_POLICY_SUBSCRIPTION " +
+                    "FROM " +
+                    "   AM_POLICY_SUBSCRIPTION " +
+                    "LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
+                    " ON "+
+                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
             "WHERE " +
                     "UUID = ?";
 
@@ -3100,6 +3156,34 @@ public class SQLConstants {
     public static final String GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_APP_ID_KEY_MANAGER_SQL =
             "SELECT CONSUMER_KEY FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
                     "KEY_MANAGER = ?";
+    public static final String GET_KEY_MAPPING_INFO_FROM_APP_ID = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE," +
+            "STATE,APP_INFO FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
+
+    public static final String ADD_GW_PUBLISHED_API_DETAILS = "INSERT INTO AM_GW_PUBLISHED_API_DETAILS (API_ID, " +
+            "API_NAME, API_VERSION, TENANT_DOMAIN) VALUES (?,?,?,?)";
+
+    public static final String ADD_GW_API_ARTIFACT = "INSERT INTO AM_GW_API_ARTIFACTS (ARTIFACT, GATEWAY_INSTRUCTION," +
+            " API_ID, GATEWAY_LABEL) VALUES (?,?,?,?)";
+
+    public static final String UPDATE_API_ARTIFACT = "UPDATE AM_GW_API_ARTIFACTS SET ARTIFACT = ?, GATEWAY_INSTRUCTION = ?" +
+            " WHERE (API_ID = ?) AND (GATEWAY_LABEL = ?)";
+
+    public static final String GET_API_ARTIFACT = "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE API_ID =? AND " +
+            "GATEWAY_LABEL =? AND GATEWAY_INSTRUCTION = ?";
+
+    public static final String GET_ALL_API_ARTIFACT = "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE "
+            + "GATEWAY_LABEL =? AND GATEWAY_INSTRUCTION = ?";
+
+    public static final String GET_PUBLISHED_GATEWAYS_FOR_API = "SELECT COUNT(*) AS COUNT FROM AM_GW_API_ARTIFACTS" +
+            " WHERE API_ID = ? AND GATEWAY_INSTRUCTION = ?";
+
+    public static final String GET_GATEWAY_PUBLISHED_API_DETAILS = "SELECT * FROM AM_GW_PUBLISHED_API_DETAILS" +
+            " WHERE API_ID = ?";
+
+    public static final String CHECK_ARTIFACT_EXISTS = "SELECT COUNT(*) AS COUNT FROM AM_GW_API_ARTIFACTS" +
+            " WHERE API_ID = ? AND GATEWAY_LABEL = ?";
+
+
 
     /** Throttle related constants**/
 
@@ -3366,6 +3450,9 @@ public class SQLConstants {
         public static final String DELETE_EMAIL_BY_UUID =
                 "DELETE FROM AM_NOTIFICATION_SUBSCRIBER WHERE UUID= ?";
 
+        public static final String GET_BOT_DETECTED_DATA =
+                "from AM_BOT_DATA SELECT request_time, message_id, http_method, headers, message_body, client_ip";
+
     }
 
     public static class RevokedJWTConstants {
@@ -3497,8 +3584,8 @@ public class SQLConstants {
             "SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =
-                " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED) VALUES " +
-                        "(?,?,?,?,?,?,?)";
+                " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED," +
+                        "DISPLAY_NAME) VALUES (?,?,?,?,?,?,?,?)";
         public static final String UPDATE_KEY_MANAGER =
                 "UPDATE AM_KEY_MANAGER SET NAME = ?,DESCRIPTION = ?,TYPE = ?,CONFIGURATION = ?,TENANT_DOMAIN = ?," +
                         "ENABLED = ? WHERE UUID = ?";

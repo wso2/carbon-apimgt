@@ -32,10 +32,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.entity.ContentType;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -45,15 +47,14 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -101,12 +102,39 @@ public class GraphQLSchemaDefinition {
     }
 
     /**
-     * build schema with scopes and roles
+     * Extract GraphQL Types and Fields from given schema
+     *
+     * @param schema GraphQL Schema
+     * @return list of all types and fields
+     */
+    public List<GraphqlSchemaType> extractGraphQLTypeList(String schema) {
+        List<GraphqlSchemaType> typeList = new ArrayList<>();
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
+        Map<java.lang.String, TypeDefinition> list = typeRegistry.types();
+        for (Map.Entry<String, TypeDefinition> entry : list.entrySet()) {
+            if (entry.getValue() instanceof ObjectTypeDefinition) {
+                GraphqlSchemaType graphqlSchemaType = new GraphqlSchemaType();
+                List<String> fieldList = new ArrayList<>();
+                graphqlSchemaType.setType(entry.getValue().getName());
+                for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
+                    fieldList.add(fieldDef.getName());
+                }
+                graphqlSchemaType.setFieldList(fieldList);
+                typeList.add(graphqlSchemaType);
+            }
+        }
+        return typeList;
+    }
+
+    /**
+     * build schema with additional info
      *
      * @param api api object
+     * @param graphqlComplexityInfo
      * @return schemaDefinition
      */
-    public String buildSchemaWithScopesAndRoles(API api) {
+    public String buildSchemaWithAdditionalInfo(API api, GraphqlComplexityInfo graphqlComplexityInfo) {
         Swagger swagger = null;
         Map<String, String> scopeRoleMap = new HashMap<>();
         Map<String, String> operationScopeMap = new HashMap<>();
@@ -119,6 +147,7 @@ public class GraphQLSchemaDefinition {
         StringBuilder scopeRoleMappingBuilder = new StringBuilder();
         StringBuilder operationAuthSchemeMappingBuilder = new StringBuilder();
         StringBuilder operationThrottlingMappingBuilder = new StringBuilder();
+        StringBuilder policyBuilder = new StringBuilder();
 
         String swaggerDef = api.getSwaggerDefinition();
         OpenAPI openAPI = null;
@@ -237,8 +266,59 @@ public class GraphQLSchemaDefinition {
                 }
                 schemaDefinitionBuilder.append(operationAuthSchemeMappingBuilder.toString());
             }
+
+            if (operationAuthSchemeMap.size() > 0) {
+                // Constructing the policy definition
+                JSONObject jsonPolicyDefinition = policyDefinitionToJson(graphqlComplexityInfo);
+                String base64EncodedPolicyDefinition = Base64.getUrlEncoder().withoutPadding().
+                        encodeToString(jsonPolicyDefinition.toJSONString().getBytes(Charset.defaultCharset()));
+                String policyDefinition = "type GraphQLAccessControlPolicy_WSO2 {\n" +
+                        base64EncodedPolicyDefinition + ": String\n}\n";
+                policyBuilder.append(policyDefinition);
+                schemaDefinitionBuilder.append(policyBuilder.toString());
+            }
         }
         return schemaDefinitionBuilder.toString();
+    }
+
+    /**
+     * Method to convert GraphqlComplexityInfo object to a JSONObject
+     *
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
+     * @return json object which contains the policy definition
+     */
+    public JSONObject policyDefinitionToJson(GraphqlComplexityInfo graphqlComplexityInfo) {
+        JSONObject policyDefinition = new JSONObject();
+        HashMap<String, HashMap<String, Integer>> customComplexityMap = new HashMap<>();
+        List<CustomComplexityDetails> list = graphqlComplexityInfo.getList();
+        for (CustomComplexityDetails customComplexityDetails : list) {
+            String type = customComplexityDetails.getType();
+            String field = customComplexityDetails.getField();
+            int complexityValue = customComplexityDetails.getComplexityValue();
+            if (customComplexityMap.containsKey(type)) {
+                customComplexityMap.get(type).put(field, complexityValue);
+            } else {
+                HashMap<String, Integer> complexityValueMap = new HashMap<>();
+                complexityValueMap.put(field, complexityValue);
+                customComplexityMap.put(type, complexityValueMap);
+            }
+        }
+
+        Map<String, Map<String, Object>> customComplexityObject = new LinkedHashMap<>(customComplexityMap.size());
+        for (HashMap.Entry<String, HashMap<String, Integer>> entry : customComplexityMap.entrySet()) {
+            HashMap<String, Integer> fieldValueMap = entry.getValue();
+            String type = entry.getKey();
+            Map<String, Object> fieldValueObject = new LinkedHashMap<>(fieldValueMap.size());
+            for (HashMap.Entry<String, Integer> subEntry : fieldValueMap.entrySet()) {
+                String field = subEntry.getKey();
+                int complexityValue = subEntry.getValue();
+                fieldValueObject.put(field, complexityValue);
+            }
+            customComplexityObject.put(type, fieldValueObject);
+        }
+
+        policyDefinition.put(APIConstants.QUERY_ANALYSIS_COMPLEXITY, customComplexityObject);
+        return policyDefinition;
     }
 
     /**

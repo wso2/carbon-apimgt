@@ -21,7 +21,8 @@ import Notification from 'rc-notification';
 import Configurations from 'Config';
 import merge from 'lodash.merge';
 import DefaultConfigurations from '../../../defaultTheme';
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+//import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Message from './Message';
 

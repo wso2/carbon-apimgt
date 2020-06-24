@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.265-SNAPSHOT</version>
+        <version>6.7.25-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,11 +35,6 @@
 
 
     <dependencies>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
-            <type>war</type>
-        </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.store.v1</artifactId>
@@ -85,14 +80,6 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
-                                    <overWrite>true</overWrite>
-                                    <type>war</type>
-                                    <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#store#v0.16.war</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.wso2.carbon.apimgt</groupId>
                                     <artifactId>org.wso2.carbon.apimgt.rest.api.store.v1</artifactId>
                                     <overWrite>true</overWrite>
                                     <type>war</type>
@@ -120,50 +107,9 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>api#am#store#v0.16.war</include>
                                         <include>api#am#store.war</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-common-doc-resources</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>
-                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
-                                    </directory>
-                                    <excludes>
-                                        <exclude>**/*.mustache</exclude>
-                                    </excludes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-specific-doc-resources</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>
-                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/documentation
-                                    </directory>
-                                    <includes>
-                                        <include>*</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -205,37 +151,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-codegen-maven-plugin</artifactId>
-                <version>${swagger-codegen-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>
-                                ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/store-api.yaml
-                            </inputSpec>
-                            <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
-                            <templateDirectory>
-                                ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
-                            </templateDirectory>
-                            <output>src/main/resources/api-docs</output>
-                        </configuration>
-                    </execution>
-                </executions>
-
-                <dependencies>
-                    <dependency>
-                        <groupId>org.wso2.carbon.apimgt</groupId>
-                        <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
-                        <version>${carbon.apimgt.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

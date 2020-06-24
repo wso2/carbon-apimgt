@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenValidationDTO;
 import javax.validation.constraints.*;
 
@@ -21,6 +22,7 @@ public class KeyManagerDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String type = null;
     private String description = null;
     private String introspectionEndpoint = null;
@@ -29,7 +31,7 @@ public class KeyManagerDTO   {
     private String revokeEndpoint = null;
     private String userInfoEndpoint = null;
     private String authorizeEndpoint = null;
-    private String jwksEndpoint = null;
+    private KeyManagerCertificatesDTO certificates = null;
     private String issuer = null;
     private String scopeManagementEndpoint = null;
     private List<String> availableGrantTypes = new ArrayList<>();
@@ -79,6 +81,24 @@ public class KeyManagerDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * display name of Key Manager to  show in UI 
+   **/
+  public KeyManagerDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "KeyManager1", value = "display name of Key Manager to  show in UI ")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -220,19 +240,19 @@ public class KeyManagerDTO   {
 
   /**
    **/
-  public KeyManagerDTO jwksEndpoint(String jwksEndpoint) {
-    this.jwksEndpoint = jwksEndpoint;
+  public KeyManagerDTO certificates(KeyManagerCertificatesDTO certificates) {
+    this.certificates = certificates;
     return this;
   }
 
   
-  @ApiModelProperty(example = "", value = "")
-  @JsonProperty("jwksEndpoint")
-  public String getJwksEndpoint() {
-    return jwksEndpoint;
+  @ApiModelProperty(value = "")
+  @JsonProperty("certificates")
+  public KeyManagerCertificatesDTO getCertificates() {
+    return certificates;
   }
-  public void setJwksEndpoint(String jwksEndpoint) {
-    this.jwksEndpoint = jwksEndpoint;
+  public void setCertificates(KeyManagerCertificatesDTO certificates) {
+    this.certificates = certificates;
   }
 
   /**
@@ -502,6 +522,7 @@ public class KeyManagerDTO   {
     KeyManagerDTO keyManager = (KeyManagerDTO) o;
     return Objects.equals(id, keyManager.id) &&
         Objects.equals(name, keyManager.name) &&
+        Objects.equals(displayName, keyManager.displayName) &&
         Objects.equals(type, keyManager.type) &&
         Objects.equals(description, keyManager.description) &&
         Objects.equals(introspectionEndpoint, keyManager.introspectionEndpoint) &&
@@ -510,7 +531,7 @@ public class KeyManagerDTO   {
         Objects.equals(revokeEndpoint, keyManager.revokeEndpoint) &&
         Objects.equals(userInfoEndpoint, keyManager.userInfoEndpoint) &&
         Objects.equals(authorizeEndpoint, keyManager.authorizeEndpoint) &&
-        Objects.equals(jwksEndpoint, keyManager.jwksEndpoint) &&
+        Objects.equals(certificates, keyManager.certificates) &&
         Objects.equals(issuer, keyManager.issuer) &&
         Objects.equals(scopeManagementEndpoint, keyManager.scopeManagementEndpoint) &&
         Objects.equals(availableGrantTypes, keyManager.availableGrantTypes) &&
@@ -530,7 +551,7 @@ public class KeyManagerDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, description, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties);
+    return Objects.hash(id, name, displayName, type, description, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, certificates, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties);
   }
 
   @Override
@@ -540,6 +561,7 @@ public class KeyManagerDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    introspectionEndpoint: ").append(toIndentedString(introspectionEndpoint)).append("\n");
@@ -548,7 +570,7 @@ public class KeyManagerDTO   {
     sb.append("    revokeEndpoint: ").append(toIndentedString(revokeEndpoint)).append("\n");
     sb.append("    userInfoEndpoint: ").append(toIndentedString(userInfoEndpoint)).append("\n");
     sb.append("    authorizeEndpoint: ").append(toIndentedString(authorizeEndpoint)).append("\n");
-    sb.append("    jwksEndpoint: ").append(toIndentedString(jwksEndpoint)).append("\n");
+    sb.append("    certificates: ").append(toIndentedString(certificates)).append("\n");
     sb.append("    issuer: ").append(toIndentedString(issuer)).append("\n");
     sb.append("    scopeManagementEndpoint: ").append(toIndentedString(scopeManagementEndpoint)).append("\n");
     sb.append("    availableGrantTypes: ").append(toIndentedString(availableGrantTypes)).append("\n");

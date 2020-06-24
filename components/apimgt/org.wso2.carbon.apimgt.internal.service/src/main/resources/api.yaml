@@ -717,6 +717,7 @@ definitions:
   SubscriptionPolicy:
     allOf:
     - $ref: '#/definitions/Policy'
+    - $ref: '#/definitions/GraphQLQuery'
     - properties:
         rateLimitCount:
           type: integer
@@ -724,6 +725,21 @@ definitions:
           type: string
         stopOnQuotaReach:
           type: boolean
+
+  #-----------------------------------------------------
+  # The GraphQL Query resource
+  #-----------------------------------------------------
+  GraphQLQuery:
+    title: GraphQL Query
+    properties:
+      graphQLMaxComplexity:
+        type: integer
+        description: Maximum Complexity of the GraphQL query
+        example: 400
+      graphQLMaxDepth:
+        type: integer
+        description: Maximum Depth of the GraphQL query
+        example: 10
   #-----------------------------------------------------
   # The Application Policy List resource
   #-----------------------------------------------------

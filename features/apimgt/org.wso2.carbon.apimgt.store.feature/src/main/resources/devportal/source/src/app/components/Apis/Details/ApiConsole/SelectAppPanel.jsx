@@ -21,9 +21,37 @@ const styles = (theme) => ({
 });
 
 const SelectAppPanel = (props) => {
-    const {
-        subscriptions, handleChanges, selectedApplication, selectedKeyType, classes,
+    let {
+        selectedApplication, selectedKeyType, selectedKeyManager,
     } = props;
+
+    const {
+        subscriptions, handleChanges, classes, keyManagers,
+    } = props;
+
+    /**
+     * This method is used to handle the updating of key generation
+     * request object.
+     * @param {*} event event fired
+     */
+    const handleSelectPanelChange = (event) => {
+        const { target } = event;
+        const { name, value } = target;
+        switch (name) {
+            case 'selectedApplication':
+                selectedApplication = value;
+                break;
+            case 'selectedKeyManager':
+                selectedKeyManager = value;
+                break;
+            case 'selectedKeyType':
+                selectedKeyType = value;
+                break;
+            default:
+                break;
+        }
+        handleChanges(event);
+    };
     return (
         <>
             <Grid x={12} md={6} className={classes.centerItems}>
@@ -39,7 +67,7 @@ const SelectAppPanel = (props) => {
                     )}
                     value={selectedApplication}
                     name='selectedApplication'
-                    onChange={handleChanges}
+                    onChange={handleSelectPanelChange}
                     SelectProps={subscriptions}
                     helperText={(
                         <FormattedMessage
@@ -62,6 +90,41 @@ const SelectAppPanel = (props) => {
                 </TextField>
             </Grid>
             <Grid x={12} md={6} className={classes.centerItems}>
+                <TextField
+                    fullWidth
+                    id='outlined-select-currency'
+                    select
+                    label={(
+                        <FormattedMessage
+                            defaultMessage='Key Managers'
+                            id='Apis.Details.ApiConsole.SelectAppPanel.keyManagers'
+                        />
+                    )}
+                    value={selectedKeyManager}
+                    name='selectedKeyManager'
+                    onChange={handleSelectPanelChange}
+                    SelectProps={keyManagers}
+                    helperText={(
+                        <FormattedMessage
+                            defaultMessage='Registered Key Managers'
+                            id='Apis.Details.ApiConsole.SelectAppPanel.select.registered.keyManagers'
+                        />
+                    )}
+                    margin='normal'
+                    variant='outlined'
+                >
+                    {keyManagers.map((keyManager) => (
+                        <MenuItem
+                            value={keyManager.name}
+                            key={keyManager.name}
+                            className={classes.menuItem}
+                        >
+                            {keyManager.name}
+                        </MenuItem>
+                    ))}
+                </TextField>
+            </Grid>
+            <Grid x={12} md={6} className={classes.centerItems}>
                 <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
                     <FormattedMessage
                         id='Apis.Details.ApiConsole.SelectAppPanel.select.key.type.heading'
@@ -72,7 +135,7 @@ const SelectAppPanel = (props) => {
                     <RadioGroup
                         name='selectedKeyType'
                         value={selectedKeyType}
-                        onChange={handleChanges}
+                        onChange={handleSelectPanelChange}
                         row
                     >
                         {(subscriptions != null && subscriptions.find((sub) => sub.applicationId

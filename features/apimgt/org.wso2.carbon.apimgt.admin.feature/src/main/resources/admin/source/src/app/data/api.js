@@ -128,6 +128,64 @@ class API extends Resource {
         });
         return promisedSettings.then(response => response.body);
     }
+    /**
+     * Get list of advanced throttling policies
+     */
+    getThrottlingPoliciesAdvanced() {
+        return this.client.then((client) => {
+            return client.apis['Advanced Policy (Collection)'].get_throttling_policies_advanced(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get list of api categories
+     */
+    getThrottlingPoliciesAdvancedPolicyId(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Advanced Policy (Individual)'].get_throttling_policies_advanced__policyId_(
+                {policyId: policyId},
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Add new advanced polcy
+     */
+    putThrottlingPoliciesAdvanced(policyId, policy) {
+        return this.client.then((client) => {
+            return client.apis['Advanced Policy (Individual)'].put_throttling_policies_advanced__policyId_(
+                {policyId: policyId, body: policy},
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * update polcy
+     */
+    postThrottlingPoliciesAdvanced(policy) {
+        return this.client.then((client) => {
+            return client.apis['Advanced Policy (Collection)'].post_throttling_policies_advanced(
+                {body: policy},
+                this._requestMetaData(),
+            );
+        });
+    }
+    /**
+     * delete polcy
+     */
+    deleteThrottlingPoliciesAdvanced(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Advanced Policy (Individual)'].delete_throttling_policies_advanced__policyId_(
+                {policyId: policyId},
+                this._requestMetaData(),
+            );
+        });
+    }
+
 
     /**
      * Get list of api categories
@@ -216,6 +274,63 @@ class API extends Resource {
     }
 
     /**
+     * Add a Subscription Throttling Policy
+     */
+    addSubscriptionThrottlingPolicy(body) {
+        return this.client.then((client) => {
+            const payload = {
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Subscription Policy (Collection)'].post_throttling_policies_subscription(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Delete a Subscription Throttling Policy
+     */
+    deleteSubscriptionPolicy(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Subscription Policy (Individual)'].delete_throttling_policies_subscription__policyId_(
+                { policyId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Update a Subscription Throttling Policy
+     */
+    updateSubscriptionThrottlingPolicy(policyId, body) {
+        return this.client.then((client) => {
+            const payload = {
+                policyId: policyId,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Subscription Policy (Individual)'].put_throttling_policies_subscription__policyId_(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get details of a Subscription Throttling Policy
+     */
+    subscriptionThrottlingPolicyGet(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Subscription Policy (Individual)'].get_throttling_policies_subscription__policyId_(
+                { policyId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
      * Add an Application Throttling Policy
      */
     addApplicationThrottlingPolicy(body) {
@@ -266,6 +381,17 @@ class API extends Resource {
     getApplicationList() {
         return this.client.then((client) => {
             return client.apis['Application (Collection)'].get_applications(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get Subscription Throttling Policies
+     */
+    getSubscritionPolicyList() {
+        return this.client.then((client) => {
+            return client.apis['Subscription Policy (Collection)'].get_throttling_policies_subscription(
                 this._requestMetaData(),
             );
         });
@@ -630,6 +756,115 @@ class API extends Resource {
             .unsubscribeAllAlerts(this._requestMetaData());
         });
     }
+
+
+
+    /**
+     * Get lis of keymanagers Registrered
+     */
+    getKeyManagersList() {
+        return this.client.then((client) => {
+            return client.apis['Key Manager (Collection)'].get_key_managers(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+        /**
+     * Get details of an Application Throttling Policy
+     */
+    keyManagerGet(keyManagerId) {
+        return this.client.then((client) => {
+            return client.apis['Key Manager (Individual)'].get_key_managers__keyManagerId_(
+                { keyManagerId: keyManagerId },
+                this._requestMetaData(),
+            );
+        });
+    }
+            /**
+     * Add an Key Manager
+     */
+    addKeyManager(body) {
+        return this.client.then((client) => {
+            const payload = {
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Key Manager (Collection)'].post_key_managers(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+             /**
+     * Update an Key Manager
+     */
+    updateKeyManager(keyManagerId, body) {
+        return this.client.then((client) => {
+            const payload = {
+                keyManagerId: keyManagerId,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Key Manager (Individual)'].put_key_managers__keyManagerId_(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+    /**
+     * Delete an Key Manager
+     */
+    deleteKeyManager(keyManagerId) {
+        return this.client.then((client) => {
+            return client.apis['Key Manager (Individual)'].delete_key_managers__keyManagerId_(
+                {keyManagerId:keyManagerId},
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get list of workflow pending requests
+     */
+    workflowsGet(workflowType) {
+        return this.client.then((client) => {
+            return client.apis['Workflow (Collection)'].get_workflows(
+                { workflowType: workflowType },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get workflow pending request according to external workflow reference
+     */
+    workflowGet(externalWorkflowReference) {
+        return this.client.then((client) => {
+            return client.apis['Workflows (Individual)'].get_workflows__externalWorkflowRef_(
+                { externalWorkflowReference: externalWorkflowReference },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Update workflow request according to external workflow reference
+     */
+    updateWorkflow(workflowReferenceId,body) {
+        return this.client.then((client) => {
+            const payload = {
+                workflowReferenceId: workflowReferenceId,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Workflows (Individual)'].post_workflows_update_workflow_status(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
 }
 
 API.CONSTS = {

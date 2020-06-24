@@ -16,23 +16,36 @@
  * under the License.
  */
 import React from 'react';
+import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
-import { useIntl } from 'react-intl';
+import { useIntl, FormattedMessage } from 'react-intl';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import DoneIcon from '@material-ui/icons/Done';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
+import AddEditExecution from 'AppComponents/Throttling/Advanced/AddEditExecution';
+import AddEditConditionPolicy from 'AppComponents/Throttling/Advanced/AddEditConditionPolicy';
+import AddEditConditionPolicyIp from 'AppComponents/Throttling/Advanced/AddEditConditionPolicyIP';
+import CON_CONSTS from 'AppComponents/Throttling/Advanced/CON_CONSTS';
+import DeleteCondition from 'AppComponents/Throttling/Advanced/DeleteCondition';
+
+/**
+ * Create UUID
+ * @returns {string} random uuid string.
+ */
+function getUUID() {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -54,9 +67,23 @@ const useStyles = makeStyles((theme) => ({
     },
     table: {
         marginBottom: 40,
+        background: '#efefef',
+        '& th': {
+            background: '#ccc',
+        },
     },
     expandContentRoot: {
         flexDirection: 'column',
+    },
+    subsubTitle: {
+        fontSize: '0.81rem',
+    },
+    alert: {
+        flex: 1,
+    },
+    hr: {
+        border: 'solid 1px #efefef',
+        width: '100%',
     },
 }));
 
@@ -65,41 +92,194 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX} Header AppBar components.
  * @param {JSON} props Provides props from parent
  */
-export default function ConditionalGroup(props) {
+function ConditionalGroup(props) {
     const intl = useIntl();
     const classes = useStyles();
     const [expanded, setExpanded] = React.useState(false);
-    const { executionFlow, setExecutionFlow } = props;
+    const {
+        group, updateGroup, hasErrors,
+    } = props;
 
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     };
-    const onChange = (e) => {
-        const field = e.target.name;
-        const { value } = e.target;
-        if (field === 'description') {
-            executionFlow[field] = value;
+    const filterRows = (type) => {
+        const filteredConditions = [];
+        for (let i = 0; i < group.conditions.length; i++) {
+            if (group.conditions[i].type === type) {
+                group.conditions[i].id = getUUID();
+                filteredConditions.push(group.conditions[i]);
+            }
         }
-        setExecutionFlow(executionFlow);
+        return filteredConditions;
+        // return group.conditions.filter((condition) => {
+        //     if (condition.type === type) {
+        //         condition.id = getUUID();
+        //     }
+        //     return condition.type === type;
+        // });
+    };
+    const onChange = (e) => {
+        group[e.target.name] = e.target.value;
+        updateGroup();
     };
     const rows = [
         {
-            name: 'IP Condition Policy',
-            description: 'This configuration is used to throttle by IP address.',
+            name: intl.formatMessage({
+                id: 'Throttling.Advanced.ConditionalGroup.ip',
+                defaultMessage: 'IP Condition Policy',
+            }),
+            description: intl.formatMessage({
+                id: 'Throttling.Advanced.ConditionalGroup.ip.help',
+                defaultMessage: 'This configuration is used to throttle by IP address.',
+            }),
+            items: filterRows(CON_CONSTS.IPCONDITION),
+            type: CON_CONSTS.IPCONDITION,
+            labelPrefix: '',
         },
         {
-            name: 'Header Condition Policy',
-            description: 'This configuration is used to throttle based on Headers.',
+            name: intl.formatMessage({
+                id: 'Throttling.Advanced.ConditionalGroup.header',
+                defaultMessage: 'Header Condition Policy',
+            }),
+            description: intl.formatMessage({
+                id: 'Throttling.Advanced.ConditionalGroup.header.help',
+                defaultMessage: 'This configuration is used to throttle based on Headers.',
+            }),
+            items: filterRows(CON_CONSTS.HEADERCONDITION),
+            type: CON_CONSTS.HEADERCONDITION,
+            labelPrefix: 'Header ',
         },
         {
-            name: 'Query Param Condition Policy',
-            description: 'This configuration is used to throttle based on query parameters.',
+            name: intl.formatMessage({
+                id: 'Throttling.Advanced.ConditionalGroup.query.param',
+                defaultMessage: 'Query Param Condition Policy',
+            }),
+            description: intl.formatMessage({
+                id: 'Throttling.Advanced.ConditionalGroup.query.param.help',
+                defaultMessage: 'This configuration is used to throttle based on query parameters.',
+            }),
+            items: filterRows(CON_CONSTS.QUERYPARAMETERCONDITION),
+            type: CON_CONSTS.QUERYPARAMETERCONDITION,
+            labelPrefix: 'Param ',
         },
         {
-            name: 'JWT Condition Policy',
-            description: 'This configuration is used to define JWT claims conditions',
+            name: intl.formatMessage({
+                id: 'Throttling.Advanced.ConditionalGroup.jwt',
+                defaultMessage: 'JWT Condition Policy',
+            }),
+            description: intl.formatMessage({
+                id: 'Throttling.Advanced.ConditionalGroup.jwt.help',
+                defaultMessage: 'This configuration is used to define JWT claims conditions',
+            }),
+            items: filterRows(CON_CONSTS.JWTCLAIMSCONDITION),
+            type: CON_CONSTS.JWTCLAIMSCONDITION,
+            labelPrefix: 'Claim ',
         },
     ];
+    const getNewItem = (type) => {
+        if (type === CON_CONSTS.IPCONDITION) {
+            return ({
+                type: CON_CONSTS.IPCONDITION,
+                invertCondition: true,
+                ipConditionType: '',
+                specificIP: '',
+                startingIP: null,
+                endingIP: null,
+            });
+        } else if (type === CON_CONSTS.HEADERCONDITION) {
+            return ({
+                type: CON_CONSTS.HEADERCONDITION, invertCondition: false, headerName: '', headerValue: '',
+            });
+        } else if (type === CON_CONSTS.QUERYPARAMETERCONDITION) {
+            return ({
+                type: CON_CONSTS.QUERYPARAMETERCONDITION, invertCondition: false, parameterName: '', parameterValue: '',
+            });
+        } else if (type === CON_CONSTS.JWTCLAIMSCONDITION) {
+            return ({
+                type: CON_CONSTS.JWTCLAIMSCONDITION, invertCondition: false, claimUrl: '', attribute: '',
+            });
+        } else {
+            return ({});
+        }
+    };
+    const addItem = (rowRef, item) => {
+        const { name, value } = item;
+        const { type: rowType } = rowRef;
+        const newItem = getNewItem(rowType);
+        if (rowType === CON_CONSTS.HEADERCONDITION) {
+            newItem.headerName = name;
+            newItem.headerValue = value;
+        } else if (rowType === CON_CONSTS.QUERYPARAMETERCONDITION) {
+            newItem.parameterName = name;
+            newItem.parameterValue = value;
+        } else if (rowType === CON_CONSTS.JWTCLAIMSCONDITION) {
+            newItem.claimUrl = name;
+            newItem.attribute = value;
+        }
+        group.conditions.push(newItem);
+        updateGroup();
+    };
+    const addItemIP = (rowRef, item) => {
+        const {
+            ipConditionType, specificIP, startingIP, endingIP,
+        } = item;
+        const { type: rowType } = rowRef;
+        const newItem = getNewItem(rowType);
+        if (ipConditionType === CON_CONSTS.IPCONDITION_IPRANGE) {
+            newItem.specificIP = null;
+            newItem.startingIP = startingIP;
+            newItem.endingIP = endingIP;
+        } else {
+            newItem.specificIP = specificIP;
+            newItem.startingIP = null;
+            newItem.endingIP = null;
+        }
+        newItem.ipConditionType = ipConditionType;
+        group.conditions.push(newItem);
+        updateGroup();
+    };
+    const deleteItem = (item) => {
+        for (let i = 0; i < group.conditions.length; i++) {
+            if (group.conditions[i].id === item.id) {
+                group.conditions.splice(i, 1);
+            }
+        }
+        updateGroup();
+    };
+    const updateItem = (rowRef, item, originalItem) => {
+        const { type: rowType } = rowRef;
+        const { name, value } = item;
+        for (let i = 0; i < group.conditions.length; i++) {
+            if (group.conditions[i].id === originalItem.id) {
+                if (rowType === CON_CONSTS.HEADERCONDITION) {
+                    group.conditions[i].headerName = name;
+                    group.conditions[i].headerValue = value;
+                } else if (rowType === CON_CONSTS.QUERYPARAMETERCONDITION) {
+                    group.conditions[i].parameterName = name;
+                    group.conditions[i].parameterValue = value;
+                } else if (rowType === CON_CONSTS.JWTCLAIMSCONDITION) {
+                    group.conditions[i].claimUrl = name;
+                    group.conditions[i].attribute = value;
+                }
+            }
+        }
+        updateGroup();
+    };
+    const updateItemIP = (item, originalItem) => {
+        const {
+            ipConditionType, specificIP, startingIP, endingIP,
+        } = item;
+        for (let i = 0; i < group.conditions.length; i++) {
+            if (group.conditions[i].id === originalItem.id) {
+                group.conditions[i].ipConditionType = ipConditionType;
+                group.conditions[i].specificIP = specificIP;
+                group.conditions[i].startingIP = startingIP;
+                group.conditions[i].endingIP = endingIP;
+            }
+        }
+        updateGroup();
+    };
     return (
         <div className={classes.root}>
             <ExpansionPanel expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
@@ -109,67 +289,224 @@ export default function ConditionalGroup(props) {
                     id='panel1bh-header'
                 >
                     <div className={classes.heading} variant='body2'>
-                        <Box display='flex'>
-                            <DoneIcon />
-                            <span>IP</span>
-                            <DoneIcon />
-                            <span>Header</span>
-                            <DoneIcon />
-                            <span>Query Param</span>
-                            <DoneIcon />
-                            <span>JWT Claim</span>
-                        </Box>
-                        <Typography variant='caption'>
-                                Condition Policies active for Group
-                            { ` ${executionFlow.id}` }
-                        </Typography>
+                        {!expanded && (
+                            <Typography variant='caption'>
+                                {group.description}
+                            </Typography>
+                        )}
                     </div>
                     {!expanded && (
                         <Typography className={classes.secondaryHeading}>
                             Expand to edit
                         </Typography>
                     )}
+                    {expanded && (
+                        <Typography className={classes.secondaryHeading}>
+                            Hide group
+                        </Typography>
+                    )}
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails classes={{ root: classes.expandContentRoot }}>
 
+                    <Box flex='1'>
+                        <Typography color='inherit' variant='subtitle2' component='div'>
+                            <FormattedMessage
+                                id='Throttling.Advanced.ConditionalGroup.condition.policies'
+                                defaultMessage='Condition Policies'
+                            />
 
-                    <Table className={classes.table} aria-label='simple table'>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Condition Policy</TableCell>
-                                <TableCell align='right'>Action</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {rows.map((row) => (
-                                <TableRow key={row.name}>
-                                    <TableCell component='th' scope='row'>
-                                        <Typography variant='body2'>
-                                            <Checkbox
-                                                checked={false}
-                                                onChange={onChange}
-                                                color='primary'
-                                                inputProps={{ 'aria-label': 'secondary checkbox' }}
-                                            />
-                                            {row.name}
-                                        </Typography>
-                                        <Typography variant='caption'>
-                                            {row.description}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell align='right'>
-                                        <Button variant='contained' size='small' disabled>Configure</Button>
+                        </Typography>
+                    </Box>
+                    {rows.map((row) => (
+                        <>
+                            <hr className={classes.hr} />
+                            <Box component='div' marginLeft={1} display='flex' alignItems='center'>
+                                <Box flex={1}>
+                                    <Typography
+                                        color='inherit'
+                                        variant='subtitle2'
+                                        component='div'
+                                        className={classes.subsubTitle}
+                                    >
+                                        {row.name}
+                                    </Typography>
+                                    <Typography variant='caption'>
+                                        {row.description}
+                                    </Typography>
+                                </Box>
+                                <Box component='span' m={1}>
+                                    <FormControlLabel
+                                        control={<Checkbox checked onChange={() => {}} name='invertCondition' />}
+                                        label={intl.formatMessage({
+                                            id: 'Throttling.Advanced.ConditionalGroup.invert.condition',
+                                            defaultMessage: 'Invert Condition',
+                                        })}
+                                    />
+                                </Box>
+                                <Box component='span' m={1}>
+                                    {row.type === CON_CONSTS.IPCONDITION ? (
+                                        <AddEditConditionPolicyIp
+                                            row={row}
+                                            callBack={addItemIP}
+                                        />
+                                    ) : (
+                                        <AddEditConditionPolicy
+                                            row={row}
+                                            callBack={addItem}
+                                        />
+                                    )}
 
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                                </Box>
+                            </Box>
 
+                            {row.items.length > 0 && (
+                                <Box component='div' marginLeft={1}>
+                                    <Table className={classes.table} size='small' aria-label='a dense table'>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>
+                                                    {row.type === CON_CONSTS.IPCONDITION ? (
+                                                        <FormattedMessage
+                                                            id='Throttling.Advanced.ConditionalGroup.ip.header.name'
+                                                            defaultMessage='IP Condition Type'
+                                                        />
+                                                    ) : (
+                                                        <>
+                                                            {row.labelPrefix}
+                                                            {' '}
+                                                            <FormattedMessage
+                                                                id='Throttling.Advanced.ConditionalGroup.header.name'
+                                                                defaultMessage='Name'
+                                                            />
+                                                        </>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {row.type === CON_CONSTS.IPCONDITION ? (
+                                                        <FormattedMessage
+                                                            id='Throttling.Advanced.ConditionalGroup.ip.header.value'
+                                                            defaultMessage='IP Address'
+                                                        />
+                                                    ) : (
+                                                        <>
+                                                            {row.labelPrefix}
+                                                            {' '}
+                                                            <FormattedMessage
+                                                                id='Throttling.Advanced.ConditionalGroup.header.value'
+                                                                defaultMessage='Value'
+                                                            />
+                                                        </>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell />
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {row.items.map((item) => (
+                                                <TableRow key={item.headerName}>
+                                                    <TableCell component='td' scope='row'>
+                                                        {item.type === CON_CONSTS.IPCONDITION
+                                                        && item.ipConditionType === CON_CONSTS.IPCONDITION_IPRANGE && (
+                                                            <FormattedMessage
+                                                                id='Throttling.Advanced.ConditionalGroup.ip.iprange'
+                                                                defaultMessage='IP Range'
+                                                            />
+                                                        ) }
+                                                        {item.type === CON_CONSTS.IPCONDITION
+                                                        && item.ipConditionType
+                                                        === CON_CONSTS.IPCONDITION_IPSPECIFIC && (
+                                                            <FormattedMessage
+                                                                id='Throttling.Advanced.ConditionalGroup.ip.specific'
+                                                                defaultMessage='Specific IP'
+                                                            />
+                                                        ) }
+                                                        {item.type === CON_CONSTS.HEADERCONDITION
+                                                        && item.headerName }
+                                                        {item.type === CON_CONSTS.QUERYPARAMETERCONDITION
+                                                        && item.parameterName }
+                                                        {item.type === CON_CONSTS.JWTCLAIMSCONDITION
+                                                        && item.claimUrl }
+                                                    </TableCell>
+                                                    <TableCell component='td' scope='row'>
+                                                        {item.type === CON_CONSTS.IPCONDITION
+                                                        && item.ipConditionType === CON_CONSTS.IPCONDITION_IPRANGE && (
+                                                            <>
+                                                                <strong>
+                                                                    <FormattedMessage
+                                                                        id='Throttling.Advanced.ConditionalGroup.from'
+                                                                        defaultMessage='From:'
+                                                                    />
+                                                                </strong>
+                                                                {item.startingIP}
+                                                                {' '}
+                                                                <strong>
+                                                                    <FormattedMessage
+                                                                        id='Throttling.Advanced.ConditionalGroup.to'
+                                                                        defaultMessage='To:'
+                                                                    />
+                                                                </strong>
+                                                                {item.endingIP}
+                                                            </>
+                                                        ) }
+                                                        {item.type === CON_CONSTS.IPCONDITION
+                                                        && item.ipConditionType
+                                                        === CON_CONSTS.IPCONDITION_IPSPECIFIC
+                                                        && (
+                                                            item.specificIP
+                                                        ) }
+                                                        {item.type === CON_CONSTS.HEADERCONDITION
+                                                        && item.headerValue }
+                                                        {item.type === CON_CONSTS.QUERYPARAMETERCONDITION
+                                                        && item.parameterValue }
+                                                        {item.type === CON_CONSTS.JWTCLAIMSCONDITION
+                                                        && item.attribute }
+                                                    </TableCell>
+                                                    <TableCell width={100} className={classes.actionColumn}>
+                                                        <Box display='flex'>
+                                                            {row.type === CON_CONSTS.IPCONDITION ? (
+                                                                <AddEditConditionPolicyIp
+                                                                    row={row}
+                                                                    item={item}
+                                                                    callBack={updateItemIP}
+                                                                />
+                                                            ) : (
+                                                                <AddEditConditionPolicy
+                                                                    row={row}
+                                                                    item={item}
+                                                                    callBack={updateItem}
+                                                                />
+                                                            )}
+                                                            <DeleteCondition
+                                                                item={item}
+                                                                row={row}
+                                                                callBack={deleteItem}
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </Box>
+                            )}
+                        </>
+                    ))}
+                    <hr className={classes.hr} />
+                    <AddEditExecution
+                        updateGroup={updateGroup}
+                        limit={group.limit}
+                        hasErrors={hasErrors}
+                        title={(
+                            <FormattedMessage
+                                id='Throttling.Advanced.ConditionalGroup.execution.policy'
+                                defaultMessage='Execution Policy'
+                            />
+                        )}
+                    />
                     <TextField
                         margin='dense'
                         name='description'
-                        value={executionFlow.description}
+                        value={group.description}
                         onChange={onChange}
                         label={intl.formatMessage({
                             id: 'Throttling.Advanced.ConditionalGroups.form.description',
@@ -189,3 +526,9 @@ export default function ConditionalGroup(props) {
         </div>
     );
 }
+ConditionalGroup.propTypes = {
+    dataRow: PropTypes.shape({
+        id: PropTypes.number.isRequired,
+    }).isRequired,
+};
+export default ConditionalGroup;

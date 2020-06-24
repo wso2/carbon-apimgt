@@ -1,10 +1,5 @@
 # carbon-apimgt
 
-# What is this branch ?
-
-We are planing to move the Admin portal implementation from Jaggery to React in next major release.Hence , this is a feature branch created targeting the APIM 3.2.0 release for the API Manager Admin portal revamping effort.
-
-
 ## About this repository
 
 |  Branch | Build Status(Jenkins) | Build Status(TravisCI) |
