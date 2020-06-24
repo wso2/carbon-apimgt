@@ -96,11 +96,15 @@
       },
       {
         "Name": "apim:app_import_export",
-        "Roles": "admin"
+        "Roles": "admin,Internal/devops"
       },
       {
         "Name": "apim:api_import_export",
-        "Roles": "admin"
+        "Roles": "admin,Internal/devops"
+      },
+      {
+        "Name": "apim:api_product_import_export",
+        "Roles": "admin,Internal/devops"
       },
       {
         "Name": "apim:label_manage",
@@ -299,6 +303,10 @@
     },
     "SubscriberRole" : {
       "CreateOnTenantLoad" : true
+    },
+    "DevOpsRole" : {
+      "CreateOnTenantLoad" : true,
+      "RoleName" : "Internal/devops"
     }
   }
 }
