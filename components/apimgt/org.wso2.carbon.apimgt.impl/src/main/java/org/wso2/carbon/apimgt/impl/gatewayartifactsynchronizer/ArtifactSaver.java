@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 
 /**

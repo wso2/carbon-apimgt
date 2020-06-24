@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,7 +113,8 @@ public class DBRetriever implements ArtifactRetriever {
                 (APIConstants.DigestAuthConstants.CHARSET));
         int synapsePort = synapseGetURL .getPort();
         String synapseProtocol = synapseGetURL .getProtocol();
-        method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
+        method.setHeader("Authorization", "Basic " + new String(credentials,
+                APIConstants.DigestAuthConstants.CHARSET));
         HttpClient httpClient = APIUtil.getHttpClient(synapsePort, synapseProtocol);
         HttpResponse httpResponse = null;
         int retryCount = 0;
