@@ -80,10 +80,6 @@ const styles = (theme) => {
             top: 0,
             left: 0,
             overflowY: 'auto',
-            marginTop: 64,
-            marginBottom: theme.custom.footer.height || 50,
-            position: 'fixed',
-            height: 'calc(100vh - 114px)',
         },
         leftMenuVerticalRight: {
             width: theme.custom.leftMenu.width,

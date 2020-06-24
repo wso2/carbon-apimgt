@@ -50,7 +50,9 @@ const useStyles = makeStyles((theme) => ({
 export default function UpdateComplexity(props) {
     const classes = useStyles();
     const [filterKeyWord, setFilter] = useState('');
-    const { setState, typelist, state } = props;
+    const {
+        setList, typelist, list, configDispatcher,
+    } = props;
 
     /**
      * Filter the information by Types.
@@ -138,7 +140,7 @@ export default function UpdateComplexity(props) {
                                                                 <b>ComplexityValue</b>
                                                             </TableCell>
                                                         </TableRow>
-                                                        {state.map((respond, index) => ((respond.type === typename.type)
+                                                        {list.map((respond, index) => ((respond.type === typename.type)
                                                      && (
                                                          <TableRow>
                                                              <TableCell>
@@ -152,13 +154,13 @@ export default function UpdateComplexity(props) {
                                                                      variant='outlined'
                                                                      value={respond.complexityValue}
                                                                      onChange={(event) => {
-                                                                         const newArr = [...state];
+                                                                         const newArr = [...list];
                                                                          newArr[index] = {
                                                                              type: respond.type,
                                                                              field: respond.field,
                                                                              complexityValue: +event.target.value,
                                                                          };
-                                                                         setState(newArr);
+                                                                         setList(newArr);
                                                                      }}
                                                                  />
                                                              </TableCell>
@@ -185,8 +187,8 @@ export default function UpdateComplexity(props) {
 }
 
 UpdateComplexity.propTypes = {
-    setState: PropTypes.func.isRequired,
-    state: PropTypes.arrayOf(
+    setList: PropTypes.func.isRequired,
+    list: PropTypes.arrayOf(
         PropTypes.shape({
             type: PropTypes.string,
             field: PropTypes.string,

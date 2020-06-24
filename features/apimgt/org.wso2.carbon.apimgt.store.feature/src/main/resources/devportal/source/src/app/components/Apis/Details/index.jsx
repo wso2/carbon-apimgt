@@ -120,21 +120,13 @@ const styles = (theme) => {
             width: theme.custom.leftMenu.width,
             top: 0,
             left: 0,
-            overflowY: 'auto',
-            marginTop: 64,
-            marginBottom: theme.custom.footer.height || 50,
-            position: 'fixed',
-            height: 'calc(100vh - 64px)',
+            overflowY: 'auto', 
         },
         leftMenuVerticalLeftMinView: {
             width: 45,
             top: 0,
             left: 0,
-            overflowY: 'auto',
-            marginTop: 64,
-            marginBottom: theme.custom.footer.height || 50,
-            position: 'fixed',
-            height: 'calc(100vh - 64px)',
+            overflowY: 'auto',  
         },
         leftMenuVerticalRight: {
             width: theme.custom.leftMenu.width,
@@ -173,7 +165,6 @@ const styles = (theme) => {
             marginRight: shiftToRight,
             paddingBottom: theme.spacing(3),
             overflowX: 'hidden',
-            minHeight: 'calc(100vh - 114px)',
         },
         contentExpandView: {
             display: 'flex',
@@ -325,6 +316,10 @@ class Details extends React.Component {
         this.updateSubscriptionData();
     }
 
+    getValueOfOpen (){
+        const isOpen = this.state.open;
+        return isOpen;
+    }
 
     handleDrawerOpen() {
         this.setState({ open: true });
@@ -523,7 +518,12 @@ class Details extends React.Component {
                             { [classes.contentLoaderRightMenu]: position === 'vertical-right' },
                         )}
                     >
-                        <LoadableSwitch api={api} updateSubscriptionData={this.updateSubscriptionData} />
+                        <LoadableSwitch 
+                            api={api} 
+                            updateSubscriptionData={this.updateSubscriptionData} 
+                            open={open}
+                        />
+                        {console.log(open)}
                     </div>
                 </div>
             </ApiContext.Provider>

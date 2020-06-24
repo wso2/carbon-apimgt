@@ -20,6 +20,7 @@ import React, { useReducer, useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import PropTypes from 'prop-types';
 import Paper from '@material-ui/core/Paper';
 import { Link } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
@@ -31,7 +32,7 @@ import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash.clonedeep';
-
+import Api from 'AppData/api';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
 import ResponseCaching from './components/ResponseCaching';
@@ -160,7 +161,7 @@ function copyAPIConfig(api) {
  * @param {*} props
  * @returns
  */
-export default function RuntimeConfiguration() {
+export default function RuntimeConfiguration(props) {
     /**
      *
      * Reduce the configuration UI related actions in to updated state
@@ -281,8 +282,10 @@ export default function RuntimeConfiguration() {
                 return state;
         }
     }
+    const { complexity } = props;
     const { api, updateAPI } = useContext(APIContext);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [updateComplexityList, setUpdateComplexityList] = useState(null);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();
     const mediationPolicies = cloneDeep(api.mediationPolicies || []);
@@ -312,6 +315,29 @@ export default function RuntimeConfiguration() {
     const updateFaultMediationPolicy = (policy) => {
         setFaultPolicy({ id: policy.id, name: policy.name, type: policy.type });
     };
+
+
+    /**
+     * Update the GraphQL Query Complexity Values
+     */
+    function updateComplexity() {
+        const apiId = apiConfig.id;
+        const apiClient = new Api();
+        const promisedComplexity = apiClient.updateGraphqlPoliciesComplexity(
+            apiId, {
+                list: updateComplexityList,
+            },
+        );
+        promisedComplexity
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    const { description } = response.body;
+                    Alert.error(description);
+                }
+            });
+    }
+
     /**
      *
      * Handle the configuration view save button action
@@ -322,7 +348,11 @@ export default function RuntimeConfiguration() {
         if (!api.isAPIProduct()) {
             apiConfig.mediationPolicies = newMediationPolicies;
         }
-        updateAPI(apiConfig)
+        if (updateComplexityList !== null) {
+            updateComplexity();
+        }
+
+        updateAPI(apiConfig, { complexity })
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
@@ -377,7 +407,7 @@ export default function RuntimeConfiguration() {
                                         <Box mt={3}>
                                             <QueryAnalysis
                                                 api={apiConfig}
-                                                configDispatcher={configDispatcher}
+                                                setUpdateComplexityList={setUpdateComplexityList}
                                                 isRestricted={isRestricted(['apim:api_create'], api)}
                                             />
                                         </Box>
@@ -510,3 +540,6 @@ export default function RuntimeConfiguration() {
         </>
     );
 }
+RuntimeConfiguration.propTypes = {
+    complexity: PropTypes.shape({}).isRequired,
+};

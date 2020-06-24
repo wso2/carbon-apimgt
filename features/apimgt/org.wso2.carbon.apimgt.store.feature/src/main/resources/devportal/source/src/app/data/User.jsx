@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
 
 import Utils from './Utils'
 
@@ -41,6 +40,9 @@ export default class User {
         this._scopes = [];
         this._idToken = id_token;
         this._remember = remember;
+        this.state = {
+            isSideBarOpen: true,
+        };
         User._userMap.set(environment, this);
     }
 
@@ -87,6 +89,15 @@ export default class User {
         Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, newToken, validityPeriod, path);
     }
 
+
+    get isSideBarOpen(){
+        return this.state.isSideBarOpen;
+    }
+
+    set isSideBarOpen(isSideBarOpen) {
+        this.state.isSideBarOpen = isSideBarOpen;
+    }
+
     /**
      *
      * @param type
@@ -104,7 +115,8 @@ export default class User {
             name: this.name,
             scopes: this._scopes,
             idToken: this._idToken,
-            remember: this._remember
+            remember: this._remember,
+            isSideBarOpen: this.state.isSideBarOpen,
         };
     }
 
@@ -121,6 +133,7 @@ export default class User {
         _user.scopes = userJson.scopes;
         _user.idToken = userJson.idToken;
         _user.rememberMe = userJson.remember;
+        _user.isSideBarOpen = userJson.isSideBarOpen;
         return _user;
     }
 }
