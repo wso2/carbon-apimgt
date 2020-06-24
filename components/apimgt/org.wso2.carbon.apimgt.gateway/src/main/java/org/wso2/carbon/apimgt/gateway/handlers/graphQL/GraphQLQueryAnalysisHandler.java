@@ -74,9 +74,9 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @return maximum query depth value if exists, or -1 to denote no complexity limitation
      */
     private int getMaxQueryDepth(MessageContext messageContext) {
-        int maxQueryDepth = ((Integer) messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH)).intValue();
-        if (maxQueryDepth != 0) {
-            return maxQueryDepth;
+        Object maxQueryDepth = messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH);
+        if (maxQueryDepth != null) {
+            return ((Integer) maxQueryDepth).intValue();
         } else {
             log.error("Maximum query depth was not allocated");
             return -1;
