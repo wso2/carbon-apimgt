@@ -26,21 +26,29 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.OAuthClient;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.TokenResponse;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.conf.OAuthEndpoint;
-import org.wso2.carbon.apimgt.gateway.utils.RedisCache;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * OAuthTokenGenerator class to check validity of tokens, request for tokens
+ * and add tokens to in-memory cache or redis cache
+ */
 public class OAuthTokenGenerator {
     private static final Log log = LogFactory.getLog(OAuthTokenGenerator.class);
 
-    public void checkTokenValidity(OAuthEndpoint oAuthEndpoint, CountDownLatch latch, boolean isRedisEnabled,
-            RedisCache redisCache)
+    /**
+     * Method to check for and refresh expired access tokens
+     * @param oAuthEndpoint OAuthEndpoint object for token endpoint properties
+     * @param latch CountDownLatch for blocking call when OAuth API is invoked
+     * @throws APISecurityException In the event of errors when generating new token
+     */
+    public static void checkTokenValidity(OAuthEndpoint oAuthEndpoint, CountDownLatch latch)
             throws APISecurityException {
         try {
             TokenResponse previousResponse = null;
-            if (isRedisEnabled) {
-                previousResponse = redisCache.getTokenResponseById(oAuthEndpoint.getId());
+            if (OAuthMediator.isRedisEnabled) {
+                previousResponse = OAuthMediator.redisCache.getTokenResponseById(oAuthEndpoint.getId());
             } else {
                 previousResponse = TokenCache.getInstance().getTokenMap().get(oAuthEndpoint.getId());
             }
@@ -51,13 +59,13 @@ public class OAuthTokenGenerator {
 
                 if (timeDifference <= 1) {
                     if (previousResponse.getRefreshToken() != null) {
-                        addTokenToCache(oAuthEndpoint, previousResponse.getRefreshToken(), isRedisEnabled, redisCache);
+                        addTokenToCache(oAuthEndpoint, previousResponse.getRefreshToken());
                     } else {
-                        addTokenToCache(oAuthEndpoint, null, isRedisEnabled, redisCache);
+                        addTokenToCache(oAuthEndpoint, null);
                     }
                 }
             } else {
-                addTokenToCache(oAuthEndpoint, null, isRedisEnabled, redisCache);
+                addTokenToCache(oAuthEndpoint, null);
             }
         } catch (IOException e) {
             log.error("Error while generating OAuth Token" + getEndpointId(oAuthEndpoint));
@@ -68,25 +76,39 @@ public class OAuthTokenGenerator {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while parsing OAuth Token response", e);
         }
-        latch.countDown();
+        if (latch != null) {
+            latch.countDown();
+        }
     }
 
-    private void addTokenToCache(OAuthEndpoint oAuthEndpoint, String refreshToken, boolean isRedisEnabled,
-            RedisCache redisCache)
+    /**
+     * Method to request for access token and add the generated token into
+     * in-memory cache or redis cache
+     * @param oAuthEndpoint OAuthEndpoint object for token endpoint properties
+     * @param refreshToken Refresh token if exists
+     * @throws IOException In the event of errors with HttpClient connections
+     * @throws APIManagementException In the event of errors when accessing the token endpoint url
+     */
+    private static void addTokenToCache(OAuthEndpoint oAuthEndpoint, String refreshToken)
             throws IOException, APIManagementException {
         TokenResponse tokenResponse = OAuthClient.generateToken(oAuthEndpoint.getTokenApiUrl(),
                 oAuthEndpoint.getClientId(), oAuthEndpoint.getClientSecret(), oAuthEndpoint.getUsername(),
                 oAuthEndpoint.getPassword(), oAuthEndpoint.getGrantType(), oAuthEndpoint.getCustomParameters(),
                 refreshToken);
         assert tokenResponse != null;
-        if (isRedisEnabled) {
-            redisCache.addTokenResponse(oAuthEndpoint.getId(), tokenResponse);
+        if (OAuthMediator.isRedisEnabled) {
+            OAuthMediator.redisCache.addTokenResponse(oAuthEndpoint.getId(), tokenResponse);
         } else {
             TokenCache.getInstance().getTokenMap().put(oAuthEndpoint.getId(), tokenResponse);
         }
     }
 
-    private String getEndpointId(OAuthEndpoint oAuthEndpoint) {
+    /**
+     * Method to construct string for logging
+     * @param oAuthEndpoint OAuthEndpoint object for token endpoint properties
+     * @return string containing token endpoint url for logging errors
+     */
+    private static String getEndpointId(OAuthEndpoint oAuthEndpoint) {
         return "[url] " + oAuthEndpoint.getTokenApiUrl();
     }
 }

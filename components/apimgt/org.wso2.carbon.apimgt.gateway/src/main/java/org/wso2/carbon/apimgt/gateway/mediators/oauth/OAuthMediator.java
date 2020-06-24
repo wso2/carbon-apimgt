@@ -51,8 +51,9 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
 
     private static final Log log = LogFactory.getLog(OAuthMediator.class);
     private JSONObject oAuthEndpointSecurityProperties;
-    private RedisCache redisCache;
-    private boolean isRedisEnabled = false;
+    public static RedisCache redisCache;
+    public static boolean isRedisEnabled = false;
+    public static OAuthEndpoint oAuthEndpoint;
 
     // Interface methods are being implemented here
     @Override
@@ -122,7 +123,7 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
 
             String decryptedClientSecret = new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret));
 
-            OAuthEndpoint oAuthEndpoint = new OAuthEndpoint();
+            oAuthEndpoint = new OAuthEndpoint();
             oAuthEndpoint.setId(uniqueIdentifier);
             oAuthEndpoint.setTokenApiUrl(tokenApiUrl);
             oAuthEndpoint.setClientId(clientId);
@@ -135,11 +136,7 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
             if (oAuthEndpoint != null) {
                 try {
                     OAuthTokenGenerator tokenGenerator = new OAuthTokenGenerator();
-                    if (isRedisEnabled) {
-                        tokenGenerator.checkTokenValidity(oAuthEndpoint, latch, true, redisCache);
-                    } else {
-                        tokenGenerator.checkTokenValidity(oAuthEndpoint, latch, false, null);
-                    }
+                    tokenGenerator.checkTokenValidity(oAuthEndpoint, latch);
                     latch.await();
                 } catch(InterruptedException | APISecurityException e) {
                     log.error("Could not generate access token...", e);
@@ -173,7 +170,7 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
      * This method returns the OAuthEndpointSecurity Properties from the API Manager Configuration
      * @return JSONObject OAuthEndpointSecurity properties
      */
-    public JSONObject getOAuthEndpointSecurityProperties() {
+    public static JSONObject getOAuthEndpointSecurityProperties() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String isRedisEnabled = configuration.getFirstProperty(APIConstants.CONFIG_IS_REDIS_ENABLED);

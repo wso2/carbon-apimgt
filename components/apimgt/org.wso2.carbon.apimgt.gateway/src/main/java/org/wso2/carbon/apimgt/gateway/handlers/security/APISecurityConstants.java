@@ -78,6 +78,9 @@ public class APISecurityConstants {
     public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
     public static final String GRAPHQL_INVALID_QUERY_MESSAGE= "INVALID QUERY";
 
+    public static final int OAUTH_INVALID_ACCESS_TOKEN = 900424;
+    public static final String OAUTH_INVALID_ACCESS_TOKEN_MESSAGE= "INVALID OAUTH ACCESS TOKEN";
+
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages
     public static final String DESCRIPTION_SEPARATOR = ". ";
