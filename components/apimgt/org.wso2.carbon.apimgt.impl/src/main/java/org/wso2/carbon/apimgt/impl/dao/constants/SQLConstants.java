@@ -3588,7 +3588,7 @@ public class SQLConstants {
                         "DISPLAY_NAME) VALUES (?,?,?,?,?,?,?,?)";
         public static final String UPDATE_KEY_MANAGER =
                 "UPDATE AM_KEY_MANAGER SET NAME = ?,DESCRIPTION = ?,TYPE = ?,CONFIGURATION = ?,TENANT_DOMAIN = ?," +
-                        "ENABLED = ? WHERE UUID = ?";
+                        "ENABLED = ?,DISPLAY_NAME = ? WHERE UUID = ?";
 
         public static final String DELETE_KEY_MANAGER =
                 "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";

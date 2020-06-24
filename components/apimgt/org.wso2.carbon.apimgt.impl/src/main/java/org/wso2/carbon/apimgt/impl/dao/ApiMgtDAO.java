@@ -8464,6 +8464,7 @@ public class ApiMgtDAO {
                     String uuid = resultSet.getString("UUID");
                     keyManagerConfigurationDTO.setUuid(uuid);
                     keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
@@ -8504,7 +8505,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
-                    keyManagerConfigurationDTO.setDisplayName("DISPLAY_NAME");
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
@@ -8545,6 +8546,7 @@ public class ApiMgtDAO {
                     String uuid = resultSet.getString("UUID");
                     keyManagerConfigurationDTO.setUuid(uuid);
                     keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
@@ -8632,7 +8634,8 @@ public class ApiMgtDAO {
                 preparedStatement.setBinaryStream(4, new ByteArrayInputStream(configurationJson.getBytes()));
                 preparedStatement.setString(5, keyManagerConfigurationDTO.getTenantDomain());
                 preparedStatement.setBoolean(6,keyManagerConfigurationDTO.isEnabled());
-                preparedStatement.setString(7, keyManagerConfigurationDTO.getUuid());
+                preparedStatement.setString(7, keyManagerConfigurationDTO.getDisplayName());
+                preparedStatement.setString(8, keyManagerConfigurationDTO.getUuid());
                 preparedStatement.executeUpdate();
                 conn.commit();
             } catch (SQLException e) {
@@ -8678,6 +8681,7 @@ public class ApiMgtDAO {
                     String uuid = resultSet.getString("UUID");
                     keyManagerConfigurationDTO.setUuid(uuid);
                     keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
