@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -59,19 +60,22 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            throw new APIManagementException("Super Tenant " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME + " " +
-                    "is not allowed to import a tenant theme");
+            String errorMessage = "Super Tenant " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME +
+                    " is not allowed to import a tenant theme";
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_NOT_ALLOWED,
+                            MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, tenantDomain));
         }
-
         RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain);
         try {
             fileInputStream.reset();
+            new APIAdminImpl().importTenantTheme(tenantId, fileInputStream);
+            return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
         } catch (IOException e) {
-            throw new APIManagementException("Failed to import tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+            String errorMessage = "Failed to import tenant theme of tenant " + tenantDomain;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_EXPORT_FAILED, tenantDomain, tenantDomain));
         }
-        new APIAdminImpl().importTenantTheme(tenantId, fileInputStream);
-        return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
     }
 
     /**
@@ -86,7 +90,6 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         APIAdminImpl apiAdmin = new APIAdminImpl();
-
         if (!apiAdmin.isTenantThemeExist(tenantId)) {
             RestApiUtil.handleResourceNotFoundError(
                     "Tenant Theme for tenant " + tenantDomain + " does not exist.", log);
@@ -103,9 +106,10 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
             return Response.ok(tenantThemeArchive, MediaType.APPLICATION_OCTET_STREAM)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + tenantThemeArchive.getName() + "\"").build();
-        } catch (Exception e) {
-            throw new APIManagementException("Failed to export tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        } catch (IOException e) {
+            String errorMessage = "Failed to export tenant theme of tenant " + tenantDomain;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_EXPORT_FAILED, tenantDomain, tenantDomain));
         }
     }
 }
