@@ -72,7 +72,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.openapitools.codegen.serializer.SerializerUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -728,7 +727,7 @@ public class OASParserUtil {
             ParseOptions options = new ParseOptions();
             options.setResolve(true);
             OpenAPI openAPI = openAPIV3Parser.read(filePath, null, options);
-            openAPIContent = SerializerUtils.toYamlString(openAPI);
+            openAPIContent = Json.pretty(openAPI);
         } else if (SwaggerVersion.SWAGGER.equals(version)) {
             SwaggerParser parser = new SwaggerParser();
             Swagger swagger = parser.read(filePath, null, true);

@@ -3425,6 +3425,9 @@ public class SQLConstants {
         public static final String DELETE_EMAIL_BY_UUID =
                 "DELETE FROM AM_NOTIFICATION_SUBSCRIBER WHERE UUID= ?";
 
+        public static final String GET_BOT_DETECTED_DATA =
+                "from AM_BOT_DATA SELECT request_time, message_id, http_method, headers, message_body, client_ip";
+
     }
 
     public static class RevokedJWTConstants {
@@ -3560,7 +3563,7 @@ public class SQLConstants {
                         "DISPLAY_NAME) VALUES (?,?,?,?,?,?,?,?)";
         public static final String UPDATE_KEY_MANAGER =
                 "UPDATE AM_KEY_MANAGER SET NAME = ?,DESCRIPTION = ?,TYPE = ?,CONFIGURATION = ?,TENANT_DOMAIN = ?," +
-                        "ENABLED = ? WHERE UUID = ?";
+                        "ENABLED = ?,DISPLAY_NAME = ? WHERE UUID = ?";
 
         public static final String DELETE_KEY_MANAGER =
                 "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";

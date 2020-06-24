@@ -78,6 +78,8 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.Notifier;
+import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -129,6 +131,10 @@ public class APIMgtDAOTest {
         config.load(dbConfigPath);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
                 (config));
+        List<Notifier> notifierList = new ArrayList<>();
+        SubscriptionsNotifier subscriptionsNotifier = new SubscriptionsNotifier();
+        notifierList.add(subscriptionsNotifier);
+        ServiceReferenceHolder.getInstance().getNotifiersMap().put(subscriptionsNotifier.getType(), notifierList);
         PowerMockito.mockStatic(KeyManagerHolder.class);
         keyManager = Mockito.mock(KeyManager.class);
         APIMgtDBUtil.initialize();

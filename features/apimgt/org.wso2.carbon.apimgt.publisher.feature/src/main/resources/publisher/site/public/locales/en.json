@@ -860,7 +860,6 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.subscription.blocked": "Subscription was blocked.",
   "Apis.Details.Subscriptions.SubscriptionsTable.subscription.blocked.prod.only": "Subscription was blocked for production only.",
   "Apis.Details.Subscriptions.SubscriptionsTable.subscription.unblocked": "Subscription was unblocked.",
-  "Apis.Details.Subscriptions.table.empty": "No subscription data available.",
   "Apis.Details.components.APIDetailsTopMenu.created.by": "Created by:",
   "Apis.Details.components.APIDetailsTopMenu.error": "Something went wrong while downloading the API.",
   "Apis.Details.components.APIDetailsTopMenu.last.updated.time": "Last updated:",

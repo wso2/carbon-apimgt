@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
@@ -49,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
@@ -322,6 +324,12 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
         checkPublishPermission();
         apiMgtDAO.updateSubscription(subscribedAPI);
+        subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
+        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
+                subscribedAPI.getSubscriptionId(), subscribedAPI.getApiId().getUUID(),
+                subscribedAPI.getApplication().getId(), subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
+        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
     }
 
     @Override

@@ -33,6 +33,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -488,6 +489,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             body, MessageContext messageContext) throws APIManagementException {
 
         String username = RestApiUtil.getLoggedInUsername();
+        try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
@@ -508,12 +510,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getClientSecret());
                         }
                     }
-                    
+
                     if (body.getAdditionalProperties() != null) {
                         if (body.getAdditionalProperties() instanceof String &&
                                 StringUtils.isNotEmpty((String) body.getAdditionalProperties())) {
                             jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, body.getAdditionalProperties());
-                        }else if (body.getAdditionalProperties() instanceof Map){
+                        } else if (body.getAdditionalProperties() instanceof Map) {
                             String jsonContent = new Gson().toJson(body.getAdditionalProperties());
                             jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonContent);
                         }
@@ -521,13 +523,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     String jsonParams = jsonParamObj.toString();
                     String tokenScopes = StringUtils.join(body.getScopes(), " ");
                     String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
-                    if (StringUtils.isNotEmpty(body.getKeyManager())){
+                    if (StringUtils.isNotEmpty(body.getKeyManager())) {
                         keyManagerName = body.getKeyManager();
                     }
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                            jsonParams,keyManagerName);
+                            jsonParams, keyManagerName);
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
@@ -538,6 +540,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
+        } catch (EmptyCallbackURLForCodeGrantsException e) {
+            RestApiUtil.handleBadRequest(e.getMessage(), log);
+        }
         return null;
     }
 

@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -35,17 +39,25 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
+import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,6 +65,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * This class provides the core API admin functionality.
@@ -430,6 +451,68 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.deleteBotDataEmailList(uuid);
     }
 
+    /**
+     * Retrieve all bot detected data
+     *
+     * @return list of bot detected data
+     * @throws APIManagementException
+     */
+    public List<BotDetectionData> retrieveBotDetectionData() throws APIManagementException {
+
+        List<BotDetectionData> botDetectionDatalist = new ArrayList<>();
+        String appName = AlertMgtConstants.APIM_ALERT_BOT_DETECTION_APP;
+        String query = SQLConstants.BotDataConstants.GET_BOT_DETECTED_DATA;
+
+        JSONObject botDataJsonObject = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        if (botDataJsonObject != null) {
+            JSONArray botDataJsonArray = (JSONArray) botDataJsonObject.get("records");
+            if (botDataJsonArray != null && botDataJsonArray.size() != 0) {
+                for (Object botData : botDataJsonArray) {
+                    JSONArray values = (JSONArray) botData;
+                    BotDetectionData botDetectionData = new BotDetectionData();
+                    botDetectionData.setCurrentTime((Long) values.get(0));
+                    botDetectionData.setMessageID((String) values.get(1));
+                    botDetectionData.setApiMethod((String) values.get(2));
+                    botDetectionData.setHeaderSet((String) values.get(3));
+                    botDetectionData.setMessageBody(extractBotDetectionDataContent((String) values.get(4)));
+                    botDetectionData.setClientIp((String) values.get(5));
+                    botDetectionDatalist.add(botDetectionData);
+                }
+            }
+        }
+        return botDetectionDatalist;
+    }
+
+    /**
+     * Extract content of the bot detection data
+     *
+     * @param messageBody message body of bot detection data
+     * @return extracted content
+     */
+    public String extractBotDetectionDataContent(String messageBody) {
+
+        String content;
+        try {
+            //Parse the message body and extract the content in XML form
+            DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource(new StringReader(messageBody)));
+            Node bodyContentNode = document.getFirstChild().getFirstChild();
+
+            //Convert XML form to String
+            StringWriter writer = new StringWriter();
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
+            String output = writer.toString();
+            content = output.substring(output.indexOf("?>") + 2); //remove <?xml version="1.0" encoding="UTF-8"?>
+        } catch (ParserConfigurationException | TransformerException | IOException | SAXException e) {
+            String errorMessage = "Error while extracting content from " + messageBody;
+            log.error(errorMessage, e);
+            content = messageBody;
+        }
+        return content;
+    }
+
     public APICategory addCategory(APICategory category, String userName) throws APIManagementException {
 
         int tenantID = APIUtil.getTenantId(userName);
@@ -582,5 +665,70 @@ public class APIAdminImpl implements APIAdmin {
             throw new APIMgtResourceNotFoundException(msg);
         }
         return workflow;
+    }
+
+    /**
+     * This method used to check the existence of the scope name for the particular user
+     *
+     * @param username      username to be validated
+     * @param scopeName     scope to be validated
+     * @throws APIManagementException
+     */
+    public boolean isScopeExistsForUser(String username, String scopeName) throws APIManagementException {
+        if (APIUtil.isUserExist(username)){
+            Map<String, String> scopeRoleMapping =
+                    APIUtil.getRESTAPIScopesForTenant(MultitenantUtils.getTenantDomain(username));
+            if (scopeRoleMapping.containsKey(scopeName)) {
+                String[] userRoles = APIUtil.getListOfRoles(username);
+                return getRoleScopeList(userRoles,scopeRoleMapping).contains(scopeName);
+            } else {
+                throw new APIManagementException("Scope Not Found.  Scope : " + scopeName + ",",
+                        ExceptionCodes.SCOPE_NOT_FOUND);
+            }
+        } else {
+            throw new APIManagementException("User Not Found. Username :" + username + ",",
+                    ExceptionCodes.USER_NOT_FOUND);
+         }
+    }
+
+    /**
+     * This method used to check the existence of the scope name
+     * @param username      tenant username to get tenant-scope mapping
+     * @param scopeName     scope to be validated
+     * @throws APIManagementException
+     */
+    public boolean isScopeExists(String username, String scopeName)  {
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+                .getTenantDomain(username));
+        return scopeRoleMapping.containsKey(scopeName);
+    }
+
+    /**
+     * This method used to get the list of scopes of a user roles
+     *
+     * @param userRoles             roles of a particular user
+     * @param scopeRoleMapping      scope-role mapping
+     * @return scopeList            scope lost of a particular user
+     * @throws APIManagementException
+     */
+    private List<String> getRoleScopeList(String[] userRoles, Map<String, String> scopeRoleMapping) {
+        List<String> userRoleList;
+        List<String> authorizedScopes = new ArrayList<>();
+
+        if (userRoles == null || userRoles.length == 0) {
+            userRoles = new String[0];
+        }
+
+        userRoleList = Arrays.asList(userRoles);
+        Iterator<Map.Entry<String, String>> iterator = scopeRoleMapping.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            for (String aRole : entry.getValue().split(",")) {
+                if (userRoleList.contains(aRole)) {
+                    authorizedScopes.add(entry.getKey());
+                }
+            }
+        }
+        return authorizedScopes;
     }
 }

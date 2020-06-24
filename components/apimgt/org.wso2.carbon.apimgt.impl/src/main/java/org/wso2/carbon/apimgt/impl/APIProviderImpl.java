@@ -130,6 +130,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
@@ -2289,8 +2290,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Collections.sort(sortedAPIs, comparator);
         for (int i = sortedAPIs.size() - 1; i >= 0; i--) {
             String oldVersion = sortedAPIs.get(i).getId().getVersion();
-            apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), oldVersion
-            );
+            apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), oldVersion);
         }
     }
 
@@ -3982,6 +3982,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
         apiMgtDAO.updateSubscription(subscribedAPI);
+        subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
+        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
+                subscribedAPI.getSubscriptionId(), subscribedAPI.getApiId().getUUID(),
+                subscribedAPI.getApplication().getId(), subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
+        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
     }
 
     public void deleteAPI(APIIdentifier identifier, String apiUuid) throws APIManagementException {
@@ -8105,6 +8111,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             // Make the LC status of the API Product published by default
             saveAPIStatus(artifactPath, APIConstants.PUBLISHED);
+
+            Set<String> tagSet = apiProduct.getTags();
+            if (tagSet != null) {
+                for (String tag : tagSet) {
+                    registry.applyTag(artifactPath, tag);
+                }
+            }
 
             String visibleRolesList = apiProduct.getVisibleRoles();
             String[] visibleRoles = new String[0];

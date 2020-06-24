@@ -70,6 +70,8 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -607,8 +609,12 @@ public class OAS2Parser extends APIDefinition {
             validationResponse.setParser(this);
             if (returnJsonContent) {
                 if (!apiDefinition.trim().startsWith("{")) { // not a json (it is yaml)
-                    JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition);
-                    validationResponse.setJsonContent(jsonNode.toString());
+                    try {
+                        JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition);
+                        validationResponse.setJsonContent(jsonNode.toString());
+                    } catch (IOException e) {
+                        throw new APIManagementException("Error while reading API definition yaml", e);
+                    }
                 } else {
                     validationResponse.setJsonContent(apiDefinition);
                 }
@@ -1317,10 +1323,10 @@ public class OAS2Parser extends APIDefinition {
                     securityDefinitions.put(SWAGGER_SECURITY_SCHEMA_KEY, defaultTypeFlow);
                 }
             }
+            //update list of security schemes in the swagger object
+            swagger.setSecurityDefinitions(securityDefinitions);
         }
-        //update list of security schemes in the swagger object
         setOtherSchemes(otherSetOfSchemes);
-        swagger.setSecurityDefinitions(securityDefinitions);
         return swagger;
     }
 
@@ -1353,7 +1359,6 @@ public class OAS2Parser extends APIDefinition {
                         opScopesDefault.addAll(opScopesDefaultInstance);
                     }
                     updatedDefaultSecurityRequirement.put(SWAGGER_SECURITY_SCHEMA_KEY, opScopesDefault);
-                    securityRequirements.add(updatedDefaultSecurityRequirement);
                     for (Map<String, List<String>> input : securityRequirements) {
                         for (String scheme : schemes) {
                             if (!SWAGGER_SECURITY_SCHEMA_KEY.equals(scheme)) {
@@ -1368,10 +1373,8 @@ public class OAS2Parser extends APIDefinition {
                             }
                             updatedDefaultSecurityRequirement.put(SWAGGER_SECURITY_SCHEMA_KEY, opScopesDefault);
                         }
-                        if (input.containsKey(SWAGGER_SECURITY_SCHEMA_KEY)) {
-                            input = updatedDefaultSecurityRequirement;
-                        }
                     }
+                    securityRequirements.add(updatedDefaultSecurityRequirement);
                 }
                 operation.setSecurity(securityRequirements);
                 entry.setValue(operation);

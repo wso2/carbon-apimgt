@@ -295,7 +295,7 @@ a {
   -moz-transition: width 3s ease;
   -o-transition: width 3s ease;
   transition: width 3s ease;
-  animation: progress-bar-stripes 2s linear infinite;
+  animation: progress-bar-stripes 4s linear infinite;
   background-color: #19569e;
 }
 .progress-bar-striped p{
@@ -305,10 +305,10 @@ a {
 @keyframes progress-bar-stripes {
 
   0% {
-    background-position: 40px 0;
+    background-position: 0 0;
   }
   100% {
-    background-position: 0 0;
+    background-position: 40px 0;
   }
 }
 /* Progress bar styles end */ 

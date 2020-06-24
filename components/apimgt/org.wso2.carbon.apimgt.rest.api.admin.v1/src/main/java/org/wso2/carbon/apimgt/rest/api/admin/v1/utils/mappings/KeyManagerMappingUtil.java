@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
@@ -92,10 +93,19 @@ public class KeyManagerMappingUtil {
             keyManagerDTO.setIssuer(issuerElement.getAsString());
             jsonObject.remove(APIConstants.KeyManager.ISSUER);
         }
-        JsonElement jwksEndpointElement = jsonObject.get(APIConstants.KeyManager.JWKS_ENDPOINT);
-        if (jwksEndpointElement != null) {
-            keyManagerDTO.setJwksEndpoint(jwksEndpointElement.getAsString());
-            jsonObject.remove(APIConstants.KeyManager.JWKS_ENDPOINT);
+        JsonElement certificateValueElement = jsonObject.get(APIConstants.KeyManager.CERTIFICATE_VALUE);
+        JsonElement certificateTypeElement = jsonObject.get(APIConstants.KeyManager.CERTIFICATE_TYPE);
+        if (certificateTypeElement != null && certificateValueElement != null) {
+            KeyManagerCertificatesDTO keyManagerCertificatesDTO = new KeyManagerCertificatesDTO();
+            keyManagerCertificatesDTO.setValue(certificateValueElement.getAsString());
+            if (APIConstants.KeyManager.CERTIFICATE_TYPE_JWKS_ENDPOINT.equals(certificateTypeElement.getAsString())) {
+                keyManagerCertificatesDTO.setType(KeyManagerCertificatesDTO.TypeEnum.JWKS);
+            } else if (APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE.equals(certificateTypeElement.getAsString())) {
+                keyManagerCertificatesDTO.setType(KeyManagerCertificatesDTO.TypeEnum.PEM);
+            }
+            keyManagerDTO.setCertificates(keyManagerCertificatesDTO);
+            jsonObject.remove(APIConstants.KeyManager.CERTIFICATE_VALUE);
+            jsonObject.remove(APIConstants.KeyManager.CERTIFICATE_TYPE);
         }
         JsonElement userInfoEndpoint = jsonObject.get(APIConstants.KeyManager.USERINFO_ENDPOINT);
         if (userInfoEndpoint != null) {
@@ -201,8 +211,16 @@ public class KeyManagerMappingUtil {
         if (StringUtils.isNotEmpty(keyManagerDTO.getIssuer())) {
             additionalProperties.put(APIConstants.KeyManager.ISSUER, keyManagerDTO.getIssuer());
         }
-        if (StringUtils.isNotEmpty(keyManagerDTO.getJwksEndpoint())) {
-            additionalProperties.put(APIConstants.KeyManager.JWKS_ENDPOINT, keyManagerDTO.getJwksEndpoint());
+        if (keyManagerDTO.getCertificates() != null) {
+            additionalProperties.put(APIConstants.KeyManager.CERTIFICATE_VALUE,
+                    keyManagerDTO.getCertificates().getValue());
+            if (KeyManagerCertificatesDTO.TypeEnum.JWKS.equals(keyManagerDTO.getCertificates().getType())) {
+                additionalProperties.put(APIConstants.KeyManager.CERTIFICATE_TYPE,
+                        APIConstants.KeyManager.CERTIFICATE_TYPE_JWKS_ENDPOINT);
+            } else if (KeyManagerCertificatesDTO.TypeEnum.PEM.equals(keyManagerDTO.getCertificates().getType())) {
+                additionalProperties.put(APIConstants.KeyManager.CERTIFICATE_TYPE,
+                        APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE);
+            }
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getUserInfoEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.USERINFO_ENDPOINT, keyManagerDTO.getUserInfoEndpoint());
