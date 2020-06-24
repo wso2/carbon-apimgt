@@ -316,11 +316,6 @@ class Details extends React.Component {
         this.updateSubscriptionData();
     }
 
-    getValueOfOpen (){
-        const isOpen = this.state.open;
-        return isOpen;
-    }
-
     handleDrawerOpen() {
         this.setState({ open: true });
     };

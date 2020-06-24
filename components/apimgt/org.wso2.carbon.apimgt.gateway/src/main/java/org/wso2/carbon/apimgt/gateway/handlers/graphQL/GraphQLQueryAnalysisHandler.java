@@ -204,8 +204,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                     return false;
                 }
                 return true;
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Throwable e) {
+                log.error(e);
             }
         } else {
             return true; // No complexity limitation check

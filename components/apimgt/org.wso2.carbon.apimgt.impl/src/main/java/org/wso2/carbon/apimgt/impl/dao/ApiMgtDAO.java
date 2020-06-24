@@ -14370,7 +14370,6 @@ public class ApiMgtDAO {
      * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException
      */
-
     public void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException {
         String addCustomComplexityDetails = SQLConstants.ADD_CUSTOM_COMPLEXITY_DETAILS_SQL;
@@ -14421,8 +14420,6 @@ public class ApiMgtDAO {
             handleException("Error while updating custom complexity details: ", e);
         }
     }
-
-
     /**
      * Add or Update complexity details
      *
@@ -14443,13 +14440,11 @@ public class ApiMgtDAO {
                 } else {
                     addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
                 }
-
             }
         } catch (SQLException ex) {
             handleException("Error while updating custom complexity details: ", ex);
         }
     }
-
 
     /**
      * Get custom complexity details for a particular API

@@ -123,13 +123,12 @@ public class SubscriptionThrottlePolicyMappingUtil {
         subscriptionPolicy.setRateLimitTimeUnit(dto.getRateLimitTimeUnit());
         subscriptionPolicy.setRateLimitCount(dto.getRateLimitCount());
         subscriptionPolicy.setStopOnQuotaReach(dto.isStopOnQuotaReach());
-        if(dto.getGraphQLMaxComplexity() != null){
+        if (dto.getGraphQLMaxComplexity() != null) {
             subscriptionPolicy.setGraphQLMaxComplexity(dto.getGraphQLMaxComplexity());
         }
-        if(dto.getGraphQLMaxDepth() != null){
+        if (dto.getGraphQLMaxDepth() != null) {
             subscriptionPolicy.setGraphQLMaxDepth(dto.getGraphQLMaxDepth());
         }
-
         List<CustomAttributeDTO> customAttributes = dto.getCustomAttributes();
         if (customAttributes != null && customAttributes.size() > 0) {
             JSONArray customAttrJsonArray = new JSONArray();
