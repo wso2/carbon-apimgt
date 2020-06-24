@@ -117,7 +117,7 @@ public class InMemoryAPIDeployer {
                         }
                     }
                     return true;
-                } catch (ArtifactSynchronizerException e ) {
+                } catch (ArtifactSynchronizerException| APIManagementException e ) {
                     log.error("Error  deploying APIs to the Gateway " + e );
                 }
             } else {
@@ -189,5 +189,4 @@ public class InMemoryAPIDeployer {
         }
         return gatewayAPIDTO;
     }
-
 }

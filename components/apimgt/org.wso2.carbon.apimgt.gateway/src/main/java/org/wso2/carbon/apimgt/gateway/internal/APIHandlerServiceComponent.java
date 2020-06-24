@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAP
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
+import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
 import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationServiceImpl;
 import org.wso2.carbon.apimgt.gateway.service.RevokedTokenDataImpl;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.endpoint.service.EndpointAdmin;
 import org.wso2.carbon.localentry.service.LocalEntryAdmin;
 import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
@@ -75,10 +77,7 @@ import java.io.IOException;
 public class APIHandlerServiceComponent {
 
     private static final Log log = LogFactory.getLog(APIHandlerServiceComponent.class);
-
     private APIKeyValidatorClientPool clientPool;
-
-
     private ServiceRegistration registration;
 
     @Activate
@@ -98,13 +97,8 @@ public class APIHandlerServiceComponent {
             APIManagerConfiguration apiManagerConfiguration =
                     ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
             String gatewayType = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-            GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
-                    ServiceReferenceHolder.getInstance()
-                            .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
-            if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-                InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-                inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(gatewayArtifactSynchronizerProperties.getGatewayLabels());
-            }
+            bundleContext.registerService(ServerStartupObserver.class.getName(), new GatewayStartupListener(), null);
+
             if ("Synapse".equalsIgnoreCase(gatewayType)) {
                 // Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();
@@ -137,10 +131,7 @@ public class APIHandlerServiceComponent {
                         webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
                     }
                 }
-
                 // Set APIM Gateway JWT Generator
-
-
                 registration =
                         context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
                                 new APIMgtGatewayJWTGeneratorImpl(), null);
@@ -385,9 +376,6 @@ public class APIHandlerServiceComponent {
 
         ServiceReferenceHolder.getInstance().setMediationSecurityAdminService(null);
     }
-
-
-
 
     @Reference(
             name = "jwt.generator.service.component",

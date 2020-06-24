@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
-import com.google.common.io.ByteStreams;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,19 +27,15 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.apache.tools.ant.types.resources.StringResource;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -49,10 +45,9 @@ import java.util.List;
 public class DBRetriever implements ArtifactRetriever {
 
     private static final Log log = LogFactory.getLog(DBRetriever.class);
-    private static final String UTF8 = "UTF-8";
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
     public static final int retrievalTimeoutInSeconds = 15;
-    public static final int retrievalRetries = 15;
+    public static final int retrievalRetries = 2;
 
     @Override
     public void init() throws ArtifactSynchronizerException {
@@ -61,23 +56,54 @@ public class DBRetriever implements ArtifactRetriever {
 
     @Override
     public String retrieveArtifact(String APIId, String gatewayLabel, String gatewayInstruction)
-            throws APIManagementException {
+            throws ArtifactSynchronizerException {
         try {
-            String baseURL = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+            String baseURL = APIConstants.HTTPS_PROTOCOL_URL_PREFIX +
+                    System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
                     System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
-            String endcodedgatewayLabel= URLEncoder.encode(gatewayLabel,UTF8);
+            String endcodedgatewayLabel= URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);
             String path  = APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ARTIFACTS + "?apiId=" + APIId +
                     "&gatewayInstruction=" + gatewayInstruction +"&gatewayLabel="+ endcodedgatewayLabel;
             String endpoint = baseURL + path;
-            return invokeService(endpoint);
+            HttpResponse httpResponse = invokeService(endpoint);
+            return EntityUtils.toString(httpResponse.getEntity(), APIConstants.DigestAuthConstants.CHARSET);
         } catch (IOException e) {
             String msg = "Error while executing the http client " ;
             log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            throw new ArtifactSynchronizerException(msg, e);
         }
     }
 
-    private String invokeService(String endpoint) throws IOException, APIManagementException {
+    @Override
+    public List<String> retrieveAllArtifacts(String label) throws ArtifactSynchronizerException {
+        List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
+        try {
+            String baseURL = APIConstants.HTTPS_PROTOCOL_URL_PREFIX +
+                    System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+                    System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
+            String endcodedgatewayLabel= URLEncoder.encode(label, APIConstants.DigestAuthConstants.CHARSET);
+            String path  = APIConstants.GatewayArtifactSynchronizer.GATEAY_SYNAPSE_ARTIFACTS
+                    + "?gatewayLabel="+ endcodedgatewayLabel;
+            String endpoint = baseURL + path;
+            HttpResponse httpResponse = invokeService(endpoint);
+            String responseString = EntityUtils.toString(httpResponse.getEntity(),
+                    APIConstants.DigestAuthConstants.CHARSET);
+            JSONObject artifactObject = new JSONObject(responseString);
+            JSONArray jArray = (JSONArray)artifactObject.get("list");
+            if (jArray != null) {
+                for (int i = 0; i < jArray.length(); i++) {
+                    gatewayRuntimeArtifactsArray.add(jArray.get(i).toString());
+                }
+            }
+            return gatewayRuntimeArtifactsArray;
+        } catch (IOException e) {
+            String msg = "Error while executing the http client " ;
+            log.error(msg, e);
+            throw new ArtifactSynchronizerException(msg, e);
+        }
+    }
+
+    private HttpResponse invokeService(String endpoint) throws IOException,ArtifactSynchronizerException {
         HttpGet method = new HttpGet(endpoint);
         URL synapseGetURL = new URL(endpoint);
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
@@ -85,7 +111,7 @@ public class DBRetriever implements ArtifactRetriever {
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         byte[] credentials = Base64.encodeBase64((username + ":" + password).getBytes
-                (StandardCharsets.UTF_8));
+                (APIConstants.DigestAuthConstants.CHARSET));
         int synapsePort = synapseGetURL .getPort();
         String synapseProtocol = synapseGetURL .getProtocol();
         method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
@@ -116,28 +142,9 @@ public class DBRetriever implements ArtifactRetriever {
         } while (retry);
         if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
             log.error("Retrieving artifacts is unsuccessful");
-            throw new APIManagementException("Error while retrieving artifacts");
+            throw new ArtifactSynchronizerException("Error while retrieving artifacts");
         }
-        return EntityUtils.toString(httpResponse.getEntity(), UTF8);
-    }
-
-    @Override
-    public List<String> retrieveAllArtifacts(String label) throws ArtifactSynchronizerException {
-        List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
-        try {
-            List<ByteArrayInputStream> baip = apiMgtDAO.getAllGatewayPublishedAPIArtifacts(label);
-            for (ByteArrayInputStream byteStream :baip){
-                byte[] bytes = ByteStreams.toByteArray(byteStream);
-                String  gatewayRuntimeArtifacts = new String(bytes);
-                gatewayRuntimeArtifactsArray.add(gatewayRuntimeArtifacts);
-            }
-            if (log.isDebugEnabled()){
-                log.debug("Successfully retrieved Artifacts from DB");
-            }
-        } catch (APIManagementException | IOException e) {
-            throw new ArtifactSynchronizerException("Error retrieving Artifact from DB", e);
-        }
-        return gatewayRuntimeArtifactsArray;
+        return httpResponse;
     }
 
     @Override

@@ -23,37 +23,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.h2.engine.Constants.UTF8;
 
 public class DBSaver implements ArtifactSaver {
 
     private static final Log log = LogFactory.getLog(DBSaver.class);
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    public static final int saverTimeoutInSeconds = 15;
+    public static final int saveRetries = 15;
 
     @Override
     public void init() throws ArtifactSynchronizerException {
@@ -63,59 +54,94 @@ public class DBSaver implements ArtifactSaver {
     @Override
     public void saveArtifact(String gatewayRuntimeArtifacts, String gatewayLabel, String gatewayInstruction)
             throws ArtifactSynchronizerException {
-        String baseUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
-        String synapsePost = baseUrl + APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ARTIFACTS;
-        HttpPost method = new HttpPost(synapsePost);
-        URL synapsePostURL = null;
+
+        JSONObject artifactObject = new JSONObject(gatewayRuntimeArtifacts);
+        String apiId = (String) artifactObject.get("apiId");
+        String apiName = (String) artifactObject.get("name");
+        String version = (String) artifactObject.get("version");
+        String tenantDomain = (String) artifactObject.get("tenantDomain");
+        byte[] bytesEncoded =  Base64.encodeBase64(gatewayRuntimeArtifacts.getBytes());
+        String bytesEncodedAsString =  new String(bytesEncoded);
+
         try {
-            synapsePostURL = new URL(synapsePost);
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-            String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-            byte[] credentials = Base64.encodeBase64((username + ":" + password).getBytes
-                    (StandardCharsets.UTF_8));
-            int keyMgtPort = synapsePostURL.getPort();
-            String keyMgtProtocol = synapsePostURL.getProtocol();
-            method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
-            HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
+            String baseUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX +
+                    System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+                    System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
+            String synapsePost = baseUrl + APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ARTIFACTS;
 
-//            List<NameValuePair> urlParameters = new ArrayList<>();
-//            urlParameters.add(new BasicNameValuePair("gatewayRuntimeArtifacts", gatewayRuntimeArtifacts));
-//            urlParameters.add(new BasicNameValuePair("gatewayLabel", gatewayLabel));
-//            urlParameters.add(new BasicNameValuePair("gatewayInstruction", gatewayInstruction));
-//            method.setEntity(new UrlEncodedFormEntity(urlParameters, "UTF-8"));
-
-            String endcodedGatewayArtifacts= URLEncoder.encode(gatewayRuntimeArtifacts,UTF8);
             JSONObject revokeRequestPayload = new JSONObject();
-            revokeRequestPayload.put("gatewayRuntimeArtifacts", endcodedGatewayArtifacts);
-            revokeRequestPayload.put("gatewayLabel", gatewayLabel);
+            revokeRequestPayload.put("apiId", apiId);
+            revokeRequestPayload.put("apiName", apiName);
+            revokeRequestPayload.put("version", version);
+            revokeRequestPayload.put("tenantDomain", tenantDomain);
             revokeRequestPayload.put("gatewayInstruction", gatewayInstruction);
-            StringEntity requestEntity = new StringEntity(revokeRequestPayload.toString());
-            method.addHeader("content-type", "application/x-www-form-urlencoded");
-            method.setEntity(requestEntity);
-
-            HttpResponse httpResponse = null;
-            httpResponse = httpClient.execute(method);
+            revokeRequestPayload.put("bytesEncodedAsString", bytesEncodedAsString);
+            revokeRequestPayload.put("gatewayLabel", URLEncoder.encode(gatewayLabel,
+                    APIConstants.DigestAuthConstants.CHARSET));
+            HttpResponse httpResponse = invokeService(synapsePost,revokeRequestPayload);
             if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-                log.error("Error in storing files to the DB");
-                throw new ArtifactSynchronizerException("Error in storing files to the DB");
+                log.error("Retrieving artifacts is UnSuccessful. Internal Data Service returned HTTP Status " +
+                        "code : " + httpResponse.getStatusLine().getStatusCode() );
+                throw new ArtifactSynchronizerException("Error while Saving Artifacts to DB");
             }
         } catch (MalformedURLException e) {
-            String msg = "Error while constructing key manager URL ";
+            String msg = "Error while constructing Synapse POST URL";
             log.error(msg, e);
             throw new ArtifactSynchronizerException(msg, e);
         } catch (IOException e) {
-            String msg = "Error while executing the http client ";
+            String msg = "Error while executing the http client";
             log.error(msg, e);
             throw new ArtifactSynchronizerException(msg, e);
         }
     }
 
+    private HttpResponse invokeService(String endpoint, JSONObject revokeRequestPayload) throws
+            IOException {
+        HttpPost method = new HttpPost(endpoint);
+        URL  synapsePostURL = new URL(endpoint);
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        byte[] credentials = Base64.encodeBase64((username + ":" + password).getBytes
+                (APIConstants.DigestAuthConstants.CHARSET));
+        int synapsePort = synapsePostURL.getPort();
+        String synapseProtocol = synapsePostURL.getProtocol();
+        method.setHeader("Authorization", "Basic " + new String(credentials,
+                APIConstants.DigestAuthConstants.CHARSET));
+        StringEntity requestEntity = new StringEntity(revokeRequestPayload.toString());
+        requestEntity.setContentType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+        method.setEntity(requestEntity);
+        HttpClient httpClient = APIUtil.getHttpClient(synapsePort, synapseProtocol);
+        HttpResponse httpResponse = null;
+        int retryCount = 0;
+        boolean retry;
+        do {
+            try {
+                httpResponse = httpClient.execute(method);
+                retry = false;
+            } catch (IOException ex) {
+                retryCount++;
+                if (retryCount < saveRetries) {
+                    retry = true;
+                    log.warn("Failed retrieving " + endpoint + " from remote endpoint: " + ex.getMessage()
+                            + ". Retrying after " + saverTimeoutInSeconds +
+                            " seconds.");
+                    try {
+                        Thread.sleep(saverTimeoutInSeconds * 1000);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+                } else {
+                    throw ex;
+                }
+            }
+        } while (retry);
+        return httpResponse;
+    }
+
     @Override
     public boolean isAPIPublished(String apiId) {
-
         try {
             return apiMgtDAO.isAPIPublishedInAnyGateway(apiId);
         } catch (APIManagementException e) {
@@ -131,7 +157,6 @@ public class DBSaver implements ArtifactSaver {
 
     @Override
     public String getName() {
-
         return APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME;
     }
 }
