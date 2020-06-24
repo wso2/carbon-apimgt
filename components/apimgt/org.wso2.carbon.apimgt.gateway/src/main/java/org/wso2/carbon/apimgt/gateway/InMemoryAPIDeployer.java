@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -180,7 +179,7 @@ public class InMemoryAPIDeployer {
                     } else {
                         log.error("Error retrieving artifacts for API " + apiId + ". Storage returned null");
                     }
-                } catch (ArtifactSynchronizerException  e) {
+                } catch (ArtifactSynchronizerException e) {
                     log.error("Error retrieving artifacts of " + apiId + " from storage", e);
                 }
             } else {
