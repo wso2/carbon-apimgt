@@ -124,7 +124,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Object} Deep copy of an object
  */
 function copyAPIConfig(api) {
-    const keyManagers = api.isAPIProduct() ? ['all'] : [...api.keyManagers];
+    const keyManagers = api.type === 'APIProduct' ? ['all'] : [...api.keyManagers];
     return {
         id: api.id,
         name: api.name,
