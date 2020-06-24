@@ -119,6 +119,8 @@ public class BlockingConditionRetriever extends TimerTask {
                     GatewayUtils.generateMap(blockConditionsDTO.getUser()));
             getThrottleDataHolder()
                     .addIplockingConditionsFromMap(GatewayUtils.generateIpRangeMap(blockConditionsDTO.getIp()));
+            getThrottleDataHolder().addSubscriptionBlockingConditionsFromMap(
+                    GatewayUtils.generateMap(blockConditionsDTO.getSubscription()));
         }
     }
 

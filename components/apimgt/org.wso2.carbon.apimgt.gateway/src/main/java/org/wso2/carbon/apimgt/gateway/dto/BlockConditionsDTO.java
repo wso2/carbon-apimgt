@@ -35,7 +35,7 @@ public class BlockConditionsDTO {
   
   private List<IPRange> ip = new ArrayList<>();
 
-
+  private List<String> subscription = new ArrayList<String>();
   
   private List<String> user = new ArrayList<String>();
   
@@ -80,5 +80,13 @@ public class BlockConditionsDTO {
 
   public void setCustom(List<String> custom) {
     this.custom = custom;
+  }
+
+  public void setSubscription(List<String> subscription) {
+    this.subscription = subscription;
+  }
+
+  public List<String> getSubscription() {
+    return subscription;
   }
 }

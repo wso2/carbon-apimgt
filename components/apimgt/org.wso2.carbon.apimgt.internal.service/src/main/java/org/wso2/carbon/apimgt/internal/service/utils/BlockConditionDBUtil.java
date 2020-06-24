@@ -114,6 +114,7 @@ public final class BlockConditionDBUtil {
         List<IPLevelDTO> ip = new ArrayList();
         List user = new ArrayList();
         List custom = new ArrayList();
+        List subscription = new ArrayList();
         String sqlQuery = "select * from AM_BLOCK_CONDITIONS";
         try {
             conn = BlockConditionDBUtil.getConnection();
@@ -167,6 +168,8 @@ public final class BlockConditionDBUtil {
                         user.add(value);
                     } else if ("CUSTOM".equals(type)) {
                         custom.add(value);
+                    } else if (APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION.equals(type)) {
+                        subscription.add(value);
                     }
                 }
             }
@@ -181,6 +184,7 @@ public final class BlockConditionDBUtil {
         blockConditionsDTO.setIp(ip);
         blockConditionsDTO.setUser(user);
         blockConditionsDTO.setCustom(custom);
+        blockConditionsDTO.setSubscription(subscription);
         return blockConditionsDTO;
     }
 

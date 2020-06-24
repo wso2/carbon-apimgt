@@ -56,6 +56,7 @@ public class ThrottleDataHolder {
     private Map<String, Long> throttleDataMap = new ConcurrentHashMap<String, Long>();
     private Map<String,Long> throttledAPIKeysMap = new ConcurrentHashMap<String, Long>();
     private Map<String, Map<String, List<ConditionDto>>> conditionDtoMap = new ConcurrentHashMap<>();
+    private Map<String, String> blockedSubscriptionConditionsMap = new ConcurrentHashMap<String, String>();
     public void addThrottleData(String key, Long value) {
         throttleDataMap.put(key, value);
     }
@@ -185,6 +186,20 @@ public class ThrottleDataHolder {
         }
     }
 
+    public void addSubscriptionBlockingCondition(String name, String value) {
+        blockedSubscriptionConditionsMap.put(name, value);
+    }
+
+    public void addSubscriptionBlockingConditionsFromMap(Map<String, String> data) {
+        if (data.size() > 0) {
+            blockedSubscriptionConditionsMap.putAll(data);
+        }
+    }
+
+    public void removeSubscriptionBlockingCondition(String name) {
+        blockedSubscriptionConditionsMap.remove(name);
+    }
+
     public void addIplockingConditionsFromMap(Map<String, Set<IPRange>> data) {
         if(data.size() > 0) {
             blockedIpConditionsMap.putAll(data);
@@ -257,10 +272,11 @@ public class ThrottleDataHolder {
     }
 
     public boolean isRequestBlocked(String apiBlockingKey, String applicationBlockingKey, String userBlockingKey,
-                                    String ipBlockingKey, String apiTenantDomain) {
+                                    String ipBlockingKey, String apiTenantDomain, String subscriptionBlockingKey) {
         return (blockedAPIConditionsMap.containsKey(apiBlockingKey) ||
                 blockedApplicationConditionsMap.containsKey(applicationBlockingKey) ||
                 blockedUserConditionsMap.containsKey(userBlockingKey) ||
+                blockedSubscriptionConditionsMap.containsKey(subscriptionBlockingKey) ||
                 isIpLevelBlocked(apiTenantDomain, ipBlockingKey));
     }
 
