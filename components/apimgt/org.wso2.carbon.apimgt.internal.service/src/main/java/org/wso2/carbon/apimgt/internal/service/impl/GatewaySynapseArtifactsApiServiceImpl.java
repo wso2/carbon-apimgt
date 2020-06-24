@@ -27,6 +27,8 @@ public class GatewaySynapseArtifactsApiServiceImpl implements GatewaySynapseArti
 
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
+    private SynapseArtifactListDTO synapseArtifactListDTOS = new SynapseArtifactListDTO();
+
     public Response gatewaySynapseArtifactsGet(String gatewayLabel, MessageContext messageContext) throws APIManagementException {
 
         List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
@@ -40,6 +42,9 @@ public class GatewaySynapseArtifactsApiServiceImpl implements GatewaySynapseArti
         } catch (APIManagementException | IOException e) {
             throw new APIManagementException("Error retrieving Artifact from DB", e);
         }
-        return Response.ok().entity(gatewayRuntimeArtifactsArray).build();
+
+        synapseArtifactListDTOS.list(gatewayRuntimeArtifactsArray);
+        synapseArtifactListDTOS.setCount(gatewayRuntimeArtifactsArray.size());
+        return Response.ok().entity(synapseArtifactListDTOS).build();
     }
 }

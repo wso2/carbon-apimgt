@@ -77,16 +77,14 @@ public class DBRetriever implements ArtifactRetriever {
     public List<String> retrieveAllArtifacts(String label) throws ArtifactSynchronizerException {
         List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
         try {
-            String baseURL = APIConstants.HTTPS_PROTOCOL_URL_PREFIX +
-                    System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+            String baseURL = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
                     System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
             String endcodedgatewayLabel= URLEncoder.encode(label, APIConstants.DigestAuthConstants.CHARSET);
             String path  = APIConstants.GatewayArtifactSynchronizer.GATEAY_SYNAPSE_ARTIFACTS
                     + "?gatewayLabel="+ endcodedgatewayLabel;
             String endpoint = baseURL + path;
             HttpResponse httpResponse = invokeService(endpoint);
-            String responseString = EntityUtils.toString(httpResponse.getEntity(),
-                    APIConstants.DigestAuthConstants.CHARSET);
+            String responseString = EntityUtils.toString(httpResponse.getEntity(), APIConstants.DigestAuthConstants.CHARSET);
             JSONObject artifactObject = new JSONObject(responseString);
             JSONArray jArray = (JSONArray)artifactObject.get("list");
             if (jArray != null) {
@@ -102,7 +100,7 @@ public class DBRetriever implements ArtifactRetriever {
         }
     }
 
-    private HttpResponse invokeService(String endpoint) throws IOException,ArtifactSynchronizerException {
+    private HttpResponse invokeService(String endpoint) throws IOException, ArtifactSynchronizerException {
         HttpGet method = new HttpGet(endpoint);
         URL synapseGetURL = new URL(endpoint);
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance()

@@ -514,27 +514,45 @@
         "summary" : "Save the given API Artifacts in database",
         "description" : "This will provide access to synapse artifacts in database.",
         "parameters" : [ {
-          "name" : "gatewayRuntimeArtifacts",
-          "in" : "query",
-          "description" : "**Search condition**.\n  Gateway runtime artifacts\n",
-          "required" : false,
-          "type" : "string"
-        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "gateway Artifacts which need to be saved\n",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/synapseArtifact"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nSynapse Artifacts saved in database Successfully\n"
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/gateway-synapse-artifacts" : {
+      "get" : {
+        "tags" : [ "Retrieving All Synapse artifacts" ],
+        "summary" : "Get all synapse artifacts for a given gateway label",
+        "description" : "This will provide access to synapse artifacts in database.\n",
+        "parameters" : [ {
           "name" : "gatewayLabel",
           "in" : "query",
-          "description" : "**Search condition**.\n  Label of the gateway\n",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "gatewayInstruction",
-          "in" : "query",
-          "description" : "**Search condition**.\n  Publish/Remove\n",
+          "description" : "**Search condition**.\n label associated with the API\n",
           "required" : false,
           "type" : "string"
         } ],
         "responses" : {
           "200" : {
-            "description" : "OK.\nSynapse Artifacts saved in database Successfully\n"
+            "description" : "An array of gatewayRuntimeArtifacts",
+            "schema" : {
+              "$ref" : "#/definitions/SynapseArtifactList"
+            }
           },
           "default" : {
             "description" : "Unexpected error",
@@ -735,6 +753,37 @@
         }
       }
     },
+    "synapseArtifact" : {
+      "properties" : {
+        "apiId" : {
+          "type" : "string"
+        },
+        "apiName" : {
+          "type" : "string",
+          "description" : "API Provider name."
+        },
+        "version" : {
+          "type" : "string",
+          "description" : "version of the API"
+        },
+        "tenantDomain" : {
+          "type" : "string",
+          "description" : "tenantDomain of the API"
+        },
+        "gatewayLabel" : {
+          "type" : "string",
+          "description" : "label of the API"
+        },
+        "gatewayInstruction" : {
+          "type" : "string",
+          "description" : "Publish/Remove"
+        },
+        "bytesEncodedAsString" : {
+          "type" : "string",
+          "description" : "bytes"
+        }
+      }
+    },
     "ApplicationList" : {
       "properties" : {
         "count" : {
@@ -881,6 +930,25 @@
           "type" : "string"
         }
       }
+    },
+    "SynapseArtifactList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Synapse Artifacts returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "SynapseArtifactList"
     },
     "ApplicationKeyMappingList" : {
       "properties" : {

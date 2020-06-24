@@ -407,29 +407,41 @@ paths:
       summary: Save the given API Artifacts in database
       description: This will provide access to synapse artifacts in database.
       parameters:
-        - name: gatewayRuntimeArtifacts
-          in: query
+        - in: body
+          name: body
           description: |
-            **Search condition**.
-              Gateway runtime artifacts
-          type: string
-        - name: gatewayLabel
-          in: query
-          description: |
-            **Search condition**.
-              Label of the gateway
-          type: string
-        - name: gatewayInstruction
-          in: query
-          description: |
-            **Search condition**.
-              Publish/Remove
-          type: string
+            gateway Artifacts which need to be saved
+          required: true
+          schema:
+            $ref: '#/definitions/synapseArtifact'
       responses:
         200:
           description: |
             OK.
             Synapse Artifacts saved in database Successfully
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /gateway-synapse-artifacts:
+    get:
+      summary: Get all synapse artifacts for a given gateway label
+      description: |
+        This will provide access to synapse artifacts in database.
+      parameters:
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the API
+          type: string
+      tags:
+        - Retrieving All Synapse artifacts
+      responses:
+        200:
+          description: An array of gatewayRuntimeArtifacts
+          schema:
+            $ref: '#/definitions/SynapseArtifactList'
         default:
           description: Unexpected error
           schema:
@@ -596,6 +608,32 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/URLMapping'
+
+  #-----------------------------------------------------
+  # synapse Artifact resource
+  #-----------------------------------------------------
+  synapseArtifact:
+    properties:
+      apiId:
+        type: string
+      apiName:
+        type: string
+        description: API Provider name.
+      version:
+        type: string
+        description: version of the API
+      tenantDomain:
+        type: string
+        description:  tenantDomain of the API
+      gatewayLabel:
+        type: string
+        description:  label of the API
+      gatewayInstruction:
+        type: string
+        description: Publish/Remove
+      bytesEncodedAsString:
+        type: string
+        description: bytes
   #-----------------------------------------------------
   # The Application List resource
   #-----------------------------------------------------
@@ -718,6 +756,24 @@ definitions:
         type: integer
       subscriptionState:
         type: string
+
+  #-----------------------------------------------------
+  # The Synapse Artifacts  List resource
+  #-----------------------------------------------------
+  SynapseArtifactList:
+    title:  SynapseArtifactList
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Synapse Artifacts returned.
+        example: 1
+      list:
+        type: array
+        items:
+          type : string
+      pagination:
+        $ref: '#/definitions/Pagination'
   #-----------------------------------------------------
   # The ApplicationKeyMapping List resource
   #-----------------------------------------------------

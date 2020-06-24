@@ -1,8 +1,10 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import com.google.common.io.ByteStreams;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -64,64 +66,22 @@ public class SynapseArtifactsApiServiceImpl implements SynapseArtifactsApiServic
         try {
             boolean status =false;
             byte[] gatewayRuntimeArtifactsAsBytes = bytesEncodedAsString.getBytes();
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayRuntimeArtifactsAsBytes);
+            byte[] bytesDecoded =  Base64.decodeBase64(gatewayRuntimeArtifactsAsBytes);
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytesDecoded);
             if (!apiMgtDAO.isAPIDetailsExists(apiId)) {
                 apiMgtDAO.addGatewayPublishedAPIDetails(apiId, apiName,
                         version, tenantDomain);
             }
             String dbQuery;
+            String decodedGatewaylabel = URLDecoder.decode(gatewayLabel,
+                    APIConstants.DigestAuthConstants.CHARSET);
             if (apiMgtDAO.isAPIArtifactExists(apiId, gatewayLabel)) {
                 dbQuery = SQLConstants.UPDATE_API_ARTIFACT;
             } else {
                 dbQuery = SQLConstants.ADD_GW_API_ARTIFACT;
             }
-            apiMgtDAO.addGatewayPublishedAPIArtifacts(apiId, gatewayLabel,
-                    byteArrayInputStream, gatewayRuntimeArtifactsAsBytes.length, gatewayInstruction, dbQuery);
-            status = true;
-            JSONObject responseObj = new JSONObject();
-            if (status) {
-                responseObj.put("Message", "Success");
-                String responseStringObj = String.valueOf(responseObj);
-                return Response.ok().entity(responseStringObj).build();
-            } else {
-                responseObj.put("Message", "Error");
-                String responseStringObj = String.valueOf(responseObj);
-                return Response.serverError().entity(responseStringObj).build();
-            }
-        } catch (APIManagementException e) {
-            throw new APIManagementException("Error saving Artifacts to the DB", e);
-        }
-    }
-
-
-    public Response synapseArtifactsPost(String gatewayRuntimeArtifacts, String gatewayLabel,
-                                         String gatewayInstruction, MessageContext messageContext)
-            throws APIManagementException {
-
-        try {
-            String decodedGatewayRuntimeArtifacts = URLDecoder.decode(gatewayRuntimeArtifacts,UTF8);
-            boolean status = false;
-            JSONObject artifactObject = new JSONObject(decodedGatewayRuntimeArtifacts);
-            String apiId = (String) artifactObject.get("apiId");
-            String apiName = (String) artifactObject.get("name");
-            String version = (String) artifactObject.get("version");
-            String tenantDomain = (String) artifactObject.get("tenantDomain");
-
-            byte[] gatewayRuntimeArtifactsAsBytes = gatewayRuntimeArtifacts.getBytes();
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayRuntimeArtifactsAsBytes);
-            if (!apiMgtDAO.isAPIDetailsExists(apiId)) {
-                apiMgtDAO.addGatewayPublishedAPIDetails(apiId, apiName,
-                        version, tenantDomain);
-            }
-
-            String dbQuery;
-            if (apiMgtDAO.isAPIArtifactExists(apiId, gatewayLabel)) {
-                dbQuery = SQLConstants.UPDATE_API_ARTIFACT;
-            } else {
-                dbQuery = SQLConstants.ADD_GW_API_ARTIFACT;
-            }
-            apiMgtDAO.addGatewayPublishedAPIArtifacts(apiId, gatewayLabel,
-                    byteArrayInputStream, gatewayRuntimeArtifactsAsBytes.length, gatewayInstruction, dbQuery);
+            apiMgtDAO.addGatewayPublishedAPIArtifacts(apiId, decodedGatewaylabel,
+                    byteArrayInputStream, bytesDecoded.length, gatewayInstruction, dbQuery);
             status = true;
             JSONObject responseObj = new JSONObject();
             if (status) {
