@@ -18,7 +18,7 @@
 
 import React, { useContext } from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import { app } from 'Settings';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import EmbadCode from 'AppComponents/Apis/Details/Social/EmbadCode';
@@ -68,6 +68,7 @@ function Social() {
     const { name: apiName } = api;
     const apiUrl = encodeURI(window.location);
     const theme = useTheme();
+    const { github_repo: github, slack_url: slack } = api.additionalProperties;
     const {
         custom: {
             social: {
@@ -84,7 +85,43 @@ function Social() {
         <>
             <div className={classes.oneFlex} />
             <div className={classes.socialLinkWrapper}>
-                {/* Facebook */}
+                {slack && (
+                    <>
+                        <a
+                            className={classes.socialLink}
+                            id='Slack'
+                            href={slack}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            title='Slack'
+                        >
+                            <img
+                                src={`${app.context}/site/public/images/social/slack.png`}
+                                alt='Slack'
+                            />
+                        </a>
+                    </>
+                )}
+                {github && (
+                    <>
+                        <a
+                            className={classes.socialLink}
+                            id='github'
+                            href={github}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            title='GitHub'
+                        >
+                            <img
+                                src={`${app.context}/site/public/images/social/github.jpg`}
+                                alt='GitHub'
+                            />
+                        </a>
+                    </>
+                )}
+                {(slack || github) && (
+                    <div className={classes.divider} />
+                )}
                 {showFacebook && (
                     <a
                         className={classes.socialLink}
@@ -92,21 +129,11 @@ function Social() {
                         href={`http://www.facebook.com/sharer.php?u=${apiUrl}`}
                         target='_blank'
                         rel='noopener noreferrer'
-                        title={(
-                            <FormattedMessage
-                                id='Apis.Details.Social.Social.facebook'
-                                defaultMessage='Facebook'
-                            />
-                        )}
+                        title='Facebook'
                     >
                         <img
                             src={`${app.context}/site/public/images/social/facebook.png`}
-                            alt={(
-                                <FormattedMessage
-                                    id='Apis.Details.Social.Social.facebook'
-                                    defaultMessage='Facebook'
-                                />
-                            )}
+                            alt='Facebook'
                         />
                     </a>
                 )}
@@ -114,25 +141,15 @@ function Social() {
                 {showTwitter && (
                     <a
                         className={classes.socialLink}
-                        id='facebook'
+                        id='Twitter'
                         href={`http://twitter.com/share?url=${apiUrl}&text=${apiName}`}
                         target='_blank'
                         rel='noopener noreferrer'
-                        title={(
-                            <FormattedMessage
-                                id='Apis.Details.Social.Social.twitter'
-                                defaultMessage='Twitter'
-                            />
-                        )}
+                        title='Twitter'
                     >
                         <img
                             src={`${app.context}/site/public/images/social/twitter.png`}
-                            alt={(
-                                <FormattedMessage
-                                    id='Apis.Details.Social.Social.twitter'
-                                    defaultMessage='Twitter'
-                                />
-                            )}
+                            alt='Twitter'
                         />
                     </a>
                 )}
@@ -140,31 +157,22 @@ function Social() {
                 {showReddit && (
                     <a
                         className={classes.socialLink}
-                        id='facebook'
+                        id='Reddit'
                         href={`http://www.reddit.com/submit?url=${apiUrl}&title=${apiName}`}
                         target='_blank'
                         rel='noopener noreferrer'
-                        title={(
-                            <FormattedMessage
-                                id='Apis.Details.Social.Social.reddit'
-                                defaultMessage='Reddit'
-                            />
-                        )}
+                        title='Reddit'
                     >
                         <img
                             src={`${app.context}/site/public/images/social/reddit.png`}
-                            alt={(
-                                <FormattedMessage
-                                    id='Apis.Details.Social.Social.reddit'
-                                    defaultMessage='Reddit'
-                                />
-                            )}
+                            alt='Reddit'
                         />
                     </a>
                 )}
                 {showEmbad && (
                     <>
                         <div className={classes.divider} />
+                        {/* TODO: Fix spelling mistake ~tmkb */}
                         <EmbadCode />
                     </>
                 )}
