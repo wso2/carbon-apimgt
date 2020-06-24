@@ -26,7 +26,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.keymgt.model.entity.APIList;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -56,7 +56,7 @@ import java.util.List;
 public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     private static final Log log = LogFactory.getLog(SubscriptionDataLoaderImpl.class);
-    private KeyManagerConfigurationsDto getKeyManagerConfigurationsDto;
+    private EventHubConfigurationDto getEventHubConfigurationDto;
 
     public static final int retrievalTimeoutInSeconds = 15;
     public static final int retrievalRetries = 15;
@@ -64,9 +64,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     public SubscriptionDataLoaderImpl() {
 
-        this.getKeyManagerConfigurationsDto = ServiceReferenceHolder.getInstance()
+        this.getEventHubConfigurationDto = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getKeyManagerConfigurationsDto();
+                .getEventHubConfigurationDto();
     }
 
     @Override
@@ -374,11 +374,11 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     private String invokeService(String path, String tenantDomain) throws DataLoadingException, IOException {
 
-        String serviceURLStr = getKeyManagerConfigurationsDto.getServiceUrl();
+        String serviceURLStr = getEventHubConfigurationDto.getServiceUrl();
         HttpGet method = new HttpGet(serviceURLStr + path);
 
             URL serviceURL = new URL(serviceURLStr + path);
-            byte[] credentials = getServiceCredentials(getKeyManagerConfigurationsDto);
+            byte[] credentials = getServiceCredentials(getEventHubConfigurationDto);
             int servicePort = serviceURL.getPort();
             String serviceProtocol = serviceURL.getProtocol();
             method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
@@ -425,10 +425,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     }
 
-    private byte[] getServiceCredentials(KeyManagerConfigurationsDto keyManagerConfigurationsDto) {
+    private byte[] getServiceCredentials(EventHubConfigurationDto eventHubConfigurationDto) {
 
-        String username = keyManagerConfigurationsDto.getUsername();
-        String pw = keyManagerConfigurationsDto.getPassword();
+        String username = eventHubConfigurationDto.getUsername();
+        String pw = eventHubConfigurationDto.getPassword();
         return Base64.encodeBase64((username + APIConstants.DELEM_COLON + pw).getBytes
                 (StandardCharsets.UTF_8));
     }
