@@ -40,7 +40,7 @@ GatewaySynapseArtifactsApiService delegate = new GatewaySynapseArtifactsApiServi
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all synapse artifacts for a given gateway label", notes = "This will provide access to synapse artifacts in database. ", response = SynapseArtifactListDTO.class, tags={ "Retrieving All Synapse artifacts" })
+    @ApiOperation(value = "Get all synapse artifacts for a given gateway label", notes = "This will provide access to the synapse artifacts in database. ", response = SynapseArtifactListDTO.class, tags={ "Retrieving All Synapse artifacts" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of gatewayRuntimeArtifacts", response = SynapseArtifactListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })

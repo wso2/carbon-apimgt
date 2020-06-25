@@ -39,7 +39,7 @@ IsAPIpublishedApiService delegate = new IsAPIpublishedApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Check whether the API is published or not", notes = "This will provide access to synapse artifacts in database. ", response = Boolean.class, tags={ "Checking for APIs" })
+    @ApiOperation(value = "Check whether an API is published or not", notes = "This will provide access to the APIs published in gateway ", response = Boolean.class, tags={ "Checking for APIs" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Whether the API Published or not", response = Boolean.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })

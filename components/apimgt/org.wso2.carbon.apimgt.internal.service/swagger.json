@@ -474,8 +474,8 @@
     "/isAPIpublished" : {
       "get" : {
         "tags" : [ "Checking for APIs" ],
-        "summary" : "Check whether the API is published or not",
-        "description" : "This will provide access to synapse artifacts in database.\n",
+        "summary" : "Check whether an API is published or not",
+        "description" : "This will provide access to the APIs published in gateway\n",
         "parameters" : [ {
           "name" : "apiId",
           "in" : "query",
@@ -502,7 +502,7 @@
     "/synapse-artifacts" : {
       "get" : {
         "tags" : [ "Retrieving Synapse artifacts" ],
-        "summary" : "Get all synapse artifacts for a given API UUID and gateway label",
+        "summary" : "Get all the synapse artifacts for a given API UUID and gateway label",
         "description" : "This will provide access to synapse artifacts in database.\n",
         "parameters" : [ {
           "name" : "apiId",
@@ -540,7 +540,7 @@
       },
       "post" : {
         "summary" : "Save the given API Artifacts in database",
-        "description" : "This will provide access to synapse artifacts in database.",
+        "description" : "This will provide access to the synapse artifacts in database.",
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
@@ -567,7 +567,7 @@
       "get" : {
         "tags" : [ "Retrieving All Synapse artifacts" ],
         "summary" : "Get all synapse artifacts for a given gateway label",
-        "description" : "This will provide access to synapse artifacts in database.\n",
+        "description" : "This will provide access to the synapse artifacts in database.\n",
         "parameters" : [ {
           "name" : "gatewayLabel",
           "in" : "query",

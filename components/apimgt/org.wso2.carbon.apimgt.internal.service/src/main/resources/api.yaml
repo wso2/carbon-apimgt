@@ -208,7 +208,7 @@ paths:
           type: string
         - $ref: "#/parameters/Accept"
       tags:
-        - Subscription Validation
+      - Subscription Validation
       responses:
         200:
           description: An array of APIs in the database
@@ -232,7 +232,7 @@ paths:
              Application ID of the application
           type: integer
       tags:
-        - Subscription Validation
+      - Subscription Validation
       responses:
         200:
           description: An array of applications in the database
@@ -246,7 +246,7 @@ paths:
     get:
       summary: Get all subscriptions
       description: |
-        This will provide access to subscriptions in database.
+         This will provide access to subscriptions in database.
       parameters:
         - $ref: '#/parameters/requestedTenant'
         - name: apiId
@@ -350,15 +350,15 @@ paths:
       description: |
         This will provide access to application vs key mappings in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
-        - name: consumerKey
-          in: query
-          description: |
-            **Search condition**.
-             Consumer Key of the application
-          type: string
+      - $ref: '#/parameters/requestedTenant'
+      - name: consumerKey
+        in: query
+        description: |
+          **Search condition**.
+           Consumer Key of the application
+        type: string
       tags:
-        - Subscription Validation
+      - Subscription Validation
       responses:
         200:
           description: An array of application key mappings in the database
@@ -370,9 +370,9 @@ paths:
             $ref: '#/definitions/Error'
   /isAPIpublished:
     get:
-      summary: Check whether the API is published or not
+      summary: Check whether an API is published or not
       description: |
-        This will provide access to synapse artifacts in database.
+        This will provide access to the APIs published in gateway
       parameters:
         - name: apiId
           in: query
@@ -393,7 +393,7 @@ paths:
             $ref: '#/definitions/Error'
   /synapse-artifacts:
     get:
-      summary: Get all synapse artifacts for a given API UUID and gateway label
+      summary: Get all the synapse artifacts for a given API UUID and gateway label
       description: |
         This will provide access to synapse artifacts in database.
       parameters:
@@ -428,7 +428,7 @@ paths:
             $ref: '#/definitions/Error'
     post:
       summary: Save the given API Artifacts in database
-      description: This will provide access to synapse artifacts in database.
+      description: This will provide access to the synapse artifacts in database.
       parameters:
         - in: body
           name: body
@@ -450,7 +450,7 @@ paths:
     get:
       summary: Get all synapse artifacts for a given gateway label
       description: |
-        This will provide access to synapse artifacts in database.
+        This will provide access to the synapse artifacts in database.
       parameters:
         - name: gatewayLabel
           in: query
@@ -861,15 +861,15 @@ definitions:
   #-----------------------------------------------------
   SubscriptionPolicy:
     allOf:
-      - $ref: '#/definitions/Policy'
-      - $ref: '#/definitions/GraphQLQuery'
-      - properties:
-          rateLimitCount:
-            type: integer
-          rateLimitTimeUnit:
-            type: string
-          stopOnQuotaReach:
-            type: boolean
+    - $ref: '#/definitions/Policy'
+    - $ref: '#/definitions/GraphQLQuery'
+    - properties:
+        rateLimitCount:
+          type: integer
+        rateLimitTimeUnit:
+          type: string
+        stopOnQuotaReach:
+          type: boolean
 
   #-----------------------------------------------------
   # The GraphQL Query resource
@@ -931,12 +931,12 @@ definitions:
   #-----------------------------------------------------
   ApiPolicy:
     allOf:
-      - $ref: '#/definitions/Policy'
-      - properties:
-          conditionGroups:
-            type: array
-            items:
-              $ref: '#/definitions/ApiPolicyConditionGroup'
+    - $ref: '#/definitions/Policy'
+    - properties:
+        conditionGroups:
+          type: array
+          items:
+            $ref: '#/definitions/ApiPolicyConditionGroup'
 
   #-----------------------------------------------------
   # The API Policy Condition  Group resource
