@@ -75,7 +75,10 @@ describe('APIs <Listing/> component tests', () => {
             </MuiThemeProvider>
         );
         let wrapper = await mountWithIntl(WithStyleListing);
-        wrapper = await wrapper.update();
+        // update the wrapper until the progress/loading icon disappears
+        while (wrapper.find('#apim-loader').length > 0) {
+            wrapper = await wrapper.update();
+        }
         expect(wrapper.contains(<SampleAPI />)).toBeTruthy();
     });
 
@@ -100,6 +103,11 @@ describe('APIs <Listing/> component tests', () => {
             .children()
             .children()
             .state().apisAndApiProducts).toEqual(mockedModel.right.list);
+
+        // update the wrapper until the progress/loading icon disappears
+        while (wrapper.find('#apim-loader').length > 0) {
+            wrapper = await wrapper.update();
+        }
 
         expect(wrapper.contains(mockedModel.right.list[0].name)).toBeTruthy();
         expect(wrapper.contains(mockedModel.right.list[0].version)).toBeTruthy();
