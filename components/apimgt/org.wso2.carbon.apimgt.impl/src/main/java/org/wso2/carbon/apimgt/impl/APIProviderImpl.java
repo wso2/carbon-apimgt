@@ -92,6 +92,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
@@ -1047,6 +1048,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Character length exceeds the allowable limit",
                     ExceptionCodes.LENGTH_EXCEEDS);
         }
+    }
+
+    public void deleteSubscriptionBlockCondition(String conditionValue)
+            throws APIManagementException {
+        BlockConditionsDTO blockCondition = apiMgtDAO.getSubscriptionBlockCondition(conditionValue, tenantDomain);
+        if (blockCondition != null) {
+            deleteBlockConditionByUUID(blockCondition.getUUID());
+        }
+    }
+
+    /**
+     * This method is used to get the context of API identified by the given APIIdentifier
+     *
+     * @param apiId api identifier
+     * @return apiContext
+     * @throws APIManagementException if failed to fetch the context for apiID
+     */
+    public String getAPIContext(APIIdentifier apiId) throws APIManagementException {
+        return apiMgtDAO.getAPIContext(apiId);
     }
 
     /**
@@ -8110,6 +8130,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             // Make the LC status of the API Product published by default
             saveAPIStatus(artifactPath, APIConstants.PUBLISHED);
+
+            Set<String> tagSet = apiProduct.getTags();
+            if (tagSet != null) {
+                for (String tag : tagSet) {
+                    registry.applyTag(artifactPath, tag);
+                }
+            }
 
             String visibleRolesList = apiProduct.getVisibleRoles();
             String[] visibleRoles = new String[0];

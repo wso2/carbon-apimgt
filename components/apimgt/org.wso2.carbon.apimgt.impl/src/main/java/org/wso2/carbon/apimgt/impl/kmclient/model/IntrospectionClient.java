@@ -24,8 +24,8 @@ import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 public interface IntrospectionClient {
 
     @RequestLine("POST")
-    @Headers({"Content-type:application/x-www-form-urlencoded", "Authorization: {authHeader}"})
-    IntrospectInfo introspect(@Param("authHeader") String authHeader, @Param("token") String token)
+    @Headers("Content-type:application/x-www-form-urlencoded")
+    IntrospectInfo introspect(@Param("token") String token)
             throws KeyManagerClientException;
 
 }

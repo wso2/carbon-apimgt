@@ -3494,6 +3494,40 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /system-scopes:
+    #--------------------------------------------------
+    # Retrieve the list of role scope mapping
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:scope_manage
+            - apim:admin
+      summary: |
+        Get the list of role scope mapping.
+      description: |
+        This operation is used to get the list of role scope mapping from tenant-conf for the apim admin dashboard
+      tags:
+        - System Scopes
+      responses:
+        200:
+          description: |
+            OK.
+            The list of role scope mappings are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/ScopeList'
+        500:
+          description: |
+            Internal Server Error.
+            An internal server error occurred while retrieving the role scope mapping.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The Tenant Theme resource APIs
 ######################################################
@@ -4932,6 +4966,52 @@ definitions:
         type: boolean
         description: To determine whether analytics is enabled or not
         example: false
+
+  #-----------------------------------------------------
+  # The Scope Role Mapping List resource
+  #-----------------------------------------------------
+  ScopeList:
+    title: Scope Role Mapping List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of scopes available for tenant.
+        example: 60
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Scope'
+
+  #-----------------------------------------------------
+  # The Scope resource
+  #-----------------------------------------------------
+  Scope:
+    title: Scope Role
+    properties:
+      tag:
+        type: string
+        description: |
+          Portal name.
+        example: "publisher"
+      name:
+        type: string
+        description: |
+          Scope name.
+        example: "apim:api_publish"
+      description:
+        type: string
+        description: |
+          About scope.
+        example: "Publish API"
+      roles:
+        schema:
+          type: array
+          items:
+            type: string
+        description: |
+          Roles for the particular scope.
+        example: ["admin","Internal/publisher"]
 
   #-----------------------------------------------------
   # The KeyManager resource

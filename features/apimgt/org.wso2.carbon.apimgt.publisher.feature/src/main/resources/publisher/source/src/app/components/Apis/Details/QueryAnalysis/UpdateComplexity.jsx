@@ -51,7 +51,7 @@ export default function UpdateComplexity(props) {
     const classes = useStyles();
     const [filterKeyWord, setFilter] = useState('');
     const {
-        setState, typelist, state, editlist, setEditList,
+        setList, typelist, list,
     } = props;
 
     /**
@@ -140,7 +140,7 @@ export default function UpdateComplexity(props) {
                                                                 <b>ComplexityValue</b>
                                                             </TableCell>
                                                         </TableRow>
-                                                        {state.map((respond, index) => ((respond.type === typename.type)
+                                                        {list.map((respond, index) => ((respond.type === typename.type)
                                                      && (
                                                          <TableRow>
                                                              <TableCell>
@@ -154,25 +154,13 @@ export default function UpdateComplexity(props) {
                                                                      variant='outlined'
                                                                      value={respond.complexityValue}
                                                                      onChange={(event) => {
-                                                                         const newArr = [...state];
-                                                                         const array = [...editlist];
+                                                                         const newArr = [...list];
                                                                          newArr[index] = {
                                                                              type: respond.type,
                                                                              field: respond.field,
                                                                              complexityValue: +event.target.value,
                                                                          };
-                                                                         const ob = newArr[index];
-                                                                         const ind = array.findIndex(
-                                                                             (item) => item.type === ob.type
-                                                                    && item.field === ob.field,
-                                                                         );
-                                                                         if (ind < 0) {
-                                                                             array.push(ob);
-                                                                         } else {
-                                                                             array[ind] = ob;
-                                                                         }
-                                                                         setEditList(array);
-                                                                         setState(newArr);
+                                                                         setList(newArr);
                                                                      }}
                                                                  />
                                                              </TableCell>
@@ -199,9 +187,8 @@ export default function UpdateComplexity(props) {
 }
 
 UpdateComplexity.propTypes = {
-    setState: PropTypes.func.isRequired,
-    setEditList: PropTypes.func.isRequired,
-    state: PropTypes.arrayOf(
+    setList: PropTypes.func.isRequired,
+    list: PropTypes.arrayOf(
         PropTypes.shape({
             type: PropTypes.string,
             field: PropTypes.string,
@@ -214,5 +201,4 @@ UpdateComplexity.propTypes = {
             summation: PropTypes.number,
         }),
     ).isRequired,
-    editlist: PropTypes.arrayOf.isRequired,
 };

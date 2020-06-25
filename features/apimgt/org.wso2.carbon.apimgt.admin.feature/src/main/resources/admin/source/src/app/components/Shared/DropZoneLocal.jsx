@@ -80,8 +80,11 @@ const rejectStyle = {
  */
 export default function DropZoneLocal(props) {
     const {
-        message, onDrop, error, children, accept,
+        message, onDrop, error, children, accept, baseStyle: baseStyleOverride,
     } = props;
+    if (baseStyleOverride) {
+        Object.assign(baseStyle, baseStyleOverride);
+    }
     const dropZoneObject = useDropzone({ onDrop });
     const {
         getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject,
@@ -119,6 +122,7 @@ DropZoneLocal.defaultProps = {
     children: null,
     error: false,
     accept: '*',
+    baseStyle: null,
 };
 DropZoneLocal.propTypes = {
     message: PropTypes.string,
@@ -127,4 +131,5 @@ DropZoneLocal.propTypes = {
     showFilesList: PropTypes.bool,
     children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]),
     error: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({})]),
+    baseStyle: PropTypes.shape({}),
 };

@@ -236,8 +236,8 @@ function AddEdit(props) {
                 policyName: state.policyName,
                 description: state.description,
                 defaultLimit: {
+                    type: state.defaultLimit.type,
                     requestCount: {
-                        type: state.defaultLimit.type,
                         requestCount: state.defaultLimit.requestCount,
                         timeUnit: state.defaultLimit.timeUnit,
                         unitTime: state.defaultLimit.unitTime,
@@ -249,8 +249,8 @@ function AddEdit(props) {
                 policyName: state.policyName,
                 description: state.description,
                 defaultLimit: {
+                    type: state.defaultLimit.type,
                     bandwidth: {
-                        type: state.defaultLimit.type,
                         dataAmount: state.defaultLimit.dataAmount,
                         dataUnit: state.defaultLimit.dataUnit,
                         timeUnit: state.defaultLimit.timeUnit,
@@ -323,7 +323,7 @@ function AddEdit(props) {
                             requestCount: result.body.defaultLimit.requestCount.requestCount,
                             timeUnit: result.body.defaultLimit.requestCount.timeUnit,
                             unitTime: result.body.defaultLimit.requestCount.unitTime,
-                            type: result.body.defaultLimit.requestCount.type,
+                            type: result.body.defaultLimit.type,
                             dataAmount: '',
                             dataUnit: 'KB',
                         },
@@ -336,7 +336,7 @@ function AddEdit(props) {
                             requestCount: '',
                             timeUnit: result.body.defaultLimit.bandwidth.timeUnit,
                             unitTime: result.body.defaultLimit.bandwidth.unitTime,
-                            type: result.body.defaultLimit.bandwidth.type,
+                            type: result.body.defaultLimit.type,
                             dataAmount: result.body.defaultLimit.bandwidth.dataAmount,
                             dataUnit: result.body.defaultLimit.bandwidth.dataUnit,
                         },
