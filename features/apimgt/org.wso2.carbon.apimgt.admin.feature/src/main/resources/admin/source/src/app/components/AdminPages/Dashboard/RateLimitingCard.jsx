@@ -27,7 +27,7 @@ import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import PolicyIcon from '@material-ui/icons/Policy';
-import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 
@@ -86,7 +86,7 @@ export default function RateLimitingCard() {
                 id: 'Dashboard.rateLimiting.card.subscriptionPolicies.description',
                 defaultMessage: 'Control access per Subscription',
             }),
-            icon: <ShoppingBasketIcon color='inherit' fontSize='small' />,
+            icon: <AssignmentTurnedInIcon color='inherit' fontSize='small' />,
         },
         {
             name: intl.formatMessage({
