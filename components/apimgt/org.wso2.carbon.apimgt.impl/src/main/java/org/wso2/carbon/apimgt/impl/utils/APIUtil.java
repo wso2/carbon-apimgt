@@ -10041,6 +10041,8 @@ public final class APIUtil {
                 subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
                 subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
                 subscriptionPolicyDTO.setTierQuotaType(subscriptionPolicy.getTierQuotaType());
+                subscriptionPolicyDTO.setGraphQLMaxDepth(subscriptionPolicy.getGraphQLMaxDepth());
+                subscriptionPolicyDTO.setGraphQLMaxComplexity(subscriptionPolicy.getGraphQLMaxComplexity());
                 subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
             }
             jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);

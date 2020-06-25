@@ -336,7 +336,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                 }
                 AuthenticationContext authenticationContext;
                 authenticationContext = GatewayUtils.generateAuthenticationContext(tokenSignature, payload, api, null
-                        , getApiLevelPolicy(), null, false);
+                        , getApiLevelPolicy(), null, false, synCtx);
                 APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, null);
                 if (log.isDebugEnabled()) {
                     log.debug("User is authorized to access the resource using Api Key.");
