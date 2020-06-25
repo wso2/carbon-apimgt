@@ -285,6 +285,7 @@ public class OAS2Parser extends APIDefinition {
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
                     "} else if (accept === \"application/xml\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
         } else if (hasJsonPayload) {
