@@ -38,6 +38,7 @@ import org.wso2.carbon.endpoint.EndpointAdminException;
 
 
 import javax.ws.rs.core.Response;
+import java.util.Map;
 
 public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
 
@@ -53,14 +54,11 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
         if (tenantDomain == null){
             tenantDomain =SUPER_TENAT_DOMAIN;
         }
-        String apiId = null;
-        String label = null;
-        try {
-            apiId = apiMgtDAO.getGatewayAPIId(apiName,version,tenantDomain);
-            label = apiMgtDAO.getGatewayAPILabel(apiId);
-        } catch (APIManagementException e) {
-            log.error(e);
-        }
+
+        Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version, tenantDomain);
+        String apiId = apiAttributes.get("apiId");
+        String label = apiAttributes.get("label");
+
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
         String definition = null;
         JSONObject responseObj = new JSONObject();
