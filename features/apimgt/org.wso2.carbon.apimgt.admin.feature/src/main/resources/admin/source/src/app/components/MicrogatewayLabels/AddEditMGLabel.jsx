@@ -64,7 +64,6 @@ function AddEditMGLabel(props) {
 
     let id = null;
     let initialState = {
-        name: undefined,
         description: '',
         hosts: [],
     };

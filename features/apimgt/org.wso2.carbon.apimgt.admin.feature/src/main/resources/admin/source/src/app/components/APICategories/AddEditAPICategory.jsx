@@ -56,7 +56,6 @@ function AddEdit(props) {
 
     let id = null;
     let initialState = {
-        name: undefined,
         description: '',
     };
 
