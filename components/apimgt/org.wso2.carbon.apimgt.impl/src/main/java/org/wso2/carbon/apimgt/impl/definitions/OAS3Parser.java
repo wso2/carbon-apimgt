@@ -158,7 +158,7 @@ public class OAS3Parser extends APIDefinition {
                             Schema jsonSchema = applicationJson.getSchema();
                             if (jsonSchema != null) {
                                 String jsonExample = getJsonExample(jsonSchema, definitions);
-                                genCode.append(getGenRespPayloads(responseEntry, jsonExample, "json", false));
+                                genCode.append(getGeneratedResponsePayloads(responseEntry, jsonExample, "json", false));
                                 respCodeInitialized = true;
                                 hasJsonPayload = true;
                             }
@@ -167,7 +167,7 @@ public class OAS3Parser extends APIDefinition {
                             Schema xmlSchema = applicationXml.getSchema();
                             if (xmlSchema != null) {
                                 String xmlExample = getXmlExample(xmlSchema, definitions);
-                                genCode.append(getGenRespPayloads(responseEntry, xmlExample, "xml", respCodeInitialized));
+                                genCode.append(getGeneratedResponsePayloads(responseEntry, xmlExample, "xml", respCodeInitialized));
                                 hasXmlPayload = true;
                             }
                         }
@@ -180,7 +180,7 @@ public class OAS3Parser extends APIDefinition {
                 //inserts minimum response code and mock payload variables to static script
                 String finalGenCode = getMandatoryScriptSection(minResponseCode, genCode);
                 //gets response section string depending on availability of json/xml payloads
-                String responseConditions = getResponseCondtionsSection(hasJsonPayload, hasXmlPayload);
+                String responseConditions = getResponseConditionsSection(hasJsonPayload, hasXmlPayload);
                 String finalScript = finalGenCode + responseConditions;
                 apiResourceMediationPolicyObject.setContent(finalScript);
                 //sets script to each resource in the swagger
@@ -270,7 +270,7 @@ public class OAS3Parser extends APIDefinition {
      * @param initialized response code array
      * @return generatedString
      */
-    private String getGenRespPayloads(String responseCode, String example, String type, boolean initialized) {
+    private String getGeneratedResponsePayloads(String responseCode, String example, String type, boolean initialized) {
         StringBuilder genRespPayload = new StringBuilder();
         if (!initialized) {
             genRespPayload.append("\nif (!responses[").append(responseCode).append("]) {").append("\n responses [").append(responseCode).append("] = [];").append("\n}");
@@ -314,7 +314,7 @@ public class OAS3Parser extends APIDefinition {
      * @param hasXmlPayload contains XML payload
      * @return response section that sets response code and type
      */
-    private String getResponseCondtionsSection(boolean hasJsonPayload, boolean hasXmlPayload) {
+    private String getResponseConditionsSection(boolean hasJsonPayload, boolean hasXmlPayload) {
         String responseSection = "";
         if (hasJsonPayload && hasXmlPayload) {
             responseSection = " accept = \"application/json\";\n" +

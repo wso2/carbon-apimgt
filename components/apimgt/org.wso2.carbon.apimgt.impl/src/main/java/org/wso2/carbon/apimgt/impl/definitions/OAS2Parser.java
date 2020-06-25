@@ -156,7 +156,7 @@ public class OAS2Parser extends APIDefinition {
                         Object applicationXml = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_XML_MEDIA_TYPE);
                         if (applicationJson != null) {
                             String jsonExample = Json.pretty(applicationJson);
-                            genCode.append(getGenRespPayloads(responseEntry, jsonExample, "json", false));
+                            genCode.append(getGeneratedResponsePayloads(responseEntry, jsonExample, "json", false));
                             respCodeInitialized = true;
                             hasJsonPayload = true;
                         }
@@ -168,7 +168,7 @@ public class OAS2Parser extends APIDefinition {
                     } else if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
                         Model model = op.getResponses().get(responseEntry).getResponseSchema();
                         String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
-                        genCode.append(getGenRespPayloads(responseEntry, schemaExample, "json", respCodeInitialized));
+                        genCode.append(getGeneratedResponsePayloads(responseEntry, schemaExample, "json", respCodeInitialized));
                         hasJsonPayload = true;
                     } else if (op.getResponses().get(responseEntry).getExamples() == null
                             && op.getResponses().get(responseEntry).getResponseSchema() == null) {
@@ -180,7 +180,7 @@ public class OAS2Parser extends APIDefinition {
                 //inserts minimum response code and mock payload variables to static script
                 String finalGenCode = getMandatoryScriptSection(minResponseCode, genCode);
                 //gets response section string depending on availability of json/xml payloads
-                String responseConditions = getResponseCondtionsSection(hasJsonPayload, hasXmlPayload);
+                String responseConditions = getResponseConditionsSection(hasJsonPayload, hasXmlPayload);
                 String finalScript = finalGenCode + responseConditions;
                 apiResourceMediationPolicyObject.setContent(finalScript);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
@@ -226,7 +226,7 @@ public class OAS2Parser extends APIDefinition {
      * @param initialized response code array
      * @return generatedString
      */
-    private String getGenRespPayloads(String responseCode, String example, String type, boolean initialized) {
+    private String getGeneratedResponsePayloads(String responseCode, String example, String type, boolean initialized) {
         StringBuilder genRespPayload = new StringBuilder();
         if (!initialized) {
             genRespPayload.append("\nif (!responses[").append(responseCode).append("]) {").append("\n responses [")
@@ -272,7 +272,7 @@ public class OAS2Parser extends APIDefinition {
      * @param hasXmlPayload contains XML payload
      * @return response section that sets response code and type
      */
-    private String getResponseCondtionsSection(boolean hasJsonPayload, boolean hasXmlPayload) {
+    private String getResponseConditionsSection(boolean hasJsonPayload, boolean hasXmlPayload) {
         String responseSection = "";
         if (hasJsonPayload && hasXmlPayload) {
             responseSection = " accept = \"application/json\";\n" +
