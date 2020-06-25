@@ -58,8 +58,8 @@ public class DBRetriever implements ArtifactRetriever {
                     System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
                     System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
             String endcodedgatewayLabel= URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);
-            String path  = APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ARTIFACTS + "?apiId=" + APIId +
-                    "&gatewayInstruction=" + gatewayInstruction +"&gatewayLabel="+ endcodedgatewayLabel;
+            String path = APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ARTIFACTS + "?apiId=" + APIId +
+                    "&gatewayInstruction=" + gatewayInstruction + "&gatewayLabel="+ endcodedgatewayLabel;
             String endpoint = baseURL + path;
             HttpResponse httpResponse = invokeService(endpoint);
             if (httpResponse.getEntity() != null ){
@@ -82,7 +82,7 @@ public class DBRetriever implements ArtifactRetriever {
                     System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
                     System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
             String endcodedgatewayLabel= URLEncoder.encode(label, APIConstants.DigestAuthConstants.CHARSET);
-            String path  = APIConstants.GatewayArtifactSynchronizer.GATEAY_SYNAPSE_ARTIFACTS
+            String path = APIConstants.GatewayArtifactSynchronizer.GATEAY_SYNAPSE_ARTIFACTS
                     + "?gatewayLabel="+ endcodedgatewayLabel;
             String endpoint = baseURL + path;
             HttpResponse httpResponse = invokeService(endpoint);
