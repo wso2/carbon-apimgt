@@ -160,16 +160,16 @@
           "required" : true,
           "type" : "string"
         }, {
-          "name" : "label",
+          "name" : "version",
           "in" : "query",
-          "description" : "Label of the API Gateway\n",
+          "description" : "version of the API Gateway\n",
           "required" : true,
           "type" : "string"
         }, {
-          "name" : "apiId",
+          "name" : "tenantDomain",
           "in" : "query",
-          "description" : "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
-          "required" : true,
+          "description" : "tenantDomain of the API Gateway\n",
+          "required" : false,
           "type" : "string"
         } ],
         "responses" : {
@@ -207,8 +207,8 @@
         "security" : [ {
           "OAuth2Security" : [ "apim:api_publish" ]
         } ],
-        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\"",
-        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=test\"",
+        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=test\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response" : "HTTP/1.1 200 OK"
       }
     },

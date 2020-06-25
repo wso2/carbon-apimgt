@@ -23,12 +23,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.ApiArtifactApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.endpoint.EndpointAdminException;
@@ -40,9 +42,24 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
 
     private static final Log log = LogFactory.getLog(ApiArtifactApiServiceImpl.class);
 
-    public Response apiArtifactGet(String apiName, String label, String apiId, MessageContext messageContext) {
+    private ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    private final String SUPER_TENAT_DOMAIN = "carbon.super";
+
+    @Override
+    public Response apiArtifactGet(String apiName, String version , String tenantDomain, MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
+        if (tenantDomain == null){
+            tenantDomain =SUPER_TENAT_DOMAIN;
+        }
+        String apiId = null;
+        String label = null;
+        try {
+            apiId = apiMgtDAO.getGatewayAPIId(apiName,version,tenantDomain);
+            label = apiMgtDAO.getGatewayAPILabel(apiId);
+        } catch (APIManagementException e) {
+            log.error(e);
+        }
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
         String definition = null;
         JSONObject responseObj = new JSONObject();
