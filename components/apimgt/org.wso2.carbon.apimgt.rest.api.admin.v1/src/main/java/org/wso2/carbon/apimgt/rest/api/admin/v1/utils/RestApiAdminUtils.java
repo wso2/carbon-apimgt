@@ -28,6 +28,8 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -106,6 +108,51 @@ public class RestApiAdminUtils {
             throw new APIManagementException(propertyName + " property value of payload cannot be blank",
                     ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
+    }
+
+    /**
+     * Validate the policy name property of Throttle Policy
+     *
+     * @param policyName policy name value of throttle policy
+     */
+    public static void validateThrottlePolicyNameProperty(String policyName)
+            throws APIManagementException {
+
+        if (StringUtils.isBlank(policyName)) {
+            String propertyName = "policyName";
+            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
+        }
+    }
+
+    /**
+     * Constructs an error message to indicate that the object corresponding to the specified type has not been provided
+     *
+     * @param typeEnum enum representing the particular type
+     * @return constructed error message
+     */
+    public static String constructMissingThrottleObjectErrorMessage(Enum<?> typeEnum) {
+
+        String propertyName = null;
+        if (typeEnum.equals(ThrottleConditionDTO.TypeEnum.HEADERCONDITION)) {
+            propertyName = "headerCondition";
+        }
+        if (typeEnum.equals(ThrottleConditionDTO.TypeEnum.IPCONDITION)) {
+            propertyName = "ipCondition";
+        }
+        if (typeEnum.equals(ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION)) {
+            propertyName = "queryParameter";
+        }
+        if (typeEnum.equals(ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION)) {
+            propertyName = "jwtClaimsCondition";
+        }
+        if (typeEnum.equals(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT)) {
+            propertyName = "requestCount";
+        }
+        if (typeEnum.equals(ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT)) {
+            propertyName = "bandwidth";
+        }
+        return propertyName + " object corresponding to type " + typeEnum + " not provided\n";
     }
 
     /**

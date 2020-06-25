@@ -205,7 +205,7 @@ ExceptionCodes implements ErrorHandler {
     LENGTH_EXCEEDS(900704, "Character length exceeds the allowable limit", 400,
             "One of the provided input character length exceeds the allowable limit."),
     BLANK_PROPERTY_VALUE(900705, "Blank value for required property", 400,
-            "%s property of payload value cannot be blank"),
+            "%s property value of payload cannot be blank"),
 
 
     //GraphQL API related codes
@@ -338,6 +338,7 @@ ExceptionCodes implements ErrorHandler {
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
     SCOPE_NOT_FOUND(901501, "Scope Not Found", 404, "Scope does not exist"),
     USER_NOT_FOUND(901502, "User Not Found", 404, "User does not exist"),
+    DEFINITION_EXCEPTION(901503, "Internal server error.", 500, " Error occurred while retrieving swagger definition"),
 
     //Analytics related codes
     ANALYTICS_NOT_ENABLED(901600, "%s not accessible", 404,

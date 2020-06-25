@@ -521,6 +521,7 @@ class Details extends Component {
                                 defaultMessage: 'overview',
                             })}
                             iconText='overview'
+                            to={pathPrefix + 'overview'}
                         />
                         <LeftMenuItem
                             text={intl.formatMessage({

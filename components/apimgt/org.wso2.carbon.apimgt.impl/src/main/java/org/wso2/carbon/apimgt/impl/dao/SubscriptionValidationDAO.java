@@ -69,7 +69,7 @@ public class SubscriptionValidationDAO {
                 PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APIS_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
-            populateAPIList(resultSet, apiList);
+            populateAPIList(resultSet, apiList, conn);
 
         } catch (SQLException e) {
             log.error("Error in loading Apis : ", e);
@@ -281,12 +281,14 @@ public class SubscriptionValidationDAO {
             if (tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ST_APIS_SQL);
                 ps.setString(1, APIConstants.TENANT_PREFIX + "%");
+                ps.setString(2, APIConstants.TENANT_PREFIX + "%");
             } else {
                 ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APIS_SQL);
                 ps.setString(1, APIConstants.TENANT_PREFIX + tenantDomain + "%");
+                ps.setString(2, APIConstants.TENANT_PREFIX + tenantDomain + "%");
             }
             ResultSet resultSet = ps.executeQuery();
-            populateAPIList(resultSet, apiList);
+            populateAPIList(resultSet, apiList, conn);
 
         } catch (SQLException e) {
             log.error("Error in loading Apis for tenantId : " + tenantDomain, e);
@@ -309,6 +311,8 @@ public class SubscriptionValidationDAO {
                 PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL);) {
             ps.setString(1, version);
             ps.setString(2, context);
+            ps.setString(3, version);
+            ps.setString(4, context);
             ResultSet resultSet = ps.executeQuery();
             Map<Integer, API> temp = new ConcurrentHashMap<>();
             while (resultSet.next()) {
@@ -340,12 +344,13 @@ public class SubscriptionValidationDAO {
         return api;
     }
 
-    private void populateAPIList(ResultSet resultSet, List<API> apiList) throws SQLException {
+    private void populateAPIList(ResultSet resultSet, List<API> apiList, Connection conn) throws SQLException {
 
         Map<Integer, API> temp = new ConcurrentHashMap<>();
         Map<Integer, URLMapping> tempUrls = new ConcurrentHashMap<>();
         while (resultSet.next()) {
             int apiId = resultSet.getInt("API_ID");
+            String apiType = resultSet.getString("API_TYPE");
             API api = temp.get(apiId);
             if (api == null) {
                 api = new API();
@@ -355,27 +360,41 @@ public class SubscriptionValidationDAO {
                 api.setPolicy(resultSet.getString("API_TIER"));
                 api.setVersion(resultSet.getString("API_VERSION"));
                 api.setContext(resultSet.getString("CONTEXT"));
+                api.setApiType(apiType);
                 temp.put(apiId, api);
                 tempUrls = new ConcurrentHashMap<>();
                 apiList.add(api);
             }
-            int urlId = resultSet.getInt("URL_MAPPING_ID");
-            URLMapping urlMapping = null;
-            urlMapping = tempUrls.get(urlId);
-            if (urlMapping == null) {
-                urlMapping = new URLMapping();
-                urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
-                urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                urlMapping.setThrottlingPolicy(resultSet.getString("THROTTLING_TIER"));
-
-                urlMapping.setUrlPattern(resultSet.getString("URL_PATTERN"));
-                tempUrls.put(urlId, urlMapping);
-                api.addResource(urlMapping);
-            }
-            urlMapping.addScope(resultSet.getString("URL_MAPPING_ID"));
+            createURLMapping(resultSet, tempUrls, api);
         }
     }
 
+    private ResultSet getAPIProductURLTemplates(int apiId, Connection conn) throws SQLException {
+
+        PreparedStatement ps =
+                conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_PRODUCT_URL_MAPPING_SQL);
+        ps.setInt(1, apiId);
+        return ps.executeQuery();
+    }
+
+    private void createURLMapping(ResultSet resultSet, Map<Integer, URLMapping> tempUrls, API api) throws SQLException {
+
+        int urlId = resultSet.getInt("URL_MAPPING_ID");
+        URLMapping urlMapping = null;
+        urlMapping = tempUrls.get(urlId);
+        if (urlMapping == null) {
+            urlMapping = new URLMapping();
+            urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
+            urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+            urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
+
+            urlMapping.setUrlPattern(resultSet.getString("URL_PATTERN"));
+            tempUrls.put(urlId, urlMapping);
+            api.addResource(urlMapping);
+        }
+        urlMapping.addScope(resultSet.getString("SCOPE_NAME"));
+
+    }
     /*
      * This method can be used to retrieve all the APIs of a given tesanat in the database
      *
@@ -600,7 +619,7 @@ public class SubscriptionValidationDAO {
         return apiPolicies;
     }
 
-        private void populateApiPolicyList(List<APIPolicy> apiPolicies, ResultSet resultSet)
+    private void populateApiPolicyList(List<APIPolicy> apiPolicies, ResultSet resultSet)
             throws SQLException {
 
         Map<Integer, APIPolicy> temp = new ConcurrentHashMap<>();
@@ -747,7 +766,7 @@ public class SubscriptionValidationDAO {
             } catch (UserStoreException e) {
                 log.error("Error in loading ApplicationPolicy for tenantDomain : " + tenantDomain, e);
             }
-        //todo
+            //todo
 
         } catch (SQLException e) {
             log.error("Error in loading application policies by policyId : " + policyName + " of " + policyName, e);

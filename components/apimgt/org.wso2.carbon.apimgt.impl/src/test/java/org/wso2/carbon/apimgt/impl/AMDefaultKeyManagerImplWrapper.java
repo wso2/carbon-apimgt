@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-
-
 /**
  * Wrapper class to mock AMDefaultKeyManagerImpl
  *
@@ -29,12 +26,7 @@ public class AMDefaultKeyManagerImplWrapper extends AMDefaultKeyManagerImpl {
 
     private final String ACCESS_TOKEN = "lskfonwoeunr23423sdnfkjbsdjfkjdf";
 
-    @Override
-    protected String getAccessTokenForKeyMgt() throws APIManagementException {
-
-        return ACCESS_TOKEN;
-    }
-//
+    //
 //    @Override
 //    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(
 //                 org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate) throws Exception {

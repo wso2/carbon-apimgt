@@ -4275,6 +4275,10 @@ definitions:
         items:
           type: string
           example: ["Finance"]
+      keyManagers:
+        description: |
+          API Key Managers
+        type: object
 
   #-----------------------------------------------------
   # The Label resource

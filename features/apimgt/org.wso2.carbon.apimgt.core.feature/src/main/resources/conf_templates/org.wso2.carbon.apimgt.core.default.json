@@ -138,5 +138,10 @@
   "apimgt.mutual_ssl.enable_client_validation": true,
   "database.local.url": "jdbc:h2:./repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE",
   "apim.key_manager.enable": true,
-  "ContainerMgtConfig.Kubernetes":"org.wso2.carbon.apimgt.impl.containermgt.K8sManager"
+  "ContainerMgtConfig.Kubernetes":"org.wso2.carbon.apimgt.impl.containermgt.K8sManager",
+  "apim.event_hub.enable": true,
+  "apim.event_hub.service_url": "https://localhost:${mgt.transport.https.port}",
+  "apim.event_hub.init_delay": "0",
+  "apim.event_hub.event_type": "Binary",
+  "apim.event_hub.java_naming_factory_initial": "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
 }

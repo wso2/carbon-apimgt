@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.7.16-SNAPSHOT</version>
+        <version>6.7.32-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -250,6 +250,7 @@
                             !org.wso2.carbon.apimgt.keymgt.stub.useradmin,
                             org.wso2.carbon.apimgt.tokenmgt.*
                         </Export-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

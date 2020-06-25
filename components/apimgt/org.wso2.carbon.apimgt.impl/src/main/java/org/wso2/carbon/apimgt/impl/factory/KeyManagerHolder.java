@@ -89,8 +89,8 @@ public class KeyManagerHolder {
             } else {
                 if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
                     keyManager = new AMDefaultKeyManagerImpl();
-                    keyManager.loadConfiguration(keyManagerConfiguration);
                     keyManager.setTenantDomain(tenantDomain);
+                    keyManager.loadConfiguration(keyManagerConfiguration);
                     jwtValidator = getJWTValidator(keyManagerConfiguration, null);
                 }
             }

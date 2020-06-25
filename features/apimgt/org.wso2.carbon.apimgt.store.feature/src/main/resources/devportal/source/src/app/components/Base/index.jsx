@@ -55,7 +55,7 @@ const styles = (theme) => {
     const pageMaxWidth = theme.custom.page.style === 'fluid' ? 'none' : theme.custom.page.width;
     return {
         appBar: {
-            position: 'relative',
+            position: 'fixed',
             backgroundColor: theme.custom.appBar.background,
             backgroundImage: `url(${app.context}${theme.custom.appBar.backgroundImage})`,
             backgroundRepeat: 'no-repeat',
@@ -90,10 +90,12 @@ const styles = (theme) => {
         contentWrapper: {
             display: 'flex',
             flexDirection: 'row',
-            overflowY: 'hidden',
+            overflowY: 'auto',
+            overflowX: 'hidden',
             position: 'relative',
             minHeight: 'calc(100vh - 114px)',
             marginLeft: -4,
+            marginTop: 64,
         },
         push: {
             height: 50,

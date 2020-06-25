@@ -23,50 +23,23 @@ import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 
 public interface DCRClient {
 
-    @RequestLine("POST /api/identity/oauth2/dcr/v1.1/register")
-    @Headers({"Content-Type: application/json", "Authorization: {authHeader}"})
-    ClientInfo createApplication(@Param("authHeader") String authHeader, ClientInfo clientInfo)
+    @RequestLine("POST ")
+    @Headers("Content-Type: application/json")
+    ClientInfo createApplication(ClientInfo clientInfo)
             throws KeyManagerClientException;
 
-
-    @RequestLine("GET /api/identity/oauth2/dcr/v1.1/register/{clientId}")
-    @Headers({"Content-Type: application/json", "Authorization: {authHeader}"})
-    ClientInfo getApplication(@Param("authHeader") String authHeader, @Param("clientId") String clientId)
+    @RequestLine("GET /{clientId}")
+    @Headers("Content-Type: application/json")
+    ClientInfo getApplication(@Param("clientId") String clientId)
             throws KeyManagerClientException;
 
-    @RequestLine("PUT /api/identity/oauth2/dcr/v1.1/register/{clientId}")
-    @Headers({"Content-Type: application/json", "Authorization: {authHeader}"})
-    ClientInfo updateApplication(@Param("authHeader") String authHeader, @Param("clientId") String clientId,
-                                        ClientInfo clientInfo) throws KeyManagerClientException;
-
-    @RequestLine("DELETE /api/identity/oauth2/dcr/v1.1/register/{clientId}")
-    @Headers({"Content-Type: application/json", "Authorization: {authHeader}"})
-    void deleteApplication(@Param("authHeader") String authHeader, @Param("clientId") String clientId)
+    @RequestLine("PUT /{clientId}")
+    @Headers("Content-Type: application/json")
+    ClientInfo updateApplication(@Param("clientId") String clientId, ClientInfo clientInfo)
             throws KeyManagerClientException;
 
-    //TODO: get url from config so that we do not need to handle it here
-    @RequestLine("POST /t/{tenantDomain}/api/identity/oauth2/dcr/v1.1/register")
-    @Headers({"Content-Type: application/json", "Authorization: {authHeader}"})
-    ClientInfo createApplicationForTenant(@Param("tenantDomain") String tenantDomain,
-                                                 @Param("authHeader") String authHeader, ClientInfo clientInfo)
-            throws KeyManagerClientException;
+    @RequestLine("DELETE /{clientId}")
+    @Headers("Content-Type: application/json")
+    void deleteApplication(@Param("clientId") String clientId) throws KeyManagerClientException;
 
-    @RequestLine("GET /t/{tenantDomain}/api/identity/oauth2/dcr/v1.1/register/{clientId}")
-    @Headers({"Content-Type: application/json", "Authorization: {authHeader}"})
-    ClientInfo getApplicationForTenant(@Param("tenantDomain") String tenantDomain,
-                                              @Param("authHeader") String authHeader,
-                                              @Param("clientId") String clientId) throws KeyManagerClientException;
-
-    @RequestLine("PUT /t/{tenantDomain}/api/identity/oauth2/dcr/v1.1/register/{clientId}")
-    @Headers({"Content-Type: application/json", "Authorization: {authHeader}"})
-    ClientInfo updateApplicationForTenant(@Param("tenantDomain") String tenantDomain,
-                                                 @Param("authHeader") String authHeader,
-                                                 @Param("clientId") String clientId, ClientInfo clientInfo)
-            throws KeyManagerClientException;
-
-    @RequestLine("DELETE /t/{tenantDomain}/api/identity/oauth2/dcr/v1.1/register/{clientId}")
-    @Headers({"Content-Type: application/json", "Authorization: {authHeader}"})
-    void deleteApplicationForTenant(@Param("tenantDomain") String tenantDomain,
-                                           @Param("authHeader") String authHeader, @Param("clientId") String clientId)
-            throws KeyManagerClientException;
 }

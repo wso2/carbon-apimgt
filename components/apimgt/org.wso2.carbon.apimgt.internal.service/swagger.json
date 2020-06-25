@@ -534,6 +534,12 @@
           "items" : {
             "type" : "string"
           }
+        },
+        "subscription" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
         }
       }
     },
@@ -647,6 +653,11 @@
         "policy" : {
           "type" : "string",
           "description" : "API level throttling policy."
+        },
+        "apiType" : {
+          "type" : "string",
+          "example" : "APIProduct",
+          "description" : "Type of the API."
         },
         "urlMappings" : {
           "type" : "array",

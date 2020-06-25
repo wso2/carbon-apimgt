@@ -27,7 +27,7 @@ import Listing from './Listing/Listing';
 
 const Details = lazy(() => import('./Details/index' /* webpackChunkName: "DeferredDetails" */));
 const DeferredDetails = (props) => (
-    <Suspense fallback={<Progress message='Loading Details component ...' />}>
+    <Suspense fallback={<Progress per={80} message='Loading Details component ...' />}>
         <Details {...props} />
     </Suspense>
 );

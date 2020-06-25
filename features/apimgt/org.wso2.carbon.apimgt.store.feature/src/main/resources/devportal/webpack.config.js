@@ -30,6 +30,11 @@ const config = {
         publicPath: 'site/public/dist/',
     },
     watch: false,
+    watchOptions: {
+        aggregateTimeout: 200,
+        poll: true,
+        ignored: ['files/**/*.js', 'node_modules/**'],
+    },
     devtool: 'source-map',
     resolve: {
         alias: {

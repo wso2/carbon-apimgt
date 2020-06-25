@@ -106,7 +106,8 @@ export default function ListBlacklistThrottlingPolicies() {
         return restApi.blacklistPoliciesGet()
             .then((result) => {
                 const policyList = result.body.list;
-                const blacklistPolicies = policyList.map((obj) => {
+                const filteredPolicyList = policyList.filter((item) => item.conditionType !== 'SUBSCRIPTION');
+                const blacklistPolicies = filteredPolicyList.map((obj) => {
                     let array = [];
                     let conditionTypeValue;
                     if (obj.conditionValue === Object(obj.conditionValue)) {
