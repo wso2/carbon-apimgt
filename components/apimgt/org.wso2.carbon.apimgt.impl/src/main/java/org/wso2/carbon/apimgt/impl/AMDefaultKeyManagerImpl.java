@@ -840,7 +840,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (scope.getRoles() != null) {
                 scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
             }
-            scopeClient.updateScope(scopeDTO, scope.getName());
+            scopeClient.updateScope(scopeDTO, scope.getKey());
         } catch (KeyManagerClientException e) {
             String errorMessage = "Error occurred while updating scope: " + scopeKey;
             handleException(errorMessage, e);
