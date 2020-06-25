@@ -36,6 +36,7 @@ import { red } from '@material-ui/core/colors/';
 import Icon from '@material-ui/core/Icon';
 import base64url from 'base64url';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import { isRestricted } from 'AppData/AuthManager';
 import Error from '@material-ui/core/SvgIcon/SvgIcon';
 import API from 'AppData/api';
 
@@ -116,9 +117,19 @@ class EditScope extends React.Component {
      */
     constructor(props) {
         super(props);
+        const valid = [];
+        valid.displayName = {
+            invalid: false,
+            error: '',
+        };
+        valid.description = {
+            invalid: false,
+            error: '',
+        };
         this.state = {
             sharedScope: null,
             validRoles: [],
+            valid,
             invalidRoles: [],
             roleValidity: true,
         };
@@ -127,6 +138,8 @@ class EditScope extends React.Component {
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
         this.handleRoleAddition = this.handleRoleAddition.bind(this);
         this.validateScopeDetails = this.validateScopeDetails.bind(this);
+        this.validateScopeDisplayName = this.validateScopeDisplayName.bind(this);
+        this.handleScopeDisplayNameInput = this.handleScopeDisplayNameInput.bind(this);
     }
 
 
@@ -213,6 +226,12 @@ class EditScope extends React.Component {
         const {
             intl, history,
         } = this.props;
+
+        if (this.validateScopeDisplayName('displayName', sharedScope.displayName)) {
+            // return status of the validation
+            return;
+        }
+
         const restAPI = new API();
         const updatedScope = sharedScope;
         updatedScope.bindings = validRoles;
@@ -281,6 +300,45 @@ class EditScope extends React.Component {
     }
 
     /**
+     * Scope display name validation.
+     * @param {any} id The id of the scope name.
+     * @param {any} value The value of the scope name.
+     * @returns {boolean} whether the scope name is validated.
+     * @memberof EditScope
+     */
+    validateScopeDisplayName(id, value) {
+        const { valid, sharedScope } = this.state;
+
+        sharedScope[id] = value;
+        valid[id].invalid = !(value && value.length > 0);
+        if (valid[id].invalid) {
+            valid[id].error = 'Scope display name cannot be empty';
+        }
+
+        if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]|(^apim:)/i.test(value)) {
+            valid[id].invalid = true;
+            valid[id].error = 'Field contains special characters';
+        }
+        if (!valid[id].invalid) {
+            valid[id].error = '';
+        }
+        this.setState({
+            valid,
+            sharedScope,
+        });
+        return valid[id].invalid;
+    }
+
+    /**
+     * Handle scope display name input.
+     * @param {any} target The id and value of the target.
+     * @memberof EditScope
+     */
+    handleScopeDisplayNameInput({ target: { id, value } }) {
+        this.validateScopeDisplayName(id, value);
+    }
+
+    /**
      *
      *
      * @returns {any} returns the UI render.
@@ -289,7 +347,7 @@ class EditScope extends React.Component {
     render() {
         const { classes } = this.props;
         const {
-            sharedScope, roleValidity, validRoles, invalidRoles,
+            sharedScope, roleValidity, validRoles, invalidRoles, valid,
         } = this.state;
         const url = '/scopes';
         if (!sharedScope) {
@@ -349,7 +407,10 @@ class EditScope extends React.Component {
                                         margin='normal'
                                         variant='outlined'
                                         placeholder='Scope Display Name'
-                                        helperText={(
+                                        error={valid.displayName.invalid}
+                                        helperText={valid.displayName.invalid ? (
+                                            valid.displayName.error
+                                        ) : (
                                             <FormattedMessage
                                                 id='Scopes.EditScope.short.description.display.name'
                                                 defaultMessage='Enter Scope Display Name ( Ex: creator )'
@@ -359,7 +420,7 @@ class EditScope extends React.Component {
                                             shrink: true,
                                         }}
                                         value={sharedScope.displayName || ''}
-                                        onChange={this.validateScopeDetails}
+                                        onChange={this.handleScopeDisplayNameInput}
                                     />
                                 </FormControl>
                                 <FormControl margin='normal'>
@@ -437,7 +498,8 @@ class EditScope extends React.Component {
                                         variant='contained'
                                         color='primary'
                                         onClick={this.updateScope}
-                                        disabled={invalidRoles.length !== 0}
+                                        disabled={invalidRoles.length !== 0
+                                            || isRestricted(['apim:shared_scope_manage'])}
                                         className={classes.saveButton}
                                     >
                                         <FormattedMessage

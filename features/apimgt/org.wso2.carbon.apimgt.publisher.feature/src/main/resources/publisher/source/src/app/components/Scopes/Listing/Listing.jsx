@@ -80,6 +80,9 @@ const styles = (theme) => ({
     head: {
         fontWeight: 200,
     },
+    disableLink: {
+        pointerEvents: 'none',
+    },
 });
 
 /**
@@ -319,17 +322,18 @@ class Listing extends React.Component {
                                         </td>
                                         <td>
                                             <Link
-                                                to={
-                                                    {
+                                                to={!isRestricted(['apim:shared_scope_manage'])
+                                                    && {
                                                         pathname: editUrl,
                                                         state: {
                                                             scopeName,
                                                             scopeId,
                                                         },
-                                                    }
-                                                }
+                                                    }}
+                                                className={isRestricted(['apim:shared_scope_manage'])
+                                                    ? classes.disableLink : ''}
                                             >
-                                                <Button>
+                                                <Button disabled={isRestricted(['apim:shared_scope_manage'])}>
                                                     <Icon>edit</Icon>
                                                     <FormattedMessage
                                                         id='Scopes.Listing.Listing.scopes.text.editor.edit'
@@ -461,7 +465,10 @@ class Listing extends React.Component {
                             defaultMessage='Scopes'
                         />
                     </Typography>
-                    <Link to={!isRestricted(['apim:shared_scope_manage']) && url}>
+                    <Link
+                        to={!isRestricted(['apim:shared_scope_manage']) && url}
+                        className={isRestricted(['apim:shared_scope_manage']) ? classes.disableLink : ''}
+                    >
                         <Button
                             size='small'
                             className={classes.button}
