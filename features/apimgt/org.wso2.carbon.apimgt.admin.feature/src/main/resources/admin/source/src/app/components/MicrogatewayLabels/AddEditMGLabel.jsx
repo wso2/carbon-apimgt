@@ -64,7 +64,7 @@ function AddEditMGLabel(props) {
 
     let id = null;
     let initialState = {
-        name: '',
+        name: undefined,
         description: '',
         hosts: [],
     };
@@ -89,6 +89,9 @@ function AddEditMGLabel(props) {
     };
 
     const handleHostValidation = (hostName) => {
+        if (hostName === undefined) {
+            return false;
+        }
         const schema = Joi.string().uri().empty();
         const validationError = schema.validate(hostName).error;
 
@@ -107,6 +110,10 @@ function AddEditMGLabel(props) {
         let error;
         switch (fieldName) {
             case 'name':
+                if (name === undefined) {
+                    error = false;
+                    break;
+                }
                 if (value === '') {
                     error = 'Name is Empty';
                 } else if (/\s/.test(value)) {
@@ -118,6 +125,10 @@ function AddEditMGLabel(props) {
                 }
                 break;
             case 'hosts':
+                if (hosts === undefined) {
+                    error = false;
+                    break;
+                }
                 if (value.length === 0) {
                     error = 'Host is empty';
                     break;
@@ -136,6 +147,9 @@ function AddEditMGLabel(props) {
     };
     const getAllFormErrors = () => {
         let errorText = '';
+        if (name === undefined) {
+            dispatch({ field: 'name', value: '' });
+        }
         const NameErrors = hasErrors('name', name);
         const hostErrors = hasErrors('hosts', hosts);
         if (NameErrors) {

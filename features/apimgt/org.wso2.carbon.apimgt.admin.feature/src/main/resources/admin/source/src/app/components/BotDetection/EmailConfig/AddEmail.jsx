@@ -75,6 +75,10 @@ function AddEmail(props) {
     };
 
     const formSaveCallback = () => {
+        if (email === undefined) {
+            setEmail('');
+            return false;
+        }
         const validationErrors = validateEmail(email);
         if (validationErrors) {
             Alert.error(validationErrors);

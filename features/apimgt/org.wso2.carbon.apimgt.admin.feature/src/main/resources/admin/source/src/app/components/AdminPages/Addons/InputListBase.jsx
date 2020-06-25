@@ -56,13 +56,13 @@ const InputList = (props) => {
             setId(i);
         } else {
             setId(id + 1);
-            setUserInputItems([{ key: '' + id, value: '', error: onValidation('') }]);
+            setUserInputItems([{ key: '' + id, value: '', error: onValidation(undefined) }]);
         }
     }, []);
 
     const onAddInputField = () => {
         setId(id + 1);
-        const newUserItemList = [...userInputItems, { key: '' + id, value: '', error: onValidation('') }];
+        const newUserItemList = [...userInputItems, { key: '' + id, value: '', error: onValidation(undefined) }];
         setUserInputItems(newUserItemList);
     };
 
