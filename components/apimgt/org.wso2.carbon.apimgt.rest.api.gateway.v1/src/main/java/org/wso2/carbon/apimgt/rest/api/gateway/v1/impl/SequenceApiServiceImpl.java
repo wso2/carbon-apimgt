@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 
@@ -40,26 +41,29 @@ public class SequenceApiServiceImpl implements SequenceApiService {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
-
         JSONObject responseObj = new JSONObject();
-        JSONArray sequencesArray = new JSONArray();
+
         if (gatewayAPIDTO != null) {
-            if (gatewayAPIDTO.getSequenceToBeAdd() != null ) {
-                SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                        new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-                for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
-                    try {
-                        if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
+            try {
+                JSONArray sequencesArray = new JSONArray();
+                JSONArray undeployedsequencesArray = new JSONArray();
+                if (gatewayAPIDTO.getSequenceToBeAdd() != null ) {
+                    SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                            new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
+                    for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
+                        if(sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
                             sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
                         } else {
                             log.error(sequence.getName() + " was not deployed in the gateway");
+                            undeployedsequencesArray.put(sequence.getContent());
                         }
-                    } catch (AxisFault axisFault) {
-                        log.error("Error in fetching deployed sequences from Synapse Configuration." , axisFault);
                     }
                 }
+            } catch (AxisFault e) {
+                String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
+                log.error(errorMessage, e);
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-            responseObj.put("Sequence", sequencesArray);
             String responseStringObj = String.valueOf(responseObj);
             return Response.ok().entity(responseStringObj).build();
         } else {
