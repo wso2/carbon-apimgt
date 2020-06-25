@@ -206,6 +206,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         application.setPolicy(event.getApplicationPolicy());
         application.setSubId(null); /// TODO see why null
         application.setTokenType(event.getTokenType());
+        application.setSubName(event.getSubscriber());
         if(log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + application.toString());

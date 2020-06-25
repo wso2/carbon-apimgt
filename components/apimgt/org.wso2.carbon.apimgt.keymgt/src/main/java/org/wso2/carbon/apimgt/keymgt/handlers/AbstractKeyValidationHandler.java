@@ -372,7 +372,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         if (APIUtil.isAdvanceThrottlingEnabled()) {
             String apiTier = api.getApiTier();
             String subscriberUserId = sub.getSubscriptionId();
-            String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
+            String subscriberTenant = MultitenantUtils.getTenantDomain(app.getSubName());
 
             ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
                     tenantId);
