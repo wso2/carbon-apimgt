@@ -31,6 +31,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +48,7 @@ public class ApiPoliciesApiServiceImpl implements ApiPoliciesApiService {
     public Response apiPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) {
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
 
+        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             if (StringUtils.isNotEmpty(policyName)) {
                 List<APIPolicy> model = new ArrayList<>();

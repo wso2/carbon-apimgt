@@ -268,13 +268,7 @@ public class APIManagerConfiguration {
             OMElement element = (OMElement) childElements.next();
             String localName = element.getLocalName();
             nameStack.push(localName);
-            if ("APIKeyValidator".equals(localName)) {
-                OMElement keyManagerServiceUrl = element.getFirstChildWithName(new QName(APIConstants.AUTHSERVER_URL));
-                if (keyManagerServiceUrl != null) {
-                    String serviceUrl = keyManagerServiceUrl.getText();
-                    addKeyManagerConfigsAsSystemProperties(APIUtil.replaceSystemProperty(serviceUrl));
-                }
-            } else if (TOKEN_REVOCATION_NOTIFIERS.equals(localName)) {
+            if (TOKEN_REVOCATION_NOTIFIERS.equals(localName)) {
                 tokenRevocationClassName = element.getAttributeValue(new QName("class"));
             } else if (REALTIME_NOTIFIER.equals(localName)) {
                 Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
@@ -1567,6 +1561,8 @@ public class APIManagerConfiguration {
             }
         }
         this.eventHubConfigurationDto = eventHubConfigurationDto;
+        addKeyManagerConfigsAsSystemProperties(APIUtil.replaceSystemProperty(eventHubConfigurationDto.getServiceUrl()));
+
     }
 
     public JWTConfigurationDto getJwtConfigurationDto() {
