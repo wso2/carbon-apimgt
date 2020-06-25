@@ -68,7 +68,7 @@ public class DBRetriever implements ArtifactRetriever {
                 throw new ArtifactSynchronizerException("HTTP response is empty");
             }
         } catch (IOException e) {
-            String msg = "Error while executing the http client " ;
+            String msg = "Error while executing the http client";
             log.error(msg, e);
             throw new ArtifactSynchronizerException(msg, e);
         }
