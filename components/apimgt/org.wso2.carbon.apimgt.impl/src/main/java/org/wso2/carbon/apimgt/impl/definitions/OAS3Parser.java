@@ -290,6 +290,7 @@ public class OAS3Parser extends APIDefinition {
     private String getMandatoryScriptSection(int minResponseCode, StringBuilder payloadVariables) {
         return "var accept = \"\\\"\"+mc.getProperty('AcceptHeader')+\"\\\"\";" +
                 "\nvar responseCode = mc.getProperty('query.param.responseCode');" +
+                "\nvar responseCodeStr = \"\\\"\"+responseCode+\"\\\"\";"+
                 "\nvar responses = [];\n" +
                 payloadVariables +
                 "\nresponses[501] = [];" +
@@ -298,11 +299,12 @@ public class OAS3Parser extends APIDefinition {
                 "\n\"description\" : \"Not Implemented\"" +
                 "}\n" +
                 "responses[501][\"application/xml\"] = <response><code>501</code><description>Not Implemented</description></response>;\n\n" +
-                "if (responseCode == null) {\n" +
-                " responseCode = " + minResponseCode + ";\n" +   //assign lowest code
-                "}\n\n" +
                 "if (!responses[responseCode]) {\n" +
                 " responseCode = 501;\n" +
+                "}\n\n" +
+                "if (responseCode == null) {\n" +
+                " responseCode = " + minResponseCode + ";\n" +   //assign lowest code
+                " responseCodeStr = \""+minResponseCode+"\";"+
                 "}\n\n" +
                 "if (accept == null || !responses[responseCode][accept]) {\n";
     }
@@ -321,6 +323,7 @@ public class OAS3Parser extends APIDefinition {
                     "}\n\n" +
                     "if (accept === \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeStr);\n"+
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
                     "} else if (accept === \"application/xml\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
@@ -331,6 +334,7 @@ public class OAS3Parser extends APIDefinition {
                     "}\n\n" +
                     "if (accept === \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeStr);\n"+
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
                     "}";
         } else if (hasXmlPayload) {
@@ -338,6 +342,7 @@ public class OAS3Parser extends APIDefinition {
                     "}\n\n" +
                     "if (accept === \"application/xml\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeStr);\n"+
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
         }
