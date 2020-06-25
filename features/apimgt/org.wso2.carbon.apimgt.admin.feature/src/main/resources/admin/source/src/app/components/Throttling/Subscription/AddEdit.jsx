@@ -35,7 +35,7 @@ import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import Switch from '@material-ui/core/Switch';
-import HelpOutline from '@material-ui/icons/HelpOutline';
+import HelpOutlinedIcon from '@material-ui/icons/HelpOutlined';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Table from '@material-ui/core/Table';
@@ -80,6 +80,9 @@ const useStyles = makeStyles((theme) => ({
     },
     buttonIcon: {
         marginRight: theme.spacing(1),
+    },
+    paddingTooltip: {
+        paddingLeft: 5,
     },
 }));
 
@@ -197,13 +200,13 @@ function AddEdit(props) {
                     requestCountEdit = result.body.defaultLimit.requestCount.requestCount;
                     timeUnitEdit = result.body.defaultLimit.requestCount.timeUnit;
                     unitTimeEdit = result.body.defaultLimit.requestCount.unitTime;
-                    typeEdit = result.body.defaultLimit.requestCount.type;
+                    typeEdit = result.body.defaultLimit.type;
                 } else if (result.body.defaultLimit.bandwidth != null) {
                     dataAmountEdit = result.body.defaultLimit.bandwidth.dataAmount;
                     dataUnitEdit = result.body.defaultLimit.bandwidth.dataUnit;
                     timeUnitEdit = result.body.defaultLimit.bandwidth.timeUnit;
                     unitTimeEdit = result.body.defaultLimit.bandwidth.unitTime;
-                    typeEdit = result.body.defaultLimit.bandwidth.type;
+                    typeEdit = result.body.defaultLimit.type;
                 }
                 const editState = {
                     policyName: result.body.policyName,
@@ -233,8 +236,8 @@ function AddEdit(props) {
                         permissionStatus: 'allow',
                     },
                     graphQL: {
-                        maxComplexity: result.body.graphQLMaxComplexity,
-                        maxDepth: result.body.graphQLMaxDepth,
+                        maxComplexity: (result.body.graphQLMaxComplexity === 0) ? '' : result.body.graphQLMaxComplexity,
+                        maxDepth: (result.body.graphQLMaxDepth === 0) ? '' : result.body.graphQLMaxDepth,
                     },
                 };
                 dispatch({ field: 'editDetails', value: editState });
@@ -397,8 +400,8 @@ function AddEdit(props) {
                 policyName: state.policyName,
                 description: state.description,
                 defaultLimit: {
+                    type: state.defaultLimit.type,
                     requestCount: {
-                        type: state.defaultLimit.type,
                         requestCount: state.defaultLimit.requestCount,
                         timeUnit: state.defaultLimit.timeUnit,
                         unitTime: state.defaultLimit.unitTime,
@@ -409,8 +412,8 @@ function AddEdit(props) {
                 billingPlan: state.billingPlan,
                 stopOnQuotaReach: state.stopOnQuotaReach,
                 customAttributes,
-                graphQLMaxComplexity: state.graphQL.maxComplexity,
-                graphQLMaxDepth: state.graphQL.maxDepth,
+                graphQLMaxComplexity: (state.graphQL.maxComplexity === '') ? 0 : state.graphQL.maxComplexity,
+                graphQLMaxDepth: (state.graphQL.maxDepth === '') ? 0 : state.graphQL.maxDepth,
                 monetization: {
                     monetizationPlan: state.monetization.monetizationPlan,
                     properties: {
@@ -426,8 +429,8 @@ function AddEdit(props) {
                 policyName: state.policyName,
                 description: state.description,
                 defaultLimit: {
+                    type: state.defaultLimit.type,
                     bandwidth: {
-                        type: state.defaultLimit.type,
                         dataAmount: state.defaultLimit.dataAmount,
                         dataUnit: state.defaultLimit.dataUnit,
                         timeUnit: state.defaultLimit.timeUnit,
@@ -439,8 +442,8 @@ function AddEdit(props) {
                 billingPlan: state.billingPlan,
                 stopOnQuotaReach: state.stopOnQuotaReach,
                 customAttributes,
-                graphQLMaxComplexity: state.graphQL.maxComplexity,
-                graphQLMaxDepth: state.graphQL.maxDepth,
+                graphQLMaxComplexity: (state.graphQL.maxComplexity === '') ? 0 : state.graphQL.maxComplexity,
+                graphQLMaxDepth: (state.graphQL.maxDepth === '') ? 0 : state.graphQL.maxDepth,
                 monetization: {
                     monetizationPlan: state.monetization.monetizationPlan,
                     properties: {
@@ -518,8 +521,9 @@ function AddEdit(props) {
     };
 
     const handleAttributeChange = (event) => {
+        const { id, name, value } = event.target;
         const tmpCustomAttributes = [...customAttributes];
-        tmpCustomAttributes[event.target.id][event.target.name] = event.target.value;
+        tmpCustomAttributes[id][name] = value;
         setCustomAttributes(tmpCustomAttributes);
     };
 
@@ -535,7 +539,7 @@ function AddEdit(props) {
         >
             <Box component='div' m={2}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12} md={12} lg={8}>
+                    <Grid item xs={12} md={12} lg={3}>
                         <Box display='flex' flexDirection='row' alignItems='center'>
                             <Box>
                                 <Typography color='inherit' variant='subtitle2' component='div'>
@@ -544,9 +548,17 @@ function AddEdit(props) {
                                         defaultMessage='General Details'
                                     />
                                 </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.AddEdit.general.details.description'
+                                        defaultMessage='Provide the name and description of the subscription policy.'
+                                    />
+                                </Typography>
                             </Box>
                         </Box>
-                        {/* General Details */}
+                    </Grid>
+                    {/* General Details */}
+                    <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
                             <TextField
                                 autoFocus
@@ -596,7 +608,14 @@ function AddEdit(props) {
                                 variant='outlined'
                             />
                         </Box>
-                        {/* Quota limits */}
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    {/* Quota limits */}
+                    <Grid item xs={12} md={12} lg={3}>
                         <Box display='flex' flexDirection='row' alignItems='center'>
                             <Box flex='1'>
                                 <Typography color='inherit' variant='subtitle2' component='div'>
@@ -605,7 +624,19 @@ function AddEdit(props) {
                                         defaultMessage='Quota Limits'
                                     />
                                 </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.AddEdit.quota.policies.add.description'
+                                        defaultMessage={'Request Count and Request Bandwidth are the '
+                                + 'two options for Quota Limit. You can use the option according '
+                                + 'to your requirement.'}
+                                    />
+                                </Typography>
                             </Box>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
+                        <Box component='div' m={1}>
                             <RadioGroup
                                 aria-label='Quota Limits'
                                 name='type'
@@ -734,7 +765,14 @@ function AddEdit(props) {
                                 </FormControl>
                             </Box>
                         </Box>
-                        {/* Burst Control (Rate Limiting) */}
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    {/* Burst Control (Rate Limiting) */}
+                    <Grid item xs={12} md={12} lg={3}>
                         <Box display='flex' flexDirection='row' alignItems='center'>
                             <Box flex='1'>
                                 <Typography color='inherit' variant='subtitle2' component='div'>
@@ -743,8 +781,17 @@ function AddEdit(props) {
                                         defaultMessage='Burst Control (Rate Limiting)'
                                     />
                                 </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.AddEdit.burst.control.add.description'
+                                        defaultMessage={'Define Burst Control Limits for the subscription policy.'
+                                        + ' This is optional.'}
+                                    />
+                                </Typography>
                             </Box>
                         </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
                             <Box display='flex' flexDirection='row'>
                                 <Grid item xs={12} md={12} lg={9}>
@@ -782,7 +829,14 @@ function AddEdit(props) {
                                 </FormControl>
                             </Box>
                         </Box>
-                        {/* Policy flags */}
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    {/* Policy flags */}
+                    <Grid item xs={12} md={12} lg={3}>
                         <Box display='flex' flexDirection='row' alignItems='center'>
                             <Box flex='1'>
                                 <Typography color='inherit' variant='subtitle2' component='div'>
@@ -791,46 +845,58 @@ function AddEdit(props) {
                                         defaultMessage='Policy Flags'
                                     />
                                 </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.AddEdit.policy.flags.add.description'
+                                        defaultMessage={'Define the billing plan for the subscription policy.'
+                                        + ' Enable stop on quota reach to block invoking an API when the'
+                                        + ' defined quota is reached.'}
+                                    />
+                                </Typography>
                             </Box>
                         </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
                             <Box display='flex' flexDirection='row' alignItems='center'>
+                                <Typography color='inherit' variant='body1' component='div'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.Billing.Plan'
+                                        defaultMessage='Billing Plan'
+                                    />
+                                </Typography>
                                 <Box flex='1'>
-                                    <Typography color='inherit' variant='body1' component='div'>
-                                        <FormattedMessage
-                                            id='Throttling.Subscription.Billing.Plan'
-                                            defaultMessage='Billing Plan'
+                                    <RadioGroup
+                                        aria-label='position'
+                                        name='billingPlan'
+                                        value={billingPlan}
+                                        onChange={onChange}
+                                        className={classes.radioGroup}
+                                    >
+                                        <FormControlLabel
+                                            value='FREE'
+                                            control={<Radio />}
+                                            label='Free'
                                         />
-                                    </Typography>
+                                        <FormControlLabel
+                                            value='COMMERCIAL'
+                                            control={<Radio />}
+                                            label='Commercial'
+                                        />
+                                    </RadioGroup>
                                 </Box>
-                                <RadioGroup
-                                    aria-label='position'
-                                    name='billingPlan'
-                                    value={billingPlan}
-                                    onChange={onChange}
-                                    className={classes.radioGroup}
-                                >
-                                    <FormControlLabel
-                                        value='FREE'
-                                        control={<Radio />}
-                                        label='Free'
-                                    />
-                                    <FormControlLabel
-                                        value='COMMERCIAL'
-                                        control={<Radio />}
-                                        label='Commercial'
-                                    />
-                                </RadioGroup>
                             </Box>
                             {billingPlan === 'COMMERCIAL' && (
                                 <div>
                                     <Box display='flex' flexDirection='row' alignItems='center'>
                                         <Box flex='1'>
-                                            <Typography color='inherit' variant='body1' component='div'>
-                                                <FormattedMessage
-                                                    id='Throttling.Subscription.monetization.plan'
-                                                    defaultMessage='Monetization Plan'
-                                                />
+                                            <Box display='flex' flexDirection='row' alignItems='center'>
+                                                <Typography color='inherit' variant='body1' component='div'>
+                                                    <FormattedMessage
+                                                        id='Throttling.Subscription.monetization.plan'
+                                                        defaultMessage='Monetization Plan'
+                                                    />
+                                                </Typography>
                                                 <Tooltip
                                                     title={(
                                                         <FormattedMessage
@@ -839,11 +905,12 @@ function AddEdit(props) {
                                                         />
                                                     )}
                                                     placement='right-end'
+                                                    className={classes.paddingTooltip}
                                                     interactive
                                                 >
-                                                    <HelpOutline />
+                                                    <HelpOutlinedIcon fontSize='medium' />
                                                 </Tooltip>
-                                            </Typography>
+                                            </Box>
                                         </Box>
                                         <Box flex='1'>
                                             <FormControl variant='outlined' className={classes.formControlSelectBottom}>
@@ -865,11 +932,13 @@ function AddEdit(props) {
                                     {monetizationPlan === 'FIXEDRATE' && (
                                         <Box display='flex' flexDirection='row' alignItems='center'>
                                             <Box flex='1'>
-                                                <Typography color='inherit' variant='body1' component='div'>
-                                                    <FormattedMessage
-                                                        id='Throttling.Subscription.Fixed.Rate'
-                                                        defaultMessage='Fixed Rate'
-                                                    />
+                                                <Box display='flex' flexDirection='row' alignItems='center'>
+                                                    <Typography color='inherit' variant='body1' component='div'>
+                                                        <FormattedMessage
+                                                            id='Throttling.Subscription.Fixed.Rate'
+                                                            defaultMessage='Fixed Rate'
+                                                        />
+                                                    </Typography>
                                                     <Tooltip
                                                         title={(
                                                             <FormattedMessage
@@ -878,11 +947,12 @@ function AddEdit(props) {
                                                             />
                                                         )}
                                                         placement='right-end'
+                                                        className={classes.paddingTooltip}
                                                         interactive
                                                     >
-                                                        <HelpOutline />
+                                                        <HelpOutlinedIcon fontSize='medium' />
                                                     </Tooltip>
-                                                </Typography>
+                                                </Box>
                                             </Box>
                                             <Box flex='1'>
                                                 <TextField
@@ -900,25 +970,28 @@ function AddEdit(props) {
                                     {monetizationPlan === 'DYNAMICRATE' && (
                                         <Box display='flex' flexDirection='row' alignItems='center'>
                                             <Box flex='1'>
-                                                <Typography color='inherit' variant='body1' component='div'>
-                                                    <FormattedMessage
-                                                        id='Throttling.Subscription.dynamic.usage'
-                                                        defaultMessage='Price Per Request'
-                                                    />
+                                                <Box display='flex' flexDirection='row' alignItems='center'>
+                                                    <Typography color='inherit' variant='body1' component='div'>
+                                                        <FormattedMessage
+                                                            id='Throttling.Subscription.dynamic.usage'
+                                                            defaultMessage='Price Per Request'
+                                                        />
+                                                    </Typography>
                                                     <Tooltip
                                                         title={(
                                                             <FormattedMessage
                                                                 id='Throttling.Subscription.dynamic.usage.tooltip'
                                                                 defaultMessage={'Price per request for the given'
-                                                                + ' billing cycle in the given currency'}
+                                                                    + ' billing cycle in the given currency'}
                                                             />
                                                         )}
                                                         placement='right-end'
+                                                        className={classes.paddingTooltip}
                                                         interactive
                                                     >
-                                                        <HelpOutline />
+                                                        <HelpOutlinedIcon fontSize='medium' />
                                                     </Tooltip>
-                                                </Typography>
+                                                </Box>
                                             </Box>
                                             <Box flex='1'>
                                                 <TextField
@@ -997,18 +1070,27 @@ function AddEdit(props) {
                                         />
                                     </Typography>
                                 </Box>
-                                <Switch
-                                    checked={stopOnQuotaReach}
-                                    onChange={onToggle}
-                                    fullWidth
-                                    align='center'
-                                    size='medium'
-                                    color='primary'
-                                    name='stopOnQuotaReach'
-                                />
+                                <Box flex='1'>
+                                    <Switch
+                                        checked={stopOnQuotaReach}
+                                        onChange={onToggle}
+                                        fullWidth
+                                        align='center'
+                                        size='medium'
+                                        color='primary'
+                                        name='stopOnQuotaReach'
+                                    />
+                                </Box>
                             </Box>
                         </Box>
-                        {/* Custom Attributes */}
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    {/* Custom Attributes */}
+                    <Grid item xs={12} md={12} lg={3}>
                         <Box display='flex' flexDirection='row' alignItems='center'>
                             <Box flex='1'>
                                 <Typography color='inherit' variant='subtitle2' component='div'>
@@ -1017,23 +1099,29 @@ function AddEdit(props) {
                                         defaultMessage='Custom Attributes'
                                     />
                                 </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.AddEdit.custom.attributes.add.description'
+                                        defaultMessage='Define custom attributes for the subscription policy.'
+                                    />
+                                </Typography>
                             </Box>
                         </Box>
-                        <Box component='div' m={2}>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
+                        <Box component='div' m={1}>
                             <Grid item xs={12}>
-                                <Box display='flex' flexDirection='row' alignItems='center'>
-                                    <Box flex='1'>
-                                        <Button
-                                            variant='outlined'
-                                            onClick={handleAddNewAttributeClick}
-                                        >
-                                            <AddCircle className={classes.buttonIcon} />
-                                            <FormattedMessage
-                                                id='Throttling.Subscription.custom.attributes.add'
-                                                defaultMessage='Add Custom Attribute'
-                                            />
-                                        </Button>
-                                    </Box>
+                                <Box flex='1'>
+                                    <Button
+                                        variant='outlined'
+                                        onClick={handleAddNewAttributeClick}
+                                    >
+                                        <AddCircle className={classes.buttonIcon} />
+                                        <FormattedMessage
+                                            id='Throttling.Subscription.custom.attributes.add'
+                                            defaultMessage='Add Custom Attribute'
+                                        />
+                                    </Button>
                                 </Box>
                                 <Table className={classes.table}>
                                     <TableBody>
@@ -1047,7 +1135,7 @@ function AddEdit(props) {
                                                         name='name'
                                                         label={intl.formatMessage({
                                                             id: `Throttling.Subscription.Properties.Properties.
-                                                                    show.add.property.property.name`,
+                                                                        show.add.property.property.name`,
                                                             defaultMessage: 'Name',
                                                         })}
                                                         margin='dense'
@@ -1097,7 +1185,14 @@ function AddEdit(props) {
                                 </Table>
                             </Grid>
                         </Box>
-                        {/* Permissions */}
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    {/* Permissions */}
+                    <Grid item xs={12} md={12} lg={3}>
                         <Box display='flex' flexDirection='row' alignItems='center'>
                             <Box flex='1'>
                                 <Typography color='inherit' variant='subtitle2' component='div'>
@@ -1106,18 +1201,18 @@ function AddEdit(props) {
                                         defaultMessage='Permissions'
                                     />
                                 </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.AddEdit.permissions.add.description'
+                                        defaultMessage='Define the permissions for the subscription policy.'
+                                    />
+                                </Typography>
                             </Box>
                         </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
                             <Box display='flex' flexDirection='row' alignItems='center'>
-                                <Box flex='1'>
-                                    <Typography color='inherit' variant='body1' component='div'>
-                                        <FormattedMessage
-                                            id='Throttling.Subscription.roles'
-                                            defaultMessage='Roles'
-                                        />
-                                    </Typography>
-                                </Box>
                                 {permissionStatus === 'allow' ? (
                                     <Box flex='1'>
                                         <TextField
@@ -1126,7 +1221,14 @@ function AddEdit(props) {
                                             required
                                             value={roles}
                                             onChange={onChange}
-                                            label='Roles'
+                                            label={(
+                                                <span>
+                                                    <FormattedMessage
+                                                        id='Throttling.Subscription.AddEdit.form.roles'
+                                                        defaultMessage='Roles'
+                                                    />
+                                                </span>
+                                            )}
                                             fullWidth
                                             multiline
                                             helperText={intl.formatMessage({
@@ -1156,22 +1258,26 @@ function AddEdit(props) {
                                     </Box>
                                 )}
                             </Box>
-                            <Box display='flex' flexDirection='row' alignItems='center'>
-                                <Box flex='1' />
-                                <Box flex='1'>
-                                    <RadioGroup
-                                        name='permissionStatus'
-                                        value={permissionStatus}
-                                        onChange={onChange}
-                                        className={classes.radioGroup}
-                                    >
-                                        <FormControlLabel value='allow' control={<Radio />} label='Allow' />
-                                        <FormControlLabel value='deny' control={<Radio />} label='Deny' />
-                                    </RadioGroup>
-                                </Box>
+                            <Box flex='1'>
+                                <RadioGroup
+                                    name='permissionStatus'
+                                    value={permissionStatus}
+                                    onChange={onChange}
+                                    className={classes.radioGroup}
+                                >
+                                    <FormControlLabel value='allow' control={<Radio />} label='Allow' />
+                                    <FormControlLabel value='deny' control={<Radio />} label='Deny' />
+                                </RadioGroup>
                             </Box>
                         </Box>
-                        {/* GraphQL */}
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    {/* GraphQL */}
+                    <Grid item xs={12} md={12} lg={3}>
                         <Box display='flex' flexDirection='row' alignItems='center'>
                             <Box flex='1'>
                                 <Typography color='inherit' variant='subtitle2' component='div'>
@@ -1180,18 +1286,19 @@ function AddEdit(props) {
                                         defaultMessage='GraphQL'
                                     />
                                 </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.AddEdit.graphql.add.description'
+                                        defaultMessage={'Provide the Maximum Complexity and Maximum depth'
+                                        + ' values for GraphQL APIs using this policy.'}
+                                    />
+                                </Typography>
                             </Box>
                         </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
                             <Box display='flex' flexDirection='row' alignItems='center'>
-                                <Box flex='1'>
-                                    <Typography color='inherit' variant='body1' component='div'>
-                                        <FormattedMessage
-                                            id='Throttling.Subscription.max.complexity'
-                                            defaultMessage='Max Complexity'
-                                        />
-                                    </Typography>
-                                </Box>
                                 <Box flex='1'>
                                     <TextField
                                         margin='dense'
@@ -1199,7 +1306,14 @@ function AddEdit(props) {
                                         value={maxComplexity}
                                         type='number'
                                         onChange={onChange}
-                                        label='Max Complexity'
+                                        label={(
+                                            <span>
+                                                <FormattedMessage
+                                                    id='Throttling.Subscription.AddEdit.form.max.complexity'
+                                                    defaultMessage='Max Complexity'
+                                                />
+                                            </span>
+                                        )}
                                         fullWidth
                                         variant='outlined'
                                     />
@@ -1207,21 +1321,20 @@ function AddEdit(props) {
                             </Box>
                             <Box display='flex' flexDirection='row' alignItems='center'>
                                 <Box flex='1'>
-                                    <Typography color='inherit' variant='body1' component='div'>
-                                        <FormattedMessage
-                                            id='Throttling.Subscription.max.depth'
-                                            defaultMessage='Max Depth'
-                                        />
-                                    </Typography>
-                                </Box>
-                                <Box flex='1'>
                                     <TextField
                                         margin='dense'
                                         name='maxDepth'
                                         type='number'
                                         value={maxDepth}
                                         onChange={onChange}
-                                        label='Max Depth'
+                                        label={(
+                                            <span>
+                                                <FormattedMessage
+                                                    id='Throttling.Subscription.AddEdit.form.max.depth'
+                                                    defaultMessage='Max Depth'
+                                                />
+                                            </span>
+                                        )}
                                         fullWidth
                                         variant='outlined'
                                     />
