@@ -33,10 +33,11 @@ public class ApplicationEvent extends Event {
     private String applicationPolicy;
     private String groupId;
     private Map<String,String> attributes;
+    private String subscriber;
 
     public ApplicationEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
                             int applicationId, String uuid, String applicationName, String tokenType,
-                            String applicationPolicy, String groupId, Map<String, String> attributes) {
+            String applicationPolicy, String groupId, Map<String, String> attributes, String subscriber) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -49,6 +50,7 @@ public class ApplicationEvent extends Event {
         this.groupId = groupId;
         this.tenantDomain = tenantDomain;
         this.attributes = attributes;
+        this.subscriber = subscriber;
     }
 
     @Override
@@ -64,6 +66,7 @@ public class ApplicationEvent extends Event {
                 ", type='" + type + '\'' +
                 ", tenantId=" + tenantId + '\'' +
                 ", tenantDomain=" + tenantDomain +
+                ", subscriber=" + subscriber +
                 '}';
     }
 
@@ -142,5 +145,13 @@ public class ApplicationEvent extends Event {
     public void setUuid(String uuid) {
 
         this.uuid = uuid;
+    }
+
+    public String getSubscriber() {
+        return subscriber;
+    }
+
+    public void setSubscriber(String subscriber) {
+        this.subscriber = subscriber;
     }
 }

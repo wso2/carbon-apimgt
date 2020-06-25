@@ -3674,7 +3674,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
                         tenantDomain, applicationId, application.getUUID(), application.getName(),
                         application.getTokenType(),
-                        application.getTier(), application.getGroupId(), application.getApplicationAttributes());
+                        application.getTier(), application.getGroupId(), application.getApplicationAttributes(), userId);
                 APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
             }
         } else {
@@ -3682,7 +3682,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
                     tenantDomain, applicationId, application.getUUID(), application.getName(),
                     application.getTokenType(), application.getTier(), application.getGroupId(),
-                    application.getApplicationAttributes());
+                    application.getApplicationAttributes(), userId);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         return applicationId;
@@ -3837,7 +3837,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId, tenantDomain,
                 application.getId(), application.getUUID(), application.getName(), application.getTokenType(),
-                application.getTier(), application.getGroupId(), application.getApplicationAttributes());
+                application.getTier(), application.getGroupId(), application.getApplicationAttributes(),
+                existingApp.getSubscriber().getName());
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
@@ -4026,7 +4027,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(), tenantId,
                         tenantDomain, applicationId, application.getUUID(), application.getName(),
                         application.getTokenType(),
-                        application.getTier(), application.getGroupId(), Collections.EMPTY_MAP);
+                        application.getTier(), application.getGroupId(), Collections.EMPTY_MAP, username);
                 APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
             }
         } else {
@@ -4034,7 +4035,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(), tenantId,
                     tenantDomain, applicationId, application.getUUID(), application.getName(),
                     application.getTokenType(),
-                    application.getTier(), application.getGroupId(), Collections.EMPTY_MAP);
+                    application.getTier(), application.getGroupId(), Collections.EMPTY_MAP, username);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
     }
