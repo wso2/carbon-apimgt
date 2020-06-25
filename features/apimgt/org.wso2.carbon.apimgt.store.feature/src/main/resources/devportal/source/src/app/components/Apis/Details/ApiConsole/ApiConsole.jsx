@@ -89,6 +89,8 @@ class ApiConsole extends React.Component {
             scopes: [],
             selectedKeyType: 'PRODUCTION',
             keys: [],
+            productionApiKey: '',
+            sandboxApiKey: '',
         };
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.updateSwagger = this.updateSwagger.bind(this);
@@ -101,6 +103,8 @@ class ApiConsole extends React.Component {
         this.setSelectedKeyType = this.setSelectedKeyType.bind(this);
         this.setKeys = this.setKeys.bind(this);
         this.updateAccessToken = this.updateAccessToken.bind(this);
+        this.setProductionApiKey = this.setProductionApiKey.bind(this);
+        this.setSandboxApiKey = this.setSandboxApiKey.bind(this);
     }
 
     /**
@@ -205,6 +209,22 @@ class ApiConsole extends React.Component {
     }
 
     /**
+     * Set Production API Key
+     * @memberof ApiConsole
+     */
+    setProductionApiKey(productionApiKey) {
+        this.setState({ productionApiKey });
+    }
+
+    /**
+     * Set Sandbox API Key
+     * @memberof ApiConsole
+     */
+    setSandboxApiKey(sandboxApiKey) {
+        this.setState({ sandboxApiKey });
+    }
+
+    /**
      * Set Username
      * @memberof ApiConsole
      */
@@ -264,13 +284,19 @@ class ApiConsole extends React.Component {
     accessTokenProvider() {
         const {
             securitySchemeType, username, password, productionAccessToken,
-            sandboxAccessToken, selectedKeyType,
+            sandboxAccessToken, selectedKeyType, productionApiKey, sandboxApiKey,
         } = this.state;
         if (securitySchemeType === 'BASIC') {
             const credentials = username + ':' + password;
             return btoa(credentials);
         }
-        if (selectedKeyType === 'PRODUCTION') {
+        if (securitySchemeType === 'API-KEY') {
+            if (selectedKeyType === 'PRODUCTION') {
+                return productionApiKey;
+            } else {
+                return sandboxApiKey;
+            }
+        } else if (selectedKeyType === 'PRODUCTION') {
             return productionAccessToken;
         } else {
             return sandboxAccessToken;
@@ -310,6 +336,7 @@ class ApiConsole extends React.Component {
         const {
             api, notFound, swagger, securitySchemeType, selectedEnvironment, labels, environments, scopes,
             username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
+            sandboxApiKey, productionApiKey,
         } = this.state;
         const user = AuthManager.getUser();
         const downloadSwagger = JSON.stringify({ ...swagger });
@@ -380,6 +407,10 @@ class ApiConsole extends React.Component {
                         selectedKeyType={selectedKeyType}
                         updateSwagger={this.updateSwagger}
                         setKeys={this.setKeys}
+                        setProductionApiKey={this.setProductionApiKey}
+                        setSandboxApiKey={this.setSandboxApiKey}
+                        productionApiKey={productionApiKey}
+                        sandboxApiKey={sandboxApiKey}
                         api={this.state.api}
                     />
 
