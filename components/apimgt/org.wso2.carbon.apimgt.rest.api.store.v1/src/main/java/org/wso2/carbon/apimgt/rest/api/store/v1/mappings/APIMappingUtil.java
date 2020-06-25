@@ -233,6 +233,7 @@ public class APIMappingUtil {
             }
         }
         dto.setCategories(categoryNamesList);
+        dto.setKeyManagers(model.getKeyManagers());
 
         return dto;
     }

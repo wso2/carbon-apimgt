@@ -11,7 +11,7 @@ import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -32,13 +32,13 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                         .getAPIManagerConfiguration();
         if (apiManagerConfiguration != null) {
-            KeyManagerConfigurationsDto keyManagerConfigurationsDto =
-                    apiManagerConfiguration.getKeyManagerConfigurationsDto();
-            if (keyManagerConfigurationsDto != null && keyManagerConfigurationsDto.isEnabled()) {
+            EventHubConfigurationDto eventHubConfigurationDto =
+                    apiManagerConfiguration.getEventHubConfigurationDto();
+            if (eventHubConfigurationDto != null && eventHubConfigurationDto.isEnabled()) {
                 try {
-                    String url = keyManagerConfigurationsDto.getServiceUrl() + "/keymanagers";
-                    byte[] credentials = Base64.encodeBase64((keyManagerConfigurationsDto.getUsername() + ":" +
-                            keyManagerConfigurationsDto.getPassword()).getBytes());
+                    String url = eventHubConfigurationDto.getServiceUrl() + "/keymanagers";
+                    byte[] credentials = Base64.encodeBase64((eventHubConfigurationDto.getUsername() + ":" +
+                            eventHubConfigurationDto.getPassword()).getBytes());
                     HttpGet method = new HttpGet(url);
                     method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
                     URL configUrl = new URL(url);

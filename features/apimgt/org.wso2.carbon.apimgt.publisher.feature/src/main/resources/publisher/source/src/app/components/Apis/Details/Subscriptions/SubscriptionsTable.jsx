@@ -47,6 +47,10 @@ import AuthManager from 'AppData/AuthManager';
 import Invoice from './Invoice';
 
 const styles = (theme) => ({
+    heading: {
+        marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(2),
+    },
     button: {
         margin: theme.spacing(1),
     },
@@ -676,6 +680,9 @@ class SubscriptionsTable extends Component {
     }
 
 
+    /**
+     *
+     */
     render() {
         const {
             subscriptions, page, rowsPerPage, totalSubscription, rowsPerPageOptions, emptyColumnHeight,
@@ -872,6 +879,7 @@ class SubscriptionsTable extends Component {
             print: false,
             download: false,
             viewColumns: false,
+            elevation: 1,
             customToolbar: false,
             search: false,
             selectableRows: 'none',
@@ -891,10 +899,66 @@ class SubscriptionsTable extends Component {
                 );
             },
         };
-
+        const subMails = {};
+        const emails = subscriberClaims && Object.entries(subscriberClaims).map(([, v]) => {
+            let email = null;
+            if (!subMails[v.name]) {
+                email = v.claims.find((claim) => claim.URI === 'http://wso2.org/claims/emailaddress').value;
+                subMails[v.name] = email;
+            }
+            return email;
+        }).reduce((a, b) => {
+            return b !== null ? `${a || ''},${b}` : a;
+        });
+        let names = null;
+        if (subMails) {
+            Object.entries(subMails).map(([k, v]) => {
+                if (v) {
+                    if (names === null) {
+                        names = k;
+                    } else {
+                        names = `${names}, ${k}`;
+                    }
+                }
+                return null;
+            });
+        }
+        const Tip = names ? React.Fragment : Tooltip;
         return (
             <>
-                <Paper>
+                <div className={classes.heading}>
+                    <Typography variant='h4'>
+                        <FormattedMessage
+                            id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
+                            defaultMessage='Manage Subscriptions'
+                        />
+                        {'   '}
+                        {subscriptions.length > 0 && (
+                            <Tip title='No contact details' placement='top'>
+                                <span>
+                                    <Button
+                                        target='_blank'
+                                        rel='noopener'
+                                        href={`mailto:?subject=Message from the API Publisher&cc=${emails}`
+                                            + `&body=Hi ${names},`}
+                                        size='small'
+                                        disabled={!names}
+                                        variant='outlined'
+                                    >
+                                        Contact Subscribers
+                                    </Button>
+                                </span>
+                            </Tip>
+                        )}
+                    </Typography>
+                    <Typography variant='caption' gutterBottom>
+                        <FormattedMessage
+                            id='Apis.Details.Subscriptions.SubscriptionsTable.sub.heading'
+                            defaultMessage='Manage subscriptions of the API'
+                        />
+                    </Typography>
+                </div>
+                <Paper elevation={0}>
                     {subscriptions.length > 0 ? (
                         <div>
                             <MUIDataTable title='' data={subscriptions} columns={columns} options={options} />
