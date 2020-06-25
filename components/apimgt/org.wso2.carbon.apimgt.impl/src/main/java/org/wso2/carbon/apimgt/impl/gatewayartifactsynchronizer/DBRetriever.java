@@ -102,13 +102,13 @@ public class DBRetriever implements ArtifactRetriever {
             }
             return gatewayRuntimeArtifactsArray;
         } catch (IOException e) {
-            String msg = "Error while executing the http client " ;
+            String msg = "Error while executing the http client";
             log.error(msg, e);
             throw new ArtifactSynchronizerException(msg, e);
         }
     }
 
-    private HttpResponse invokeService(String endpoint) throws IOException, ArtifactSynchronizerException {
+    private HttpResponse invokeService(String endpoint) throws IOException {
         HttpGet method = new HttpGet(endpoint);
         URL synapseGetURL = new URL(endpoint);
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
