@@ -928,7 +928,7 @@ public class APIManagerComponent {
     private void configureNotificationEventPublisher() {
 
         OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-        adapterConfiguration.setName(APIConstants.NOTIFICATION_EVENT_PUBLISHER);
+        adapterConfiguration.setName(APIConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER);
         adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
         Map<String, String> adapterParameters = new HashMap<>();

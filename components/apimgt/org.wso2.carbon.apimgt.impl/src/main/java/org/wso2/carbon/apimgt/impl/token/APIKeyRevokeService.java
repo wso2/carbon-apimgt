@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.tokenmgt.service;
+package org.wso2.carbon.apimgt.impl.token;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 

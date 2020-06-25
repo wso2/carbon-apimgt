@@ -15,12 +15,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.tokenmgt.events;
+package org.wso2.carbon.apimgt.impl.publishers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.tokenmgt.token.TokenRevocationNotifier;
+import org.wso2.carbon.apimgt.impl.token.TokenRevocationNotifier;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;

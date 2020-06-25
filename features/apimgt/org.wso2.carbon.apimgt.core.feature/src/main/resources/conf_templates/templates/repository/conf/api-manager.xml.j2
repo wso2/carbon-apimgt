@@ -367,7 +367,7 @@
        {% if apim.jwt.expiry_time is defined %}
         <JWTExpiryTime>{{apim.jwt.expiry_time}}</JWTExpiryTime>
        {% endif %}
-     <EnableDefaultKeyManagerRegistration>{{apim.key_manager.enable_registration}}</EnableKeyManagerRegistration>
+     <EnableDefaultKeyManagerRegistration>{{apim.key_manager.enable_registration}}</EnableDefaultKeyManagerRegistration>
      <EnableKeyManagerConfigurationRetriever>{{apim.key_manager.enable_retriever}}</EnableKeyManagerConfigurationRetriever>
     </APIKeyValidator>
 
