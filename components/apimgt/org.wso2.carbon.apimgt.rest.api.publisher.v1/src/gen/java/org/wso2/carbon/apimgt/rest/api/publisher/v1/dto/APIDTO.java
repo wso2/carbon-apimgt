@@ -9,11 +9,11 @@ import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import javax.validation.constraints.*;
@@ -39,6 +39,7 @@ public class APIDTO   {
     private String lifeCycleStatus = null;
     private WSDLInfoDTO wsdlInfo = null;
     private String wsdlUrl = null;
+    private String testKey = null;
     private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
@@ -413,6 +414,23 @@ public enum EndpointImplementationTypeEnum {
   }
   public void setWsdlUrl(String wsdlUrl) {
     this.wsdlUrl = wsdlUrl;
+  }
+
+  /**
+   **/
+  public APIDTO testKey(String testKey) {
+    this.testKey = testKey;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "8swdwj9080edejhj", value = "")
+  @JsonProperty("testKey")
+  public String getTestKey() {
+    return testKey;
+  }
+  public void setTestKey(String testKey) {
+    this.testKey = testKey;
   }
 
   /**
@@ -1148,6 +1166,7 @@ public enum EndpointImplementationTypeEnum {
         Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
         Objects.equals(wsdlInfo, API.wsdlInfo) &&
         Objects.equals(wsdlUrl, API.wsdlUrl) &&
+        Objects.equals(testKey, API.testKey) &&
         Objects.equals(responseCachingEnabled, API.responseCachingEnabled) &&
         Objects.equals(cacheTimeout, API.cacheTimeout) &&
         Objects.equals(destinationStatsEnabled, API.destinationStatsEnabled) &&
@@ -1193,7 +1212,7 @@ public enum EndpointImplementationTypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
   }
 
   @Override
@@ -1210,6 +1229,7 @@ public enum EndpointImplementationTypeEnum {
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    wsdlInfo: ").append(toIndentedString(wsdlInfo)).append("\n");
     sb.append("    wsdlUrl: ").append(toIndentedString(wsdlUrl)).append("\n");
+    sb.append("    testKey: ").append(toIndentedString(testKey)).append("\n");
     sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");

@@ -19,15 +19,19 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import AuthManager from 'AppData/AuthManager';
 import Progress from 'AppComponents/Shared/Progress';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import Paper from '@material-ui/core/Paper';
 import 'swagger-ui-react/swagger-ui.css';
 import API from 'AppData/api';
+import AuthManager, { isRestricted } from 'AppData/AuthManager';
 import { TryOutController, SwaggerUI } from 'developer_portal';
-import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import Button from '@material-ui/core/Button';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import Banner from 'AppComponents/Shared/Banner';
+import ApiContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import uuid from 'uuid/v4';
 
 /**
  * @inheritdoc
@@ -40,6 +44,9 @@ const styles = (theme) => ({
     categoryHeading: {
         marginBottom: theme.spacing(2),
         marginLeft: theme.spacing(-5),
+    },
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
     },
     buttonIcon: {
         marginRight: 10,
@@ -82,8 +89,12 @@ const styles = (theme) => ({
         documentBackground: '#efefef',
         tokenTextBoxBackground: '#efefef',
     },
-    contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
+    stateButton: {
+        marginRight: theme.spacing(),
+    },
+    head: {
+        fontWeight: 200,
+        marginBottom: 20,
     },
     emptyBox: {
         marginTop: theme.spacing(2),
@@ -94,6 +105,18 @@ const styles = (theme) => ({
         flexDirection: 'column',
         marginLeft: theme.custom.leftMenuWidth,
         paddingBottom: theme.spacing(3),
+    },
+    actions: {
+        padding: '20px 0',
+        '& button': {
+            marginLeft: 0,
+        },
+    },
+    helpText: {
+        paddingTop: theme.spacing(1),
+    },
+    messageBox: {
+        marginTop: 20,
     },
 });
 
@@ -109,12 +132,15 @@ class TestConsole extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            securitySchemeType: 'BASIC',
+            securitySchemeType: 'TEST',
             username: '',
             password: '',
             scopes: [],
             selectedKeyType: 'PRODUCTION',
             keys: [],
+            newState: null,
+            // isUpdating: null,
+            // pageError: null,
         };
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.updateSwagger = this.updateSwagger.bind(this);
@@ -127,6 +153,10 @@ class TestConsole extends React.Component {
         this.setSelectedKeyType = this.setSelectedKeyType.bind(this);
         this.setKeys = this.setKeys.bind(this);
         this.updateAccessToken = this.updateAccessToken.bind(this);
+        this.WORKFLOW_STATUS = {
+            CREATED: 'CREATED',
+            APPROVED: 'APPROVED',
+        };
     }
 
     /**
@@ -155,8 +185,10 @@ class TestConsole extends React.Component {
                     environments = apiData.gatewayEnvironments.map((endpoint) => { return endpoint; });
                 }
                 const securtySchemas = apiData.securityScheme;
-                securtySchemas.push('basic_auth');
+                console.log('SEC schemas' + securtySchemas);
+                securtySchemas.push('test_auth');
                 securtySchemas.shift();
+                console.log('SEC schemas333333: ' + securtySchemas);
                 if (apiData.endpointURLs) {
                     environments = apiData.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
                 }
@@ -204,6 +236,7 @@ class TestConsole extends React.Component {
         settingPromise
             .then((settingsNew) => {
                 if (settingsNew.environment) {
+                    console.log('Settings new' + JSON.stringify(settingsNew));
                     urls = settingsNew.environment.map((endpoints) => { return endpoints.endpoints; });
                     httpVal = urls.map((val) => { return val.http; });
                     httpsVal = urls.map((value) => { return value.https; });
@@ -284,45 +317,69 @@ class TestConsole extends React.Component {
         this.setState({ keys });
     }
 
-    /**
-     * Load the access token for given key type
-     * @memberof TryOutController
-     */
-    updateAccessToken() {
-        const {
-            keys, selectedKeyType,
-        } = this.state;
-        let accessToken;
-        if (keys.get(selectedKeyType)) {
-            ({ accessToken } = keys.get(selectedKeyType).token);
-        }
-        if (selectedKeyType === 'PRODUCTION') {
-            this.setProductionAccessToken(accessToken);
-        } else {
-            this.setSandboxAccessToken(accessToken);
-        }
-    }
 
-    /**
-     *
-     * Provids the access token to the Swagger UI
-     * @returns {*} access token
-     * @memberof ApiConsole
-     */
-    accessTokenProvider() {
-        const {
-            securitySchemeType, username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
-        } = this.state;
-        if (securitySchemeType === 'BASIC') {
-            const credentials = username + ':' + password;
-            return btoa(credentials);
-        }
-        if (selectedKeyType === 'PRODUCTION') {
-            return productionAccessToken;
-        } else {
-            return sandboxAccessToken;
-        }
-    }
+    handleClick = () => {
+        this.setState({ newState: 'Hi there!' });
+        console.log('updateAPI');
+        const { apiObj } = this.props;
+        console.log('updateLCStateofAPI');
+        const action = 'Deploy as a Prototype';
+        const promisedUpdate = API.updateLcState(apiObj.id, action);
+        promisedUpdate
+            .then((response) => {
+                console.log('updateLCStateofAPI' + JSON.stringify(response));
+                const newState = response.body.lifecycleState.state;
+                console.log('new life cycle state' + newState);
+                this.setState({ newState });
+                this.context.updateAPI();
+                // disable store
+                console.log('ID' + apiObj.id);
+                const promisedApi = API.get(apiObj.id);
+                promisedApi
+                    .then((getResponse) => {
+                        const apiData = getResponse;
+                        console.log('APIDATEEEEE' + JSON.stringify(getResponse.enableStore));
+                        apiData.enableStore = false;
+                        console.log('enableStore==+++++++++++++' + JSON.stringify(apiData));
+                        const token = uuid();
+                        console.log('TOKEN' + token);
+                        apiData.testKey = token;
+                        this.context.updateAPI({ enableStore: false, testKey: token });
+                    })
+                    .catch((errorResponse) => {
+                        console.error(errorResponse);
+                    });
+                // const { intl } = this.props;
+                // if (workflowStatus === this.WORKFLOW_STATUS.CREATED) {
+                //     Alert.info(intl.formatMessage({
+                //         id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success.createStatus',
+                //         defaultMessage: 'Lifecycle state change request has been sent',
+                //     }));
+                // } else {
+                //     Alert.info(intl.formatMessage({
+                //         id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success.otherStatus',
+                //         defaultMessage: 'Lifecycle state updated successfully',
+                //     }));
+                // }
+            })
+            .catch((error) => {
+                // if (error.response) {
+                //     Alert.error(error.response.body.description);
+                //     // this.setState({ pageError: error.response.body });
+                // } else {
+                //     // TODO add i18n ~tmkb
+                //     const message = 'Something went wrong while updating the lifecycle';
+                //     Alert.error(message);
+                //     // this.setState({ pageError: error.response.body });
+                // }
+                console.error(error);
+            });
+        const promisedApi = API.get(apiObj.id);
+        promisedApi
+            .then((getResponse) => {
+                console.log('FINAL Result' + JSON.stringify(getResponse));
+            });
+    };
 
     /**
      * Load the swagger file of the selected environemnt
@@ -349,6 +406,54 @@ class TestConsole extends React.Component {
     }
 
     /**
+     *
+     * Provids the access token to the Swagger UI
+     * @returns {*} access token
+     * @memberof ApiConsole
+     */
+    accessTokenProvider() {
+        const {
+            securitySchemeType, username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
+        } = this.state;
+        console.log('state-----' + this.state.username);
+        console.log('testKey----' + this.state.api.testKey);
+        console.log('state4444======' + JSON.stringify(this.state));
+        if (securitySchemeType === 'BASIC') {
+            const credentials = username + ':' + password;
+            return btoa(credentials);
+        }
+        if (securitySchemeType === 'TEST') {
+            console.log('TOKEN set access token provider @@@@@@@@@@@' + this.state.api.testKey);
+            return this.state.api.testKey;
+        }
+        if (selectedKeyType === 'PRODUCTION') {
+            return productionAccessToken;
+        } else {
+            return sandboxAccessToken;
+        }
+    }
+
+
+    /**
+     * Load the access token for given key type
+     * @memberof TryOutController
+     */
+    updateAccessToken() {
+        const {
+            keys, selectedKeyType,
+        } = this.state;
+        let accessToken;
+        if (keys.get(selectedKeyType)) {
+            ({ accessToken } = keys.get(selectedKeyType).token);
+        }
+        if (selectedKeyType === 'PRODUCTION') {
+            this.setProductionAccessToken(accessToken);
+        } else {
+            this.setSandboxAccessToken(accessToken);
+        }
+    }
+
+    /**
      * @inheritdoc
      * @memberof ApiConsole
      */
@@ -356,8 +461,9 @@ class TestConsole extends React.Component {
         const { classes } = this.props;
         const {
             swagger, api, securitySchemeType, selectedEnvironment, productionAccessToken, sandboxAccessToken,
-            labels, environments, scopes, username, password, selectedKeyType, serverError, settings,
+            labels, environments, scopes, username, password, selectedKeyType, serverError, settings, newState,
         } = this.state;
+        console.log('newState11111111111' + newState);
         if (serverError) {
             return (
                 <Typography variant='h4' className={classes.titleSub}>
@@ -370,52 +476,125 @@ class TestConsole extends React.Component {
             return <Progress />;
         }
 
-        let isApiKeyEnabled = false;
+        // let isApiKeyEnabled = false;
         let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
-        if (api && api.securityScheme) {
-            isApiKeyEnabled = api.securityScheme.includes('api_key');
-            if (isApiKeyEnabled && securitySchemeType === 'API-KEY') {
-                authorizationHeader = 'apikey';
-            }
-        }
+        authorizationHeader = 'testkey';
+        console.log('sec----------------------------------------' + securitySchemeType);
         swagger.servers = settings;
+        console.log('SWAGGER' + JSON.stringify(swagger));
+        const isProtoTyped = api.lifeCycleStatus.toLowerCase() === 'prototyped';
+        const enableForTest = api.enableStore === false;
+        console.log('Enable for store  ------------' + enableForTest);
+        console.log('after click' + isProtoTyped);
         return (
             <>
-                <Typography variant='h4' className={classes.titleSub}>
-                    <FormattedMessage id='Apis.Details.index.Tryout' defaultMessage='Test Console' />
-                </Typography>
-                <Paper className={classes.paper}>
-                    <TryOutController
-                        setSecurityScheme={this.setSecurityScheme}
-                        securitySchemeType={securitySchemeType}
-                        setSelectedEnvironment={this.setSelectedEnvironment}
-                        selectedEnvironment={selectedEnvironment}
-                        productionAccessToken={productionAccessToken}
-                        setProductionAccessToken={this.setProductionAccessToken}
-                        sandboxAccessToken={sandboxAccessToken}
-                        setSandboxAccessToken={this.setSandboxAccessToken}
-                        swagger={swagger}
-                        labels={labels}
-                        environments={environments}
-                        scopes={scopes}
-                        setUsername={this.setUsername}
-                        setPassword={this.setPassword}
-                        username={username}
-                        password={password}
-                        setSelectedKeyType={this.setSelectedKeyType}
-                        selectedKeyType={selectedKeyType}
-                        updateSwagger={this.updateSwagger}
-                        setKeys={this.setKeys}
-                        api={this.state.api}
+                {!isProtoTyped && (
+                    <>
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                            <FormattedMessage
+                                id='Apis.Details.index.Tryout'
+                                defaultMessage='Test Console'
+                            />
+                        </Typography>
+                        <Typography variant='caption' component='div' className={classes.helpText}>
+                            <FormattedMessage
+                                id='Apis.Details.Properties.Properties.help.main'
+                                defaultMessage={`Usually, APIs have a pre-defined set of properties such as 
+                                the name, version, context, etc. API Properties allows you to 
+                                add specific custom properties to the API.`}
+                            />
+                        </Typography>
+                        <div className={classes.messageBox}>
+                            <InlineMessage type='info' height={140}>
+                                <div className={classes.contentWrapper}>
+                                    <Typography variant='h5' component='h3' className={classes.head}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Properties.Properties.add.new.property.message.title'
+                                            defaultMessage='Create Additional Properties'
+                                        />
+                                    </Typography>
+                                    <Typography component='p'>
+                                        <FormattedMessage
+                                            id='Apis.Details.tryout.initialize.test'
+                                            defaultMessage='You can test the resources before publishing to the
+                                            devportal'
+                                        />
+                                    </Typography>
+                                    <div className={classes.actions}>
+                                        <Button
+                                            variant='contained'
+                                            color='primary'
+                                            className={classes.button}
+                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                            onClick={this.handleClick}
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Details.index.initTest'
+                                                defaultMessage='Initialize test'
+                                            />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </InlineMessage>
+                        </div>
+                    </>
+                )}
+                {(isProtoTyped && enableForTest) && (
+                    <Paper className={classes.paper}>
+                        <Typography variant='h4' className={classes.titleSub}>
+                            <FormattedMessage id='Apis.Details.index.Tryout' defaultMessage='Test Console' />
+                        </Typography>
+                        <TryOutController
+                            setSecurityScheme={this.setSecurityScheme}
+                            securitySchemeType={securitySchemeType}
+                            setSelectedEnvironment={this.setSelectedEnvironment}
+                            selectedEnvironment={selectedEnvironment}
+                            productionAccessToken={productionAccessToken}
+                            setProductionAccessToken={this.setProductionAccessToken}
+                            sandboxAccessToken={sandboxAccessToken}
+                            setSandboxAccessToken={this.setSandboxAccessToken}
+                            swagger={swagger}
+                            labels={labels}
+                            environments={environments}
+                            scopes={scopes}
+                            setUsername={this.setUsername}
+                            setPassword={this.setPassword}
+                            username={username}
+                            password={password}
+                            setSelectedKeyType={this.setSelectedKeyType}
+                            selectedKeyType={selectedKeyType}
+                            updateSwagger={this.updateSwagger}
+                            setKeys={this.setKeys}
+                            api={this.state.api}
+                        />
+                        <SwaggerUI
+                            api={this.state.api}
+                            accessTokenProvider={this.accessTokenProvider}
+                            spec={swagger}
+                            authorizationHeader={authorizationHeader}
+                            securitySchemeType={securitySchemeType}
+                        />
+                    </Paper>
+                )}
+                {(isProtoTyped && !enableForTest) && (
+                    <Banner
+                        disableActions
+                        dense
+                        paperProps={{ elevation: 1 }}
+                        type='info'
+                        message='API should be in prototype(testing) state. Please demote to created state and click
+                        on the initialize Test button in the Test Console left menu item.'
                     />
-                    <SwaggerUI
-                        api={this.state.api}
-                        accessTokenProvider={this.accessTokenProvider}
-                        spec={swagger}
-                        authorizationHeader={authorizationHeader}
-                        securitySchemeType={securitySchemeType}
+                )}
+                {(!isProtoTyped) && (
+                    <Banner
+                        disableActions
+                        dense
+                        paperProps={{ elevation: 1 }}
+                        type='info'
+                        message='This API is not in the prototype-test state.'
                     />
-                </Paper>
+                )}
             </>
         );
     }
@@ -427,6 +606,14 @@ TestConsole.propTypes = {
         grid: PropTypes.string.isRequired,
         userNotificationPaper: PropTypes.string.isRequired,
         buttonIcon: PropTypes.string.isRequired,
+        lcState: PropTypes.shape({}).isRequired,
+        theme: PropTypes.shape({}).isRequired,
+        intl: PropTypes.shape({
+            formatMessage: PropTypes.func,
+        }).isRequired,
     }).isRequired,
 };
+
+TestConsole.contextType = ApiContext;
+
 export default withAPI(withStyles(styles)(TestConsole));

@@ -107,7 +107,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
                             APIConstants.DEPRECATED };
                 }
-                
+
                 String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
                 lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
 

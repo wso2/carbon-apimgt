@@ -7676,6 +7676,9 @@ definitions:
       wsdlUrl:
         type: string
         example: /apimgt/applicationdata/wsdls/admin--soap1.wsdl
+      testKey:
+        type: string
+        example: 8swdwj9080edejhj
       responseCachingEnabled:
         type: boolean
         example: true
@@ -8139,6 +8142,9 @@ definitions:
       enableStore:
         type: boolean
         example: true
+      testKey:
+        type: string
+        example: 8swdwj9080edejhj
       responseCachingEnabled:
         type: boolean
         example: true

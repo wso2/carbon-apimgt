@@ -1990,6 +1990,79 @@ class API extends Resource {
     }
 
     /**
+     * Update the life cycle state of an API given its id (UUID)
+     * @param id {string} UUID of the api
+     * @param state {string} Target state which need to be transferred
+     * @param callback {function} Callback function which needs to be executed in the success call
+     */
+    static updateLcState(id, state, checkedItems, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const payload = {
+            action: state,
+            apiId: id,
+            lifecycleChecklist: checkedItems,
+            'Content-Type': 'application/json',
+        };
+        const promise_lc_update = apiClient.then(client => {
+            return client.apis['API Lifecycle'].post_apis_change_lifecycle(payload, this._requestMetaData());
+        });
+        if (callback) {
+            return promise_lc_update.then(callback);
+        } else {
+            return promise_lc_update;
+        }
+    }
+
+    /**
+     * Get details of a given API
+     * @param id {string} UUID of the api.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static get(id, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promisedAPI = apiClient.then(client => {
+            return client.apis['APIs'].get_apis__apiId_(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        if (callback) {
+            return promisedAPI.then(callback);
+        } else {
+            return promisedAPI;
+        }
+       
+    }
+
+    /**
+     * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
+     * @param api {Object} Updated API object(JSON) which needs to be updated
+     */
+    static update(updatedProperties, callback = null) {
+        console.log('API factory');
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const updatedAPI = updatedProperties;
+        console.log('updated api' + JSON.stringify(updatedAPI));
+        const promisedUpdate = apiClient.then(client => {
+            const payload = {
+                apiId: updatedAPI.id,
+                body: updatedAPI,
+            };
+            return client.apis['APIs'].put_apis__apiId_(payload);
+        });
+        if (callback) {
+            return promisedUpdate.then(callback);
+            console.log('promised update' + JSON.stringify(promisedUpdate));
+        } else {
+            return promisedUpdate;
+            console.log('promised update' + JSON.stringify(promisedUpdate));
+        }
+    }
+
+    /**
      * Get settings of an API
      */
     static getSettings() {

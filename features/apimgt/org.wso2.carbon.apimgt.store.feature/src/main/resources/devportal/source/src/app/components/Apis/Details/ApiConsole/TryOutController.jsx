@@ -106,7 +106,6 @@ function TryOutController(props) {
         setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey, environmentObject, setURLs, api,
     } = props;
     const classes = styles();
-
     const [showToken, setShowToken] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [notFound, setNotFound] = useState(false);
@@ -388,14 +387,21 @@ function TryOutController(props) {
     let isApiKeyEnabled = false;
     let isBasicAuthEnabled = false;
     let isOAuthEnabled = false;
+    let isTestKeyEnabled = false;
     let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
     let prefix = 'Bearer';
     if (api && api.securityScheme) {
         isApiKeyEnabled = api.securityScheme.includes('api_key');
         isBasicAuthEnabled = api.securityScheme.includes('basic_auth');
         isOAuthEnabled = api.securityScheme.includes('oauth2');
+        isTestKeyEnabled = api.securityScheme.includes('test_auth');
         if (isApiKeyEnabled && securitySchemeType === 'API-KEY') {
             authorizationHeader = 'apikey';
+            prefix = '';
+        }
+        if (isTestKeyEnabled && securitySchemeType === 'TEST') {
+            console.log('TEST scheme------------');
+            authorizationHeader = 'testKey';
             prefix = '';
         }
     }
@@ -411,18 +417,22 @@ function TryOutController(props) {
         <IntlProvider locale='en'>
             <Grid x={12} md={6} className={classes.centerItems}>
                 <Box>
-                    <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
-                        <FormattedMessage
-                            id='api.console.security.heading'
-                            defaultMessage='Security'
-                        />
-                    </Typography>
-                    <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
-                        <FormattedMessage
-                            id='api.console.security.type.heading'
-                            defaultMessage='Security Type'
-                        />
-                    </Typography>
+                    {securitySchemeType !== 'TEST' && (
+                        <>
+                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
+                                <FormattedMessage
+                                    id='api.console.security.heading'
+                                    defaultMessage='Security'
+                                />
+                            </Typography>
+                            <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
+                                <FormattedMessage
+                                    id='api.console.security.type.heading'
+                                    defaultMessage='Security Type'
+                                />
+                            </Typography>
+                        </>
+                    )}
                     {(isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && (
                         <FormControl component='fieldset'>
                             <RadioGroup
@@ -475,17 +485,18 @@ function TryOutController(props) {
             <Grid xs={12} md={12} item>
                 <Box display='block'>
                     {user && subscriptions
-                        && subscriptions.length > 0 && securitySchemeType !== 'BASIC' && (
-                        <SelectAppPanel
-                            subscriptions={subscriptions}
-                            handleChanges={handleChanges}
-                            selectedApplication={selectedApplication}
-                            selectedKeyManager={selectedKeyManager}
-                            selectedKeyType={selectedKeyType}
-                            keyManagers={keyManagers}
-                        />
-                    )}
-                    {subscriptions && subscriptions.length === 0 && (
+                        && subscriptions.length > 0 && securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST'
+                        && (
+                            <SelectAppPanel
+                                subscriptions={subscriptions}
+                                handleChanges={handleChanges}
+                                selectedApplication={selectedApplication}
+                                selectedKeyManager={selectedKeyManager}
+                                selectedKeyType={selectedKeyType}
+                                keyManagers={keyManagers}
+                            />
+                        )}
+                    {subscriptions && subscriptions.length === 0 && securitySchemeType !== 'TEST' && (
                         <Box display='flex' justifyContent='center'>
                             <Typography variant='body1' gutterBottom>
                                 <FormattedMessage
@@ -497,7 +508,7 @@ function TryOutController(props) {
                     )}
                     <Box display='block' justifyContent='center'>
                         <Grid x={8} md={6} className={classes.tokenType} item>
-                            {securitySchemeType === 'BASIC' ? (
+                            {securitySchemeType === 'BASIC' && (
                                 <>
                                     <Grid x={12} md={12} item>
                                         <TextField
@@ -530,7 +541,8 @@ function TryOutController(props) {
                                         />
                                     </Grid>
                                 </>
-                            ) : (
+                            )}
+                            {securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST' && (
                                 <TextField
                                     fullWidth
                                     margin='normal'
@@ -575,7 +587,7 @@ function TryOutController(props) {
                                     }}
                                 />
                             )}
-                            {securitySchemeType !== 'BASIC' && (
+                            {securitySchemeType === 'BASIC' && securitySchemeType !== 'TEST' && (
                                 <>
                                     <Button
                                         onClick={securitySchemeType === 'API-KEY' ? generateApiKey
