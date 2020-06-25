@@ -36,6 +36,7 @@ public class ApplicationPoliciesApiServiceImpl implements ApplicationPoliciesApi
     public Response applicationPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
+        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
 
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             if (StringUtils.isNotEmpty(policyName)) {
