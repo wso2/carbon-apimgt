@@ -1613,6 +1613,7 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_APPLICATION = "APPLICATION";
     public static final String BLOCKING_CONDITIONS_API = "API";
     public static final String BLOCKING_CONDITIONS_USER = "USER";
+    public static final String BLOCKING_CONDITIONS_SUBSCRIPTION = "SUBSCRIPTION";
     public static final String BLOCKING_CONDITIONS_IP = "IP";
     public static final String BLOCK_CONDITION_IP_RANGE = "IPRANGE";
     public static final String BLOCK_CONDITION_FIXED_IP = "fixedIp";
@@ -2069,7 +2070,7 @@ public final class APIConstants {
     public static final String JWT_AUTHENTICATION_CONFIG = "JWTAuthentication";
     public static final String JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION =
             JWT_AUTHENTICATION_CONFIG + ".EnableSubscriptionValidationViaKeyManager";
-
+    public static final String APPLICATION_TOKEN_TYPE_JWT = "JWT";
     /**
      * Constants for the recommendation system
      *
