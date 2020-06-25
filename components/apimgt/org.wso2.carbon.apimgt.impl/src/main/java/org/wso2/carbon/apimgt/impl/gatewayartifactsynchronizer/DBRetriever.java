@@ -23,7 +23,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
@@ -45,8 +44,6 @@ public class DBRetriever implements ArtifactRetriever {
 
     private static final Log log = LogFactory.getLog(DBRetriever.class);
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-    public static final int retrievalTimeoutInSeconds = 15;
-    public static final int retrievalRetries = 2;
 
     @Override
     public void init() throws ArtifactSynchronizerException {
@@ -65,7 +62,11 @@ public class DBRetriever implements ArtifactRetriever {
                     "&gatewayInstruction=" + gatewayInstruction +"&gatewayLabel="+ endcodedgatewayLabel;
             String endpoint = baseURL + path;
             HttpResponse httpResponse = invokeService(endpoint);
-            return EntityUtils.toString(httpResponse.getEntity(), APIConstants.DigestAuthConstants.CHARSET);
+            if (httpResponse.getEntity() != null ){
+                return EntityUtils.toString(httpResponse.getEntity(), APIConstants.DigestAuthConstants.CHARSET);
+            } else {
+                throw new ArtifactSynchronizerException("HTTP response is empty");
+            }
         } catch (IOException e) {
             String msg = "Error while executing the http client " ;
             log.error(msg, e);
@@ -77,14 +78,21 @@ public class DBRetriever implements ArtifactRetriever {
     public List<String> retrieveAllArtifacts(String label) throws ArtifactSynchronizerException {
         List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
         try {
-            String baseURL = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+            String baseURL = APIConstants.HTTPS_PROTOCOL_URL_PREFIX +
+                    System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
                     System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
             String endcodedgatewayLabel= URLEncoder.encode(label, APIConstants.DigestAuthConstants.CHARSET);
             String path  = APIConstants.GatewayArtifactSynchronizer.GATEAY_SYNAPSE_ARTIFACTS
                     + "?gatewayLabel="+ endcodedgatewayLabel;
             String endpoint = baseURL + path;
             HttpResponse httpResponse = invokeService(endpoint);
-            String responseString = EntityUtils.toString(httpResponse.getEntity(), APIConstants.DigestAuthConstants.CHARSET);
+            String responseString;
+            if (httpResponse.getEntity() != null ){
+                responseString = EntityUtils.toString(httpResponse.getEntity(),
+                        APIConstants.DigestAuthConstants.CHARSET);
+            } else {
+                throw new ArtifactSynchronizerException("HTTP response is empty");
+            }
             JSONObject artifactObject = new JSONObject(responseString);
             JSONArray jArray = (JSONArray)artifactObject.get("list");
             if (jArray != null) {
@@ -114,35 +122,7 @@ public class DBRetriever implements ArtifactRetriever {
         method.setHeader("Authorization", "Basic " + new String(credentials,
                 APIConstants.DigestAuthConstants.CHARSET));
         HttpClient httpClient = APIUtil.getHttpClient(synapsePort, synapseProtocol);
-        HttpResponse httpResponse = null;
-        int retryCount = 0;
-        boolean retry = false;
-        do {
-            try {
-                httpResponse = httpClient.execute(method);
-                retry = false;
-            } catch (IOException ex) {
-                retryCount++;
-                if (retryCount < retrievalRetries) {
-                    retry = true;
-                    log.warn("Failed retrieving " + endpoint + " from remote endpoint: " + ex.getMessage()
-                            + ". Retrying after " + retrievalTimeoutInSeconds +
-                            " seconds.");
-                    try {
-                        Thread.sleep(retrievalTimeoutInSeconds * 1000);
-                    } catch (InterruptedException e) {
-                        // Ignore
-                    }
-                } else {
-                    throw ex;
-                }
-            }
-        } while (retry);
-        if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-            log.error("Retrieving artifacts is unsuccessful");
-            throw new ArtifactSynchronizerException("Error while retrieving artifacts");
-        }
-        return httpResponse;
+        return  APIUtil.executeHTTPRequest(method, httpClient);
     }
 
     @Override

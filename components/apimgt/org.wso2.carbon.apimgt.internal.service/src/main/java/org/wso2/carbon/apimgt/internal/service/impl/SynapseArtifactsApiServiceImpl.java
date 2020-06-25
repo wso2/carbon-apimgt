@@ -7,28 +7,15 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
-import org.wso2.carbon.apimgt.internal.service.*;
-import org.wso2.carbon.apimgt.internal.service.dto.*;
-
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.wso2.carbon.apimgt.internal.service.SynapseArtifactsApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-
-import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
-
+import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactDTO;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.List;
-
-import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
-import static org.h2.engine.Constants.UTF8;
 
 
 public class SynapseArtifactsApiServiceImpl implements SynapseArtifactsApiService {

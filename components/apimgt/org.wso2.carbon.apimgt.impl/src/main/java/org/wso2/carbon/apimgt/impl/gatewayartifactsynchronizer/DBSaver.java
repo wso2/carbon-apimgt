@@ -24,14 +24,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -47,8 +44,6 @@ public class DBSaver implements ArtifactSaver {
 
     private static final Log log = LogFactory.getLog(DBSaver.class);
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-    public static final int saverTimeoutInSeconds = 15;
-    public static final int saveRetries = 15;
 
     @Override
     public void init() throws ArtifactSynchronizerException {
@@ -119,42 +114,14 @@ public class DBSaver implements ArtifactSaver {
              StringEntity requestEntity = new StringEntity(revokeRequestPayload.toString());
              requestEntity.setContentType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
              method.setEntity(requestEntity);
-             return executeHTTPRequest(method, httpClient);
+             return APIUtil.executeHTTPRequest(method, httpClient);
 
         } else {
              HttpGet method = new HttpGet(endpoint);
              method.setHeader("Authorization", "Basic " + new String(credentials,
                     APIConstants.DigestAuthConstants.CHARSET));
-             return executeHTTPRequest(method, httpClient);
+             return APIUtil.executeHTTPRequest(method, httpClient);
         }
-    }
-
-    private HttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient ) throws IOException {
-        HttpResponse httpResponse = null;
-        int retryCount = 0;
-        boolean retry;
-        do {
-            try {
-                httpResponse = httpClient.execute(method);
-                retry = false;
-            } catch (IOException ex) {
-                retryCount++;
-                if (retryCount < saveRetries) {
-                    retry = true;
-                    log.warn("Failed retrieving from remote endpoint: " + ex.getMessage()
-                            + ". Retrying after " + saverTimeoutInSeconds +
-                            " seconds.");
-                    try {
-                        Thread.sleep(saverTimeoutInSeconds * 1000);
-                    } catch (InterruptedException e) {
-                        // Ignore
-                    }
-                } else {
-                    throw ex;
-                }
-            }
-        } while (retry);
-        return httpResponse;
     }
 
     @Override
