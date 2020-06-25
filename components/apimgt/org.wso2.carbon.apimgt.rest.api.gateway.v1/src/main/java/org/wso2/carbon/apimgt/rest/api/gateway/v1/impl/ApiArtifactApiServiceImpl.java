@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.ApiArtifactApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.endpoint.EndpointAdminException;
 
 
@@ -66,8 +67,9 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
 
         if (gatewayAPIDTO != null) {
             try {
+                JSONArray endPointArray = new JSONArray();
+                JSONArray unDeployedEndPointArray = new JSONArray();
                 if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null ) {
-                    JSONArray endPointArray = new JSONArray();
                     EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy
                             (gatewayAPIDTO.getTenantDomain());
                     for (GatewayContentDTO gatewayEndpoint : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
@@ -75,13 +77,16 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
                             endPointArray.put(endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()));
                         } else {
                             log.error(gatewayEndpoint.getName() + " was not deployed in the gateway");
+                            unDeployedEndPointArray.put(gatewayEndpoint.getContent());
                         }
                     }
-                    responseObj.put("Endpoints", endPointArray);
                 }
+                responseObj.put("Deployed Endpoints", endPointArray);
+                responseObj.put("UnDeployed Endpoints", unDeployedEndPointArray);
 
+                JSONArray localEntryArray = new JSONArray();
+                JSONArray UnDeploeydLocalEntryArray = new JSONArray();
                 if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
-                    JSONArray localEntryArray = new JSONArray();
                     LocalEntryServiceProxy localEntryServiceProxy = new
                             LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
                     for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
@@ -89,13 +94,16 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
                             localEntryArray.put(localEntryServiceProxy.getEntry(localEntry.getName()));
                         } else {
                             log.error(localEntry.getName() + " was not deployed in the gateway");
+                            UnDeploeydLocalEntryArray.put(localEntry.getContent());
                         }
                     }
-                    responseObj.put("Local Entries", localEntryArray);
                 }
+                responseObj.put("Deployed Local Entries", localEntryArray);
+                responseObj.put("Undeployed Local Entries", UnDeploeydLocalEntryArray);
 
+                JSONArray sequencesArray = new JSONArray();
+                JSONArray undeployedsequencesArray = new JSONArray();
                 if (gatewayAPIDTO.getSequenceToBeAdd() != null ) {
-                    JSONArray sequencesArray = new JSONArray();
                     SequenceAdminServiceProxy sequenceAdminServiceProxy =
                             new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
                     for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
@@ -103,14 +111,20 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
                             sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
                         } else {
                             log.error(sequence.getName() + " was not deployed in the gateway");
+                            undeployedsequencesArray.put(sequence.getContent());
                         }
                     }
-                    responseObj.put("Sequences", sequencesArray);
                 }
+                responseObj.put("Deployed Sequences", sequencesArray);
+                responseObj.put("Undeployed Sequences", undeployedsequencesArray);
             } catch (EndpointAdminException e) {
-                log.error("Error in fetching deployed Endpoints from Synapse Configuration." , e);
-            } catch (AxisFault axisFault) {
-                log.error("Error in fetching deployed artifacts from Synapse Configuration." , axisFault);
+                String errorMessage = "Error in fetching deployed Endpoints from Synapse Configuration";
+                log.error(errorMessage, e);
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            } catch (AxisFault e) {
+                String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
+                log.error(errorMessage, e);
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
 
             responseObj.put("Definition", definition);
