@@ -26,6 +26,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Link } from 'react-router-dom';
+import Create from '@material-ui/icons/Create';
 import IconButton from '@material-ui/core/IconButton';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -44,6 +45,14 @@ import Delete from '../Delete/Delete';
 import Usage from '../Usage/Usage';
 
 const styles = (theme) => ({
+    contentInside: {
+        padding: theme.spacing(3),
+        paddingTop: theme.spacing(2),
+        '& > div[class^="MuiPaper-root-"]': {
+            boxShadow: 'none',
+            backgroundColor: 'transparent',
+        },
+    },
     root: {
         paddingTop: 0,
         paddingLeft: 0,
@@ -52,7 +61,6 @@ const styles = (theme) => ({
         position: 'relative',
         margin: theme.spacing(1),
     },
-    headline: { paddingTop: theme.spacing(1.25), paddingLeft: theme.spacing(2.5) },
     heading: {
         flexGrow: 1,
         marginTop: 10,
@@ -74,14 +82,22 @@ const styles = (theme) => ({
     buttonIcon: {
         marginRight: theme.spacing(1),
     },
-    content: {
-        margin: `${theme.spacing(2)}px 0 ${theme.spacing(2)}px 0`,
-    },
-    head: {
-        fontWeight: 200,
-    },
     disableLink: {
         pointerEvents: 'none',
+    },
+    headline: {
+        paddingTop: theme.spacing(1.25),
+        paddingLeft: theme.spacing(2.5),
+    },
+    head: {
+        paddingBottom: theme.spacing(2),
+        fontWeight: 200,
+    },
+    content: {
+        paddingBottom: theme.spacing(2),
+    },
+    buttonLeft: {
+        marginRight: theme.spacing(1),
     },
 });
 
@@ -410,21 +426,13 @@ class Listing extends React.Component {
 
         if (scopes.length === 0) {
             return (
-                <div className={classes.root}>
-                    <div className={classes.titleWrapper}>
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage
-                                id='Scopes.Listing.Listing.heading.scope.heading'
-                                defaultMessage='Scopes'
-                            />
-                        </Typography>
-                    </div>
+                <div className={classes.contentInside}>
                     <InlineMessage type='info' height={140}>
                         <div className={classes.contentWrapper}>
                             <Typography variant='h5' component='h3' className={classes.head}>
                                 <FormattedMessage
-                                    id='Scopes.Listing.Listing.create.scopes.title'
-                                    defaultMessage='Create Scopes'
+                                    id='Scopes.Listing.sample.scope.manager'
+                                    defaultMessage='Welcome to WSO2 API Manager'
                                 />
                             </Typography>
                             <Typography component='p' className={classes.content}>
@@ -439,13 +447,15 @@ class Listing extends React.Component {
                             <div className={classes.actions}>
                                 <Link to={url}>
                                     <Button
+                                        size='small'
                                         variant='contained'
                                         color='primary'
                                         className={classes.button}
                                     >
+                                        <Create />
                                         <FormattedMessage
                                             id='Scopes.Listing.Listing.create.scopes.button'
-                                            defaultMessage='Create Scopes'
+                                            defaultMessage='Create a new scope'
                                         />
                                     </Button>
                                 </Link>
