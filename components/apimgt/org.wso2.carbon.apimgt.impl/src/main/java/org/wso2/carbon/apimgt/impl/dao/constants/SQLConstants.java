@@ -3171,6 +3171,12 @@ public class SQLConstants {
     public static final String GET_API_ARTIFACT = "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE API_ID =? AND " +
             "GATEWAY_LABEL =? AND GATEWAY_INSTRUCTION = ?";
 
+    public static final String GET_API_ID = "SELECT API_ID  FROM AM_GW_PUBLISHED_API_DETAILS " +
+            "WHERE API_NAME =? AND " + "TENANT_DOMAIN =? AND API_VERSION =?";
+
+    public static final String GET_API_LABEL = "SELECT GATEWAY_LABEL  FROM AM_GW_API_ARTIFACTS " +
+            "WHERE API_ID =?";
+
     public static final String GET_ALL_API_ARTIFACT = "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE "
             + "GATEWAY_LABEL =? AND GATEWAY_INSTRUCTION = ?";
 

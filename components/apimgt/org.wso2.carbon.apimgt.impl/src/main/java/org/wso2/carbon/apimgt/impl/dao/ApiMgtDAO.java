@@ -15528,6 +15528,44 @@ public class ApiMgtDAO {
         return baip;
     }
 
+
+    public String getGatewayAPIId(String APIName, String version,
+                                                                String tenantDomain)
+            throws APIManagementException {
+
+        String apiId= null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ID)) {
+            statement.setString(1, APIName);
+            statement.setString(2, tenantDomain);
+            statement.setString(3, version);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                apiId = rs.getString(1);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get artifacts of API ID for  " + APIName, e);
+        }
+        return apiId;
+    }
+
+    public String getGatewayAPILabel(String apiID)
+            throws APIManagementException {
+
+        String apiId= null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_LABEL)) {
+            statement.setString(1, apiID);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                apiId = rs.getString(1);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get label of API ID for  " + apiID, e);
+        }
+        return apiId;
+    }
+
     /**
      * Retrieve the list of blobs of the APIs for a given label
      *
