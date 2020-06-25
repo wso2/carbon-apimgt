@@ -110,7 +110,7 @@ function AddEditMGLabel(props) {
         let error;
         switch (fieldName) {
             case 'name':
-                if (name === undefined) {
+                if (value === undefined) {
                     error = false;
                     break;
                 }
