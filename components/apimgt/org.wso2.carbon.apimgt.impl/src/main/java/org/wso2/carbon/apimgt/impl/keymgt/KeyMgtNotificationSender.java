@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.databridge.commons.Event;
@@ -26,11 +26,11 @@ public class KeyMgtNotificationSender {
         Event keyManagerEvent = new Event(APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_STREAM_ID,
                 System.currentTimeMillis(),
                 null, null, objects);
-        KeyManagerConfigurationsDto keyManagerConfigurationsDto =
+        EventHubConfigurationDto eventHubConfigurationDto =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                        .getKeyManagerConfigurationsDto();
+                        .getEventHubConfigurationDto();
 
-        if (keyManagerConfigurationsDto.isEnabled()) {
+        if (eventHubConfigurationDto.isEnabled()) {
             APIUtil.publishEvent(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, keyManagerEvent);
         }
     }

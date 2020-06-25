@@ -10778,12 +10778,12 @@ public final class APIUtil {
         if (!keyManagerConfigurationDTO.getAdditionalProperties()
                 .containsKey(APIConstants.KeyManager.TOKEN_ENDPOINT)) {
             keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
-                    getTokenEndpoint().concat("/token"));
+                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
         }
         if (!keyManagerConfigurationDTO.getAdditionalProperties()
                 .containsKey(APIConstants.KeyManager.REVOKE_ENDPOINT)) {
             keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
-                    getTokenEndpoint().concat("/revoke"));
+                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.REVOKE_URL));
         }
         if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                 APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)) {

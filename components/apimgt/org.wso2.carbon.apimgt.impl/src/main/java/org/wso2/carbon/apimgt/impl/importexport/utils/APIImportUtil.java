@@ -255,7 +255,6 @@ public final class APIImportUtil {
             }
             if (Boolean.FALSE.equals(overwrite)) {
                 //Add API in CREATED state
-                importedApi.setAsDefaultVersion(false);
                 apiProvider.addAPI(importedApi);
             }
 

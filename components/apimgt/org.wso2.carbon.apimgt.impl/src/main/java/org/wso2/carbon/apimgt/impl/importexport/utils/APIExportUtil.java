@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
@@ -523,10 +524,11 @@ public class APIExportUtil {
                     apiToReturn.setScopes(new LinkedHashSet<>());
                     apiToReturn.setUriTemplates(new LinkedHashSet<>());
                 }
-                String swaggerDefinition = OASParserUtil.getAPIDefinition(apiToReturn.getId(), registry);
-                JsonParser parser = new JsonParser();
-                JsonObject json = parser.parse(swaggerDefinition).getAsJsonObject();
-                String formattedSwaggerJson = gson.toJson(json);
+                APIIdentifier apiIdentifier = apiToReturn.getId();
+                String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
+                APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
+                String formattedSwaggerJson = parser.getOASDefinitionForPublisher(apiToReturn, apiSwagger);
+
                 switch (exportFormat) {
                     case YAML:
                         String swaggerInYaml = CommonUtil.jsonToYaml(formattedSwaggerJson);

@@ -8464,6 +8464,7 @@ public class ApiMgtDAO {
                     String uuid = resultSet.getString("UUID");
                     keyManagerConfigurationDTO.setUuid(uuid);
                     keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
@@ -8504,7 +8505,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
-                    keyManagerConfigurationDTO.setDisplayName("DISPLAY_NAME");
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
@@ -8545,6 +8546,7 @@ public class ApiMgtDAO {
                     String uuid = resultSet.getString("UUID");
                     keyManagerConfigurationDTO.setUuid(uuid);
                     keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
@@ -8632,7 +8634,8 @@ public class ApiMgtDAO {
                 preparedStatement.setBinaryStream(4, new ByteArrayInputStream(configurationJson.getBytes()));
                 preparedStatement.setString(5, keyManagerConfigurationDTO.getTenantDomain());
                 preparedStatement.setBoolean(6,keyManagerConfigurationDTO.isEnabled());
-                preparedStatement.setString(7, keyManagerConfigurationDTO.getUuid());
+                preparedStatement.setString(7, keyManagerConfigurationDTO.getDisplayName());
+                preparedStatement.setString(8, keyManagerConfigurationDTO.getUuid());
                 preparedStatement.executeUpdate();
                 conn.commit();
             } catch (SQLException e) {
@@ -8678,6 +8681,7 @@ public class ApiMgtDAO {
                     String uuid = resultSet.getString("UUID");
                     keyManagerConfigurationDTO.setUuid(uuid);
                     keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
@@ -10408,9 +10412,7 @@ public class ApiMgtDAO {
         Connection conn = null;
         PreparedStatement policyStatement = null;
         boolean hasCustomAttrib = false;
-        ResultSet rs = null;
 
-        int policyId = 0;
         try {
             if (policy.getCustomAttributes() != null) {
                 hasCustomAttrib = true;
@@ -10421,34 +10423,29 @@ public class ApiMgtDAO {
             if (hasCustomAttrib) {
                 addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL;
             }
-            policyStatement = conn.prepareStatement(addQuery, new String[]{"POLICY_ID"});
+            policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
             policyStatement.setInt(12, policy.getRateLimitCount());
             policyStatement.setString(13, policy.getRateLimitTimeUnit());
             policyStatement.setBoolean(14, policy.isStopOnQuotaReach());
-            policyStatement.setString(15, policy.getBillingPlan());
+            policyStatement.setInt(15, policy.getGraphQLMaxDepth());
+            policyStatement.setInt(16, policy.getGraphQLMaxComplexity());
+            policyStatement.setString(17, policy.getBillingPlan());
             if (hasCustomAttrib) {
-                policyStatement.setBytes(16, policy.getCustomAttributes());
-                policyStatement.setString(17, policy.getMonetizationPlan());
-                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
-                policyStatement.setString(21, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
+                policyStatement.setBytes(18, policy.getCustomAttributes());
+                policyStatement.setString(19, policy.getMonetizationPlan());
+                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                policyStatement.setString(21, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                policyStatement.setString(22, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                policyStatement.setString(23, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
             } else {
-                policyStatement.setString(16, policy.getMonetizationPlan());
-                policyStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
-                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
+                policyStatement.setString(18, policy.getMonetizationPlan());
+                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                policyStatement.setString(21, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                policyStatement.setString(22, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
             }
             policyStatement.executeUpdate();
-            rs = policyStatement.getGeneratedKeys();
-            if (rs.next()) {
-                policyId = Integer.parseInt(rs.getString(1));
-            }
-            if(policy.getGraphQLMaxDepth() > 0 || policy.getGraphQLMaxComplexity() > 0){
-                addGraphQLQueryAnalysisInfo(conn, policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity(), policyId);
-            }
             conn.commit();
         } catch (SQLIntegrityConstraintViolationException e) {
             boolean isSubscriptionPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_SUB, policy.getTenantId(),
@@ -10483,26 +10480,7 @@ public class ApiMgtDAO {
                 handleException("Failed to add Subscription Policy: " + policy, e);
             }
         } finally {
-            APIMgtDBUtil.closeAllConnections(policyStatement, conn, rs);
-        }
-    }
-
-    private void addGraphQLQueryAnalysisInfo(Connection conn, int maxDepth, int maxComplexity, int policyId)
-            throws APIManagementException {
-
-        PreparedStatement ps = null;
-        try{
-            String query = SQLConstants.ADD_QUERY_ANALYSIS_SQL;
-            ps = conn.prepareStatement(query);
-            ps.setInt(1,policyId);
-            ps.setInt(2,maxDepth);
-            ps.setInt(3,maxComplexity);
-            ps.executeUpdate();
-        } catch (Exception e) {
-            handleException("Failed to add GraphQL Query Analysis Info: " , e);
-
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, null);
+            APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
         }
     }
 
@@ -11113,7 +11091,7 @@ public class ApiMgtDAO {
      * Get subscription level policies specified by tier names belonging to a specific tenant
      *
      * @param subscriptionTiers subscription tiers
-     * @param tenantID tenantID filters the polices belongs to specific tenant
+     * @param tenantID          tenantID filters the polices belongs to specific tenant
      * @return subscriptionPolicy array list
      */
     public SubscriptionPolicy[] getSubscriptionPolicies(String[] subscriptionTiers, int tenantID) throws APIManagementException {
@@ -11988,14 +11966,11 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
 
-
     public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
         Connection connection = null;
-        ResultSet rs = null;
         PreparedStatement updateStatement = null;
         boolean hasCustomAttrib = false;
         String updateQuery;
-        String checkEntry;
 
         try {
             if (policy.getCustomAttributes() != null) {
@@ -12003,13 +11978,11 @@ public class ApiMgtDAO {
             }
             if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
                 updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_SQL;
-                checkEntry = SQLConstants.GET_SUBSCRIPTION_POLICY_SQL;
                 if (hasCustomAttrib) {
                     updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL;
                 }
             } else if (!StringUtils.isBlank(policy.getUUID())) {
                 updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_BY_UUID_SQL;
-                checkEntry = SQLConstants.GET_SUBSCRIPTION_POLICY_BY_UUID_SQL;
                 if (hasCustomAttrib) {
                     updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_BY_UUID_SQL;
                 }
@@ -12024,7 +11997,7 @@ public class ApiMgtDAO {
 
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            updateStatement = connection.prepareStatement(updateQuery, new String[]{"POLICY_ID"});
+            updateStatement = connection.prepareStatement(updateQuery);
             if (!StringUtils.isEmpty(policy.getDisplayName())) {
                 updateStatement.setString(1, policy.getDisplayName());
             } else {
@@ -12048,64 +12021,49 @@ public class ApiMgtDAO {
             updateStatement.setInt(8, policy.getRateLimitCount());
             updateStatement.setString(9, policy.getRateLimitTimeUnit());
             updateStatement.setBoolean(10, policy.isStopOnQuotaReach());
-            updateStatement.setString(11, policy.getBillingPlan());
-
+            updateStatement.setInt(11, policy.getGraphQLMaxDepth());
+            updateStatement.setInt(12, policy.getGraphQLMaxComplexity());
+            updateStatement.setString(13, policy.getBillingPlan());
             if (hasCustomAttrib) {
                 long lengthOfStream = policy.getCustomAttributes().length;
-                updateStatement.setBinaryStream(12, new ByteArrayInputStream(policy.getCustomAttributes()),
+                updateStatement.setBinaryStream(14, new ByteArrayInputStream(policy.getCustomAttributes()),
                         lengthOfStream);
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(13, policy.getMonetizationPlan());
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
-                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setString(18, policy.getPolicyName());
-                    updateStatement.setInt(19, policy.getTenantId());
+                    updateStatement.setString(15, policy.getMonetizationPlan());
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
+                    updateStatement.setString(20, policy.getPolicyName());
+                    updateStatement.setInt(21, policy.getTenantId());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(13, policy.getMonetizationPlan());
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
-                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setString(18, policy.getUUID());
+                    updateStatement.setString(15, policy.getMonetizationPlan());
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
+                    updateStatement.setString(20, policy.getUUID());
                 }
             } else {
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(12, policy.getMonetizationPlan());
-                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setString(17, policy.getPolicyName());
-                    updateStatement.setInt(18, policy.getTenantId());
+                    updateStatement.setString(14, policy.getMonetizationPlan());
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
+                    updateStatement.setString(19, policy.getPolicyName());
+                    updateStatement.setInt(20, policy.getTenantId());
 
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(12, policy.getMonetizationPlan());
-                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setString(17, policy.getUUID());
+                    updateStatement.setString(14, policy.getMonetizationPlan());
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
+                    updateStatement.setString(19, policy.getUUID());
                 }
             }
             updateStatement.executeUpdate();
-            int policyId = 0;
-            PreparedStatement ps1 = connection.prepareStatement(checkEntry);
-            if(!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                ps1.setString(1, policy.getPolicyName());
-                ps1.setInt(2, policy.getTenantId());
-            }
-            if(!StringUtils.isBlank(policy.getUUID())) {
-                ps1.setString(1, policy.getUUID());
-            }
-            rs = ps1.executeQuery();
-            if (rs.next()) {
-                policyId = rs.getInt("POLICY_ID");
-            }
-            if(policy.getGraphQLMaxDepth() != 0 || policy.getGraphQLMaxComplexity() != 0){
-                updateGraphQLQueryAnalysisInfo(connection, policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity(), policyId);
-            }
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
@@ -12120,30 +12078,9 @@ public class ApiMgtDAO {
             handleException(
                     "Failed to update subscription policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(updateStatement, connection, rs);
+            APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
         }
     }
-
-    private void updateGraphQLQueryAnalysisInfo(Connection conn, int maxDepth, int maxComplexity, int policyId)
-            throws APIManagementException {
-
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try{
-            String query = SQLConstants.UPDATE_QUERY_ANALYSIS_SQL;
-            ps = conn.prepareStatement(query);
-            ps.setInt(1,maxComplexity);
-            ps.setInt(2,maxDepth);
-            ps.setInt(3,policyId);
-            ps.executeUpdate();
-        } catch (Exception e) {
-            handleException("Failed to update Subscription Policy: " , e);
-
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, rs);
-        }
-    }
-
 
 
     /**
@@ -14430,10 +14367,9 @@ public class ApiMgtDAO {
      * Add custom complexity details for a particular API
      *
      * @param apiIdentifier         APIIdentifier object to retrieve API ID
-     * @param graphqlComplexityInfo GraphqlComplexityDetails object
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException
      */
-
     public void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException {
         String addCustomComplexityDetails = SQLConstants.ADD_CUSTOM_COMPLEXITY_DETAILS_SQL;
@@ -14461,7 +14397,7 @@ public class ApiMgtDAO {
      * Update custom complexity details for a particular API
      *
      * @param apiIdentifier         APIIdentifier object to retrieve API ID
-     * @param graphqlComplexityInfo GraphqlComplexityDetails object
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException
      */
     public void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
@@ -14484,7 +14420,31 @@ public class ApiMgtDAO {
             handleException("Error while updating custom complexity details: ", e);
         }
     }
-
+    /**
+     * Add or Update complexity details
+     *
+     * @param apiIdentifier         APIIdentifier object to retrieve API ID
+     * @param graphqlComplexityInfo GraphqlComplexityDetails object
+     * @throws APIManagementException
+     */
+    public void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+            throws APIManagementException {
+        String getCustomComplexityDetailsQuery = SQLConstants.GET_CUSTOM_COMPLEXITY_DETAILS_SQL;
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement getCustomComplexityDetails = conn.prepareStatement(getCustomComplexityDetailsQuery)) {
+            int apiId = getAPIID(apiIdentifier, conn);
+            getCustomComplexityDetails.setInt(1, apiId);
+            try (ResultSet rs1 = getCustomComplexityDetails.executeQuery()) {
+                if (rs1.next()) {
+                    updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+                } else {
+                    addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+                }
+            }
+        } catch (SQLException ex) {
+            handleException("Error while updating custom complexity details: ", ex);
+        }
+    }
 
     /**
      * Get custom complexity details for a particular API
@@ -15256,7 +15216,7 @@ public class ApiMgtDAO {
                         usedApi.setUriTemplates(usedUriTemplates);
                         usedApiList.add(usedApi);
                     } catch (SQLException e) {
-                        handleException("Failed to retrieve Resource usages of shared scope with scope ID" + uuid, e);
+                        handleException("Failed to retrieve Resource usages of shared scope with scope ID " + uuid, e);
                     }
                 }
             }
@@ -15346,7 +15306,7 @@ public class ApiMgtDAO {
                     Scope scope = new Scope();
                     scope.setId(rs.getString("UUID"));
                     scope.setKey(rs.getString("NAME"));
-                    scope.setUsageCount(rs.getInt("usage"));
+                    scope.setUsageCount(rs.getInt("usages"));
                     scopeList.add(scope);
                 }
             }
