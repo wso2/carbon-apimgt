@@ -23,10 +23,11 @@ import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 /**
  * Entity for keeping mapping between Application and Consumer key.
  */
-public class ApplicationKeyMapping implements CacheableEntity<String> {
+public class ApplicationKeyMapping implements CacheableEntity<ApplicationKeyMappingCacheKey> {
 
     private String consumerKey;
     private String keyType;
+    private String keyManager;
     private String wfState;
     private int applicationId;
 
@@ -71,8 +72,30 @@ public class ApplicationKeyMapping implements CacheableEntity<String> {
     }
 
     @Override
-    public String getCacheKey() {
+    public ApplicationKeyMappingCacheKey getCacheKey() {
 
-        return getConsumerKey();
+        return new ApplicationKeyMappingCacheKey(getConsumerKey(), getKeyManager());
+    }
+
+    public String getKeyManager() {
+
+        return keyManager;
+    }
+
+    public void setKeyManager(String keyManager) {
+
+        this.keyManager = keyManager;
+    }
+
+    @Override
+    public String toString() {
+
+        return "ApplicationKeyMapping{" +
+                "consumerKey='" + consumerKey + '\'' +
+                ", keyType='" + keyType + '\'' +
+                ", keyManager='" + keyManager + '\'' +
+                ", wfState='" + wfState + '\'' +
+                ", applicationId=" + applicationId +
+                '}';
     }
 }

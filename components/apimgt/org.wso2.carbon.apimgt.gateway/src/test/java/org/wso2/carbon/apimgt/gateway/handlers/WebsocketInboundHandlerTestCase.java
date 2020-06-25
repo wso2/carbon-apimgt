@@ -48,7 +48,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
+import org.wso2.carbon.apimgt.keymgt.service.APIKeyValidationService;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
@@ -259,11 +259,9 @@ public class WebsocketInboundHandlerTestCase {
 
         ConfigurationContext ctx = ConfigurationContextFactory
                 .createConfigurationContextFromFileSystem(null, null);
-        APIKeyValidationServiceStub apiKeyValidationServiceStub = Mockito.mock(APIKeyValidationServiceStub.class);
+        APIKeyValidationService apiKeyValidationService = Mockito.mock(APIKeyValidationService.class);
         WebsocketWSClient websocketWSClient = Mockito.mock(WebsocketWSClient.class);
         try {
-            PowerMockito.whenNew(APIKeyValidationServiceStub.class).withArguments(ctx, API_KEY_VALIDATOR_URL +
-                    "APIKeyValidationService").thenReturn(apiKeyValidationServiceStub);
             PowerMockito.when(websocketWSClient.getAPIKeyData(TENANT_URL, "1.0", "587hfbt4i8ydno87ywq", "abc.com"))
                     .thenReturn(apiKeyValidationInfoDTO);
             PowerMockito.whenNew(WebsocketWSClient.class).withNoArguments().thenReturn(websocketWSClient);
@@ -385,11 +383,9 @@ public class WebsocketInboundHandlerTestCase {
         PowerMockito.when(APISecurityUtils.getKeyValidatorClientType()).thenReturn("invalid");
         ConfigurationContext ctx = ConfigurationContextFactory
                 .createConfigurationContextFromFileSystem(null, null);
-        APIKeyValidationServiceStub apiKeyValidationServiceStub = Mockito.mock(APIKeyValidationServiceStub.class);
+        APIKeyValidationService apiKeyValidationServiceStub = Mockito.mock(APIKeyValidationService.class);
         WebsocketWSClient websocketWSClient = Mockito.mock(WebsocketWSClient.class);
         try {
-            PowerMockito.whenNew(APIKeyValidationServiceStub.class).withArguments(ctx, API_KEY_VALIDATOR_URL +
-                    "APIKeyValidationService").thenReturn(apiKeyValidationServiceStub);
             PowerMockito.when(websocketWSClient.getAPIKeyData(SUPER_TENANT_URL, "1.0", "587hfbt4i8ydno87ywq","carbon" +
                     ".super"))
                     .thenReturn(apiKeyValidationInfoDTO);

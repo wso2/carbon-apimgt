@@ -2290,4 +2290,10 @@ public final class APIConstants {
         public static final String CONTAINER_MANAGEMENT_INFO ="ContainerMgtInfo";
 
     }
+    
+    public enum PolicyType {
+        API,
+        APPLICATION,
+        SUBSCRIPTION
+    }
 }

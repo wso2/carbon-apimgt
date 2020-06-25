@@ -86,6 +86,10 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
             <exclusions>
                 <exclusion>
@@ -426,7 +430,7 @@
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
                             org.slf4j,
-                            org.wso2.carbon.apimgt.keymgt.stub.validator; version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.keymgt; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.base.*; version="${imp.pkg.version.carbon.base}",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",

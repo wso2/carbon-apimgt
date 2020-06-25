@@ -57,4 +57,10 @@ public interface Identifier {
      * @return uuid
      */
     String getUUID();
+    
+    /**
+     * Internal API Id
+     * @return id
+     */
+    int getId();
 }

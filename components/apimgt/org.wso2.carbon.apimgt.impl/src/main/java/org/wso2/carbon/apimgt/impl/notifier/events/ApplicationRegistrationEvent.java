@@ -29,9 +29,10 @@ public class ApplicationRegistrationEvent extends Event {
     private int applicationId;
     private String consumerKey;
     private String keyType;
+    private String keyManager;
 
-    public ApplicationRegistrationEvent(String eventId, long timestamp, String type, int tenantId,int applicationId,
-                                        String consumerKey, String keyType) {
+    public ApplicationRegistrationEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, int applicationId,
+                                        String consumerKey, String keyType, String keyManager) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -39,6 +40,8 @@ public class ApplicationRegistrationEvent extends Event {
         this.applicationId = applicationId;
         this.consumerKey = consumerKey;
         this.keyType = keyType;
+        this.keyManager  = keyManager;
+        this.tenantDomain = tenantDomain;
     }
 
     @Override
@@ -50,7 +53,8 @@ public class ApplicationRegistrationEvent extends Event {
                 ", eventId='" + eventId + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
-                ", tenantId=" + tenantId +
+                ", tenantId=" + tenantId + '\'' +
+                ", tenantDomain=" + tenantDomain +
                 '}';
     }
 
@@ -91,5 +95,15 @@ public class ApplicationRegistrationEvent extends Event {
 
     public void setKeyType(String keyType) {
         this.keyType = keyType;
+    }
+
+    public String getKeyManager() {
+
+        return keyManager;
+    }
+
+    public void setKeyManager(String keyManager) {
+
+        this.keyManager = keyManager;
     }
 }

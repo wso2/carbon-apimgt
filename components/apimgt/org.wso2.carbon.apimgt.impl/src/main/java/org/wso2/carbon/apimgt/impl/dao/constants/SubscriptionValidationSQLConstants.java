@@ -22,38 +22,56 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_ALL_APPLICATIONS_SQL =
             " SELECT " +
+                    "   APP.UUID AS APP_UUID," +
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.APPLICATION_TIER AS TIER," +
+                    "   APP.NAME AS NAME," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
-                    "   SUB.USER_ID AS SUB_NAME" +
+                    "   SUB.USER_ID AS SUB_NAME," +
+                    "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
+                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE"+
                     " FROM " +
-                    "   AM_APPLICATION AS APP," +
-                    "   AM_SUBSCRIBER AS SUB" +
+                    "   AM_SUBSCRIBER AS SUB," +
+                    "   AM_APPLICATION AS APP" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES AS ATTRIBUTES  " +
+                    "ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID ";
 
     public static final String GET_TENANT_APPLICATIONS_SQL =
             " SELECT " +
+                    "   APP.UUID AS APP_UUID," +
                     "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.NAME AS NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
-                    "   SUB.USER_ID AS SUB_NAME" +
+                    "   SUB.USER_ID AS SUB_NAME," +
+                    "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
+                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE"+
                     " FROM " +
-                    "   AM_APPLICATION AS APP," +
-                    "   AM_SUBSCRIBER AS SUB" +
+                    "   AM_SUBSCRIBER AS SUB," +
+                    "   AM_APPLICATION AS APP" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES AS ATTRIBUTES" +
+                    "  ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   SUB.TENANT_ID = ? ";
 
     public static final String GET_APPLICATION_BY_ID_SQL =
             " SELECT " +
+                    "   APP.UUID AS APP_UUID," +
                     "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.NAME AS NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
-                    "   SUB.USER_ID AS SUB_NAME" +
+                    "   SUB.USER_ID AS SUB_NAME," +
+                    "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
+                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE"+
                     " FROM " +
-                    "   AM_APPLICATION AS APP," +
-                    "   AM_SUBSCRIBER AS SUB" +
+                    "   AM_SUBSCRIBER AS SUB," +
+                    "   AM_APPLICATION AS APP" +
+                    "   LEFT OUTER JOIN AM_APPLICATION_ATTRIBUTES AS ATTRIBUTES  " +
+                    "ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   APP.APPLICATION_ID = ? ";
@@ -180,6 +198,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APPLICATION_ID," +
                     "   CONSUMER_KEY," +
                     "   KEY_TYPE," +
+                    "   KEY_MANAGER," +
                     "   STATE " +
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING" +
@@ -254,6 +273,7 @@ public class SubscriptionValidationSQLConstants {
                     "   POLICY.NAME," +
                     "   POLICY.TENANT_ID," +
                     "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   POLICY.APPLICABLE_LEVEL," +
                     "   COND.CONDITION_GROUP_ID," +
                     "   COND.QUOTA_TYPE" +
                     " FROM" +
@@ -308,6 +328,23 @@ public class SubscriptionValidationSQLConstants {
                     "   AM_CONDITION_GROUP AS COND " +
                     " ON " +
                     "   POLICY.POLICY_ID = COND.POLICY_ID";
+    
+    public static final String GET_TENANT_API_POLICY_SQL =
+            "SELECT" +
+                    "   POLICY.POLICY_ID," +
+                    "   POLICY.NAME," +
+                    "   POLICY.TENANT_ID," +
+                    "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   POLICY.APPLICABLE_LEVEL," +
+                    "   COND.CONDITION_GROUP_ID," +
+                    "   COND.QUOTA_TYPE" +
+                    " FROM" +
+                    "   AM_API_THROTTLE_POLICY AS POLICY " +
+                    " LEFT JOIN " +
+                    "   AM_CONDITION_GROUP AS COND " +
+                    " ON " +
+                    "   POLICY.POLICY_ID = COND.POLICY_ID" +
+                    " WHERE POLICY.TENANT_ID = ? AND POLICY.NAME = ?";
 
     public static final String GET_TENANT_APIS_SQL =
             "SELECT" +
@@ -472,6 +509,7 @@ public class SubscriptionValidationSQLConstants {
                     "   MAPPING.APPLICATION_ID," +
                     "   MAPPING.CONSUMER_KEY," +
                     "   MAPPING.KEY_TYPE," +
+                    "   MAPPING.KEY_MANAGER," +
                     "   MAPPING.STATE" +
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING AS MAPPING," +

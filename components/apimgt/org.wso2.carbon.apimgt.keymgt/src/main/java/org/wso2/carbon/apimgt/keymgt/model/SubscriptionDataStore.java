@@ -42,9 +42,10 @@ public interface SubscriptionDataStore {
      * Gets the {@link ApplicationKeyMapping} entry by Key
      *
      * @param key <ApplicationIs>.<keyType>
+     * @param keyManager Keymanager Name
      * @return {@link ApplicationKeyMapping} entry
      */
-    ApplicationKeyMapping getKeyMappingByKey(String key);
+    ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager);
 
     /**
      * Get API by Context and Version
@@ -89,6 +90,36 @@ public interface SubscriptionDataStore {
      * @return Application Throttling Policy
      */
     ApplicationPolicy getApplicationPolicyByName(String policyName, int tenantId);
+    
+    void addOrUpdateApplication(Application application);
+
+    void addOrUpdateSubscription(Subscription subscription);
+
+    void addOrUpdateAPI(API api);
+    
+    void addOrUpdateAPIWithUrlTemplates(API api);
+
+    void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping);
+    
+    void addOrUpdateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy);
+
+    void addOrUpdateApplicationPolicy(ApplicationPolicy applicationPolicy);
+    
+    void addOrUpdateApiPolicy(ApiPolicy apiPolicy);
+    
+    void removeApplication(Application application);
+
+    void removeAPI(API api);
+
+    void removeSubscription(Subscription subscription);
+
+    void removeApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping);
+
+    void removeSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy);
+
+    void removeApplicationPolicy(ApplicationPolicy applicationPolicy);
+    
+    void removeApiPolicy(ApiPolicy apiPolicy);
 
 }
 

@@ -128,4 +128,11 @@ public class API implements CacheableEntity<String> {
 
         this.apiType = apiType;
     }
+
+    @Override
+    public String toString() {
+        return "API [apiId=" + apiId + ", provider=" + provider + ", name=" + name + ", version=" + version
+                + ", context=" + context + ", policy=" + policy + ", apiType=" + apiType + ", urlMappings="
+                + urlMappings + "]";
+    }
 }
