@@ -140,7 +140,7 @@ public class DeploymentsMappingUtil {
                             .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
                     for (Object clusterInfo : clustersInfo) {
                         //check whether cluster details are defined.
-                        if (!((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME).equals("")) {
+                        if (!"".equals(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME))) {
                             DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
                             deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterInfo)
                                     .get(ContainerBasedConstants.CLUSTER_NAME).toString());

@@ -4145,8 +4145,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                 .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
                                         for (Object containerMgtInfoObj : containerMgtInfo) {
                                             JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
-                                            if (containerMgtInfoDetails.get(ContainerBasedConstants.CLUSTER_NAME)
-                                                    .toString().equalsIgnoreCase(clusterId)) {
+                                            if (clusterId.equalsIgnoreCase(containerMgtInfoDetails
+                                                    .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
                                                 ContainerManager containerManager =
                                                         getContainerManagerInstance(containerMgtDetails
                                                                 .get(ContainerBasedConstants.CLASS_NAME).toString());
@@ -5643,8 +5643,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                         .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
                                                 for (Object containerMgtInfoObj : containerMgtInfo) {
                                                     JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
-                                                    if (containerMgtInfoDetails.get(ContainerBasedConstants.CLUSTER_NAME)
-                                                            .toString().equalsIgnoreCase(clusterId)) {
+                                                    if (clusterId.equalsIgnoreCase(containerMgtInfoDetails
+                                                            .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
                                                         ContainerManager containerManager =
                                                                 getContainerManagerInstance(containerMgtDetails
                                                                         .get(ContainerBasedConstants.CLASS_NAME).toString());
@@ -8747,8 +8747,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                 .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
                                         for (Object containerMgtInfoObj : containerMgtInfo) {
                                             JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
-                                            if (containerMgtInfoDetails.get(ContainerBasedConstants.CLUSTER_NAME)
-                                                    .toString().equalsIgnoreCase(clusterName)) {
+                                            if (clusterName.equalsIgnoreCase(containerMgtInfoDetails
+                                                    .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
                                                 ContainerManager containerManager = getContainerManagerInstance(containerMgtDetails
                                                         .get(ContainerBasedConstants.CLASS_NAME).toString());
                                                 containerManager.initManager(containerMgtInfoDetails);
