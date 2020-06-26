@@ -180,6 +180,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         boolean policyLevelUserTriggered = false;
         String ipLevelBlockingKey;
         String appLevelBlockingKey = "";
+        String subscriptionLevelBlockingKey = "";
         boolean stopOnQuotaReach = true;
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
@@ -199,11 +200,14 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             //Do blocking if there are blocking conditions present
             if (getThrottleDataHolder().isBlockingConditionsPresent()) {
                 appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
+                subscriptionLevelBlockingKey = apiContext + ":" + apiVersion + ":" + authContext.getSubscriber()
+                        + "-" + authContext.getApplicationName() + ":" + authContext.getKeyType();
                 Timer timer = getTimer(MetricManager.name(
                         APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), BLOCKED_TEST));
                 Timer.Context context = timer.start();
                 isBlockedRequest = getThrottleDataHolder()
-                        .isRequestBlocked(apiContext, appLevelBlockingKey, authorizedUser, clientIp, apiTenantDomain);
+                        .isRequestBlocked(apiContext, appLevelBlockingKey, authorizedUser, clientIp, apiTenantDomain,
+                                subscriptionLevelBlockingKey);
                 context.stop();
             }
 

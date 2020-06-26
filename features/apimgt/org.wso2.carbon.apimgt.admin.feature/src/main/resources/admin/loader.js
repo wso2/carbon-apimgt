@@ -1,5 +1,6 @@
+/* eslint-disable no-param-reassign */
 /**
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,17 +19,42 @@
  */
 /* eslint-disable func-names */
 const fs = require('fs');
-const path = require('path');
 
 module.exports = function (source, map) {
     const isWin = process.platform === 'win32';
     const pathSeperator = isWin ? '\\' : '/';
-    const headerPath = path.resolve(this.rootContext + pathSeperator + 'override' + this.resourcePath.split(`${pathSeperator}source`)[1]);
     let newSource = source;
-    if (fs.existsSync(headerPath)) {
-        newSource = fs.readFileSync(headerPath, 'utf8');
-        newSource = newSource.replace(/AppOverride/g, this.rootContext + '/override/');
 
+    let headerPath = this.resourcePath;
+    const rootContextSplits = this.rootContext.split(pathSeperator);
+    let appContext = null;
+    if (rootContextSplits.length > 0) {
+        appContext = rootContextSplits[rootContextSplits.length - 1];
+        if (this.resourcePath.indexOf(appContext + pathSeperator + 'override' + pathSeperator + 'src') === -1) {
+            headerPath = this.resourcePath.replace(
+                appContext + pathSeperator + 'source' + pathSeperator + 'src',
+                appContext + pathSeperator + 'override' + pathSeperator + 'src',
+            );
+        }
+    }
+
+    if (appContext && fs.existsSync(headerPath)) {
+        newSource = fs.readFileSync(headerPath, 'utf8');
+        if (newSource.indexOf('AppOverride')) {
+            const lines = newSource.split('\n');
+            const formatedLines = [];
+
+            // Check if there are import statements with 'AppOverride' prefix and re write the file path
+            const regex = /import(?:["'\s]*([\w*{}\n\r\t, ]+)from\s*)?["'\s].*([@\w/_-]+)["'\s].*/;
+            lines.forEach((line) => {
+                if (regex.test(line) && line.indexOf('AppOverride')) {
+                    line = line.replace(/AppOverride/g, this.rootContext + pathSeperator + 'override');
+                    line = isWin ? line.replace(/\\/g, '/') : line;
+                }
+                formatedLines.push(line);
+            });
+            newSource = formatedLines.join('\n');
+        }
         this.addDependency(headerPath);
     }
     this.callback(null, newSource, map);

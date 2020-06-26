@@ -39,7 +39,7 @@ public final class ContainerBasedConstants {
     public static final String SWAGGER = "swagger";
     public static final String MODE = "privateJet";
     public static final String MASTER_URL = "MasterURL";
-    public static final String INGRESS_URL = "IngressURL";
+    public static final String ACCESS_URL = "AccessURL";
     public static final String NAMESPACE = "Namespace";
     public static final String REPLICAS = "Replicas";
     public static final String SATOKEN = "SAToken";
@@ -50,7 +50,7 @@ public final class ContainerBasedConstants {
     public static final String CLUSTER_INFO = "ClusterInfo";
     public static final String CONTAINER_MANAGEMENT_INFO = "ContainerMgtInfo";
     public static final String PROPERTIES = "Properties";
-    public static final String CLUSTER_ID = "ClusterId";
+    public static final String CLUSTER_NAME = "ClusterName";
     public static final String DISPLAY_NAME = "DisplayName";
     public static final String CONTAINER_MANAGEMENT = "ContainerMgt";
     public static final String CLASS_NAME = "ClassName";

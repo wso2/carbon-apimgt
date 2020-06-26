@@ -293,7 +293,7 @@ class Operation extends React.Component {
                                 value={apiScope.scope.name}
                                 dense
                             >
-                                <Checkbox checked={operation.scopes.includes(apiScope.scope.name)} />
+                                <Checkbox checked={operation.scopes.includes(apiScope.scope.name)} color='primary' />
                                 {apiScope.scope.name}
                             </MenuItem>
                         )) : (
@@ -321,7 +321,7 @@ class Operation extends React.Component {
                                 value={sharedScope.scope.name}
                                 dense
                             >
-                                <Checkbox checked={operation.scopes.includes(sharedScope.scope.name)} />
+                                <Checkbox checked={operation.scopes.includes(sharedScope.scope.name)} color='primary' />
                                 {sharedScope.scope.name}
                             </MenuItem>
                         )) : (

@@ -35,7 +35,7 @@ public class APIPolicyConditionGroup {
     private List<ConditionDTO> conditionDTOS;
 
     public int getPolicyId() {
-    
+
         return policyId;
     }
 

@@ -44,8 +44,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.QueryParameterConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RequestCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitTypeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
@@ -137,61 +137,66 @@ public class CommonThrottleMappingUtil {
     }
 
     /**
-     * Converts a list of Throttle Condition Type DTOs into a list of model Condition objects
+     * Converts a list of Throttle Condition DTOs into a list of Condition model objects
      *
-     * @param throttleConditionTypeDTOs list of Throttle Condition Type DTOs
-     * @return Derived list of model Condition objects from Throttle Condition Type DTOs
+     * @param throttleConditionDTOs list of Throttle Condition DTOs
+     * @return Derived list of Condition model objects from Throttle Condition DTOs
      * @throws UnsupportedThrottleConditionTypeException
      */
-    public static List<Condition> fromDTOListToConditionList(List<ThrottleConditionDTO> throttleConditionTypeDTOs)
+    public static List<Condition> fromDTOListToConditionList(List<ThrottleConditionDTO> throttleConditionDTOs)
             throws UnsupportedThrottleConditionTypeException {
+
         List<Condition> conditions = new ArrayList<>();
         String errorMessage;
-        if (throttleConditionTypeDTOs != null) {
-            for (ThrottleConditionDTO dto : throttleConditionTypeDTOs) {
-                ThrottleConditionDTO.TypeEnum typeEnum = dto.getType();
-                if (typeEnum != null) {
-                    switch (typeEnum) {
+
+        if (throttleConditionDTOs != null) {
+            for (ThrottleConditionDTO dto : throttleConditionDTOs) {
+                ThrottleConditionDTO.TypeEnum conditionType = dto.getType();
+                if (conditionType != null) {
+                    switch (conditionType) {
                         case HEADERCONDITION: {
                             if (dto.getHeaderCondition() != null) {
-                                conditions.add(fromDTOToHeaderCondition(dto.getHeaderCondition()));
+                                conditions.add(fromDTOToHeaderCondition(dto.getHeaderCondition(),
+                                        dto.isInvertCondition()));
                             } else {
                                 errorMessage =
-                                        constructErrorMessage(ThrottleConditionDTO.TypeEnum.HEADERCONDITION,
-                                                dto);
+                                        RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                                ThrottleConditionDTO.TypeEnum.HEADERCONDITION) + dto.toString();
                                 throw new UnsupportedThrottleConditionTypeException(errorMessage);
                             }
                             break;
                         }
                         case IPCONDITION: {
                             if (dto.getIpCondition() != null) {
-                                conditions.add(fromDTOToIPCondition(dto.getIpCondition()));
+                                conditions.add(fromDTOToIPCondition(dto.getIpCondition(), dto.isInvertCondition()));
                             } else {
                                 errorMessage =
-                                        constructErrorMessage(ThrottleConditionDTO.TypeEnum.IPCONDITION,
-                                                dto);
+                                        RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                                ThrottleConditionDTO.TypeEnum.IPCONDITION) + dto.toString();
                                 throw new UnsupportedThrottleConditionTypeException(errorMessage);
                             }
                             break;
                         }
                         case QUERYPARAMETERCONDITION: {
                             if (dto.getQueryParameterCondition() != null) {
-                                conditions.add(fromDTOToQueryParameterCondition(dto.getQueryParameterCondition()));
+                                conditions.add(fromDTOToQueryParameterCondition(dto.getQueryParameterCondition(),
+                                        dto.isInvertCondition()));
                             } else {
                                 errorMessage =
-                                        constructErrorMessage(ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION,
-                                                dto);
+                                        RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                                ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION) + dto.toString();
                                 throw new UnsupportedThrottleConditionTypeException(errorMessage);
                             }
                             break;
                         }
                         case JWTCLAIMSCONDITION: {
                             if (dto.getJwtClaimsCondition() != null) {
-                                conditions.add(fromDTOToJWTClaimsCondition(dto.getJwtClaimsCondition()));
+                                conditions.add(fromDTOToJWTClaimsCondition(dto.getJwtClaimsCondition(),
+                                        dto.isInvertCondition()));
                             } else {
                                 errorMessage =
-                                        constructErrorMessage(ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION,
-                                                dto);
+                                        RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                                ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION) + dto.toString();
                                 throw new UnsupportedThrottleConditionTypeException(errorMessage);
                             }
                             break;
@@ -237,6 +242,7 @@ public class CommonThrottleMappingUtil {
             throws UnsupportedThrottleConditionTypeException {
 
         ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
+        throttleConditionDTO.setInvertCondition(condition.isInvertCondition());
         if (condition instanceof IPCondition) {
             throttleConditionDTO.setType(ThrottleConditionDTO.TypeEnum.IPCONDITION);
             throttleConditionDTO.setIpCondition(fromIPConditionToDTO((IPCondition) condition));
@@ -264,79 +270,70 @@ public class CommonThrottleMappingUtil {
      * @return Derived Quota policy object from DTO
      * @throws UnsupportedThrottleLimitTypeException
      */
-    public static QuotaPolicy fromDTOToQuotaPolicy(ThrottleLimitTypeDTO dto)
+    public static QuotaPolicy fromDTOToQuotaPolicy(ThrottleLimitDTO dto)
             throws UnsupportedThrottleLimitTypeException {
 
-        ThrottleLimitDTO throttleLimit = getThrottleLimitType(dto);
+        String errorMessage;
         QuotaPolicy quotaPolicy = new QuotaPolicy();
-        quotaPolicy.setLimit(fromDTOToLimit(throttleLimit));
-        quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(throttleLimit.getType()));
+        ThrottleLimitDTO.TypeEnum limitType = dto.getType();
+
+        if (limitType != null) {
+            switch (dto.getType()) {
+                case REQUESTCOUNTLIMIT: {
+                    if (dto.getRequestCount() != null) {
+                        quotaPolicy.setLimit(fromDTOToRequestCountLimit(dto.getRequestCount()));
+                    } else {
+                        errorMessage =
+                                RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                        ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT) + dto.toString();
+                        throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                    }
+                    break;
+                }
+                case BANDWIDTHLIMIT: {
+                    if (dto.getBandwidth() != null) {
+                        quotaPolicy.setLimit(fromDTOToBandwidthLimit(dto.getBandwidth()));
+                    } else {
+                        errorMessage =
+                                RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                        ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT) + dto.toString();
+                        throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                    }
+                    break;
+                }
+            }
+            quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(dto.getType()));
+        } else {
+            errorMessage = "defaultLimit 'type' property has not been specified\n" + dto.toString();
+            throw new UnsupportedThrottleLimitTypeException(errorMessage);
+        }
         return quotaPolicy;
     }
 
     /**
-     * Obtain Throttle Limit DTO object from Throttle Limit Type object
-     *
-     * @param dto Throttle Policy Default limit DTO object
-     * @return Throttle Limit DTO object
-     * @throws UnsupportedThrottleLimitTypeException
-     */
-    public static ThrottleLimitDTO getThrottleLimitType(ThrottleLimitTypeDTO dto)
-            throws UnsupportedThrottleLimitTypeException {
-
-        if (dto.getBandwidth() != null && dto.getRequestCount() != null) {
-            String msg = "Throttle limit types " + dto.getBandwidth().getClass().getName() + " and " +
-                    dto.getRequestCount().getClass().getName() + " cannot be specified at once";
-            throw new UnsupportedThrottleLimitTypeException(msg);
-        } else if (dto.getBandwidth() != null) {
-            return dto.getBandwidth();
-        } else if (dto.getRequestCount() != null) {
-            return dto.getRequestCount();
-        } else {
-            throw new UnsupportedThrottleLimitTypeException("A Throttle limit type has not been specified");
-        }
-    }
-
-    /**
-     * Converts a Quota Policy object into a Throttle Limit Type DTO object
+     * Converts a Quota Policy object into a Throttle Limit DTO object
      *
      * @param quotaPolicy Quota Policy object
-     * @return Throttle Limit Type DTO object derived from the Quota Policy object
+     * @return Throttle Limit DTO object derived from the Quota Policy object
      * @throws UnsupportedThrottleLimitTypeException
      */
-    public static ThrottleLimitTypeDTO fromQuotaPolicyToDTO(QuotaPolicy quotaPolicy)
+    public static ThrottleLimitDTO fromQuotaPolicyToDTO(QuotaPolicy quotaPolicy)
             throws UnsupportedThrottleLimitTypeException {
 
-        ThrottleLimitTypeDTO defaultLimitType = new ThrottleLimitTypeDTO();
+        ThrottleLimitDTO defaultLimitType = new ThrottleLimitDTO();
         if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
             RequestCountLimit requestCountLimit = (RequestCountLimit) quotaPolicy.getLimit();
+            defaultLimitType.setType(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT);
             defaultLimitType.setRequestCount(fromRequestCountLimitToDTO(requestCountLimit));
         } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
             BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
+            defaultLimitType.setType(ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT);
             defaultLimitType.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
         } else {
             String msg = "Throttle limit type " + quotaPolicy.getType() + " is not supported";
             throw new UnsupportedThrottleLimitTypeException(msg);
         }
         return defaultLimitType;
-    }
-
-    /**
-     * Converts a Throttle Limit DTO object into a Limit object
-     *
-     * @param dto Throttle Limit DTO object
-     * @return Limit object derived from DTO
-     * @throws UnsupportedThrottleLimitTypeException
-     */
-    public static Limit fromDTOToLimit(ThrottleLimitDTO dto) throws UnsupportedThrottleLimitTypeException {
-        if (dto instanceof BandwidthLimitDTO) {
-            return fromDTOToBandwidthLimit((BandwidthLimitDTO) dto);
-        } else if (dto instanceof RequestCountLimitDTO) {
-            return fromDTOToRequestCountLimit((RequestCountLimitDTO) dto);
-        } else {
-            String msg = "Throttle limit type " + dto.getClass().getName() + " is not supported";
-            throw new UnsupportedThrottleLimitTypeException(msg);
-        }
     }
 
     /**
@@ -347,7 +344,8 @@ public class CommonThrottleMappingUtil {
      */
     public static BandwidthLimit fromDTOToBandwidthLimit(BandwidthLimitDTO dto) {
         BandwidthLimit bandwidthLimit = new BandwidthLimit();
-        bandwidthLimit = updateFieldsFromDTOToLimit(dto, bandwidthLimit);
+        bandwidthLimit.setTimeUnit(dto.getTimeUnit());
+        bandwidthLimit.setUnitTime(dto.getUnitTime());
         bandwidthLimit.setDataAmount(dto.getDataAmount());
         bandwidthLimit.setDataUnit(dto.getDataUnit());
         return bandwidthLimit;
@@ -357,11 +355,12 @@ public class CommonThrottleMappingUtil {
      * Converts a Request Count Limit DTO object into a Request Count model object
      *
      * @param dto Request Count Limit DTO object
-     * @return Request Count model object derived from DTO
+     * @return Request Count Limit model object derived from DTO
      */
     public static RequestCountLimit fromDTOToRequestCountLimit(RequestCountLimitDTO dto) {
         RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit = updateFieldsFromDTOToLimit(dto, requestCountLimit);
+        requestCountLimit.setTimeUnit(dto.getTimeUnit());
+        requestCountLimit.setUnitTime(dto.getUnitTime());
         requestCountLimit.setRequestCount(dto.getRequestCount());
         return requestCountLimit;
     }
@@ -374,8 +373,8 @@ public class CommonThrottleMappingUtil {
      */
     public static BandwidthLimitDTO fromBandwidthLimitToDTO(BandwidthLimit bandwidthLimit) {  //done
         BandwidthLimitDTO dto = new BandwidthLimitDTO();
-        dto = updateFieldsFromLimitToDTO(bandwidthLimit, dto);
-        dto.setType(ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT);
+        dto.setTimeUnit(bandwidthLimit.getTimeUnit());
+        dto.setUnitTime(bandwidthLimit.getUnitTime());
         dto.setDataAmount(bandwidthLimit.getDataAmount());
         dto.setDataUnit(bandwidthLimit.getDataUnit());
         return dto;
@@ -389,8 +388,8 @@ public class CommonThrottleMappingUtil {
      */
     public static RequestCountLimitDTO fromRequestCountLimitToDTO(RequestCountLimit requestCountLimit) { //done
         RequestCountLimitDTO dto = new RequestCountLimitDTO();
-        dto = updateFieldsFromLimitToDTO(requestCountLimit, dto);
-        dto.setType(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT);
+        dto.setTimeUnit(requestCountLimit.getTimeUnit());
+        dto.setUnitTime(requestCountLimit.getUnitTime());
         dto.setRequestCount(requestCountLimit.getRequestCount());
         return dto;
     }
@@ -398,14 +397,16 @@ public class CommonThrottleMappingUtil {
     /**
      * Converts a IP Condition DTO object into a model object
      *
-     * @param dto IP Condition DTO object
+     * @param dto             IP Condition DTO object
+     * @param invertCondition Invert condition relevant to the DTO
      * @return IP Condition model object derived from DTO
      */
-    public static IPCondition fromDTOToIPCondition(IPConditionDTO dto) {
+    public static IPCondition fromDTOToIPCondition(IPConditionDTO dto, boolean invertCondition) {
+
         String ipConditionType = mapIPConditionTypeFromDTOToModel(dto.getIpConditionType());
         IPCondition ipCondition = new IPCondition(ipConditionType);
         ipCondition.setConditionEnabled(Boolean.TRUE.toString());
-        ipCondition.setInvertCondition(dto.isInvertCondition());
+        ipCondition.setInvertCondition(invertCondition);
         ipCondition.setSpecificIP(dto.getSpecificIP());
         ipCondition.setStartingIP(dto.getStartingIP());
         ipCondition.setEndingIP(dto.getEndingIP());
@@ -421,7 +422,6 @@ public class CommonThrottleMappingUtil {
     public static IPConditionDTO fromIPConditionToDTO(IPCondition ipCondition) {
         IPConditionDTO.IpConditionTypeEnum ipConditionType = mapIPConditionTypeFromModelToDTO(ipCondition.getType());
         IPConditionDTO dto = new IPConditionDTO();
-        dto.setInvertCondition(ipCondition.isInvertCondition());
         dto.setIpConditionType(ipConditionType);
         dto.setSpecificIP(ipCondition.getSpecificIP());
         dto.setStartingIP(ipCondition.getStartingIP());
@@ -432,13 +432,15 @@ public class CommonThrottleMappingUtil {
     /**
      * Converts a Header Condition DTO object into a model object
      *
-     * @param dto Header Condition DTO object
+     * @param dto             Header Condition DTO object
+     * @param invertCondition Invert condition relevant to the DTO
      * @return Header Condition model object derived from Header Condition DTO
      */
-    public static HeaderCondition fromDTOToHeaderCondition(HeaderConditionDTO dto) {
+    public static HeaderCondition fromDTOToHeaderCondition(HeaderConditionDTO dto, boolean invertCondition) {
+
         HeaderCondition headerCondition = new HeaderCondition();
         headerCondition.setConditionEnabled(Boolean.TRUE.toString());
-        headerCondition.setInvertCondition(dto.isInvertCondition());
+        headerCondition.setInvertCondition(invertCondition);
         headerCondition.setHeader(dto.getHeaderName());
         headerCondition.setValue(dto.getHeaderValue());
         return headerCondition;
@@ -452,7 +454,6 @@ public class CommonThrottleMappingUtil {
      */
     public static HeaderConditionDTO fromHeaderConditionToDTO(HeaderCondition headerCondition) {
         HeaderConditionDTO dto = new HeaderConditionDTO();
-        dto.setInvertCondition(headerCondition.isInvertCondition());
         dto.setHeaderName(headerCondition.getHeaderName());
         dto.setHeaderValue(headerCondition.getValue());
         return dto;
@@ -461,13 +462,16 @@ public class CommonThrottleMappingUtil {
     /**
      * Converts a Query Parameter Condition DTO object into a model object
      *
-     * @param dto Query Parameter Condition DTO object
+     * @param dto             Query Parameter Condition DTO object
+     * @param invertCondition Invert condition relevant to the DTO
      * @return Query Parameter Condition model object derived from Query Parameter Condition DTO
      */
-    public static QueryParameterCondition fromDTOToQueryParameterCondition(QueryParameterConditionDTO dto) {
+    public static QueryParameterCondition fromDTOToQueryParameterCondition(QueryParameterConditionDTO dto,
+                                                                           boolean invertCondition) {
+
         QueryParameterCondition queryParameterCondition = new QueryParameterCondition();
         queryParameterCondition.setConditionEnabled(Boolean.TRUE.toString());
-        queryParameterCondition.setInvertCondition(dto.isInvertCondition());
+        queryParameterCondition.setInvertCondition(invertCondition);
         queryParameterCondition.setParameter(dto.getParameterName());
         queryParameterCondition.setValue(dto.getParameterValue());
         return queryParameterCondition;
@@ -481,7 +485,6 @@ public class CommonThrottleMappingUtil {
      */
     public static QueryParameterConditionDTO fromQueryParameterConditionToDTO(QueryParameterCondition condition) {
         QueryParameterConditionDTO dto = new QueryParameterConditionDTO();
-        dto.setInvertCondition(condition.isInvertCondition());
         dto.setParameterName(condition.getParameter());
         dto.setParameterValue(condition.getValue());
         return dto;
@@ -490,13 +493,15 @@ public class CommonThrottleMappingUtil {
     /**
      * Converts a JWT Claims Condition DTO object into a model object
      *
-     * @param dto JWT Claims Condition DTO object
+     * @param dto             JWT Claims Condition DTO object
+     * @param invertCondition Invert condition relevant to the DTO
      * @return JWT Claims Condition model object derived from JWT Claims Condition DTO
      */
-    public static JWTClaimsCondition fromDTOToJWTClaimsCondition(JWTClaimsConditionDTO dto) {
+    public static JWTClaimsCondition fromDTOToJWTClaimsCondition(JWTClaimsConditionDTO dto, boolean invertCondition) {
+
         JWTClaimsCondition jwtClaimsCondition = new JWTClaimsCondition();
         jwtClaimsCondition.setConditionEnabled(Boolean.TRUE.toString());
-        jwtClaimsCondition.setInvertCondition(dto.isInvertCondition());
+        jwtClaimsCondition.setInvertCondition(invertCondition);
         jwtClaimsCondition.setAttribute(dto.getAttribute());
         jwtClaimsCondition.setClaimUrl(dto.getClaimUrl());
         return jwtClaimsCondition;
@@ -510,39 +515,8 @@ public class CommonThrottleMappingUtil {
      */
     public static JWTClaimsConditionDTO fromJWTClaimsConditionToDTO(JWTClaimsCondition condition) {
         JWTClaimsConditionDTO dto = new JWTClaimsConditionDTO();
-        dto.setInvertCondition(condition.isInvertCondition());
         dto.setClaimUrl(condition.getClaimUrl());
         dto.setAttribute(condition.getAttribute());
-        return dto;
-    }
-
-    /**
-     * Update common fields of Limit model object using Throttle Limit DTO object
-     * Fields update: timeUnit, unitTime
-     *
-     * @param dto   Throttle limit DTO object
-     * @param limit Limit object
-     * @param <T>   Type of Limit
-     * @return Limit model object with common fields updated
-     */
-    public static <T extends Limit> T updateFieldsFromDTOToLimit(ThrottleLimitDTO dto, T limit) {
-        limit.setTimeUnit(dto.getTimeUnit());
-        limit.setUnitTime(dto.getUnitTime());
-        return limit;
-    }
-
-    /**
-     * Update common fields of Throttle Limit DTO object using Limit model object
-     * Fields update: timeUnit, unitTime
-     *
-     * @param limit Limit model object
-     * @param dto   Throttle Limit DTO object
-     * @param <T>   Type of Throttle Limit object
-     * @return Throttle Limit DTO object with common fields updated
-     */
-    public static <T extends ThrottleLimitDTO> T updateFieldsFromLimitToDTO(Limit limit, T dto) {
-        dto.setTimeUnit(limit.getTimeUnit());
-        dto.setUnitTime(limit.getUnitTime());
         return dto;
     }
 
@@ -666,19 +640,5 @@ public class CommonThrottleMappingUtil {
             default:
                 return null;
         }
-    }
-
-    /**
-     * Constructs an error message to indicate that condition item corresponding to a condition type is not provided
-     *
-     * @param typeEnum Throttle Condition Type DTO's Type Enum
-     * @param dto      Throttle Conditiom Type DTO onject
-     * @return constructed error message
-     */
-    public static String constructErrorMessage(ThrottleConditionDTO.TypeEnum typeEnum,
-                                               ThrottleConditionDTO dto) {
-
-        return "Condition item corresponding to type " + typeEnum + " not provided\n"
-                + dto.toString();
     }
 }

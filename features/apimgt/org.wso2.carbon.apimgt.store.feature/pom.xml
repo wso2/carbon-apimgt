@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.7.2-SNAPSHOT</version>
+        <version>6.7.37-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -245,9 +245,6 @@
                                 </importBundleDef>
                                 <importBundleDef>
                                     org.wso2.orbit.org.openapitools:openapi-generator:${openapi.generator.version}
-                                </importBundleDef>
-                                <importBundleDef>
-                                    org.wso2.orbit.org.openapitools.swagger.parser:swagger-parser:${openapitools.swagger.parser.version}
                                 </importBundleDef>
                                 <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso
                                 </importBundleDef>

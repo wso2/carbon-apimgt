@@ -31,6 +31,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
 
     private String name;
     private String uuid;
+    private String displayName;
     private String description;
     private String tenantDomain;
     private Map<String,Object> additionalProperties = new HashMap();
@@ -100,6 +101,16 @@ public class KeyManagerConfigurationDTO implements Serializable {
     public boolean isEnabled() {
 
         return enabled;
+    }
+
+    public String getDisplayName() {
+
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+
+        this.displayName = displayName;
     }
 
     public void setEnabled(boolean enabled) {

@@ -30,6 +30,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApiCategoriesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.KeyManagersApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.MeApi"/>
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>

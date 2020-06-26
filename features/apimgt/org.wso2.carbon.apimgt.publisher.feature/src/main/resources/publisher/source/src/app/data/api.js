@@ -1766,25 +1766,7 @@ class API extends Resource {
         });
         return promisePolicies.then(response => response.body);
     }
-    /**
-     * Update complexity related details of an API
-     */
-    addGraphqlPoliciesComplexity(api_id, body) {
-        const promised_updateComplexity = this.client.then(client => {
-            const payload = {
-                apiId: api_id,
-                body,
-                'Content-Type': 'application/json',
-            };
-            return client.apis['GraphQL Policies'].post_apis__apiId__graphql_policies_complexity(
-                    payload,
-                    this._requestMetaData(),
-            );
-        });
-        return promised_updateComplexity;
-    }
-
-
+    
     /**
      * Update complexity related details of an API
      */

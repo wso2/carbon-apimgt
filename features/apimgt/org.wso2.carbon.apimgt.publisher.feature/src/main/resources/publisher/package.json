@@ -8,7 +8,7 @@
         "test:coverage": "jest --coverage",
         "build:prod": "rm -R site/public/dist/; npm rum i18n && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack -d --watch ",
-        "analysis": "NODE_ENV=development NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
+        "analysis": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
         "lint": "eslint source",
         "i18n": "extract-messages -l=en,fr -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'"
     },
@@ -26,7 +26,8 @@
         "async-react-component": "^0.7.0",
         "autosuggest-highlight": "^3.1.1",
         "base64url": "3.0.1",
-        "caniuse-api": "^1.6.1",
+        "caniuse-api": "^3.0.0",
+        "developer_portal": "^1.0.0",
         "downshift": "^3.1.0",
         "draft-js": "^0.10.5",
         "draftjs-to-html": "^0.8.4",
@@ -68,8 +69,7 @@
         "swagger-ui": "^3.25.0",
         "swagger-ui-react": "^3.25.0",
         "typeface-roboto": "0.0.35",
-        "url-loader": "^0.5.9",
-        "developer_portal": "^1.0.0"
+        "url-loader": "^0.5.9"
     },
     "devDependencies": {
         "@babel/core": "^7.6.4",
@@ -108,6 +108,7 @@
         "swagger-parser": "^7.0.0",
         "webpack": "v4.28.4",
         "webpack-bundle-analyzer": "^2.9.1",
-        "webpack-cli": "^3.3.2"
+        "webpack-cli": "^3.3.2",
+        "worker-loader": "^2.0.0"
     }
 }

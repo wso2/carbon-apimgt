@@ -96,6 +96,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
@@ -109,7 +110,6 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
-import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -119,7 +119,16 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMRegistryService;
+import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.IDPConfiguration;
+import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
+import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
+import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
@@ -233,6 +242,7 @@ import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
@@ -10773,12 +10783,12 @@ public final class APIUtil {
         if (!keyManagerConfigurationDTO.getAdditionalProperties()
                 .containsKey(APIConstants.KeyManager.TOKEN_ENDPOINT)) {
             keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
-                    getTokenEndpoint().concat("/token"));
+                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
         }
         if (!keyManagerConfigurationDTO.getAdditionalProperties()
                 .containsKey(APIConstants.KeyManager.REVOKE_ENDPOINT)) {
             keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
-                    getTokenEndpoint().concat("/revoke"));
+                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.REVOKE_URL));
         }
         if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                 APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)) {
@@ -10800,6 +10810,29 @@ public final class APIUtil {
         if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                 APIConstants.KeyManager.CLAIM_MAPPING)){
             keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CLAIM_MAPPING, getDefaultClaimMappings());
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.CERTIFICATE_TYPE)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CERTIFICATE_TYPE,
+                    APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.CERTIFICATE_VALUE)) {
+            try {
+                Certificate certificate = CertificateMgtUtils.getInstance()
+                        .getPublicCertificate(keyManagerConfigurationDTO.getTenantDomain());
+                String x509certificateContent = null;
+                if (certificate != null) {
+                    x509certificateContent = getX509certificateContent(certificate);
+
+                }
+                keyManagerConfigurationDTO
+                        .addProperty(APIConstants.KeyManager.CERTIFICATE_VALUE, x509certificateContent);
+            } catch (APIManagementException e) {
+                log.error("Error while adding public key into keyManagerConfiguration");
+            } catch (java.security.cert.CertificateEncodingException e) {
+                log.error("Error while reading encoded data");
+            }
         }
         return keyManagerConfigurationDTO;
     }
@@ -10939,7 +10972,7 @@ public final class APIUtil {
                             get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
                     for (Object clusterInfo : clustersInfo) {
                         //check if the clusters defined in tenant-conf.json
-                        if (!((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).equals("")) {
+                        if (!"".equals(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME))) {
                             containerMgtInfoFromTenant.add(clusterInfo);
                         }
                     }
@@ -10947,8 +10980,8 @@ public final class APIUtil {
                         containerMgtObj.put(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO, containerMgtInfoFromTenant);
                         for (Object apimConfig : containerMgtFromToml) {
                             //get class name from the api-manager.xml
-                            if (((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).equals(containerMgtDetails
-                                    .get(ContainerBasedConstants.TYPE))) {
+                            if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString()
+                                    .equalsIgnoreCase(((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).toString())) {
                                 containerMgtObj.put(ContainerBasedConstants.CLASS_NAME, ((JSONObject) apimConfig)
                                         .get(ContainerBasedConstants.CLASS_NAME));
                             }
@@ -10969,6 +11002,35 @@ public final class APIUtil {
 
         return containerMgt;
     }
+    public static String getX509certificateContent(Certificate certificate)
+            throws java.security.cert.CertificateEncodingException {
+        byte[] encoded = Base64.encodeBase64(certificate.getEncoded());
+        String base64EncodedString =
+                APIConstants.BEGIN_CERTIFICATE_STRING
+                        .concat(new String(encoded)).concat("\n")
+                        .concat(APIConstants.END_CERTIFICATE_STRING);
+        return Base64.encodeBase64URLSafeString(base64EncodedString.getBytes());
+    }
 
+    public static X509Certificate retrieveCertificateFromContent(String base64EncodedCertificate)
+            throws APIManagementException {
+
+        if (base64EncodedCertificate != null) {
+            base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate).
+                    replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                    .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+
+            byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
+            try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
+                X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
+                    return x509Certificate;
+            } catch (IOException | javax.security.cert.CertificateException e) {
+                String msg = "Error while converting into X509Certificate";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        }
+        return null;
+    }
 }
 

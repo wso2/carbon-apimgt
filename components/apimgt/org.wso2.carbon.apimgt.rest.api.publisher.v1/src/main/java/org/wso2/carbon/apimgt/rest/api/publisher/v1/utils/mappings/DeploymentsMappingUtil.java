@@ -18,8 +18,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.openjpa.persistence.jest.JSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -38,6 +40,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
@@ -69,22 +72,49 @@ public class DeploymentsMappingUtil {
                 for (Object containerMgtInfoObj : containerMgtInfo) {
                     DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
                     List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
-                    JSONArray clustersInfo = (JSONArray) (((JSONObject) containerMgtInfoObj).get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
+                    String environmentType = (String) ((JSONObject) containerMgtInfoObj)
+                            .get(ContainerBasedConstants.TYPE);
+                    k8sClustersInfoDTO.setName(environmentType);
+                    JSONArray clustersInfo = (JSONArray) (((JSONObject) containerMgtInfoObj)
+                            .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
                     //check is the super tenant defined cluster ddtails
                     if (clustersInfo != null && !clustersInfo.isEmpty()) {
                         for (Object clusterInfo : clustersInfo) {
                             DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
-                            deploymentClusterInfoDTO.setClusterId(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).toString());
-                            deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterInfo).get(ContainerBasedConstants.DISPLAY_NAME).toString());
-                            JSONObject properties = (JSONObject) ((JSONObject) clusterInfo).get(ContainerBasedConstants.PROPERTIES);
-                            deploymentClusterInfoDTO.setMasterURL(properties.get(ContainerBasedConstants.MASTER_URL).toString().replace("\\", ""));
-                            deploymentClusterInfoDTO.setNamespace(properties.get(ContainerBasedConstants.NAMESPACE).toString());
-                            deploymentClusterInfoDTO.setIngressURL(properties.get(ContainerBasedConstants.INGRESS_URL).toString().replace("\\", ""));
+                            deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterInfo)
+                                    .get(ContainerBasedConstants.CLUSTER_NAME).toString());
+                            deploymentClusterInfoDTO.setDisplayName(((JSONObject) clusterInfo)
+                                    .get(ContainerBasedConstants.DISPLAY_NAME).toString());
+                            JSONObject properties = (JSONObject) ((JSONObject) (((JSONObject) clusterInfo)
+                                    .get(ContainerBasedConstants.PROPERTIES))).clone();
+                            if(properties != null && environmentType.equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)){
+                                if(properties.get(ContainerBasedConstants.ACCESS_URL) != null &&
+                                        !"".equals(properties.get(ContainerBasedConstants.ACCESS_URL))){
+                                    deploymentClusterInfoDTO.setAccessURL(properties.get(ContainerBasedConstants.ACCESS_URL)
+                                            .toString().replace("\\", ""));
+                                    properties.remove(ContainerBasedConstants.ACCESS_URL);
+                                }
+                                if(properties.get(ContainerBasedConstants.SATOKEN) != null){
+                                    properties.remove(ContainerBasedConstants.SATOKEN);
+                                }
+                                if(properties.get(ContainerBasedConstants.REPLICAS) != null){
+                                    properties.remove(ContainerBasedConstants.REPLICAS);
+                                }
+                                if(properties.get(ContainerBasedConstants.JWT_SECURITY_CR_NAME) != null){
+                                    properties.remove(ContainerBasedConstants.JWT_SECURITY_CR_NAME);
+                                }
+                                if(properties.get(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME) != null){
+                                    properties.remove(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME);
+                                }
+                                if(properties.get(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME) != null){
+                                    properties.remove(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME);
+                                }
+                                deploymentClusterInfoDTO.setProperties(new Gson().fromJson(properties.toString(), HashMap.class));
+                            }
 
                             deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
                         }
                         k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
-                        k8sClustersInfoDTO.setName((String) ((JSONObject) containerMgtInfoObj).get(ContainerBasedConstants.TYPE));
                         deploymentsList.add(k8sClustersInfoDTO);
                     }
                 }
@@ -103,23 +133,49 @@ public class DeploymentsMappingUtil {
                 for (Object containerMgtInfoObj : containerMgtInfo) {
                     DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
                     List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
-                    JSONArray clustersInfo = (JSONArray) (((JSONObject) containerMgtInfoObj).get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
+                    String environmentType = (String) ((JSONObject) containerMgtInfoObj)
+                            .get(ContainerBasedConstants.TYPE);
+                    k8sClustersInfoDTO.setName(environmentType);
+                    JSONArray clustersInfo = (JSONArray) (((JSONObject) containerMgtInfoObj)
+                            .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
                     for (Object clusterInfo : clustersInfo) {
                         //check whether cluster details are defined.
-                        if (!((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).equals("")) {
+                        if (!"".equals(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME))) {
                             DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
-                            deploymentClusterInfoDTO.setClusterId(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).toString());
-                            deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterInfo).get(ContainerBasedConstants.DISPLAY_NAME).toString());
-                            JSONObject properties = (JSONObject) ((JSONObject) clusterInfo).get(ContainerBasedConstants.PROPERTIES);
-                            deploymentClusterInfoDTO.setMasterURL(properties.get(ContainerBasedConstants.MASTER_URL).toString());
-                            deploymentClusterInfoDTO.setNamespace(properties.get(ContainerBasedConstants.NAMESPACE).toString());
-                            deploymentClusterInfoDTO.setIngressURL(properties.get(ContainerBasedConstants.INGRESS_URL).toString());
-
+                            deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterInfo)
+                                    .get(ContainerBasedConstants.CLUSTER_NAME).toString());
+                            deploymentClusterInfoDTO.setDisplayName(((JSONObject) clusterInfo)
+                                    .get(ContainerBasedConstants.DISPLAY_NAME).toString());
+                            JSONObject properties = (JSONObject) ((JSONObject) (((JSONObject) clusterInfo)
+                                    .get(ContainerBasedConstants.PROPERTIES))).clone();
+                            if(properties != null && environmentType.equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)){
+                                if(properties.get(ContainerBasedConstants.ACCESS_URL) != null &&
+                                        !"".equals(properties.get(ContainerBasedConstants.ACCESS_URL))){
+                                    deploymentClusterInfoDTO.setAccessURL(properties.get(ContainerBasedConstants.ACCESS_URL)
+                                            .toString().replace("\\", ""));
+                                    properties.remove(ContainerBasedConstants.ACCESS_URL);
+                                }
+                                if(properties.get(ContainerBasedConstants.SATOKEN) != null){
+                                    properties.remove(ContainerBasedConstants.SATOKEN);
+                                }
+                                if(properties.get(ContainerBasedConstants.REPLICAS) != null){
+                                    properties.remove(ContainerBasedConstants.REPLICAS);
+                                }
+                                if(properties.get(ContainerBasedConstants.JWT_SECURITY_CR_NAME) != null){
+                                    properties.remove(ContainerBasedConstants.JWT_SECURITY_CR_NAME);
+                                }
+                                if(properties.get(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME) != null){
+                                    properties.remove(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME);
+                                }
+                                if(properties.get(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME) != null){
+                                    properties.remove(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME);
+                                }
+                                deploymentClusterInfoDTO.setProperties(new Gson().fromJson(properties.toString(), HashMap.class));
+                            }
                             deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
                         }
                     }
                     if (!deploymentClusterInfoDTOList.isEmpty()) {
-                        k8sClustersInfoDTO.setName((String) ((JSONObject) containerMgtInfoObj).get(ContainerBasedConstants.TYPE));
                         k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
                     }
                     deploymentsList.add(k8sClustersInfoDTO);

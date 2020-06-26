@@ -577,7 +577,7 @@ class Environments extends React.Component {
                                             <Typography className={classes.heading}>
                                                 <FormattedMessage
                                                     id='Apis.Details.InfoBar.ingress.urls'
-                                                    defaultMessage='Kubernetes Ingress URLs'
+                                                    defaultMessage='Kubernetes Access URLs'
                                                 />
                                             </Typography>
                                         )}

@@ -784,4 +784,8 @@
         <ClientCertificateHeader>X-WSO2-CLIENT-CERTIFICATE</ClientCertificateHeader>
         <EnableClientCertificateValidation>true</EnableClientCertificateValidation>
     </MutualSSL>
+
+    <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
+     change his/her password via devportal. By default this feature is enabled.-->
+    <EnableChangePassword>true</EnableChangePassword>
 </APIManager>

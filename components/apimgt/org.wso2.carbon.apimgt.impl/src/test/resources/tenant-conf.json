@@ -7,11 +7,11 @@
       "Type": "Kubernetes",
       "ContainerMgtInfo": [
         {
-          "ClusterId": "",
+          "ClusterName": "",
           "DisplayName": "",
           "Properties": {
             "MasterURL": "",
-            "IngressURL": "",
+            "AccessURL": "",
             "SAToken": "",
             "Namespace": "default",
             "Replicas": 1,
@@ -264,6 +264,10 @@
       },
       {
         "Name": "apim:bot_data",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:scope_manage",
         "Roles": "admin"
       }
     ]

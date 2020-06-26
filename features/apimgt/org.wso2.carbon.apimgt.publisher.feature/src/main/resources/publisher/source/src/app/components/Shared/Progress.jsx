@@ -18,21 +18,41 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import Themes from 'Themes';
 
 const Progress = (props) => {
-    const { message } = props;
-    return (
-        <div className='apim-dual-ring'>
-            <span style={{ width: '200px', display: 'block', marginLeft: '-33px' }}>{message}</span>
-        </div>
-    );
+    const { message, per } = props;
+    if (per === -1) { // Means default value means no progress percentage
+        return (
+            <div className='apim-dual-ring'>
+                <span style={{ width: '200px', display: 'block', marginLeft: '-33px' }}>{message}</span>
+            </div>
+        );
+    } else {
+        return (
+            <div id='apim-loader' className='progress-bar-striped'>
+                <span style={{
+                    backgroundColor: Themes.light.custom.wrapperBackground,
+                    width: '300px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}
+                >
+                    {message}
+                </span>
+                <div style={{ width: `${per}%` }}> &nbsp; </div>
+            </div>
+        );
+    }
 };
 
 Progress.defaultProps = {
     message: '',
+    per: -1,
 };
 
 Progress.propTypes = {
     message: PropTypes.string,
+    per: PropTypes.number,
 };
 export default Progress;

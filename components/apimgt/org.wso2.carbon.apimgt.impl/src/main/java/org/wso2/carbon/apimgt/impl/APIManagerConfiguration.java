@@ -34,10 +34,10 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
@@ -133,7 +133,7 @@ public class APIManagerConfiguration {
     }
 
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
-    private KeyManagerConfigurationsDto keyManagerConfigurationsDto;
+    private EventHubConfigurationDto eventHubConfigurationDto;
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
 
@@ -489,8 +489,8 @@ public class APIManagerConfiguration {
                 setRecommendationConfigurations(element);
             } else if (APIConstants.GlobalCacheInvalidation.GLOBAL_CACHE_INVALIDATION.equals(localName)) {
                 setGlobalCacheInvalidationConfiguration(element);
-            } else if (APIConstants.KeyManager.KEY_MANAGER_CONFIGURATIONS.equals(localName)) {
-                setKeyManagerConfigurationsDto(element);
+            } else if (APIConstants.KeyManager.EVENT_HUB_CONFIGURATIONS.equals(localName)) {
+                setEventHubConfiguration(element);
             } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_PUBLISHER_CONFIG.equals(localName)) {
                 setRuntimeArtifactsSyncPublisherConfig(element);
             } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG.equals(localName)) {
@@ -1499,48 +1499,36 @@ public class APIManagerConfiguration {
         }
     }
 
-    private void setKeyManagerConfigurationsDto(OMElement omElement) {
+    private void setEventHubConfiguration(OMElement omElement) {
 
-        KeyManagerConfigurationsDto keyManagerConfigurationsDto = new KeyManagerConfigurationsDto();
+        EventHubConfigurationDto eventHubConfigurationDto = new EventHubConfigurationDto();
         OMElement enableElement = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.ENABLE));
         if (enableElement != null && Boolean.parseBoolean(enableElement.getText())) {
-            keyManagerConfigurationsDto.setEnabled(true);
+            eventHubConfigurationDto.setEnabled(true);
             OMElement serviceUrl = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.SERVICE_URL));
             if (serviceUrl != null) {
-                keyManagerConfigurationsDto.setServiceUrl(serviceUrl.getText());
-            } else {
-                String keyManagerURl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                        System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
-                keyManagerConfigurationsDto.setServiceUrl(keyManagerURl);
+                eventHubConfigurationDto.setServiceUrl(
+                        APIUtil.replaceSystemProperty(serviceUrl.getText()).concat(APIConstants.INTERNAL_WEB_APP_EP));
             }
             OMElement initDelay = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.INIT_DELAY));
             if (initDelay != null) {
-                keyManagerConfigurationsDto.setInitDelay(Integer.parseInt(initDelay.getText()));
-            } else {
-                String keyManagerURl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                        System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
-                keyManagerConfigurationsDto.setServiceUrl(keyManagerURl);
+                eventHubConfigurationDto.setInitDelay(Integer.parseInt(initDelay.getText()));
             }
             OMElement usernameElement = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.USERNAME));
             if (usernameElement != null) {
-                keyManagerConfigurationsDto.setUsername(usernameElement.getText());
-            } else {
-                keyManagerConfigurationsDto.setUsername(getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
+                eventHubConfigurationDto.setUsername(usernameElement.getText());
             }
             OMElement passwordElement = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.PASSWORD));
             if (passwordElement != null) {
                 String password = MiscellaneousUtil.resolve(passwordElement, secretResolver);
-                keyManagerConfigurationsDto.setPassword(APIUtil.replaceSystemProperty(password).toCharArray());
-            } else {
-                keyManagerConfigurationsDto
-                        .setPassword(getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray());
+                eventHubConfigurationDto.setPassword(APIUtil.replaceSystemProperty(password).toCharArray());
             }
 
             OMElement configurationRetrieverElement =
-                    omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_RETRIEVER));
+                    omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.EVENT_RECEIVER_CONFIGURATION));
             if (configurationRetrieverElement != null) {
-                KeyManagerConfigurationsDto.KeyManagerConfigurationRetrieverDto keyManagerConfigurationRetrieverDto =
-                        new KeyManagerConfigurationsDto.KeyManagerConfigurationRetrieverDto();
+                EventHubConfigurationDto.EventHubReceiverConfiguration eventHubReceiverConfiguration =
+                        new EventHubConfigurationDto.EventHubReceiverConfiguration();
                 Iterator receiverConnectionDetailsElements = configurationRetrieverElement.getChildElements();
                 Properties properties = new Properties();
                 while (receiverConnectionDetailsElements.hasNext()) {
@@ -1548,12 +1536,37 @@ public class APIManagerConfiguration {
                     String value = MiscellaneousUtil.resolve(element, secretResolver);
                     properties.put(element.getLocalName(), APIUtil.replaceSystemProperty(value));
                 }
-                keyManagerConfigurationRetrieverDto.setJmsConnectionParameters(properties);
-                keyManagerConfigurationsDto.setKeyManagerConfigurationRetrieverDto(keyManagerConfigurationRetrieverDto);
+                eventHubReceiverConfiguration.setJmsConnectionParameters(properties);
+                eventHubConfigurationDto.setEventHubReceiverConfiguration(eventHubReceiverConfiguration);
+            }
+            OMElement eventPublisherElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.EVENT_PUBLISHER_CONFIGURATIONS));
+            EventHubConfigurationDto.EventHubPublisherConfiguration eventHubPublisherConfiguration =
+                    new EventHubConfigurationDto.EventHubPublisherConfiguration();
+            if (eventPublisherElement != null) {
+                OMElement receiverUrlGroupElement = eventPublisherElement.getFirstChildWithName(new
+                        QName
+                        (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_REVEIVER_URL_GROUP));
+                if (receiverUrlGroupElement != null) {
+                    eventHubPublisherConfiguration
+                            .setReceiverUrlGroup(APIUtil.replaceSystemProperty(receiverUrlGroupElement
+                                    .getText()));
+                }
+                OMElement authUrlGroupElement = eventPublisherElement.getFirstChildWithName(new QName
+                        (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_AUTH_URL_GROUP));
+                if (authUrlGroupElement != null) {
+                    eventHubPublisherConfiguration
+                            .setAuthUrlGroup(APIUtil.replaceSystemProperty(authUrlGroupElement.getText()));
+                }
+                OMElement eventTypeElement = eventPublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_TYPE));
+                if (eventTypeElement != null) {
+                    eventHubPublisherConfiguration.setType(eventTypeElement.getText().trim());
+                }
+                eventHubConfigurationDto.setEventHubPublisherConfiguration(eventHubPublisherConfiguration);
             }
         }
-
-        this.keyManagerConfigurationsDto = keyManagerConfigurationsDto;
+        this.eventHubConfigurationDto = eventHubConfigurationDto;
     }
 
     public JWTConfigurationDto getJwtConfigurationDto() {
@@ -1561,9 +1574,9 @@ public class APIManagerConfiguration {
         return jwtConfigurationDto;
     }
 
-    public KeyManagerConfigurationsDto getKeyManagerConfigurationsDto() {
+    public EventHubConfigurationDto getEventHubConfigurationDto() {
 
-        return keyManagerConfigurationsDto;
+        return eventHubConfigurationDto;
     }
 
     private void setRuntimeArtifactsSyncPublisherConfig (OMElement omElement){
@@ -1672,8 +1685,8 @@ public class APIManagerConfiguration {
                             containerMgt.put(ContainerBasedConstants.CLASS_NAME,
                                     deploymentEnvs.get(containerMgt.get(ContainerBasedConstants.TYPE)));
                         }
-                    } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.CLUSTER_ID)) {
-                        containerMgtInfoObj.put(ContainerBasedConstants.CLUSTER_ID, containerMgtInfoElement.getText());
+                    } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.CLUSTER_NAME)) {
+                        containerMgtInfoObj.put(ContainerBasedConstants.CLUSTER_NAME, containerMgtInfoElement.getText());
                     } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.DISPLAY_NAME)) {
                         containerMgtInfoObj.put(ContainerBasedConstants.DISPLAY_NAME, containerMgtInfoElement.getText());
                     } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.PROPERTIES)) {
@@ -1682,32 +1695,7 @@ public class APIManagerConfiguration {
                         JSONObject propertyObj = new JSONObject();
                         while (clusterPropertiesIterator.hasNext()) {
                             OMElement propertyElement = (OMElement) clusterPropertiesIterator.next();
-
-                            if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.REPLICAS)) {
-                                propertyObj.put(ContainerBasedConstants.REPLICAS, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.INGRESS_URL)) {
-                                propertyObj.put(ContainerBasedConstants.INGRESS_URL, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.NAMESPACE)) {
-                                propertyObj.put(ContainerBasedConstants.NAMESPACE, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.SATOKEN)) {
-                                propertyObj.put(ContainerBasedConstants.SATOKEN, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.MASTER_URL)) {
-                                propertyObj.put(ContainerBasedConstants.MASTER_URL, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.JWT_SECURITY_CR_NAME)) {
-                                propertyObj.put(ContainerBasedConstants.JWT_SECURITY_CR_NAME, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME)) {
-                                propertyObj.put(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME)) {
-                                propertyObj.put(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME, propertyElement.getText());
-                            }
+                            propertyObj.put(propertyElement.getAttributeValue(new QName("name")), propertyElement.getText());
                         }
                         containerMgtInfoObj.put(ContainerBasedConstants.PROPERTIES, propertyObj);
                     }

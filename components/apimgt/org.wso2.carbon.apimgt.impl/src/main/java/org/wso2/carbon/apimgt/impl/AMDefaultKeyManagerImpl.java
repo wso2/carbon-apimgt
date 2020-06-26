@@ -18,31 +18,17 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import org.apache.axis2.util.URL;
+import feign.Feign;
+import feign.Response;
+import feign.gson.GsonDecoder;
+import feign.gson.GsonEncoder;
+import feign.okhttp.OkHttpClient;
+import feign.slf4j.Slf4jLogger;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.apache.oltu.oauth2.common.OAuth;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -58,33 +44,31 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.kmclient.FormEncoder;
+import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
+import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
+import org.wso2.carbon.apimgt.impl.kmclient.model.AuthClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.BearerInterceptor;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
+import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
+import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ScopeClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClientPool;
 import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
-import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
-import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
-import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
-import java.net.MalformedURLException;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -95,13 +79,15 @@ import java.util.Set;
 public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     private static final Log log = LogFactory.getLog(AMDefaultKeyManagerImpl.class);
-    private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
-    private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
     private static final String GRANT_TYPE_VALUE = "client_credentials";
-    private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
-    private CloseableHttpClient kmHttpClient;
-    private SubscriberKeyMgtClientPool subscriberKeyMgtClientPool;
+
+    private DCRClient dcrClient;
+    private IntrospectionClient introspectionClient;
+    private AuthClient authClient;
+    private AuthClient revokeClient;
     private AccessTokenGenerator accessTokenGenerator;
+    private ScopeClient scopeClient;
+
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
 
@@ -111,11 +97,22 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         // Subscriber's name should be passed as a parameter, since it's under the subscriber the OAuth App is created.
         String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.
                 OAUTH_CLIENT_USERNAME);
+
+        if (StringUtils.isEmpty(userId)) {
+            throw new APIManagementException("Missing user ID for OAuth application creation.");
+        }
+
         String applicationName = oAuthApplicationInfo.getClientName();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
-        String callBackURL = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_CALLBACK_URL);
-        if (keyType != null) {
-            applicationName = applicationName + '_' + keyType;
+
+        if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
+            String domain = UserCoreUtil.extractDomainFromName(userId);
+            if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
+                userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+            }
+            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(userId), applicationName, keyType);
+        } else {
+            throw new APIManagementException("Missing required information for OAuth application creation.");
         }
 
         if (log.isDebugEnabled()) {
@@ -126,58 +123,70 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String[] tokenScopes = new String[1];
         tokenScopes[0] = tokenScope;
 
-        org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
+        ClientInfo request = createClientInfo(oAuthApplicationInfo, applicationName, false);
+        ClientInfo createdClient;
 
         try {
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate =
-                    new org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo();
-            applicationToCreate.setIsSaasApplication(oAuthApplicationInfo.getIsSaasApplication());
-            applicationToCreate.setCallBackURL(callBackURL);
-            applicationToCreate.setClientName(applicationName);
-            applicationToCreate.setAppOwner(userId);
-            applicationToCreate.setJsonString(oAuthApplicationInfo.getJsonString());
-            applicationToCreate.setTokenType(oAuthApplicationInfo.getTokenType());
-            info = createOAuthApplicationbyApplicationInfo(applicationToCreate);
-        } catch (Exception e) {
-            handleException("Can not create OAuth application  : " + applicationName, e);
+            createdClient = dcrClient.createApplication(request);
+            buildDTOFromClientInfo(createdClient, oAuthApplicationInfo);
+
+            oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
+            oAuthApplicationInfo.setIsSaasApplication(false);
+
+            return oAuthApplicationInfo;
+
+        } catch (KeyManagerClientException e) {
+            handleException("Cannot create OAuth application  : " + applicationName, e);
+            return null;
         }
+    }
 
-        if (info == null || info.getJsonString() == null) {
-            handleException("OAuth app does not contains required data  : " + applicationName,
-                    new APIManagementException("OAuth app does not contains required data"));
+    /**
+     * Construct ClientInfo object for application create request
+     *
+     * @param info            The OAuthApplicationInfo object
+     * @param applicationName The name of the application to be created. We specifically request for this value as this
+     *                        should be formatted properly prior to calling this method
+     * @return constructed ClientInfo object
+     * @throws JSONException for errors in parsing the OAuthApplicationInfo json string
+     */
+    private ClientInfo createClientInfo(OAuthApplicationInfo info, String applicationName, boolean isUpdate)
+            throws JSONException {
+
+        ClientInfo clientInfo = new ClientInfo();
+        JSONObject infoJson = new JSONObject(info.getJsonString());
+        if (infoJson.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
+            // this is done as there are instances where the grant string begins with a comma character.
+            String grantString = infoJson.getString(ApplicationConstants.OAUTH_CLIENT_GRANT);
+            if (grantString.startsWith(",")) {
+                grantString = grantString.substring(1);
+            }
+            String[] grantTypes = grantString.split(",");
+            clientInfo.setGrantTypes(Arrays.asList(grantTypes));
         }
-
-        oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
-        oAuthApplicationInfo.setClientName(info.getClientName());
-        oAuthApplicationInfo.setClientId(info.getClientId());
-        oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
-        oAuthApplicationInfo.setClientSecret(info.getClientSecret());
-        oAuthApplicationInfo.setIsSaasApplication(info.getIsSaasApplication());
-
-        try {
-            JSONObject jsonObject = new JSONObject(info.getJsonString());
-
-            if (jsonObject.has(ApplicationConstants.
-                    OAUTH_REDIRECT_URIS)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
-            }
-
-            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_NAME)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_NAME, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_NAME));
-            }
-
-            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_GRANT, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_GRANT));
-            }
-        } catch (JSONException e) {
-            handleException("Can not retrieve information of the created OAuth application", e);
+        if (StringUtils.isNotEmpty(info.getCallBackURL())) {
+            String callBackURL = info.getCallBackURL();
+            String[] callbackURLs = callBackURL.trim().split("\\s*,\\s*");
+            clientInfo.setRedirectUris(Arrays.asList(callbackURLs));
         }
-
-        return oAuthApplicationInfo;
-
+        clientInfo.setClientName(applicationName);
+        //todo: run tests by commenting the type
+        clientInfo.setTokenType(info.getTokenType());
+        if (StringUtils.isNotEmpty(info.getClientId())) {
+            if (isUpdate) {
+                clientInfo.setClientId(info.getClientId());
+            } else {
+                clientInfo.setPresetClientId(info.getClientId());
+            }
+        }
+        if (StringUtils.isNotEmpty(info.getClientSecret())) {
+            if (isUpdate) {
+                clientInfo.setClientId(info.getClientSecret());
+            } else {
+                clientInfo.setPresetClientSecret(info.getClientSecret());
+            }
+        }
+        return clientInfo;
     }
 
     @Override
@@ -185,73 +194,50 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         OAuthApplicationInfo oAuthApplicationInfo = appInfoDTO.getOAuthApplicationInfo();
 
-        try {
+        String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
+        String applicationName = oAuthApplicationInfo.getClientName();
+        String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
-            String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
-            String[] grantTypes = null;
-            if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT) != null) {
-                grantTypes = ((String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT))
-                        .split(",");
+        // First we attempt to get the tenant domain from the userID and if it is not possible, we fetch it
+        // from the ThreadLocalCarbonContext
+
+        if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
+            // Replace the domain name separator with an underscore for secondary user stores
+            String domain = UserCoreUtil.extractDomainFromName(userId);
+            if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
+                userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
-            String applicationName = oAuthApplicationInfo.getClientName();
-            String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
-
-            if (keyType != null) {
-                applicationName = applicationName + "_" + keyType;
-            }
-            log.debug("Updating OAuth Client with ID : " + oAuthApplicationInfo.getClientId());
-
-            if (log.isDebugEnabled() && oAuthApplicationInfo.getCallBackURL() != null) {
-                log.debug("CallBackURL : " + oAuthApplicationInfo.getCallBackURL());
-            }
-
-            if (log.isDebugEnabled() && applicationName != null) {
-                log.debug("Client Name : " + applicationName);
-            }
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = updateOAuthApplication(userId,
-                    applicationName, oAuthApplicationInfo.getCallBackURL(), oAuthApplicationInfo.getClientId(),
-                    grantTypes);
-            OAuthApplicationInfo newAppInfo = new OAuthApplicationInfo();
-            newAppInfo.setClientId(applicationInfo.getClientId());
-            newAppInfo.setCallBackURL(applicationInfo.getCallBackURL());
-            newAppInfo.setClientSecret(applicationInfo.getClientSecret());
-            newAppInfo.setJsonString(applicationInfo.getJsonString());
-
-            return newAppInfo;
-        } catch (Exception e) {
-            handleException("Error occurred while updating OAuth Client : ", e);
+            // Construct the application name subsequent to replacing email domain separator
+            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(userId), applicationName, keyType);
+        } else {
+            throw new APIManagementException("Missing required information for OAuth application update.");
         }
-        return null;
+
+        log.debug("Updating OAuth Client with ID : " + oAuthApplicationInfo.getClientId());
+        if (log.isDebugEnabled() && oAuthApplicationInfo.getCallBackURL() != null) {
+            log.debug("CallBackURL : " + oAuthApplicationInfo.getCallBackURL());
+        }
+        if (log.isDebugEnabled() && applicationName != null) {
+            log.debug("Client Name : " + applicationName);
+        }
+
+        ClientInfo request = createClientInfo(oAuthApplicationInfo, applicationName, true);
+        ClientInfo createdClient;
+        try {
+            createdClient = dcrClient.updateApplication(oAuthApplicationInfo.getClientId(), request);
+            return buildDTOFromClientInfo(createdClient, new OAuthApplicationInfo());
+        } catch (KeyManagerClientException e) {
+            handleException("Error occurred while updating OAuth Client : ", e);
+            return null;
+        }
     }
 
     @Override
     public OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest appInfoDTO, String owner)
             throws APIManagementException {
 
-        OAuthApplicationInfo oAuthApplicationInfo = appInfoDTO.getOAuthApplicationInfo();
-        String userId = oAuthApplicationInfo.getAppOwner();
-
-        try {
-            String applicationName = oAuthApplicationInfo.getClientName();
-            String[] grantTypes = null;
-            if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT) != null) {
-                grantTypes = ((String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT))
-                        .split(",");
-            }
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = updateOAuthApplicationOwner(
-                    userId, owner, applicationName,
-                    oAuthApplicationInfo.getCallBackURL(), oAuthApplicationInfo.getClientId(), grantTypes);
-            OAuthApplicationInfo newAppInfo = new OAuthApplicationInfo();
-            newAppInfo.setAppOwner(applicationInfo.getAppOwner());
-            newAppInfo.setClientId(applicationInfo.getClientId());
-            newAppInfo.setCallBackURL(applicationInfo.getCallBackURL());
-            newAppInfo.setClientSecret(applicationInfo.getClientSecret());
-            newAppInfo.setJsonString(applicationInfo.getJsonString());
-            return newAppInfo;
-        } catch (Exception e) {
-            handleException("Error occurred while updating OAuth application owner to " + userId, e);
-        }
-        return null;
+        log.debug("Owner not updated in the Identity Server as all apps are created under ");
+        return appInfoDTO.getOAuthApplicationInfo();
     }
 
     @Override
@@ -261,16 +247,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.debug("Trying to delete OAuth application for consumer key :" + consumerKey);
         }
 
-        SubscriberKeyMgtClient keyMgtClient = null;
         try {
-            keyMgtClient = subscriberKeyMgtClientPool.get();
-            keyMgtClient.deleteOAuthApplication(consumerKey);
-        } catch (Exception e) {
-            handleException("Can not remove service provider for the given consumer key : " + consumerKey, e);
-        } finally {
-            if (keyMgtClient != null) {
-                subscriberKeyMgtClientPool.release(keyMgtClient);
-            }
+            dcrClient.deleteApplication(consumerKey);
+        } catch (KeyManagerClientException e) {
+            handleException("Cannot remove service provider for the given consumer key : " + consumerKey, e);
         }
     }
 
@@ -281,153 +261,58 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.debug("Trying to retrieve OAuth application for consumer key :" + consumerKey);
         }
 
-        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         try {
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = getOAuthApplication(consumerKey);
-
-            if (info == null || info.getClientId() == null) {
-                return null;
-            }
-            oAuthApplicationInfo.setClientName(info.getClientName());
-            oAuthApplicationInfo.setClientId(info.getClientId());
-            oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
-            oAuthApplicationInfo.setClientSecret(info.getClientSecret());
-
-            JSONObject jsonObject = new JSONObject(info.getJsonString());
-
-            if (jsonObject.has(ApplicationConstants.
-                    OAUTH_REDIRECT_URIS)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
-            }
-
-            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_NAME)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_NAME, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_NAME));
-            }
-
-            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_GRANT, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_GRANT));
-            }
-
-        } catch (Exception e) {
-            handleException("Can not retrieve OAuth application for the given consumer key : " + consumerKey, e);
+            ClientInfo clientInfo = dcrClient.getApplication(consumerKey);
+            return buildDTOFromClientInfo(clientInfo, new OAuthApplicationInfo());
+        } catch (KeyManagerClientException e) {
+            handleException("Cannot retrieve service provider for the given consumer key : " + consumerKey, e);
+            return null;
         }
-        return oAuthApplicationInfo;
     }
 
     @Override
-    public AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest)
-            throws APIManagementException {
+    public AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest) throws APIManagementException {
 
-        String newAccessToken;
-        long validityPeriod;
-        AccessTokenInfo tokenInfo = null;
+        AccessTokenInfo tokenInfo;
 
         if (tokenRequest == null) {
             log.warn("No information available to generate Token.");
             return null;
         }
 
-        String tokenEndpoint = getConfigurationParamValue(APIConstants.TOKEN_URL);
-        //To revoke tokens we should call revoke API deployed in API gateway.
-        String revokeEndpoint = getConfigurationParamValue(APIConstants.REVOKE_URL);
-        URL keyMgtURL = new URL(tokenEndpoint);
-        int keyMgtPort = keyMgtURL.getPort();
-        String keyMgtProtocol = keyMgtURL.getProtocol();
+        //We do not revoke the previously obtained token anymore since we do not possess the access token.
 
-        // Call the /revoke only if there's a token to be revoked.
-        try {
-            if (tokenRequest.getTokenToRevoke() != null && !tokenRequest.getTokenToRevoke().isEmpty()) {
-                URL revokeEndpointURL = new URL(revokeEndpoint);
-                String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
-                int revokeEndpointPort = revokeEndpointURL.getPort();
-
-                HttpPost httpRevokePost = new HttpPost(revokeEndpoint);
-
-                // Request parameters.
-                List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
-                revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
-                revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
-                revokeParams.add(new BasicNameValuePair("token", tokenRequest.getTokenToRevoke()));
-
-                //Revoke the Old Access Token
-                httpRevokePost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
-                int statusCode;
-                String responseBody;
-                try {
-                    HttpResponse revokeResponse = executeHTTPrequest(revokeEndpointPort, revokeEndpointProtocol,
-                            httpRevokePost);
-                    statusCode = revokeResponse.getStatusLine().getStatusCode();
-                    responseBody = EntityUtils.toString(revokeResponse.getEntity());
-                } finally {
-                    httpRevokePost.reset();
-                }
-
-                if (statusCode != 200) {
-                    String errorReason = "Token revoke failed : HTTP error code : " + statusCode + ". Reason "
-                            + responseBody;
-                    throw new APIManagementException(errorReason);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
-                    }
-                }
-            }
-
-            // When validity time set to a negative value, a token is considered never to expire.
-            if (tokenRequest.getValidityPeriod() == OAuthConstants.UNASSIGNED_VALIDITY_PERIOD) {
-                // Setting a different -ve value if the set value is -1 (-1 will be ignored by TokenValidator)
-                tokenRequest.setValidityPeriod(-2L);
-            }
-
-            //Generate New Access Token
-            HttpPost httpTokpost = new HttpPost(tokenEndpoint);
-            List<NameValuePair> tokParams = new ArrayList<>(3);
-            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_VALUE));
-            if (tokenRequest.getValidityPeriod() != 0) {
-                tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
-                        Long.toString(tokenRequest.getValidityPeriod())));
-            }
-            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
-            tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
-
-            String scopes = String.join(" ", tokenRequest.getScope());
-            tokParams.add(new BasicNameValuePair("scope", scopes));
-
-            httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
-            try {
-                HttpResponse tokResponse = executeHTTPrequest(keyMgtPort, keyMgtProtocol, httpTokpost);
-                HttpEntity tokEntity = tokResponse.getEntity();
-
-                if (tokResponse.getStatusLine().getStatusCode() != 200) {
-                    throw new APIManagementException("Error occurred while calling token endpoint: HTTP error code : " +
-                            tokResponse.getStatusLine().getStatusCode());
-                } else {
-                    tokenInfo = new AccessTokenInfo();
-                    String responseStr = EntityUtils.toString(tokEntity);
-                    JSONObject obj = new JSONObject(responseStr);
-                    newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
-                    validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-                    if (obj.has("scope")) {
-                        tokenInfo.setScope(((String) obj.get("scope")).split(" "));
-                    }
-                    tokenInfo.setAccessToken(newAccessToken);
-                    tokenInfo.setValidityPeriod(validityPeriod);
-                }
-            } finally {
-                httpTokpost.reset();
-            }
-        } catch (ClientProtocolException e) {
-            handleException("Error while creating token - Invalid protocol used", e);
-        } catch (UnsupportedEncodingException e) {
-            handleException("Error while preparing request for token/revoke APIs", e);
-        } catch (IOException e) {
-            handleException("Error while creating tokens - " + e.getMessage(), e);
-        } catch (JSONException e) {
-            handleException("Error while parsing response from token api", e);
+        // When validity time set to a negative value, a token is considered never to expire.
+        if (tokenRequest.getValidityPeriod() == OAuthConstants.UNASSIGNED_VALIDITY_PERIOD) {
+            // Setting a different -ve value if the set value is -1 (-1 will be ignored by TokenValidator)
+            tokenRequest.setValidityPeriod(-2L);
         }
+
+        //Generate New Access Token
+        String scopes = String.join(" ", tokenRequest.getScope());
+        TokenInfo tokenResponse;
+
+        try {
+            if (tokenRequest.getValidityPeriod() != 0) {
+                String definedValidityPeriod = Long.toString(tokenRequest.getValidityPeriod());
+                tokenResponse = authClient.generateWithValidityPeriod(tokenRequest.getClientId(),
+                        tokenRequest.getClientSecret(), GRANT_TYPE_VALUE, scopes, definedValidityPeriod);
+            } else {
+                tokenResponse = authClient.generate(tokenRequest.getClientId(),
+                        tokenRequest.getClientSecret(), GRANT_TYPE_VALUE, scopes);
+            }
+        } catch (KeyManagerClientException e) {
+            throw new APIManagementException("Error occurred while calling token endpoint!", e);
+        }
+
+        tokenInfo = new AccessTokenInfo();
+        if (StringUtils.isNotEmpty(tokenResponse.getScope())) {
+            tokenInfo.setScope(tokenResponse.getScope().split(" "));
+        } else {
+            tokenInfo.setScope(new String[0]);
+        }
+        tokenInfo.setAccessToken(tokenResponse.getToken());
+        tokenInfo.setValidityPeriod(tokenResponse.getExpiry());
 
         return tokenInfo;
     }
@@ -435,87 +320,46 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException {
 
-        OAuthAdminService oauthAdminService = new OAuthAdminService();
-        OAuthConsumerAppDTO appDTO;
-        try {
-            if (oauthAdminService != null) {
-                appDTO = oauthAdminService.updateAndRetrieveOauthSecretKey(tokenRequest.getClientId());
-                return appDTO.getOauthConsumerSecret();
-            }
-        } catch (IdentityOAuthAdminException e) {
-            handleException("Error while generating new consumer secret", e);
-        }
-        return null;
+        throw new APIManagementException("Regenerating consumer secret is not supported at the moment.");
     }
 
     @Override
     public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
-        OAuth2TokenValidationRequestDTO requestDTO = new OAuth2TokenValidationRequestDTO();
-        OAuth2TokenValidationRequestDTO.OAuth2AccessToken token = requestDTO.new OAuth2AccessToken();
 
-        token.setIdentifier(accessToken);
-        token.setTokenType("bearer");
-        requestDTO.setAccessToken(token);
-
-        OAuth2TokenValidationRequestDTO.TokenValidationContextParam[] contextParams =
-                new OAuth2TokenValidationRequestDTO.TokenValidationContextParam[1];
-        requestDTO.setContext(contextParams);
-
-        OAuth2ClientApplicationDTO clientApplicationDTO = findOAuthConsumerIfTokenIsValid(requestDTO);
-        OAuth2TokenValidationResponseDTO responseDTO = clientApplicationDTO.getAccessTokenValidationResponse();
-
-        if (!responseDTO.isValid()) {
-            tokenInfo.setTokenValid(responseDTO.isValid());
-            log.error("Invalid OAuth Token : " + responseDTO.getErrorMsg());
-            tokenInfo.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
-            return tokenInfo;
-        }
-
-        tokenInfo.setTokenValid(responseDTO.isValid());
-        tokenInfo.setEndUserName(responseDTO.getAuthorizedUser());
-        tokenInfo.setConsumerKey(clientApplicationDTO.getConsumerKey());
-
-        // Convert Expiry Time to milliseconds.
-        if (responseDTO.getExpiryTime() == Long.MAX_VALUE) {
-            tokenInfo.setValidityPeriod(Long.MAX_VALUE);
-        } else {
-            tokenInfo.setValidityPeriod(responseDTO.getExpiryTime() * 1000L);
-        }
-
-        tokenInfo.setIssuedTime(System.currentTimeMillis());
-        tokenInfo.setScope(responseDTO.getScope());
-
-        // If token has am_application_scope, consider the token as an Application token.
-        String[] scopes = responseDTO.getScope();
-        String applicationTokenScope = getConfigurationElementValue(APIConstants.APPLICATION_TOKEN_SCOPE);
-
-        if (scopes != null && applicationTokenScope != null && !applicationTokenScope.isEmpty()) {
-            if (Arrays.asList(scopes).contains(applicationTokenScope)) {
-                tokenInfo.setApplicationToken(true);
+        try {
+            IntrospectInfo introspectInfo = introspectionClient.introspect(accessToken);
+            tokenInfo.setAccessToken(accessToken);
+            boolean isActive = introspectInfo.isActive();
+            if (!isActive) {
+                tokenInfo.setTokenValid(false);
+                tokenInfo.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                return tokenInfo;
             }
-        }
+            tokenInfo.setTokenValid(true);
+            tokenInfo.setValidityPeriod(introspectInfo.getExpiry() * 1000L);
+            if (StringUtils.isNotEmpty(introspectInfo.getScope())) {
+                String[] scopes = introspectInfo.getScope().split(" ");
+                tokenInfo.setScope(scopes);
+            }
+            tokenInfo.setConsumerKey(introspectInfo.getClientId());
+            tokenInfo.setIssuedTime(System.currentTimeMillis());
+            String username = introspectInfo.getUsername();
+            if (!StringUtils.isEmpty(username)) {
+                tokenInfo.setEndUserName(username);
+            }
 
-        if (checkAccessTokenPartitioningEnabled() &&
-                checkUserNameAssertionEnabled()) {
-            tokenInfo.setConsumerKey(
-                    ApiMgtDAO.getInstance().getConsumerKeyForTokenWhenTokenPartitioningEnabled(accessToken));
+            return tokenInfo;
+        } catch (KeyManagerClientException e) {
+            throw new APIManagementException("Error occurred in token introspection!", e);
         }
-
-        return tokenInfo;
     }
 
     @Override
     public KeyManagerConfiguration getKeyManagerConfiguration() throws APIManagementException {
 
         return configuration;
-    }
-
-    @Override
-    public OAuthApplicationInfo buildFromJSON(String jsonInput) throws APIManagementException {
-
-        return null;
     }
 
     /**
@@ -537,55 +381,27 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String[] tokenScopes = new String[1];
         tokenScopes[0] = tokenScope;
         String clientSecret = (String) oAuthApplicationInfo.getParameter("client_secret");
-        oAuthApplicationInfo.setClientSecret(clientSecret);
         //for the first time we set default time period.
         oAuthApplicationInfo.addParameter(ApplicationConstants.VALIDITY_PERIOD,
                 getConfigurationParamValue(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD));
 
-        //check whether given consumer key and secret match or not. If it does not match throw an exception.
-        org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
-        try {
-            info = getOAuthApplication(oAuthApplicationInfo.getClientId());
-            if (!clientSecret.equals(info.getClientSecret())) {
-                throw new APIManagementException("The secret key is wrong for the given consumer key " + consumerKey);
-            }
+        String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
 
-        } catch (Exception e) {
+        //check whether given consumer key and secret match or not. If it does not match throw an exception.
+        ClientInfo clientInfo;
+        try {
+            clientInfo = dcrClient.getApplication(consumerKey);
+            buildDTOFromClientInfo(clientInfo, oAuthApplicationInfo);
+        } catch (KeyManagerClientException e) {
             handleException("Some thing went wrong while getting OAuth application for given consumer key " +
                     oAuthApplicationInfo.getClientId(), e);
         }
-        if (info != null && info.getClientId() == null) {
-            return null;
-        }
 
+        if (!clientSecret.equals(oAuthApplicationInfo.getClientSecret())) {
+            throw new APIManagementException("The secret key is wrong for the given consumer key " + consumerKey);
+        }
         oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
-        oAuthApplicationInfo.setClientName(info.getClientName());
-        oAuthApplicationInfo.setClientId(info.getClientId());
-        oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
-        oAuthApplicationInfo.setClientSecret(info.getClientSecret());
-        oAuthApplicationInfo.setIsSaasApplication(info.getIsSaasApplication());
-
-        try {
-            JSONObject jsonObject = new JSONObject(info.getJsonString());
-
-            if (jsonObject.has(ApplicationConstants.
-                    OAUTH_REDIRECT_URIS)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
-            }
-
-            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_NAME)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_NAME, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_NAME));
-            }
-
-            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
-                oAuthApplicationInfo.addParameter(ApplicationConstants.
-                        OAUTH_CLIENT_GRANT, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_GRANT));
-            }
-        } catch (JSONException e) {
-            handleException("Can not read information from the retrieved OAuth application", e);
-        }
+        oAuthApplicationInfo.setIsSaasApplication(false);
 
         if (log.isDebugEnabled()) {
             log.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
@@ -595,37 +411,115 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * This method initialize the HTTP Client and Connection Manager to call services in KeyManager.
+     * Builds an OAuthApplicationInfo object using the ClientInfo response
      *
-     * @throws APIManagementException if an error occurs while initializing HttpClient
+     * @param appResponse ClientInfo response object
+     * @param oAuthApplicationInfo original OAuthApplicationInfo object
+     * @return OAuthApplicationInfo object with response information added
      */
-    protected void initializeHttpClient() throws APIManagementException {
+    private OAuthApplicationInfo buildDTOFromClientInfo(ClientInfo appResponse,
+                                                        OAuthApplicationInfo oAuthApplicationInfo) {
 
-        try {
-            String authServerURL = (String) configuration.getParameter(APIConstants.AUTHSERVER_URL);
-            java.net.URL keyManagerURL = new java.net.URL(authServerURL);
-            int keyManagerPort = keyManagerURL.getPort();
-            String keyManagerProtocol = keyManagerURL.getProtocol();
-            this.kmHttpClient = (CloseableHttpClient) APIUtil.getHttpClient(keyManagerPort, keyManagerProtocol);
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Error while initializing HttpClient due to malformed URL", e);
+        oAuthApplicationInfo.setClientName(appResponse.getClientName());
+        oAuthApplicationInfo.setClientId(appResponse.getClientId());
+        if (appResponse.getRedirectUris() != null) {
+            oAuthApplicationInfo.setCallBackURL(String.join(",", appResponse.getRedirectUris()));
+            oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_REDIRECT_URIS,
+                    String.join(",", appResponse.getRedirectUris()));
         }
+        oAuthApplicationInfo.setClientSecret(appResponse.getClientSecret());
+        if (appResponse.getGrantTypes() != null) {
+            oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT,
+                    String.join(" ", appResponse.getGrantTypes()));
+        } else if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT) instanceof String) {
+            oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT, ((String) oAuthApplicationInfo.
+                    getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT)).replace(",", " "));
+        }
+        oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_NAME, appResponse.getClientName());
+        return oAuthApplicationInfo;
     }
 
     @Override
     public void loadConfiguration(KeyManagerConfiguration configuration) throws APIManagementException {
+
         this.configuration = configuration;
-        subscriberKeyMgtClientPool  = new SubscriberKeyMgtClientPool();
-        subscriberKeyMgtClientPool.setConfiguration(configuration);//Initialize a Http Client and Connection Manager using the ServerURL of KM
-        initializeHttpClient();
+
         String consumerKey = (String) configuration.getParameter(APIConstants.KEY_MANAGER_CONSUMER_KEY);
         String consumerSecret = (String) configuration.getParameter(APIConstants.KEY_MANAGER_CONSUMER_SECRET);
         String keyManagerServiceUrl = (String) configuration.getParameter(APIConstants.AUTHSERVER_URL);
-        String tokenEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(
-                "/oauth2/token");
-        String revokeEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(
-                "/oauth2/revoke");
-        accessTokenGenerator = new AccessTokenGenerator(tokenEndpoint,revokeEndpoint,consumerKey,consumerSecret);
+
+        String dcrEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT) != null) {
+            dcrEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
+        } else {
+            dcrEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext().trim()).concat("/api/identity/oauth2/dcr/v1.1/register");
+        }
+        String tokenEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.TOKEN_ENDPOINT) != null) {
+            tokenEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.TOKEN_ENDPOINT);
+        } else {
+            tokenEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(
+                    "/oauth2/token");
+        }
+        String revokeEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.REVOKE_ENDPOINT) != null) {
+            revokeEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.REVOKE_ENDPOINT);
+        } else {
+            revokeEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(
+                    "/oauth2/revoke");
+        }
+        String scopeEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT) != null) {
+            scopeEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT);
+        } else {
+            scopeEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext().trim())
+                    .concat(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH);
+        }
+        String introspectionEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.INTROSPECTION_ENDPOINT) != null) {
+            introspectionEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.INTROSPECTION_ENDPOINT);
+        } else {
+            introspectionEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext().trim()).concat("/oauth2/introspect");
+        }
+        accessTokenGenerator = new AccessTokenGenerator(tokenEndpoint, revokeEndpoint, consumerKey, consumerSecret);
+
+        dcrClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(DCRClient.class, dcrEndpoint);
+        authClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .errorDecoder(new KMClientErrorDecoder())
+                .encoder(new FormEncoder())
+                .target(AuthClient.class, tokenEndpoint);
+
+        introspectionClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .encoder(new FormEncoder())
+                .target(IntrospectionClient.class, introspectionEndpoint);
+        scopeClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(ScopeClient.class, scopeEndpoint);
     }
 
     @Override
@@ -725,26 +619,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Get scope management service tenant URL for given KM endpoint.
-     *
-     * @return Scope Management Service host URL (Eg:https://localhost:9444/api/identity/oauth2/v1.0/scopes)
-     * @throws APIManagementException If a malformed km endpoint is provided
-     */
-    private String getScopeManagementServiceEndpoint() throws APIManagementException {
-
-        String authServerURL = (String) configuration.getParameter(APIConstants.AUTHSERVER_URL);
-        if (StringUtils.isEmpty(authServerURL)) {
-            throw new APIManagementException("API Key Validator Server URL cannot be empty or null");
-        }
-        String scopeMgtTenantEndpoint = authServerURL.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0];
-        if (StringUtils.isNoneEmpty(tenantDomain) && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            scopeMgtTenantEndpoint += "/t/" + tenantDomain;
-        }
-        scopeMgtTenantEndpoint += APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH;
-        return scopeMgtTenantEndpoint;
-    }
-
-    /**
      * This method will be used to register a Scope in the authorization server.
      *
      * @param scope        Scope to register
@@ -753,37 +627,22 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void registerScope(Scope scope) throws APIManagementException {
 
-        String accessToken = getAccessTokenForScopeMgt();
-        String scopeEndpoint = getScopeManagementServiceEndpoint();
         String scopeKey = scope.getKey();
-        try {
-            HttpPost httpPost = new HttpPost(scopeEndpoint);
-            httpPost.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            ScopeDTO scopeDTO = new ScopeDTO();
-            scopeDTO.setName(scopeKey);
-            scopeDTO.setDisplayName(scope.getName());
-            scopeDTO.setDescription(scope.getDescription());
-            if (scope.getRoles() != null) {
-                scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
+        ScopeDTO scopeDTO = new ScopeDTO();
+        scopeDTO.setName(scopeKey);
+        scopeDTO.setDisplayName(scope.getName());
+        scopeDTO.setDescription(scope.getDescription());
+        if (scope.getRoles() != null) {
+            scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
+        }
+        try (Response response = scopeClient.registerScope(scopeDTO)) {
+            if (response.status() != HttpStatus.SC_CREATED) {
+                String responseString = readHttpResponseAsString(response.body());
+                throw new APIManagementException("Error occurred while registering scope: " + scopeKey + ". Error" +
+                        " Status: " + response.status() + " . Error Response: " + responseString);
             }
-            StringEntity payload = new StringEntity(new Gson().toJson(scopeDTO));
-            httpPost.setEntity(payload);
-            if (log.isDebugEnabled()) {
-                log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to register scope "
-                        + scopeKey);
-            }
-            try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpPost)) {
-                int statusCode = httpResponse.getStatusLine().getStatusCode();
-                if (statusCode != HttpStatus.SC_CREATED) {
-                    String responseString = readHttpResponseAsString(httpResponse);
-                    throw new APIManagementException("Error occurred while registering scope: " + scopeKey + " via "
-                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: " + responseString);
-                }
-            }
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while registering scope: " + scopeKey + " via " + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
+        } catch (KeyManagerClientException e) {
+            handleException("Can not scope : " + scopeKey, e);
         }
     }
 
@@ -794,40 +653,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @return Response Body String
      * @throws APIManagementException If an error occurs while reading the response
      */
-    protected String readHttpResponseAsString(CloseableHttpResponse httpResponse) throws APIManagementException {
+    protected String readHttpResponseAsString(Response.Body httpResponse) throws APIManagementException {
 
-        try {
-            HttpEntity entity = httpResponse.getEntity();
-            String responseString = entity != null ? EntityUtils.toString(entity, StandardCharsets.UTF_8) : null;
-            //release all resources held by the responseHttpEntity
-            EntityUtils.consume(entity);
-            return responseString;
+        try (InputStream inputStream = httpResponse.asInputStream()) {
+            return IOUtils.toString(inputStream);
         } catch (IOException e) {
             String errorMessage = "Error occurred while reading response body as string";
             throw new APIManagementException(errorMessage, e);
         }
-    }
-
-
-    /**
-     * Get access token with scope management scopes for the tenant using the KM Mgt OAuth Application.
-     *
-     * @return Access Token
-     */
-    private String getAccessTokenForScopeMgt() throws APIManagementException {
-
-        return accessTokenGenerator.getAccessToken(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES);
-    }
-
-    /**
-     * Construct Bearer Authorization header for AccessTokenInfo.
-     *
-     * @param accessToken Access Token
-     * @return Bearer Authorization header
-     */
-    private String getBearerAuthorizationHeader(String accessToken) {
-
-        return APIConstants.AUTHORIZATION_BEARER + accessToken;
     }
 
     /**
@@ -840,29 +673,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Scope getScopeByName(String name) throws APIManagementException {
 
-        ScopeDTO scopeDTO;
-        String accessToken = getAccessTokenForScopeMgt();
-        String scopeEndpoint = getScopeManagementServiceEndpoint()
-                + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
-                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, name));
-        HttpGet httpGet = new HttpGet(scopeEndpoint);
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-        if (log.isDebugEnabled()) {
-            log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to get scope "
-                    + name);
-        }
-        try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpGet)) {
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            String responseString = readHttpResponseAsString(httpResponse);
-            if (statusCode == HttpStatus.SC_OK && StringUtils.isNoneEmpty(responseString)) {
-                scopeDTO = new Gson().fromJson(responseString, ScopeDTO.class);
-            } else {
-                throw new APIManagementException("Error occurred while retrieving scope: " + name + " via "
-                        + scopeEndpoint + ". Error Status: " + statusCode + ". Error Response: " + responseString);
-            }
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while retrieving scope: " + name + " via " + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
+        ScopeDTO scopeDTO = null;
+        try {
+            scopeDTO = scopeClient.getScopeByName(name);
+        } catch (KeyManagerClientException ex) {
+            handleException("Can read scope : " + name, ex);
         }
         return fromDTOToScope(scopeDTO);
     }
@@ -886,13 +701,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * Get Scope object list from ScopeDTO List response received from authorization server.
      *
-     * @param scopeDTOList Scope DTO List
+     * @param scopeDTOS Scope DTO Array
      * @return Scope Object to Scope Name Mappings
      */
-    private Map<String, Scope> fromDTOListToScopeListMapping(List<ScopeDTO> scopeDTOList) {
+    private Map<String, Scope> fromDTOListToScopeListMapping(ScopeDTO[] scopeDTOS) {
 
         Map<String, Scope> scopeListMapping = new HashMap<>();
-        for (ScopeDTO scopeDTO : scopeDTOList) {
+        for (ScopeDTO scopeDTO : scopeDTOS) {
             scopeListMapping.put(scopeDTO.getName(), fromDTOToScope(scopeDTO));
         }
         return scopeListMapping;
@@ -908,32 +723,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Map<String, Scope> getAllScopes() throws APIManagementException {
 
-        List<ScopeDTO> allScopeDTOS;
-        // Get access token
-        String accessToken = getAccessTokenForScopeMgt();
-        String scopeEndpoint = getScopeManagementServiceEndpoint();
-        HttpGet httpGet = new HttpGet(scopeEndpoint);
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-        if (log.isDebugEnabled()) {
-            log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to get scopes");
+        ScopeDTO[] scopes = new ScopeDTO[0];
+        try {
+            scopes = scopeClient.getScopes();
+        } catch (KeyManagerClientException ex) {
+            handleException("Error while retrieving scopes", ex);
         }
-        try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpGet)) {
-            String responseString = readHttpResponseAsString(httpResponse);
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            if (statusCode == HttpStatus.SC_OK && StringUtils.isNoneEmpty(responseString)) {
-                Type scopeListType =
-                        new TypeToken<ArrayList<ScopeDTO>>() {
-                        }.getType();
-                allScopeDTOS = new Gson().fromJson(responseString, scopeListType);
-            } else {
-                throw new APIManagementException("Error occurred while retrieving scopes via: " + scopeEndpoint
-                        + ". Error Status: " + statusCode + " . Error Response: " + responseString);
-            }
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while getting retrieving via " + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
-        }
-        return fromDTOListToScopeListMapping(allScopeDTOS);
+        return fromDTOListToScopeListMapping(scopes);
     }
 
     /**
@@ -1013,29 +809,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void deleteScope(String scopeName) throws APIManagementException {
 
-        // Get access token
-        String accessToken = getAccessTokenForScopeMgt();
-        String scopeEndpoint = getScopeManagementServiceEndpoint()
-                + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
-                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeName));
-
-        HttpDelete httpDelete = new HttpDelete(scopeEndpoint);
-        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-        if (log.isDebugEnabled()) {
-            log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to delete scope "
-                    + scopeName);
-        }
-        try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpDelete)) {
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            if (statusCode != HttpStatus.SC_OK) {
-                String responseString = readHttpResponseAsString(httpResponse);
-                String errorMessage = "Error occurred while deleting scope: " + scopeName + " via: " + scopeEndpoint
-                        + ". Error Status: " + statusCode + " . Error Response: " + responseString;
+        try {
+            Response response = scopeClient.deleteScope(scopeName);
+            if (response.status() != HttpStatus.SC_OK) {
+                String responseString = readHttpResponseAsString(response.body());
+                String errorMessage =
+                        "Error occurred while deleting scope: " + scopeName + ". Error Status: " + response.status() +
+                                " . Error Response: " + responseString;
                 throw new APIManagementException(errorMessage);
             }
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while deleting scope: " + scopeName + " via " + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
+        } catch (KeyManagerClientException ex) {
+            handleException("Error occurred while deleting scope", ex);
         }
     }
 
@@ -1048,39 +832,18 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void updateScope(Scope scope) throws APIManagementException {
 
-        // Get access token
-        String accessToken = getAccessTokenForScopeMgt();
         String scopeKey = scope.getKey();
-        String scopeEndpoint = getScopeManagementServiceEndpoint()
-                + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
-                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeKey));
         try {
-            HttpPut httpPut = new HttpPut(scopeEndpoint);
-            httpPut.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-            httpPut.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             ScopeDTO scopeDTO = new ScopeDTO();
             scopeDTO.setDisplayName(scope.getName());
             scopeDTO.setDescription(scope.getDescription());
             if (scope.getRoles() != null) {
                 scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
             }
-            StringEntity payload = new StringEntity(new Gson().toJson(scopeDTO));
-            httpPut.setEntity(payload);
-            if (log.isDebugEnabled()) {
-                log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to update scope "
-                        + scopeKey);
-            }
-            try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpPut)) {
-                int statusCode = httpResponse.getStatusLine().getStatusCode();
-                if (statusCode != HttpStatus.SC_OK) {
-                    String responseString = readHttpResponseAsString(httpResponse);
-                    throw new APIManagementException("Error occurred while updating scope: " + scopeKey + " via: "
-                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: " + responseString);
-                }
-            }
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while updating scope: " + scopeKey + " via " + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
+            scopeClient.updateScope(scopeDTO, scope.getKey());
+        } catch (KeyManagerClientException e) {
+            String errorMessage = "Error occurred while updating scope: " + scopeKey;
+            handleException(errorMessage, e);
         }
     }
 
@@ -1095,42 +858,19 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public boolean isScopeExists(String scopeName) throws APIManagementException {
 
-        // Get access token
-        String accessToken = getAccessTokenForScopeMgt();
-        String scopeEndpoint = getScopeManagementServiceEndpoint()
-                + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
-                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeName));
-
-        HttpHead httpHead = new HttpHead(scopeEndpoint);
-        httpHead.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
-        if (log.isDebugEnabled()) {
-            log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to check scope existence of "
-                    + scopeName);
-        }
-        try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpHead)) {
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            if (statusCode != HttpStatus.SC_OK) {
-                if (statusCode != HttpStatus.SC_NOT_FOUND) {
-                    String responseString = readHttpResponseAsString(httpResponse);
-                    String errorMessage = "Error occurred while checking existence of scope: " + scopeName + " via: "
-                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: " + responseString;
-                    throw new APIManagementException(errorMessage);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Scope " + scopeName + " not found in authorization server " + scopeEndpoint);
-                    }
-                    return false;
-                }
+        try (Response response = scopeClient.isScopeExist(scopeName)) {
+            if (response.status() == HttpStatus.SC_OK) {
+                return true;
+            } else if (response.status() != HttpStatus.SC_NOT_FOUND) {
+                String responseString = readHttpResponseAsString(response.body());
+                String errorMessage = "Error occurred while checking existence of scope: " + scopeName + ". Error " +
+                        "Status: " + response.status() + " . Error Response: " + responseString;
+                throw new APIManagementException(errorMessage);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Scope " + scopeName + " found in authorization server " + scopeEndpoint);
-            }
-            return true;
-        } catch (IOException e) {
-            String errorMessage = "Error occurred while checking existence of scope: " + scopeName + " via "
-                    + scopeEndpoint;
-            throw new APIManagementException(errorMessage, e);
+        } catch (KeyManagerClientException e) {
+            handleException("Error while check scope exist", e);
         }
+        return false;
     }
 
     /**
@@ -1157,91 +897,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         return APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE;
     }
 
-    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate) throws Exception {
-
-        SubscriberKeyMgtClient keyMgtClient = null;
-        try {
-            keyMgtClient = subscriberKeyMgtClientPool.get();
-            return keyMgtClient.createOAuthApplicationbyApplicationInfo(applicationToCreate);
-        } finally {
-            subscriberKeyMgtClientPool.release(keyMgtClient);
-        }
-
-    }
-
-    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo updateOAuthApplication(String userId,
-                                                                                               String applicationName,
-                                                                                               String callBackURL,
-                                                                                               String clientId,
-                                                                                               String[] grantTypes)
-            throws Exception {
-
-        SubscriberKeyMgtClient keyMgtClient = null;
-        try {
-            keyMgtClient = subscriberKeyMgtClientPool.get();
-            return keyMgtClient
-                    .updateOAuthApplication(userId, applicationName, callBackURL, clientId, grantTypes);
-        } finally {
-            subscriberKeyMgtClientPool.release(keyMgtClient);
-        }
-
-    }
-
-    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo updateOAuthApplicationOwner(
-            String userId, String owner, String applicationName, String callBackURL, String clientId,
-            String[] grantTypes) throws Exception {
-
-        SubscriberKeyMgtClient keyMgtClient = null;
-        try {
-            keyMgtClient = subscriberKeyMgtClientPool.get();
-            return keyMgtClient
-                    .updateOAuthApplicationOwner(userId, owner, applicationName, callBackURL, clientId, grantTypes);
-        } finally {
-            subscriberKeyMgtClientPool.release(keyMgtClient);
-        }
-    }
-
-    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo getOAuthApplication(String consumerKey)
-            throws Exception {
-
-        SubscriberKeyMgtClient keyMgtClient = null;
-        try {
-            keyMgtClient = subscriberKeyMgtClientPool.get();
-            return keyMgtClient.getOAuthApplication(consumerKey);
-        } finally {
-            subscriberKeyMgtClientPool.release(keyMgtClient);
-        }
-    }
-
-    /**
-     * Executes the HTTP request and returns the response.
-     *
-     * @param port
-     * @param protocol
-     * @param httpPost Post payload
-     * @return response
-     * @throws ClientProtocolException
-     * @throws IOException
-     */
-    protected HttpResponse executeHTTPrequest(int port, String protocol, HttpPost httpPost) throws IOException {
-
-        HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
-        return httpClient.execute(httpPost);
-    }
-
-    /**
-     * Returns the value of the provided APIM configuration element.
-     *
-     * @param property APIM configuration element name
-     * @return APIM configuration element value
-     */
-    protected String getConfigurationElementValue(String property) {
-
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getFirstProperty(property);
-    }
-
     /**
      * Return the value of the provided configuration parameter.
      *
@@ -1251,18 +906,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     protected String getConfigurationParamValue(String parameter) {
 
         return (String) configuration.getParameter(parameter);
-    }
-
-    /**
-     * Returns the OAuth application details if the token is valid.
-     *
-     * @param requestDTO Token validation request
-     * @return
-     */
-    protected OAuth2ClientApplicationDTO findOAuthConsumerIfTokenIsValid(OAuth2TokenValidationRequestDTO requestDTO) {
-
-        OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
-        return oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid(requestDTO);
     }
 
     /**
@@ -1283,6 +926,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     protected boolean checkUserNameAssertionEnabled() {
 
         return APIUtil.checkUserNameAssertionEnabled();
+    }
+
+    private String getTenantAwareContext() {
+
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            return "/t/".concat(tenantDomain);
+        }
+        return "";
     }
 
 }

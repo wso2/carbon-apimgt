@@ -17,13 +17,11 @@
  */
 
 import Base from './Base/index';
-import Apis from './Apis/Apis';
 import Logout from './Logout';
 import Endpoints from './Endpoints';
 
 export {
     Base,
-    Apis,
     Logout,
     Endpoints,
 };

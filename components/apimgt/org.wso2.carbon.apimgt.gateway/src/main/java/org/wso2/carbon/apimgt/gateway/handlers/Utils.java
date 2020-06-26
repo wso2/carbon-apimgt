@@ -402,8 +402,8 @@ public class Utils {
                     String base64EncodedCertificate = (String) headers.get(Utils.getClientCertificateHeader());
                     if (base64EncodedCertificate != null) {
                         base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate).
-                                replaceAll(APIMgtGatewayConstants.BEGIN_CERTIFICATE_STRING, "")
-                                .replaceAll(APIMgtGatewayConstants.END_CERTIFICATE_STRING, "");
+                                replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                                .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
 
                         byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
                         try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
