@@ -3976,6 +3976,54 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get details of the subscription block condition by condition value and tenant domain
+     *
+     * @param conditionValue condition value of the block condition
+     * @param tenantDomain tenant domain of the block condition
+     * @return Block condition
+     * @throws APIManagementException
+     */
+    public BlockConditionsDTO getSubscriptionBlockCondition(String conditionValue, String tenantDomain)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        BlockConditionsDTO blockCondition = null;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.GET_SUBSCRIPTION_BLOCK_CONDITION_BY_VALUE_AND_DOMAIN_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            selectPreparedStatement = connection.prepareStatement(query);
+            selectPreparedStatement.setString(1, conditionValue);
+            selectPreparedStatement.setString(2, tenantDomain);
+            resultSet = selectPreparedStatement.executeQuery();
+            if (resultSet.next()) {
+                blockCondition = new BlockConditionsDTO();
+                blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
+                blockCondition.setConditionType(resultSet.getString("TYPE"));
+                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
+                blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
+                blockCondition.setUUID(resultSet.getString("UUID"));
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to rollback getting Subscription Block condition with condition value "
+                            + conditionValue + " of tenant " + tenantDomain, ex);
+                }
+            }
+            handleException("Failed to get Subscription Block condition with condition value " + conditionValue
+                    + " of tenant " + tenantDomain, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return blockCondition;
+    }
+
+    /**
      * @param application Application
      * @param userId      User Id
      * @throws APIManagementException if failed to add Application
@@ -12453,6 +12501,45 @@ public class ApiMgtDAO {
             } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType) ||
                     APIConstants.BLOCK_CONDITION_IP_RANGE.equals(conditionType)) {
                 valid = true;
+            } else if (APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION.equals(conditionType)) {
+                /* ATM this condition type will be used internally to handle subscription blockings for JWT type access
+                   tokens.
+                */
+                String[] conditionsArray = conditionValue.split(":");
+                if (conditionsArray.length > 0) {
+                    String apiContext = conditionsArray[0];
+                    String applicationIdentifier = conditionsArray[2];
+
+                    String[] app = applicationIdentifier.split("-");
+                    String appOwner = app[0];
+                    String appName = app[1];
+
+                    // Check whether the given api context exists in tenant
+                    String extractedTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
+                    if (extractedTenantDomain == null) {
+                        extractedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                    }
+                    if (tenantDomain.equals(extractedTenantDomain) && isValidContext(apiContext)) {
+                        valid = true;
+                    } else {
+                        throw new APIManagementException(
+                                "Couldn't Save Subscription Block Condition Due to Invalid API Context "
+                                        + apiContext);
+                    }
+
+                    // Check whether the given application is valid
+                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) &&
+                            isValidApplication(appOwner, appName)) {
+                        valid = true;
+                    } else {
+                        throw new APIManagementException(
+                                "Couldn't Save Subscription Block Condition Due to Invalid Application " + "name "
+                                        + appName + " from Application " + "Owner " + appOwner);
+                    }
+                } else {
+                    throw new APIManagementException(
+                            "Invalid subscription block condition with insufficient data : " + conditionValue);
+                }
             }
             if (valid) {
                 connection = APIMgtDBUtil.getConnection();
@@ -15216,7 +15303,7 @@ public class ApiMgtDAO {
                         usedApi.setUriTemplates(usedUriTemplates);
                         usedApiList.add(usedApi);
                     } catch (SQLException e) {
-                        handleException("Failed to retrieve Resource usages of shared scope with scope ID" + uuid, e);
+                        handleException("Failed to retrieve Resource usages of shared scope with scope ID " + uuid, e);
                     }
                 }
             }
@@ -15306,7 +15393,7 @@ public class ApiMgtDAO {
                     Scope scope = new Scope();
                     scope.setId(rs.getString("UUID"));
                     scope.setKey(rs.getString("NAME"));
-                    scope.setUsageCount(rs.getInt("usage"));
+                    scope.setUsageCount(rs.getInt("usages"));
                     scopeList.add(scope);
                 }
             }

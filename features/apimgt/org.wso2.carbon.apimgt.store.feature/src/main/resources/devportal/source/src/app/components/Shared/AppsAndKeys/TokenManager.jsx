@@ -236,11 +236,11 @@ class TokenManager extends React.Component {
     loadApplication = () => {
         this.getserverSupportedGrantTypes();
         this.getRegisteredKeyManagers();
+        const { keyType } = this.props;
         if (this.appId) {
             this.application
-                .then((application) => application.getKeys())
+                .then((application) => application.getKeys(keyType))
                 .then((keys) => {
-                    const { keyType } = this.props;
                     const { keyRequest, selectedTab } = this.state;
                     if (keys.size > 0 && keys.get(selectedTab) && keys.get(selectedTab).keyType === keyType) {
                         const { callbackUrl, supportedGrantTypes } = keys.get(selectedTab);
@@ -344,7 +344,9 @@ class TokenManager extends React.Component {
                 );
             })
             .then((response) => {
-                this.setState({ keys: response.keys });
+                const newKeys = new Map([...keys]);
+                newKeys.set(selectedTab, response);
+                this.setState({ keys: newKeys });
                 Alert.info(intl.formatMessage({
                     id: 'Shared.AppsAndKeys.TokenManager.key.update.success',
                     defaultMessage: 'Application keys updated successfully',

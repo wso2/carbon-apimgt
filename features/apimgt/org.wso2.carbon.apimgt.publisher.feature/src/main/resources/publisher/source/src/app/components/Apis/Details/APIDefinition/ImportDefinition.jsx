@@ -147,7 +147,8 @@ export default function ImportDefinition(props) {
     function updateGraphQLAPIDefinition(graphQLSchema) {
         const promisedAPI = api.updateGraphQLAPIDefinition(api.id, graphQLSchema);
         promisedAPI
-            .then(() => {
+            .then((response) => {
+                api.operations = response.obj;
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.APIDefinition.APIDefinition.graphQLDefinition.updated.successfully',
                     defaultMessage: 'Schema Definition Updated Successfully',
@@ -178,7 +179,6 @@ export default function ImportDefinition(props) {
             .then((response) => {
                 const { isValid, graphQLInfo } = response.obj;
                 if (isValid === true) {
-                    api.operations = graphQLInfo.operations;
                     updateGraphQLAPIDefinition(graphQLInfo.graphQLSchema.schemaDefinition);
                 }
             })
