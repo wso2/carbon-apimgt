@@ -281,6 +281,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_import_export
+            - apim:api_product_import_export
       tags:
         - APIs
       responses:

@@ -80,9 +80,7 @@ securityDefinitions:
       apim:sub_manage: Retrieve, Manage subscriptions
       apim:store_settings: Retrieve store settings
       apim:sub_alert_manage: Retrieve, subscribe and configure store alert types
-      apim:app_import_export: Import and export applications
-      apim:api_import_export: Import and export APIs
-      apim:api_product_import_export: Import and export API Products
+      apim:app_import_export: Import and export applications related operations
 
 ######################################################
 # The "API Collection" resource APIs
@@ -1199,8 +1197,6 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-            - apim:api_import_export
-            - apim:api_product_import_export
             - apim:app_import_export
       x-wso2-request: |
         GET https://localhost:9443/api/am/store/v1/applications
@@ -1359,8 +1355,6 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-            - apim:api_import_export
-            - apim:api_product_import_export
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015\""
       x-wso2-request: |
         GET https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015
@@ -1417,8 +1411,6 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-            - apim:api_import_export
-            - apim:api_product_import_export
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/store/v1/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\""
       x-wso2-request: "PUT https://localhost:9443/api/am/store/v1/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n   \"callbackUrl\": \"\",\n   \"throttlingPolicy\": \"Bronze\",\n   \"description\": \"sample app description updated\",\n   \"name\": \"sampleapp\",\n    \"groupId\": \"org1\"\n}"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"\",\n   \"subscriber\": \"admin\",\n   \"throttlingPolicy\": \"Bronze\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description updated\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
@@ -1544,8 +1536,6 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-            - apim:api_import_export
-            - apim:api_product_import_export
       description: |
         Generate keys (Consumer key/secret) for application
       parameters:
@@ -2436,8 +2426,6 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:sub_manage
-            - apim:api_import_export
-            - apim:api_product_import_export
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed\""
       x-wso2-request: |
         GET https://localhost:9443/api/am/store/v1/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed

@@ -93,7 +93,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Remove an application ", notes = "This operation can be used to remove an application specifying its id. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications"),
+            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -113,10 +113,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Generate application keys", notes = "Generate keys (Consumer key/secret) for application ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs")
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -134,10 +132,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of an application ", notes = "This operation can be used to retrieve details of an individual application specifying the application id in the URI. ", response = ApplicationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs")
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Applications",  })
     @ApiResponses(value = { 
@@ -402,10 +398,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update an application ", notes = "This operation can be used to update an application. Upon succesfull you will retrieve the updated application as the response. ", response = ApplicationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs")
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Applications",  })
     @ApiResponses(value = { 
@@ -423,11 +417,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/Search applications ", notes = "This operation can be used to retrieve list of applications that is belonged to the user associated with the provided access token. ", response = ApplicationListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products"),
-            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications"),
+            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs")
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Applications",  })
     @ApiResponses(value = { 

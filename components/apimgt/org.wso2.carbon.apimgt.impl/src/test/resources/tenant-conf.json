@@ -120,11 +120,11 @@
       },
       {
         "Name": "apim:app_manage",
-        "Roles": "admin,Internal/subscriber"
+        "Roles": "admin,Internal/subscriber,Internal/devops"
       },
       {
         "Name": "apim:sub_manage",
-        "Roles": "admin,Internal/subscriber"
+        "Roles": "admin,Internal/subscriber,Internal/devops"
       },
       {
         "Name" : "apim:monetization_usage_publish",
