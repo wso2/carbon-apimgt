@@ -2550,6 +2550,8 @@ CREATE TABLE AM_API_CATEGORIES (
   PRIMARY KEY (UUID)
 ) /
 
+-- AM_GW_PUBLISHED_API_DETAILS & AM_GW_API_ARTIFACTS are independent tables for Artifact synchronizer feature which --
+-- should not have any referential integrity constraints with other tables in AM database--
 CREATE TABLE IF NOT EXISTS AM_GW_PUBLISHED_API_DETAILS (
   API_ID varchar(255) NOT NULL,
   TENANT_DOMAIN varchar(255),
