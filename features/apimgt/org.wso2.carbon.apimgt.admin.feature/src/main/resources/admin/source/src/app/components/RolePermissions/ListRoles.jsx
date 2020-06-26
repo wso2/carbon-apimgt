@@ -1,9 +1,9 @@
 import React from 'react';
 
-const ListRoles = (props) => {
+const ListRoles = () => {
     return (
         <div>
-            Hello World
+            Role mapping component placeholder text
         </div>
     );
 };
