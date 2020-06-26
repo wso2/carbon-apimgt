@@ -138,9 +138,6 @@ class TestConsole extends React.Component {
             scopes: [],
             selectedKeyType: 'PRODUCTION',
             keys: [],
-            newState: null,
-            // isUpdating: null,
-            // pageError: null,
         };
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.updateSwagger = this.updateSwagger.bind(this);
@@ -185,10 +182,8 @@ class TestConsole extends React.Component {
                     environments = apiData.gatewayEnvironments.map((endpoint) => { return endpoint; });
                 }
                 const securtySchemas = apiData.securityScheme;
-                console.log('SEC schemas' + securtySchemas);
                 securtySchemas.push('test_auth');
                 securtySchemas.shift();
-                console.log('SEC schemas333333: ' + securtySchemas);
                 if (apiData.endpointURLs) {
                     environments = apiData.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
                 }
@@ -236,7 +231,6 @@ class TestConsole extends React.Component {
         settingPromise
             .then((settingsNew) => {
                 if (settingsNew.environment) {
-                    console.log('Settings new' + JSON.stringify(settingsNew));
                     urls = settingsNew.environment.map((endpoints) => { return endpoints.endpoints; });
                     httpVal = urls.map((val) => { return val.http; });
                     httpsVal = urls.map((value) => { return value.https; });
@@ -319,65 +313,30 @@ class TestConsole extends React.Component {
 
 
     handleClick = () => {
-        this.setState({ newState: 'Hi there!' });
-        console.log('updateAPI');
         const { apiObj } = this.props;
-        console.log('updateLCStateofAPI');
         const action = 'Deploy as a Prototype';
         const promisedUpdate = API.updateLcState(apiObj.id, action);
         promisedUpdate
             .then((response) => {
-                console.log('updateLCStateofAPI' + JSON.stringify(response));
                 const newState = response.body.lifecycleState.state;
                 console.log('new life cycle state' + newState);
-                this.setState({ newState });
                 this.context.updateAPI();
                 // disable store
-                console.log('ID' + apiObj.id);
                 const promisedApi = API.get(apiObj.id);
                 promisedApi
                     .then((getResponse) => {
                         const apiData = getResponse;
-                        console.log('APIDATEEEEE' + JSON.stringify(getResponse.enableStore));
                         apiData.enableStore = false;
-                        console.log('enableStore==+++++++++++++' + JSON.stringify(apiData));
                         const token = uuid();
-                        console.log('TOKEN' + token);
                         apiData.testKey = token;
                         this.context.updateAPI({ enableStore: false, testKey: token });
                     })
                     .catch((errorResponse) => {
                         console.error(errorResponse);
                     });
-                // const { intl } = this.props;
-                // if (workflowStatus === this.WORKFLOW_STATUS.CREATED) {
-                //     Alert.info(intl.formatMessage({
-                //         id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success.createStatus',
-                //         defaultMessage: 'Lifecycle state change request has been sent',
-                //     }));
-                // } else {
-                //     Alert.info(intl.formatMessage({
-                //         id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success.otherStatus',
-                //         defaultMessage: 'Lifecycle state updated successfully',
-                //     }));
-                // }
             })
             .catch((error) => {
-                // if (error.response) {
-                //     Alert.error(error.response.body.description);
-                //     // this.setState({ pageError: error.response.body });
-                // } else {
-                //     // TODO add i18n ~tmkb
-                //     const message = 'Something went wrong while updating the lifecycle';
-                //     Alert.error(message);
-                //     // this.setState({ pageError: error.response.body });
-                // }
                 console.error(error);
-            });
-        const promisedApi = API.get(apiObj.id);
-        promisedApi
-            .then((getResponse) => {
-                console.log('FINAL Result' + JSON.stringify(getResponse));
             });
     };
 
@@ -415,15 +374,11 @@ class TestConsole extends React.Component {
         const {
             securitySchemeType, username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
         } = this.state;
-        console.log('state-----' + this.state.username);
-        console.log('testKey----' + this.state.api.testKey);
-        console.log('state4444======' + JSON.stringify(this.state));
         if (securitySchemeType === 'BASIC') {
             const credentials = username + ':' + password;
             return btoa(credentials);
         }
         if (securitySchemeType === 'TEST') {
-            console.log('TOKEN set access token provider @@@@@@@@@@@' + this.state.api.testKey);
             return this.state.api.testKey;
         }
         if (selectedKeyType === 'PRODUCTION') {
@@ -461,9 +416,8 @@ class TestConsole extends React.Component {
         const { classes } = this.props;
         const {
             swagger, api, securitySchemeType, selectedEnvironment, productionAccessToken, sandboxAccessToken,
-            labels, environments, scopes, username, password, selectedKeyType, serverError, settings, newState,
+            labels, environments, scopes, username, password, selectedKeyType, serverError, settings,
         } = this.state;
-        console.log('newState11111111111' + newState);
         if (serverError) {
             return (
                 <Typography variant='h4' className={classes.titleSub}>
@@ -476,16 +430,11 @@ class TestConsole extends React.Component {
             return <Progress />;
         }
 
-        // let isApiKeyEnabled = false;
         let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
         authorizationHeader = 'testkey';
-        console.log('sec----------------------------------------' + securitySchemeType);
         swagger.servers = settings;
-        console.log('SWAGGER' + JSON.stringify(swagger));
         const isProtoTyped = api.lifeCycleStatus.toLowerCase() === 'prototyped';
         const enableForTest = api.enableStore === false;
-        console.log('Enable for store  ------------' + enableForTest);
-        console.log('after click' + isProtoTyped);
         return (
             <>
                 {!isProtoTyped && (
@@ -498,10 +447,8 @@ class TestConsole extends React.Component {
                         </Typography>
                         <Typography variant='caption' component='div' className={classes.helpText}>
                             <FormattedMessage
-                                id='Apis.Details.Properties.Properties.help.main'
-                                defaultMessage={`Usually, APIs have a pre-defined set of properties such as 
-                                the name, version, context, etc. API Properties allows you to 
-                                add specific custom properties to the API.`}
+                                id='APis.Details.tryout.help.main'
+                                defaultMessage='Test the APIs while in Development stage.'
                             />
                         </Typography>
                         <div className={classes.messageBox}>
@@ -509,15 +456,14 @@ class TestConsole extends React.Component {
                                 <div className={classes.contentWrapper}>
                                     <Typography variant='h5' component='h3' className={classes.head}>
                                         <FormattedMessage
-                                            id='Apis.Details.Properties.Properties.add.new.property.message.title'
-                                            defaultMessage='Create Additional Properties'
+                                            id='Apis.Details.tryout.title'
+                                            defaultMessage='Start Testing'
                                         />
                                     </Typography>
                                     <Typography component='p'>
                                         <FormattedMessage
                                             id='Apis.Details.tryout.initialize.test'
-                                            defaultMessage='You can test the resources before publishing to the
-                                            devportal'
+                                            defaultMessage='Initialize the API to Prototype(testing) state'
                                         />
                                     </Typography>
                                     <div className={classes.actions}>

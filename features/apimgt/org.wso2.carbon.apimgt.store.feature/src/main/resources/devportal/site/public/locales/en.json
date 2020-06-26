@@ -1,4 +1,5 @@
 {
+  "Apis.Details.APIConsole.APIConsole.download.swagger": "Swagger ( /swagger.json )",
   "Apis.Details.ApiCOnsole.generate.test.key": "GET TEST KEY ",
   "Apis.Details.ApiConsole.ApiConsole.subscribe.to.application": "Please subscribe to an application",
   "Apis.Details.ApiConsole.ApiConsole.title": "Try Out",
@@ -175,7 +176,6 @@
   "Apis.Details.Subscribe.use.google.location.service": "Use Google's location service?",
   "Apis.Details.Subscribe.view.all.link": "View All",
   "Apis.Details.TryOutConsole.access.token.tooltip": "You can use your existing Access Token or you can generate a new Test Key.",
-  "Apis.Details.index.Tryout": "Test Console",
   "Apis.Details.index.all.apis": "ALL APIs",
   "Apis.Details.index.comments": "Comments",
   "Apis.Details.index.documentation": "Documentation",
