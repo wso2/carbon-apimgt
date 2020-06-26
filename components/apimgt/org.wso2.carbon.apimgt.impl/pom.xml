@@ -375,6 +375,10 @@
             <artifactId>okhttp</artifactId>
             <version>${org.wso2.orbit.com.squareup.okhttp.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.user.mgt.common</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

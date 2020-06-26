@@ -330,8 +330,14 @@ ExceptionCodes implements ErrorHandler {
             "Key Manager is not enabled in the system"),
     KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
             "Required application properties are missing"),
-    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered");
+    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
 
+    // Password change related
+    PASSWORD_CHANGE_DISABLED(901450, "Password change disabled", 400, "Password change operation is disabled in the system"),
+
+    CURRENT_PASSWORD_INCORRECT(901451, "Current password incorrect", 400, "The current password entered is incorrect"),
+
+    PASSWORD_PATTERN_INVALID(901452, "Password pattern invalid", 400, "Password entered is invalid since it doesn't comply with the pattern/policy configured");
 
     private final long errorCode;
     private final String errorMessage;

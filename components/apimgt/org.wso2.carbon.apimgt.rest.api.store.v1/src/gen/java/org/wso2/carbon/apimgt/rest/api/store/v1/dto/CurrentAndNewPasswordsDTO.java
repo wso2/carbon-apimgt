@@ -13,31 +13,31 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class OldAndNewPasswordsDTO   {
+public class CurrentAndNewPasswordsDTO   {
   
-    private String oldPassword = null;
+    private String currentPassword = null;
     private String newPassword = null;
 
   /**
    **/
-  public OldAndNewPasswordsDTO oldPassword(String oldPassword) {
-    this.oldPassword = oldPassword;
+  public CurrentAndNewPasswordsDTO currentPassword(String currentPassword) {
+    this.currentPassword = currentPassword;
     return this;
   }
 
   
   @ApiModelProperty(example = "password123", value = "")
-  @JsonProperty("oldPassword")
-  public String getOldPassword() {
-    return oldPassword;
+  @JsonProperty("currentPassword")
+  public String getCurrentPassword() {
+    return currentPassword;
   }
-  public void setOldPassword(String oldPassword) {
-    this.oldPassword = oldPassword;
+  public void setCurrentPassword(String currentPassword) {
+    this.currentPassword = currentPassword;
   }
 
   /**
    **/
-  public OldAndNewPasswordsDTO newPassword(String newPassword) {
+  public CurrentAndNewPasswordsDTO newPassword(String newPassword) {
     this.newPassword = newPassword;
     return this;
   }
@@ -61,22 +61,22 @@ public class OldAndNewPasswordsDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    OldAndNewPasswordsDTO oldAndNewPasswords = (OldAndNewPasswordsDTO) o;
-    return Objects.equals(oldPassword, oldAndNewPasswords.oldPassword) &&
-        Objects.equals(newPassword, oldAndNewPasswords.newPassword);
+    CurrentAndNewPasswordsDTO currentAndNewPasswords = (CurrentAndNewPasswordsDTO) o;
+    return Objects.equals(currentPassword, currentAndNewPasswords.currentPassword) &&
+        Objects.equals(newPassword, currentAndNewPasswords.newPassword);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oldPassword, newPassword);
+    return Objects.hash(currentPassword, newPassword);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class OldAndNewPasswordsDTO {\n");
+    sb.append("class CurrentAndNewPasswordsDTO {\n");
     
-    sb.append("    oldPassword: ").append(toIndentedString(oldPassword)).append("\n");
+    sb.append("    currentPassword: ").append(toIndentedString(currentPassword)).append("\n");
     sb.append("    newPassword: ").append(toIndentedString(newPassword)).append("\n");
     sb.append("}");
     return sb.toString();

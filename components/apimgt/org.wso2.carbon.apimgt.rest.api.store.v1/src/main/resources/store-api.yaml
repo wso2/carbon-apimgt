@@ -3708,7 +3708,7 @@ paths:
         POST https://localhost:9443/api/am/store/v1/me/change-password
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
         {
-          "oldPassword": "12345",
+          "currentPassword": "12345",
           "newPassword": "54321"
         }
       x-wso2-response: "HTTP/1.1 200 OK"
@@ -3720,10 +3720,10 @@ paths:
         - in: body
           name: body
           description: |
-            Old (current) and new password of the user
+            Current and new password of the user
           required: true
           schema:
-            $ref: '#/definitions/OldAndNewPasswords'
+            $ref: '#/definitions/CurrentAndNewPasswords'
       tags:
         - Users
       responses:
@@ -5955,12 +5955,12 @@ definitions:
         description: ingress URL
         example: http://wso2.com:9443
   #-----------------------------------------------------
-  # User's Old and new password resource
+  # User's current and new password resource
   #-----------------------------------------------------
-  OldAndNewPasswords:
-    title: Old and new passowrd of the user
+  CurrentAndNewPasswords:
+    title: Current and new passowrd of the user
     properties:
-      oldPassword:
+      currentPassword:
         type: string
         example: "password123"
       newPassword:

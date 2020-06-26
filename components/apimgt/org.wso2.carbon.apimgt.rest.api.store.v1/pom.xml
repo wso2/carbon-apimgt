@@ -167,10 +167,6 @@
             <artifactId>slf4j-api</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.user.mgt.common</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

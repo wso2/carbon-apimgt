@@ -43,10 +43,6 @@
             <version>4.5.2</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.user.mgt.common</artifactId>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -62,7 +58,6 @@
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.user.mgt.common.*;version="${carbon.identity.version}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

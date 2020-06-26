@@ -10964,35 +10964,5 @@ public final class APIUtil {
 
         return containerMgt;
     }
-
-    /**
-     * validates a username,password combination. Works for any tenant domain.
-     *
-     * @param username username of the user(including tenant domain)
-     * @param password password of the user
-     * @return true if username,password is correct
-     * @throws APIManagementException
-     */
-    public static boolean isUserCredentialsValid(String username, String password) throws APIManagementException {
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
-        UserStoreManager userStoreManager;
-        boolean isUserCredentialsValid = false;
-        try {
-            userStoreManager =
-                    CarbonContext.getThreadLocalCarbonContext().getUserRealm().getUserStoreManager();
-            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
-
-            isUserCredentialsValid = userStoreManager.authenticate(tenantAwareUserName, password);
-        } catch (UserStoreException e) {
-            APIUtil.handleException("Error occurred while validating credentials of user: " + username, e);
-        } finally {
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().endTenantFlow();
-        }
-        return isUserCredentialsValid;
-    }
 }
 
