@@ -47,9 +47,9 @@
             "redirect_uri": loginCallbackUrl
         };
      var tenantDomain = "carbon.super" ;
-     if(appUtils.isPerTenantServiceProviderEnabled()){
+     if (appUtils.isPerTenantServiceProviderEnabled()) {
         tenantDomain = appUtils.getTenantDomain();
-      }
+     }
         var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
         var systemApplicationDAO = new SystemApplicationDTO();
         // this is to support migration from admin_publisher to apim_publisher

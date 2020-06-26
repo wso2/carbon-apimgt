@@ -47,7 +47,7 @@
     var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
     var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
     if (loginCallbackUrl == null) {
-	        loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+	    loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
     }
 
     var logoutCallbackUrl = appUtils.getTenantBasedLogoutCallBack();
