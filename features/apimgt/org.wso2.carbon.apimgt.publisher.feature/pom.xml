@@ -183,6 +183,9 @@
                                 <bundleDef>org.wso2.orbit.com.squareup.okio:okio:${okio.wso2.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.org.apache.commons:commons-compress:${org.wso2.orbit.org.apache.commons.compress.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp:${okhttp.wso2.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.orbit.com.amazonaws:awslambda:${org.wso2.orbit.com.amazonaws.version}
+                                </bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>

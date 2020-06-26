@@ -2293,6 +2293,14 @@ public final class APIConstants {
         public static final String CONTAINER_MANAGEMENT_INFO ="ContainerMgtInfo";
 
     }
+    public static class TopicNames {
+        //APIM default topic names
+        public static final String TOPIC_THROTTLE_DATA = "throttleData";
+        public static final String TOPIC_TOKEN_REVOCATION = "tokenRevocation";
+        public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
+        public static final String TOPIC_KEY_MANAGER = "keyManager";
+        public static final String TOPIC_NOTIFICATION = "notification";
+    }
 
     public static final String ENABLE_CHANGE_PASSWORD = "EnableChangePassword";
 }

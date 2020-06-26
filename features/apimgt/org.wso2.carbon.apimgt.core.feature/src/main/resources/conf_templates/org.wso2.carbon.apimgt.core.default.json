@@ -146,5 +146,7 @@
   "apim.event_hub.event_type": "Binary",
   "apim.event_hub.java_naming_factory_initial": "org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
   "apim.key_manager.enable_registration": true,
-  "apim.key_manager.enable_retriever": true
+  "apim.key_manager.enable_retriever": true,
+  "apim.event_hub.username": "$ref{apim.throttling.username}",
+  "apim.event_hub.password": "$ref{apim.throttling.password}"
 }
