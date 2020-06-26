@@ -123,7 +123,7 @@ function TryOutController(props) {
         let keys;
         let selectedKeyTypes = 'PRODUCTION';
         let accessToken;
-        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+        if (api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() !== 'prototyped') {
             const promiseSubscriptions = restApi.getSubscriptions(apiID);
             promiseSubscriptions.then((subscriptionsResponse) => {
                 if (subscriptionsResponse !== null) {

@@ -160,11 +160,10 @@ class LifeCycleUpdate extends Component {
 
     /**
      *
-     *
+     * Set true the enableStore Property.
      * @memberof disableStore
      */
     enableStore() {
-        console.log('Enable store ------------');
         const api = new API();
         const { id } = this.props.api;
         const promisedApi = api.get(id);
