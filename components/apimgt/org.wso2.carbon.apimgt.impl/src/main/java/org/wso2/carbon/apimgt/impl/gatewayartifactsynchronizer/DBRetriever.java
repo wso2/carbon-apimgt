@@ -83,7 +83,7 @@ public class DBRetriever implements ArtifactRetriever {
                     System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
             String endcodedVersion= URLEncoder.encode(version, APIConstants.DigestAuthConstants.CHARSET);
             String path = APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ARTIFACTS + "?apiName=" + apiName +
-                    "&version=" + endcodedVersion+ "&tenantDomain="+ tenantDomain;
+                    "&tenantDomain="+ tenantDomain + "&version=" + endcodedVersion;
             String endpoint = baseURL + path;
             HttpResponse httpResponse = invokeService(endpoint);
             String responseString;
