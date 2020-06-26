@@ -60,7 +60,7 @@ public class OAuthClient {
      * @throws APIManagementException In the event of an unexpected HTTP status code from the backend
      */
     public static TokenResponse generateToken(String url, String clientId, String clientSecret,
-            String username, String password, String grantType, JSONObject customParameters, String refreshToken)
+            String username, char[] password, String grantType, JSONObject customParameters, String refreshToken)
             throws IOException, APIManagementException {
         if(log.isDebugEnabled()) {
             log.debug("Initializing token generation request: [token-endpoint] " + url);
@@ -85,7 +85,7 @@ public class OAuthClient {
             } else if (grantType.equals(APIConstants.OAuthConstants.PASSWORD)) {
                 payload.append(APIConstants.OAuthConstants.PASSWORD_GRANT_TYPE + "&username=")
                         .append(username).append("&password=")
-                        .append(password);
+                        .append(String.valueOf(password));
             }
 
             payload = appendCustomParameters(customParameters, payload);

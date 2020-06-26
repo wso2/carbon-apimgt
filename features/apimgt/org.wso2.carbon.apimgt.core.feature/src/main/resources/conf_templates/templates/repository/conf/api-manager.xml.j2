@@ -1014,12 +1014,17 @@
         </APISecurityAudit>
     {% endif %}
 
-    {% if redis_config is defined %}
+    {% if apim.redis_config is defined %}
         <RedisConfig>
-            <IsRedisEnabled>{{redis_config.is_redis_enabled}}</IsRedisEnabled>
-            <RedisHost>{{redis_config.redis_host}}</RedisHost>
-            <RedisPort>{{redis_config.redis_port}}</RedisPort>
-            <RedisPassword>{{redis_config.redis_password}}</RedisPassword>
+            {% if apim.redis_config.host is defined %}
+            <RedisHost>{{apim.redis_config.host}}</RedisHost>
+            {% endif %}
+            {% if apim.redis_config.port is defined %}
+            <RedisPort>{{apim.redis_config.port}}</RedisPort>
+            {% endif %}
+            {% if apim.redis_config.password is defined %}
+            <RedisPassword>{{apim.redis_config.password}}</RedisPassword>
+            {% endif %}
         </RedisConfig>
     {% endif %}
 

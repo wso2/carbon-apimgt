@@ -60,17 +60,17 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
     public void init(SynapseEnvironment synapseEnvironment) {
         oAuthEndpointSecurityProperties = getOAuthEndpointSecurityProperties();
         if (oAuthEndpointSecurityProperties != null) {
-            isRedisEnabled = Boolean.parseBoolean((String) oAuthEndpointSecurityProperties
+            isRedisEnabled = ((Boolean) oAuthEndpointSecurityProperties
                     .get(APIConstants.IS_REDIS_ENABLED));
             if (isRedisEnabled) {
                 String redisHost = (String) oAuthEndpointSecurityProperties.get(APIConstants.REDIS_HOST);
                 String redisPort = (String) oAuthEndpointSecurityProperties.get(APIConstants.REDIS_PORT);
                 if (oAuthEndpointSecurityProperties.containsKey(APIConstants.REDIS_PASSWORD)) {
-                    String redisPassword = (String) oAuthEndpointSecurityProperties
+                    char[] redisPassword = (char[]) oAuthEndpointSecurityProperties
                             .get(APIConstants.REDIS_PASSWORD);
                     redisCache = new RedisCache(redisHost, Integer.valueOf(redisPort), redisPassword);
                 } else {
-                    redisCache = new RedisCache(redisHost, Integer.valueOf(redisPort), "");
+                    redisCache = new RedisCache(redisHost, Integer.valueOf(redisPort), null);
                 }
             }
         }
@@ -129,14 +129,15 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
             oAuthEndpoint.setClientId(clientId);
             oAuthEndpoint.setClientSecret(decryptedClientSecret);
             oAuthEndpoint.setUsername(username);
-            oAuthEndpoint.setPassword(password);
+            if (password != null) {
+                oAuthEndpoint.setPassword(password.toCharArray());
+            }
             oAuthEndpoint.setGrantType(grantType);
             oAuthEndpoint.setCustomParameters(customParameters);
 
             if (oAuthEndpoint != null) {
                 try {
-                    OAuthTokenGenerator tokenGenerator = new OAuthTokenGenerator();
-                    tokenGenerator.checkTokenValidity(oAuthEndpoint, latch);
+                    OAuthTokenGenerator.checkTokenValidity(oAuthEndpoint, latch);
                     latch.await();
                 } catch(InterruptedException | APISecurityException e) {
                     log.error("Could not generate access token...", e);
@@ -173,17 +174,15 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
     public static JSONObject getOAuthEndpointSecurityProperties() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String isRedisEnabled = configuration.getFirstProperty(APIConstants.CONFIG_IS_REDIS_ENABLED);
         String redisHost = configuration.getFirstProperty(APIConstants.CONFIG_REDIS_HOST);
         String redisPort = configuration.getFirstProperty(APIConstants.CONFIG_REDIS_PORT);
         String redisPassword = configuration.getFirstProperty(APIConstants.CONFIG_REDIS_PASSWORD);
 
         JSONObject configProperties = new JSONObject();
 
-        if (StringUtils.isNotBlank(isRedisEnabled) && "true".equals(isRedisEnabled)
-                && StringUtils.isNotBlank(redisHost)
+        if(StringUtils.isNotBlank(redisHost)
                 && StringUtils.isNotBlank(redisPort)) {
-            configProperties.put(APIConstants.IS_REDIS_ENABLED, isRedisEnabled);
+            configProperties.put(APIConstants.IS_REDIS_ENABLED, true);
             configProperties.put(APIConstants.REDIS_HOST, redisHost);
             configProperties.put(APIConstants.REDIS_PORT, redisPort);
             if (StringUtils.isNotBlank(redisPassword)) {

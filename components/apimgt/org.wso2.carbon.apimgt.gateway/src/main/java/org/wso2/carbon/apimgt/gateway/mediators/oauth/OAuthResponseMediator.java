@@ -58,8 +58,8 @@ public class OAuthResponseMediator extends AbstractMediator implements ManagedLi
                 try {
                     OAuthTokenGenerator.checkTokenValidity(OAuthMediator.oAuthEndpoint, null);
                     log.error("OAuth 2.0 access token has been rejected by the backend...");
-                    handleFailure(APISecurityConstants.OAUTH_INVALID_ACCESS_TOKEN, messageContext,
-                            APISecurityConstants.OAUTH_INVALID_ACCESS_TOKEN_MESSAGE, "Please try again");
+                    handleFailure(APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR, messageContext,
+                            APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE, "Please try again");
                 } catch (APISecurityException e) {
                     log.error("Error when generating oauth 2.0 access token...", e);
                 }

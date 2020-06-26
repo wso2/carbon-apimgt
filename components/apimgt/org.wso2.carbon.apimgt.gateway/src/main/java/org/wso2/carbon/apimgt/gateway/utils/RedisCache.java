@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.utils;
 
-import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.TokenResponse;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -40,8 +39,8 @@ public class RedisCache {
      * @param port Port used by the Redis server
      * @param password Password for the Redis Server
      */
-    public RedisCache(String host, Integer port, String password) {
-        if (StringUtils.isNotBlank(password)) {
+    public RedisCache(String host, Integer port, char[] password) {
+        if (password != null) {
             jedisPool = new JedisPool(new JedisPoolConfig(), host, port);
         } else {
             jedisPool = new JedisPool(host, port);
@@ -49,8 +48,8 @@ public class RedisCache {
 
         jedis = new Jedis(host, port);
 
-        if (StringUtils.isNotBlank(password)) {
-            jedis.auth(password);
+        if (password != null) {
+            jedis.auth(String.valueOf(password));
         }
     }
 
