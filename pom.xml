@@ -79,9 +79,9 @@
                     </dependencies>
                 </plugin>
                 <!--<plugin>-->
-                    <!--<groupId>io.swagger.codegen.v3</groupId>-->
-                    <!--<artifactId>swagger-codegen-maven-plugin</artifactId>-->
-                    <!--<version>${swagger3-codegen-maven-plugin.version}</version>-->
+                <!--<groupId>io.swagger.codegen.v3</groupId>-->
+                <!--<artifactId>swagger-codegen-maven-plugin</artifactId>-->
+                <!--<version>${swagger3-codegen-maven-plugin.version}</version>-->
                 <!--</plugin>-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1312,9 +1312,9 @@
                 <version>${swagger.parser.v3.version}</version>
             </dependency>
             <!--<dependency>-->
-                <!--<groupId>io.swagger.codegen.v3</groupId>-->
-                <!--<artifactId>swagger-codegen-maven-plugin</artifactId>-->
-                <!--<version>${swagger3-codegen-maven-plugin.version}</version>-->
+            <!--<groupId>io.swagger.codegen.v3</groupId>-->
+            <!--<artifactId>swagger-codegen-maven-plugin</artifactId>-->
+            <!--<version>${swagger3-codegen-maven-plugin.version}</version>-->
             <!--</dependency>-->
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -1649,33 +1649,6 @@
                 <version>${org.wso2.orbit.io.fabric8.kubernetes.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.com.squareup.okio</groupId>
-                <artifactId>okio</artifactId>
-                <version>${org.wso2.orbit.com.squareup.okio.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.org.apache.commons</groupId>
-                <artifactId>commons-compress</artifactId>
-                <version>${org.wso2.orbit.org.apache.commons.compress.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
-                <artifactId>okhttp</artifactId>
-                <version>${okhttp.wso2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.squareup.okio</groupId>
-                <artifactId>okio</artifactId>
-                <version>${com.squareup.okio.version}</version>
-
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.io.fabric8</groupId>
-                <artifactId>kubernetes-client</artifactId>
-                <version>${org.wso2.orbit.io.fabric8.kubernetes.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.orbit.org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${org.wso2.orbit.org.apache.commons.compress.version}</version>
@@ -1711,7 +1684,6 @@
                 <scope>provided</scope>
                 <version>${javax.enterprise.version}</version>
             </dependency>
-<<<<<<< HEAD
             <dependency>
                 <groupId>io.github.openfeign</groupId>
                 <artifactId>feign-core</artifactId>
@@ -1732,26 +1704,7 @@
                 <artifactId>feign-slf4j</artifactId>
                 <version>${openfeign.version}</version>
             </dependency>
-=======
-
-            <!-- https://mvnrepository.com/artifact/io.fabric8/kubernetes-server-mock -->
-<!--            <dependency>-->
-<!--                <groupId>io.fabric8</groupId>-->
-<!--                <artifactId>kubernetes-server-mock</artifactId>-->
-<!--                <version>3.1.8</version>-->
-<!--                <scope>test</scope>-->
-<!--            </dependency>-->
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-server-mock</artifactId>
-                <version>${kubernetes-server-mock.version}</version>
-<!--&lt;!&ndash;                <scope>test</scope>&ndash;&gt;-->
-
-            </dependency>
-
->>>>>>> war files
         </dependencies>
-
     </dependencyManagement>
 
     <properties>
@@ -1849,13 +1802,13 @@
         <!-- Jaggery Version -->
         <jaggery.version>0.14.12</jaggery.version>
 
-	<!-- OSGi -->
+        <!-- OSGi -->
         <imp.package.version.osgi.service>[1.2.0,1.3.0)</imp.package.version.osgi.service>
         <imp.package.version.osgi.util>[1.2.0,2.0.0)</imp.package.version.osgi.util>
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-	    <synapse.version>2.1.7-wso2v168</synapse.version>
+        <synapse.version>2.1.7-wso2v168</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 

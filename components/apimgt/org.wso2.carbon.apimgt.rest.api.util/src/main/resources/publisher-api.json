@@ -3680,6 +3680,62 @@
         }
       }
     },
+    "/service-discovery/endpoints": {
+      "get": {
+        "x-scope": "apim:serviceEndpoints_view",
+        "x-wso2-curl": "",
+        "summary": "Get list of services discovery system.",
+        "description": "Using this operation, you can retrieve complete list of available services discovery system.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          }
+        ],
+        "tags": [
+          "Service Discovery Types"
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok.\nList of service discovery system is returned.\n",
+            "headers": {
+              "Content-type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests\n(Will be supported in future).\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modified the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/ServiceDiscoverySystemTypeList"
+            }
+          },
+          "304": {
+            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested\nresource (Will be supported in future).\n"
+          },
+          "404": {
+            "description": "Not Found.\nNo services discovery systems are available .\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/service-discovery/endpoints/{type}": {
         "get": {
             "x-scope": "apim:serviceEndpoints_view",
@@ -3913,6 +3969,13 @@
       "in": "query",
       "description": "Defines whether the returned response should contain full details of API\n",
       "type": "boolean"
+    },
+    "type": {
+      "name": "type",
+      "in": "path",
+      "description": "Service discovery system type\n",
+      "required": true,
+      "type": "string"
     }
   },
   "definitions": {
@@ -5270,6 +5333,82 @@
           "type": "string",
           "description": "The resource policy content",
           "example": "<header description=\"SOAPAction\" name=\"SOAPAction\" scope=\"transport\" value=\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\"/>"
+        }
+      }
+    },
+    "TypeInfo": {
+      "title": "Type info with details.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Kubernetes"
+        }
+      }
+    },
+    "ServiceDiscoverySystemTypeList": {
+      "title": "type list",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of types returned.\n",
+          "example": 1
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TypeInfo"
+          },
+          "description": "Type of the service discovery system\n",
+          "example": "Kubernetes"
+        }
+      }
+    },
+    "ServiceDiscoveriesInfoList": {
+      "title": "service list",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of services returned.\n",
+          "example": 1
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of the service discovery system\n",
+          "example": "Kubernetes"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ServiceDiscoveriesInfo"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+
+    "ServiceDiscoveriesInfoList": {
+      "title": "service list",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of services returned.\n",
+          "example": 1
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of the service discovery system\n",
+          "example": "Kubernetes"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ServiceDiscoveriesInfo"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
         }
       }
     }

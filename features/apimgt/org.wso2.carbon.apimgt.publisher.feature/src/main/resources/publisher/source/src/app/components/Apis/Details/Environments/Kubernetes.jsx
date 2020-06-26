@@ -16,8 +16,7 @@
  * under the License.
  */
 
-// import React from 'react';
-import React, { useContext } from 'react';
+import React from 'react';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
@@ -151,7 +150,7 @@ export default function Kubernetes(props) {
                         {clusters.clusters.map((row) => (
                             <TableRow key={row.clusterId}>
                                 <TableCell padding='checkbox'>
-                                    { <Checkbox
+                                    <Checkbox
                                         disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                         checked={handleOnChecked(row.clusterId)}
                                         onChange={(e) => handleEnvironmentsSelect(e, row.clusterId)}

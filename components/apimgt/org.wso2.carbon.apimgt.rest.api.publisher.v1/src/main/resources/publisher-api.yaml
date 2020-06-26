@@ -10727,8 +10727,6 @@ definitions:
   #------------------------------------------------------
   ServiceDiscoveriesInfo:
     title: details of the service
-     #Kubernetes
-    # services:
     properties:
       serviceName:
         type: string

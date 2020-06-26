@@ -41,7 +41,7 @@
   "Apis.Create.OpenAPI.ApiCreateOpenAPI.sub.heading": "Create an API using an existing OpenAPI definition (swagger) file or URL.",
   "Apis.Create.OpenAPI.ApiCreateOpenAPI.wizard.one": "Provide OpenAPI",
   "Apis.Create.OpenAPI.ApiCreateOpenAPI.wizard.two": "Create API",
-  "Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.dropzone": "Drag & Drop Open API File/Archive  here {break} or {break} Browse files",
+  "Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.dropzone": "Drag & Drop Open API File/Archive here {break} or {break} Browse files",
   "Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.upload": "Browse File to Upload",
   "Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.type": "Input Type",
   "Apis.Create.WSDL.ApiCreateWSDL.heading": "Expose a SOAP Service as a REST API",

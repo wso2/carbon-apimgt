@@ -109,32 +109,6 @@ export default class Protected extends Component {
             });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
         }
-        const deploymentPromise = api.getDeployments();
-        if (user) {
-            this.setState({ user });
-            deploymentPromise.then((deploymentsNew) => this.setState({ allDeployments: deploymentsNew }));
-        } else {
-            // If no user data available , Get the user info from existing token information
-            // This could happen when OAuth code authentication took place and could send
-            // user information via redirection
-            const userPromise = AuthManager.getUserFromToken();
-            userPromise.then((loggedUser) => this.setState({ user: loggedUser }));
-            deploymentPromise.then((deploymentsNew) => this.setState({ allDeployments: deploymentsNew }));
-        }
-        const deploymentStatusPromise = api.getDeploymentStatus();
-        if (user) {
-            this.setState({ user });
-            deploymentStatusPromise
-                .then((deploymentStatusNew) => this.setState({ deploymentStatus: deploymentStatusNew }));
-        } else {
-            // If no user data available , Get the user info from existing token information
-            // This could happen when OAuth code authentication took place and could send
-            // user information via redirection
-            const userPromise = AuthManager.getUserFromToken();
-            userPromise.then((loggedUser) => this.setState({ user: loggedUser }));
-            deploymentStatusPromise
-                .then((deploymentStatusNew) => this.setState({ deploymentStatus: deploymentStatusNew }));
-        }
     }
 
     /**
