@@ -107,7 +107,10 @@ function ListLabels() {
                 return workflowlist;
             })
             .catch((error) => {
-                Alert.error('Unable to get workflow pending requests for User Creation', error.message);
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.UserCreation.apicall.has.errors',
+                    defaultMessage: 'Unable to get workflow pending requests for User Creation',
+                }));
                 throw (error);
             });
     }
@@ -120,8 +123,11 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error('Unable to fetch data. ', e.message);
                 console.error('Unable to fetch data. ', e.message);
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.UserCreation.fetch.has.errors',
+                    defaultMessage: 'Unable to fetch data. ',
+                }));
             });
     };
 
@@ -150,7 +156,10 @@ function ListLabels() {
             .catch((error) => {
                 const { response } = error;
                 if (response.body) {
-                    Alert.error('Unable to complete User creation approve/reject process. ', error.message);
+                    Alert.error(intl.formatMessage({
+                        id: 'Workflow.UserCreation.updateStatus.has.errors',
+                        defaultMessage: 'Unable to complete User creation approve/reject process.',
+                    }));
                     throw (response.body.description);
                 }
                 return null;

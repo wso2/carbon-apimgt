@@ -109,7 +109,10 @@ function ListLabels() {
                 return workflowlist;
             })
             .catch((error) => {
-                Alert.error('Unable to get workflow pending requests for Application Creation', error.message);
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.ApplicationCreation.apicall.has.errors',
+                    defaultMessage: 'Unable to get workflow pending requests for Application Creation',
+                }));
                 throw (error);
             });
     }
@@ -122,8 +125,11 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error('Unable to fetch data. ', e.message);
                 console.error('Unable to fetch data. ', e.message);
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.ApplicationCreation.fetch.has.errors',
+                    defaultMessage: 'Unable to fetch data.',
+                }));
             });
     };
 
@@ -153,7 +159,10 @@ function ListLabels() {
             .catch((error) => {
                 const { response } = error;
                 if (response.body) {
-                    Alert.error('Unable to complete application creation approve/reject process. ', error.message);
+                    Alert.error(intl.formatMessage({
+                        id: 'Workflow.ApplicationCreation.updateStatus.has.errors',
+                        defaultMessage: 'Unable to complete application creation approve/reject process. ',
+                    }));
                     throw (response.body.description);
                 }
                 return null;
@@ -238,18 +247,6 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                /* customSort: (data1, colIndex, order) => {
-                    return data1.sort((a, b) => {
-                        if (order === 'asc') {
-                            return a.data[colIndex].toString().localeCompare(b.data[colIndex],
-                                undefined, { numeric: true });
-                        } else if (order === 'desc') {
-                            return b.data[colIndex].toString().localeCompare(a.data[colIndex],
-                                undefined, { numeric: true });
-                        }
-                        return null;
-                    });
-                }, */
                 customBodyRender: (value, tableMeta) => {
                     const dataRow = data[tableMeta.rowIndex];
                     const { properties } = dataRow;
@@ -334,7 +331,6 @@ function ListLabels() {
 
     const columns = [
         ...columProps,
-
     ];
 
     const options = {

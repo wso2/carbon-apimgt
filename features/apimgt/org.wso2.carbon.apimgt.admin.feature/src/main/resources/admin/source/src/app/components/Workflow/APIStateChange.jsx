@@ -106,7 +106,10 @@ function ListLabels() {
                 return workflowlist;
             })
             .catch((error) => {
-                Alert.error('Unable to get workflow pending requests for API State Change', error.message);
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.APIStateChange.apicall.has.errors',
+                    defaultMessage: 'Unable to get workflow pending requests for API State Change',
+                }));
                 throw (error);
             });
     }
@@ -119,8 +122,11 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error('Unable to fetch data. ', e.message);
                 console.error('Unable to fetch data. ', e.message);
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.APIStateChange.fetch.has.errors',
+                    defaultMessage: 'Unable to fetch data.',
+                }));
             });
     };
 
@@ -142,7 +148,7 @@ function ListLabels() {
             .then(() => {
                 return (
                     <FormattedMessage
-                        id='Workflow.ApplicationCreation.update.success'
+                        id='Workflow.APIStateChange.update.success'
                         defaultMessage='workflow status is updated successfully'
                     />
                 );
@@ -150,7 +156,10 @@ function ListLabels() {
             .catch((error) => {
                 const { response } = error;
                 if (response.body) {
-                    Alert.error('Unable to complete API state change approve/reject process. ', error.message);
+                    Alert.error(intl.formatMessage({
+                        id: 'Workflow.APIStateChange.updateStatus.has.errors',
+                        defaultMessage: 'Unable to complete API state change approve/reject process. ',
+                    }));
                     throw (response.body.description);
                 }
                 return null;

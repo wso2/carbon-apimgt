@@ -108,7 +108,10 @@ function ListLabels() {
                 return workflowlist;
             })
             .catch((error) => {
-                Alert.error('Unable to get workflow pending requests for Subscription Creation', error.message);
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.SubscriptionCreation.apicall.has.errors',
+                    defaultMessage: 'Unable to get workflow pending requests for Subscription Creation',
+                }));
                 throw (error);
             });
     }
@@ -121,8 +124,11 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error('Unable to fetch data. ', e.message);
                 console.error('Unable to fetch data. ', e.message);
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.SubscriptionCreation.fetch.has.errors',
+                    defaultMessage: 'Unable to fetch data.',
+                }));
             });
     };
 
@@ -152,7 +158,10 @@ function ListLabels() {
             .catch((error) => {
                 const { response } = error;
                 if (response.body) {
-                    Alert.error('Unable to complete subscription creation approve/reject process. ', error.message);
+                    Alert.error(intl.formatMessage({
+                        id: 'Workflow.ApplicationCreation.updateStatus.has.errors',
+                        defaultMessage: 'Unable to complete subscription creation approve/reject process. ',
+                    }));
                     throw (response.body.description);
                 }
                 return null;
@@ -236,7 +245,7 @@ function ListLabels() {
                 defaultMessage: 'Subscriber',
             }),
             options: {
-                sort: true,
+                sort: false,
                 customBodyRender: (value, tableMeta) => {
                     const dataRow = data[tableMeta.rowIndex];
                     const { properties } = dataRow;

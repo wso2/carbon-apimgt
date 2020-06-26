@@ -114,7 +114,10 @@ function ListLabels() {
                     resolve(registrationlist);
                 })
                 .catch((error) => {
-                    Alert.error('Unable to get workflow pending requests for Registration Creation', error.message);
+                    Alert.error(intl.formatMessage({
+                        id: 'Workflow.RegistrationCreation.apicall.has.errors',
+                        defaultMessage: 'Unable to get workflow pending requests for Registration Creation',
+                    }));
                     reject(error);
                 });
         });
@@ -128,8 +131,11 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error('Unable to fetch data. ', e.message);
                 console.error('Unable to fetch data. ', e.message);
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.RegistrationCreation.fetch.has.errors',
+                    defaultMessage: 'Unable to fetch data.',
+                }));
             });
     };
 
@@ -160,7 +166,10 @@ function ListLabels() {
             .catch((error) => {
                 const { response } = error;
                 if (response.body) {
-                    Alert.error('Unable to complete registration creation approve/reject process. ', error.message);
+                    Alert.error(intl.formatMessage({
+                        id: 'Workflow.RegistrationCreation.updateStatus.has.errors',
+                        defaultMessage: 'Unable to complete registration creation approve/reject process.  ',
+                    }));
                     throw (response.body.description);
                 }
                 return null;
