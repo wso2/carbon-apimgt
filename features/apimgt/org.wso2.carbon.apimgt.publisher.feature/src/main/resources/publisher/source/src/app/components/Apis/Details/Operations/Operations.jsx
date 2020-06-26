@@ -20,7 +20,6 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import cloneDeep from 'lodash.clonedeep';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
@@ -124,7 +123,7 @@ class Operations extends React.Component {
         super(props);
         const { api } = props;
         const { operations } = api;
-        const operationCopy = cloneDeep(operations);
+        const operationCopy = [...operations];
         operationCopy.sort((a, b) => ((a.target + a.verb > b.target + b.verb) ? 1 : -1));
         this.state = {
             notFound: false,
