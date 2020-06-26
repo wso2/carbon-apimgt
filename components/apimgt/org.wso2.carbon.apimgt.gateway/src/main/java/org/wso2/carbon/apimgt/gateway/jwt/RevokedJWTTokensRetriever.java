@@ -28,6 +28,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.gateway.dto.RevokedJWTTokenDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -62,13 +63,10 @@ public class RevokedJWTTokensRetriever extends TimerTask {
 
         try {
             // The resource resides in the throttle web app. Hence reading throttle configs
-            ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = getThrottleProperties()
-                    .getBlockCondition();
-            String url = blockConditionRetrieverConfiguration.getServiceUrl() + "/revokedjwt";
+            String url = getEventHubConfiguration().getServiceUrl() + "/revokedjwt";
             HttpGet method = new HttpGet(url);
-            byte[] credentials = Base64.encodeBase64((blockConditionRetrieverConfiguration.getUsername() + ":" +
-                    blockConditionRetrieverConfiguration.getPassword()).getBytes
-                    (StandardCharsets.UTF_8));
+            byte[] credentials = Base64.encodeBase64((getEventHubConfiguration().getUsername() + ":" +
+                    getEventHubConfiguration().getPassword()).getBytes(StandardCharsets.UTF_8));
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
             URL keyMgtURL = new URL(url);
             int keyMgtPort = keyMgtURL.getPort();
@@ -127,12 +125,11 @@ public class RevokedJWTTokensRetriever extends TimerTask {
      */
     public void startRevokedJWTTokensRetriever() {
         //using same initDelay as in keytemplates,blocking conditions retriever
-        new Timer().schedule(this, getThrottleProperties().getBlockCondition().getInitDelay());
+        new Timer().schedule(this, getEventHubConfiguration().getInitDelay());
     }
 
-    protected ThrottleProperties getThrottleProperties() {
-        return ServiceReferenceHolder
-                .getInstance().getThrottleProperties();
+    protected EventHubConfigurationDto getEventHubConfiguration() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
     }
 
 }

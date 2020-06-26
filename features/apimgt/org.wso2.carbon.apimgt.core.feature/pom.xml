@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.7.35-SNAPSHOT</version>
+        <version>6.7.38-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -57,6 +57,14 @@
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -208,6 +216,8 @@
                                 <bundleDef>io.github.openfeign:feign-gson:${openfeign.version}</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-okhttp:${openfeign.version}</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-slf4j:${openfeign.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.squareup.okio:okio</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

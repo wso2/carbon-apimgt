@@ -45,7 +45,7 @@ ImportApiService delegate = new ImportApiServiceImpl();
     @ApiOperation(value = "Import an API", notes = "This operation can be used to import an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs")
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API (Individual)",  })
     @ApiResponses(value = { 
@@ -64,7 +64,7 @@ ImportApiService delegate = new ImportApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import an API Product", notes = "This operation can be used to import an API Product. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products"),
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "API Product (Individual)",  })
@@ -84,7 +84,7 @@ ImportApiService delegate = new ImportApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import an Application", notes = "This operation can be used to import an Application. ", response = ApplicationInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications"),
+            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Application (Individual)" })

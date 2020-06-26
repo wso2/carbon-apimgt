@@ -42,7 +42,9 @@ SearchApiService delegate = new SearchApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/Search APIs and API Documents by content ", notes = "This operation provides you a list of available APIs and API Documents qualifying the given keyword match. ", response = SearchResultListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "Unified Search" })
     @ApiResponses(value = { 

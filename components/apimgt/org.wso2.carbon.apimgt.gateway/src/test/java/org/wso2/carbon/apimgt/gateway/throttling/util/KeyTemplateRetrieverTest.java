@@ -31,6 +31,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -57,15 +58,13 @@ public class KeyTemplateRetrieverTest {
         Mockito.when(httpClient.execute(Mockito.any(HttpGet.class))).thenReturn(httpResponse);
         BDDMockito.given(APIUtil.getHttpClient(Mockito.anyInt(),Mockito.anyString())).willReturn(httpClient);
 
-        ThrottleProperties throttleProperties = new ThrottleProperties();
-        ThrottleProperties.BlockCondition blockCondition = new ThrottleProperties.BlockCondition();
-        blockCondition.setUsername("admin");
-        blockCondition.setPassword("admin");
-        blockCondition.setEnabled(true);
-        blockCondition.setServiceUrl("http://localhost:18084/internal/data/v1");
+        EventHubConfigurationDto eventHubConfigurationDto = new EventHubConfigurationDto();
+        eventHubConfigurationDto.setUsername("admin");
+        eventHubConfigurationDto.setPassword("admin".toCharArray());
+        eventHubConfigurationDto.setEnabled(true);
+        eventHubConfigurationDto.setServiceUrl("http://localhost:18084/internal/data/v1");
         ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-        throttleProperties.setBlockCondition(blockCondition);
-        KeyTemplateRetriever keyTemplateRetriever = new KeyTemplateRetrieverWrapper(throttleProperties,
+        KeyTemplateRetriever keyTemplateRetriever = new KeyTemplateRetrieverWrapper(eventHubConfigurationDto,
                 throttleDataHolder);
         keyTemplateRetriever.run();
         Map<String,String> keyTemplateMap = throttleDataHolder.getKeyTemplateMap();

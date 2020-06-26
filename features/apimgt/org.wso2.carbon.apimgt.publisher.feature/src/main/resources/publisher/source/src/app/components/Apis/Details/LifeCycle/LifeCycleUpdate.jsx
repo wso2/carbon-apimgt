@@ -155,22 +155,23 @@ class LifeCycleUpdate extends Component {
             api: { id: apiUUID },
         } = this.props;
         this.updateLCStateOfAPI(apiUUID, action);
+        this.enableStore();
     }
 
     /**
      *
-     *
+     * Set true the enableStore Property.
      * @memberof disableStore
      */
-    disableStore() {
+    enableStore() {
         const api = new API();
         const { id } = this.props.api;
         const promisedApi = api.get(id);
         promisedApi
             .then((getResponse) => {
                 const apiData = getResponse.body;
-                apiData.enableStore = false;
-                api.update(apiData);
+                apiData.enableStore = true;
+                this.context.updateAPI({ enableStore: true });
             })
             .catch((errorResponse) => {
                 console.error(errorResponse);
@@ -202,7 +203,6 @@ class LifeCycleUpdate extends Component {
         );
         const isCertAvailable = certList.length !== 0;
         const isBusinessPlanAvailable = api.policies.length !== 0;
-        lifecycleStates.push({ event: 'Deploy To Test', targetState: '' });
         const lifecycleButtons = lifecycleStates.map((item) => {
             const state = { ...item, displayName: item.event };
             if (state.event === 'Deploy as a Prototype') {
@@ -229,17 +229,6 @@ class LifeCycleUpdate extends Component {
                         || (isMutualSSLEnabled && !isCertAvailable)
                         || (isAppLayerSecurityMandatory && !isBusinessPlanAvailable)
                         || api.endpointConfig.implementation_status === 'prototyped',
-                };
-            }
-            if (state.event === 'Deploy To Test') {
-                const { displayName } = state;
-                return {
-                    ...state,
-                    displayName,
-                    disabled:
-                        api.endpointConfig === null
-                        || !isPrototype
-                        || api.lifeCycleStatus === 'PROTOTYPED',
                 };
             }
             return {

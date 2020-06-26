@@ -85,7 +85,7 @@ const styles = (theme) => {
         wrapper: {
             minHeight: '100%',
             marginBottom: -50,
-            background: theme.palette.background.default + ' url('+ app.context + theme.custom.backgroundImage + ') repeat left top',
+            background: theme.palette.background.default + ' url(' + app.context + theme.custom.backgroundImage + ') repeat left top',
         },
         contentWrapper: {
             display: 'flex',
@@ -356,8 +356,8 @@ class Layout extends React.Component {
         const strokeColorSelected = theme.palette.getContrastText(theme.custom.appBar.activeBackground);
 
         let publicTenantStoreVisible = true;
-        
-        if(publicTenantStore) {
+
+        if (publicTenantStore) {
             const { active: publicTenantStoreActive } = publicTenantStore;
             publicTenantStoreVisible = publicTenantStoreActive;
         }
@@ -449,62 +449,31 @@ class Layout extends React.Component {
                                 {showSearch && (<HeaderSearch id='headerSearch' />)}
                                 {tenantDomain && customUrlEnabledDomain === 'null' && tenantDomain !== 'INVALID'
                                     && publicTenantStoreVisible && (
-                                    <Link
-                                        style={{
-                                            textDecoration: 'none',
-                                            color: '#ffffff',
-                                        }}
-                                        to='/'
-                                        onClick={() => setTenantDomain('INVALID')}
-                                        id='gotoPubulicDevPortal'
-                                    >
-                                        <Button className={classes.publicStore}>
-                                            <Icon className={classes.icons}>public</Icon>
-                                            <Hidden mdDown>
-                                                <FormattedMessage
-                                                    id='Base.index.go.to.public.store'
-                                                    defaultMessage='Go to public Dev Portal'
-                                                />
-                                            </Hidden>
-                                        </Button>
-                                    </Link>
-                                )}
+                                        <Link
+                                            style={{
+                                                textDecoration: 'none',
+                                                color: '#ffffff',
+                                            }}
+                                            to='/'
+                                            onClick={() => setTenantDomain('INVALID')}
+                                            id='gotoPubulicDevPortal'
+                                        >
+                                            <Button className={classes.publicStore}>
+                                                <Icon className={classes.icons}>public</Icon>
+                                                <Hidden mdDown>
+                                                    <FormattedMessage
+                                                        id='Base.index.go.to.public.store'
+                                                        defaultMessage='Go to public Dev Portal'
+                                                    />
+                                                </Hidden>
+                                            </Button>
+                                        </Link>
+                                    )}
                                 <VerticalDivider height={64} />
                                 {languageSwitchActive && <LanuageSelector />}
                                 {user ? (
                                     <>
                                         <div className={classes.linkWrapper}>
-                                            <List className={classes.listRoot}>
-                                                <Link to='/settings' id='settingsLink' className={classNames({ [classes.selected]: selected === 'settings', [classes.links]: true })}>
-                                                    <ListItem button>
-                                                        <ListItemIcon classes={{ root: classes.listIconRoot }}>
-                                                            <Icon
-                                                                className={classes.icons}
-                                                                style={{
-                                                                    color: selected === 'settings'
-                                                                        ? strokeColorSelected
-                                                                        : strokeColor
-                                                                }}>settings</Icon>
-                                                        </ListItemIcon>
-                                                        <Hidden mdDown>
-                                                             <ListItemText
-                                                                classes={{
-                                                                    root: classes.listItemTextRoot,
-                                                                    primary: classNames({
-                                                                        [classes.selectedText]: selected === 'settings',
-                                                                        [classes.listText]: selected !== 'settings',
-                                                                    }),
-                                                                }}
-                                                                primary={intl.formatMessage({
-                                                                    id: 'Base.Header.GlobalNavbar.menu.settings',
-                                                                    defaultMessage: 'Settings',
-                                                                })}
-                                                            />
-                                                        </Hidden>
-                                                    </ListItem>
-                                                    {selected === 'settings' && (<div className={classes.triangleDown}></div>)}
-                                                </Link>
-                                            </List>
                                             <Button
                                                 buttonRef={(node) => {
                                                     this.anchorEl = node;
@@ -532,6 +501,7 @@ class Layout extends React.Component {
                                                     vertical: 'top',
                                                     horizontal: 'center',
                                                 }}
+                                                placement='bottom-end'
                                             >
                                                 {({ TransitionProps, placement }) => (
                                                     <Grow
@@ -545,6 +515,42 @@ class Layout extends React.Component {
                                                         <Paper>
                                                             <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
                                                                 <MenuList>
+                                                                    <MenuItem className={classes.logoutLink}>
+                                                                        <Link
+                                                                            to='/settings/manage-alerts'
+                                                                            onClick={this.handleCloseUserMenu}
+                                                                        >
+                                                                            <FormattedMessage
+                                                                                id='Base.index.settingsMenu.alertConfiguration'
+                                                                                defaultMessage='Alert configure'
+                                                                            />
+                                                                        </Link>
+                                                                    </MenuItem>
+                                                                    <MenuItem className={classes.logoutLink}>
+                                                                        <Link
+                                                                            to={'/settings/change-password/'}
+                                                                            onClick={this.handleCloseUserMenu}
+                                                                        >
+                                                                            <FormattedMessage
+                                                                                id='Base.index.settingsMenu.changePassword'
+                                                                                defaultMessage='Change Password'
+                                                                            />
+                                                                        </Link>
+                                                                    </MenuItem>
+                                                                    {/* {user.name !== 'admin' ?
+                                                                        <MenuItem className={classes.logoutLink}>
+                                                                            <Link
+                                                                                to={'/settings/change-password/'}
+                                                                                onClick={this.handleCloseUserMenu}
+                                                                            >
+                                                                                <FormattedMessage
+                                                                                    id='Base.index.settingsMenu.changePassword'
+                                                                                    defaultMessage='Change Password'
+                                                                                />
+                                                                            </Link>
+                                                                        </MenuItem> :
+                                                                        null
+                                                                    } */}
                                                                     <MenuItem onClick={this.doOIDCLogout} className={classes.logoutLink}>
                                                                         <FormattedMessage
                                                                             id='Base.index.logout'
