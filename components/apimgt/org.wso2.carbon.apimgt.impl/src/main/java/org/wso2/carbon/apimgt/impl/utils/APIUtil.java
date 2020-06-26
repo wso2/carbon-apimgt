@@ -4506,6 +4506,17 @@ public final class APIUtil {
                 }
             }
 
+            // create devOps role if it's creation is enabled in tenant-conf.json
+            JSONObject devOpsRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_DEVOPS_ROLE);
+            if (isRoleCreationEnabled(devOpsRoleConfig)) {
+                String devOpsRoleName = String.valueOf(devOpsRoleConfig
+                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (!StringUtils.isBlank(devOpsRoleName)) {
+                    createDevOpsRole(devOpsRoleName, tenantId);
+                }
+            }
+
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
         }
@@ -4803,6 +4814,22 @@ public final class APIUtil {
                 new Permission(APIConstants.Permissions.CONFIGURE_GOVERNANCE, UserMgtConstants.EXECUTE_ACTION),
                 new Permission(APIConstants.Permissions.RESOURCE_GOVERN, UserMgtConstants.EXECUTE_ACTION)};
         createRole(roleName, creatorPermissions, tenantId);
+    }
+
+    /**
+     * Create APIM DevOps roles with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createDevOpsRole(String roleName, int tenantId) throws APIManagementException {
+        Permission[] devOpsPermissions = new Permission[]{
+                new Permission(APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
+        };
+        createRole(roleName, devOpsPermissions, tenantId);
     }
 
     /**

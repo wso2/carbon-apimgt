@@ -80,9 +80,9 @@ securityDefinitions:
       apim:mediation_policy_view: View mediation policies
       apim:mediation_policy_create: Create mediation policies
       apim:app_owner_change: Retrieve and manage applications #TODO: Verify Description
-      apim:app_import_export: Import and export applications
-      apim:api_import_export: Import and export APIs
-      apim:api_product_import_export: Import and export API Products
+      apim:app_import_export: Import and export applications related operations
+      apim:api_import_export: Import and export APIs related operations
+      apim:api_product_import_export: Import and export API Products related operations
       apim:label_manage: Manage labels
       apim:label_read: Retrieve labels
       apim:monetization_usage_publish: Retrieve and publish Monetization related usage records #TODO: Verify Description
@@ -1836,6 +1836,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:app_owner_change
+            - apim:app_import_export
       x-wso2-request: |
         GET https://localhost:9443/api/am/admin/v1/applications
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
