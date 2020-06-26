@@ -15479,10 +15479,10 @@ public class ApiMgtDAO {
             statement.setString(3, gatewayInstruction);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                byte[] st = (byte[]) rs.getObject(1);
-                baip = new ByteArrayInputStream(st);
+                InputStream inputStream = rs.getBinaryStream(1);
+                baip = new ByteArrayInputStream(IOUtils.toByteArray(inputStream));
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Failed to get artifacts of API with ID " + APIId, e);
         }
         return baip;
@@ -15504,12 +15504,12 @@ public class ApiMgtDAO {
             statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                byte[] st = (byte[]) rs.getObject(1);
-                ByteArrayInputStream byteArrayInputStream= new ByteArrayInputStream(st);
+                InputStream inputStream = rs.getBinaryStream(1);
+                ByteArrayInputStream byteArrayInputStream= new ByteArrayInputStream(IOUtils.toByteArray(inputStream));
                 baip.add(byteArrayInputStream);
             }
             return baip;
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Failed to get artifacts " , e);
         }
         return baip;

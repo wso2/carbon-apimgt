@@ -79,7 +79,7 @@ public class DBSaver implements ArtifactSaver {
                     APIConstants.DigestAuthConstants.CHARSET));
             HttpResponse httpResponse = invokeService(synapsePost,revokeRequestPayload);
             if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-                log.error("Retrieving artifacts is UnSuccessful. Internal Data Service returned HTTP Status " +
+                log.error("Saving artifacts is UnSuccessful. Internal Data Service returned HTTP Status " +
                         "code : " + httpResponse.getStatusLine().getStatusCode() );
                 throw new ArtifactSynchronizerException("Error while Saving Artifacts to DB");
             }
