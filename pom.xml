@@ -1718,14 +1718,14 @@
         <carbon.apimgt.version>6.7.36-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.2.24</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.2.25</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.6.0</carbon.kernel.version>
         <carbon.kernel.feature.version>4.6.0</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.commons.version>4.7.24</carbon.commons.version>
-        <carbon.registry.version>4.7.32</carbon.registry.version>
+        <carbon.commons.version>4.7.32</carbon.commons.version>
+        <carbon.registry.version>4.7.34</carbon.registry.version>
         <carbon.mediation.version>4.7.48</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
@@ -1746,7 +1746,7 @@
 
         <graphql.java.version>13.0.wso2v2</graphql.java.version>
 
-        <carbon.governance.version>4.8.14</carbon.governance.version>
+        <carbon.governance.version>4.8.18</carbon.governance.version>
         <carbon.deployment.version>4.10.1</carbon.deployment.version>
         <carbon.multitenancy.version>4.8.1</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
@@ -1784,7 +1784,7 @@
         <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
 
         <!-- Axis2 Version -->
-        <axis2.wso2.version>1.6.1-wso2v40</axis2.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v41</axis2.wso2.version>
         <axis2.osgi.version.range>[1.6.1, 1.7.0)</axis2.osgi.version.range>
 
         <!-- Apache Axiom -->
