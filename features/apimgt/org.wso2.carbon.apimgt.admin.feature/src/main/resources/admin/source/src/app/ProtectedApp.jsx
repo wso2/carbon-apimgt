@@ -311,8 +311,8 @@ class Protected extends Component {
         return (
             <MuiThemeProvider theme={theme}>
                 <AppErrorBoundary>
-                    <Base header={header} leftMenu={leftMenu}>
-                        {settings ? (
+                    {settings ? (
+                        <Base header={header} leftMenu={leftMenu}>
                             <AppContextProvider value={{ settings, user, isSuperTenant }}>
                                 <Route>
                                     <Switch>
@@ -328,10 +328,10 @@ class Protected extends Component {
                                     </Switch>
                                 </Route>
                             </AppContextProvider>
-                        ) : (
-                            <Progress message='Loading Settings ...' />
-                        )}
-                    </Base>
+                        </Base>
+                    ) : (
+                        <Progress message='Loading Settings ...' />
+                    )}
                     <iframe
                         title='iframeOP'
                         id='iframeOP'
