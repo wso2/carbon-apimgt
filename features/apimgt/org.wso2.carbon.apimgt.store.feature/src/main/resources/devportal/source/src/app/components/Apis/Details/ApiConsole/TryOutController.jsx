@@ -214,7 +214,7 @@ function TryOutController(props) {
      * Generate access token
      * */
     function generateAccessToken() {
-        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+        if (api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() !== 'prototyped') {
             setIsUpdating(true);
             const applicationPromise = Application.get(selectedApplication);
             applicationPromise
@@ -249,7 +249,7 @@ function TryOutController(props) {
      * Generate api key
      * */
     function generateApiKey() {
-        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+        if (api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() !== 'prototyped') {
             setIsUpdating(true);
             const promisedKey = restApi.generateApiKey(selectedApplication, selectedKeyType, -1);
             promisedKey
@@ -288,7 +288,7 @@ function TryOutController(props) {
      * @memberof TryOutController
      */
     function updateApplication() {
-        if (!api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped') {
+        if (api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() !== 'prototyped') {
             let accessToken;
             let keyType;
             if (subscriptions !== null && subscriptions.length !== 0 && selectedApplication.length !== 0) {
@@ -400,7 +400,6 @@ function TryOutController(props) {
             prefix = '';
         }
         if (isTestKeyEnabled && securitySchemeType === 'TEST') {
-            console.log('TEST scheme------------');
             authorizationHeader = 'testKey';
             prefix = '';
         }
