@@ -218,6 +218,14 @@ public class JMSMessageListener implements MessageListener {
                 ServiceReferenceHolder.getInstance().getAPIThrottleDataService().removeIpBlockingCondition(tenantDomain,
                         conditionId);
             }
+        } else if (APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION.equals(condition)) {
+            if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService().addBlockingCondition(
+                        APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION, conditionValue, conditionValue);
+            } else {
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                        .removeBlockCondition(APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION,conditionValue);
+            }
         }
     }
 

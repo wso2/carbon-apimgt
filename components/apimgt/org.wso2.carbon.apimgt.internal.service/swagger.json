@@ -534,6 +534,12 @@
           "items" : {
             "type" : "string"
           }
+        },
+        "subscription" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
         }
       }
     },

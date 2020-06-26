@@ -58,6 +58,7 @@ public class APIDTO   {
     private AdvertiseInfoDTO advertiseInfo = null;
     private Boolean isSubscriptionAvailable = null;
     private List<String> categories = new ArrayList<>();
+    private Object keyManagers = null;
 
   /**
    * UUID of the api 
@@ -594,6 +595,24 @@ public class APIDTO   {
     this.categories = categories;
   }
 
+  /**
+   * API Key Managers 
+   **/
+  public APIDTO keyManagers(Object keyManagers) {
+    this.keyManagers = keyManagers;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "API Key Managers ")
+  @JsonProperty("keyManagers")
+  public Object getKeyManagers() {
+    return keyManagers;
+  }
+  public void setKeyManagers(Object keyManagers) {
+    this.keyManagers = keyManagers;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -633,12 +652,13 @@ public class APIDTO   {
         Objects.equals(avgRating, API.avgRating) &&
         Objects.equals(advertiseInfo, API.advertiseInfo) &&
         Objects.equals(isSubscriptionAvailable, API.isSubscriptionAvailable) &&
-        Objects.equals(categories, API.categories);
+        Objects.equals(categories, API.categories) &&
+        Objects.equals(keyManagers, API.keyManagers);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers);
   }
 
   @Override
@@ -676,6 +696,7 @@ public class APIDTO   {
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("    isSubscriptionAvailable: ").append(toIndentedString(isSubscriptionAvailable)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
+    sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("}");
     return sb.toString();
   }

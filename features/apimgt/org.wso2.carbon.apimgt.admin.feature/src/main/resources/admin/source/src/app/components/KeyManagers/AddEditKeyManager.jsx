@@ -47,6 +47,7 @@ import KeyManagerConfiguration from 'AppComponents/KeyManagers/KeyManagerConfigu
 import ClaimMappings from 'AppComponents/KeyManagers/ClaimMapping';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import Cetificates from 'AppComponents/KeyManagers/Cetificates';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -85,6 +86,9 @@ const useStyles = makeStyles((theme) => ({
         position: 'absolute',
         marginTop: '-5px',
     },
+    chipContainer: {
+        marginBottom: 8,
+    },
 }));
 
 
@@ -120,6 +124,7 @@ function reducer(state, newValue) {
         case 'displayName':
         case 'consumerKeyClaim':
         case 'scopesClaim':
+        case 'certificates':
             return { ...state, [field]: value };
         case 'all':
             return value;
@@ -162,6 +167,10 @@ function AddEditKeyManager(props) {
         scopesClaim: '',
         consumerKeyClaim: '',
         additionalProperties: {},
+        certificates: {
+            type: 'PEM',
+            value: '',
+        },
     });
     const { settings } = useAppContext();
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -171,7 +180,7 @@ function AddEditKeyManager(props) {
         tokenEndpoint, revokeEndpoint,
         userInfoEndpoint, authorizeEndpoint,
         issuer, scopeManagementEndpoint, availableGrantTypes, consumerKeyClaim, scopesClaim,
-        enableTokenGeneration, enableMapOAuthConsumerApps,
+        enableTokenGeneration, enableMapOAuthConsumerApps, certificates,
         enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, tokenValidation, additionalProperties,
     } = state;
     const [validating, setValidating] = useState(false);
@@ -336,9 +345,12 @@ function AddEditKeyManager(props) {
         <ContentBase
             pageStyle='half'
             title={
-                intl.formatMessage({
-                    id: 'Keymanagers.Create.new',
-                    defaultMessage: 'KeyManager - Create new',
+                id ? `${intl.formatMessage({
+                    id: 'KeyManagers.AddEditKeyManager.title.edit',
+                    defaultMessage: 'Key Manager - Edit ',
+                })} ${name}` : intl.formatMessage({
+                    id: 'KeyManagers.AddEditKeyManager.title.new',
+                    defaultMessage: 'Key Manager - Create new',
                 })
             }
             help={<div />}
@@ -629,9 +641,36 @@ function AddEditKeyManager(props) {
                                 value={scopesClaim}
                                 onChange={onChange}
                             />
-
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={3}>
+                        <Typography color='inherit' variant='subtitle2' component='div'>
+                            <FormattedMessage
+                                id='KeyManagers.AddEditKeyManager.grant.types'
+                                defaultMessage='Grant Types'
+                            />
+                        </Typography>
+                        <Typography color='inherit' variant='caption' component='p'>
+                            <FormattedMessage
+                                id='KeyManagers.AddEditKeyManager.grant.types.description'
+                                defaultMessage={'Add the supported grant types by the'
+                                    + ' key manager. Press enter to add each grant.'}
+                            />
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
+                        <Box component='div' m={1}>
                             <ChipInput
-                                classes={{ root: classes.chipInputRoot, helperText: classes.chipInputHelpText }}
+                                classes={{
+                                    root: classes.chipInputRoot,
+                                    helperText: classes.chipInputHelpText,
+                                    chipContainer: classes.chipContainer,
+                                }}
                                 value={availableGrantTypes}
                                 onAdd={(grantType) => {
                                     availableGrantTypes.push(grantType);
@@ -652,6 +691,30 @@ function AddEditKeyManager(props) {
                                     </div>
                                 )}
                             />
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={3}>
+                        <Typography color='inherit' variant='subtitle2' component='div'>
+                            <FormattedMessage
+                                id='KeyManagers.AddEditKeyManager.cetificate'
+                                defaultMessage='Cetificates'
+                            />
+                        </Typography>
+                        <Typography color='inherit' variant='caption' component='p'>
+                            <FormattedMessage
+                                id='KeyManagers.AddEditKeyManager.cetificate.description'
+                                defaultMessage='Upload or provide the certificate inline.'
+                            />
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
+                        <Box component='div' m={1}>
+                            <Cetificates certificates={certificates} dispatch={dispatch} />
                         </Box>
                     </Grid>
                     <Grid item xs={12}>

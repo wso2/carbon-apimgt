@@ -64,6 +64,7 @@ public class BlockingConditionRetrieverTest {
                 throttleDataHolder);
         blockingConditionRetriever.run();
         Assert.assertTrue(throttleDataHolder.isRequestBlocked("/pizzashack/1.0.0", "admin:DefaultApplication",
-                "admin", "127.0.0.1", "carbon.super"));
+                "admin", "127.0.0.1", "carbon.super",
+                "/pizzashack/1.0.0:1.0.0:admin-DefaultApplication"));
     }
 }

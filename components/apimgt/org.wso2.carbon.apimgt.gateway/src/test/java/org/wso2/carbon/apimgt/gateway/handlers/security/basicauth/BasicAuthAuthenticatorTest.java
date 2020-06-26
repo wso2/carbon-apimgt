@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
 
 import java.util.TreeMap;
 
@@ -59,31 +60,40 @@ public class BasicAuthAuthenticatorTest {
 
         basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true);
         BasicAuthCredentialValidator basicAuthCredentialValidator = Mockito.mock(BasicAuthCredentialValidator.class);
+        BasicAuthValidationInfoDTO basicAuthValidationInfoDTO = new BasicAuthValidationInfoDTO();
 
         Mockito.when(basicAuthCredentialValidator.validate(Mockito.anyString(), Mockito.anyString()))
                 .thenAnswer(invocationOnMock -> {
                     Object argument1 = invocationOnMock.getArguments()[0];
                     Object argument2 = invocationOnMock.getArguments()[1];
 
-                    if ((argument1.equals("test_username@carbon.super") ||
-                            argument1.equals("test_username_blocked@carbon.super")) &&
-                            argument2.equals("test_password")) {
-                        return true;
+                    if ((argument1.equals("test_username@carbon.super") || argument1
+                            .equals("test_username_blocked@carbon.super")) && argument2.equals("test_password")) {
+                        basicAuthValidationInfoDTO.setAuthenticated(true);
+                        basicAuthValidationInfoDTO.setHashedPassword("hashed_test_password");
+                        if ("test_username@carbon.super".equals(argument1)) {
+                            basicAuthValidationInfoDTO.setDomainQualifiedUsername("test_username@carbon.super");
+                        } else if ("test_username_blocked@carbon.super".equals(argument1)) {
+                            basicAuthValidationInfoDTO.setDomainQualifiedUsername("test_username_blocked@carbon.super");
+                        }
+                        String[] userRoleList = { "roleQ", "roleX" };
+                        basicAuthValidationInfoDTO.setUserRoleList(userRoleList);
+                        return basicAuthValidationInfoDTO;
                     }
-                    return false;
+                    return basicAuthValidationInfoDTO;
                 });
 
-        Mockito.when(basicAuthCredentialValidator.validateScopes(Mockito.anyString(), Mockito.any(OpenAPI.class),
-                Mockito.any(MessageContext.class)))
-                .thenAnswer(invocationOnMock -> {
-                    Object argument = invocationOnMock.getArguments()[0];
-                    if (argument.equals("test_username@carbon.super")) {
-                        return true;
-                    } else if (argument.equals("test_username_blocked@carbon.super")) {
-                        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
-                    }
-                    return false;
-                });
+        Mockito.when(basicAuthCredentialValidator
+                .validateScopes(Mockito.anyString(), Mockito.any(OpenAPI.class), Mockito.any(MessageContext.class),
+                        Mockito.anyObject())).thenAnswer(invocationOnMock -> {
+            Object argument = invocationOnMock.getArguments()[0];
+            if (argument.equals("test_username@carbon.super")) {
+                return true;
+            } else if (argument.equals("test_username_blocked@carbon.super")) {
+                throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+            }
+            return false;
+        });
         basicAuthAuthenticator.setBasicAuthCredentialValidator(basicAuthCredentialValidator);
         Mockito.when(messageContext.getProperty(BasicAuthAuthenticator.PUBLISHER_TENANT_DOMAIN)).
                 thenReturn("carbon.super");

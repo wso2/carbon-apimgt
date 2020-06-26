@@ -191,7 +191,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         mapping.setApplicationId(event.getApplicationId());
         mapping.setConsumerKey(event.getConsumerKey());
         mapping.setKeyType(event.getKeyType());
-        mapping.setWfState(null);// TODO see why null
+        mapping.setKeyManager(event.getKeyManager());
         if(log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + mapping.toString());
@@ -204,7 +204,6 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         application.setId(event.getApplicationId());
         application.setName(event.getApplicationName());
         application.setPolicy(event.getApplicationPolicy());
-        application.setSubId(null); /// TODO see why null
         application.setTokenType(event.getTokenType());
         application.setSubName(event.getSubscriber());
         if(log.isDebugEnabled()) {
@@ -218,7 +217,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         sub.setApiId(event.getApiId()); 
         sub.setAppId(event.getApplicationId());
         sub.setPolicyId(event.getPolicyId());
-        sub.setSubscriptionId(String.valueOf(event.getSubscriptionId()));  /// TODO try to send same format
+        sub.setSubscriptionId(String.valueOf(event.getSubscriptionId()));
         sub.setSubscriptionState(event.getSubscriptionState());
         if(log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());

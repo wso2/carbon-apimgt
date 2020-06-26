@@ -18,7 +18,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { CircularProgress, Typography, Grid } from '@material-ui/core';
+import { CircularProgress, Grid } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Link } from 'react-router-dom';
@@ -29,7 +29,6 @@ import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import Progress from 'AppComponents/Shared/Progress';
 import { FormattedMessage } from 'react-intl';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import SubscriptionsTable from './SubscriptionsTable';
 import SubscriptionPoliciesManage from './SubscriptionPoliciesManage';
 import SubscriptionAvailability from './SubscriptionAvailability';
@@ -40,10 +39,6 @@ const useStyles = makeStyles((theme) => ({
     },
     emptyBox: {
         marginTop: theme.spacing(2),
-    },
-    heading: {
-        marginTop: theme.spacing(3),
-        marginBottom: theme.spacing(2),
     },
 }));
 
@@ -153,34 +148,7 @@ function Subscriptions(props) {
                     </Link>
                 </Grid>
             </Grid>
-            <div className={classes.heading}>
-                <Typography variant='h4'>
-                    <FormattedMessage
-                        id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
-                        defaultMessage='Manage Subscriptions'
-                    />
-                </Typography>
-                <Typography variant='caption' gutterBottom>
-                    <FormattedMessage
-                        id='Apis.Details.Subscriptions.SubscriptionsTable.sub.heading'
-                        defaultMessage='Manage subscriptions of the API'
-                    />
-                </Typography>
-            </div>
-            {subscriptions !== 0 ? (
-                <SubscriptionsTable api={api} />
-            ) : (
-                <InlineMessage type='info' height={80} className={classes.emptyBox}>
-                    <div className={classes.contentWrapper}>
-                        <Typography component='p' className={classes.content}>
-                            <FormattedMessage
-                                id='Apis.Details.Subscriptions.table.empty'
-                                defaultMessage='No subscription data available.'
-                            />
-                        </Typography>
-                    </div>
-                </InlineMessage>
-            )}
+            <SubscriptionsTable api={api} />
         </>
     );
 }
