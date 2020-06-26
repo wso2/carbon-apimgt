@@ -121,6 +121,7 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_PUBLISHER_ROLE = "PublisherRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE = "CreatorRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_DEVOPS_ROLE = "DevOpsRole";
     public static final String ANALYTICS_ROLE = "Internal/analytics";
     public static final String API_TENANT_CONF_ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
 
@@ -380,6 +381,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
 
     public static final String API_OVERVIEW_ENABLE_STORE = "overview_enableStore";
+
+    public static final String API_OVERVIEW_TESTKEY = "overview_testKey";
 
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
@@ -661,6 +664,10 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
     public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
+    public static final String ENABLE_DEFAULT_KEY_MANAGER_REGISTRATION = API_KEY_VALIDATOR +
+            "EnableDefaultKeyManagerRegistration";
+    public static final String ENABLE_KEY_MANAGER_RETRIVAL  = API_KEY_VALIDATOR+
+            "EnableKeyManagerConfigurationRetriever";
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER + "KeyManagerClientImpl";
@@ -905,8 +912,7 @@ public final class APIConstants {
 
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
-    public static final String TOKEN_REVOCATION_EVENT_PUBLISHER = "tokenRevocationPublisher";
-    public static final String CACHE_INVALIDATION_EVENT_PUBLISHER = "cacheInvalidationEventPublisher";
+    public static final String EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER = "eventHubNotificationEventPublisher";
     public static final String NOTIFICATION_EVENT_PUBLISHER = "notificationPublisher";
 
     public static final int AM_CREATOR_APIMGT_EXECUTION_ID = 200;
@@ -1154,12 +1160,11 @@ public final class APIConstants {
     public static final String GRAPHQL_PAYLOAD = "GRAPHQL_PAYLOAD";
     public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
     public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "GraphQLAccessControlPolicy";
-    public static final String QUERY_ANALYSIS_DEPTH = "depth";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
     public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
     public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
-    public static final String CHECK_ENABLED = "enabled";
-    public static final String DEFAULT_DEPTH_ROLE = "default";
+    public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
+    public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
@@ -2290,4 +2295,14 @@ public final class APIConstants {
         public static final String CONTAINER_MANAGEMENT_INFO ="ContainerMgtInfo";
 
     }
+    public static class TopicNames {
+        //APIM default topic names
+        public static final String TOPIC_THROTTLE_DATA = "throttleData";
+        public static final String TOPIC_TOKEN_REVOCATION = "tokenRevocation";
+        public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
+        public static final String TOPIC_KEY_MANAGER = "keyManager";
+        public static final String TOPIC_NOTIFICATION = "notification";
+    }
+
+    public static final String ENABLE_CHANGE_PASSWORD = "EnableChangePassword";
 }

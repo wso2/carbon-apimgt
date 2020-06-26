@@ -651,7 +651,8 @@ public class GatewayUtils {
                                                                       JSONObject api,
                                                                       APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
                                                                       String apiLevelPolicy, String endUserToken,
-                                                                      boolean isOauth) throws java.text.ParseException {
+                                                                      boolean isOauth,
+                                                                      org.apache.synapse.MessageContext synCtx) throws java.text.ParseException {
 
 
         AuthenticationContext authContext = new AuthenticationContext();
@@ -734,6 +735,12 @@ public class GatewayUtils {
                         && APIConstants.JwtTokenConstants.QUOTA_TYPE_BANDWIDTH
                                 .equals(subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.QUOTA_TYPE))) {
                     authContext.setIsContentAware(true);;
+                }
+                if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_DEPTH);
+                    Integer graphQLMaxComplexity = (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_COMPLEXITY);
+                    synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH, graphQLMaxDepth);
+                    synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY, graphQLMaxComplexity);
                 }
             }
         }

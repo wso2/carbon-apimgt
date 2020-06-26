@@ -17,10 +17,12 @@
  */
 package org.wso2.carbon.apimgt.jms.listener.utils;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -31,16 +33,10 @@ import org.wso2.carbon.core.ServerStartupObserver;
 public class JMSListenerStartupShutdownListener implements ServerStartupObserver, ServerShutdownHandler {
 
     private Log log = LogFactory.getLog(JMSListenerStartupShutdownListener.class);
-    private JMSTransportHandler jmsTransportHandlerForTrafficManager;
     private JMSTransportHandler jmsTransportHandlerForEventHub;
 
     public JMSListenerStartupShutdownListener() {
 
-        ThrottleProperties.JMSConnectionProperties jmsConnectionProperties =
-                ServiceReferenceHolder.getInstance().getAPIMConfiguration().getThrottleProperties()
-                        .getJmsConnectionProperties();
-        this.jmsTransportHandlerForTrafficManager =
-                new JMSTransportHandler(jmsConnectionProperties.getJmsConnectionProperties());
         EventHubConfigurationDto.EventHubReceiverConfiguration eventHubReceiverConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIMConfiguration().getEventHubConfigurationDto()
                         .getEventHubReceiverConfiguration();
@@ -59,26 +55,20 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
     @Override
     public void completedServerStartup() {
 
-        jmsTransportHandlerForTrafficManager
-                .subscribeForJmsEvents(JMSConstants.TOPIC_THROTTLE_DATA, new JMSMessageListener());
-        jmsTransportHandlerForEventHub.subscribeForJmsEvents(JMSConstants.TOPIC_TOKEN_REVOCATION,
-                new GatewayTokenRevocationMessageListener());
-        jmsTransportHandlerForEventHub
-                .subscribeForJmsEvents(JMSConstants.TOPIC_CACHE_INVALIDATION, new APIMgtGatewayCacheMessageListener());
-        jmsTransportHandlerForEventHub
-                .subscribeForJmsEvents(JMSConstants.TOPIC_KEY_MANAGER, new KeyManagerJMSMessageListener());
-        jmsTransportHandlerForEventHub
-                .subscribeForJmsEvents(JMSConstants.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
+        APIManagerConfiguration apimConfiguration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        if (apimConfiguration != null) {
+            String enableKeyManagerRetrieval =
+                    apimConfiguration.getFirstProperty(APIConstants.ENABLE_KEY_MANAGER_RETRIVAL);
+            if (JavaUtils.isTrueExplicitly(enableKeyManagerRetrieval)) {
+                jmsTransportHandlerForEventHub
+                        .subscribeForJmsEvents(JMSConstants.TOPIC_KEY_MANAGER, new KeyManagerJMSMessageListener());
+            }
+        }
     }
 
     @Override
     public void invoke() {
 
-        if (jmsTransportHandlerForTrafficManager != null) {
-            // This method will make shutdown the Listener.
-            log.debug("Unsubscribe from JMS Events...");
-            jmsTransportHandlerForTrafficManager.unSubscribeFromEvents();
-        }
         if (jmsTransportHandlerForEventHub != null) {
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();

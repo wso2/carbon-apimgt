@@ -66,6 +66,7 @@ public enum StateEnum {
     private StateEnum state = null;
     private Boolean enableSchemaValidation = null;
     private Boolean enableStore = null;
+    private String testKey = null;
     private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
 
@@ -350,6 +351,23 @@ public enum SubscriptionAvailabilityEnum {
   }
   public void setEnableStore(Boolean enableStore) {
     this.enableStore = enableStore;
+  }
+
+  /**
+   **/
+  public APIProductDTO testKey(String testKey) {
+    this.testKey = testKey;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "8swdwj9080edejhj", value = "")
+  @JsonProperty("testKey")
+  public String getTestKey() {
+    return testKey;
+  }
+  public void setTestKey(String testKey) {
+    this.testKey = testKey;
   }
 
   /**
@@ -827,6 +845,7 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(state, apIProduct.state) &&
         Objects.equals(enableSchemaValidation, apIProduct.enableSchemaValidation) &&
         Objects.equals(enableStore, apIProduct.enableStore) &&
+        Objects.equals(testKey, apIProduct.testKey) &&
         Objects.equals(responseCachingEnabled, apIProduct.responseCachingEnabled) &&
         Objects.equals(cacheTimeout, apIProduct.cacheTimeout) &&
         Objects.equals(visibility, apIProduct.visibility) &&
@@ -857,7 +876,7 @@ public enum SubscriptionAvailabilityEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, enableStore, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, enableStore, testKey, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
   }
 
   @Override
@@ -874,6 +893,7 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    enableStore: ").append(toIndentedString(enableStore)).append("\n");
+    sb.append("    testKey: ").append(toIndentedString(testKey)).append("\n");
     sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");

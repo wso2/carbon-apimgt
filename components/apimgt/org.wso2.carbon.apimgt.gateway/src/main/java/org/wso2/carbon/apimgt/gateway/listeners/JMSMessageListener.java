@@ -16,15 +16,15 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.jms.listener.utils;
+package org.wso2.carbon.apimgt.gateway.listeners;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.jms.listener.APICondition;
-import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 
 import java.util.Date;
 import java.util.Enumeration;
@@ -76,7 +76,7 @@ public class JMSMessageListener implements MessageListener {
                         String key = (String) enumeration.nextElement();
                         map.put(key, mapMessage.getObject(key));
                     }
-                    if (JMSConstants.TOPIC_THROTTLE_DATA.equalsIgnoreCase(jmsDestination.getTopicName())) {
+                    if (APIConstants.TopicNames.TOPIC_THROTTLE_DATA.equalsIgnoreCase(jmsDestination.getTopicName())) {
                         if (map.get(APIConstants.THROTTLE_KEY) != null) {
                             /*
                              * This message contains throttle data in map which contains Keys

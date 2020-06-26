@@ -161,7 +161,7 @@ function Operation(props) {
                     classes={{ content: classes.contentNoMargin }}
                 >
                     <Grid container direction='row' justify='space-between' alignItems='center' spacing={0}>
-                        <Grid item md={6}>
+                        <Grid item md={4}>
                             <Badge invisible={!operation['x-wso2-new']} color='error' variant='dot'>
                                 <Button
                                     disableFocusRipple
@@ -202,16 +202,16 @@ function Operation(props) {
                         ) : (
                             <Grid item md={3} />
                         )}
-                        <Grid item md={2}>
+                        <Grid item md={4}>
                             <Typography
                                 display='inline'
                                 style={{ margin: '0px 30px' }}
                                 variant='caption'
                                 gutterBottom
                             >
-                                <b>{ getOperationScopes(operation, spec)[0] != null && 'Scope : ' }</b>
-                                { getOperationScopes(operation, spec)[0] != null
-                                    && getOperationScopes(operation, spec)[0] }
+                                <b>{ getOperationScopes(operation, spec) != null && 'Scope : ' }</b>
+                                { getOperationScopes(operation, spec) != null
+                                    && getOperationScopes(operation, spec).join(', ') }
                             </Typography>
                         </Grid>
                         {!(disableDelete || markAsDelete) && (

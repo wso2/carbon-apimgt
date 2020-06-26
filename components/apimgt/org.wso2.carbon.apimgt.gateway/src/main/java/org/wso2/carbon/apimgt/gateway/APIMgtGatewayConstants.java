@@ -202,5 +202,7 @@ public class APIMgtGatewayConstants {
     public static final String SPAN_APPLICATION_ID = "span.application.id";
     public static final String SPAN_APPLICATION_CONSUMER_KEY = "span.consumerkey";
     public static final String SPAN_ENDPOINT = "span.endpoint";
+
+    public static final String TEST_KEY = "testkey";
 }
 

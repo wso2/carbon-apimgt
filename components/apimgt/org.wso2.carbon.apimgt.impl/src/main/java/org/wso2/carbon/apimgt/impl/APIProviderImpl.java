@@ -71,6 +71,8 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
+import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
@@ -110,9 +112,8 @@ import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -127,10 +128,10 @@ import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
@@ -187,7 +188,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -211,6 +211,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
@@ -3242,6 +3243,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (registry.resourceExists(targetPath)) {
                 apiTargetArtifact = registry.get(targetPath);
             }
+
+            JSONObject additionProperties = new JSONObject();
             if (apiTargetArtifact != null) {
                 // Copying all the properties.
                 Properties properties = apiSourceArtifact.getProperties();
@@ -3251,6 +3254,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         String propertyName = (String) propertyNames.nextElement();
                         if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
                             apiTargetArtifact.setProperty(propertyName, apiSourceArtifact.getProperty(propertyName));
+                            additionProperties.put(propertyName, apiSourceArtifact.getProperty(propertyName));
                         }
                     }
                 }
@@ -3285,6 +3289,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIIdentifier newId = new APIIdentifier(api.getId().getProviderName(),
                     api.getId().getApiName(), newVersion);
             API newAPI = getAPI(newId, api.getId(), oldContext);
+
+            //Populate additional properties in the API object
+            if (additionProperties.size() != 0) {
+                newAPI.setAdditionalProperties(additionProperties);
+            }
 
             if (api.isDefaultVersion()) {
                 newAPI.setAsDefaultVersion(true);
@@ -4145,8 +4154,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                 .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
                                         for (Object containerMgtInfoObj : containerMgtInfo) {
                                             JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
-                                            if (containerMgtInfoDetails.get(ContainerBasedConstants.CLUSTER_ID)
-                                                    .toString().equalsIgnoreCase(clusterId)) {
+                                            if (clusterId.equalsIgnoreCase(containerMgtInfoDetails
+                                                    .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
                                                 ContainerManager containerManager =
                                                         getContainerManagerInstance(containerMgtDetails
                                                                 .get(ContainerBasedConstants.CLASS_NAME).toString());
@@ -5643,8 +5652,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                         .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
                                                 for (Object containerMgtInfoObj : containerMgtInfo) {
                                                     JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
-                                                    if (containerMgtInfoDetails.get(ContainerBasedConstants.CLUSTER_ID)
-                                                            .toString().equalsIgnoreCase(clusterId)) {
+                                                    if (clusterId.equalsIgnoreCase(containerMgtInfoDetails
+                                                            .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
                                                         ContainerManager containerManager =
                                                                 getContainerManagerInstance(containerMgtDetails
                                                                         .get(ContainerBasedConstants.CLASS_NAME).toString());
@@ -6857,7 +6866,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
 
         if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-            APIUtil.publishEvent(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, blockingMessage);
+            APIUtil.publishEventToTrafficManager(Collections.EMPTY_MAP, blockingMessage);
         }
     }
 
@@ -6870,7 +6879,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-            APIUtil.publishEvent(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, keyTemplateMessage);
+            APIUtil.publishEventToTrafficManager(Collections.EMPTY_MAP, keyTemplateMessage);
         }
     }
 
@@ -8747,8 +8756,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                 .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
                                         for (Object containerMgtInfoObj : containerMgtInfo) {
                                             JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
-                                            if (containerMgtInfoDetails.get(ContainerBasedConstants.CLUSTER_ID)
-                                                    .toString().equalsIgnoreCase(clusterName)) {
+                                            if (clusterName.equalsIgnoreCase(containerMgtInfoDetails
+                                                    .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
                                                 ContainerManager containerManager = getContainerManagerInstance(containerMgtDetails
                                                         .get(ContainerBasedConstants.CLASS_NAME).toString());
                                                 containerManager.initManager(containerMgtInfoDetails);

@@ -20,9 +20,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.osgi.service.dmt.Uri;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.databridge.commons.Event;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -49,10 +49,11 @@ public class APIAuthenticationAdminClient {
         }
         api.put("resources", resources);
 
-        Object[] event = new Object[]{APIConstants.RESOURCE_CACHE_NAME, api.toJSONString()};
+        Object[] objectData = new Object[]{APIConstants.RESOURCE_CACHE_NAME, api.toJSONString()};
         log.debug("Sending Resource Invalidation Message");
-        APIUtil.publishEventToStream(APIConstants.CACHE_INVALIDATION_STREAM_ID,
-                APIConstants.CACHE_INVALIDATION_EVENT_PUBLISHER, event);
+        Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
+                null, null, objectData);
+        APIUtil.publishEventToEventHub(null, event);
     }
 
     /**
@@ -63,9 +64,10 @@ public class APIAuthenticationAdminClient {
 
         JSONArray tokenArray = new JSONArray();
         tokenArray.addAll(activeTokens);
-        Object[] event = new Object[]{APIConstants.GATEWAY_KEY_CACHE_NAME, tokenArray.toJSONString()};
-        APIUtil.publishEventToStream(APIConstants.CACHE_INVALIDATION_STREAM_ID,
-                APIConstants.CACHE_INVALIDATION_EVENT_PUBLISHER, event);
+        Object[] objectData = new Object[]{APIConstants.GATEWAY_KEY_CACHE_NAME, tokenArray.toJSONString()};
+        Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
+                null, null, objectData);
+        APIUtil.publishEventToEventHub(null, event);
     }
 
     /**
@@ -87,10 +89,10 @@ public class APIAuthenticationAdminClient {
 
         JSONArray userArray = new JSONArray();
         userArray.addAll(Arrays.asList(username_list));
-        Object[] event = new Object[]{APIConstants.GATEWAY_USERNAME_CACHE_NAME, userArray.toJSONString()};
-        APIUtil.publishEventToStream(APIConstants.CACHE_INVALIDATION_STREAM_ID,
-                APIConstants.CACHE_INVALIDATION_EVENT_PUBLISHER, event);
-
+        Object[] objectData = new Object[]{APIConstants.GATEWAY_USERNAME_CACHE_NAME, userArray.toJSONString()};
+        Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
+                null, null, objectData);
+        APIUtil.publishEventToEventHub(null, event);
     }
 
 }

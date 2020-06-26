@@ -34,10 +34,7 @@ public class ServiceReferenceHolder {
 
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
-    private APIThrottleDataService throttleDataService;
     private APIManagerConfiguration apimConfiguration;
-    private CacheInvalidationService cacheInvalidationService;
-    private RevokedTokenService revokedTokenService;
     private KeyManagerConfigurationService keyManagerService;
 
     public static ServiceReferenceHolder getInstance() {
@@ -47,17 +44,6 @@ public class ServiceReferenceHolder {
     private ServiceReferenceHolder() {
     }
 
-    public void setAPIThrottleDataService(APIThrottleDataService dataService) {
-        if (dataService != null) {
-            throttleDataService = dataService;
-        } else {
-            throttleDataService = null;
-        }
-    }
-
-    public APIThrottleDataService getAPIThrottleDataService() {
-        return throttleDataService;
-    }
 
     public APIManagerConfiguration getAPIMConfiguration() {
         return apimConfiguration;
@@ -72,24 +58,7 @@ public class ServiceReferenceHolder {
 
     }
 
-    public void setCacheInvalidationService(CacheInvalidationService cacheInvalidationService) {
-        this.cacheInvalidationService = cacheInvalidationService;
 
-    }
-
-    public CacheInvalidationService getCacheInvalidationService() {
-
-        return cacheInvalidationService;
-    }
-
-    public void setRevokedTokenService(RevokedTokenService revokedTokenService) {
-        this.revokedTokenService = revokedTokenService;
-    }
-
-    public RevokedTokenService getRevokedTokenService() {
-
-        return revokedTokenService;
-    }
 
     public void setKeyManagerService(KeyManagerConfigurationService keyManagerService) {
         this.keyManagerService = keyManagerService;

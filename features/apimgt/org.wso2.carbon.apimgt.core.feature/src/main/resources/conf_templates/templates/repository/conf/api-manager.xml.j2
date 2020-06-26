@@ -367,14 +367,8 @@
        {% if apim.jwt.expiry_time is defined %}
         <JWTExpiryTime>{{apim.jwt.expiry_time}}</JWTExpiryTime>
        {% endif %}
-        {% if apim.key_manager.inmemory_sub_validation is defined %}
-        <InMemorySubscriptionValidation>
-            <Enabled>{{apim.key_manager.inmemory_sub_validation.enable}}</Enabled>
-            <ServiceURL>{{apim.key_manager.inmemory_sub_validation.service_url}}</ServiceURL>
-            <username>{{apim.key_manager.inmemory_sub_validation.username}}</username>
-            <password>{{apim.key_manager.inmemory_sub_validation.password}}</password>
-        </InMemorySubscriptionValidation>
-        {% endif %}
+     <EnableDefaultKeyManagerRegistration>{{apim.key_manager.enable_registration}}</EnableDefaultKeyManagerRegistration>
+     <EnableKeyManagerConfigurationRetriever>{{apim.key_manager.enable_retriever}}</EnableKeyManagerConfigurationRetriever>
     </APIKeyValidator>
 
 
@@ -540,6 +534,11 @@
 
         <!-- Configure Access-Control-Allow-Headers -->
         <Access-Control-Allow-Headers>{% for header in apim.cors.allow_headers %}{{header}}{{ "," if not loop.last }}{% endfor %}</Access-Control-Allow-Headers>
+
+        <!-- Configure Access-Control-Expose-Headers -->
+        {% if apim.cors.expose_headers is defined %}
+            <Access-Control-Expose-Headers>{% for header in apim.cors.expose_headers %}{{header}}{{ "," if not loop.last }}{% endfor %}</Access-Control-Expose-Headers>
+        {% endif %}
 
         <!-- Configure Access-Control-Allow-Credentials -->
         <!-- Specifying this header to true means that the server allows cookies (or other user credentials) to be included on cross-origin requests.
@@ -1230,7 +1229,7 @@
          <ContainerMgtInfo>
              <Type>{{cluster.type}}</Type>
              <ClassName>{{cluster.class}}</ClassName>
-             <ClusterId>{{cluster.clusterId}}</ClusterId>
+             <ClusterName>{{cluster.clusterName}}</ClusterName>
              <DisplayName>{{cluster.displayName}}</DisplayName>
              <Properties>
                  {% for key,value in cluster.properties.items() %}
@@ -1240,4 +1239,8 @@
          </ContainerMgtInfo>
          {% endfor %}
      </ContainerMgt>
+
+     <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
+      change his/her password via devportal. By default this feature is enabled.-->
+     <EnableChangePassword>{{apim.enable_change_password}}</EnableChangePassword>
 </APIManager>
