@@ -18,7 +18,6 @@
 
 import React from 'react';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
-import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import { TagCloud } from 'react-tagcloud';

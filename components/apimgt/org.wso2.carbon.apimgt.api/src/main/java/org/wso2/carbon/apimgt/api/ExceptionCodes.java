@@ -204,6 +204,8 @@ ExceptionCodes implements ErrorHandler {
     INVALID_DATE_TIME_STAMP(900703, "Invalid timestamp value", 400, "Timestamp should be in ISO8601 format"),
     LENGTH_EXCEEDS(900704, "Character length exceeds the allowable limit", 400,
             "One of the provided input character length exceeds the allowable limit."),
+    BLANK_PROPERTY_VALUE(900705, "Blank value for required property", 400,
+            "%s property value of payload cannot be blank"),
 
 
     //GraphQL API related codes
@@ -331,6 +333,16 @@ ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
             "Required application properties are missing"),
     KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
+
+    //Scope related
+    SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
+    SCOPE_NOT_FOUND(901501, "Scope Not Found", 404, "Scope does not exist"),
+    USER_NOT_FOUND(901502, "User Not Found", 404, "User does not exist"),
+    DEFINITION_EXCEPTION(901503, "Internal server error.", 500, " Error occurred while retrieving swagger definition"),
+
+    //Analytics related codes
+    ANALYTICS_NOT_ENABLED(901600, "%s not accessible", 404,
+            "Analytics should be enabled to access %s"),
 
     // Password change related
     PASSWORD_CHANGE_DISABLED(901450, "Password change disabled", 400, "Password change operation is disabled in the system"),

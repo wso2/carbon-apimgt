@@ -132,9 +132,14 @@ class Publisher extends React.Component {
      * @param {string} locale Locale name
      */
     loadLocale(locale) {
-        fetch(`${Configurations.app.context}/site/public/locales/${locale}.json`)
-            .then((resp) => resp.json())
-            .then((messages) => this.setState({ messages }));
+        // Skip loading the locale file if the language code is english,
+        // Because we have used english defaultMessage in the FormattedText component
+        // and en.json is generated from those default messages, Hence no point of fetching it
+        if (locale !== 'en') {
+            fetch(`${Configurations.app.context}/site/public/locales/${locale}.json`)
+                .then((resp) => resp.json())
+                .then((messages) => this.setState({ messages }));
+        }
     }
 
     /**
@@ -149,7 +154,7 @@ class Publisher extends React.Component {
         } = this.state;
         const locale = languageWithoutRegionCode || language;
         if (!userResolved) {
-            return <Progress message='Resolving user ...' />;
+            return <Progress per={5} message='Resolving user ...' />;
         }
         return (
             <IntlProvider locale={locale} messages={messages}>
@@ -168,7 +173,7 @@ class Publisher extends React.Component {
                                         return <RedirectToLogin />;
                                     }
                                     return (
-                                        <Suspense fallback={<Progress message='Loading app ...' />}>
+                                        <Suspense fallback={<Progress per={10} message='Loading app ...' />}>
                                             <ProtectedApp user={user} />
                                         </Suspense>
                                     );

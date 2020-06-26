@@ -95,7 +95,9 @@ public class APIThrottleDataServiceImpl implements APIThrottleDataService {
             case APIConstants.BLOCKING_CONDITIONS_USER:
                 throttleDataHolder.addUserBlockingCondition(conditionKey, conditionValue);
                 break;
-
+            case APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION:
+                throttleDataHolder.addSubscriptionBlockingCondition(conditionKey, conditionValue);
+                break;
         }
     }
 
@@ -111,6 +113,9 @@ public class APIThrottleDataServiceImpl implements APIThrottleDataService {
                 break;
             case APIConstants.BLOCKING_CONDITIONS_USER:
                 throttleDataHolder.removeUserBlockingCondition(conditionKey);
+                break;
+            case APIConstants.BLOCKING_CONDITIONS_SUBSCRIPTION:
+                throttleDataHolder.removeSubscriptionBlockingCondition(conditionKey);
                 break;
         }
     }

@@ -43,6 +43,7 @@ public class KeyManagerMappingUtil {
 
         KeyManagerInfoDTO keyManagerInfoDTO = new KeyManagerInfoDTO();
         keyManagerInfoDTO.setName(configurationDto.getName());
+        keyManagerInfoDTO.setDisplayName(configurationDto.getDisplayName());
         keyManagerInfoDTO.setDescription(configurationDto.getDescription());
         keyManagerInfoDTO.setId(configurationDto.getUuid());
         keyManagerInfoDTO.setEnabled(configurationDto.isEnabled());

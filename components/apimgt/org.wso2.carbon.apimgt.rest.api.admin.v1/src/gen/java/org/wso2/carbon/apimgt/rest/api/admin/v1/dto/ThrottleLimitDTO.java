@@ -2,8 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BandwidthLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RequestCountLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -22,7 +22,7 @@ public class ThrottleLimitDTO   {
 @XmlEnum(String.class)
 public enum TypeEnum {
 
-    @XmlEnumValue("RequestCountLimit") REQUESTCOUNTLIMIT(String.valueOf("RequestCountLimit")), @XmlEnumValue("BandwidthLimit") BANDWIDTHLIMIT(String.valueOf("BandwidthLimit"));
+    @XmlEnumValue("REQUESTCOUNTLIMIT") REQUESTCOUNTLIMIT(String.valueOf("REQUESTCOUNTLIMIT")), @XmlEnumValue("BANDWIDTHLIMIT") BANDWIDTHLIMIT(String.valueOf("BANDWIDTHLIMIT"));
 
 
     private String value;
@@ -51,11 +51,11 @@ public enum TypeEnum {
 }
 
     private TypeEnum type = null;
-    private String timeUnit = null;
-    private Integer unitTime = null;
+    private RequestCountLimitDTO requestCount = null;
+    private BandwidthLimitDTO bandwidth = null;
 
   /**
-   * Type of the throttling limit. Allowed values are \&quot;RequestCountLimit\&quot; and \&quot;BandwidthLimit\&quot;. Please see schemas of each of those throttling limit types in Definitions section. 
+   * Type of the throttling limit. Allowed values are \&quot;REQUESTCOUNTLIMIT\&quot; and \&quot;BANDWIDTHLIMIT\&quot;. Please see schemas of \&quot;RequestCountLimit\&quot; and \&quot;BandwidthLimit\&quot; throttling limit types in Definitions section. 
    **/
   public ThrottleLimitDTO type(TypeEnum type) {
     this.type = type;
@@ -63,7 +63,7 @@ public enum TypeEnum {
   }
 
   
-  @ApiModelProperty(example = "RequestCountLimit", required = true, value = "Type of the throttling limit. Allowed values are \"RequestCountLimit\" and \"BandwidthLimit\". Please see schemas of each of those throttling limit types in Definitions section. ")
+  @ApiModelProperty(example = "REQUESTCOUNTLIMIT", required = true, value = "Type of the throttling limit. Allowed values are \"REQUESTCOUNTLIMIT\" and \"BANDWIDTHLIMIT\". Please see schemas of \"RequestCountLimit\" and \"BandwidthLimit\" throttling limit types in Definitions section. ")
   @JsonProperty("type")
   @NotNull
   public TypeEnum getType() {
@@ -74,41 +74,37 @@ public enum TypeEnum {
   }
 
   /**
-   * Unit of the time. Allowed values are \&quot;sec\&quot;, \&quot;min\&quot;, \&quot;hour\&quot;, \&quot;day\&quot;
    **/
-  public ThrottleLimitDTO timeUnit(String timeUnit) {
-    this.timeUnit = timeUnit;
+  public ThrottleLimitDTO requestCount(RequestCountLimitDTO requestCount) {
+    this.requestCount = requestCount;
     return this;
   }
 
   
-  @ApiModelProperty(example = "min", required = true, value = "Unit of the time. Allowed values are \"sec\", \"min\", \"hour\", \"day\"")
-  @JsonProperty("timeUnit")
-  @NotNull
-  public String getTimeUnit() {
-    return timeUnit;
+  @ApiModelProperty(value = "")
+  @JsonProperty("requestCount")
+  public RequestCountLimitDTO getRequestCount() {
+    return requestCount;
   }
-  public void setTimeUnit(String timeUnit) {
-    this.timeUnit = timeUnit;
+  public void setRequestCount(RequestCountLimitDTO requestCount) {
+    this.requestCount = requestCount;
   }
 
   /**
-   * Time limit that the throttling limit applies.
    **/
-  public ThrottleLimitDTO unitTime(Integer unitTime) {
-    this.unitTime = unitTime;
+  public ThrottleLimitDTO bandwidth(BandwidthLimitDTO bandwidth) {
+    this.bandwidth = bandwidth;
     return this;
   }
 
   
-  @ApiModelProperty(example = "10", required = true, value = "Time limit that the throttling limit applies.")
-  @JsonProperty("unitTime")
-  @NotNull
-  public Integer getUnitTime() {
-    return unitTime;
+  @ApiModelProperty(value = "")
+  @JsonProperty("bandwidth")
+  public BandwidthLimitDTO getBandwidth() {
+    return bandwidth;
   }
-  public void setUnitTime(Integer unitTime) {
-    this.unitTime = unitTime;
+  public void setBandwidth(BandwidthLimitDTO bandwidth) {
+    this.bandwidth = bandwidth;
   }
 
 
@@ -122,13 +118,13 @@ public enum TypeEnum {
     }
     ThrottleLimitDTO throttleLimit = (ThrottleLimitDTO) o;
     return Objects.equals(type, throttleLimit.type) &&
-        Objects.equals(timeUnit, throttleLimit.timeUnit) &&
-        Objects.equals(unitTime, throttleLimit.unitTime);
+        Objects.equals(requestCount, throttleLimit.requestCount) &&
+        Objects.equals(bandwidth, throttleLimit.bandwidth);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, timeUnit, unitTime);
+    return Objects.hash(type, requestCount, bandwidth);
   }
 
   @Override
@@ -137,8 +133,8 @@ public enum TypeEnum {
     sb.append("class ThrottleLimitDTO {\n");
     
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    timeUnit: ").append(toIndentedString(timeUnit)).append("\n");
-    sb.append("    unitTime: ").append(toIndentedString(unitTime)).append("\n");
+    sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
+    sb.append("    bandwidth: ").append(toIndentedString(bandwidth)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, {
+    useEffect, useState, useCallback,
+} from 'react';
 import {
     FormControl,
     Grid,
@@ -30,6 +32,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import LaunchIcon from '@material-ui/icons/Launch';
+import { Progress } from 'AppComponents/Shared';
 
 import cloneDeep from 'lodash.clonedeep';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
@@ -589,10 +592,14 @@ function EndpointOverview(props) {
      * Method to update the resource paths object in the swagger.
      * @param {any} paths The updated paths object.
      * */
-    const updatePaths = (paths) => {
-        updateSwagger({ ...swaggerDef, paths });
-    };
+    const updatePaths = useCallback(
+        (paths) => {
+            updateSwagger({ ...swaggerDef, paths });
+        },
+        [swaggerDef],
+    );
 
+    const iff = (condition, then, otherwise) => (condition ? then : otherwise);
 
     /**
      *
@@ -666,8 +673,8 @@ function EndpointOverview(props) {
                     )}
                 </Grid>
                 <Grid item xs={12}>
-                    {endpointType.key === 'INLINE'
-                        ? <InlineEndpoints paths={swaggerDef.paths} updatePaths={updatePaths} />
+                    {endpointType.key === 'INLINE' ? iff(Object.keys(swaggerDef.paths).length !== 0,
+                        <InlineEndpoints paths={swaggerDef.paths} updatePaths={updatePaths} />, <Progress />)
                         : (
                             <Paper className={classes.endpointContainer}>
                                 {endpointType.key === 'awslambda'

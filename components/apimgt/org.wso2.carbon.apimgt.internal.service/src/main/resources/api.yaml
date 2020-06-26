@@ -436,6 +436,10 @@ definitions:
         type: array
         items:
           type: string
+      subscription:
+        type: array
+        items:
+          type: string
   RevokedJWTList:
     type: array
     items:
@@ -522,6 +526,10 @@ definitions:
       policy:
         type: string
         description: API level throttling policy.
+      apiType:
+        type: string
+        description: Type of the API.
+        example: APIProduct
       urlMappings:
         type: array
         items:

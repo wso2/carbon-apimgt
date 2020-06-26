@@ -126,9 +126,14 @@ class Admin extends React.Component {
      * @param {string} locale Locale name
      */
     loadLocale(locale) {
-        fetch(`${Configurations.app.context}/site/public/locales/${locale}.json`)
-            .then((resp) => resp.json())
-            .then((messages) => this.setState({ messages }));
+        // Skip loading the locale file if the language code is english,
+        // Because we have used english defaultMessage in the FormattedText component
+        // and en.json is generated from those default messages, Hence no point of fetching it
+        if (locale !== 'en') {
+            fetch(`${Configurations.app.context}/site/public/locales/${locale}.json`)
+                .then((resp) => resp.json())
+                .then((messages) => this.setState({ messages }));
+        }
     }
 
     /**

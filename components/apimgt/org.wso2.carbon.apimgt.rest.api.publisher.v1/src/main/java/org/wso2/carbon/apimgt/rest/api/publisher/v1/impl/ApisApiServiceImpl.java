@@ -514,51 +514,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
 
     /**
-     * Create complexity details of a given API
-     *
-     * @param apiId          apiId
-     * @param body           GraphQLQueryComplexityInfo DTO as request body
-     * @param messageContext message context
-     * @return Response
-     */
-
-    @Override
-    public Response apisApiIdGraphqlPoliciesComplexityPost(String apiId, GraphQLQueryComplexityInfoDTO body, MessageContext messageContext) throws APIManagementException {
-        try {
-            if (StringUtils.isBlank(apiId)) {
-                String errorMessage = "API ID cannot be empty or null.";
-                RestApiUtil.handleBadRequest(errorMessage, log);
-            }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            GraphqlComplexityInfo graphqlComplexityInfo =
-                    GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                apiProvider.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
-                return Response.ok().build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while adding complexity details of API : " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while adding complexity details of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-        return null;
-    }
-
-
-    /**
      * Update complexity details of a given API
      *
      * @param apiId          apiId
@@ -581,7 +536,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                apiProvider.updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+                apiProvider.addOrUpdateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
                 return Response.ok().build();
             } else {
                 throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
@@ -659,14 +614,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                     tenantDomain);
 
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schemaDefinition);
-            Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationArray);
+            List<APIOperationsDTO> operationListWithOldData =
+                    APIMappingUtil.getOperationListWithOldData(originalAPI.getUriTemplates(),
+                            extractGraphQLOperationList(schemaDefinition));
+
+            Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationListWithOldData);
             originalAPI.setUriTemplates(uriTemplates);
 
             apiProvider.saveGraphqlSchemaDefinition(originalAPI, schemaDefinition);
             apiProvider.updateAPI(originalAPI);
-            String schema = apiProvider.getGraphqlSchema(apiIdentifier);
-            return Response.ok().entity(schema).build();
+            APIDTO modifiedAPI = APIMappingUtil.fromAPItoDTO(originalAPI);
+            return Response.ok().entity(modifiedAPI.getOperations()).build();
         } catch (APIManagementException | FaultGatewaysException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -712,7 +670,10 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             JSONParser parser = new JSONParser();
             String oldEndpointConfigString = originalAPI.getEndpointConfig();
-            JSONObject oldEndpointConfig = (JSONObject) parser.parse(oldEndpointConfigString);
+            JSONObject oldEndpointConfig = null;
+            if (StringUtils.isNotBlank(oldEndpointConfigString)) {
+                oldEndpointConfig = (JSONObject) parser.parse(oldEndpointConfigString);
+            }
             String oldProductionApiSecret = null;
             String oldSandboxApiSecret = null;
 

@@ -118,15 +118,16 @@ public class ApplicationImportExportManager {
             if (!StringUtils.isEmpty(tenantDomain) && APIUtil.isTenantAvailable(tenantDomain)) {
                 String name = apiIdentifier.getApiName();
                 String version = apiIdentifier.getVersion();
-                //creating a solr compatible search query
+                //creating a solr compatible search query, here we will execute a search query without wildcard *s
                 StringBuilder searchQuery = new StringBuilder();
                 String[] searchCriteria = {name, "version:" + version};
                 for (int i = 0; i < searchCriteria.length; i++) {
                     if (i == 0) {
-                        searchQuery = new StringBuilder(APIUtil.getSingleSearchCriteria(searchCriteria[i]));
+                        searchQuery = new StringBuilder(
+                                APIUtil.getSingleSearchCriteria(searchCriteria[i]).replace("*", ""));
                     } else {
                         searchQuery.append(APIConstants.SEARCH_AND_TAG)
-                                .append(APIUtil.getSingleSearchCriteria(searchCriteria[i]));
+                                .append(APIUtil.getSingleSearchCriteria(searchCriteria[i]).replace("*", ""));
                     }
                 }
                 Map matchedAPIs;
