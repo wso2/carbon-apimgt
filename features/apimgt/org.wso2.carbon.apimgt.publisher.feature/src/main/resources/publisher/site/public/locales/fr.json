@@ -1,4 +1,5 @@
 {
+  "APis.Details.tryout.help.main": "",
   "Api.category.dropdown.tooltip": "",
   "Apis.APIsNavigation.alerts": "",
   "Apis.Base.Header.settings.SettingsButton.settings.caption": "",
@@ -879,6 +880,7 @@
   "Apis.Details.index.endpoints": "",
   "Apis.Details.index.environments": "",
   "Apis.Details.index.external-stores": "",
+  "Apis.Details.index.initTest": "",
   "Apis.Details.index.left.menu.scope": "",
   "Apis.Details.index.lifecycle": "",
   "Apis.Details.index.monetization": "",
@@ -890,6 +892,8 @@
   "Apis.Details.index.schema.definition": "",
   "Apis.Details.index.subscriptions": "",
   "Apis.Details.index.wsdl.definition": "",
+  "Apis.Details.tryout.initialize.test": "",
+  "Apis.Details.tryout.title": "",
   "Apis.GraphQL.Steps.ProvideGraphQL.error.empty": "",
   "Apis.GraphQL.Steps.ProvideGraphQL.file.invalid.file": "",
   "Apis.GraphQL.Steps.ProvideGraphQL.try.dropping.schema.file": "",

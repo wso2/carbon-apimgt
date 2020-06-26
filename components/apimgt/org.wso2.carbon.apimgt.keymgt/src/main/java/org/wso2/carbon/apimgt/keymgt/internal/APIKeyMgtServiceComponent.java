@@ -28,25 +28,15 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
-import org.wso2.carbon.apimgt.keymgt.handlers.SessionDataPublisherImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
-import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
-import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component(
@@ -64,16 +54,6 @@ public class APIKeyMgtServiceComponent {
         try {
             APIKeyMgtDataHolder.initData();
             log.debug("Key Manager User Operation Listener is enabled.");
-            // Checking token revocation feature enabled config
-            // registering logout token revoke listener
-            try {
-                SessionDataPublisherImpl dataPublisher = new SessionDataPublisherImpl();
-                ctxt.getBundleContext().registerService(AuthenticationDataPublisher.class.getName(), dataPublisher, null);
-                log.debug("SessionDataPublisherImpl bundle is activated");
-            } catch (Throwable e) {
-                log.error("SessionDataPublisherImpl bundle activation Failed", e);
-            }
-            // loading white listed scopes
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");
             }
@@ -193,59 +173,6 @@ public class APIKeyMgtServiceComponent {
             }
         }
         return true;
-    }
-
-    /**
-     * Method to configure wso2event type event adapter to be used for token revocation.
-     */
-    private void configureTokenRevocationEventPublisher() {
-        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-        adapterConfiguration.setName(APIConstants.TOKEN_REVOCATION_EVENT_PUBLISHER);
-        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
-        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_TYPE);
-        Map<String, String> adapterParameters = new HashMap<>();
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        ThrottleProperties.TrafficManager trafficManager = configuration.getThrottleProperties().getTrafficManager();
-        adapterParameters.put(APIConstants.RECEIVER_URL, trafficManager.getReceiverUrlGroup());
-        adapterParameters.put(APIConstants.AUTHENTICATOR_URL, trafficManager.getAuthUrlGroup());
-        adapterParameters.put(APIConstants.USERNAME, trafficManager.getUsername());
-        adapterParameters.put(APIConstants.PASSWORD, trafficManager.getPassword());
-        adapterParameters.put(APIConstants.PROTOCOL, trafficManager.getType());
-        adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
-        adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
-        adapterConfiguration.setStaticProperties(adapterParameters);
-        try {
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
-        } catch (OutputEventAdapterException e) {
-            log.warn("Exception occurred while creating token revocation event adapter. Token Revocation may not " + "work properly", e);
-        }
-    }
-
-    /**
-     * Method to configure wso2event type event adapter to be used for token revocation.
-     */
-    private void configureCacheInvalidationEventPublisher() {
-        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-        adapterConfiguration.setName(APIConstants.CACHE_INVALIDATION_EVENT_PUBLISHER);
-        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
-        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_TYPE);
-        Map<String, String> adapterParameters = new HashMap<>();
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        ThrottleProperties.TrafficManager trafficManager = configuration.getThrottleProperties().getTrafficManager();
-        adapterParameters.put(APIConstants.RECEIVER_URL, trafficManager.getReceiverUrlGroup());
-        adapterParameters.put(APIConstants.AUTHENTICATOR_URL, trafficManager.getAuthUrlGroup());
-        adapterParameters.put(APIConstants.USERNAME, trafficManager.getUsername());
-        adapterParameters.put(APIConstants.PASSWORD, trafficManager.getPassword());
-        adapterParameters.put(APIConstants.PROTOCOL, trafficManager.getType());
-        adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
-        adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
-        adapterConfiguration.setStaticProperties(adapterParameters);
-        try {
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
-        } catch (OutputEventAdapterException e) {
-            log.warn("Exception occurred while creating cache invalidation event adapter. Cache invalidation may not " +
-                    "work properly", e);
-        }
     }
 
     /**

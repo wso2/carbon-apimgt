@@ -1733,8 +1733,8 @@ public class APIManagerConfiguration {
                             containerMgt.put(ContainerBasedConstants.CLASS_NAME,
                                     deploymentEnvs.get(containerMgt.get(ContainerBasedConstants.TYPE)));
                         }
-                    } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.CLUSTER_ID)) {
-                        containerMgtInfoObj.put(ContainerBasedConstants.CLUSTER_ID, containerMgtInfoElement.getText());
+                    } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.CLUSTER_NAME)) {
+                        containerMgtInfoObj.put(ContainerBasedConstants.CLUSTER_NAME, containerMgtInfoElement.getText());
                     } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.DISPLAY_NAME)) {
                         containerMgtInfoObj.put(ContainerBasedConstants.DISPLAY_NAME, containerMgtInfoElement.getText());
                     } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.PROPERTIES)) {
@@ -1743,32 +1743,7 @@ public class APIManagerConfiguration {
                         JSONObject propertyObj = new JSONObject();
                         while (clusterPropertiesIterator.hasNext()) {
                             OMElement propertyElement = (OMElement) clusterPropertiesIterator.next();
-
-                            if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.REPLICAS)) {
-                                propertyObj.put(ContainerBasedConstants.REPLICAS, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.INGRESS_URL)) {
-                                propertyObj.put(ContainerBasedConstants.INGRESS_URL, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.NAMESPACE)) {
-                                propertyObj.put(ContainerBasedConstants.NAMESPACE, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.SATOKEN)) {
-                                propertyObj.put(ContainerBasedConstants.SATOKEN, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.MASTER_URL)) {
-                                propertyObj.put(ContainerBasedConstants.MASTER_URL, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.JWT_SECURITY_CR_NAME)) {
-                                propertyObj.put(ContainerBasedConstants.JWT_SECURITY_CR_NAME, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME)) {
-                                propertyObj.put(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME)) {
-                                propertyObj.put(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME, propertyElement.getText());
-                            }
+                            propertyObj.put(propertyElement.getAttributeValue(new QName("name")), propertyElement.getText());
                         }
                         containerMgtInfoObj.put(ContainerBasedConstants.PROPERTIES, propertyObj);
                     }

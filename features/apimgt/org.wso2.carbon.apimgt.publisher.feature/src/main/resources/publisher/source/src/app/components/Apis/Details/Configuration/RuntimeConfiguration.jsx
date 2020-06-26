@@ -20,7 +20,6 @@ import React, { useReducer, useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import PropTypes from 'prop-types';
 import Paper from '@material-ui/core/Paper';
 import { Link } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
@@ -162,7 +161,7 @@ function copyAPIConfig(api) {
  * @param {*} props
  * @returns
  */
-export default function RuntimeConfiguration(props) {
+export default function RuntimeConfiguration() {
     /**
      *
      * Reduce the configuration UI related actions in to updated state
@@ -283,7 +282,6 @@ export default function RuntimeConfiguration(props) {
                 return state;
         }
     }
-    const { complexity } = props;
     const { api, updateAPI } = useContext(APIContext);
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateComplexityList, setUpdateComplexityList] = useState(null);
@@ -353,7 +351,7 @@ export default function RuntimeConfiguration(props) {
             updateComplexity();
         }
 
-        updateAPI(apiConfig, { complexity })
+        updateAPI(apiConfig)
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
@@ -541,6 +539,3 @@ export default function RuntimeConfiguration(props) {
         </>
     );
 }
-RuntimeConfiguration.propTypes = {
-    complexity: PropTypes.shape({}).isRequired,
-};

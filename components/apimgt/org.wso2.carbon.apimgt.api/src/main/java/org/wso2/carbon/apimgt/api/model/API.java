@@ -176,6 +176,8 @@ public class API implements Serializable {
      */
     private boolean enableStore = true;
 
+    private String testKey;
+
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -988,6 +990,15 @@ public class API implements Serializable {
 
     public void setEnableStore(boolean enableStore) {
         this.enableStore = enableStore;
+    }
+
+
+    public String getTestKey() {
+        return testKey;
+    }
+
+    public void setTestKey(String testKey) {
+        this.testKey = testKey;
     }
 
     /**

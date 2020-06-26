@@ -31,7 +31,6 @@ public class SubscriptionPolicy extends Policy {
     private String monetizationPlan = null;
     private Map<String, String> monetizationPlanProperties = new HashMap<String, String>();
     private String tierQuotaType;
-
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
 

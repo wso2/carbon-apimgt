@@ -132,7 +132,7 @@ public class SwaggerCreator {
         Boolean securityTypeOauth2 = isAPISecurityTypeOauth2(securityType);
         Boolean securityTypeBasicAuth = isAPISecurityBasicAuth(securityType);
 
-        if (securityTypeBasicAuth && !securityTypeOauth2 && !"".equals(basicSecurityName)) {
+        if (basicSecurityName != null && securityTypeBasicAuth && !securityTypeOauth2 && !"".equals(basicSecurityName)) {
 
             SecurityRequirement basicOauthSecurityReq = referBasicAuthInSwagger(basicSecurityName);
             List<SecurityRequirement> basicAuth = new ArrayList<SecurityRequirement>();
@@ -140,7 +140,7 @@ public class SwaggerCreator {
             apiDefinitionJsonObject.put(ContainerBasedConstants.SECURITY, basicAuth);
         } else if (securityTypeOauth2 && !securityTypeBasicAuth) {
 
-            if (!"".equals(oauthSecurityName) || !"".equals(jwtSecurityName)) {
+            if (oauthSecurityName != null && !"".equals(oauthSecurityName) || jwtSecurityName != null && !"".equals(jwtSecurityName)) {
 
                 SecurityRequirement oauth2SecurityReq = referOauth2InSwagger(oauthSecurityName, jwtSecurityName);
                 List<SecurityRequirement> oauth2 = new ArrayList<SecurityRequirement>();
@@ -149,7 +149,9 @@ public class SwaggerCreator {
             }
         } else if (securityTypeBasicAuth && securityTypeOauth2) {
 
-            if (!"".equals(oauthSecurityName) || !"".equals(basicSecurityName) || !"".equals(jwtSecurityName)) {
+            if (oauthSecurityName != null && !"".equals(oauthSecurityName) ||
+                    basicSecurityName != null && !"".equals(basicSecurityName) ||
+                    jwtSecurityName != null && !"".equals(jwtSecurityName)) {
                 List<SecurityRequirement> basicOauthJWT = new ArrayList<SecurityRequirement>();
                 SecurityRequirement basicOauthJWTSecurityReq = referBasicOAuth2JWTInSwagger(basicSecurityName,
                         oauthSecurityName, jwtSecurityName);
@@ -185,14 +187,17 @@ public class SwaggerCreator {
     private SecurityRequirement referOauth2InSwagger(String oauthSecurityName, String jwtSecurityName) {
 
         SecurityRequirement securityRequirement = new SecurityRequirement();
-        if (!"".equals(oauthSecurityName) && !"".equals(jwtSecurityName)) {
+        if (oauthSecurityName != null && jwtSecurityName != null &&
+                !"".equals(oauthSecurityName) && !"".equals(jwtSecurityName)) {
             securityRequirement.addList(oauthSecurityName, new ArrayList<String>());
             securityRequirement.addList(jwtSecurityName, new ArrayList<String>());
 
-        } else if (!"".equals(oauthSecurityName) && "".equals(jwtSecurityName)) {
+        } else if (oauthSecurityName != null && jwtSecurityName != null &&  !"".equals(oauthSecurityName)
+                && "".equals(jwtSecurityName)) {
             securityRequirement.addList(oauthSecurityName, new ArrayList<String>());
 
-        } else if ("".equals(oauthSecurityName) && !"".equals(jwtSecurityName)) {
+        } else if (oauthSecurityName != null && jwtSecurityName != null && "".equals(oauthSecurityName)
+                && !"".equals(jwtSecurityName)) {
             securityRequirement.addList(jwtSecurityName, new ArrayList<String>());
         }
         return securityRequirement;
@@ -206,8 +211,9 @@ public class SwaggerCreator {
     private SecurityRequirement referBasicAuthInSwagger(String basicSecurityName) {
 
         SecurityRequirement securityRequirement = new SecurityRequirement();
-        securityRequirement.addList(basicSecurityName, new ArrayList<String>());
-
+        if(basicSecurityName != null){
+            securityRequirement.addList(basicSecurityName, new ArrayList<String>());
+        }
         return securityRequirement;
     }
 
@@ -221,7 +227,7 @@ public class SwaggerCreator {
     private SecurityRequirement referBasicOAuth2JWTInSwagger(String basicSecurityName, String oauthSecurityName,
                                                              String jwtSecurityName) {
         SecurityRequirement securityRequirement = referOauth2InSwagger(oauthSecurityName, jwtSecurityName);
-        if (!"".equals(basicSecurityName)) {
+        if (basicSecurityName != null && !"".equals(basicSecurityName)) {
             securityRequirement.addList(basicSecurityName, new ArrayList<String>());
         }
 

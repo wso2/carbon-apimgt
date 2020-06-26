@@ -126,6 +126,30 @@ export default function Kubernetes(props) {
         }
         return include;
     }
+
+    const generateElement = (key, value) => {
+        return (
+            <TableRow>
+                <TableCell align='left'>{key}</TableCell>
+                <TableCell align='left'>{value}</TableCell>
+            </TableRow>
+        );
+    };
+    /**
+     *
+     * Handle generating table with property data
+     * @param {*} data JSONObject with cluster propertues
+     * @returns {properties} rendered elements
+     */
+    function generatePropertyData(data) {
+        const properties = Object.keys(data).reduce((result, currentKey) => {
+            const elementToPush = generateElement(currentKey, data[currentKey]);
+            result.push(elementToPush);
+
+            return result;
+        }, []);
+        return properties;
+    }
     return (
         <>
             <Typography variant='h4' gutterBottom align='left' className={classes.mainTitle}>
@@ -141,28 +165,32 @@ export default function Kubernetes(props) {
                         <TableRow>
                             <TableCell />
                             <TableCell align='left'>Name</TableCell>
-                            <TableCell align='left'>Namespace</TableCell>
-                            <TableCell align='left'>Master URL</TableCell>
-                            <TableCell align='left'>Ingress URL</TableCell>
+                            <TableCell align='left'>Properties</TableCell>
+                            <TableCell align='left'>Access URL</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {clusters.clusters.map((row) => (
-                            <TableRow key={row.clusterId}>
+                            <TableRow key={row.clusterName}>
                                 <TableCell padding='checkbox'>
                                     <Checkbox
                                         disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                                        checked={handleOnChecked(row.clusterId)}
-                                        onChange={(e) => handleEnvironmentsSelect(e, row.clusterId)}
+                                        checked={handleOnChecked(row.clusterName)}
+                                        onChange={(e) => handleEnvironmentsSelect(e, row.clusterName)}
                                         color='primary'
                                     />
                                 </TableCell>
                                 <TableCell component='th' scope='row'>
-                                    {row.clusterName}
+                                    {row.displayName}
                                 </TableCell>
-                                <TableCell align='left'>{row.namespace}</TableCell>
-                                <TableCell align='left'>{row.masterURL}</TableCell>
-                                <TableCell align='left'>{row.ingressURL}</TableCell>
+                                <TableCell align='left'>
+                                    <Table>
+                                        <TableBody>
+                                            {generatePropertyData(row.properties)}
+                                        </TableBody>
+                                    </Table>
+                                </TableCell>
+                                <TableCell align='left'>{row.accessURL}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

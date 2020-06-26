@@ -39,6 +39,9 @@
             <name>Type</name>
         </field>
         <field type="text">
+            <name>testKey</name>
+        </field>
+        <field type="text">
             <name>keyManagers</name>
         </field>
         <field type="options">

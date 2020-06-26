@@ -7792,6 +7792,9 @@ definitions:
       wsdlUrl:
         type: string
         example: /apimgt/applicationdata/wsdls/admin--soap1.wsdl
+      testKey:
+        type: string
+        example: 8swdwj9080edejhj
       responseCachingEnabled:
         type: boolean
         example: true
@@ -8255,6 +8258,9 @@ definitions:
       enableStore:
         type: boolean
         example: true
+      testKey:
+        type: string
+        example: 8swdwj9080edejhj
       responseCachingEnabled:
         type: boolean
         example: true
@@ -10603,27 +10609,25 @@ definitions:
   DeploymentClusterInfo:
     title: DeploymentClusterInfo
     required:
-      - clusterId
       - clusterName
-      - masterURL
-      - namespace
-      - ingressURL
+      - displayName
+      - accessURL
+      - properties
     properties:
       clusterName:
         type: string
-        example: Kubernetes
-      masterURL:
-        type: string
-        example: "https://localhost:9095"
-      namespace:
-        type: string
-        example: "def"
-      ingressURL:
+        example: minikube
+      accessURL:
         type: string
         example: "https://api.com"
-      clusterId:
+      displayName:
         type: string
         example: "kubernetes-minikube"
+      properties:
+        type: object
+        additionalProperties:
+          type: string
+
 
   #-----------------------------------------------------
   # The DeploymentStatus List resource

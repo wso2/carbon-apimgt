@@ -102,6 +102,12 @@ public class APIProduct {
 
     private Date lastUpdated;
     private Date createdTime;
+    private String testKey;
+
+    /**
+     * Property to hold enable/disable status of the store visibility.
+     */
+    private boolean enableStore = true;
 
     public APIProduct(){}
 
@@ -441,6 +447,22 @@ public class APIProduct {
 
     public String getContextTemplate() {
         return contextTemplate;
+    }
+
+    public boolean isEnableStore() {
+        return enableStore;
+    }
+
+    public void setEnableStore(boolean enableStore) {
+        this.enableStore = enableStore;
+    }
+
+    public String getTestKey() {
+        return testKey;
+    }
+
+    public void setTestKey(String testKey) {
+        this.testKey = testKey;
     }
 
     @Override
