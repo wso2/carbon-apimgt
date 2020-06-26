@@ -97,9 +97,11 @@ securityDefinitions:
       apim:publisher_settings: Retrieve store settings
       apim:pub_alert_manage: Get/ subscribe/ configure publisher alerts
       apim:shared_scope_manage: Manage shared scopes
-      #------------------------------------------------------------------------------------------------------------myedit
       apim:serviceEndpoints_view: View available services.
-      #------------------------------------------------------------------------------------------------------------
+      apim:app_import_export: Import and export applications related operations
+      apim:api_import_export: Import and export APIs related operations
+      apim:api_product_import_export: Import and export API Products related operations
+
 
 security:
   - OAuth2Security:
@@ -124,6 +126,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_import_export
       x-examples:
         $ref: docs/examples/apis/apis_get.yaml
       parameters:
@@ -280,6 +283,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_import_export
+            - apim:api_product_import_export
       tags:
         - APIs
       responses:
@@ -415,6 +420,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_delete
+            - apim:api_import_export
       summary: Delete an API
       description: |
         This operation can be used to delete an existing API proving the Id of the API.
@@ -1244,6 +1250,7 @@ paths:
       security:
         - OAuth2Security:
           - apim:api_publish
+          - apim:api_import_export
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish\""
       x-wso2-request: |
         POST https://127.0.0.1:9443/api/am/publisher/v1/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish
@@ -5151,6 +5158,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_import_export
+            - apim:api_product_import_export
       produces:
         - application/json
       x-examples:
@@ -5317,6 +5326,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_product_import_export
       summary: Delete an API Product
       description: |
         This operation can be used to delete an existing API Product proving the Id of the API Product.
