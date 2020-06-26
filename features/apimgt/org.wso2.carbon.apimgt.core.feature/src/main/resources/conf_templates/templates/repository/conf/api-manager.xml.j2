@@ -541,6 +541,11 @@
         <!-- Configure Access-Control-Allow-Headers -->
         <Access-Control-Allow-Headers>{% for header in apim.cors.allow_headers %}{{header}}{{ "," if not loop.last }}{% endfor %}</Access-Control-Allow-Headers>
 
+        <!-- Configure Access-Control-Expose-Headers -->
+        {% if apim.cors.expose_headers is defined %}
+            <Access-Control-Expose-Headers>{% for header in apim.cors.expose_headers %}{{header}}{{ "," if not loop.last }}{% endfor %}</Access-Control-Expose-Headers>
+        {% endif %}
+
         <!-- Configure Access-Control-Allow-Credentials -->
         <!-- Specifying this header to true means that the server allows cookies (or other user credentials) to be included on cross-origin requests.
              It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin header does not contain the wildcard (*) -->
