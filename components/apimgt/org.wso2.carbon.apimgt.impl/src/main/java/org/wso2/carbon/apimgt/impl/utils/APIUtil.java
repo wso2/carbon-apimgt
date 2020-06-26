@@ -10967,7 +10967,7 @@ public final class APIUtil {
                             get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
                     for (Object clusterInfo : clustersInfo) {
                         //check if the clusters defined in tenant-conf.json
-                        if (!((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).equals("")) {
+                        if (!"".equals(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME))) {
                             containerMgtInfoFromTenant.add(clusterInfo);
                         }
                     }
@@ -10975,8 +10975,8 @@ public final class APIUtil {
                         containerMgtObj.put(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO, containerMgtInfoFromTenant);
                         for (Object apimConfig : containerMgtFromToml) {
                             //get class name from the api-manager.xml
-                            if (((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).equals(containerMgtDetails
-                                    .get(ContainerBasedConstants.TYPE))) {
+                            if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString()
+                                    .equalsIgnoreCase(((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).toString())) {
                                 containerMgtObj.put(ContainerBasedConstants.CLASS_NAME, ((JSONObject) apimConfig)
                                         .get(ContainerBasedConstants.CLASS_NAME));
                             }

@@ -2,6 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.*;
 
 
@@ -16,10 +19,9 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class DeploymentClusterInfoDTO   {
   
     private String clusterName = null;
-    private String masterURL = null;
-    private String namespace = null;
-    private String ingressURL = null;
-    private String clusterId = null;
+    private String accessURL = null;
+    private String displayName = null;
+    private Map<String, String> properties = new HashMap<>();
 
   /**
    **/
@@ -29,7 +31,7 @@ public class DeploymentClusterInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "Kubernetes", required = true, value = "")
+  @ApiModelProperty(example = "minikube", required = true, value = "")
   @JsonProperty("clusterName")
   @NotNull
   public String getClusterName() {
@@ -41,74 +43,56 @@ public class DeploymentClusterInfoDTO   {
 
   /**
    **/
-  public DeploymentClusterInfoDTO masterURL(String masterURL) {
-    this.masterURL = masterURL;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "https://localhost:9095", required = true, value = "")
-  @JsonProperty("masterURL")
-  @NotNull
-  public String getMasterURL() {
-    return masterURL;
-  }
-  public void setMasterURL(String masterURL) {
-    this.masterURL = masterURL;
-  }
-
-  /**
-   **/
-  public DeploymentClusterInfoDTO namespace(String namespace) {
-    this.namespace = namespace;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "def", required = true, value = "")
-  @JsonProperty("namespace")
-  @NotNull
-  public String getNamespace() {
-    return namespace;
-  }
-  public void setNamespace(String namespace) {
-    this.namespace = namespace;
-  }
-
-  /**
-   **/
-  public DeploymentClusterInfoDTO ingressURL(String ingressURL) {
-    this.ingressURL = ingressURL;
+  public DeploymentClusterInfoDTO accessURL(String accessURL) {
+    this.accessURL = accessURL;
     return this;
   }
 
   
   @ApiModelProperty(example = "https://api.com", required = true, value = "")
-  @JsonProperty("ingressURL")
+  @JsonProperty("accessURL")
   @NotNull
-  public String getIngressURL() {
-    return ingressURL;
+  public String getAccessURL() {
+    return accessURL;
   }
-  public void setIngressURL(String ingressURL) {
-    this.ingressURL = ingressURL;
+  public void setAccessURL(String accessURL) {
+    this.accessURL = accessURL;
   }
 
   /**
    **/
-  public DeploymentClusterInfoDTO clusterId(String clusterId) {
-    this.clusterId = clusterId;
+  public DeploymentClusterInfoDTO displayName(String displayName) {
+    this.displayName = displayName;
     return this;
   }
 
   
   @ApiModelProperty(example = "kubernetes-minikube", required = true, value = "")
-  @JsonProperty("clusterId")
+  @JsonProperty("displayName")
   @NotNull
-  public String getClusterId() {
-    return clusterId;
+  public String getDisplayName() {
+    return displayName;
   }
-  public void setClusterId(String clusterId) {
-    this.clusterId = clusterId;
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
+
+  /**
+   **/
+  public DeploymentClusterInfoDTO properties(Map<String, String> properties) {
+    this.properties = properties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("properties")
+  @NotNull
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+  public void setProperties(Map<String, String> properties) {
+    this.properties = properties;
   }
 
 
@@ -122,15 +106,14 @@ public class DeploymentClusterInfoDTO   {
     }
     DeploymentClusterInfoDTO deploymentClusterInfo = (DeploymentClusterInfoDTO) o;
     return Objects.equals(clusterName, deploymentClusterInfo.clusterName) &&
-        Objects.equals(masterURL, deploymentClusterInfo.masterURL) &&
-        Objects.equals(namespace, deploymentClusterInfo.namespace) &&
-        Objects.equals(ingressURL, deploymentClusterInfo.ingressURL) &&
-        Objects.equals(clusterId, deploymentClusterInfo.clusterId);
+        Objects.equals(accessURL, deploymentClusterInfo.accessURL) &&
+        Objects.equals(displayName, deploymentClusterInfo.displayName) &&
+        Objects.equals(properties, deploymentClusterInfo.properties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(clusterName, masterURL, namespace, ingressURL, clusterId);
+    return Objects.hash(clusterName, accessURL, displayName, properties);
   }
 
   @Override
@@ -139,10 +122,9 @@ public class DeploymentClusterInfoDTO   {
     sb.append("class DeploymentClusterInfoDTO {\n");
     
     sb.append("    clusterName: ").append(toIndentedString(clusterName)).append("\n");
-    sb.append("    masterURL: ").append(toIndentedString(masterURL)).append("\n");
-    sb.append("    namespace: ").append(toIndentedString(namespace)).append("\n");
-    sb.append("    ingressURL: ").append(toIndentedString(ingressURL)).append("\n");
-    sb.append("    clusterId: ").append(toIndentedString(clusterId)).append("\n");
+    sb.append("    accessURL: ").append(toIndentedString(accessURL)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
+    sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
     sb.append("}");
     return sb.toString();
   }
