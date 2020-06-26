@@ -737,8 +737,8 @@ public class GatewayUtils {
                     authContext.setIsContentAware(true);;
                 }
                 if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get("graphQLMaxDepth");
-                    Integer graphQLMaxComplexity = (int) (long) subscriptionTierObj.get("graphQLMaxComplexity");
+                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_DEPTH);
+                    Integer graphQLMaxComplexity = (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_COMPLEXITY);
                     synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH, graphQLMaxDepth);
                     synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY, graphQLMaxComplexity);
                 }
