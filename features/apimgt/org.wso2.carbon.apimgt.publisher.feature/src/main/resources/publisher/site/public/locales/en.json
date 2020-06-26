@@ -1,4 +1,5 @@
 {
+  "APis.Details.tryout.help.main": "Test the APIs while in Development stage.",
   "Api.category.dropdown.tooltip": "API categories can be added via admin portal UI or admin REST API. There has to be pre-defined API categories in the environment in order to be attached to an API.",
   "Apis.APIsNavigation.alerts": "Alerts",
   "Apis.Base.Header.settings.SettingsButton.settings.caption": "Settings",
@@ -879,6 +880,7 @@
   "Apis.Details.index.endpoints": "endpoints",
   "Apis.Details.index.environments": "environments",
   "Apis.Details.index.external-stores": "external dev portals",
+  "Apis.Details.index.initTest": "Initialize test",
   "Apis.Details.index.left.menu.scope": "scopes",
   "Apis.Details.index.lifecycle": "lifecycle",
   "Apis.Details.index.monetization": "monetization",
@@ -890,6 +892,8 @@
   "Apis.Details.index.schema.definition": "Schema Definition",
   "Apis.Details.index.subscriptions": "subscriptions",
   "Apis.Details.index.wsdl.definition": "WSDL Definition",
+  "Apis.Details.tryout.initialize.test": "Initialize the API to Prototype(testing) state",
+  "Apis.Details.tryout.title": "Start Testing",
   "Apis.GraphQL.Steps.ProvideGraphQL.error.empty": "This field cannot be empty.",
   "Apis.GraphQL.Steps.ProvideGraphQL.file.invalid.file": "Invalid file",
   "Apis.GraphQL.Steps.ProvideGraphQL.try.dropping.schema.file": "Try dropping schema file here, or click to select schema to upload.",

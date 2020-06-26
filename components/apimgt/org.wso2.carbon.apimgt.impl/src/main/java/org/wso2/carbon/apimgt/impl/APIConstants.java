@@ -381,6 +381,8 @@ public final class APIConstants {
 
     public static final String API_OVERVIEW_ENABLE_STORE = "overview_enableStore";
 
+    public static final String API_OVERVIEW_TESTKEY = "overview_testKey";
+
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
