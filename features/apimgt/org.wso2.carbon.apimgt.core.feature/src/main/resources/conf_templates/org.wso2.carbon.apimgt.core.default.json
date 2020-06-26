@@ -139,6 +139,7 @@
   "database.local.url": "jdbc:h2:./repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE",
   "apim.key_manager.enable": true,
   "ContainerMgtConfig.Kubernetes":"org.wso2.carbon.apimgt.impl.containermgt.K8sManager",
+  "apim.enable_change_password": true,
   "apim.event_hub.enable": true,
   "apim.event_hub.service_url": "https://localhost:${mgt.transport.https.port}",
   "apim.event_hub.init_delay": "0",

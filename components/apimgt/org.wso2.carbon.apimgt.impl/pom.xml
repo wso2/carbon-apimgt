@@ -403,6 +403,10 @@
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-slf4j</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.user.mgt.common</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
