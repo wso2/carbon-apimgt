@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.jms.listener.utils;
+package org.wso2.carbon.apimgt.gateway.listeners;
 
 import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
@@ -40,15 +40,14 @@ import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 import com.google.gson.Gson;
 
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
-import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -61,7 +60,7 @@ public class GatewayJMSMessageListener implements MessageListener {
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
     GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
-            .getInstance().getAPIMConfiguration().getGatewayArtifactSynchronizerProperties();
+            .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
 
     public void onMessage(Message message) {
 
@@ -79,7 +78,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                         String key = (String) enumeration.nextElement();
                         map.put(key, mapMessage.getObject(key));
                     }
-                    if (JMSConstants.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
+                    if (APIConstants.TopicNames.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
                         if (map.get(APIConstants.EVENT_TYPE) !=
                                 null) {
                             /*

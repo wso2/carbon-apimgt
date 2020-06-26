@@ -34,6 +34,8 @@ const SwaggerUI = (props) => {
                 req.headers[authorizationHeader] = accessTokenProvider();
             } else if (securitySchemeType === 'BASIC') {
                 req.headers[authorizationHeader] = 'Basic ' + accessTokenProvider();
+            } else if (securitySchemeType === 'TEST') {
+                req.headers[authorizationHeader] = accessTokenProvider();
             } else {
                 req.headers[authorizationHeader] = 'Bearer ' + accessTokenProvider();
             }

@@ -182,7 +182,7 @@ export default function Environments() {
             {
                 allDeployments
                  && (
-                     allDeployments.map((clusters) => (clusters.name === 'kubernetes' && (
+                     allDeployments.map((clusters) => (clusters.name.toLowerCase() === 'kubernetes' && (
                          <Kubernetes
                              clusters={clusters}
                              selectedDeployments={selectedDeployments}

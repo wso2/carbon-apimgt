@@ -27,4 +27,12 @@ const Settings = {
         kerberos: 'Kerberos',
         'urn:ietf:params:oauth:grant-type:device_code': 'Device Code',
     },
+    passwordChange: {
+        guidelinesEnabled: false,
+        policyList: [
+            'Policy 1',
+            'Policy 2',
+            'Policy 3',
+        ],
+    },
 };

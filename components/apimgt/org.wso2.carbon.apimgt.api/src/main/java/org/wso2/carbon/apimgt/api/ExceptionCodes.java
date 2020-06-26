@@ -342,8 +342,14 @@ ExceptionCodes implements ErrorHandler {
 
     //Analytics related codes
     ANALYTICS_NOT_ENABLED(901600, "%s not accessible", 404,
-            "Analytics should be enabled to access %s");
+            "Analytics should be enabled to access %s"),
 
+    // Password change related
+    PASSWORD_CHANGE_DISABLED(901450, "Password change disabled", 400, "Password change operation is disabled in the system"),
+
+    CURRENT_PASSWORD_INCORRECT(901451, "Current password incorrect", 400, "The current password entered is incorrect"),
+
+    PASSWORD_PATTERN_INVALID(901452, "Password pattern invalid", 400, "Password entered is invalid since it doesn't comply with the pattern/policy configured");
 
     private final long errorCode;
     private final String errorMessage;

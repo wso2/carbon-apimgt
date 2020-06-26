@@ -16,7 +16,7 @@
  *under the License.
  */
 
-package org.wso2.carbon.apimgt.tokenmgt.events;
+package org.wso2.carbon.apimgt.impl.notifier;
 
 import org.apache.axis2.util.URL;
 import org.apache.commons.codec.binary.Base64;
@@ -31,8 +31,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.message.BasicNameValuePair;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.token.TokenRevocationNotifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.tokenmgt.token.TokenRevocationNotifier;
 import org.wso2.carbon.databridge.commons.Event;
 
 import java.io.IOException;
@@ -49,7 +49,7 @@ import java.util.Properties;
  */
 public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
 
-    private static final Log log = LogFactory.getLog(APIMOAuthEventInterceptor.class);
+    private static final Log log = LogFactory.getLog(TokenRevocationNotifierImpl.class);
     private final String DEFAULT_TTL = "3600";
 
     /**
@@ -66,8 +66,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         Object[] objects = new Object[]{revokedToken, realtimeNotifierTTL, expiryTimeForJWT};
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
-        APIUtil.publishEvent(APIConstants.TOKEN_REVOCATION_EVENT_PUBLISHER, Collections.EMPTY_MAP,
-                tokenRevocationMessage);
+        APIUtil.publishEventToEventHub(Collections.EMPTY_MAP, tokenRevocationMessage);
         log.debug("Successfully sent the revoked token notification on realtime");
     }
 

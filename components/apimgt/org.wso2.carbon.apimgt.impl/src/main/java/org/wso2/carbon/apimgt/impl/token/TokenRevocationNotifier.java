@@ -16,7 +16,7 @@
  *under the License.
  */
 
-package org.wso2.carbon.apimgt.tokenmgt.token;
+package org.wso2.carbon.apimgt.impl.token;
 
 import java.util.Properties;
 

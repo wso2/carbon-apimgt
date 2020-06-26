@@ -859,12 +859,15 @@ public class APIMappingUtil {
                                 APIDeploymentClusterInfoDTO apiDeploymentClusterInfoDTO =
                                         new APIDeploymentClusterInfoDTO();
                                 if (deploymentEnvironment.getClusterNames().contains(containerMgtInfo
-                                        .get(ContainerBasedConstants.CLUSTER_ID).toString())) {
+                                        .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
                                     apiDeploymentClusterInfoDTO.setClusterName(containerMgtInfo
-                                            .get(ContainerBasedConstants.CLUSTER_ID).toString());
-                                    apiDeploymentClusterInfoDTO.setIngressURL(((JSONObject) containerMgtInfo
-                                            .get(ContainerBasedConstants.PROPERTIES))
-                                            .get(ContainerBasedConstants.INGRESS_URL).toString());
+                                            .get(ContainerBasedConstants.CLUSTER_NAME).toString());
+                                    if(((JSONObject) containerMgtInfo.get(ContainerBasedConstants.PROPERTIES))
+                                            .get(ContainerBasedConstants.ACCESS_URL) != null){
+                                        apiDeploymentClusterInfoDTO.setIngressURL(((JSONObject) containerMgtInfo
+                                                .get(ContainerBasedConstants.PROPERTIES))
+                                                .get(ContainerBasedConstants.ACCESS_URL).toString());
+                                    }
                                     clusterInfoArray.add(apiDeploymentClusterInfoDTO);
                                 }
                             }

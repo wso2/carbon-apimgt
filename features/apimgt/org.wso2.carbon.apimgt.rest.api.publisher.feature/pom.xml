@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.7.35-SNAPSHOT</version>
+        <version>6.7.38-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -146,6 +146,15 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.util:${carbon.apimgt.version}
                                 </bundleDef>
+                                <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-core</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-annotations</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-databind</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${fasterxml.jackson.version}</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-guava:${fasterxml.jackson.version}</bundleDef>
+                                <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
+                                <bundleDef>commons-codec:commons-codec</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

@@ -17,7 +17,6 @@
 */
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +30,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
@@ -64,12 +63,10 @@ public class KeyTemplateRetriever extends TimerTask {
     private String[] retrieveKeyTemplateData() {
 
         try {
-            ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = getThrottleProperties()
-                    .getBlockCondition();
-            String url = blockConditionRetrieverConfiguration.getServiceUrl() + "/keyTemplates";
-            byte[] credentials = Base64.encodeBase64((blockConditionRetrieverConfiguration.getUsername() + ":" +
-                                                      blockConditionRetrieverConfiguration.getPassword()).getBytes
-                    (StandardCharsets.UTF_8));
+            String url = getEventHubConfiguration().getServiceUrl() + "/keyTemplates";
+            byte[] credentials = Base64.encodeBase64(
+                    (getEventHubConfiguration().getUsername() + ":" + getEventHubConfiguration().getPassword())
+                            .getBytes(StandardCharsets.UTF_8));
             HttpGet method = new HttpGet(url);
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
             URL keyMgtURL = new URL(url);
@@ -107,9 +104,9 @@ public class KeyTemplateRetriever extends TimerTask {
         return null;
     }
 
-    protected ThrottleProperties getThrottleProperties() {
+    protected EventHubConfigurationDto getEventHubConfiguration() {
         return ServiceReferenceHolder
-                .getInstance().getThrottleProperties();
+                .getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
     }
 
 
@@ -123,7 +120,8 @@ public class KeyTemplateRetriever extends TimerTask {
     }
 
     public void startKeyTemplateDataRetriever() {
-        new Timer().schedule(this, getThrottleProperties().getBlockCondition().getInitDelay());
+
+        new Timer().schedule(this, getEventHubConfiguration().getInitDelay());
     }
 
 

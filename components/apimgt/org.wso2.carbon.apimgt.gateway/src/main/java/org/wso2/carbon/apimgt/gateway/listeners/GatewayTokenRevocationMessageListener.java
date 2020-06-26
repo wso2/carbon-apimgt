@@ -16,24 +16,17 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.jms.listener.utils;
+package org.wso2.carbon.apimgt.gateway.listeners;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.jms.JMSException;
@@ -62,7 +55,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                         String key = (String) enumeration.nextElement();
                         map.put(key, mapMessage.getObject(key));
                     }
-                    if (JMSConstants.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
+                    if (APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
                         if (map.get(APIConstants.REVOKED_TOKEN_KEY) !=
                                 null) {
                             /*
