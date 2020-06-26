@@ -40,7 +40,7 @@ public class ApplicationRegistrationEvent extends Event {
         this.applicationId = applicationId;
         this.consumerKey = consumerKey;
         this.keyType = keyType;
-        this.keyManager  = keyManager;
+        this.keyManager = keyManager;
         this.tenantDomain = tenantDomain;
     }
 
