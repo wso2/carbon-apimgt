@@ -20,26 +20,21 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.7.38-SNAPSHOT</version>
+        <version>6.7.37-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.apimgt.keymanager.feature</artifactId>
+    <artifactId>org.wso2.carbon.apimgt.internal.service.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Api management Key Manager Feature</name>
+    <name>WSO2 Carbon - Api management Internal Data Service Feature</name>
     <url>http://wso2.org</url>
 
     <description>
-        This feature contains the core bundles required for Key Management functionalities.
+        This feature contains Internal Data Service required to Retrieve Events.
     </description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.core.feature</artifactId>
-            <type>zip</type>
-        </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
@@ -47,18 +42,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -78,6 +61,57 @@
     <build>
         <plugins>
             <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <!--phase>generate-resources</phase-->
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>resources</directory>
+                                    <includes>
+                                        <include>p2.inf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.wso2.carbon.apimgt</groupId>
+                                    <artifactId>org.wso2.carbon.apimgt.internal.service</artifactId>
+                                    <overWrite>true</overWrite>
+                                    <type>war</type>
+                                    <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
+                                    <destFileName>internal#data#v1.war</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
                 <executions>
@@ -88,7 +122,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.apimgt.keymanager</id>
+                            <id>org.wso2.carbon.apimgt.internal.service</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
@@ -103,19 +137,6 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${carbon.apimgt.version}
                                 </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${carbon.apimgt.version}
-                                </bundleDef>
-
-                                <bundleDef>
-                                    org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}
-                                </bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
@@ -124,32 +145,12 @@
                                 </bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-core:${fasterxml.jackson.version}
                                 </bundleDef>
-                                <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                                 <bundleDef>commons-codec:commons-codec</bundleDef>
                             </bundles>
-                            <importBundles>
-                                <importBundleDef>
-                                    org.wso2.carbon.identity.framework:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}
-                                </importBundleDef>
-                                <importBundleDef>
-                                    org.wso2.carbon.event-processing:org.wso2.carbon.event.processor.stub:${event.processor.stub.version}
-                                </importBundleDef>
-                            </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}
                                 </importFeatureDef>
-                                <importFeatureDef>
-                                    org.wso2.carbon.identity.oauth.server:${carbon.identity-inbound-auth-oauth.version}
-                                </importFeatureDef>
-                                <importFeatureDef>
-                                    org.wso2.carbon.um.ws.service.server:${carbon.identity-user-ws.version}
-                                </importFeatureDef>
                             </importFeatures>
-                            <includedFeatures>
-                                <includedFeatureDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core.feature:${carbon.apimgt.version}
-                                </includedFeatureDef>
-                            </includedFeatures>
                         </configuration>
                     </execution>
                 </executions>

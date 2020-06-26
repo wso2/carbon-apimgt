@@ -83,6 +83,7 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -5437,18 +5438,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
-        String baseUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        EventHubConfigurationDto eventHubConfigurationDto = config.getEventHubConfigurationDto();
+        String baseUrl = eventHubConfigurationDto.getServiceUrl() + APIConstants.INTERNAL_WEB_APP_EP;
         String apiKeyRevokeEp = baseUrl + APIConstants.API_KEY_REVOKE_PATH;
         HttpPost method = new HttpPost(apiKeyRevokeEp);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         URL keyMgtURL = null;
         try {
             keyMgtURL = new URL(apiKeyRevokeEp);
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-            String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+
+            String username = config.getFirstProperty(eventHubConfigurationDto.getUsername());
+            String password = config.getFirstProperty(eventHubConfigurationDto.getPassword());
             byte[] credentials = Base64.encodeBase64((username + ":" + password).getBytes
                     (StandardCharsets.UTF_8));
             int keyMgtPort = keyMgtURL.getPort();

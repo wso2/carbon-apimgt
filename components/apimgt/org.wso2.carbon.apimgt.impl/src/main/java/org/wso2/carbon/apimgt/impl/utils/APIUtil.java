@@ -10298,32 +10298,6 @@ public final class APIUtil {
         return skipRolesByRegex;
     }
 
-    public static void publishEventToStream(String streamId, String eventPublisherName, Object[] eventData) {
-
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            OutputEventAdapterService eventAdapterService =
-                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
-            Event blockingMessage = new Event(streamId, System.currentTimeMillis(),
-                    null, null, eventData);
-            ThrottleProperties throttleProperties =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration().getThrottleProperties();
-
-            if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-                eventAdapterService.publish(eventPublisherName, Collections.EMPTY_MAP, blockingMessage);
-            }
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-
-    }
-
     /**
      * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
      * in the super tenant
@@ -10633,6 +10607,42 @@ public final class APIUtil {
             tenantFlowStarted = true;
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
                     .publish(eventName, dynamicProperties, event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
+    public static void publishEventToTrafficManager(Map dynamicProperties, Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                    .publish(APIConstants.BLOCKING_EVENT_PUBLISHER, dynamicProperties, event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
+    public static void publishEventToEventHub(Map dynamicProperties, Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                    .publish(APIConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER, dynamicProperties, event);
         } finally {
             if (tenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();

@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tokenmgt.ExpiredJWTCleaner;
 import org.wso2.carbon.identity.oauth.event.AbstractOAuthEventInterceptor;
@@ -45,7 +46,7 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
     private RevocationRequestPublisher revocationRequestPublisher;
 
     public APIMOAuthEventInterceptor() {
-        revocationRequestPublisher = RevocationRequestPublisher.getInstance();
+        revocationRequestPublisher = RevocationRequestPublisher.getInstance().getInstance();
     }
     /**
      * Overridden method to handle the post processing of token revocation
