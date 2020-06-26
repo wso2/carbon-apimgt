@@ -179,25 +179,56 @@ function ConditionalGroup(props) {
     ];
     const getNewItem = (type) => {
         if (type === CON_CONSTS.IPCONDITION) {
-            return ({
-                type: CON_CONSTS.IPCONDITION,
-                invertCondition: true,
-                ipConditionType: '',
-                specificIP: '',
-                startingIP: null,
-                endingIP: null,
-            });
+            return (
+                {
+                    type: CON_CONSTS.IPCONDITION,
+                    invertCondition: false,
+                    headerCondition: null,
+                    ipCondition: {
+                        ipConditionType: 'IPSPECIFIC',
+                        specificIP: '',
+                        startingIP: null,
+                        endingIP: null,
+                    },
+                    jwtClaimsCondition: null,
+                    queryParameterCondition: null,
+                }
+            );
         } else if (type === CON_CONSTS.HEADERCONDITION) {
             return ({
-                type: CON_CONSTS.HEADERCONDITION, invertCondition: false, headerName: '', headerValue: '',
+                type: CON_CONSTS.HEADERCONDITION,
+                invertCondition: false,
+                headerCondition: {
+                    headerName: '',
+                    headerValue: '',
+                },
+                ipCondition: null,
+                jwtClaimsCondition: null,
+                queryParameterCondition: null,
             });
         } else if (type === CON_CONSTS.QUERYPARAMETERCONDITION) {
             return ({
-                type: CON_CONSTS.QUERYPARAMETERCONDITION, invertCondition: false, parameterName: '', parameterValue: '',
+                type: CON_CONSTS.QUERYPARAMETERCONDITION,
+                invertCondition: false,
+                headerCondition: null,
+                ipCondition: null,
+                jwtClaimsCondition: null,
+                queryParameterCondition: {
+                    parameterName: '',
+                    parameterValue: '',
+                },
             });
         } else if (type === CON_CONSTS.JWTCLAIMSCONDITION) {
             return ({
-                type: CON_CONSTS.JWTCLAIMSCONDITION, invertCondition: false, claimUrl: '', attribute: '',
+                type: CON_CONSTS.JWTCLAIMSCONDITION,
+                invertCondition: false,
+                headerCondition: null,
+                ipCondition: null,
+                jwtClaimsCondition: {
+                    claimUrl: '',
+                    attribute: '',
+                },
+                queryParameterCondition: null,
             });
         } else {
             return ({});
@@ -208,34 +239,34 @@ function ConditionalGroup(props) {
         const { type: rowType } = rowRef;
         const newItem = getNewItem(rowType);
         if (rowType === CON_CONSTS.HEADERCONDITION) {
-            newItem.headerName = name;
-            newItem.headerValue = value;
+            newItem.headerCondition.headerName = name;
+            newItem.headerCondition.headerValue = value;
         } else if (rowType === CON_CONSTS.QUERYPARAMETERCONDITION) {
-            newItem.parameterName = name;
-            newItem.parameterValue = value;
+            newItem.queryParameterCondition.parameterName = name;
+            newItem.queryParameterCondition.parameterValue = value;
         } else if (rowType === CON_CONSTS.JWTCLAIMSCONDITION) {
-            newItem.claimUrl = name;
-            newItem.attribute = value;
+            newItem.jwtClaimsCondition.claimUrl = name;
+            newItem.jwtClaimsCondition.attribute = value;
         }
         group.conditions.push(newItem);
         updateGroup();
     };
-    const addItemIP = (rowRef, item) => {
+    const addItemIP = (item) => {
         const {
             ipConditionType, specificIP, startingIP, endingIP,
         } = item;
-        const { type: rowType } = rowRef;
-        const newItem = getNewItem(rowType);
+        const newItem = getNewItem(CON_CONSTS.IPCONDITION);
         if (ipConditionType === CON_CONSTS.IPCONDITION_IPRANGE) {
-            newItem.specificIP = null;
-            newItem.startingIP = startingIP;
-            newItem.endingIP = endingIP;
+            newItem.ipCondition.specificIP = null;
+            newItem.ipCondition.startingIP = startingIP;
+            newItem.ipCondition.endingIP = endingIP;
+            newItem.ipCondition.ipConditionType = ipConditionType;
         } else {
-            newItem.specificIP = specificIP;
-            newItem.startingIP = null;
-            newItem.endingIP = null;
+            newItem.ipCondition.specificIP = specificIP;
+            newItem.ipCondition.startingIP = null;
+            newItem.ipCondition.endingIP = null;
+            newItem.ipCondition.ipConditionType = ipConditionType;
         }
-        newItem.ipConditionType = ipConditionType;
         group.conditions.push(newItem);
         updateGroup();
     };
@@ -253,14 +284,14 @@ function ConditionalGroup(props) {
         for (let i = 0; i < group.conditions.length; i++) {
             if (group.conditions[i].id === originalItem.id) {
                 if (rowType === CON_CONSTS.HEADERCONDITION) {
-                    group.conditions[i].headerName = name;
-                    group.conditions[i].headerValue = value;
+                    group.conditions[i].headerCondition.headerName = name;
+                    group.conditions[i].headerCondition.headerValue = value;
                 } else if (rowType === CON_CONSTS.QUERYPARAMETERCONDITION) {
-                    group.conditions[i].parameterName = name;
-                    group.conditions[i].parameterValue = value;
+                    group.conditions[i].queryParameterCondition.parameterName = name;
+                    group.conditions[i].queryParameterCondition.parameterValue = value;
                 } else if (rowType === CON_CONSTS.JWTCLAIMSCONDITION) {
-                    group.conditions[i].claimUrl = name;
-                    group.conditions[i].attribute = value;
+                    group.conditions[i].jwtClaimsCondition.claimUrl = name;
+                    group.conditions[i].jwtClaimsCondition.attribute = value;
                 }
             }
         }
@@ -272,13 +303,30 @@ function ConditionalGroup(props) {
         } = item;
         for (let i = 0; i < group.conditions.length; i++) {
             if (group.conditions[i].id === originalItem.id) {
-                group.conditions[i].ipConditionType = ipConditionType;
-                group.conditions[i].specificIP = specificIP;
-                group.conditions[i].startingIP = startingIP;
-                group.conditions[i].endingIP = endingIP;
+                group.conditions[i].ipCondition.ipConditionType = ipConditionType;
+                group.conditions[i].ipCondition.specificIP = specificIP;
+                group.conditions[i].ipCondition.startingIP = startingIP;
+                group.conditions[i].ipCondition.endingIP = endingIP;
             }
         }
         updateGroup();
+    };
+    const setInvertCondition = (e, rowType) => {
+        const { checked } = e.target;
+        for (let i = 0; i < group.conditions.length; i++) {
+            if (group.conditions[i].type === rowType) {
+                group.conditions[i].invertCondition = checked;
+            }
+        }
+        updateGroup();
+    };
+    const isInvertConditionChecked = (row) => {
+        let checked = false;
+        const { items } = row;
+        if (items && items.length > 0) {
+            checked = items[0].invertCondition;
+        }
+        return checked;
     };
     return (
         <div className={classes.root}>
@@ -335,13 +383,21 @@ function ConditionalGroup(props) {
                                     </Typography>
                                 </Box>
                                 <Box component='span' m={1}>
-                                    <FormControlLabel
-                                        control={<Checkbox checked onChange={() => {}} name='invertCondition' />}
-                                        label={intl.formatMessage({
-                                            id: 'Throttling.Advanced.ConditionalGroup.invert.condition',
-                                            defaultMessage: 'Invert Condition',
-                                        })}
-                                    />
+                                    {row.items.length > 0 && (
+                                        <FormControlLabel
+                                            control={(
+                                                <Checkbox
+                                                    checked={isInvertConditionChecked(row)}
+                                                    onChange={(e) => setInvertCondition(e, row.type)}
+                                                    name='invertCondition'
+                                                />
+                                            )}
+                                            label={intl.formatMessage({
+                                                id: 'Throttling.Advanced.ConditionalGroup.invert.condition',
+                                                defaultMessage: 'Invert Condition',
+                                            })}
+                                        />
+                                    )}
                                 </Box>
                                 <Box component='span' m={1}>
                                     {row.type === CON_CONSTS.IPCONDITION ? (
@@ -406,14 +462,15 @@ function ConditionalGroup(props) {
                                                 <TableRow key={item.headerName}>
                                                     <TableCell component='td' scope='row'>
                                                         {item.type === CON_CONSTS.IPCONDITION
-                                                        && item.ipConditionType === CON_CONSTS.IPCONDITION_IPRANGE && (
+                                                        && item.ipCondition.ipConditionType
+                                                        === CON_CONSTS.IPCONDITION_IPRANGE && (
                                                             <FormattedMessage
                                                                 id='Throttling.Advanced.ConditionalGroup.ip.iprange'
                                                                 defaultMessage='IP Range'
                                                             />
                                                         ) }
                                                         {item.type === CON_CONSTS.IPCONDITION
-                                                        && item.ipConditionType
+                                                        && item.ipCondition.ipConditionType
                                                         === CON_CONSTS.IPCONDITION_IPSPECIFIC && (
                                                             <FormattedMessage
                                                                 id='Throttling.Advanced.ConditionalGroup.ip.specific'
@@ -421,15 +478,16 @@ function ConditionalGroup(props) {
                                                             />
                                                         ) }
                                                         {item.type === CON_CONSTS.HEADERCONDITION
-                                                        && item.headerName }
+                                                        && item.headerCondition.headerName }
                                                         {item.type === CON_CONSTS.QUERYPARAMETERCONDITION
-                                                        && item.parameterName }
+                                                        && item.queryParameterCondition.parameterName }
                                                         {item.type === CON_CONSTS.JWTCLAIMSCONDITION
-                                                        && item.claimUrl }
+                                                        && item.jwtClaimsCondition.claimUrl }
                                                     </TableCell>
                                                     <TableCell component='td' scope='row'>
                                                         {item.type === CON_CONSTS.IPCONDITION
-                                                        && item.ipConditionType === CON_CONSTS.IPCONDITION_IPRANGE && (
+                                                        && item.ipCondition.ipConditionType
+                                                        === CON_CONSTS.IPCONDITION_IPRANGE && (
                                                             <>
                                                                 <strong>
                                                                     <FormattedMessage
@@ -437,7 +495,7 @@ function ConditionalGroup(props) {
                                                                         defaultMessage='From:'
                                                                     />
                                                                 </strong>
-                                                                {item.startingIP}
+                                                                {item.ipCondition.startingIP}
                                                                 {' '}
                                                                 <strong>
                                                                     <FormattedMessage
@@ -445,21 +503,21 @@ function ConditionalGroup(props) {
                                                                         defaultMessage='To:'
                                                                     />
                                                                 </strong>
-                                                                {item.endingIP}
+                                                                {item.ipCondition.endingIP}
                                                             </>
                                                         ) }
                                                         {item.type === CON_CONSTS.IPCONDITION
-                                                        && item.ipConditionType
+                                                        && item.ipCondition.ipConditionType
                                                         === CON_CONSTS.IPCONDITION_IPSPECIFIC
                                                         && (
-                                                            item.specificIP
+                                                            item.ipCondition.specificIP
                                                         ) }
                                                         {item.type === CON_CONSTS.HEADERCONDITION
-                                                        && item.headerValue }
+                                                        && item.headerCondition.headerValue }
                                                         {item.type === CON_CONSTS.QUERYPARAMETERCONDITION
-                                                        && item.parameterValue }
+                                                        && item.queryParameterCondition.parameterValue }
                                                         {item.type === CON_CONSTS.JWTCLAIMSCONDITION
-                                                        && item.attribute }
+                                                        && item.jwtClaimsCondition.attribute }
                                                     </TableCell>
                                                     <TableCell width={100} className={classes.actionColumn}>
                                                         <Box display='flex'>
