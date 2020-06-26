@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
 import Settings from 'Settings';
@@ -27,6 +27,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import ChangePasswordBase from './ChangePasswordBase';
+import PageNotFound from 'AppComponents/Base/Errors/PageNotFound'
+import API from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
+import Progress from 'AppComponents/Shared/Progress';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStarText: {
@@ -53,29 +57,50 @@ function reducer(state, { field, value }) {
     };
 }
 
+// API call to get password change enabled
+// todo: replace this with rest api call or retrieve from settings api.
+const getPasswordChangeEnabled = () => {
+    const promiseIsPwdChangeEnabled = new Promise(resolve => {
+        setTimeout(resolve({ enabled: true }), 1);
+    });
+    return promiseIsPwdChangeEnabled;
+}
+
 const ChangePassword = () => {
     const classes = useStyles();
     const username = AuthManager.getUser().name;
     const initialState = {
-        oldPassword: undefined,
+        currentPassword: undefined,
         newPassword: undefined,
         repeatedNewPassword: undefined,
     };
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { oldPassword, newPassword, repeatedNewPassword } = state;
+    const { currentPassword, newPassword, repeatedNewPassword } = state;
+    const [passwordChangeEligible, setPasswordChangeEligible] = useState();
     const passwordChangeGuideEnabled = false || Settings.passwordChange.guidelinesEnabled;
     let passwordChangeGuide = [];
     if (passwordChangeGuideEnabled) {
         passwordChangeGuide = Settings.passwordChange.policyList;
     }
 
-    const validateOldPasswordChange = () => {
-        if (oldPassword === '') {
+    const validateCurrentPasswordChange = () => {
+        if (currentPassword === '') {
             return true;
         } else {
             return false;
         }
     };
+
+    // Check whether the user is eligible to change the password
+    useEffect(() => {
+        getPasswordChangeEnabled().then(res => {
+            if (!res.enabled) {
+                setPasswordChangeEligible(false);
+            } else {
+                setPasswordChangeEligible(true);
+            }
+        })
+    }, []);
 
     const validatePasswordChange = () => {
         // todo: update password validation policy
@@ -111,7 +136,28 @@ const ChangePassword = () => {
     };
 
     const handleSave = () => {
-        alert(oldPassword + ' ' + newPassword + ' ' + repeatedNewPassword);
+        // todo: use intl
+        const restApi = new API();
+        return restApi
+            .changePassword(currentPassword, newPassword)
+            .then((res) => {
+                Alert.success('Successfuly changed the password');
+                window.history.back();
+            })
+            .catch((error) => {
+                const errorCode = error.response.body.code;
+                switch (errorCode) {
+                    case 901450:
+                        Alert.error('Password change disabled');
+                        break;
+                    case 901451:
+                        Alert.error('Current password incorrect');
+                        break;
+                    case 901452:
+                        Alert.error('Password pattern invalid');
+                        break;
+                }
+            });
     };
 
     const title = (
@@ -153,105 +199,117 @@ const ChangePassword = () => {
         </>
     );
 
-    return (
-        <ChangePasswordBase title={title}>
-            <Box py={2} display='flex' justifyContent='center'>
-                <Grid item xs={10} md={9}>
-                    <Box component='div' m={2}>
-                        <Grid
-                            container
-                            mt={2}
-                            spacing={2}
-                            direction='column'
-                            justify='center'
-                            alignItems='flex-start'
-                        >
-                            <TextField
-                                classes={{
-                                    root: classes.mandatoryStarText,
-                                }}
-                                required
-                                autoFocus
-                                margin='dense'
-                                name='oldPassword'
-                                value={oldPassword}
-                                onChange={handleChange}
-                                label={<FormattedMessage id='Settings.ChangePasswordForm.old.password' defaultMessage='Old Password' />}
-                                fullWidth
-                                error={validateOldPasswordChange()}
-                                helperText={<FormattedMessage id='Settings.ChangePasswordForm.enter.old.password' defaultMessage='Enter Old Password' />}
-                                variant='outlined'
-                                type='password'
-                            />
-                            <TextField
-                                classes={{
-                                    root: classes.mandatoryStarText,
-                                }}
-                                margin='dense'
-                                name='newPassword'
-                                value={newPassword}
-                                onChange={handleChange}
-                                label={
-                                    <FormattedMessage id='Settings.ChangePasswordForm.new.password' defaultMessage='New Password' />
-                                }
-                                required
-                                fullWidth
-                                error={validatePasswordChange()}
-                                helperText={validatePasswordChange()
-                                    || <FormattedMessage id='Settings.ChangePasswordForm.enter.new.password' defaultMessage='Enter a New Password' />}
-                                variant='outlined'
-                                type='password'
-                            />
-                            <TextField
-                                classes={{
-                                    root: classes.mandatoryStarText,
-                                }}
-                                margin='dense'
-                                name='repeatedNewPassword'
-                                value={repeatedNewPassword}
-                                onChange={handleChange}
-                                label={
-                                    <FormattedMessage id='Settings.ChangePasswordForm.confirm.new.password' defaultMessage='Confirm new Password' />
-                                }
-                                required
-                                fullWidth
-                                error={validateRepeatedPassword()}
-                                helperText={validateRepeatedPassword()
-                                    || <FormattedMessage id='Settings.ChangePasswordForm.confirmationOf.new.password' defaultMessage='Confirmation of new Password' />}
-                                variant='outlined'
-                                type='password'
-                            />
+    if (passwordChangeEligible === undefined) {
+        return <Progress />;
+    }
 
-                            <Box my={2} display='flex' flexDirection='row'>
-                                <Box mr={1}>
-                                    <Button
-                                        color='primary'
-                                        variant='contained'
-                                        onClick={handleSave}
-                                    >
-                                        <FormattedMessage
-                                            id='Settings.ChangePasswordForm.Save.Button.text'
-                                            defaultMessage='Save'
-                                        />
-                                    </Button>
+    // If the user is eligible to change the password, display password change form.
+    // otherwise, display page not found.
+
+    if (passwordChangeEligible) {
+        return (
+            <ChangePasswordBase title={title}>
+                <Box py={2} display='flex' justifyContent='center'>
+                    <Grid item xs={10} md={9}>
+                        <Box component='div' m={2}>
+                            <Grid
+                                container
+                                mt={2}
+                                spacing={2}
+                                direction='column'
+                                justify='center'
+                                alignItems='flex-start'
+                            >
+                                <TextField
+                                    classes={{
+                                        root: classes.mandatoryStarText,
+                                    }}
+                                    required
+                                    autoFocus
+                                    margin='dense'
+                                    name='currentPassword'
+                                    value={currentPassword}
+                                    onChange={handleChange}
+                                    label={<FormattedMessage id='Settings.ChangePasswordForm.current.password' defaultMessage='Current Password' />}
+                                    fullWidth
+                                    error={validateCurrentPasswordChange()}
+                                    helperText={<FormattedMessage id='Settings.ChangePasswordForm.enter.current.password' defaultMessage='Enter Current Password' />}
+                                    variant='outlined'
+                                    type='password'
+                                />
+                                <TextField
+                                    classes={{
+                                        root: classes.mandatoryStarText,
+                                    }}
+                                    margin='dense'
+                                    name='newPassword'
+                                    value={newPassword}
+                                    onChange={handleChange}
+                                    label={
+                                        <FormattedMessage id='Settings.ChangePasswordForm.new.password' defaultMessage='New Password' />
+                                    }
+                                    required
+                                    fullWidth
+                                    error={validatePasswordChange()}
+                                    helperText={validatePasswordChange()
+                                        || <FormattedMessage id='Settings.ChangePasswordForm.enter.new.password' defaultMessage='Enter a New Password' />}
+                                    variant='outlined'
+                                    type='password'
+                                />
+                                <TextField
+                                    classes={{
+                                        root: classes.mandatoryStarText,
+                                    }}
+                                    margin='dense'
+                                    name='repeatedNewPassword'
+                                    value={repeatedNewPassword}
+                                    onChange={handleChange}
+                                    label={
+                                        <FormattedMessage id='Settings.ChangePasswordForm.confirm.new.password' defaultMessage='Confirm new Password' />
+                                    }
+                                    required
+                                    fullWidth
+                                    error={validateRepeatedPassword()}
+                                    helperText={validateRepeatedPassword()
+                                        || <FormattedMessage id='Settings.ChangePasswordForm.confirmationOf.new.password' defaultMessage='Confirmation of new Password' />}
+                                    variant='outlined'
+                                    type='password'
+                                />
+
+                                <Box my={2} display='flex' flexDirection='row'>
+                                    <Box mr={1}>
+                                        <Button
+                                            color='primary'
+                                            variant='contained'
+                                            onClick={handleSave}
+                                        >
+                                            <FormattedMessage
+                                                id='Settings.ChangePasswordForm.Save.Button.text'
+                                                defaultMessage='Save'
+                                            />
+                                        </Button>
+                                    </Box>
+                                    <Box mx={1}>
+                                        <Button
+                                            onClick={() => window.history.back()}
+                                        >
+                                            <FormattedMessage
+                                                id='Settings.ChangePasswordForm.Cancel.Button.text'
+                                                defaultMessage='Cancel'
+                                            />
+                                        </Button>
+                                    </Box>
                                 </Box>
-                                <Box mx={1}>
-                                    <Button
-                                        onClick={() => window.history.back()}
-                                    >
-                                        <FormattedMessage
-                                            id='Settings.ChangePasswordForm.Cancel.Button.text'
-                                            defaultMessage='Cancel'
-                                        />
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    </Box>
-                </Grid>
-            </Box>
-        </ChangePasswordBase>
-    );
+                            </Grid>
+                        </Box>
+                    </Grid>
+                </Box>
+            </ChangePasswordBase>
+        );
+    } else {
+        return <PageNotFound />;
+    }
+
 };
 
 export default ChangePassword;

@@ -524,7 +524,18 @@ class Layout extends React.Component {
                                                                             />
                                                                         </Link>
                                                                     </MenuItem>
-                                                                    {user.name !== 'admin' ?
+                                                                    <MenuItem className={classes.logoutLink}>
+                                                                        <Link
+                                                                            to={'/settings/change-password/'}
+                                                                            onClick={this.handleCloseUserMenu}
+                                                                        >
+                                                                            <FormattedMessage
+                                                                                id='Base.index.settingsMenu.changePassword'
+                                                                                defaultMessage='Change Password'
+                                                                            />
+                                                                        </Link>
+                                                                    </MenuItem>
+                                                                    {/* {user.name !== 'admin' ?
                                                                         <MenuItem className={classes.logoutLink}>
                                                                             <Link
                                                                                 to={'/settings/change-password/'}
@@ -537,7 +548,7 @@ class Layout extends React.Component {
                                                                             </Link>
                                                                         </MenuItem> :
                                                                         null
-                                                                    }
+                                                                    } */}
                                                                     <MenuItem onClick={this.doOIDCLogout} className={classes.logoutLink}>
                                                                         <FormattedMessage
                                                                             id='Base.index.logout'

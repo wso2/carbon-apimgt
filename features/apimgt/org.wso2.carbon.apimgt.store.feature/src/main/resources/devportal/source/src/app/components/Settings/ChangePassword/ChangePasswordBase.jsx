@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
  * @param {Object} props title and children components are expected
  * @returns {React.Component} Base element
  */
-function ApplicationCreateBase(props) {
+function ChangePasswordBase(props) {
     const { title, children } = props;
     const classes = useStyles();
     return (
@@ -60,8 +60,8 @@ function ApplicationCreateBase(props) {
         </Box>
     );
 }
-ApplicationCreateBase.propTypes = {
+ChangePasswordBase.propTypes = {
     title: PropTypes.element.isRequired,
     children: PropTypes.element.isRequired,
 };
-export default ApplicationCreateBase;
+export default ChangePasswordBase;
