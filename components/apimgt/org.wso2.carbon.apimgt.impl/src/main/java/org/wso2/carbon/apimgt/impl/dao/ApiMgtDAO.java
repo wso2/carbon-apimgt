@@ -4671,6 +4671,10 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            if (connection.getMetaData().getDriverName().contains("MS SQL") ||
+                    connection.getMetaData().getDriverName().contains("Microsoft")) {
+                offset = start + offset;
+            }
             // sortColumn, sortOrder variable values has sanitized in jaggery level (applications-list.jag)for security.
             sqlQuery = sqlQuery.replace("$1", sortColumn);
             sqlQuery = sqlQuery.replace("$2", sortOrder);
