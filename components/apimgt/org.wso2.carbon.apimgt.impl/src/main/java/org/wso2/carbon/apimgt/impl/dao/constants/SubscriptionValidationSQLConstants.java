@@ -29,7 +29,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME," +
                     "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
-                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE"+
+                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE" +
                     " FROM " +
                     "   AM_SUBSCRIBER AS SUB," +
                     "   AM_APPLICATION AS APP" +
