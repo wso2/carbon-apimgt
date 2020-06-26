@@ -325,16 +325,19 @@ class Details extends React.Component {
     handleDrawerOpen() {
         this.setState({ open: true });  
         const user = AuthManager.getUser();
-        user.isSideBarOpen = true;
-        AuthManager.setUser(user);
+        if(user != null){
+            user.isSideBarOpen = true;
+            AuthManager.setUser(user);
+        }
     };
 
     handleDrawerClose() {
         this.setState({ open: false });
         const user = AuthManager.getUser();
-        user.isSideBarOpen = false;
-        AuthManager.setUser(user);
-        
+        if(user != null){
+            user.isSideBarOpen = false;
+            AuthManager.setUser(user);
+        }
     };
 
     /**
