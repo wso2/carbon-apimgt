@@ -249,7 +249,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APS.TENANT_ID AS TENANT_ID, " +
                     "   APS.MAX_DEPTH AS MAX_DEPTH, " +
                     "   APS.MAX_COMPLEXITY AS MAX_COMPLEXITY" +
-                    "FROM " +
+                    " FROM " +
                     "   AM_POLICY_SUBSCRIPTION AS APS" +
                     " WHERE " +
                     "   APS.NAME = ? AND " +
