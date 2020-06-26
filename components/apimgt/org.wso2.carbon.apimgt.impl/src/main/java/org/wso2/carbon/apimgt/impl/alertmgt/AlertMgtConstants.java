@@ -27,6 +27,7 @@ public class AlertMgtConstants {
     public static final String ADMIN_DASHBOARD_AGENT = "admin-dashboard";
     public static final String APIM_STAKEHOLDER_ALERT_APP = "APIM_STAKEHOLDER_ALERT";
     public static final String APIM_ALERT_CONFIG_APP = "APIM_CONFIGURATION_ALERT";
+    public static final String APIM_ALERT_BOT_DETECTION_APP = "APIM_ALERT_BOT_DETECTION_EMAIL";
     public static final String API_NAME_KEY = "apiName";
     public static final String API_CREATOR_KEY = "apiCreator";
     public static final String API_VERSION_KEY = "apiVersion";

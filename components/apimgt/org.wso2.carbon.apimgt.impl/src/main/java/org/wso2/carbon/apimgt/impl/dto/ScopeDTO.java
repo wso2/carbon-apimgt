@@ -17,19 +17,25 @@
  */
 package org.wso2.carbon.apimgt.impl.dto;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Model of Scope DTO
  */
-public class ScopeDTO {
+public class ScopeDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    @SerializedName("name")
     private String name;
+    @SerializedName("displayName")
     private String displayName;
+    @SerializedName("description")
     private String description;
+    @SerializedName("bindings")
     private List<String> bindings = new ArrayList<String>();
 
     public String getName() {

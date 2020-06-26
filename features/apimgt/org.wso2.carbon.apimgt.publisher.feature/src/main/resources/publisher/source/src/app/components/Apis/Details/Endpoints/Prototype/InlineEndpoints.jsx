@@ -16,7 +16,9 @@
  *  under the License.
  */
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, {
+    useState, useEffect, useContext, useCallback,
+} from 'react';
 import PropTypes from 'prop-types';
 import { Grid } from '@material-ui/core';
 import GenericResource from 'AppComponents/Apis/Details/Endpoints/Prototype/GenericResource';
@@ -37,7 +39,10 @@ const defaultScript = '/* mc.setProperty(\'CONTENT_TYPE\', \'application/json\')
  * */
 function InlineEndpoints(props) {
     const { api } = useContext(APIContext);
-    const { paths, updatePaths } = props;
+    const {
+        paths, updatePaths,
+    } = props;
+    const [mockValueDetails, setMockValueDetails] = useState({ resourcePath: '', resourceMethod: '' });
 
     /**
      * Handles the onChange event of the script editor.
@@ -46,11 +51,14 @@ function InlineEndpoints(props) {
      * @param {string} path The path value of the resource.
      * @param {string} method The resource method.
      * */
-    const onScriptChange = (value, path, method) => {
-        const tmpPaths = JSON.parse(JSON.stringify(paths));
-        tmpPaths[path][method][xMediationScriptProperty] = value;
-        updatePaths(tmpPaths);
-    };
+    const onScriptChange = useCallback(
+        (value, path, method) => {
+            const tmpPaths = JSON.parse(JSON.stringify(paths));
+            tmpPaths[path][method][xMediationScriptProperty] = value;
+            updatePaths(tmpPaths);
+        },
+        [mockValueDetails.resourcePath, mockValueDetails.resourceMethod],
+    );
 
     const [mockScripts, setMockScripts] = useState([]);
 
@@ -87,6 +95,7 @@ function InlineEndpoints(props) {
                                     onChange={onScriptChange}
                                     scriptContent={script}
                                     originalScript={originalScript}
+                                    setMockValueDetails={setMockValueDetails}
                                 />
                             );
                         })
@@ -102,4 +111,4 @@ InlineEndpoints.propTypes = {
     updatePaths: PropTypes.func.isRequired,
 };
 
-export default InlineEndpoints;
+export default React.memo(InlineEndpoints);

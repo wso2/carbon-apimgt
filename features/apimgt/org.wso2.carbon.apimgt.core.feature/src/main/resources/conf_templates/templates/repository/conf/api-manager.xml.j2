@@ -541,6 +541,11 @@
         <!-- Configure Access-Control-Allow-Headers -->
         <Access-Control-Allow-Headers>{% for header in apim.cors.allow_headers %}{{header}}{{ "," if not loop.last }}{% endfor %}</Access-Control-Allow-Headers>
 
+        <!-- Configure Access-Control-Expose-Headers -->
+        {% if apim.cors.expose_headers is defined %}
+            <Access-Control-Expose-Headers>{% for header in apim.cors.expose_headers %}{{header}}{{ "," if not loop.last }}{% endfor %}</Access-Control-Expose-Headers>
+        {% endif %}
+
         <!-- Configure Access-Control-Allow-Credentials -->
         <!-- Specifying this header to true means that the server allows cookies (or other user credentials) to be included on cross-origin requests.
              It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin header does not contain the wildcard (*) -->
@@ -1112,27 +1117,84 @@
         <EnableClientCertificateValidation>{{apimgt.mutual_ssl.enable_client_validation}}</EnableClientCertificateValidation>
      </MutualSSL>
 
-     <KeyManagerConfigurations>
-        <Enable>{{apim.key_manager.enable}}</Enable>
-        {% if apim.key_manager.connector.service_url is defined %}
-        <ServiceUrl>{{apim.key_manager.connector.service_url}}</ServiceUrl>
+     <EventHubConfigurations>
+        <Enable>{{apim.event_hub.enable}}</Enable>
+        {% if apim.event_hub.username is defined %}
+         <Username>{{apim.event_hub.username}}</Username>
+        {% else %}
+         <Username>{{apim.throttling.username}}</Username>
         {% endif %}
-         {% if apim.key_manager.connector.service_url is defined %}
-        <InitDelay>{{apim.key_manager.connector.init_delay}}</InitDelay>
+        {% if apim.event_hub.password is defined %}
+         <Password>{{apim.event_hub.password}}</Password>
+        {% else %}
+         <Password>{{apim.throttling.password}}</Password>
+        {% endif %}
+        {% if apim.event_hub.service_url is defined %}
+        <ServiceURL>{{apim.event_hub.service_url}}</ServiceURL>
+        {% endif %}
+         {% if apim.event_hub.init_delay is defined %}
+        <InitDelay>{{apim.event_hub.init_delay}}</InitDelay>
           {% endif %}
-         <ConfigurationRetriever>
-             <transport.jms.ConnectionFactoryJNDIName>keymanager</transport.jms.ConnectionFactoryJNDIName>
-             <transport.jms.DestinationType>TopicConnectionFactory</transport.jms.DestinationType>
-             <java.naming.factory.initial>{{apim.key_manager.configuration_retriever.java_naming_factory_initial}}</java.naming.factory.initial>
-             {% if apim.key_manager.configuration_retriever.topic_connection_urls is defined %}
-             <connectionfactory.TopicConnectionFactory>amqp://{{apim.key_manager.configuration_retriever.username}}:{{apim.key_manager.configuration_retriever.password}}@clientid/carbon?brokerlist='{% for url in apim.key_manager.configuration_retriever.topic_connection_urls %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+        <EventPublisherConfiguration>
+            <Type>{{apim.event_hub.event_type}}</Type>
+            {% if apim.event_hub.publish.url_group is defined %}
+                <ReceiverUrlGroup>
+                {%- for group in apim.event_hub.publish.url_group -%}
+                    {%- if group.type == "loadbalance" -%}
+                { {{- group.urls.toList()|join(',') -}} }
+                    {%- else -%}{ {{- group.urls.toList()|join('|') -}} }
+                    {%- endif -%}
+                    {{- "," if not loop.last -}}
+                {%- endfor -%}
+                </ReceiverUrlGroup>
+                <AuthUrlGroup>
+                    {%- for group in apim.event_hub.publish.url_group -%}
+                    {%- if group.type == "loadbalance" -%}
+                    { {{- group.auth_urls.toList()|join(',') -}} }
+                    {%- else -%}{ {{- group.auth_urls.toList()|join('|') -}} }
+                    {%- endif -%}
+                    {{- "," if not loop.last -}}
+                    {%- endfor -%}
+                </AuthUrlGroup>
+            {%else%}
+                {% if apim.throttling.url_group is defined %}
+                    <ReceiverUrlGroup>
+                    {%- for group in apim.throttling.url_group -%}
+                        {%- if group.type == "loadbalance" -%}
+                    { {{- group.traffic_manager_urls.toList()|join(',') -}} }
+                        {%- else -%}{ {{- group.traffic_manager_urls.toList()|join('|') -}} }
+                        {%- endif -%}
+                        {{- "," if not loop.last -}}
+                    {%- endfor -%}
+                    </ReceiverUrlGroup>
+                    <AuthUrlGroup>
+                        {%- for group in apim.throttling.url_group -%}
+                        {%- if group.type == "loadbalance" -%}
+                        { {{- group.traffic_manager_auth_urls.toList()|join(',') -}} }
+                        {%- else -%}{ {{- group.traffic_manager_auth_urls.toList()|join('|') -}} }
+                        {%- endif -%}
+                        {{- "," if not loop.last -}}
+                        {%- endfor -%}
+                    </AuthUrlGroup>
+                {%- else -%}
+                    <ReceiverUrlGroup>tcp://${carbon.local.ip}:${receiver.url.port}</ReceiverUrlGroup>
+                    <AuthUrlGroup>ssl://${carbon.local.ip}:${auth.url.port}</AuthUrlGroup>
+                {% endif %}
+            {% endif %}}
+        </EventPublisherConfiguration>
+         <EventReceiverConfiguration>
+             <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
+             <transport.jms.DestinationType>topic</transport.jms.DestinationType>
+             <java.naming.factory.initial>{{apim.event_hub.java_naming_factory_initial}}</java.naming.factory.initial>
+             {% if apim.event_hub.event_listening_endpoints is defined %}
+             <connectionfactory.TopicConnectionFactory>amqp://{{apim.event_hub.username}}:{{apim.event_hub.password}}@clientid/carbon?brokerlist='{% for url in apim.event_hub.event_listening_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
              {% elif apim.throttling.throttle_decision_endpoints is defined %}
              <connectionfactory.TopicConnectionFactory>amqp://{{apim.throttling.jms.username}}:{{apim.throttling.jms.password}}@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
              {% else %}
              <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
              {% endif %}
-         </ConfigurationRetriever>
-     </KeyManagerConfigurations>
+         </EventReceiverConfiguration>
+     </EventHubConfigurations>
 
     {% if apim.sync_runtime_artifacts.publisher is defined %}
     <SyncRuntimeArtifactsPublisher>
@@ -1173,7 +1235,7 @@
          <ContainerMgtInfo>
              <Type>{{cluster.type}}</Type>
              <ClassName>{{cluster.class}}</ClassName>
-             <ClusterId>{{cluster.clusterId}}</ClusterId>
+             <ClusterName>{{cluster.clusterName}}</ClusterName>
              <DisplayName>{{cluster.displayName}}</DisplayName>
              <Properties>
                  {% for key,value in cluster.properties.items() %}
@@ -1183,4 +1245,8 @@
          </ContainerMgtInfo>
          {% endfor %}
      </ContainerMgt>
+
+     <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
+      change his/her password via devportal. By default this feature is enabled.-->
+     <EnableChangePassword>{{apim.enable_change_password}}</EnableChangePassword>
 </APIManager>

@@ -1558,13 +1558,9 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getComplexityDetails(apiIdentifier);
     }
 
-    public void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
-        apiMgtDAO.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
-    }
 
-
-    public void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
-        apiMgtDAO.updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+    public void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+        apiMgtDAO.addOrUpdateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
     }
 
 
@@ -3113,6 +3109,13 @@ public abstract class AbstractAPIManager implements APIManager {
                     if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
                         OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetaData()
                                 , OAuthApplicationInfo.class);
+                        if (storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES)
+                                instanceof String) {
+                            oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                    ((String) storedOAuthApplicationInfo
+                                            .getParameter(APIConstants.JSON_GRANT_TYPES))
+                                            .replace(",", " "));
+                        }
                         if (oAuthApplicationInfo == null) {
                             oAuthApplicationInfo = storedOAuthApplicationInfo;
                         } else {
@@ -3132,7 +3135,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
                         apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
                         apiKey.setGrantTypes(
-                                oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+                                (String) oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
                         if (oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES) != null) {
                             apiKey.setAdditionalProperties(
                                     oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES));

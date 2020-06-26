@@ -23,6 +23,7 @@ public class BlockConditionsDTO   {
     private List<IPLevelDTO> ip = new ArrayList<>();
     private List<String> user = new ArrayList<>();
     private List<String> custom = new ArrayList<>();
+    private List<String> subscription = new ArrayList<>();
 
   /**
    **/
@@ -109,6 +110,23 @@ public class BlockConditionsDTO   {
     this.custom = custom;
   }
 
+  /**
+   **/
+  public BlockConditionsDTO subscription(List<String> subscription) {
+    this.subscription = subscription;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("subscription")
+  public List<String> getSubscription() {
+    return subscription;
+  }
+  public void setSubscription(List<String> subscription) {
+    this.subscription = subscription;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -123,12 +141,13 @@ public class BlockConditionsDTO   {
         Objects.equals(application, blockConditions.application) &&
         Objects.equals(ip, blockConditions.ip) &&
         Objects.equals(user, blockConditions.user) &&
-        Objects.equals(custom, blockConditions.custom);
+        Objects.equals(custom, blockConditions.custom) &&
+        Objects.equals(subscription, blockConditions.subscription);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(api, application, ip, user, custom);
+    return Objects.hash(api, application, ip, user, custom, subscription);
   }
 
   @Override
@@ -141,6 +160,7 @@ public class BlockConditionsDTO   {
     sb.append("    ip: ").append(toIndentedString(ip)).append("\n");
     sb.append("    user: ").append(toIndentedString(user)).append("\n");
     sb.append("    custom: ").append(toIndentedString(custom)).append("\n");
+    sb.append("    subscription: ").append(toIndentedString(subscription)).append("\n");
     sb.append("}");
     return sb.toString();
   }

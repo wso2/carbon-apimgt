@@ -29,8 +29,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
-import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
@@ -47,7 +45,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({HostObjectComponent.class, PrivilegedCarbonContext.class, ProviderKeyMgtClient.class,
+@PrepareForTest({HostObjectComponent.class, PrivilegedCarbonContext.class,
         HostObjectUtils.class, MultitenantUtils.class, Caching.class})
 public class HostObjectUtilsTest {
     private HostObjectUtils hostObject = new HostObjectUtils();
@@ -69,58 +67,6 @@ public class HostObjectUtilsTest {
         hostObject.setConfigContextService(null);
         String returnedPortError = hostObject.getBackendPort("http");
         Assert.assertNull(returnedPortError);
-
-    }
-
-    @Test
-    public void testGetKeyManagementClient() throws Exception {
-        PowerMockito.mockStatic(HostObjectComponent.class);
-        HostObjectComponent hostObjectComponent = Mockito.mock(HostObjectComponent.class);
-        APIManagerConfiguration apimConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        Mockito.when(hostObjectComponent.getAPIManagerConfiguration()).thenReturn(apimConfiguration);
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).thenReturn("https://localhost:9443/services/");
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn("admin");
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn("admin");
-
-        Assert.assertTrue(hostObject.getKeyManagementClient() instanceof SubscriberKeyMgtClient);
-    }
-
-    @Test
-    public void testGetProviderClient() throws Exception {
-        PowerMockito.mockStatic(HostObjectComponent.class);
-        HostObjectComponent hostObjectComponent = Mockito.mock(HostObjectComponent.class);
-        APIManagerConfiguration apimConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        ProviderKeyMgtClient pkmClient = PowerMockito.mock(ProviderKeyMgtClient.class);
-
-        Mockito.when(hostObjectComponent.getAPIManagerConfiguration()).thenReturn(apimConfiguration);
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).thenReturn("https://localhost:9443/services/");
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn("admin");
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn("admin");
-        PowerMockito.whenNew(ProviderKeyMgtClient.class).withAnyArguments().thenReturn(pkmClient);
-
-        Assert.assertTrue(hostObject.getProviderClient() instanceof ProviderKeyMgtClient);
-
-    }
-
-    @Test
-    public void testGetProviderClientWithInvalidCredentials() throws Exception {
-        PowerMockito.mockStatic(HostObjectComponent.class);
-        HostObjectComponent hostObjectComponent = Mockito.mock(HostObjectComponent.class);
-        APIManagerConfiguration apimConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        ProviderKeyMgtClient pkmClient = PowerMockito.mock(ProviderKeyMgtClient.class);
-
-        Mockito.when(hostObjectComponent.getAPIManagerConfiguration()).thenReturn(apimConfiguration);
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).thenReturn("https://localhost:9443/services/");
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn(null);
-        PowerMockito.whenNew(ProviderKeyMgtClient.class).withAnyArguments().thenReturn(pkmClient);
-
-        try{
-            hostObject.getProviderClient();
-            Assert.fail("APIManagementExcception not thrown");
-        } catch (APIManagementException e) {
-            String msg = "Authentication credentials for API Provider manager unspecified";
-            Assert.assertEquals(msg, e.getMessage());
-        }
 
     }
 
