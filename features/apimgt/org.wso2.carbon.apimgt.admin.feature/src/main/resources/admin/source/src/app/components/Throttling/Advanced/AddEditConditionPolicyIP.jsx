@@ -76,12 +76,10 @@ function validateIPRange(startIP, endIP) {
         let startIp = 0;
         let endIp = 0;
         for (let i = 0; i < 4; i++) {
-            // eslint-disable-next-line no-restricted-properties
-            startIp += startIPBlocks[i] * Math.pow(256, 3 - i);
+            startIp += startIPBlocks[i] * 256 ** (3 - i);
         }
         for (let i = 0; i < 4; i++) {
-            // eslint-disable-next-line no-restricted-properties
-            endIp += endIPBlocks[i] * Math.pow(256, 3 - i);
+            endIp += endIPBlocks[i] * 256 ** (3 - i);
         }
         if (startIp < endIp) {
             return true;
