@@ -80,11 +80,11 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             if (maxDepth > 0) {
                 return maxDepth;
             } else {
-                log.error("Maximum query depth was not allocated");
+                log.debug("Maximum query depth value is 0");
                 return -1;
             }
         } else {
-            log.error("Maximum query depth was not allocated");
+            log.debug("Maximum query depth not applicable");
             return -1;
         }
     }
@@ -232,11 +232,11 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             if (maxComplexity > 0) {
                 return maxComplexity;
             } else {
-                log.error("Maximum query complexity was not allocated");
+                log.debug("Maximum query complexity value is 0");
                 return -1;
             }
         } else {
-            log.error("Maximum query complexity was not allocated");
+            log.debug("Maximum query complexity not applicable");
             return -1;
         }
     }
