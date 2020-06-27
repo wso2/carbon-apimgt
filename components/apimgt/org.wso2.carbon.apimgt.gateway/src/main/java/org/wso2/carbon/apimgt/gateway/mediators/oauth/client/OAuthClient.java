@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators.oauth.client;
 
-import com.google.gson.Gson;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +26,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -37,6 +38,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class represents the client used to request and retrieve OAuth tokens
@@ -61,7 +65,7 @@ public class OAuthClient {
      */
     public static TokenResponse generateToken(String url, String clientId, String clientSecret,
             String username, char[] password, String grantType, JSONObject customParameters, String refreshToken)
-            throws IOException, APIManagementException {
+            throws IOException, APIManagementException, ParseException {
         if(log.isDebugEnabled()) {
             log.debug("Initializing token generation request: [token-endpoint] " + url);
         }
@@ -124,7 +128,7 @@ public class OAuthClient {
      * @throws IOException In the event of a problem parsing the response from the backend
      */
     private static TokenResponse getTokenResponse(CloseableHttpResponse response)
-            throws APIManagementException, IOException {
+            throws APIManagementException, IOException, ParseException {
         int responseCode = response.getStatusLine().getStatusCode();
 
         if (!(responseCode == HttpStatus.SC_OK)) {
@@ -140,7 +144,26 @@ public class OAuthClient {
             stringBuilder.append(inputLine);
         }
 
-        TokenResponse tokenResponse = new Gson().fromJson(stringBuilder.toString(), TokenResponse.class);
+        JSONParser parser = new JSONParser();
+        JSONObject jsonResponse = (JSONObject) parser.parse(stringBuilder.toString());
+        TokenResponse tokenResponse = new TokenResponse();
+        if (jsonResponse.containsKey("access_token")) {
+            tokenResponse.setAccessToken((String) jsonResponse.get("access_token"));
+            if (jsonResponse.containsKey("refresh_token")) {
+                tokenResponse.setRefreshToken((String) jsonResponse.get("refresh_token"));
+            }
+            if (jsonResponse.containsKey("scope")) {
+                Set<String> scopeSet = Stream.of( jsonResponse.get("scope").toString().trim()
+                        .split("\\s*,\\s*") ).collect(Collectors.toSet());
+                tokenResponse.setScope(scopeSet);
+            }
+            if (jsonResponse.containsKey("token_type")) {
+                tokenResponse.setTokenType((String) jsonResponse.get("token_type"));
+            }
+            if (jsonResponse.containsKey("expires_in")) {
+                tokenResponse.setExpiresIn( jsonResponse.get("expires_in").toString());
+            }
+        }
         long currentTimeInSeconds = System.currentTimeMillis() / 1000;
         long expiryTimeInSeconds = currentTimeInSeconds + Long.parseLong(tokenResponse.getExpiresIn());
         tokenResponse.setValidTill(expiryTimeInSeconds);
@@ -149,7 +172,11 @@ public class OAuthClient {
             log.debug("Response: [status-code] " + responseCode + " [message] "
                     + stringBuilder.toString());
         }
-        return tokenResponse;
+        if (tokenResponse.getAccessToken() != null) {
+            return tokenResponse;
+        } else {
+            return null;
+        }
     }
 
 }

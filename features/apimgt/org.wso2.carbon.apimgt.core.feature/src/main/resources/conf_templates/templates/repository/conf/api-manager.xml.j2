@@ -1022,8 +1022,20 @@
             {% if apim.redis_config.port is defined %}
             <RedisPort>{{apim.redis_config.port}}</RedisPort>
             {% endif %}
+            {% if apim.redis_config.user is defined %}
+            <RedisUser>{{apim.redis_config.user}}</RedisUser>
+            {% endif %}
             {% if apim.redis_config.password is defined %}
             <RedisPassword>{{apim.redis_config.password}}</RedisPassword>
+            {% endif %}
+            {% if apim.redis_config.database_id is defined %}
+            <RedisDatabaseId>{{apim.redis_config.database_id}}</RedisDatabaseId>
+            {% endif %}
+            {% if apim.redis_config.connection_timeout is defined %}
+            <RedisConnectionTimeout>{{apim.redis_config.connection_timeout}}</RedisConnectionTimeout>
+            {% endif %}
+            {% if apim.redis_config.ssl is defined %}
+            <RedisIsSslEnabled>{{apim.redis_config.ssl}}</RedisIsSslEnabled>
             {% endif %}
         </RedisConfig>
     {% endif %}

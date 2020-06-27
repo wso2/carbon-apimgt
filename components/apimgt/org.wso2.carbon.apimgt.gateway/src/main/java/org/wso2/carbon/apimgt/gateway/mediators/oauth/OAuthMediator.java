@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators.oauth;
 
-import org.apache.commons.lang3.StringUtils;
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.codec.binary.Base64;
@@ -33,10 +33,9 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.TokenResponse;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.conf.OAuthEndpoint;
-import org.wso2.carbon.apimgt.gateway.utils.RedisCache;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisConfig;
 import org.wso2.carbon.apimgt.impl.APIConstants.OAuthConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -50,36 +49,21 @@ import java.util.concurrent.CountDownLatch;
 public class OAuthMediator extends AbstractMediator implements ManagedLifecycle {
 
     private static final Log log = LogFactory.getLog(OAuthMediator.class);
-    private JSONObject oAuthEndpointSecurityProperties;
-    public static RedisCache redisCache;
+    private static RedisConfig redisConfig;
+    public static RedisCacheUtils redisCacheUtils;
     public static boolean isRedisEnabled = false;
     public static OAuthEndpoint oAuthEndpoint;
 
     // Interface methods are being implemented here
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
-        oAuthEndpointSecurityProperties = getOAuthEndpointSecurityProperties();
-        if (oAuthEndpointSecurityProperties != null) {
-            isRedisEnabled = ((Boolean) oAuthEndpointSecurityProperties
-                    .get(APIConstants.IS_REDIS_ENABLED));
-            if (isRedisEnabled) {
-                String redisHost = (String) oAuthEndpointSecurityProperties.get(APIConstants.REDIS_HOST);
-                String redisPort = (String) oAuthEndpointSecurityProperties.get(APIConstants.REDIS_PORT);
-                if (oAuthEndpointSecurityProperties.containsKey(APIConstants.REDIS_PASSWORD)) {
-                    char[] redisPassword = (char[]) oAuthEndpointSecurityProperties
-                            .get(APIConstants.REDIS_PASSWORD);
-                    redisCache = new RedisCache(redisHost, Integer.valueOf(redisPort), redisPassword);
-                } else {
-                    redisCache = new RedisCache(redisHost, Integer.valueOf(redisPort), null);
-                }
-            }
-        }
+        getRedisConfig();
     }
 
     @Override
     public void destroy() {
         if (isRedisEnabled) {
-            redisCache.stopRedisCacheSession();
+            redisCacheUtils.stopRedisCacheSession();
         }
     }
 
@@ -137,7 +121,7 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
 
             if (oAuthEndpoint != null) {
                 try {
-                    OAuthTokenGenerator.checkTokenValidity(oAuthEndpoint, latch);
+                    OAuthTokenGenerator.generateToken(oAuthEndpoint, latch);
                     latch.await();
                 } catch(InterruptedException | APISecurityException e) {
                     log.error("Could not generate access token...", e);
@@ -146,7 +130,8 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
 
             TokenResponse tokenResponse;
             if (isRedisEnabled) {
-                tokenResponse = redisCache.getTokenResponseById(oAuthEndpoint.getId());
+                assert oAuthEndpoint != null;
+                tokenResponse = (TokenResponse) redisCacheUtils.getObject(oAuthEndpoint.getId(), TokenResponse.class);
             } else {
                 tokenResponse = TokenCache.getInstance().getTokenMap().get(oAuthEndpoint.getId());
             }
@@ -168,28 +153,28 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     /**
-     * This method returns the OAuthEndpointSecurity Properties from the API Manager Configuration
-     * @return JSONObject OAuthEndpointSecurity properties
+     * This method retrieves the Redis Config Properties from the API Manager Configuration
+     * and passes it to an instance of RedisCacheUtils
      */
-    public static JSONObject getOAuthEndpointSecurityProperties() {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String redisHost = configuration.getFirstProperty(APIConstants.CONFIG_REDIS_HOST);
-        String redisPort = configuration.getFirstProperty(APIConstants.CONFIG_REDIS_PORT);
-        String redisPassword = configuration.getFirstProperty(APIConstants.CONFIG_REDIS_PASSWORD);
+    public static void getRedisConfig() {
+        JSONObject redisConfigProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getRedisConfigProperties();
 
-        JSONObject configProperties = new JSONObject();
+        redisConfig = new Gson().fromJson(String.valueOf(redisConfigProperties), RedisConfig.class);
 
-        if(StringUtils.isNotBlank(redisHost)
-                && StringUtils.isNotBlank(redisPort)) {
-            configProperties.put(APIConstants.IS_REDIS_ENABLED, true);
-            configProperties.put(APIConstants.REDIS_HOST, redisHost);
-            configProperties.put(APIConstants.REDIS_PORT, redisPort);
-            if (StringUtils.isNotBlank(redisPassword)) {
-                configProperties.put(APIConstants.REDIS_PASSWORD, redisPassword);
+        if (redisConfig != null) {
+            isRedisEnabled = redisConfig.isRedisEnabled();
+            if (isRedisEnabled) {
+                if (redisConfig.getUser() != null
+                        && redisConfig.getPassword() != null
+                        && redisConfig.getConnectionTimeout() != 0) {
+                    redisCacheUtils = new RedisCacheUtils(redisConfig.getHost(), redisConfig.getPort(),
+                            redisConfig.getConnectionTimeout(), redisConfig.getUser(),
+                            redisConfig.getPassword(), redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
+                } else {
+                    redisCacheUtils = new RedisCacheUtils(redisConfig.getHost(), redisConfig.getPort());
+                }
             }
-            return configProperties;
         }
-        return null;
     }
 }

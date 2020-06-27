@@ -1239,15 +1239,24 @@ public final class APIConstants {
 
     // For Redis Configuration
     public static final String REDIS_CONFIG = "RedisConfig.";
-    public static final String CONFIG_IS_REDIS_ENABLED = REDIS_CONFIG + "IsRedisEnabled";
     public static final String CONFIG_REDIS_HOST = REDIS_CONFIG + "RedisHost";
     public static final String CONFIG_REDIS_PORT = REDIS_CONFIG + "RedisPort";
+    public static final String CONFIG_REDIS_USER = REDIS_CONFIG + "RedisUser";
     public static final String CONFIG_REDIS_PASSWORD = REDIS_CONFIG + "RedisPassword";
+    public static final String CONFIG_REDIS_DATABASE_ID = REDIS_CONFIG + "RedisDatabaseId";
+    public static final String CONFIG_REDIS_CONNECTION_TIMEOUT = REDIS_CONFIG + "RedisConnectionTimeout";
+    public static final String CONFIG_REDIS_READ_TIMEOUT = REDIS_CONFIG + "RedisReadTimeout";
+    public static final String CONFIG_REDIS_IS_SSL_ENABLED = REDIS_CONFIG + "RedisIsSslEnabled";
 
     public static final String IS_REDIS_ENABLED = "isRedisEnabled";
     public static final String REDIS_HOST = "redisHost";
     public static final String REDIS_PORT = "redisPort";
+    public static final String REDIS_USER = "redisUser";
     public static final String REDIS_PASSWORD = "redisPassword";
+    public static final String REDIS_DATABASE_ID = "redisDatabaseId";
+    public static final String REDIS_CONNECTION_TIMEOUT = "redisConnectionTimeout";
+    public static final String REDIS_READ_TIMEOUT = "redisReadTimeout";
+    public static final String REDIS_IS_SSL_ENABLED = "redisIsSslEnabled";
 
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";

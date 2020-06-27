@@ -20,12 +20,14 @@ package org.wso2.carbon.apimgt.gateway.mediators.oauth;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.OAuthClient;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.TokenResponse;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.conf.OAuthEndpoint;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -38,17 +40,20 @@ public class OAuthTokenGenerator {
     private static final Log log = LogFactory.getLog(OAuthTokenGenerator.class);
 
     /**
-     * Method to check for and refresh expired access tokens
+     * Method to check for and refresh expired/generate new access tokens
      * @param oAuthEndpoint OAuthEndpoint object for token endpoint properties
      * @param latch CountDownLatch for blocking call when OAuth API is invoked
      * @throws APISecurityException In the event of errors when generating new token
      */
-    public static void checkTokenValidity(OAuthEndpoint oAuthEndpoint, CountDownLatch latch)
+    public static void generateToken(OAuthEndpoint oAuthEndpoint, CountDownLatch latch)
             throws APISecurityException {
         try {
             TokenResponse previousResponse = null;
             if (OAuthMediator.isRedisEnabled) {
-                previousResponse = OAuthMediator.redisCache.getTokenResponseById(oAuthEndpoint.getId());
+                Object previousResponseObject = RedisCacheUtils.getInstance().getObject(oAuthEndpoint.getId(), TokenResponse.class);
+                if (previousResponseObject != null) {
+                    previousResponse = (TokenResponse) previousResponseObject;
+                }
             } else {
                 previousResponse = TokenCache.getInstance().getTokenMap().get(oAuthEndpoint.getId());
             }
@@ -74,7 +79,11 @@ public class OAuthTokenGenerator {
         } catch (APIManagementException e) {
             log.error("Could not retrieve OAuth Token" + getEndpointId(oAuthEndpoint));
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Error while parsing OAuth Token response", e);
+                    "Error while retrieving OAuth token", e);
+        } catch (ParseException e) {
+            log.error("Could not retrieve OAuth Token" + getEndpointId(oAuthEndpoint));
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while parsing OAuth Token endpoint response", e);
         }
         if (latch != null) {
             latch.countDown();
@@ -90,14 +99,14 @@ public class OAuthTokenGenerator {
      * @throws APIManagementException In the event of errors when accessing the token endpoint url
      */
     private static void addTokenToCache(OAuthEndpoint oAuthEndpoint, String refreshToken)
-            throws IOException, APIManagementException {
+            throws IOException, APIManagementException, ParseException {
         TokenResponse tokenResponse = OAuthClient.generateToken(oAuthEndpoint.getTokenApiUrl(),
                 oAuthEndpoint.getClientId(), oAuthEndpoint.getClientSecret(), oAuthEndpoint.getUsername(),
                 oAuthEndpoint.getPassword(), oAuthEndpoint.getGrantType(), oAuthEndpoint.getCustomParameters(),
                 refreshToken);
         assert tokenResponse != null;
         if (OAuthMediator.isRedisEnabled) {
-            OAuthMediator.redisCache.addTokenResponse(oAuthEndpoint.getId(), tokenResponse);
+            RedisCacheUtils.getInstance().addObject(oAuthEndpoint.getId(), tokenResponse);
         } else {
             TokenCache.getInstance().getTokenMap().put(oAuthEndpoint.getId(), tokenResponse);
         }

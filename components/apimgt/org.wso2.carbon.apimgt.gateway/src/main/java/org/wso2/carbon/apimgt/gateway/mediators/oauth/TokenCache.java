@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Token Cache Implementation
+ * Token Cache Singleton Implementation
  */
 public class TokenCache {
     private static final TokenCache instance = new TokenCache();
