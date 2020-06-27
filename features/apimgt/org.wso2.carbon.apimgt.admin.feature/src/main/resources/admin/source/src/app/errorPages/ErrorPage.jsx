@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/core/styles';
-import ErrorList from './errorList';
+import ErrorList from './ErrorList';
 
 const useStyles = makeStyles((theme) => ({
     root: {
