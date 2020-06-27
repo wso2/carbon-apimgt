@@ -20,7 +20,7 @@ import React from 'react';
 import Configurations from 'Config';
 import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
-import ErrorPage from '../../errorPages/errorPage';
+import ErrorPage from '../../errorPages/ErrorPage';
 
 const page = Configurations.app.context + '/services/auth/login';
 
