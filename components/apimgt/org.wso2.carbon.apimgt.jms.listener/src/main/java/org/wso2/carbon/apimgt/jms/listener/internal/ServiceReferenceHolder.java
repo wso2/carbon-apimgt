@@ -22,11 +22,8 @@ package org.wso2.carbon.apimgt.jms.listener.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
-import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
-import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 
 /**
  * Class for keeping service references.
@@ -37,7 +34,6 @@ public class ServiceReferenceHolder {
 
     private APIManagerConfiguration apimConfiguration;
     private KeyManagerConfigurationService keyManagerService;
-    private KeyManagerDataService keyManagerDataService;
 
     public static ServiceReferenceHolder getInstance() {
         return instance;
@@ -71,11 +67,4 @@ public class ServiceReferenceHolder {
         return keyManagerService;
     }
 
-    public KeyManagerDataService getKeyManagerDataService() {
-        return keyManagerDataService;
-    }
-
-    public void setKeyManagerDataService(KeyManagerDataService keyManagerDataService) {
-        this.keyManagerDataService = keyManagerDataService;
-    }
 }
