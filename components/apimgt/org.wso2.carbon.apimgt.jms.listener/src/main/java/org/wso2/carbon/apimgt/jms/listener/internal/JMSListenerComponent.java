@@ -122,23 +122,7 @@ public class JMSListenerComponent {
         }
     }
     
-    @Reference(
-            name = "keymanager.data.service",
-            service = KeyManagerDataService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetKeyManagerDataService")
-    protected void setKeyManagerDataService(KeyManagerDataService keymanagerDataService) {
 
-        log.debug("Setting KeyManagerDataService");
-        ServiceReferenceHolder.getInstance().setKeyManagerDataService(keymanagerDataService);
-    }
-
-    protected void unsetKeyManagerDataService(KeyManagerDataService keymanagerDataService) {
-
-        log.debug("Un-setting KeyManagerDataService");
-        ServiceReferenceHolder.getInstance().setKeyManagerDataService(null);
-    }
 
 }
 

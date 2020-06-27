@@ -79,8 +79,8 @@ public class GatewayStartupListener implements ServerStartupObserver, ServerShut
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
         jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
                 new GatewayTokenRevocationMessageListener());
-        jmsTransportHandlerForEventHub
-                .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_CACHE_INVALIDATION, new APIMgtGatewayCacheMessageListener());
+        jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_CACHE_INVALIDATION,
+                new APIMgtGatewayCacheMessageListener());
         jmsTransportHandlerForEventHub
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
     }

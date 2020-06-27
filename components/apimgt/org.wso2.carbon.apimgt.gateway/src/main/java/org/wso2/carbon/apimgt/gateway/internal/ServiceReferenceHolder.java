@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
@@ -65,6 +66,8 @@ public class ServiceReferenceHolder {
     private APIThrottleDataService throttleDataService;
 
     private JWTValidationService jwtValidationService;
+    private KeyManagerDataService keyManagerDataService;
+
     public void setThrottleDataHolder(ThrottleDataHolder throttleDataHolder) {
         this.throttleDataHolder = throttleDataHolder;
     }
@@ -274,4 +277,13 @@ public class ServiceReferenceHolder {
         return throttleDataService;
     }
 
+    public KeyManagerDataService getKeyManagerDataService() {
+
+        return keyManagerDataService;
+    }
+
+    public void setKeyManagerDataService(KeyManagerDataService keyManagerDataService) {
+
+        this.keyManagerDataService = keyManagerDataService;
+    }
 }
