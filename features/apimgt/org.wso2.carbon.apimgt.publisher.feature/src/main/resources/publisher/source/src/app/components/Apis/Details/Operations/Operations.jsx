@@ -122,10 +122,13 @@ class Operations extends React.Component {
     constructor(props) {
         super(props);
         const { api } = props;
+        const { operations } = api;
+        const operationCopy = [...operations];
+        operationCopy.sort((a, b) => ((a.target + a.verb > b.target + b.verb) ? 1 : -1));
         this.state = {
             notFound: false,
             apiPolicies: [],
-            operations: api.operations,
+            operations: operationCopy,
             apiThrottlingPolicy: api.apiThrottlingPolicy,
             filterKeyWord: '',
             isSaving: false,
