@@ -162,6 +162,14 @@ public interface APIAdmin  {
     List<BotDetectionData> getBotDetectionAlertSubscriptions() throws APIManagementException;
 
     /**
+     * Retrieve all bot detected data
+     *
+     * @return list of bot detected data
+     * @throws APIManagementException
+     */
+    List<BotDetectionData> retrieveBotDetectionData() throws APIManagementException;
+
+    /**
      * Adds a new category for the tenant
      *
      * @param userName    logged in user name

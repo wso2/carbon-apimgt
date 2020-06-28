@@ -449,12 +449,7 @@ public class APIAdminImpl implements APIAdmin {
         return apiMgtDAO.getBotDetectionAlertSubscription(field, value);
     }
 
-    /**
-     * Retrieve all bot detected data
-     *
-     * @return list of bot detected data
-     * @throws APIManagementException
-     */
+    @Override
     public List<BotDetectionData> retrieveBotDetectionData() throws APIManagementException {
 
         List<BotDetectionData> botDetectionDatalist = new ArrayList<>();
