@@ -39,7 +39,7 @@ function GlobalNavBar(props) {
     const { custom: { landingPage: { active: landingPageActive, activeForAnonymous } } } = theme;
     const isUserFound = AuthManager.getUser();
     return (
-        <List className={classes.listRoot}>
+        <List className={classes.listRootInline} component='nav' >
             {landingPageActive && (isUserFound && !activeForAnonymous ||  activeForAnonymous)
                 && (
                     <Link to='/home' className={classNames({ [classes.selected]: selected === 'home', [classes.links]: true })}>
