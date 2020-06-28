@@ -216,9 +216,9 @@ public class RedisCacheUtils {
     }
 
     /**
-     * Add Serializable object into Redis
+     * Add object into Redis
      * @param key Key at which the object should be associated with
-     * @param object Serializable object to be saved
+     * @param object object to be saved
      */
     public void addObject(String key, Object object) {
         try (Jedis jedis = jedisPool.getResource()) {
@@ -230,9 +230,9 @@ public class RedisCacheUtils {
     }
 
     /**
-     * Get Serializable object from Redis
+     * Get object from Redis
      * @param key Key at which the object is saved
-     * @return Serializable object associated with the key
+     * @return object associated with the key
      */
     public Object getObject(String key, Class objectType) {
         try (Jedis jedis = jedisPool.getResource()) {

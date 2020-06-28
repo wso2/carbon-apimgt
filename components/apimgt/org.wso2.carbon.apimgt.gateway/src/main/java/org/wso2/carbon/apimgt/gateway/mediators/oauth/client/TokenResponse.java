@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.gateway.mediators.oauth.client;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +30,7 @@ import java.util.stream.Stream;
  * This class represents the Token Response data object designed to store and transfer
  * the essential data returned from an OAuth-protected backend
  */
-public class TokenResponse implements Serializable {
+public class TokenResponse {
 
     @SerializedName("access_token")
     private String accessToken;
