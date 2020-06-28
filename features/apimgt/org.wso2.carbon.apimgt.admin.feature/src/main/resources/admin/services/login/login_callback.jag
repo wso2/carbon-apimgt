@@ -58,9 +58,10 @@
         var tokenEndpoint = appUtils.getLoopbackOrigin() + TOKEN_URL_SUFFIX;
         var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
 
-        var erroLogin = serverUrl + app.context +"/error-pages?code="
+        var erroLogin = serverUrl + app.context +"/error-pages?code=";
+        var responseFailed = false;
         if (JSON.parse(result.data).error != null) {
-            response.sendRedirect(erroLogin + "500");
+            responseFailed = true; 
         } else {
             response.contentType = "application/json";
             var tokenResponse = JSON.parse(result.data);
@@ -159,9 +160,12 @@
                 "maxAge": Integer(-1)
             };
             response.addCookie(cookie);
+        }
 
             var state = request.getParameter("state");
-            if (state !== null) {
+            if (responseFailed === true) {
+                response.sendRedirect(erroLogin + "500");    
+            } else if (state !== null) {
                 state = decodeURIComponent(state);
                 if ( state !== '/') {
                     response.sendRedirect(app.context + state);
@@ -172,6 +176,5 @@
                 response.sendRedirect(app.context);
             }
         }
-    }
 }());
 %>
