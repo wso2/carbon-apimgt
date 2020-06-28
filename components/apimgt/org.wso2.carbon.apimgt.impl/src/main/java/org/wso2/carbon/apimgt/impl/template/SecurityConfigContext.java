@@ -122,8 +122,8 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                         EndpointSecurityModel endpointSecurityModel = new ObjectMapper()
                                 .convertValue(productionEndpointSecurity, EndpointSecurityModel.class);
                         if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
-                            if (endpointSecurityModel.getUsername() != null
-                                    && endpointSecurityModel.getPassword() != null) {
+                            if (StringUtils.isNotBlank(endpointSecurityModel.getUsername())
+                                    && StringUtils.isNotBlank(endpointSecurityModel.getPassword())) {
                                 endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
                                         endpointSecurityModel.getUsername().concat(":")
                                                 .concat(endpointSecurityModel.getPassword()).getBytes())));
@@ -139,8 +139,8 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                         EndpointSecurityModel endpointSecurityModel = new ObjectMapper()
                                 .convertValue(sandboxEndpointSecurity, EndpointSecurityModel.class);
                         if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
-                            if (endpointSecurityModel.getUsername() != null &&
-                                    endpointSecurityModel.getPassword() != null) {
+                            if (StringUtils.isNotBlank(endpointSecurityModel.getUsername()) &&
+                                    StringUtils.isNotBlank(endpointSecurityModel.getPassword())) {
                                 endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
                                         endpointSecurityModel.getUsername().concat(":")
                                                 .concat(endpointSecurityModel.getPassword()).getBytes())));
@@ -173,8 +173,8 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                         endpointSecurityModel.setType(endpointSecurityEntry.getValue().getType());
                         endpointSecurityModel
                                 .setAdditionalProperties(endpointSecurityEntry.getValue().getAdditionalProperties());
-                        if (endpointSecurityModel.getUsername() != null
-                                && endpointSecurityModel.getPassword() != null) {
+                        if (StringUtils.isNotBlank(endpointSecurityModel.getUsername())
+                                && StringUtils.isNotBlank(endpointSecurityModel.getPassword())) {
                             endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
                                     endpointSecurityModel.getUsername().concat(":")
                                             .concat(endpointSecurityModel.getPassword())
