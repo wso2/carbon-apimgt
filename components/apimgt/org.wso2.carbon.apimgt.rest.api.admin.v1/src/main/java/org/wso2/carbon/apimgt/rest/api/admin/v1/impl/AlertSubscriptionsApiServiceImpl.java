@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
@@ -41,7 +42,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.Response;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -168,12 +168,13 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      *
      * @param messageContext
      * @return list of bot detection alert subscriptions
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs when retrieving bot detection alert subscriptions
      */
     @Override
     public Response getBotDetectionAlertSubscriptions(MessageContext messageContext) throws APIManagementException {
 
-        List<BotDetectionData> botDetectionDataList = new APIAdminImpl().retrieveSavedBotDataEmailList();
+        APIAdmin apiAdmin = new APIAdminImpl();
+        List<BotDetectionData> botDetectionDataList = apiAdmin.getBotDetectionAlertSubscriptions();
         BotDetectionAlertSubscriptionListDTO listDTO =
                 BotDetectionMappingUtil.fromAlertSubscriptionListToListDTO(botDetectionDataList);
         return Response.ok().entity(listDTO).build();
@@ -184,8 +185,8 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      *
      * @param body           email to be registered for the subscription
      * @param messageContext
-     * @return alert subscription DTO containin the uuid of the subscription and the registered email
-     * @throws APIManagementException
+     * @return alert subscription DTO containing the uuid of the subscription and the registered email
+     * @throws APIManagementException if an error occurs when subscribing for bot detection alerts
      */
     @Override
     public Response subscribeForBotDetectionAlerts(BotDetectionAlertSubscriptionDTO body, MessageContext messageContext)
@@ -197,26 +198,19 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
             throw new APIManagementException(propertyName + " property value of payload cannot be blank",
                     ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
-
-        try {
-            APIAdminImpl apiAdmin = new APIAdminImpl();
-            BotDetectionData alertSubscription =
-                    apiAdmin.getBotDetectionAlertSubscription(AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD, email);
-            if (alertSubscription != null) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "Email: " + email + " has already been subscribed for bot detection alerts", log);
-            }
-            apiAdmin.addBotDataEmailConfiguration(email);
-            BotDetectionData newAlertSubscription =
-                    apiAdmin.getBotDetectionAlertSubscription(AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD, email);
-            BotDetectionAlertSubscriptionDTO alertSubscriptionDTO =
-                    BotDetectionMappingUtil.fromAlertSubscriptionToDTO(newAlertSubscription);
-            return Response.ok(alertSubscriptionDTO).build();
-        } catch (APIManagementException | SQLException e) {
-            String errorMessage = "Error when subscribing for bot detection alerts with email: " + email;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        APIAdmin apiAdmin = new APIAdminImpl();
+        BotDetectionData alertSubscription =
+                apiAdmin.getBotDetectionAlertSubscription(AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD, email);
+        if (alertSubscription != null) {
+            RestApiUtil.handleResourceAlreadyExistsError(
+                    "Email: " + email + " has already been subscribed for bot detection alerts", log);
         }
-        return null;
+        apiAdmin.addBotDetectionAlertSubscription(email);
+        BotDetectionData newAlertSubscription =
+                apiAdmin.getBotDetectionAlertSubscription(AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD, email);
+        BotDetectionAlertSubscriptionDTO alertSubscriptionDTO =
+                BotDetectionMappingUtil.fromAlertSubscriptionToDTO(newAlertSubscription);
+        return Response.ok(alertSubscriptionDTO).build();
     }
 
     /**
@@ -225,24 +219,20 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      * @param uuid           uuid of the subscription
      * @param messageContext
      * @return 200 OK response if the subscription is deleted successfully
+     * @throws APIManagementException if an error occurs when un-subscribing from bot detection alerts
      */
     @Override
-    public Response unsubscribeFromBotDetectionAlerts(String uuid, MessageContext messageContext) {
+    public Response unsubscribeFromBotDetectionAlerts(String uuid, MessageContext messageContext)
+            throws APIManagementException {
 
-        try {
-            APIAdminImpl apiAdmin = new APIAdminImpl();
-            BotDetectionData alertSubscription = apiAdmin.getBotDetectionAlertSubscription("uuid", uuid);
-            if (alertSubscription == null) {
-                RestApiUtil.handleResourceNotFoundError(
-                        "Bot detection alert subscription with uuid: " + uuid + " does not exist.", log);
-            }
-            apiAdmin.deleteBotDataEmailList(uuid);
-            return Response.ok().build();
-        } catch (APIManagementException | SQLException e) {
-            String errorMessage = "Error when deleting bot detection alert subscription with uuid: " + uuid;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        APIAdmin apiAdmin = new APIAdminImpl();
+        BotDetectionData alertSubscription = apiAdmin.getBotDetectionAlertSubscription("uuid", uuid);
+        if (alertSubscription == null) {
+            RestApiUtil.handleResourceNotFoundError(
+                    "Bot detection alert subscription with uuid: " + uuid + " does not exist.", log);
         }
-        return null;
+        apiAdmin.deleteBotDetectionAlertSubscription(uuid);
+        return Response.ok().build();
     }
 
     /**
