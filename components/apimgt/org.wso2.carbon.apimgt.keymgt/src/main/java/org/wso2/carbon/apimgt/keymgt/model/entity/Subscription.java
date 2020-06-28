@@ -87,4 +87,12 @@ public class Subscription implements CacheableEntity<String> {
 
         return SubscriptionDataStoreUtil.getSubscriptionCacheKey(getAppId(), getApiId());
     }
+
+    @Override
+    public String toString() {
+        return "Subscription [subscriptionId=" + subscriptionId + ", policyId=" + policyId + ", apiId=" + apiId
+                + ", appId=" + appId + ", subscriptionState=" + subscriptionState + "]";
+    }
+    
+    
 }

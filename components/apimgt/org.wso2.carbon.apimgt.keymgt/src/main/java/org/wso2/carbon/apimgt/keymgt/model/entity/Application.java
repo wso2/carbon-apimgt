@@ -31,8 +31,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Application implements CacheableEntity<Integer> {
 
     private Integer id = null;
+    private String uuid;
     private String name = null;
     private Integer subId = null;
+    private String subName = null;
     private String policy = null;
     private String tokenType = null;
     private List<String> groupIds = new ArrayList<>();
@@ -121,5 +123,31 @@ public class Application implements CacheableEntity<Integer> {
     public void removeAttribute(String key) {
 
         this.attributes.remove(key);
+    }
+
+    public String getSubName() {
+
+        return subName;
+    }
+
+    public void setSubName(String subName) {
+
+        this.subName = subName;
+    }
+
+    public void setUUID(String uuid) {
+
+        this.uuid = uuid;
+    }
+
+    @Override
+    public String toString() {
+        return "Application [id=" + id + ", name=" + name + ", subId=" + subId + ", policy=" + policy + ", tokenType="
+                + tokenType + ", groupIds=" + groupIds + ", attributes=" + attributes + "]";
+    }
+
+    public String getUUID() {
+
+        return uuid;
     }
 }

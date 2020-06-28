@@ -579,6 +579,7 @@ public class GatewayUtils {
             authContext.setSpikeArrestLimit(apiKeyValidationInfoDTO.getSpikeArrestLimit());
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
+            authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
         } else {
             if (jwtValidationInfo.getClaims().get(APIConstants.JwtTokenConstants.KEY_TYPE)!= null) {
                 authContext.setKeyType(

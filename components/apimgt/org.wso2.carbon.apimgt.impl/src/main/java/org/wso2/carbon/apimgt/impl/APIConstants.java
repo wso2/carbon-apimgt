@@ -2303,6 +2303,11 @@ public final class APIConstants {
         public static final String TOPIC_KEY_MANAGER = "keyManager";
         public static final String TOPIC_NOTIFICATION = "notification";
     }
+    public enum PolicyType {
+        API,
+        APPLICATION,
+        SUBSCRIPTION
+    }
 
     public static final String ENABLE_CHANGE_PASSWORD = "EnableChangePassword";
 }

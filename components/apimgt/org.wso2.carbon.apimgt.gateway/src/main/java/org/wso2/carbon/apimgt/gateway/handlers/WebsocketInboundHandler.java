@@ -35,6 +35,7 @@ import org.apache.http.HttpHeaders;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -286,7 +287,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
                     AuthenticationContext authenticationContext =
-                            new JWTValidator(null, null).
+                            new JWTValidator(null, new APIKeyValidator(null)).
                                     authenticateForWebSocket(signedJWT, apiContextUri, version);
                     if(authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;

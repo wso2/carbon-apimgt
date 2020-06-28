@@ -556,6 +556,8 @@ definitions:
   #-----------------------------------------------------
   Application:
     properties:
+      uuid:
+        type: string
       id:
         type: integer
       name:
@@ -684,6 +686,8 @@ definitions:
         type: string
       keyType:
         type: string
+      keyManager:
+        type: string
 
   #---------------------  --------------------------------
   # The Throttle Policy resource
@@ -796,6 +800,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ApiPolicyConditionGroup'
+       applicableLevel:
+        type: string
 
   #-----------------------------------------------------
   # The API Policy Condition  Group resource

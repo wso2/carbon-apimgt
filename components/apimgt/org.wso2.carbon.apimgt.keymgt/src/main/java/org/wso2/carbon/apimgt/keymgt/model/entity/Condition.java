@@ -15,25 +15,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-/**
- * Entity for keeping Application Policy
- */
-public class ApplicationPolicy extends Policy {
+public class Condition {
+    private String conditionType;
+    private String name;
+    private String value;
+    private boolean isInverted;
 
-    private static final String type = "APPLICATION";
-
-    @Override
-    public String getCacheKey() {
-
-        return POLICY_TYPE.APPLICATION + DELEM_PERIOD + super.getCacheKey();
+    public String getConditionType() {
+        return conditionType;
     }
 
-    @Override
-    public String toString() {
-        return "ApplicationPolicy [getId()=" + getId() + ", getQuotaType()=" + getQuotaType() + ", isContentAware()="
-                + isContentAware() + ", getTenantId()=" + getTenantId() + ", getName()=" + getName() + "]";
+    public void setConditionType(String conditionType) {
+        this.conditionType = conditionType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public boolean isInverted() {
+        return isInverted;
+    }
+
+    public void setInverted(boolean isInverted) {
+        this.isInverted = isInverted;
     }
 }

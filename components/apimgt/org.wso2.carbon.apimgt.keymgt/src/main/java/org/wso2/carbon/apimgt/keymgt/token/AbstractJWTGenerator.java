@@ -24,15 +24,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -54,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class represents the JSON Web Token generator.
@@ -81,11 +81,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     private String dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
 
     private String signatureAlgorithm = SHA256_WITH_RSA;
-
-
-    private static ConcurrentHashMap<Integer, Key> privateKeys = new ConcurrentHashMap<Integer, Key>();
-    private static ConcurrentHashMap<Integer, Certificate> publicCerts = new ConcurrentHashMap<Integer, Certificate>();
-    private ApiMgtDAO dao = ApiMgtDAO.getInstance();
 
     private String userAttributeSeparator = APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT;
 
@@ -363,13 +358,9 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         return null;
     }
 
-    public Application getApplicationbyId(int applicationId) {
-        try {
-            Application application = dao.getApplicationById(applicationId);
-            return application;
-        } catch (APIManagementException e) {
-            log.error("Error in retrieving application with the id: " + applicationId);
-            return null;
-        }
+    protected Application getApplicationById(String tenantDomain, int applicationId) {
+
+        SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        return datastore.getApplicationById(applicationId);
     }
 }

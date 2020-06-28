@@ -22,11 +22,22 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
+import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -87,9 +98,10 @@ public class GatewayJMSMessageListener implements MessageListener {
         }
     }
 
-    private void handleNotificationMessage(String eventType, long timestamp, String event) {
+    private void handleNotificationMessage(String eventType, long timestamp, String encodedEvent) {
 
-        byte[] eventDecoded = Base64.decodeBase64(event);
+        byte[] eventDecoded = Base64.decodeBase64(encodedEvent);
+        String eventJson = new String(eventDecoded);
 
         if ((APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType))
@@ -104,7 +116,77 @@ public class GatewayJMSMessageListener implements MessageListener {
                 } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
                     inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
                 }
+                }
+        }
+        if (EventType.APPLICATION_CREATE.toString().equals(eventType)
+                || EventType.APPLICATION_UPDATE.toString().equals(eventType)) {
+            ApplicationEvent event = new Gson().fromJson(eventJson, ApplicationEvent.class);
+            ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateApplication(event);;
+        } else if (EventType.SUBSCRIPTIONS_CREATE.toString().equals(eventType)
+                || EventType.SUBSCRIPTIONS_UPDATE.toString().equals(eventType)) {
+            SubscriptionEvent event = new Gson().fromJson(eventJson, SubscriptionEvent.class);
+            ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateSubscription(event);
+        } else if (EventType.API_UPDATE.toString().equals(eventType)) {
+            APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
+            ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateAPI(event);
+        } else if (EventType.API_LIFECYCLE_CHANGE.toString().equals(eventType)) {
+            APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
+            if (APIStatus.CREATED.toString().equals(event.getApiStatus())
+                    || APIStatus.RETIRED.toString().equals(event.getApiStatus())) {
+                ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeAPI(event);
+            } else {
+                ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateAPI(event);
             }
+        } else if (EventType.APPLICATION_REGISTRATION_CREATE.toString().equals(eventType)) {
+            ApplicationRegistrationEvent event = new Gson().fromJson(eventJson, ApplicationRegistrationEvent.class);
+            ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateApplicationKeyMapping(event);
+        } else if (EventType.API_DELETE.toString().equals(eventType)) {
+            APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
+            ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeAPI(event);
+        } else if (EventType.SUBSCRIPTIONS_DELETE.toString().equals(eventType)) {
+            SubscriptionEvent event = new Gson().fromJson(eventJson, SubscriptionEvent.class);
+            ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeSubscription(event);
+        } else if (EventType.APPLICATION_DELETE.toString().equals(eventType)) {
+            ApplicationEvent event = new Gson().fromJson(eventJson, ApplicationEvent.class);
+            ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeApplication(event);
+        } else {
+            PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
+            boolean updatePolicy = false;
+            boolean deletePolicy = false;
+            if (EventType.POLICY_CREATE.toString().equals(eventType)
+                    || EventType.POLICY_UPDATE.toString().equals(eventType)) {
+                updatePolicy = true;
+            } else if (EventType.POLICY_DELETE.toString().equals(eventType)) {
+                deletePolicy = true;
+            }
+            if (event.getPolicyType() == PolicyType.API) {
+                APIPolicyEvent policyEvent = new Gson().fromJson(eventJson, APIPolicyEvent.class);
+                if (updatePolicy) {
+                    ServiceReferenceHolder.getInstance().getKeyManagerDataService()
+                            .addOrUpdateAPIPolicy(policyEvent);
+                } else if (deletePolicy) {
+                    ServiceReferenceHolder.getInstance().getKeyManagerDataService()
+                            .removeAPIPolicy(policyEvent);
+                }
+            } else if (event.getPolicyType() == PolicyType.SUBSCRIPTION) {
+                SubscriptionPolicyEvent policyEvent = new Gson().fromJson(eventJson, SubscriptionPolicyEvent.class);
+                if (updatePolicy) {
+                    ServiceReferenceHolder.getInstance().getKeyManagerDataService()
+                            .addOrUpdateSubscriptionPolicy(policyEvent);
+                } else if (deletePolicy) {
+                    ServiceReferenceHolder.getInstance().getKeyManagerDataService()
+                            .removeSubscriptionPolicy(policyEvent);
+                }
+            } else if (event.getPolicyType() == PolicyType.APPLICATION) {
+                ApplicationPolicyEvent policyEvent = new Gson().fromJson(eventJson, ApplicationPolicyEvent.class);
+                if (updatePolicy) {
+                    ServiceReferenceHolder.getInstance().getKeyManagerDataService()
+                            .addOrUpdateApplicationPolicy(policyEvent);
+                } else if (deletePolicy) {
+                    ServiceReferenceHolder.getInstance().getKeyManagerDataService()
+                            .removeApplicationPolicy(policyEvent);
+                }
+            } 
         }
     }
 }

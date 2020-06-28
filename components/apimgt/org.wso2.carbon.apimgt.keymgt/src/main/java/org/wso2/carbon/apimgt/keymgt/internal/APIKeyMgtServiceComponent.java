@@ -29,11 +29,20 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
+import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
+import org.wso2.carbon.apimgt.keymgt.listeners.ServerStartupListener;
+import org.wso2.carbon.apimgt.keymgt.service.KeyManagerDataServiceImpl;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+import org.wso2.carbon.core.ServerStartupObserver;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -54,6 +63,16 @@ public class APIKeyMgtServiceComponent {
         try {
             APIKeyMgtDataHolder.initData();
             log.debug("Key Manager User Operation Listener is enabled.");
+            // Register subscription datastore related service
+            serviceRegistration = ctxt.getBundleContext().registerService(
+                    Axis2ConfigurationContextObserver.class.getName(), new ServerStartupListener(), null);
+            serviceRegistration = ctxt.getBundleContext().registerService(
+                    ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
+
+            // Register KeyManagerDataService
+            serviceRegistration = ctxt.getBundleContext().registerService(KeyManagerDataService.class.getName(),
+                    new KeyManagerDataServiceImpl(), null);
+
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");
             }
@@ -99,14 +118,14 @@ public class APIKeyMgtServiceComponent {
              policy = ReferencePolicy.DYNAMIC, 
              unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
-        APIKeyMgtDataHolder.setRealmService(realmService);
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
         if (log.isDebugEnabled()) {
             log.debug("Realm Service is set in the API KeyMgt bundle.");
         }
     }
 
     protected void unsetRealmService(RealmService realmService) {
-        APIKeyMgtDataHolder.setRealmService(null);
+        ServiceReferenceHolder.getInstance().setRealmService(null);
         if (log.isDebugEnabled()) {
             log.debug("Realm Service is unset in the API KeyMgt bundle.");
         }
