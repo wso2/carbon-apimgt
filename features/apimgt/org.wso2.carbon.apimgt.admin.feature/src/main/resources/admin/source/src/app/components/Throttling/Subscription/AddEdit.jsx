@@ -1134,8 +1134,8 @@ function AddEdit(props) {
                                                         id={index}
                                                         name='name'
                                                         label={intl.formatMessage({
-                                                            id: `Throttling.Subscription.Properties.Properties.
-                                                                        show.add.property.property.name`,
+                                                            id: 'Throttling.Subscription.Properties.Properties.'
+                                                                        + 'show.add.property.property.name',
                                                             defaultMessage: 'Name',
                                                         })}
                                                         margin='dense'
