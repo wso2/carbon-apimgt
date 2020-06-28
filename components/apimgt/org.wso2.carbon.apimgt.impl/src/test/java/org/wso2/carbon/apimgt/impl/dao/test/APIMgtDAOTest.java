@@ -1525,7 +1525,8 @@ public class APIMgtDAOTest {
     public void testGetGraphQLComplexityDetails() throws APIManagementException {
         APIIdentifier apiIdentifier = new APIIdentifier("RASIKA", "API1", "1.0.0");
         apiMgtDAO.addOrUpdateComplexityDetails(apiIdentifier, getGraphqlComplexityInfoDetails());
-        apiMgtDAO.getComplexityDetails(apiIdentifier);
+        GraphqlComplexityInfo graphqlComplexityInfo = apiMgtDAO.getComplexityDetails(apiIdentifier);
+        assertEquals(2,graphqlComplexityInfo.getList().size());
     }
 
     private GraphqlComplexityInfo getGraphqlComplexityInfoDetails() {
