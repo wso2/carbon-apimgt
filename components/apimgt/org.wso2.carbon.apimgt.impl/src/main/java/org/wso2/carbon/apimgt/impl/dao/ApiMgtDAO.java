@@ -14566,18 +14566,17 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Configure email list
-     * modify email list by adding or removing emails
+     * Add a bot detection alert subscription
+     *
+     * @param email email to be registered for the subscription
+     * @throws APIManagementException if an error occurs when adding a bot detection alert subscription
      */
-    public void addBotDataEmailConfiguration(String email) throws SQLException, APIManagementException {
-        Connection connection;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        connection = APIMgtDBUtil.getConnection();
-        connection.setAutoCommit(false);
-        try {
-            String emailListSaveQuery = SQLConstants.BotDataConstants.ADD_NOTIFICATION;
-            ps = connection.prepareStatement(emailListSaveQuery);
+    public void addBotDetectionAlertSubscription(String email) throws APIManagementException {
+
+        String query = SQLConstants.BotDataConstants.ADD_NOTIFICATION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
             UUID uuid = UUID.randomUUID();
             String randomUUIDString = uuid.toString();
             String category = "Bot-Detection";
@@ -14589,30 +14588,22 @@ public class ApiMgtDAO {
             ps.execute();
             connection.commit();
         } catch (SQLException e) {
-            connection.rollback();
-            handleException("Error while save email list.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+            handleException("Error while adding bot detection alert subscription", e);
         }
     }
 
     /**
-     * retrieve email list which configured for BotDetectedData Api alert
+     * Retrieve all bot detection alert subscriptions
+     *
+     * @throws APIManagementException if an error occurs when retrieving bot detection alert subscriptions
      */
-    public List<BotDetectionData> retrieveSavedBotDataEmailList()
-            throws APIManagementException {
+    public List<BotDetectionData> getBotDetectionAlertSubscriptions() throws APIManagementException {
 
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
         List<BotDetectionData> list = new ArrayList<>();
-
-        try {
-            String sqlQuery;
-            conn = APIMgtDBUtil.getConnection();
-            sqlQuery = SQLConstants.BotDataConstants.GET_SAVED_ALERT_EMAILS;
-            ps = conn.prepareStatement(sqlQuery);
-            resultSet = ps.executeQuery();
+        String query = SQLConstants.BotDataConstants.GET_SAVED_ALERT_EMAILS;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 BotDetectionData botDetectedData = new BotDetectionData();
                 botDetectedData.setUuid(resultSet.getString("UUID"));
@@ -14620,37 +14611,28 @@ public class ApiMgtDAO {
                 list.add(botDetectedData);
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve saved email types by tenant Name. ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            handleException("Error while retrieving bot detection alert subscriptions", e);
         }
         return list;
-
     }
 
     /**
-     * Delete email list from the database by using the tenantDomain
+     * Delete a bot detection alert subscription
+     *
+     * @param uuid uuid of the subscription
+     * @throws APIManagementException if an error occurs when deleting a bot detection alert subscription
      */
-    public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
+    public void deleteBotDetectionAlertSubscription(String uuid) throws APIManagementException {
 
-        Connection connection;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        connection = APIMgtDBUtil.getConnection();
-        connection.setAutoCommit(false);
-
-        try {
+        String query = SQLConstants.BotDataConstants.DELETE_EMAIL_BY_UUID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            String deleteEmail = SQLConstants.BotDataConstants.DELETE_EMAIL_BY_UUID;
-            ps = connection.prepareStatement(deleteEmail);
             ps.setString(1, uuid);
             ps.execute();
             connection.commit();
         } catch (SQLException e) {
-            connection.rollback();
-            handleException("Failed to delete alert email data.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+            handleException("Error while deleting bot detection alert subscription", e);
         }
     }
 
