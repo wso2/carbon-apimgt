@@ -1,11 +1,21 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.simple.JSONObject;
+
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMRegistryService;
+import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
@@ -17,12 +27,11 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SystemScopesMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Base64;
-import java.util.List;
-
-import java.io.InputStream;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -67,6 +76,49 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
             return Response.ok().entity(scopeListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error when getting the list of scopes-role mapping.";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    public Response updateRolesForScope(ScopeListDTO body, MessageContext messageContext) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(RestApiUtil.getLoggedInUsername());
+        //read from tenant-conf.json
+        JsonObject existingTenantConfObject = new JsonObject();
+        try {
+            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+            String existingTenantConf = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
+             existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
+        } catch (RegistryException | UserStoreException e) {
+            APIUtil.handleException("Couldn't read tenant configuration from tenant registry", e);
+        }
+        try {
+
+            JSONObject responseJson = new JSONObject();
+            JSONArray scopeJson = new JSONArray();
+
+            for(int i = 0; i < body.getList().size(); i++) {
+                JSONObject scopeRoleJson = new JSONObject();
+                scopeRoleJson.put("Name", body.getList().get(i).getName());
+                scopeRoleJson.put("Roles", body.getList().get(i).getRoles());
+                scopeJson.put(scopeRoleJson);
+            }
+
+            responseJson.put("Scope", scopeJson);
+            //Here we are removing RESTAPIScopes from the existing tenant-conf
+            // Adding new RESTAPIScopes to the existing tenant-conf.
+            existingTenantConfObject.remove("RESTAPIScopes");
+            Gson gson = new Gson();
+            existingTenantConfObject.add("RESTAPIScopes",
+                    gson.fromJson(responseJson.toString(), JsonElement.class));
+            APIUtil.updateTenantConf(existingTenantConfObject.toString(),tenantDomain);
+            Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+                    .getTenantDomain(RestApiUtil.getLoggedInUsername()));
+            ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
+            return Response.ok().entity(scopeListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error when updating the list of scopes-role mapping.";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

@@ -3529,6 +3529,52 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+    #--------------------------------------------------
+    # Update the roles for scopes
+    #--------------------------------------------------
+    put:
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:scope_manage
+      summary: |
+        Update Roles For Scope
+      operationId: updateRolesForScope
+      description: |
+        This operation is used to update the roles for all scopes
+      parameters:
+        - in: body
+          name: body
+          description: |
+            Key Manager object with updated information
+          required: true
+          schema:
+            $ref: '#/definitions/ScopeList'
+      tags:
+        - System Scopes
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with the newly added roles.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/ScopeList'
+        400:
+          description: |
+            Bad Request.
+            Invalid Request or request validation failure.
+        500:
+          description: |
+            Internal Server Error
+            An internal server error occurred while updating the roles.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The Tenant Theme resource APIs
 ######################################################
