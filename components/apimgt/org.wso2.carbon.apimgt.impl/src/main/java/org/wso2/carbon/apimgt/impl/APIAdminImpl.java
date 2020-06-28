@@ -425,40 +425,25 @@ public class APIAdminImpl implements APIAdmin {
         return keyManagerConfiguration;
     }
 
-    /**
-     * configure email list to which the alert needs to be sent
-     */
-    public void addBotDataEmailConfiguration(String email) throws APIManagementException, SQLException {
+    @Override
+    public void addBotDetectionAlertSubscription(String email) throws APIManagementException {
 
-        apiMgtDAO.addBotDataEmailConfiguration(email);
+        apiMgtDAO.addBotDetectionAlertSubscription(email);
     }
 
-    /**
-     * retrieve the configured email list
-     */
-    public List<BotDetectionData> retrieveSavedBotDataEmailList() throws APIManagementException {
+    @Override
+    public List<BotDetectionData> getBotDetectionAlertSubscriptions() throws APIManagementException {
 
-        List<BotDetectionData> list;
-        list = apiMgtDAO.retrieveSavedBotDataEmailList();
-        return list;
+        return apiMgtDAO.getBotDetectionAlertSubscriptions();
     }
 
-    /**
-     * remove all configured email list
-     */
-    public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
+    @Override
+    public void deleteBotDetectionAlertSubscription(String uuid) throws APIManagementException {
 
-        apiMgtDAO.deleteBotDataEmailList(uuid);
+        apiMgtDAO.deleteBotDetectionAlertSubscription(uuid);
     }
 
-    /**
-     * Retrieve a bot detection alert subscription by querying a particular field (uuid or email)
-     *
-     * @param field field to be queried to obtain the bot detection alert subscription. Can be uuid or email
-     * @param value value corresponding to the field (uuid or email value)
-     * @return if subscription exist, returns the bot detection alert subscription, else returns a null object
-     * @throws APIManagementException
-     */
+    @Override
     public BotDetectionData getBotDetectionAlertSubscription(String field, String value) throws APIManagementException {
 
         return apiMgtDAO.getBotDetectionAlertSubscription(field, value);
