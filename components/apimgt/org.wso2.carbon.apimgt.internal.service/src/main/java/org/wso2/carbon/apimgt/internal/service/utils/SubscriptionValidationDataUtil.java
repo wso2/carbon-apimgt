@@ -46,6 +46,10 @@ import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
+import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -306,6 +310,16 @@ public class SubscriptionValidationDataUtil {
             applicationKeyMappingListDTO.setCount(0);
         }
         return applicationKeyMappingListDTO;
+    }
+
+    public static String validateTenantDomain(String xWSO2Tenant, MessageContext messageContext) {
+
+
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (!tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            xWSO2Tenant = tenantDomain;
+        }
+        return xWSO2Tenant;
     }
 
 }

@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -75,8 +76,9 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {
             return;
         }
-
-        //Extract and check if "Authorization: Basic" is present in the request. If not, by-passes the interceptor. 
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        inMessage.put(RestApiConstants.TENANT_DOMAIN, tenantDomain);
+        //Extract and check if "Authorization: Basic" is present in the request. If not, by-passes the interceptor.
         //If yes, set the request_authentication_scheme property in the message as basic_auth and execute the basic 
         //authentication flow.
         AuthorizationPolicy policy = inMessage.get(AuthorizationPolicy.class);
