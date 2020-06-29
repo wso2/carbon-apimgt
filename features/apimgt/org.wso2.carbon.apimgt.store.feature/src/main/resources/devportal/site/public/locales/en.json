@@ -205,7 +205,7 @@
   "Apis.Listing.DocThumb.apiName": "Api Name",
   "Apis.Listing.DocThumb.apiVersion": "Api Version",
   "Apis.Listing.DocThumb.sourceType": "Source Type:",
-  "Apis.Listing.Listing.ApiTagCloud.title": "Tag Cloud",
+  "Apis.Listing.Listing.ApiTagCloud.title": "Tag Cloud / API Categories",
   "Apis.Listing.Listing.apis.main": "APIs",
   "Apis.Listing.NoApi.nodata.content": "There are no APIs to display right now.",
   "Apis.Listing.NoApi.nodata.title": "No APIs Available",

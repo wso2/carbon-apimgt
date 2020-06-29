@@ -29,7 +29,8 @@ import HelpOutline from '@material-ui/icons/HelpOutline';
 import { makeStyles } from '@material-ui/core/styles';
 
 import API from 'AppData/api';
-import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { withAPI, useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { isRestricted } from 'AppData/AuthManager';
 
 const useStyles = makeStyles((theme) => ({
     tooltip: {
@@ -43,6 +44,7 @@ function APICategories(props) {
     const [categories, setCategories] = useState({});
     const { api, configDispatcher } = props;
     const classes = useStyles();
+    const [apiFromContext] = useAPI();
 
     useEffect(() => {
         API.apiCategories().then((response) => setCategories(response.body));
@@ -67,6 +69,7 @@ function APICategories(props) {
                     name='categories'
                     margin='normal'
                     variant='outlined'
+                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                     value={api.categories}
                     SelectProps={{
                         multiple: true,

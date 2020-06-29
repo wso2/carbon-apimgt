@@ -78,8 +78,8 @@ public class ServerStartupListener implements ServerStartupObserver {
         String authenticationEndpointDir = "authenticationendpoint";
         String accountRecoveryEndpointDir = "accountrecoveryendpoint";
         String headerJspFile = "header.jsp";
-        String footerJspFile = "footer.jsp";
-        String titleJspFile = "title.jsp";
+        String footerJspFile = "product-footer.jsp";
+        String titleJspFile = "product-title.jsp";
         String cookiePolicyContentJspFile = "cookie-policy-content.jsp";
         String privacyPolicyContentJspFile = "privacy-policy-content.jsp";
         try {
