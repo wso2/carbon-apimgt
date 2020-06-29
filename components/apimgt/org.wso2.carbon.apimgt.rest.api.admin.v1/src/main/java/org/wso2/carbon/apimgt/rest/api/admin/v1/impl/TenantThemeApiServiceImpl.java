@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -66,15 +67,26 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_NOT_ALLOWED,
                             MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, tenantDomain));
         }
-        RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain);
+
+        APIAdmin apiAdmin = new APIAdminImpl();
         try {
+            apiAdmin.importTenantTheme(tenantId, fileInputStream);
             fileInputStream.reset();
-            new APIAdminImpl().importTenantTheme(tenantId, fileInputStream);
+            boolean isImportSuccessful = RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain);
+            if (!isImportSuccessful) {
+                apiAdmin.deleteTenantTheme(tenantId);
+                String errorMessage = "Error occurred when importing tenant theme of " + tenantDomain
+                        + " to the file system";
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, tenantDomain));
+            }
+
+
             return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
         } catch (IOException e) {
             String errorMessage = "Failed to import tenant theme of tenant " + tenantDomain;
             throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_EXPORT_FAILED, tenantDomain, tenantDomain));
+                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, tenantDomain));
         }
     }
 

@@ -160,12 +160,17 @@ public class RestApiAdminUtils {
      *
      * @param themeFile    content relevant to the tenant theme
      * @param tenantDomain tenant to which the theme is imported
+     * @return true if tenant theme is imported successfully to the file system, false otherwise
      * @throws APIManagementException if an error occurs while importing tenant theme
+     * @throws IOException            if an error occurs while deleting an incomplete tenant theme directory
      */
-    public static void importTenantTheme(InputStream themeFile, String tenantDomain) throws APIManagementException {
+    public static boolean importTenantTheme(InputStream themeFile, String tenantDomain)
+            throws APIManagementException, IOException {
 
         ZipInputStream zipInputStream = null;
         byte[] buffer = new byte[1024];
+        File folder = null;
+        boolean success = false;
 
         String outputFolder = "repository" + File.separator + "deployment" + File.separator + "server"
                 + File.separator + "jaggeryapps" + File.separator + "devportal" + File.separator + "site"
@@ -173,9 +178,10 @@ public class RestApiAdminUtils {
 
         try {
             //create output directory if it does not exist
-            File folder = new File(outputFolder);
+            folder = new File(outputFolder);
             if (!folder.exists()) {
                 if (!folder.mkdirs()) {
+                    FileUtils.deleteDirectory(folder);
                     APIUtil.handleException("Unable to create tenant theme directory at " + outputFolder);
                 }
             } else {
@@ -196,6 +202,7 @@ public class RestApiAdminUtils {
                 String canonicalizedNewFilePath = newFile.getCanonicalPath();
                 String canonicalizedDestinationPath = new File(outputFolder).getCanonicalPath();
                 if (!canonicalizedNewFilePath.startsWith(canonicalizedDestinationPath)) {
+                    FileUtils.deleteDirectory(folder);
                     APIUtil.handleException(
                             "Attempt to upload invalid zip archive with file at " + fileName + ". File path is " +
                                     "outside target directory");
@@ -205,6 +212,7 @@ public class RestApiAdminUtils {
                     if (!newFile.exists()) {
                         boolean status = newFile.mkdir();
                         if (!status) {
+                            FileUtils.deleteDirectory(folder);
                             APIUtil.handleException("Error while creating " + newFile.getName() + " directory");
                         }
                     }
@@ -223,6 +231,7 @@ public class RestApiAdminUtils {
 
                         fileOutputStream.close();
                     } else {
+                        FileUtils.deleteDirectory(folder);
                         APIUtil.handleException(
                                 "Unsupported file is uploaded with tenant theme by " + tenantDomain + " : file name : "
                                         + zipEntry.getName());
@@ -230,13 +239,16 @@ public class RestApiAdminUtils {
                 }
                 zipEntry = zipInputStream.getNextEntry();
             }
+            success = true;
             zipInputStream.closeEntry();
             zipInputStream.close();
         } catch (IOException ex) {
+            FileUtils.deleteDirectory(folder);
             APIUtil.handleException("Failed to deploy tenant theme for tenant " + tenantDomain, ex);
         } finally {
             IOUtils.closeQuietly(zipInputStream);
             IOUtils.closeQuietly(themeFile);
         }
+        return success;
     }
 }
