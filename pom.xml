@@ -1916,7 +1916,7 @@
         <woodstox-core.version>6.2.1</woodstox-core.version>
         <apache.commons.version>2.8.0</apache.commons.version>
         <apache.commons.lang3.version>3.10</apache.commons.lang3.version>
-        <io.swagger.codegen.version>2.4.14</io.swagger.codegen.version>
+        <io.swagger.codegen.version>2.4.11</io.swagger.codegen.version>
 
         <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
