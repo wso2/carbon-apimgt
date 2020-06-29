@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.claim.mgt.ClaimManagementException;
 import org.wso2.carbon.claim.mgt.ClaimManagerHandler;
+import org.wso2.carbon.identity.application.common.model.Claim;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataHandler;
 import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataException;
@@ -202,8 +203,12 @@ public class JWTGenerator extends AbstractJWTGenerator {
         Map<String, String> userClaims = new HashMap<>();
         Map<String, String> userClaimsCopy = new HashMap<>();
         for (Map.Entry<ClaimMapping, String> entry : userAttributes.entrySet()) {
-            userClaims.put(entry.getKey().getLocalClaim().getClaimUri(), entry.getValue());
-            userClaimsCopy.put(entry.getKey().getLocalClaim().getClaimUri(), entry.getValue());
+            Claim claimObject = entry.getKey().getLocalClaim();
+            if (claimObject == null) {
+                claimObject = entry.getKey().getRemoteClaim();
+            }
+            userClaims.put(claimObject.getClaimUri(), entry.getValue());
+            userClaimsCopy.put(claimObject.getClaimUri(), entry.getValue());
         }
 
         String convertClaimsFromOIDCtoConsumerDialect =
