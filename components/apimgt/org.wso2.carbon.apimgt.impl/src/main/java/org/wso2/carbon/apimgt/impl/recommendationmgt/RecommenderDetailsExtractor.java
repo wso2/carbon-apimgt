@@ -148,7 +148,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 }
 
                 if (!APIConstants.ADD_API.equals(publishingDetailType) && userName != null
-                        && userName != APIConstants.WSO2_ANONYMOUS_USER && requestTenantDomain != null) {
+                        && !userName.equals(APIConstants.WSO2_ANONYMOUS_USER) && requestTenantDomain != null) {
                     updateRecommendationsCache(userName, requestTenantDomain);
                 }
             }
@@ -251,7 +251,11 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     @Override
     public void publishClickedApi(ApiTypeWrapper api, String userName) {
 
-        if (userName != APIConstants.WSO2_ANONYMOUS_USER) {
+        if (userName == null) {
+            log.error("Username cannot be null");
+            return;
+        }
+        if (!userName.equals(APIConstants.WSO2_ANONYMOUS_USER)) {
             String userID = getUserId(userName);
             String apiName = api.getName();
             JSONObject obj = new JSONObject();
@@ -268,7 +272,11 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     @Override
     public void publishSearchQueries(String query, String username) {
 
-        if (userName != APIConstants.WSO2_ANONYMOUS_USER) {
+        if (username == null) {
+            log.error("Username cannot be null");
+            return;
+        }
+        if (!userName.equals(APIConstants.WSO2_ANONYMOUS_USER)) {
             String userID = getUserId(userName);
             query = query.split("&", 2)[0];
             JSONObject obj = new JSONObject();
