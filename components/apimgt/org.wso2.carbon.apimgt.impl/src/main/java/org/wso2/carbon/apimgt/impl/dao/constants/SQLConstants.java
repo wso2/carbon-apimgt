@@ -3104,6 +3104,13 @@ public class SQLConstants {
                 "ON RES_SCOPE.SCOPE_ID = SCOPE.SCOPE_ID " +
             "WHERE RES_SCOPE.RESOURCE_PATH = ?";
 
+
+    /** MGW Dashboard related constants **/
+
+    public static final String ADD_MGWDATA_SQL = "INSERT INTO MGW_DASHBOARD_DATA VALUES (?,?,?,?,?,?,?)";
+
+    public static final String UPDATE_MGWDATA_SQL = "UPDATE MGW_DASHBOARD_DATA SET STATUS = OFFLINE, WHERE PROJECT_NAME = ?";
+
     /** API Categories related constants **/
 
     public static final String ADD_CATEGORY_SQL = "INSERT INTO AM_API_CATEGORIES "
@@ -3541,6 +3548,10 @@ public class SQLConstants {
     public static final String GET_API_SCOPES_SQL =
             " SELECT ARSM.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM "
                     + "WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.API_ID = ?";
+
+
+
+
 
     /**
      * Static class to hold database queries related to key management.

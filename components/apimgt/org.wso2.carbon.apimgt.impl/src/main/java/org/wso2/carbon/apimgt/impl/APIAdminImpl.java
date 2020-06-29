@@ -29,15 +29,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -66,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -83,6 +76,42 @@ public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    Map<String, Long> lastUpdatedTimesMap = new ConcurrentHashMap<>();
+
+    public APIAdminImpl() {
+        Thread checkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    List<String> offlineProjects = new ArrayList<>();
+                    lastUpdatedTimesMap.forEach((s, aLong) -> {
+                        long currentTime = System.currentTimeMillis();
+                        long timeDiff = currentTime - aLong;
+                        // ToDO : check value
+                        if (timeDiff > 6000) {
+                            // update records from db
+                            try {
+                                apiMgtDAO.updateMgwData(s, false);
+                            } catch (APIManagementException e) {
+                                e.printStackTrace();
+                            }
+                            offlineProjects.add(s);
+//                            lastUpdatedTimesMap.remove(s);
+                        }
+                    });
+                    for (String offlineProject : offlineProjects) {
+                        lastUpdatedTimesMap.remove(offlineProject);
+                    }
+                    try {
+                        Thread.sleep(6000);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }
+        });
+        checkThread.start();
+    }
 
     /**
      * Returns all labels associated with given tenant domain.
@@ -92,7 +121,6 @@ public class APIAdminImpl implements APIAdmin {
      * @throws APIManagementException
      */
     public List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
-
         return apiMgtDAO.getAllLabels(tenantDomain);
     }
 
@@ -181,6 +209,26 @@ public class APIAdminImpl implements APIAdmin {
         }
         return false;
     }
+
+    /**
+     * @param mgwData           content to add
+     * @throws APIManagementException if failed add Label
+     */
+    public MgwData addMgwData(MgwData mgwData) throws APIManagementException {
+        return apiMgtDAO.addMgwData(mgwData);
+    }
+
+    /**
+     * Updates the details of the mgwData.
+     *
+     *
+     * @throws APIManagementException if failed to update mgwData
+     */
+    public MgwData updateMgwData(String projectName, boolean onlineStatus) throws APIManagementException {
+
+        return apiMgtDAO.updateMgwData(projectName,onlineStatus );
+    }
+
 
     @Override
     public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException {
