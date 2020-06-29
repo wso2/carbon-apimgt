@@ -57,6 +57,8 @@
         <jaxrs:properties>
             <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
             <entry key="map.cxf.interceptor.fault" value="true" />
+            <!-- This is added to restrict the size of attachments sent through the requests. -->
+            <entry key="attachment-max-size" value="10240"/>
         </jaxrs:properties>
     </jaxrs:server>
 
