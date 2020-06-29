@@ -104,17 +104,6 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.tokenmgt</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.wso2.carbon.apimgt</groupId>
-                    <artifactId>org.wso2.carbon.apimgt.tracing</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
             <scope>provided</scope>
         </dependency>

@@ -44,7 +44,7 @@ KeymanagersApiService delegate = new KeymanagersApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of key managers", response = KeyManagerDTO.class, responseContainer = "List"),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response keymanagersGet() throws APIManagementException{
-        return delegate.keymanagersGet(securityContext);
+    public Response keymanagersGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.keymanagersGet(xWSO2Tenant, securityContext);
     }
 }

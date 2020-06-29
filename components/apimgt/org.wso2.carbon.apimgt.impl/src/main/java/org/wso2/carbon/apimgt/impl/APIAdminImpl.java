@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -308,6 +309,7 @@ public class APIAdminImpl implements APIAdmin {
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain)
             throws APIManagementException {
 
+        KeyMgtRegistrationService.registerDefaultKeyManager(tenantDomain);
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
                 apiMgtDAO.getKeyManagerConfigurationsByTenant(tenantDomain);
         Iterator<KeyManagerConfigurationDTO> iterator = keyManagerConfigurationsByTenant.iterator();

@@ -142,9 +142,11 @@ public class ServerStartupListener implements ServerStartupObserver {
             throw new IOException("An error occurred while copying file to directory", ex);
         }
     }
-    private void startConfigureKeyManagerConfigurations(){
-        KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever  =
-                new KeyManagerConfigurationDataRetriever();
+
+    private void startConfigureKeyManagerConfigurations() {
+
+        KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever =
+                new KeyManagerConfigurationDataRetriever(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         keyManagerConfigurationDataRetriever.startLoadKeyManagerConfigurations();
     }
 
