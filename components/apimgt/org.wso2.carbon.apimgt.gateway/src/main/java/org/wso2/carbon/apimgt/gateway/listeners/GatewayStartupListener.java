@@ -29,13 +29,16 @@ import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 
+/**
+ * Class for loading synapse artifacts to memory on initial server startup
+ */
+
 public class GatewayStartupListener implements ServerStartupObserver, Runnable, ServerShutdownHandler {
     private static final Log log = LogFactory.getLog(GatewayStartupListener.class);
     private JMSTransportHandler jmsTransportHandlerForTrafficManager;
     private JMSTransportHandler jmsTransportHandlerForEventHub;
 
     public GatewayStartupListener() {
-
         ThrottleProperties.JMSConnectionProperties jmsConnectionProperties =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getThrottleProperties()
                         .getJmsConnectionProperties();
