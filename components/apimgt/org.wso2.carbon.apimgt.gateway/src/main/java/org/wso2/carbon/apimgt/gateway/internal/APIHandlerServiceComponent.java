@@ -78,7 +78,6 @@ public class APIHandlerServiceComponent {
     private static final Log log = LogFactory.getLog(APIHandlerServiceComponent.class);
 
     private APIKeyValidatorClientPool clientPool;
-
     private ServiceRegistration registration;
 
     @Activate
