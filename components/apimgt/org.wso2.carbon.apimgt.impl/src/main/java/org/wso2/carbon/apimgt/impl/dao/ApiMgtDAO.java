@@ -15618,4 +15618,25 @@ public class ApiMgtDAO {
         }
         return false;
     }
+
+    /**
+     * Deletes a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @throws APIManagementException if an error occurs when deleting a tenant theme
+     */
+    public boolean deleteTenantTheme(int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.DELETE_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            ResultSet resultSet = statement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            handleException("Failed to delete tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+        return false;
+    }
 }
