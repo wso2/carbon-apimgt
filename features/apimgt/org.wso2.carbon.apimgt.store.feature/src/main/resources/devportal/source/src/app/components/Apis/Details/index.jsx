@@ -246,7 +246,8 @@ class Details extends React.Component {
             if (user != null) {
                 this.setState({open:user.isSideBarOpen});
                 existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
-                promisedApplications = restApi.getAllApplications();
+                const subscriptionLimit = Settings.app.subscribeApplicationLimit || 5000;
+                promisedApplications = restApi.getAllApplications(null, subscriptionLimit);
 
                 Promise.all([existingSubscriptions, promisedApplications])
                     .then((response) => {
@@ -262,7 +263,7 @@ class Details extends React.Component {
                                 policy: element.throttlingPolicy,
                                 status: element.status,
                                 subscriptionId: element.subscriptionId,
-                                label: appIdToNameMapping[element.applicationId],
+                                label: element.applicationInfo.name,
                             };
                         });
 

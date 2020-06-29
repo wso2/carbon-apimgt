@@ -239,9 +239,9 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      * @deprecated Use Application.all method instead
      */
-    getAllApplications(callback = null) {
+    getAllApplications(callback = null, limit = 25) {
         const promiseGet = this.client.then((client) => {
-            return client.apis.Applications.get_applications({}, this._requestMetaData());
+            return client.apis.Applications.get_applications({limit}, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);

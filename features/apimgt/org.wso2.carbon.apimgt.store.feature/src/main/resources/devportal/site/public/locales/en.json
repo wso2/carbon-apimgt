@@ -186,6 +186,7 @@
   "Apis.Listing.APIList.id": "Id",
   "Apis.Listing.APIList.name": "Name",
   "Apis.Listing.APIList.policy": "Policy",
+  "Apis.Listing.APIList.version": "Version",
   "Apis.Listing.ApiBreadcrumbs.apigroups.main": "API Groups",
   "Apis.Listing.ApiTableView.context": "Context",
   "Apis.Listing.ApiTableView.error.loading": "Error While Loading APIs",
