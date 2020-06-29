@@ -18,6 +18,7 @@ public class ApplicationKeyMappingDTO   {
     private Integer applicationId = null;
     private String consumerKey = null;
     private String keyType = null;
+    private String keyManager = null;
 
   /**
    **/
@@ -70,6 +71,23 @@ public class ApplicationKeyMappingDTO   {
     this.keyType = keyType;
   }
 
+  /**
+   **/
+  public ApplicationKeyMappingDTO keyManager(String keyManager) {
+    this.keyManager = keyManager;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("keyManager")
+  public String getKeyManager() {
+    return keyManager;
+  }
+  public void setKeyManager(String keyManager) {
+    this.keyManager = keyManager;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -82,12 +100,13 @@ public class ApplicationKeyMappingDTO   {
     ApplicationKeyMappingDTO applicationKeyMapping = (ApplicationKeyMappingDTO) o;
     return Objects.equals(applicationId, applicationKeyMapping.applicationId) &&
         Objects.equals(consumerKey, applicationKeyMapping.consumerKey) &&
-        Objects.equals(keyType, applicationKeyMapping.keyType);
+        Objects.equals(keyType, applicationKeyMapping.keyType) &&
+        Objects.equals(keyManager, applicationKeyMapping.keyManager);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, consumerKey, keyType);
+    return Objects.hash(applicationId, consumerKey, keyType, keyManager);
   }
 
   @Override
@@ -98,6 +117,7 @@ public class ApplicationKeyMappingDTO   {
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
+    sb.append("    keyManager: ").append(toIndentedString(keyManager)).append("\n");
     sb.append("}");
     return sb.toString();
   }

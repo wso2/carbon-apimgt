@@ -719,6 +719,7 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
             api.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
+            api.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
 
             Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
@@ -965,6 +966,7 @@ public final class APIUtil {
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setEnableStore(Boolean.parseBoolean(
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
+            api.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
                 cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
@@ -1303,6 +1305,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA,
                     Boolean.toString(api.isEnabledSchemaValidation()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE, Boolean.toString(api.isEnableStore()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TESTKEY, api.getTestKey());
 
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -4542,6 +4545,17 @@ public final class APIUtil {
                 }
             }
 
+            // create devOps role if it's creation is enabled in tenant-conf.json
+            JSONObject devOpsRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_DEVOPS_ROLE);
+            if (isRoleCreationEnabled(devOpsRoleConfig)) {
+                String devOpsRoleName = String.valueOf(devOpsRoleConfig
+                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (!StringUtils.isBlank(devOpsRoleName)) {
+                    createDevOpsRole(devOpsRoleName, tenantId);
+                }
+            }
+
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
         }
@@ -4839,6 +4853,22 @@ public final class APIUtil {
                 new Permission(APIConstants.Permissions.CONFIGURE_GOVERNANCE, UserMgtConstants.EXECUTE_ACTION),
                 new Permission(APIConstants.Permissions.RESOURCE_GOVERN, UserMgtConstants.EXECUTE_ACTION)};
         createRole(roleName, creatorPermissions, tenantId);
+    }
+
+    /**
+     * Create APIM DevOps roles with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createDevOpsRole(String roleName, int tenantId) throws APIManagementException {
+        Permission[] devOpsPermissions = new Permission[]{
+                new Permission(APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
+        };
+        createRole(roleName, devOpsPermissions, tenantId);
     }
 
     /**
@@ -9719,6 +9749,8 @@ public final class APIUtil {
             apiProduct.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             apiProduct.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
+            apiProduct.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.ENABLE_STORE)));
+            apiProduct.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
             apiProduct.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
 
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
@@ -10080,6 +10112,8 @@ public final class APIUtil {
                 subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
                 subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
                 subscriptionPolicyDTO.setTierQuotaType(subscriptionPolicy.getTierQuotaType());
+                subscriptionPolicyDTO.setGraphQLMaxDepth(subscriptionPolicy.getGraphQLMaxDepth());
+                subscriptionPolicyDTO.setGraphQLMaxComplexity(subscriptionPolicy.getGraphQLMaxComplexity());
                 subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
             }
             jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
@@ -10141,11 +10175,8 @@ public final class APIUtil {
 
         boolean isJwtToken = false;
         try {
-            org.json.JSONObject decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder()
-                    .decode(token.split("\\.")[0])));
             // Check if the decoded header contains type as 'JWT'.
-            if (APIConstants.JWT.equals(decodedHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))
-                    && (StringUtils.countMatches(token, APIConstants.DOT) == 2)) {
+            if (StringUtils.countMatches(token, APIConstants.DOT) == 2) {
                 isJwtToken = true;
             } else {
                 log.debug("Not a valid JWT token. " + getMaskedToken(token));
@@ -10335,32 +10366,6 @@ public final class APIUtil {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
-    }
-
-    public static void publishEventToStream(String streamId, String eventPublisherName, Object[] eventData) {
-
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            OutputEventAdapterService eventAdapterService =
-                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
-            Event blockingMessage = new Event(streamId, System.currentTimeMillis(),
-                    null, null, eventData);
-            ThrottleProperties throttleProperties =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration().getThrottleProperties();
-
-            if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-                eventAdapterService.publish(eventPublisherName, Collections.EMPTY_MAP, blockingMessage);
-            }
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-
     }
 
     /**
@@ -10672,6 +10677,42 @@ public final class APIUtil {
             tenantFlowStarted = true;
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
                     .publish(eventName, dynamicProperties, event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
+    public static void publishEventToTrafficManager(Map dynamicProperties, Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                    .publish(APIConstants.BLOCKING_EVENT_PUBLISHER, dynamicProperties, event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
+    public static void publishEventToEventHub(Map dynamicProperties, Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                    .publish(APIConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER, dynamicProperties, event);
         } finally {
             if (tenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -11006,7 +11047,7 @@ public final class APIUtil {
                             get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
                     for (Object clusterInfo : clustersInfo) {
                         //check if the clusters defined in tenant-conf.json
-                        if (!((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).equals("")) {
+                        if (!"".equals(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME))) {
                             containerMgtInfoFromTenant.add(clusterInfo);
                         }
                     }
@@ -11014,8 +11055,8 @@ public final class APIUtil {
                         containerMgtObj.put(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO, containerMgtInfoFromTenant);
                         for (Object apimConfig : containerMgtFromToml) {
                             //get class name from the api-manager.xml
-                            if (((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).equals(containerMgtDetails
-                                    .get(ContainerBasedConstants.TYPE))) {
+                            if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString()
+                                    .equalsIgnoreCase(((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).toString())) {
                                 containerMgtObj.put(ContainerBasedConstants.CLASS_NAME, ((JSONObject) apimConfig)
                                         .get(ContainerBasedConstants.CLASS_NAME));
                             }

@@ -20,17 +20,19 @@ package org.wso2.carbon.apimgt.impl.notifier.events;
 
 import java.util.Objects;
 
+import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
+
 /**
  * An Event Object which can holds the data related to Application Policy which are required
  * for the validation purpose in a gateway.
  */
-public class ApplicationPolicyEvent extends Event {
+public class ApplicationPolicyEvent extends PolicyEvent {
     private int policyId;
     private String policyName;
     private String quotaType;
 
-    public ApplicationPolicyEvent(String eventId, long timestamp, String type, int tenantId,int policyId,
-                                  String policyName, String quotaType) {
+    public ApplicationPolicyEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
+            int policyId, String policyName, String quotaType) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -38,6 +40,8 @@ public class ApplicationPolicyEvent extends Event {
         this.policyId = policyId;
         this.policyName = policyName;
         this.quotaType = quotaType;
+        this.tenantDomain = tenantDomain;
+        this.policyType = PolicyType.APPLICATION;
     }
 
     @Override
@@ -49,7 +53,8 @@ public class ApplicationPolicyEvent extends Event {
                 ", eventId='" + eventId + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
-                ", tenantId=" + tenantId +
+                ", tenantId=" + tenantId + '\'' +
+                ", tenantDomain=" + tenantDomain +
                 '}';
     }
 

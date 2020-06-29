@@ -152,7 +152,8 @@ public class SQLConstants {
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
                     "   AND (SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.UNBLOCKED +
-                    "' OR SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING + "')" +
+                    "' OR SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING +
+                    "' OR SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED + "')" +
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.APPLICATION_ID = ?";
 
@@ -174,7 +175,8 @@ public class SQLConstants {
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
                     "   AND (SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.UNBLOCKED +
-                    "' OR SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING + "')" +
+                    "' OR SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING +
+                    "' OR SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED + "')" +
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.APPLICATION_ID = ?";
 
@@ -3303,6 +3305,8 @@ public class SQLConstants {
         public static final String BLOCK_CONDITION_EXIST_SQL =
                 "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =? AND TYPE =? " +
                         "AND VALUE =?";
+        public static final String GET_SUBSCRIPTION_BLOCK_CONDITION_BY_VALUE_AND_DOMAIN_SQL =
+                "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE VALUE = ? AND DOMAIN = ? ";
 
         public static final String TIER_HAS_SUBSCRIPTION = " select count(sub.TIER_ID) as c from AM_SUBSCRIPTION sub, AM_API api "
         		+ " where sub.TIER_ID = ? and api.API_PROVIDER like ? and sub.API_ID = api.API_ID ";

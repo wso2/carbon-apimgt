@@ -31,9 +31,13 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
@@ -46,15 +50,18 @@ import java.security.MessageDigest;
 import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( {AbstractJWTGenerator.class,APIUtil.class,KeyStoreManager.class,CarbonUtils.class})
+@PrepareForTest( {AbstractJWTGenerator.class,APIUtil.class,KeyStoreManager.class,CarbonUtils.class,
+        SubscriptionDataHolder.class})
 public class TokenGenTest {
     private static final Log log = LogFactory.getLog(TokenGenTest.class);
 
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(CarbonUtils.class);
+        PowerMockito.mockStatic(SubscriptionDataHolder.class);
         ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
         Mockito.when(serverConfiguration.getFirstProperty(APIConstants.PORT_OFFSET_CONFIG)).thenReturn("2");
         PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
@@ -63,6 +70,18 @@ public class TokenGenTest {
         config.load(dbConfigPath);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(
                 new APIManagerConfigurationServiceImpl(config));
+        SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
+        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
+        PowerMockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
+        PowerMockito.when(SubscriptionDataHolder.getInstance()
+                .getTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
+                .thenReturn(subscriptionDataStore);
+        Application application = new Application();
+        application.setId(1);
+        application.setName("app2");
+        application.setUUID(UUID.randomUUID().toString());
+        application.addAttribute("abc","cde");
+        Mockito.when(subscriptionDataStore.getApplicationById(1)).thenReturn(application);
     }
 
     @Test
@@ -86,6 +105,7 @@ public class TokenGenTest {
         dto.setApplicationId("1");
         dto.setApplicationTier("UNLIMITED");
         dto.setEndUserName("malalgoda");
+        dto.setSubscriberTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
         //Here we will call generate token method with 4 argument.
         String token = jwtGen.generateToken(validationContext);
@@ -140,6 +160,7 @@ public class TokenGenTest {
         dto.setApplicationId("1");
         dto.setApplicationTier("UNLIMITED");
         dto.setEndUserName("denis");
+        dto.setSubscriberTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
         TokenValidationContext validationContext = new TokenValidationContext();
         validationContext.setValidationInfoDTO(dto);

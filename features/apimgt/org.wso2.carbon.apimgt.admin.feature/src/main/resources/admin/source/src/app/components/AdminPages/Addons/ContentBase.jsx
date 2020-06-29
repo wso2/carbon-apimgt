@@ -20,127 +20,104 @@ import PropTypes from 'prop-types';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
+import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
 
-const styles = (theme) => ({
-    root: {
-        minHeight: 43,
-    },
-    paper: {
-        maxWidth: 936,
-        margin: 'auto',
-        overflow: 'hidden',
-    },
-    smallBox: {
-        maxWidth: 450,
-        margin: 'auto',
-        overflow: 'hidden',
-    },
-    searchBar: {
-        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-    },
-    searchInput: {
-        fontSize: theme.typography.fontSize,
-    },
-    block: {
-        display: 'block',
-    },
-    addUser: {
-        marginRight: theme.spacing(1),
-    },
-    contentWrapper: {
-        margin: '40px 16px',
-    },
-    secondaryBar: {
-        zIndex: 0,
-    },
-    menuButton: {
-        marginLeft: -theme.spacing(1),
-    },
-    iconButtonAvatar: {
-        padding: 4,
-    },
-    link: {
-        textDecoration: 'none',
-        color: 'rgba(255, 255, 255, 0.7)',
-        '&:hover': {
-            color: theme.palette.common.white,
+const useStyles = makeStyles(() => {
+    const minHeight = 43;
+    return ({
+        pageTitle: {
+            minHeight,
+            backgroundColor: '#f6f6f6',
         },
-    },
-    button: {
-        borderColor: 'rgba(255, 255, 255, 0.7)',
-    },
-    main: {
-        flex: 1,
-        padding: theme.spacing(6, 4),
-        background: '#eaeff1',
-    },
-    gridRoot: {
-        paddingLeft: 0,
-    },
+        root: {
+            flexGrow: 1,
+            minHeight: `calc(100vh - (${minHeight + 57}px))`,
+            backgroundColor: '#eaeff1',
+        },
+    });
 });
 
 /**
  * Render base for content.
- * @param {JSON} props .
+ * @param {JSON} props -  Component properties
+ * @param {string} props.title -  Page title
+ * @param {object} props.children -  Page content
+ * @param {object} props.help -  Page help component
+ * @param {string} props.backgroundColor -  Page background color in #xxxxxx format
+ * @param {object} props.paperProps -  Page background color in #xxxxxx format
+ * @param {object} props.pageStyle - @deprecated Page style one of 'half' 'full' or 'small'
  * @returns {JSX} Header AppBar components.
  */
 function ContentBase(props) {
+    const classes = useStyles();
     const {
-        classes, title, children, help, pageStyle,
+        title, children, help, width, pageStyle, PaperProps, classes: classesProp, paperLess,
     } = props;
-
+    let size = 8;// default half/medium
+    if ([width, pageStyle].includes('small')) {
+        size = 5;
+    } else if ([width, pageStyle].includes('full')) {
+        size = 11;
+    }
     return (
-        <>
-            <Toolbar className={classes.root}>
-                <Grid container alignItems='center' spacing={1} classes={{ root: classes.gridRoot }}>
-                    <Grid item xs>
-                        <Typography color='inherit' variant='h5' component='h1'>
-                            {title}
-                        </Typography>
-                    </Grid>
-                    {help && (
-                        <Grid item>
-                            {help}
+        <div className={clsx(classesProp.root, classes.root)}>
+            <Grid
+                container
+                direction='row'
+                justify='center'
+                alignItems='flex-start'
+            >
+                <Grid item xs={12}>
+                    <Toolbar className={clsx(classesProp.pageTitle, classes.pageTitle)}>
+                        <Grid container alignItems='center' spacing={1}>
+                            <Grid item xs>
+                                <Typography color='inherit' variant='h5' component='h1'>
+                                    {title}
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                {help}
+                            </Grid>
                         </Grid>
-                    )}
+                    </Toolbar>
                 </Grid>
-            </Toolbar>
-            <main className={classes.main}>
-                {pageStyle && (pageStyle === 'half') && (
-                    <Paper className={classes.paper}>
-                        {children}
-                    </Paper>
-                )}
-                {pageStyle && (pageStyle === 'paperLess') && (
-                    <>
-                        {children}
-                    </>
-                )}
-                {pageStyle && (pageStyle === 'small') && (
-                    <div className={classes.smallBox}>
-                        {children}
-                    </div>
-                )}
-                {pageStyle && (pageStyle === 'full') && (
-                    <Paper>
-                        {children}
-                    </Paper>
-                )}
-            </main>
-        </>
+                <Grid item xs={11} sm={size}>
+                    <Box pt={6}>
+                        {pageStyle === 'paperLess' || paperLess ? children : (
+                            <Paper {...PaperProps}>
+                                {children}
+                            </Paper>
+                        )}
+                    </Box>
+                </Grid>
+
+            </Grid>
+        </div>
     );
 }
 ContentBase.defaultProps = {
-    pageStyle: null,
+    width: 'medium',
+    PaperProps: {},
+    classes: {},
+    pageStyle: 'half',
+    paperLess: false,
 };
 ContentBase.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
     help: PropTypes.element.isRequired,
     title: PropTypes.string.isRequired,
     children: PropTypes.element.isRequired,
-    pageStyle: PropTypes.string,
+    width: PropTypes.oneOf(['medium', 'full', 'small']),
+    pageStyle: PropTypes.oneOf(['half', 'full', 'small']), // @deprecated
+    PaperProps: PropTypes.shape({ elevation: PropTypes.number }),
+    /**
+   * Override or extend the styles applied to the component.
+   * See [CSS API](#css) below for more details.
+   */
+    classes: PropTypes.shape({ root: PropTypes.string }),
+    paperLess: PropTypes.bool,
 };
 
-export default withStyles(styles)(ContentBase);
+export default ContentBase;

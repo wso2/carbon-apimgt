@@ -80,6 +80,7 @@ securityDefinitions:
       apim:sub_manage: Retrieve, Manage subscriptions
       apim:store_settings: Retrieve store settings
       apim:sub_alert_manage: Retrieve, subscribe and configure store alert types
+      apim:app_import_export: Import and export applications related operations
 
 ######################################################
 # The "API Collection" resource APIs
@@ -1196,6 +1197,7 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:app_import_export
       x-wso2-request: |
         GET https://localhost:9443/api/am/store/v1/applications
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -1476,6 +1478,7 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+            - apim:app_import_export
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://localhost:9443/api/am/store/v1/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4\""
       x-wso2-request: |
         DELETE https://localhost:9443/api/am/store/v1/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4
@@ -3689,6 +3692,54 @@ paths:
           description: |
             Not Found.
             Retrieving types and fields failed.
+
+  #######################################################################
+  # The "Change logged-in User Password" Processing Function resource API
+  #######################################################################
+  '/me/change-password':
+
+    #-----------------------------------------------------
+    # Change password of the logged-in user
+    #-----------------------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+      operationId: changeUserPassword
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d -d @data.json \"https://localhost:9443/api/am/store/v1/me/change-password\""
+      x-wso2-request: |
+        POST https://localhost:9443/api/am/store/v1/me/change-password
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+        {
+          "currentPassword": "12345",
+          "newPassword": "54321"
+        }
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary:
+        Change the password of the user
+      description: |
+        Using this operation, logged-in user can change his/her password.
+      parameters:
+        - in: body
+          name: body
+          description: |
+            Current and new password of the user
+          required: true
+          schema:
+            $ref: '#/definitions/CurrentAndNewPasswords'
+      tags:
+        - Users
+      responses:
+        200:
+          description:
+            OK.
+            User password changed successfully
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -5915,7 +5966,18 @@ definitions:
         type: string
         description: ingress URL
         example: http://wso2.com:9443
-
+  #-----------------------------------------------------
+  # User's current and new password resource
+  #-----------------------------------------------------
+  CurrentAndNewPasswords:
+    title: Current and new passowrd of the user
+    properties:
+      currentPassword:
+        type: string
+        example: "password123"
+      newPassword:
+        type: string
+        example: "newpassword1234"
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

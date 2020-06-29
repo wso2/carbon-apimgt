@@ -203,6 +203,23 @@ public interface APIProvider extends APIManager {
 
     void addPolicy(Policy policy) throws APIManagementException;
 
+    /**
+     * Deletes a subscription block condition when the condition key is given
+     *
+     * @param conditionValue condition key ex: /api/1.0:admin-testApplication:SANDBOX
+     * @throws APIManagementException
+     */
+    void deleteSubscriptionBlockCondition(String conditionValue) throws APIManagementException;
+
+    /**
+     * Get the context of API identified by the given APIIdentifier
+     *
+     * @param apiId api identifier
+     * @return apiContext
+     * @throws APIManagementException if failed to fetch the context for apiID
+     */
+    String getAPIContext(APIIdentifier apiId) throws APIManagementException;
+
 
     /**
      * Get api throttling policy by name

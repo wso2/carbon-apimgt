@@ -252,7 +252,7 @@ export default function OperationGovernance(props) {
                                 value={apiScope.scope.name}
                                 dense
                             >
-                                <Checkbox checked={operationScopes.includes(apiScope.scope.name)} />
+                                <Checkbox checked={operationScopes.includes(apiScope.scope.name)} color='primary' />
                                 {apiScope.scope.name}
                             </MenuItem>
                         )) : (
@@ -282,7 +282,7 @@ export default function OperationGovernance(props) {
                                 value={sharedScope.scope.name}
                                 dense
                             >
-                                <Checkbox checked={operationScopes.includes(sharedScope.scope.name)} />
+                                <Checkbox checked={operationScopes.includes(sharedScope.scope.name)} color='primary' />
                                 {sharedScope.scope.name}
                             </MenuItem>
                         )) : (

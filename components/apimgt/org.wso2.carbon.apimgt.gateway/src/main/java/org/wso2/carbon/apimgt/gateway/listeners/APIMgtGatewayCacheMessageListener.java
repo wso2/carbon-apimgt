@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.jms.listener.utils;
+package org.wso2.carbon.apimgt.gateway.listeners;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,8 +25,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -60,7 +60,8 @@ public class APIMgtGatewayCacheMessageListener implements MessageListener {
                         String key = (String) enumeration.nextElement();
                         map.put(key, mapMessage.getObject(key));
                     }
-                    if (JMSConstants.TOPIC_CACHE_INVALIDATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
+                    if (APIConstants.TopicNames.TOPIC_CACHE_INVALIDATION
+                            .equalsIgnoreCase(jmsDestination.getTopicName())) {
                         if (map.get(APIConstants.CACHE_INVALIDATION_TYPE) != null) {
                             if (APIConstants.RESOURCE_CACHE_NAME
                                     .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {

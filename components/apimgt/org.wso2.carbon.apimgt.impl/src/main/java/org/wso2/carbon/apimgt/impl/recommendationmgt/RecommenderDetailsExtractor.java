@@ -55,7 +55,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     private static final Logger log = LoggerFactory.getLogger(RecommenderDetailsExtractor.class);
     private static String streamID = "org.wso2.apimgt.recommendation.event.stream:1.0.0";
     private boolean tenantFlowStarted = false;
-    private boolean superAdminTenantFlowStarted = false;
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     private int applicationId;

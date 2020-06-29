@@ -217,7 +217,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an API", notes = "This operation can be used to delete an existing API proving the Id of the API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_delete", description = "Delete API")
+            @AuthorizationScope(scope = "apim:api_delete", description = "Delete API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -365,7 +366,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of an API", notes = "Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it. ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -857,7 +860,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Change API Status", notes = "This operation is used to change the lifecycle of an API. Eg: Publish an API which is in `CREATED` state. In order to change the lifecycle, we need to provide the lifecycle `action` as a query parameter.  For example, to Publish an API, `action` should be `Publish`. Note that the `Re-publish` action is available only after calling `Block`.  Some actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter. Please see parameters table for more information. ", response = WorkflowResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Lifecycle",  })
     @ApiResponses(value = { 
@@ -912,7 +916,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/Search APIs ", notes = "This operation provides you a list of available APIs qualifying under a given search condition.  Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation. ", response = APIListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 

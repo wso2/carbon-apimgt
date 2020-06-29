@@ -43,7 +43,7 @@ ExportApiService delegate = new ExportApiServiceImpl();
     @ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs")
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API (Individual)",  })
     @ApiResponses(value = { 
@@ -60,7 +60,7 @@ ExportApiService delegate = new ExportApiServiceImpl();
     @Produces({ "application/zip" })
     @ApiOperation(value = "Export an API Product", notes = "This operation can be used to export the details of a particular API Product as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products"),
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "API Product (Individual)",  })
@@ -78,7 +78,7 @@ ExportApiService delegate = new ExportApiServiceImpl();
     @Produces({ "application/json", "application/zip" })
     @ApiOperation(value = "Export an Application", notes = "This operation can be used to export the details of a particular Application as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications"),
+            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Application (Individual)" })

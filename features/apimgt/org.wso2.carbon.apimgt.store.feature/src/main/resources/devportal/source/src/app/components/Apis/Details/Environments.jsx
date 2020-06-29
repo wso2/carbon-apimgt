@@ -25,6 +25,7 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
@@ -75,7 +76,8 @@ const styles = theme => ({
         },
     },
     iconStyle: {
-        cursor: 'grab',
+        cursor: 'pointer',
+        margin: '-10px 0',
     },
     envRoot: {
         '& span, & h5, & label, & td, & li': {
@@ -258,7 +260,9 @@ class Environments extends React.Component {
                                                         text={endpoint.URLs.http}
                                                         onCopy={() => this.onCopy('urlCopied')}
                                                     >
-                                                        <Icon color='secondary'>insert_drive_file</Icon>
+                                                        <IconButton aria-label='Copy to clipboard'>
+                                                            <Icon color='secondary'>insert_drive_file</Icon>
+                                                        </IconButton>
                                                     </CopyToClipboard>
                                                 </Tooltip>
                                             </Grid>
@@ -300,7 +304,9 @@ class Environments extends React.Component {
                                                         text={endpoint.URLs.https}
                                                         onCopy={() => this.onCopy('urlCopied')}
                                                     >
-                                                        <Icon color='secondary'>insert_drive_file</Icon>
+                                                        <IconButton aria-label='Copy to clipboard'>
+                                                            <Icon color='secondary'>insert_drive_file</Icon>
+                                                        </IconButton>
                                                     </CopyToClipboard>
                                                 </Tooltip>
                                             </Grid>
@@ -342,7 +348,9 @@ class Environments extends React.Component {
                                                         text={endpoint.URLs.ws}
                                                         onCopy={() => this.onCopy('urlCopied')}
                                                     >
-                                                        <Icon color='secondary'>insert_drive_file</Icon>
+                                                        <IconButton aria-label='Copy to clipboard'>
+                                                            <Icon color='secondary'>insert_drive_file</Icon>
+                                                        </IconButton>
                                                     </CopyToClipboard>
                                                 </Tooltip>
                                             </Grid>
@@ -384,7 +392,9 @@ class Environments extends React.Component {
                                                         text={endpoint.URLs.wss}
                                                         onCopy={() => this.onCopy('urlCopied')}
                                                     >
-                                                        <Icon color='secondary'>insert_drive_file</Icon>
+                                                        <IconButton aria-label='Copy to clipboard'>
+                                                            <Icon color='secondary'>insert_drive_file</Icon>
+                                                        </IconButton>
                                                     </CopyToClipboard>
                                                 </Tooltip>
                                             </Grid>
@@ -439,7 +449,9 @@ class Environments extends React.Component {
                                                             text={endpoint.defaultVersionURLs.http}
                                                             onCopy={() => this.onCopy('urlCopied')}
                                                         >
-                                                            <Icon color='secondary'>file_copy</Icon>
+                                                            <IconButton aria-label='Copy to clipboard'>
+                                                                <Icon color='secondary'>file_copy</Icon>
+                                                            </IconButton>
                                                         </CopyToClipboard>
                                                     </Tooltip>
                                                 </Grid>
@@ -482,7 +494,9 @@ class Environments extends React.Component {
                                                             text={endpoint.defaultVersionURLs.https}
                                                             onCopy={() => this.onCopy('urlCopied')}
                                                         >
-                                                            <Icon color='secondary'>file_copy</Icon>
+                                                            <IconButton aria-label='Copy to clipboard'>
+                                                                <Icon color='secondary'>file_copy</Icon>
+                                                            </IconButton>
                                                         </CopyToClipboard>
                                                     </Tooltip>
                                                 </Grid>
@@ -525,7 +539,9 @@ class Environments extends React.Component {
                                                             text={endpoint.defaultVersionURLs.ws}
                                                             onCopy={() => this.onCopy('urlCopied')}
                                                         >
-                                                            <Icon color='secondary'>file_copy</Icon>
+                                                            <IconButton aria-label='Copy to clipboard'>
+                                                                <Icon color='secondary'>file_copy</Icon>
+                                                            </IconButton>
                                                         </CopyToClipboard>
                                                     </Tooltip>
                                                 </Grid>
@@ -568,7 +584,9 @@ class Environments extends React.Component {
                                                             text={endpoint.defaultVersionURLs.wss}
                                                             onCopy={() => this.onCopy('urlCopied')}
                                                         >
-                                                            <Icon color='secondary'>file_copy</Icon>
+                                                            <IconButton aria-label='Copy to clipboard'>
+                                                                <Icon color='secondary'>file_copy</Icon>
+                                                            </IconButton>
                                                         </CopyToClipboard>
                                                     </Tooltip>
                                                 </Grid>
@@ -577,7 +595,7 @@ class Environments extends React.Component {
                                             <Typography className={classes.heading}>
                                                 <FormattedMessage
                                                     id='Apis.Details.InfoBar.ingress.urls'
-                                                    defaultMessage='Kubernetes Ingress URLs'
+                                                    defaultMessage='Kubernetes Access URLs'
                                                 />
                                             </Typography>
                                         )}
@@ -626,7 +644,9 @@ class Environments extends React.Component {
                                                                                 text={endpoint.defaultVersionURLs.ws}
                                                                                 onCopy={() => this.onCopy('urlCopied')}
                                                                             >
-                                                                                <Icon color='secondary'>file_copy</Icon>
+                                                                                <IconButton aria-label='Copy to clipboard'>
+                                                                                    <Icon color='secondary'>file_copy</Icon>
+                                                                                </IconButton>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>

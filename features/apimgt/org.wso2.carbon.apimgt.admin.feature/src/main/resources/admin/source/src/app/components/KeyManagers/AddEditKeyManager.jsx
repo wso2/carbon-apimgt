@@ -685,8 +685,8 @@ function AddEditKeyManager(props) {
                                     <div className={classes.chipHelper}>
                                         {intl.formatMessage({
                                             id: 'Throttling.Advanced.AddEdit.form.claim.help',
-                                            // eslint-disable-next-line max-len
-                                            defaultMessage: 'Type Available Grant Types and press Enter/Return to add them.',
+                                            defaultMessage: 'Type Available Grant Types and '
+                                            + 'press Enter/Return to add them.',
                                         })}
                                     </div>
                                 )}

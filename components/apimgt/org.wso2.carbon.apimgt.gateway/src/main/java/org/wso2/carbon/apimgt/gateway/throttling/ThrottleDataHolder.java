@@ -59,6 +59,7 @@ public class ThrottleDataHolder {
     public void addThrottleData(String key, Long value) {
         throttleDataMap.put(key, value);
     }
+    private Map<String, String> blockedSubscriptionConditionsMap = new ConcurrentHashMap<String, String>();
 
     public void addThrottleDataFromMap(Map<String, Long> data) {
         throttleDataMap.putAll(data);
@@ -90,6 +91,20 @@ public class ThrottleDataHolder {
                 conditionDtoMap.remove(key);
             }
         }
+    }
+
+    public void addSubscriptionBlockingCondition(String name, String value) {
+        blockedSubscriptionConditionsMap.put(name, value);
+    }
+
+    public void addSubscriptionBlockingConditionsFromMap(Map<String, String> data) {
+        if (data.size() > 0) {
+            blockedSubscriptionConditionsMap.putAll(data);
+        }
+    }
+
+    public void removeSubscriptionBlockingCondition(String name) {
+        blockedSubscriptionConditionsMap.remove(name);
     }
 
     public void removeThrottledAPIKey(String key){
@@ -257,10 +272,11 @@ public class ThrottleDataHolder {
     }
 
     public boolean isRequestBlocked(String apiBlockingKey, String applicationBlockingKey, String userBlockingKey,
-                                    String ipBlockingKey, String apiTenantDomain) {
+                                    String ipBlockingKey, String apiTenantDomain, String subscriptionBlockingKey) {
         return (blockedAPIConditionsMap.containsKey(apiBlockingKey) ||
                 blockedApplicationConditionsMap.containsKey(applicationBlockingKey) ||
                 blockedUserConditionsMap.containsKey(userBlockingKey) ||
+                blockedSubscriptionConditionsMap.containsKey(subscriptionBlockingKey) ||
                 isIpLevelBlocked(apiTenantDomain, ipBlockingKey));
     }
 

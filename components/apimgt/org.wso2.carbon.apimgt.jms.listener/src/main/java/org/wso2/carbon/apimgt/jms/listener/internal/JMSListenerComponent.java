@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSListenerStartupShutdownListener;
@@ -68,23 +69,7 @@ public class JMSListenerComponent {
                 .registerService(ServerShutdownHandler.class, jmsListenerStartupShutdownListener, null);
     }
 
-    @Reference(
-            name = "throttle.data.service",
-            service = APIThrottleDataService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetAPIThrottleDataService")
-    protected void setAPIThrottleDataService(APIThrottleDataService throttleDataService) {
 
-        log.debug("Setting APIThrottleDataService");
-        ServiceReferenceHolder.getInstance().setAPIThrottleDataService(throttleDataService);
-    }
-
-    protected void unsetAPIThrottleDataService(APIThrottleDataService throttleDataService) {
-
-        log.debug("Un-setting APIThrottleDataService");
-        ServiceReferenceHolder.getInstance().setAPIThrottleDataService(null);
-    }
 
     @Reference(
             name = "api.manager.config.service",
@@ -104,23 +89,7 @@ public class JMSListenerComponent {
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
     }
 
-    @Reference(
-            name = "revoke.token.service",
-            service = RevokedTokenService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetRevokedTokenService")
-    protected void setRevokedTokenService(RevokedTokenService revokedTokenService) {
 
-        log.debug("Setting Revoked Token Service");
-        ServiceReferenceHolder.getInstance().setRevokedTokenService(revokedTokenService);
-    }
-
-    protected void unsetRevokedTokenService(RevokedTokenService revokedTokenService) {
-
-        log.debug("unSetting Revoked Token Service");
-        ServiceReferenceHolder.getInstance().setRevokedTokenService(null);
-    }
 
     @Reference(
             name = "key.manager.service",
@@ -140,26 +109,7 @@ public class JMSListenerComponent {
         ServiceReferenceHolder.getInstance().setKeyManagerService(null);
     }
 
-    @Reference(
-            name = "api.manager.cache.invalidation.service",
-            service = CacheInvalidationService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetCacheInvalidationService")
 
-    protected void setCacheInvalidationService(CacheInvalidationService cacheInvalidationService) {
-
-        log.debug("Setting Cache Invalidation Service");
-        ServiceReferenceHolder.getInstance().setCacheInvalidationService(cacheInvalidationService);
-
-    }
-
-    protected void unsetCacheInvalidationService(CacheInvalidationService cacheInvalidationService) {
-
-        log.debug("Setting Cache Invalidation Service");
-        ServiceReferenceHolder.getInstance().setCacheInvalidationService(null);
-
-    }
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
@@ -171,6 +121,8 @@ public class JMSListenerComponent {
             this.registration.unregister();
         }
     }
+    
+
 
 }
 

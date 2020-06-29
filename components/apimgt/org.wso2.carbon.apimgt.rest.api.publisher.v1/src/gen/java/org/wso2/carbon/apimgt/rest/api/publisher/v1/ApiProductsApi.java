@@ -48,6 +48,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an API Product", notes = "This operation can be used to delete an existing API Product proving the Id of the API Product. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Products",  })

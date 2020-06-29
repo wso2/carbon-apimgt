@@ -537,6 +537,10 @@ definitions:
         type: array
         items:
           type: string
+      subscription:
+        type: array
+        items:
+          type: string
   RevokedJWTList:
     type: array
     items:
@@ -679,6 +683,8 @@ definitions:
   #-----------------------------------------------------
   Application:
     properties:
+      uuid:
+        type: string
       id:
         type: integer
       name:
@@ -825,6 +831,8 @@ definitions:
         type: string
       keyType:
         type: string
+      keyManager:
+        type: string
 
   #---------------------  --------------------------------
   # The Throttle Policy resource
@@ -907,7 +915,7 @@ definitions:
   #-----------------------------------------------------
   ApplicationPolicy:
     allOf:
-      - $ref: '#/definitions/Policy'
+    - $ref: '#/definitions/Policy'
   #-----------------------------------------------------
   # The Api Policy List resource
   #-----------------------------------------------------
@@ -933,10 +941,12 @@ definitions:
     allOf:
     - $ref: '#/definitions/Policy'
     - properties:
-        conditionGroups:
-          type: array
-          items:
-            $ref: '#/definitions/ApiPolicyConditionGroup'
+       conditionGroups:
+        type: array
+        items:
+          $ref: '#/definitions/ApiPolicyConditionGroup'
+       applicableLevel:
+        type: string
 
   #-----------------------------------------------------
   # The API Policy Condition  Group resource
