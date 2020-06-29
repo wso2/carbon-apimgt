@@ -227,6 +227,10 @@
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${fasterxml.jackson.version}</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-guava:${fasterxml.jackson.version}</bundleDef>
+                                <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
+                                <bundleDef>commons-codec:commons-codec</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}

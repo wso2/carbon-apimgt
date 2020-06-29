@@ -66,8 +66,7 @@ public class KeyManagerHolder {
             tenantKeyManagerDto = new TenantKeyManagerDto();
         }
         if (tenantKeyManagerDto.getKeyManagerByName(name) != null) {
-            throw new APIManagementException("Key Manager " + keyManagerConfiguration.getName() + " already " +
-                    "initialized in tenant " + keyManagerConfiguration.getTenantDomain());
+            log.error("Key Manager " + name + " already initialized in tenant " + tenantDomain);
         }
         if (keyManagerConfiguration.isEnabled()) {
             KeyManager keyManager = null;

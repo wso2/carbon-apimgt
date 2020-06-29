@@ -140,6 +140,8 @@ paths:
       summary: An Array of key managers configured
       description: |
         this will provide key managers configured
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
       responses:
         200:
           description: An array of key managers
