@@ -141,7 +141,7 @@ const styles = (theme) => ({
         transformOrigin: 'left bottom 0',
         position: 'absolute',
         whiteSpace: 'nowrap',
-        top: theme.custom.infoBar.height * 2,
+        top: theme.custom.infoBar.height * 4,
         marginLeft: 23,
         cursor: 'pointer',
     },
@@ -308,7 +308,7 @@ class CommonListing extends React.Component {
                             <Icon>keyboard_arrow_right</Icon>
                         </div>
                         <div className={classes.rotatedText} onClick={this.toggleLeftMenu}>
-                            <FormattedMessage defaultMessage='Tag Cloud' id='Apis.Listing.Listing.ApiTagCloud.title' />
+                            <FormattedMessage defaultMessage='Tag Cloud / API Categories' id='Apis.Listing.Listing.ApiTagCloud.title' />
                         </div>
                     </div>
                 )}
