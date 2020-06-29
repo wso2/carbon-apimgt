@@ -728,13 +728,7 @@ public class APIAdminImpl implements APIAdmin {
         return authorizedScopes;
     }
 
-    /**
-     * Adds or Updates a tenant theme to the database
-     *
-     * @param tenantId     tenant ID of user
-     * @param themeContent content of the tenant theme
-     * @throws APIManagementException
-     */
+    @Override
     public void importTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
         if (apiMgtDAO.isTenantThemeExist(tenantId)) {
@@ -744,27 +738,21 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
-    /**
-     * Retrieves a tenant theme from the database
-     *
-     * @param tenantId tenant ID of user
-     * @return content of the tenant theme
-     * @throws APIManagementException
-     */
+    @Override
     public InputStream getTenantTheme(int tenantId) throws APIManagementException {
 
         return apiMgtDAO.getTenantTheme(tenantId);
     }
 
-    /**
-     * Checks whether a tenant theme exist for a particular tenant
-     *
-     * @param tenantId tenant ID of user
-     * @return true if a tenant theme exist for a particular tenant ID, false otherwise
-     * @throws APIManagementException
-     */
+    @Override
     public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
 
         return apiMgtDAO.isTenantThemeExist(tenantId);
+    }
+
+    @Override
+    public void deleteTenantTheme(int tenantId) throws APIManagementException {
+
+        apiMgtDAO.deleteTenantTheme(tenantId);
     }
 }
