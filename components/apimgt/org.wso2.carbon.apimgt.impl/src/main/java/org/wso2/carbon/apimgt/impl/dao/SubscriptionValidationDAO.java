@@ -331,14 +331,21 @@ public class SubscriptionValidationDAO {
                     api.setContext(resultSet.getString("CONTEXT"));
                     temp.put(apiId, api);
                 }
-
-                URLMapping urlMapping = new URLMapping();
-                urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
-                urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
-                urlMapping.setUrlPattern(resultSet.getString("URL_PATTERN"));
-                api.addResource(urlMapping);
-
+                String urlPattern = resultSet.getString("URL_PATTERN");
+                String httpMethod = resultSet.getString("HTTP_METHOD");
+                URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
+                if (urlMapping == null) {
+                    urlMapping = new URLMapping();
+                    urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
+                    urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                    urlMapping.setHttpMethod(httpMethod);
+                    urlMapping.setUrlPattern(urlPattern);
+                    api.addResource(urlMapping);
+                }
+                String scopeName = resultSet.getString("SCOPE_NAME");
+                if (StringUtils.isNotEmpty(scopeName)) {
+                    urlMapping.addScope(scopeName);
+                }
             }
 
         } catch (SQLException e) {

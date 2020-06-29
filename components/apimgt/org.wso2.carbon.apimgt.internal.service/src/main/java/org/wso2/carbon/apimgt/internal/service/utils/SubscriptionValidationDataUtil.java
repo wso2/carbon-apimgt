@@ -67,14 +67,15 @@ public class SubscriptionValidationDataUtil {
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
             apidto.setName(model.getName());
-            List<URLMapping> urlMappings = model.getAllResources();
+            Map<String,URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
-            for (URLMapping urlMapping : urlMappings) {
+            for (URLMapping urlMapping : urlMappings.values()) {
                 URLMappingDTO urlMappingDTO = new URLMappingDTO();
                 urlMappingDTO.setAuthScheme(urlMapping.getAuthScheme());
                 urlMappingDTO.setHttpMethod(urlMapping.getHttpMethod());
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
+                urlMappingDTO.setScopes(urlMapping.getScopes());
                 urlMappingsDTO.add(urlMappingDTO);
             }
             apidto.setUrlMappings(urlMappingsDTO);
@@ -94,14 +95,15 @@ public class SubscriptionValidationDataUtil {
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
             apidto.setName(model.getName());
-            List<URLMapping> urlMappings = model.getAllResources();
+            Map<String,URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
-            for (URLMapping urlMapping : urlMappings) {
+            for (URLMapping urlMapping : urlMappings.values()) {
                 URLMappingDTO urlMappingDTO = new URLMappingDTO();
                 urlMappingDTO.setAuthScheme(urlMapping.getAuthScheme());
                 urlMappingDTO.setHttpMethod(urlMapping.getHttpMethod());
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
+                urlMappingDTO.setScopes(urlMapping.getScopes());
                 urlMappingsDTO.add(urlMappingDTO);
             }
             apidto.setUrlMappings(urlMappingsDTO);
