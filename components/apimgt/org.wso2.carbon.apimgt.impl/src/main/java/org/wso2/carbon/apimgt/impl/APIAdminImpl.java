@@ -729,13 +729,15 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public void importTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
-        if (apiMgtDAO.isTenantThemeExist(tenantId)) {
-            apiMgtDAO.updateTenantTheme(tenantId, themeContent);
-        } else {
-            apiMgtDAO.addTenantTheme(tenantId, themeContent);
-        }
+        apiMgtDAO.addTenantTheme(tenantId, themeContent);
+    }
+
+    @Override
+    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        apiMgtDAO.updateTenantTheme(tenantId, themeContent);
     }
 
     @Override

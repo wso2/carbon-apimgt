@@ -368,13 +368,22 @@ public interface APIAdmin  {
             throws APIManagementException;
 
     /**
-     * Adds or Updates a tenant theme in the database
+     * Adds a tenant theme to the database
      *
      * @param tenantId     tenant ID of user
      * @param themeContent content of the tenant theme
      * @throws APIManagementException if an error occurs when importing a tenant theme
      */
-    void importTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
+    void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
+
+    /**
+     * Updates an existing tenant theme in the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     * @throws APIManagementException if an error occurs when importing a tenant theme
+     */
+    void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
 
     /**
      * Retrieves a tenant theme from the database
