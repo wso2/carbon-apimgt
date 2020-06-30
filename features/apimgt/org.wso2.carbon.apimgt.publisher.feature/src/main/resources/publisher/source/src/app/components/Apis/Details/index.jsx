@@ -618,14 +618,17 @@ class Details extends Component {
                             to={pathPrefix + 'documents'}
                             Icon={<DocumentsIcon />}
                         />
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.Tryout',
-                                defaultMessage: 'test console',
-                            })}
-                            to={pathPrefix + 'test-console'}
-                            iconText='test'
-                        />
+                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isRestricted(['apim:api_publish'],
+                            api) && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.Tryout',
+                                    defaultMessage: 'test console',
+                                })}
+                                to={pathPrefix + 'test-console'}
+                                iconText='test'
+                            />
+                        )}
                         {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
@@ -758,6 +761,10 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.TRYOUT}
+                                    component={() => <TestConsole apiObj={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.TRYOUT_PRODUCT}
                                     component={() => <TestConsole apiObj={api} />}
                                 />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
