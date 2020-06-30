@@ -25,7 +25,7 @@ public class GatewaySynapseArtifactsApiServiceImpl implements GatewaySynapseArti
         List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
         try {
             List<ByteArrayInputStream> baip = apiMgtDAO.getAllGatewayPublishedAPIArtifacts(gatewayLabel);
-            for (ByteArrayInputStream byteStream :baip){
+            for (ByteArrayInputStream byteStream :baip) {
                 byte[] bytes = ByteStreams.toByteArray(byteStream);
                 String  gatewayRuntimeArtifacts = new String(bytes);
                 gatewayRuntimeArtifactsArray.add(gatewayRuntimeArtifacts);

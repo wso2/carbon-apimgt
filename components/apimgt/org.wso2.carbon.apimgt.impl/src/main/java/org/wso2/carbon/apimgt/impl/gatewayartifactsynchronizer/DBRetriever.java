@@ -62,7 +62,7 @@ public class DBRetriever implements ArtifactRetriever {
                     "&gatewayInstruction=" + gatewayInstruction + "&gatewayLabel="+ endcodedgatewayLabel;
             String endpoint = baseURL + path;
             HttpResponse httpResponse = invokeService(endpoint);
-            if (httpResponse.getEntity() != null ){
+            if (httpResponse.getEntity() != null ) {
                 return EntityUtils.toString(httpResponse.getEntity(), APIConstants.DigestAuthConstants.CHARSET);
             } else {
                 throw new ArtifactSynchronizerException("HTTP response is empty");
@@ -87,7 +87,7 @@ public class DBRetriever implements ArtifactRetriever {
             String endpoint = baseURL + path;
             HttpResponse httpResponse = invokeService(endpoint);
             String responseString;
-            if (httpResponse.getEntity() != null ){
+            if (httpResponse.getEntity() != null ) {
                 responseString = EntityUtils.toString(httpResponse.getEntity(),
                         APIConstants.DigestAuthConstants.CHARSET);
             } else {

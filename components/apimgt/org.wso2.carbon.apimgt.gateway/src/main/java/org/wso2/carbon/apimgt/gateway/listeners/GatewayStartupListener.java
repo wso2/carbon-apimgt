@@ -58,7 +58,7 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
         startListener();
     }
 
-    private boolean  deployArtifactsAtStartup(){
+    private boolean deployArtifactsAtStartup() {
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
