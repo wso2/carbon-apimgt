@@ -48,6 +48,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -555,13 +556,13 @@ public final class APIUtil {
      * @return HTTPResponse
      * @throws IOException
      */
-    public static HttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient) throws IOException {
-        HttpResponse httpResponse = null;
+    public static CloseableHttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient) throws IOException {
+        CloseableHttpResponse httpResponse = null;
         int retryCount = 0;
         boolean retry;
         do {
             try {
-                httpResponse = httpClient.execute(method);
+                httpResponse = (CloseableHttpResponse) httpClient.execute(method);
                 retry = false;
             } catch (IOException ex) {
                 retryCount++;
@@ -580,6 +581,7 @@ public final class APIUtil {
                 }
             }
         } while (retry);
+        method.releaseConnection();
         return httpResponse;
     }
 

@@ -10,7 +10,6 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactDTO;
 
 import java.util.List;
 
@@ -22,5 +21,4 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface SynapseArtifactsApiService {
       public Response synapseArtifactsGet(String apiId, String gatewayLabel, String gatewayInstruction, MessageContext messageContext) throws APIManagementException;
-      public Response synapseArtifactsPost(SynapseArtifactDTO body, MessageContext messageContext) throws APIManagementException;
 }

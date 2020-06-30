@@ -144,7 +144,13 @@
       "get" : {
         "summary" : "An Array of key managers configured",
         "description" : "this will provide key managers configured\n",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "An array of key managers",
@@ -471,34 +477,6 @@
         }
       }
     },
-    "/isAPIpublished" : {
-      "get" : {
-        "tags" : [ "Checking for APIs" ],
-        "summary" : "Check whether an API is published or not",
-        "description" : "This will provide access to the APIs published in gateway\n",
-        "parameters" : [ {
-          "name" : "apiId",
-          "in" : "query",
-          "description" : "**Search condition**.\n  Api ID\n",
-          "required" : false,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Whether the API Published or not",
-            "schema" : {
-              "type" : "boolean"
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/synapse-artifacts" : {
       "get" : {
         "tags" : [ "Retrieving Synapse artifacts" ],
@@ -529,30 +507,6 @@
             "schema" : {
               "type" : "string"
             }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "post" : {
-        "summary" : "Save the given API Artifacts in database",
-        "description" : "This will provide access to the synapse artifacts in database.",
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "body",
-          "description" : "gateway Artifacts which need to be saved\n",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/synapseArtifact"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK.\nSynapse Artifacts saved in database Successfully\n"
           },
           "default" : {
             "description" : "Unexpected error",
