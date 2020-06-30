@@ -54,7 +54,8 @@ export default function ListDetectedBotData() {
         return restApi
             .getDetectedBotData()
             .then((result) => {
-                return (result.body);
+                console.log(result.obj.list);
+                return (result.obj.list);
             })
             .catch((error) => {
                 throw (error);
@@ -63,10 +64,10 @@ export default function ListDetectedBotData() {
 
     const columProps = [
         {
-            name: 'recordtime',
+            name: 'recordedTime',
             label: intl.formatMessage({
                 id: 'AdminPages.BotDetection.detected.data.table.header.label.record.time',
-                defaultMessage: 'Record Time',
+                defaultMessage: 'Recorded Time',
             }),
             options: {
                 sort: true,
@@ -93,7 +94,7 @@ export default function ListDetectedBotData() {
             },
         },
         {
-            name: 'headersSet',
+            name: 'headerSet',
             label: intl.formatMessage({
                 id: 'AdminPages.BotDetection.detected.data.table.header.label.headers.set',
                 defaultMessage: 'Headers Set',
@@ -102,7 +103,7 @@ export default function ListDetectedBotData() {
                 sort: true,
                 customBodyRender: (value) => {
                     return (
-                        value.join(', ')
+                        value.replace('[', '').replace(']', '')
                     );
                 },
             },
@@ -131,7 +132,7 @@ export default function ListDetectedBotData() {
             },
         },
         {
-            name: 'clientIP',
+            name: 'clientIp',
             label: intl.formatMessage({
                 id: 'AdminPages.BotDetection.detected.data.table.header.label.client.ip',
                 defaultMessage: 'Client IP',
