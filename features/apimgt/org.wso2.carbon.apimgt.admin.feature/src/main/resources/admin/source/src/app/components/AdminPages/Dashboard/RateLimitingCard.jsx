@@ -76,6 +76,7 @@ export default function RateLimitingCard() {
                 defaultMessage: 'Applicable per access token generated for an application',
             }),
             icon: <PhonelinkSetupIcon color='inherit' fontSize='small' />,
+            path: '/throttling/application',
         },
         {
             name: intl.formatMessage({
@@ -87,6 +88,7 @@ export default function RateLimitingCard() {
                 defaultMessage: 'Control access per Subscription',
             }),
             icon: <AssignmentTurnedInIcon color='inherit' fontSize='small' />,
+            path: '/throttling/subscription',
         },
         {
             name: intl.formatMessage({
@@ -99,6 +101,7 @@ export default function RateLimitingCard() {
                 + 'rules for specific use cases, which are applied globally across all tenants.',
             }),
             icon: <AssignmentIcon color='inherit' fontSize='small' />,
+            path: '/throttling/custom',
         },
     ];
 
