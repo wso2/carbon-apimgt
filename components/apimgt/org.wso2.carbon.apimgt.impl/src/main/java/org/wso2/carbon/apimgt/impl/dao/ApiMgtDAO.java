@@ -15525,7 +15525,7 @@ public class ApiMgtDAO {
      *
      * @param tenantId     tenant ID of user
      * @param themeContent content of the tenant theme
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs when adding a tenant theme to the database
      */
     public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
@@ -15547,11 +15547,11 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Updates a tenant theme in the database
+     * Updates an existing tenant theme in the database
      *
      * @param tenantId     tenant ID of user
      * @param themeContent content of the tenant theme
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs when updating an existing tenant theme in the database
      */
     public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
@@ -15577,7 +15577,7 @@ public class ApiMgtDAO {
      *
      * @param tenantId tenant ID of user
      * @return content of the tenant theme
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs when retrieving a tenant theme from the database
      */
     public InputStream getTenantTheme(int tenantId) throws APIManagementException {
 
@@ -15602,7 +15602,8 @@ public class ApiMgtDAO {
      *
      * @param tenantId tenant ID of user
      * @return true if a tenant theme exist for a particular tenant ID, false otherwise
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs when determining whether a tenant theme exists for a given
+     *                                tenant ID
      */
     public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
 
@@ -15623,7 +15624,7 @@ public class ApiMgtDAO {
      * Deletes a tenant theme from the database
      *
      * @param tenantId tenant ID of user
-     * @throws APIManagementException if an error occurs when deleting a tenant theme
+     * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
      */
     public void deleteTenantTheme(int tenantId) throws APIManagementException {
 

@@ -53,6 +53,7 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
      * @param fileDetail      file details as Attachment
      * @param messageContext
      * @return Theme import response
+     * @throws APIManagementException if an error occurs when importing a tenant theme
      */
     @Override
     public Response importTenantTheme(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
@@ -91,6 +92,7 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
      *
      * @param messageContext
      * @return Theme export response
+     * @throws APIManagementException if an error occurs when importing a tenant theme
      */
     @Override
     public Response exportTenantTheme(MessageContext messageContext) throws APIManagementException {

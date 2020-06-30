@@ -372,7 +372,7 @@ public interface APIAdmin  {
      *
      * @param tenantId     tenant ID of user
      * @param themeContent content of the tenant theme
-     * @throws APIManagementException if an error occurs when importing a tenant theme
+     * @throws APIManagementException if an error occurs when adding a tenant theme to the database
      */
     void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
 
@@ -381,7 +381,7 @@ public interface APIAdmin  {
      *
      * @param tenantId     tenant ID of user
      * @param themeContent content of the tenant theme
-     * @throws APIManagementException if an error occurs when importing a tenant theme
+     * @throws APIManagementException if an error occurs when updating an existing tenant theme in the database
      */
     void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
 
@@ -390,7 +390,7 @@ public interface APIAdmin  {
      *
      * @param tenantId tenant ID of user
      * @return content of the tenant theme
-     * @throws APIManagementException if an error occurs when retrieving the tenant theme
+     * @throws APIManagementException if an error occurs when retrieving a tenant theme from the database
      */
     InputStream getTenantTheme(int tenantId) throws APIManagementException;
 
@@ -408,7 +408,7 @@ public interface APIAdmin  {
      * Deletes a tenant theme from the database
      *
      * @param tenantId tenant ID of user
-     * @throws APIManagementException if an error occurs when deleting a tenant theme
+     * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
      */
     void deleteTenantTheme(int tenantId) throws APIManagementException;
 }

@@ -160,14 +160,14 @@ public class RestApiAdminUtils {
     }
 
     /**
-     * Extract the content of the provided tenant theme archive
+     * Import the content of the provided tenant theme archive to the file system
      *
-     * @param themeFile    content relevant to the tenant theme
+     * @param themeContent content relevant to the tenant theme
      * @param tenantDomain tenant to which the theme is imported
-     * @throws APIManagementException if an error occurs while importing tenant theme
+     * @throws APIManagementException if an error occurs while importing the tenant theme to the file system
      * @throws IOException            if an error occurs while deleting an incomplete tenant theme directory
      */
-    public static void importTenantTheme(InputStream themeFile, String tenantDomain, InputStream existingTenantTheme)
+    public static void importTenantTheme(InputStream themeContent, String tenantDomain, InputStream existingTenantTheme)
             throws APIManagementException, IOException {
 
         ZipInputStream zipInputStream = null;
@@ -195,7 +195,7 @@ public class RestApiAdminUtils {
             }
 
             //get the zip file content
-            zipInputStream = new ZipInputStream(themeFile);
+            zipInputStream = new ZipInputStream(themeContent);
             //get the zipped file list entry
             ZipEntry zipEntry = zipInputStream.getNextEntry();
 
@@ -250,10 +250,16 @@ public class RestApiAdminUtils {
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, tenantDomain));
         } finally {
             IOUtils.closeQuietly(zipInputStream);
-            IOUtils.closeQuietly(themeFile);
+            IOUtils.closeQuietly(themeContent);
         }
     }
 
+    /**
+     * Retrieves the directory location in the file system where the tenant theme is imported
+     *
+     * @param tenantDomain tenant to which the theme is imported
+     * @return directory location in the file system where the tenant theme is imported
+     */
     public static String getTenantThemeDirectoryPath(String tenantDomain) {
 
         return "repository" + File.separator + "deployment" + File.separator + "server" + File.separator + "jaggeryapps"
@@ -261,11 +267,25 @@ public class RestApiAdminUtils {
                 + File.separator + "tenant_themes" + File.separator + tenantDomain;
     }
 
+    /**
+     * Retrieves the directory location in the file system where the tenant theme is temporarily backed-up
+     *
+     * @param tenantDomain tenant to which the theme is imported
+     * @return directory location in the file system where the tenant theme is temporarily backed-up
+     */
     public static String getTenantThemeBackupDirectoryPath(String tenantDomain) {
 
         return System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + tenantDomain;
     }
 
+    /**
+     * Reverts the changes that occurred when importing a tenant theme
+     *
+     * @param tenantDomain        tenant to which the theme is imported
+     * @param existingTenantTheme tenant theme which existed before the current import operation
+     * @throws APIManagementException if an error occurs when reverting the changes
+     * @throws IOException            if an error occurs when reverting the changes
+     */
     public static void revertTenantThemeImportChanges(String tenantDomain, InputStream existingTenantTheme)
             throws APIManagementException, IOException {
 
@@ -282,10 +302,10 @@ public class RestApiAdminUtils {
     }
 
     /**
-     * Delete a tenant theme from the file system and deletes the tenant theme from the database
+     * Deletes a tenant theme from the file system and deletes the tenant theme from the database
      *
+     * @param tenantId             tenant ID of the tenant to which the theme is imported
      * @param tenantThemeDirectory directory in the file system to where the tenant theme is imported
-     * @param tenantId             tenant to which the theme is imported
      * @throws APIManagementException if an error occurs when deleting the tenant theme from the database
      * @throws IOException            if an error occurs when deleting the tenant theme directory
      */
@@ -297,6 +317,16 @@ public class RestApiAdminUtils {
         apiAdmin.deleteTenantTheme(tenantId);
     }
 
+    /**
+     * Restores the tenant theme which existed before the current import operation was performed
+     *
+     * @param tenantId             tenant ID of the tenant to which the theme is imported
+     * @param tenantThemeDirectory directory in the file system to where the tenant theme is imported
+     * @param backupDirectory      directory in the file system where the tenant theme is temporarily backed-up
+     * @param existingTenantTheme  tenant theme which existed before the current import operation
+     * @throws APIManagementException if an error occurs when updating the tenant theme in the database
+     * @throws IOException            if an error occurs when restoring the tenant theme directory
+     */
     public static void restoreTenantTheme(int tenantId, File tenantThemeDirectory, File backupDirectory,
                                           InputStream existingTenantTheme) throws APIManagementException, IOException {
 
