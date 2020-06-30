@@ -18,7 +18,7 @@ swagger: '2.0'
 # Prolog
 ######################################################
 info:
-  version: "v1.1"
+  version: "v1.2"
   title: "WSO2 API Manager - Admin"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.
@@ -2360,9 +2360,9 @@ paths:
             - apim:api_product_import_export
       produces:
         - application/zip
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/admin/v0.16/export/api-product?name=SampleAPIProduct&version=1.0.0&providerName=admin > exportAPIProduct.zip"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/admin/v0.17/export/api-product?name=SampleAPIProduct&version=1.0.0&providerName=admin > exportAPIProduct.zip"
       x-wso2-request: |
-        GET https://localhost:9443/api/am/admin/v0.16/export/api-product?name=SampleAPIProduct&version=1.0.0&providerName=admin
+        GET https://localhost:9443/api/am/admin/v0.17/export/api-product?name=SampleAPIProduct&version=1.0.0&providerName=admin
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-api-product.zip\"\n  Content-Type: application/zip"
       summary: Export an API Product
@@ -2534,132 +2534,6 @@ paths:
           description: |
             Not Found.
             Analytics Not Enabled.
-          schema:
-            $ref: '#/definitions/Error'
-
-  #-----------------------------------------------------
-  # Get configured email list
-  #-----------------------------------------------------
-  /botData/getEmailList:
-
-    get:
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:bot_data
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer 8739edc7-7c95-34d5-895a-398fe5dd5972\" https://localhost:9443/api/am/admin/v1/botData/getEmailList -H \"accept: application/json\""
-      produces:
-        - application/json
-      summary: |
-        Get all configured email list
-      description: |
-        Get all email list which configured to trigger for BotData api email alert
-      parameters:
-        - name: tenantDomain
-          in: query
-          description: |
-            Pass the tenantDomain to get the email list and if not passed it will get from the logged user.
-          required: false
-          type: string
-      responses:
-        200:
-          description: |
-            OK.
-            Export Successful.
-        400:
-          description: |
-            Bad Request.messageID
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            Requested Data does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-#-----------------------------------------------------
-  # Delete email
-#-----------------------------------------------------
-  /botData/deleteEmail:
-
-    delete:
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:bot_data
-      x-wso2-curl: "curl -k -X DELETE -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" https://localhost:9443/api/am/admin/v1/botData/deleteEmail?uuid=23a2a896-bd58-46ec-83c7-2f2b5cc09284 -H \"accept: application/json\""
-      summary: Delete an configured email.
-      description: |
-        Delete an configured email from DB by pasing uuid.
-      parameters:
-        - name: uuid
-          in: query
-          description: |
-            Pass the uuid to remove the email
-          required: true
-          type: string
-      responses:
-        200:
-          description: |
-            OK.
-            Email successfully deleted.
-        404:
-          description: |
-            Not Found.
-            Resource to be deleted does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-#-----------------------------------------------------
-  # Add email
-#-----------------------------------------------------
-  /botData/addEmail:
-
-    post:
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:bot_data
-      summary: Add an Email
-      description: |
-          Here we can use this to configure email
-      parameters:
-        - in: body
-          name: body
-          description: |
-              A email
-          required: true
-          schema:
-            $ref: '#/definitions/Email'
-      responses:
-        200:
-          description: |
-            OK.
-            Email List updated.
-          schema:
-            $ref: '#/definitions/Email'
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
 
@@ -2908,7 +2782,7 @@ paths:
         - OAuth2Security:
             - apim:api_workflow_view
       x-wso2-curl: "curl https://localhost:9443/api/am/admin/v1/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/admin/v0.16/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
+      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/admin/v0.17/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
       x-wso2-request: |
         GET https://localhost:9443/api/am/admin/v1/workflows/c43a325c-260b-4302-81cb-768eafaa3aed
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n                 \"WF_TYPE\": \"AM_APPLICATION_CREATION\",\n         \"WF_STATUS\": \"APPROVED\",\n         \"WF_CREATED_TIME\": \"  2020-02-10 09:33:34.476\"\n    \"WF_UPDATED_TIME\": \"  2020-02-10 09:33:34.476\"\n    \"WF_STATUS_DESC\": \"  Approve workflow request\"\n   \"TENANT_ID\": \"-1234\",\n  \"TENANT_DOMAIN\": \"carbon.super\",\n  \"WF_EXTERNAL_REFERENCE\": \"5871244b-d6f3-466e-8995-8accd1e64303\",\n  \"PAYLOAD\": \"7b2263616c6c4261636b55524c22\",\n } "
@@ -3445,6 +3319,138 @@ paths:
         500:
           description: |
             Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+###########################################################
+# The Bot Detection Alert Subscription Management resources
+###########################################################
+
+  '/alert-subscriptions/bot-detection':
+    #------------------------------------------------------------
+    # Retrieve the list of subscriptions for bot detection alerts
+    #------------------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_alert_manage
+      operationId: getBotDetectionAlertSubscriptions
+      produces:
+        - application/json
+      summary: |
+        Get the list of subscriptions for bot detection
+      description: |
+        Get the list of subscriptions which are subscribed to receive email alerts for bot detection
+      tags:
+        - Bot Detection Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            The list of bot detection alert subscriptions are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/BotDetectionAlertSubscriptionList'
+        500:
+          description: |
+            Internal Server Error.
+            An error occurred while retrieving bot detection alert subscriptions.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Subscribe for bot detection alerts
+    #-----------------------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_alert_manage
+      operationId: subscribeForBotDetectionAlerts
+      summary: Subscribe for bot detection alerts
+      description: |
+        Register a subscription for bot detection alerts
+      parameters:
+        - in: body
+          name: body
+          description: |
+            The email to register to receive bot detection alerts
+          required: true
+          schema:
+            $ref: '#/definitions/BotDetectionAlertSubscription'
+      tags:
+        - Bot Detection Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            Bot detection alert subscription is registered successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/BotDetectionAlertSubscription'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error.
+            An error occurred while adding a bot detection subscription.
+          schema:
+            $ref: '#/definitions/Error'
+
+  '/alert-subscriptions/bot-detection/{uuid}':
+    #-----------------------------------------------------
+    # Unsubscribe from bot detection alerts
+    #-----------------------------------------------------
+    delete:
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_alert_manage
+      operationId: unsubscribeFromBotDetectionAlerts
+      summary: Unsubscribe from bot detection alerts.
+      description: |
+        Delete a subscription from bot detection alerts.
+      parameters:
+        - in: path
+          name: uuid
+          required: true
+          type: string
+          description: uuid of the subscription
+      tags:
+        - Bot Detection Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            Bot detection alert subscription is deleted successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        404:
+          description: |
+            Not Found.
+            Resource to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while deleting a bot detection subscription.
           schema:
             $ref: '#/definitions/Error'
 
@@ -4083,17 +4089,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/AdvancedThrottlePolicyInfo'
-
-  #-----------------------------------------------------
-  # The Email list
-  #-----------------------------------------------------
-  Email:
-    title: Email
-    properties:
-      email:
-        type: string
-        description: email value
-        example: "abc@.com"
 
 #-----------------------------------------------------
 # The Application Throttling Policy resource
@@ -5286,6 +5281,39 @@ definitions:
         items:
           type: string
           example: "admin@wso2.com"
+
+  #-----------------------------------------------------
+  # The Bot Detection Alert Subscription List resource
+  #-----------------------------------------------------
+  BotDetectionAlertSubscriptionList:
+    title: Bot Detection Alert Subscription List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Bot Detection Alert Subscriptions returned.
+        example: 3
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/BotDetectionAlertSubscription'
+
+  #-----------------------------------------------------
+  # The Bot Detection Alert Subscription resource
+  #-----------------------------------------------------
+  BotDetectionAlertSubscription:
+    title: Bot Detection Alert Subscription
+    required:
+      - email
+    properties:
+      uuid:
+        type: string
+        description: UUID of the subscription
+        example: "urn:uuid:1ed6d2de-29df-4fed-a96a-46d2329dce65"
+      email:
+        type: string
+        description: email
+        example: "abc@.com"
 
     #-----------------------------------------------------
   # The Workflow List resource

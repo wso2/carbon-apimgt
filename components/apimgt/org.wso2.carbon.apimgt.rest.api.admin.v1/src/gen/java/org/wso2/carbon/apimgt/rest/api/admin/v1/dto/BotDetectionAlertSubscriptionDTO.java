@@ -13,21 +13,41 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class EmailDTO   {
+public class BotDetectionAlertSubscriptionDTO   {
   
+    private String uuid = null;
     private String email = null;
 
   /**
-   * email value
+   * UUID of the subscription
    **/
-  public EmailDTO email(String email) {
+  public BotDetectionAlertSubscriptionDTO uuid(String uuid) {
+    this.uuid = uuid;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "urn:uuid:1ed6d2de-29df-4fed-a96a-46d2329dce65", value = "UUID of the subscription")
+  @JsonProperty("uuid")
+  public String getUuid() {
+    return uuid;
+  }
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
+
+  /**
+   * email
+   **/
+  public BotDetectionAlertSubscriptionDTO email(String email) {
     this.email = email;
     return this;
   }
 
   
-  @ApiModelProperty(example = "abc@.com", value = "email value")
+  @ApiModelProperty(example = "abc@.com", required = true, value = "email")
   @JsonProperty("email")
+  @NotNull
   public String getEmail() {
     return email;
   }
@@ -44,20 +64,22 @@ public class EmailDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    EmailDTO email = (EmailDTO) o;
-    return Objects.equals(email, email.email);
+    BotDetectionAlertSubscriptionDTO botDetectionAlertSubscription = (BotDetectionAlertSubscriptionDTO) o;
+    return Objects.equals(uuid, botDetectionAlertSubscription.uuid) &&
+        Objects.equals(email, botDetectionAlertSubscription.email);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(email);
+    return Objects.hash(uuid, email);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class EmailDTO {\n");
+    sb.append("class BotDetectionAlertSubscriptionDTO {\n");
     
+    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    email: ").append(toIndentedString(email)).append("\n");
     sb.append("}");
     return sb.toString();

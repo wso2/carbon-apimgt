@@ -3429,6 +3429,12 @@ public class SQLConstants {
         public static final String DELETE_EMAIL_BY_UUID =
                 "DELETE FROM AM_NOTIFICATION_SUBSCRIBER WHERE UUID= ?";
 
+        public static final String GET_ALERT_SUBSCRIPTION_BY_UUID =
+                "SELECT UUID, SUBSCRIBER_ADDRESS FROM AM_NOTIFICATION_SUBSCRIBER WHERE UUID = ?";
+
+        public static final String GET_ALERT_SUBSCRIPTION_BY_EMAIL =
+                "SELECT UUID, SUBSCRIBER_ADDRESS FROM AM_NOTIFICATION_SUBSCRIBER WHERE SUBSCRIBER_ADDRESS = ?";
+
         public static final String GET_BOT_DETECTED_DATA =
                 "from AM_BOT_DATA SELECT request_time, message_id, http_method, headers, message_body, client_ip";
 

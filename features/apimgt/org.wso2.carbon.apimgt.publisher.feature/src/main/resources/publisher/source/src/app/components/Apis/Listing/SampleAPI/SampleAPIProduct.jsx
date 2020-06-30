@@ -75,7 +75,7 @@ function SampleAPI() {
                         }
                     />
                 </Typography>
-                {!AuthManager.isNotCreator() && (
+                {AuthManager.isNotCreator() && (
                     <div className={classes.actions}>
                         <Link id='itest-id-createdefault' to='/api-products/create' className={classes.links}>
                             <Button

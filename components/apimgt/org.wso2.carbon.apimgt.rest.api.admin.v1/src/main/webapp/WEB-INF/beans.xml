@@ -33,7 +33,6 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.PoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ApplicationsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.BotDataApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.LabelsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ExportApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ImportApi"/>
