@@ -201,7 +201,7 @@ beans.xml file.
 14. Rename the target/org.wso2.carbon.apimgt.rest.api.util
 -{version}.jar file as org.wso2.carbon.apimgt.rest.api.util_{version}.jar and copy to <AM_HOME>/lib/runtimes/cxf3/
 
-15. Build org.wso2.carbon.apimgt.rest.api.admin and deploy the api#am#admin#v0.16.war in the pack
+15. Build org.wso2.carbon.apimgt.rest.api.admin and deploy the api#am#admin#v0.17.war in the pack
 
 ##### Invoke the new /sample resource:
 
