@@ -41,7 +41,8 @@ public class DBSaver implements ArtifactSaver {
     }
 
     /**
-     * This method is used to save deployable artifact of an API to the storage in publisher profile. So we don't need
+     * This method is used to save deployable artifact of an API to the storage in publisher profile. From Publisher
+     * profile we can access DB.Thus we don't need an HTTP request to internal service like DB retriever
      *
      */
     @Override
