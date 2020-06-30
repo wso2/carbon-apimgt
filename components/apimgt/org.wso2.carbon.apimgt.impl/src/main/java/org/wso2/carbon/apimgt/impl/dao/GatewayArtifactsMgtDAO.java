@@ -46,7 +46,7 @@ public class GatewayArtifactsMgtDAO {
     public void addGatewayPublishedAPIDetails(String APIId, String APIName, String version, String tenantDomain)
             throws APIManagementException {
 
-        try (Connection connection = APIMgtDBUtil.getArtifactSynchronizerConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_PUBLISHED_API_DETAILS)) {
             statement.setString(1, APIId);
             statement.setString(2, APIName);
@@ -71,7 +71,7 @@ public class GatewayArtifactsMgtDAO {
             int streamLength, String gatewayInstruction, String query)
             throws APIManagementException {
 
-        try (Connection connection = APIMgtDBUtil.getArtifactSynchronizerConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBinaryStream(1, bais, streamLength);
             statement.setString(2, gatewayInstruction);
@@ -95,7 +95,7 @@ public class GatewayArtifactsMgtDAO {
             throws APIManagementException {
 
         String gatewayRuntimeArtifacts = null;
-        try (Connection connection = APIMgtDBUtil.getArtifactSynchronizerConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ARTIFACT)) {
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
@@ -124,7 +124,7 @@ public class GatewayArtifactsMgtDAO {
             throws APIManagementException {
 
         List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
-        try (Connection connection = APIMgtDBUtil.getArtifactSynchronizerConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_API_ARTIFACT)) {
             statement.setString(1, label);
             statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
@@ -153,7 +153,7 @@ public class GatewayArtifactsMgtDAO {
     public boolean isAPIPublishedInAnyGateway(String APIId) throws APIManagementException {
 
         int count = 0;
-        try (Connection connection = APIMgtDBUtil.getArtifactSynchronizerConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_PUBLISHED_GATEWAYS_FOR_API)) {
             statement.setString(1, APIId);
             statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
@@ -175,7 +175,7 @@ public class GatewayArtifactsMgtDAO {
      */
     public boolean isAPIDetailsExists(String APIId) throws APIManagementException {
 
-        try (Connection connection = APIMgtDBUtil.getArtifactSynchronizerConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection
                         .prepareStatement(SQLConstants.GET_GATEWAY_PUBLISHED_API_DETAILS)) {
             statement.setString(1, APIId);
@@ -196,7 +196,7 @@ public class GatewayArtifactsMgtDAO {
     public boolean isAPIArtifactExists(String APIId, String gatewayLabel) throws APIManagementException {
 
         int count = 0;
-        try (Connection connection = APIMgtDBUtil.getArtifactSynchronizerConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.CHECK_ARTIFACT_EXISTS)) {
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
