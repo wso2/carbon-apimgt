@@ -25,7 +25,6 @@ import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import VisibilitySensor from 'react-visibility-sensor';
 import Paper from '@material-ui/core/Paper';
 import { withStyles, createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Line } from 'rc-progress';
@@ -693,41 +692,34 @@ class APISecurityAudit extends Component {
                                     </Typography>
                                     <div className={classes.auditSummaryDiv}>
                                         <div className={classes.auditSummarySubDiv}>
-                                            <VisibilitySensor>
-                                                {({ isVisible }) => {
-                                                    const progressScore = isVisible ? overallScore : 0;
-                                                    return (
-                                                        <CircularProgressbarWithChildren
-                                                            value={progressScore}
-                                                        >
-                                                            <Typography
-                                                                variant='body1'
-                                                                className={classes.circularProgressBarScore}
-                                                            >
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.APIDefinition.AuditApi
+                                            <CircularProgressbarWithChildren
+                                                value={overallScore}
+                                            >
+                                                <Typography
+                                                    variant='body1'
+                                                    className={classes.circularProgressBarScore}
+                                                >
+                                                    <FormattedMessage
+                                                        id='Apis.Details.APIDefinition.AuditApi
                                                                     .OverallScoreProgress'
-                                                                    defaultMessage='{overallScore}'
-                                                                    values={{
-                                                                        overallScore: (
-                                                                            <strong>{Math.round(overallScore)}</strong>
-                                                                        ),
-                                                                    }}
-                                                                />
-                                                            </Typography>
-                                                            <Typography
-                                                                variant='body1'
-                                                                className={classes.circularProgressBarScoreFooter}
-                                                            >
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.APIDefinition.AuditApi.ScoreFooter'
-                                                                    defaultMessage='out of 100'
-                                                                />
-                                                            </Typography>
-                                                        </CircularProgressbarWithChildren>
-                                                    );
-                                                }}
-                                            </VisibilitySensor>
+                                                        defaultMessage='{overallScore}'
+                                                        values={{
+                                                            overallScore: (
+                                                                <strong>{Math.round(overallScore)}</strong>
+                                                            ),
+                                                        }}
+                                                    />
+                                                </Typography>
+                                                <Typography
+                                                    variant='body1'
+                                                    className={classes.circularProgressBarScoreFooter}
+                                                >
+                                                    <FormattedMessage
+                                                        id='Apis.Details.APIDefinition.AuditApi.ScoreFooter'
+                                                        defaultMessage='out of 100'
+                                                    />
+                                                </Typography>
+                                            </CircularProgressbarWithChildren>
                                         </div>
                                         <div className={classes.auditSummaryDivRight}>
                                             {{}.hasOwnProperty.call(reportObject, 'score')
@@ -851,20 +843,12 @@ class APISecurityAudit extends Component {
                                                                 ),
                                                             }}
                                                         />
-                                                        <VisibilitySensor>
-                                                            {({ isVisible }) => {
-                                                                const progressScore = isVisible
-                                                                    ? ((this.roundScore(reportObject.security.score)
-                                                                     / 30
-                                                                    ) * 100) : 0;
-                                                                return (
-                                                                    <Line
-                                                                        percent={progressScore}
-                                                                        strokeColor='#3d98c7'
-                                                                    />
-                                                                );
-                                                            }}
-                                                        </VisibilitySensor>
+                                                        <Line
+                                                            percent={((this.roundScore(reportObject.security.score)
+                                                                / 30
+                                                            ) * 100)}
+                                                            strokeColor='#3d98c7'
+                                                        />
                                                     </Typography>
                                                 )}
                                             {{}.hasOwnProperty.call(reportObject, 'data')
@@ -886,19 +870,11 @@ class APISecurityAudit extends Component {
                                                                 ),
                                                             }}
                                                         />
-                                                        <VisibilitySensor>
-                                                            {({ isVisible }) => {
-                                                                const progressScore = isVisible
-                                                                    ? ((this.roundScore(reportObject.data.score) / 70
-                                                                    ) * 100) : 0;
-                                                                return (
-                                                                    <Line
-                                                                        percent={progressScore}
-                                                                        strokeColor='#3d98c7'
-                                                                    />
-                                                                );
-                                                            }}
-                                                        </VisibilitySensor>
+                                                        <Line
+                                                            percent={((this.roundScore(reportObject.data.score) / 70
+                                                            ) * 100)}
+                                                            strokeColor='#3d98c7'
+                                                        />
                                                     </Typography>
                                                 )}
                                             {{}.hasOwnProperty.call(reportObject, 'validationErrors')
