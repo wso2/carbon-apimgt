@@ -57,7 +57,7 @@ public class DBRetriever implements ArtifactRetriever {
 
     @Override
     public String retrieveArtifact(String APIId, String gatewayLabel, String gatewayInstruction)
-            throws ArtifactSynchronizerException, IOException {
+            throws ArtifactSynchronizerException {
         CloseableHttpResponse httpResponse = null;
         try {
             String baseURL = eventHubConfigurationDto.getServiceUrl();
@@ -66,22 +66,24 @@ public class DBRetriever implements ArtifactRetriever {
                     "&gatewayInstruction=" + gatewayInstruction + "&gatewayLabel="+ endcodedgatewayLabel;
             String endpoint = baseURL + path;
             httpResponse = invokeService(endpoint);
+            String gatewayRuntimeArtifact = null;
             if (httpResponse.getEntity() != null ) {
-                return EntityUtils.toString(httpResponse.getEntity(), APIConstants.DigestAuthConstants.CHARSET);
+                gatewayRuntimeArtifact = EntityUtils.toString(httpResponse.getEntity(),
+                        APIConstants.DigestAuthConstants.CHARSET);
+                httpResponse.close();
             } else {
                 throw new ArtifactSynchronizerException("HTTP response is empty");
             }
+            return gatewayRuntimeArtifact;
         } catch (IOException e) {
             String msg = "Error while executing the http client";
             log.error(msg, e);
             throw new ArtifactSynchronizerException(msg, e);
-        } finally {
-            httpResponse.close();
         }
     }
 
     @Override
-    public List<String> retrieveAllArtifacts(String label) throws ArtifactSynchronizerException, IOException {
+    public List<String> retrieveAllArtifacts(String label) throws ArtifactSynchronizerException {
         List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
         CloseableHttpResponse httpResponse = null;
         try {
@@ -94,6 +96,7 @@ public class DBRetriever implements ArtifactRetriever {
             if (httpResponse.getEntity() != null ) {
                 responseString = EntityUtils.toString(httpResponse.getEntity(),
                         APIConstants.DigestAuthConstants.CHARSET);
+                httpResponse.close();
             } else {
                 throw new ArtifactSynchronizerException("HTTP response is empty");
             }
@@ -109,8 +112,6 @@ public class DBRetriever implements ArtifactRetriever {
             String msg = "Error while executing the http client";
             log.error(msg, e);
             throw new ArtifactSynchronizerException(msg, e);
-        } finally {
-            httpResponse.close();
         }
     }
 

@@ -581,7 +581,6 @@ public final class APIUtil {
                 }
             }
         } while (retry);
-        method.releaseConnection();
         return httpResponse;
     }
 
