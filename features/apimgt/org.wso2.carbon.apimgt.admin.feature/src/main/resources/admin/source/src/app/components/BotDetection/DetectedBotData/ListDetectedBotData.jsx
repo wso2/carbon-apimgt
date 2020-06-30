@@ -54,7 +54,6 @@ export default function ListDetectedBotData() {
         return restApi
             .getDetectedBotData()
             .then((result) => {
-                console.log(result.obj.list);
                 return (result.obj.list);
             })
             .catch((error) => {

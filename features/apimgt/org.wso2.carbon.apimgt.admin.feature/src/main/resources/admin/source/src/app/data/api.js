@@ -611,7 +611,6 @@ class API extends Resource {
      */
     getDetectedBotData() {
         return this.client.then((client) => {
-            console.log(client)
             return client.apis['default'].getBotDetectionData()
         });
     }
