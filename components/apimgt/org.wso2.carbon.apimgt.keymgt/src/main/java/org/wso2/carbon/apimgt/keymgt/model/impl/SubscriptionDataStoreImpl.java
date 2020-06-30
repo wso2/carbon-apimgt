@@ -52,7 +52,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         APPLICATION,
         API
     }
-    public static final String DELEM_PERIOD = ".";
+    public static final String DELEM_PERIOD = ":";
 
     // Maps for keeping Subscription related details.
     private Map<ApplicationKeyMappingCacheKey, ApplicationKeyMapping> applicationKeyMappingMap;
@@ -380,9 +380,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     public void removeAPI(API api) {
         apiMap.remove(api.getCacheKey());
     }
-    
+
     @Override
     public void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping) {
+
+        applicationKeyMappingMap.remove(applicationKeyMapping.getCacheKey());
         applicationKeyMappingMap.put(applicationKeyMapping.getCacheKey(), applicationKeyMapping);
     }
     
@@ -393,11 +395,13 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     
     @Override
     public void addOrUpdateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+        subscriptionPolicyMap.remove(subscriptionPolicy.getCacheKey());
         subscriptionPolicyMap.put(subscriptionPolicy.getCacheKey(), subscriptionPolicy);
     }
     
     @Override
     public void addOrUpdateApplicationPolicy(ApplicationPolicy applicationPolicy) {
+        appPolicyMap.remove(applicationPolicy.getCacheKey());
         appPolicyMap.put(applicationPolicy.getCacheKey(), applicationPolicy);
     }
     
@@ -413,6 +417,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     
     @Override
     public void addOrUpdateApplication(Application application) {
+        applicationMap.remove(application.getId());
         applicationMap.put(application.getId(), application);
     }
     
@@ -425,6 +430,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     public void addOrUpdateApiPolicy(ApiPolicy apiPolicy) {
         try {
             ApiPolicy policy = new SubscriptionDataLoaderImpl().getAPIPolicy(apiPolicy.getName(), tenantDomain);
+            apiPolicyMap.remove(apiPolicy.getCacheKey());
             apiPolicyMap.put(apiPolicy.getCacheKey(), policy);
         } catch (DataLoadingException e) {
             log.error("Exception while loading api policy for " + apiPolicy.getName() + " for domain " + tenantDomain,

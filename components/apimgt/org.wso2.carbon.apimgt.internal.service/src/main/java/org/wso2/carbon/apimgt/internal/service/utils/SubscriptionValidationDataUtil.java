@@ -46,6 +46,10 @@ import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
+import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,14 +71,15 @@ public class SubscriptionValidationDataUtil {
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
             apidto.setName(model.getName());
-            List<URLMapping> urlMappings = model.getAllResources();
+            Map<String,URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
-            for (URLMapping urlMapping : urlMappings) {
+            for (URLMapping urlMapping : urlMappings.values()) {
                 URLMappingDTO urlMappingDTO = new URLMappingDTO();
                 urlMappingDTO.setAuthScheme(urlMapping.getAuthScheme());
                 urlMappingDTO.setHttpMethod(urlMapping.getHttpMethod());
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
+                urlMappingDTO.setScopes(urlMapping.getScopes());
                 urlMappingsDTO.add(urlMappingDTO);
             }
             apidto.setUrlMappings(urlMappingsDTO);
@@ -94,14 +99,15 @@ public class SubscriptionValidationDataUtil {
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
             apidto.setName(model.getName());
-            List<URLMapping> urlMappings = model.getAllResources();
+            Map<String,URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
-            for (URLMapping urlMapping : urlMappings) {
+            for (URLMapping urlMapping : urlMappings.values()) {
                 URLMappingDTO urlMappingDTO = new URLMappingDTO();
                 urlMappingDTO.setAuthScheme(urlMapping.getAuthScheme());
                 urlMappingDTO.setHttpMethod(urlMapping.getHttpMethod());
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
+                urlMappingDTO.setScopes(urlMapping.getScopes());
                 urlMappingsDTO.add(urlMappingDTO);
             }
             apidto.setUrlMappings(urlMappingsDTO);
@@ -304,6 +310,16 @@ public class SubscriptionValidationDataUtil {
             applicationKeyMappingListDTO.setCount(0);
         }
         return applicationKeyMappingListDTO;
+    }
+
+    public static String validateTenantDomain(String xWSO2Tenant, MessageContext messageContext) {
+
+
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (!tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            xWSO2Tenant = tenantDomain;
+        }
+        return xWSO2Tenant;
     }
 
 }

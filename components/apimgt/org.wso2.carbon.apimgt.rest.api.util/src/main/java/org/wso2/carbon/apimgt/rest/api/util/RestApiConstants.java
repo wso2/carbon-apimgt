@@ -277,4 +277,6 @@ public final class RestApiConstants {
     public static final String ERROR_SCOPE_VALIDATION_FAILED = "You cannot access API as scope validation failed";
 
     public static final String DEFAULT_ENVIRONMENT = "Production and Sandbox";
+
+    public static final String TENANT_DOMAIN = "LoggedInUserTenantDomain";
 }

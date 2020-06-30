@@ -58,7 +58,6 @@ import TouchAppIcon from '@material-ui/icons/TouchApp';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import AccountTreeIcon from '@material-ui/icons/AccountTree';
 
-
 const RouteMenuMapping = (intl) => [
     {
         id: intl.formatMessage({

@@ -72,7 +72,6 @@ import java.util.Set;
  */
 public class APIKeyValidationService {
     private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
-    private static KeyValidationHandler keyValidationHandler;
 
     /**
      * Validates the access tokens issued for a particular user to access an API.
