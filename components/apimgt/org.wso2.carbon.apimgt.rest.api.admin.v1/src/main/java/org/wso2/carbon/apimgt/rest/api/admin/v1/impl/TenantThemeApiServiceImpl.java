@@ -69,23 +69,19 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
         }
 
         APIAdmin apiAdmin = new APIAdminImpl();
+        InputStream existingTenantTheme = null;
         try {
-            apiAdmin.importTenantTheme(tenantId, fileInputStream);
-            fileInputStream.reset();
-            boolean isImportSuccessful = RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain);
-            if (!isImportSuccessful) {
-                apiAdmin.deleteTenantTheme(tenantId);
-                String errorMessage = "Error occurred when importing tenant theme of " + tenantDomain
-                        + " to the file system";
-                throw new APIManagementException(errorMessage,
-                        ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, tenantDomain));
+            if (apiAdmin.isTenantThemeExist(tenantId)) {
+                existingTenantTheme = apiAdmin.getTenantTheme(tenantId);
+                apiAdmin.updateTenantTheme(tenantId, fileInputStream);
+            } else {
+                apiAdmin.addTenantTheme(tenantId, fileInputStream);
             }
-
-
+            fileInputStream.reset();
+            RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain, existingTenantTheme);
             return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
         } catch (IOException e) {
-            String errorMessage = "Failed to import tenant theme of tenant " + tenantDomain;
-            throw new APIManagementException(errorMessage,
+            throw new APIManagementException(e.getMessage(),
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, tenantDomain));
         }
     }
