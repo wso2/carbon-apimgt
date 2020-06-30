@@ -37,6 +37,9 @@ export default function Dashboard() {
                 <Grid item xs={11} md={6}>
                     <APICategoriesCard />
                 </Grid>
+                <Grid item xs={11} md={6}>
+                    <TasksWorkflowCard />
+                </Grid>
             </Grid>
         </ContentBase>
     );
