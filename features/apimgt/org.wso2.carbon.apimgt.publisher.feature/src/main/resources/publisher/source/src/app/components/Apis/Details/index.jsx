@@ -763,10 +763,6 @@ class Details extends Component {
                                     path={Details.subPaths.TRYOUT}
                                     component={() => <TestConsole apiObj={api} />}
                                 />
-                                <Route
-                                    path={Details.subPaths.TRYOUT_PRODUCT}
-                                    component={() => <TestConsole apiObj={api} />}
-                                />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
                             </Switch>
                         </div>
