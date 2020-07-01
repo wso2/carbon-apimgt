@@ -8,6 +8,7 @@
   "database.apim_db.pool_options.validationInterval": "30000",
   "database.apim_db.pool_options.defaultAutoCommit": "true",
   "apim.datasource.name": "jdbc/WSO2AM_DB",
+  "apim.datasource_sync_runtime_artifacts.name": "jdbc/WSO2AS_DB",
   "apim.gateway_type": "Synapse",
   "apim.enable_secure_vault": "false",
   "apim.jwt.enable": false,

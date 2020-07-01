@@ -1199,6 +1199,9 @@
         {% if apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway is defined %}
         <PublishDirectlyToGW>{{apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway}}</PublishDirectlyToGW>
         {% endif %}
+        {% if database.sync_runtime_artifacts_db is defined %}
+        <DataSourceName>{{apim.datasource_sync_runtime_artifacts.name}}</DataSourceName>
+        {% endif %}
     </SyncRuntimeArtifactsPublisher>
     {% endif %}
 
