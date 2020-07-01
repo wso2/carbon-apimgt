@@ -430,7 +430,7 @@
   "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.tokenUrl.error": "Token URL should not be empty or formatted incorrectly",
   "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.username.error": "Username should not be empty",
   "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.none": "None",
-  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.oauth": "OAuth",
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.oauth": "OAuth 2.0",
   "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.oauth.grant.type.client": "Client Credentials",
   "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.oauth.grant.type.password": "Resource Owner Password",
   "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.input": "Password",

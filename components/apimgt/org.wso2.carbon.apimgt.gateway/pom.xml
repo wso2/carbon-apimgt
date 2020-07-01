@@ -308,6 +308,10 @@
             <artifactId>awslambda</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jedis</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
         </dependency>
@@ -447,6 +451,7 @@
                             org.wso2.orbit.re2j.*; version="${re2j.version}",
                             graphql.*; version="${graphql.java.version}",
                             com.amazonaws.*; version="${com.amazonaws.version}",
+                            org.apache.servicemix.bundles.jedis.*; version="${servicemix.bundles.jedis.version}",
                             com.nimbusds.jwt.*,
                             org.apache.commons.codec.*,
                             *;resolution:=optional
