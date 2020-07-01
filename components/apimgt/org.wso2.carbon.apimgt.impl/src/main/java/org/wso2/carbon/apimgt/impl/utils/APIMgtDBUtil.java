@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import javax.naming.Context;
@@ -46,6 +47,7 @@ public final class APIMgtDBUtil {
     private static final Log log = LogFactory.getLog(APIMgtDBUtil.class);
 
     private static volatile DataSource dataSource = null;
+    private static volatile DataSource artifactSynchronizerDataSource = null;
     private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
     
     private static final String DATA_SOURCE_NAME = "DataSourceName";
@@ -56,7 +58,7 @@ public final class APIMgtDBUtil {
      * @throws APIManagementException if an error occurs while loading DB configuration
      */
     public static void initialize() throws APIManagerDatabaseException {
-        if (dataSource != null) {
+        if (dataSource != null && artifactSynchronizerDataSource != null) {
             return;
         }
 
@@ -81,6 +83,29 @@ public final class APIMgtDBUtil {
                     log.error(DATA_SOURCE_NAME + " not defined in api-manager.xml.");
                 }
             }
+
+            if (artifactSynchronizerDataSource == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Initializing data source");
+                }
+                GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+                String artifactSynchronizerDataSourceName =
+                        gatewayArtifactSynchronizerProperties.getArtifactSynchronizerDataSource();
+
+                if (artifactSynchronizerDataSourceName != null) {
+                    try {
+                        Context ctx = new InitialContext();
+                        artifactSynchronizerDataSource = (DataSource) ctx.lookup(artifactSynchronizerDataSourceName);
+                    } catch (NamingException e) {
+                        throw new APIManagerDatabaseException("Error while looking up the data " +
+                                "source: " + artifactSynchronizerDataSourceName, e);
+                    }
+                } else {
+                    log.error("AS" + DATA_SOURCE_NAME + " not defined in api-manager.xml.");
+                }
+            }
         }
     }
 
@@ -93,6 +118,19 @@ public final class APIMgtDBUtil {
     public static Connection getConnection() throws SQLException {
         if (dataSource != null) {
             return dataSource.getConnection();
+        }
+        throw new SQLException("Data source is not configured properly.");
+    }
+
+    /**
+     * Utility method to get a new database connection for gatewayRuntime artifacts
+     *
+     * @return Connection
+     * @throws java.sql.SQLException if failed to get Connection
+     */
+    public static Connection getArtifactSynchronizerConnection() throws SQLException {
+        if (artifactSynchronizerDataSource != null) {
+            return artifactSynchronizerDataSource.getConnection();
         }
         throw new SQLException("Data source is not configured properly.");
     }
