@@ -128,6 +128,23 @@ class API extends Resource {
         });
         return promisedSettings.then(response => response.body);
     }
+
+    /**
+     * Retrieve scopes for a particular user
+     */
+    getUserScope(username, scope) {
+        return this.client.then((client) => {
+            const data = {
+                username,
+                scope,
+            };
+            return client.apis['Settings'].get_settings_scopes__scope_(
+                data,
+                this._requestMetaData(),
+            );
+        });
+    }
+
     /**
      * Get list of advanced throttling policies
      */

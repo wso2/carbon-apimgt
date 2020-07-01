@@ -52,6 +52,7 @@
   "AdminPages.ApiCategories.table.header.category.name": "",
   "AdminPages.ApiCategories.table.header.category.number.of.apis": "",
   "AdminPages.ApplicationSettings.Edit.form.edit.successful": "",
+  "AdminPages.ApplicationSettings.Edit.form.helperText": "",
   "AdminPages.ApplicationSettings.Edit.form.name": "",
   "AdminPages.ApplicationSettings.List.empty.content.application.settings": "",
   "AdminPages.ApplicationSettings.List.empty.title.change.application.ownership": "",

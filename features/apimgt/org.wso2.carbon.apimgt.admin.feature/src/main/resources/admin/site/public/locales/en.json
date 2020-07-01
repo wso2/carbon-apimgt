@@ -52,6 +52,7 @@
   "AdminPages.ApiCategories.table.header.category.name": "Category Name",
   "AdminPages.ApiCategories.table.header.category.number.of.apis": "Number of APIs",
   "AdminPages.ApplicationSettings.Edit.form.edit.successful": "Application owner changed successfully",
+  "AdminPages.ApplicationSettings.Edit.form.helperText": "Enter a new Owner, make sure the new owner has logged into the store at least once",
   "AdminPages.ApplicationSettings.Edit.form.name": "Application Name",
   "AdminPages.ApplicationSettings.List.empty.content.application.settings": "If required, you can transfer the ownership of your application to another user in your organization. Thereby, when transferring ownership, the new owner will have the required permission to delete or edit the respective application.{breakingLine}{breakingLine}Create an application with Devportal to change ownership.",
   "AdminPages.ApplicationSettings.List.empty.title.change.application.ownership": "Application Ownership Change",

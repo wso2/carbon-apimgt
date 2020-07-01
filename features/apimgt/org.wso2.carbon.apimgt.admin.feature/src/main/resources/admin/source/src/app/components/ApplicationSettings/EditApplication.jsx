@@ -50,6 +50,7 @@ function reducer(state, { field, value }) {
  */
 function Edit(props) {
     const classes = useStyles();
+    const restApi = new API();
     const {
         updateList, dataRow, icon, triggerButtonText, title, applicationList,
     } = props;
@@ -81,50 +82,53 @@ function Edit(props) {
         const applicationsWithSameName = applicationList.filter(
             (app) => app.name === name && app.owner === owner,
         );
-        if (applicationsWithSameName.length > 0) {
-            valid.error = `${owner} already has an application with name: ${name}`;
-            valid.invalid = true;
-        }
-        // todo: Validate whether the owner is an existing subscriber or not.
 
-        return valid;
+        const promiseValidation = new Promise((resolve) => {
+            if (applicationsWithSameName.length > 0) {
+                valid.error = `${owner} already has an application with name: ${name}`;
+                valid.invalid = true;
+                resolve(valid);
+            }
+            const basicScope = 'apim:subscribe';
+            restApi.getUserScope(owner, basicScope)
+                .then((result) => {
+                    if (result.body.name !== basicScope) {
+                        valid.error = `${owner} is not a valid Subscriber`;
+                        valid.invalid = true;
+                    }
+                    resolve(valid);
+                });
+        });
+
+        return promiseValidation;
     };
 
-    const getAllFormErrors = () => {
-        let errorText = '';
-        const valid = validateOwner(applicationList);
-        if (valid.invalid) {
-            errorText += valid.error;
-        }
-
-        return errorText;
-    };
     const formSaveCallback = () => {
-        const formErrors = getAllFormErrors();
-        if (formErrors !== '') {
-            Alert.error(formErrors);
-            return false;
-        }
-
-        const restApi = new API();
-        return restApi.updateApplicationOwner(id, owner)
-            .then(() => {
-                return (
-                    <FormattedMessage
-                        id='AdminPages.ApplicationSettings.Edit.form.edit.successful'
-                        defaultMessage='Application owner changed successfully'
-                    />
-                );
-            })
-            .catch((error) => {
-                const { response } = error;
-                if (response.body) {
-                    throw response.body.description;
-                }
-            })
-            .finally(() => {
-                updateList();
-            });
+        return validateOwner().then((valid) => {
+            if (valid.invalid) {
+                Alert.error(valid.error);
+                return false;
+            } else {
+                return restApi.updateApplicationOwner(id, owner)
+                    .then(() => {
+                        return (
+                            <FormattedMessage
+                                id='AdminPages.ApplicationSettings.Edit.form.edit.successful'
+                                defaultMessage='Application owner changed successfully'
+                            />
+                        );
+                    })
+                    .catch((error) => {
+                        const { response } = error;
+                        if (response.body) {
+                            throw response.body.description;
+                        }
+                    })
+                    .finally(() => {
+                        updateList();
+                    });
+            }
+        });
     };
 
     return (
@@ -160,7 +164,13 @@ function Edit(props) {
                 onChange={onChange}
                 label='Owner'
                 fullWidth
-                helperText='Enter a new Owner'
+                helperText={(
+                    <FormattedMessage
+                        id='AdminPages.ApplicationSettings.Edit.form.helperText'
+                        defaultMessage={'Enter a new Owner, '
+                        + 'make sure the new owner has logged into the store at least once'}
+                    />
+                )}
                 variant='outlined'
             />
         </FormDialogBase>
