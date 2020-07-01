@@ -54,7 +54,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
             String requestedTenantDomain = apiConsumer.getRequestedTenant();
 
             if (apiConsumer.isRecommendationEnabled(requestedTenantDomain) &&
-                    userName != APIConstants.WSO2_ANONYMOUS_USER) {
+                    !userName.equals(APIConstants.WSO2_ANONYMOUS_USER)) {
                 int maxRecommendations = recommendationEnvironment.getMaxRecommendations();
                 String recommendations = apiConsumer.getApiRecommendations(userName, requestedTenantDomain);
 
