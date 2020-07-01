@@ -18,12 +18,10 @@
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import Icon from '@material-ui/core/Icon';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 import KeyConfiguration from 'AppComponents/Shared/AppsAndKeys/KeyConfiguration';
 import Application from 'AppData/Application';
 import API from 'AppData/api';
@@ -31,18 +29,14 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import cloneDeep from 'lodash.clonedeep';
 import ButtonPanel from './ButtonPanel';
-import Paper from '@material-ui/core/Paper';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
+import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
     keyConfigWrapper: {
         paddingLeft: theme.spacing(4),
+        flexDirection: 'column',
     },
     radioWrapper: {
         flexDirection: 'row',
@@ -51,6 +45,20 @@ const useStyles = makeStyles((theme) => ({
         background: 'none',
         marginBottom: theme.spacing(2),
         marginTop: theme.spacing(2),
+    },
+    subTitle: {
+        fontWeight: 400,
+    },
+    tabPanel: {
+        '& .MuiBox-root': {
+            padding: 0,
+        }
+    },
+    hr: {
+        border: 'solid 1px #efefef',
+    },
+    muiFormGroupRoot: {
+        flexDirection: 'row',
     },
 }));
 
@@ -66,18 +74,16 @@ function TabPanel(props) {
             {...other}
         >
             {value === index && (
-                <Box p={3}>
-                    <Typography>{children}</Typography>
-                </Box>
+                <>{children}</>
             )}
         </div>
     );
 };
 
 TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
+    children: PropTypes.node,
+    index: PropTypes.any.isRequired,
+    value: PropTypes.any.isRequired,
 };
 
 const generateKeysStep = (props) => {
@@ -127,7 +133,7 @@ const generateKeysStep = (props) => {
     * @param {*} currentTab current tab
     * @memberof Wizard
     */
-   const handleTabChange = (event, newSelectedTab) => {
+    const handleTabChange = (event, newSelectedTab) => {
         setSelectedTab(newSelectedTab);
     };
 
@@ -174,7 +180,7 @@ const generateKeysStep = (props) => {
         Application.get(createdApp.value).then((application) => {
             return application.generateKeys(
                 keyRequest.keyType, keyRequest.supportedGrantTypes,
-                keyRequest.callbackUrl, keyRequest.validityTime, 
+                keyRequest.callbackUrl, keyRequest.validityTime,
                 keyRequest.additionalProperties, keyRequest.keyManager
             );
         }).then((response) => {
@@ -197,84 +203,143 @@ const generateKeysStep = (props) => {
             }
         });
     };
+
+    const getKeyManagerDescription = () => {
+        const selectedKMObject = keyManagers.filter(item => item.name === selectedTab);
+        if (selectedKMObject && selectedKMObject.length === 1) {
+            return selectedKMObject[0].description;
+        }
+        return '';
+    }
     const classes = useStyles();
 
     return (
         <>
-            <div className={classes.keyConfigWrapper}>
-                <FormControl component='fieldset' className={classes.formControl}>
-                    <FormLabel component='legend'>
-                        <FormattedMessage
-                            defaultMessage='Key Type'
-                            id='Apis.Details.Credentials.Wizard.GenerateKeysStep.keyType'
+            <Box component='div' marginLeft={4}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={12} lg={2}>
+                        <Typography color='inherit' variant='subtitle2' component='div'>
+                            <FormattedMessage
+                                defaultMessage='Key Type'
+                                id='Apis.Details.Credentials.Wizard.GenerateKeysStep.keyType'
+                            />
+                        </Typography>
+                        <Typography color='inherit' variant='caption' component='p'>
+                            <FormattedMessage
+                                defaultMessage='Select the environment to generate the keys'
+                                id='Apis.Details.Credentials.Wizard.GenerateKeysStep.keyType.help'
+                            />
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={10}>
+                        <RadioGroup value={selectedType} onChange={handleRadioChange} classes={{ root: classes.radioWrapper }}>
+                            <FormControlLabel
+                                value='PRODUCTION'
+                                control={<Radio />}
+                                label={intl.formatMessage({
+                                    defaultMessage: 'Production',
+                                    id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.production',
+                                })}
+                            />
+                            <FormControlLabel
+                                value='SANDBOX'
+                                control={<Radio />}
+                                label={intl.formatMessage({
+                                    defaultMessage: 'Sandbox',
+                                    id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.sandbox',
+                                })}
+                            />
+                        </RadioGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    {keyManagers && keyManagers.length > 1 && (<>
+                        <Grid item xs={12} md={12} lg={2}>
+                            <Typography color='inherit' variant='subtitle2' component='div'>
+                                <FormattedMessage
+                                    defaultMessage='Key manager'
+                                    id='Shared.AppsAndKeys.TokenManager.key.manager'
+                                />
+                            </Typography>
+                            <Typography color='inherit' variant='caption' component='p'>
+                                <FormHelperText><FormattedMessage
+                                    defaultMessage='Select a key manager to generate keys'
+                                    id='Shared.AppsAndKeys.TokenManager.key.manager.help'
+                                /></FormHelperText>
+
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={12} lg={10}>
+                            <RadioGroup
+                                classes={{ root: classes.muiFormGroupRoot }}
+                                aria-label="keymanagers" name="keymanagers"
+                                value={selectedTab}
+                                onChange={handleTabChange}>
+                                {keyManagers.map(keymanager => (
+                                    <FormControlLabel
+                                        disabled={!keymanager.enabled}
+                                        value={keymanager.name} control={<Radio />}
+                                        label={keymanager.displayName || keymanager.name} />
+
+                                ))}
+                            </RadioGroup>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box marginTop={2} marginBottom={2}>
+                                <hr className={classes.hr} />
+                            </Box>
+                        </Grid>
+                    </>)}
+                </Grid>
+                {keyManagers.map(keymanager => (<TabPanel value={selectedTab} index={keymanager.name}><Grid container spacing={2}>
+                    <Grid item xs={12} md={12} lg={2}>
+                        <Typography color='inherit' variant='subtitle2' component='div'>
+                            <FormattedMessage
+                                defaultMessage='Key Configuration'
+                                id='Shared.AppsAndKeys.TokenManager.key.configuration'
+                            />
+                        </Typography>
+                        <Typography color='inherit' variant='caption' component='p'>
+                            <FormHelperText>{getKeyManagerDescription()}</FormHelperText>
+
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={10}>
+                        <KeyConfiguration
+                            updateKeyRequest={setKeyRequest}
+                            keyRequest={keyRequest}
+                            keyType={selectedType}
+                            isUserOwner={isUserOwner}
+                            setGenerateEnabled={setNextActive}
+                            keyManagerConfig={keymanager}
+                            selectedTab={selectedTab}
+                            isKeysAvailable={false}
                         />
-                    </FormLabel>
-                    <RadioGroup value={selectedType} onChange={handleRadioChange} classes={{ root: classes.radioWrapper }}>
-                        <FormControlLabel
-                            value='PRODUCTION'
-                            control={<Radio />}
-                            label={intl.formatMessage({
-                                defaultMessage: 'PRODUCTION',
-                                id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.production',
-                            })}
-                        />
-                        <FormControlLabel
-                            value='SANDBOX'
-                            control={<Radio />}
-                            label={intl.formatMessage({
-                                defaultMessage: 'SANDBOX',
-                                id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.sandbox',
-                            })}
-                        />
-                    </RadioGroup>
-                </FormControl>
-                <Paper className={classes.paper}>
-                    <Tabs
-                        value={selectedTab}
-                        indicatorColor="primary"
-                        textColor="primary"
-                        onChange={handleTabChange}
-                        aria-label="key manager tabs"
-                    >
-                        {keyManagers.map(keymanager => (
-                            <Tab label={keymanager.name} value={keymanager.name} disabled={!keymanager.enabled}/>
-                        ))}
-                        
-                    </Tabs>
-                    {keyManagers.map(keymanager => (
-                        <TabPanel value={selectedTab} index={keymanager.name}>
-                            <ExpansionPanel defaultExpanded>
-                                <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
-                                    <Typography className={classes.heading} variant='subtitle1'>
-                                        <FormattedMessage
-                                            defaultMessage='Key Configuration'
-                                            id='Shared.AppsAndKeys.TokenManager.key.configuration'
-                                        />
-                                    </Typography>    
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails className={classes.keyConfigWrapper}>
-                                    <KeyConfiguration
-                                        updateKeyRequest={setKeyRequest}
-                                        keyRequest={keyRequest}
-                                        keyType={selectedType}
-                                        isUserOwner={isUserOwner}
-                                        setGenerateEnabled={setNextActive}
-                                        keyManagerConfig={keymanager}
-                                        selectedTab={selectedTab}
-                                        isKeysAvailable={false}
-                                    />
-                                    <ButtonPanel
-                                        classes={classes}
-                                        currentStep={currentStep}
-                                        handleCurrentStep={generateKeys}
-                                        nextActive={nextActive}
-                                    />
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
-                        </TabPanel>
-                    ))}
-                </Paper>    
-            </div>    
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                </Grid>
+                </TabPanel>))}
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <Box component='span' m={1}>
+                            <ButtonPanel
+                                classes={classes}
+                                currentStep={currentStep}
+                                handleCurrentStep={generateKeys}
+                                nextActive={nextActive}
+                            />
+                        </Box>
+
+                    </Grid>
+                </Grid>
+            </Box>
         </>
     );
 };
