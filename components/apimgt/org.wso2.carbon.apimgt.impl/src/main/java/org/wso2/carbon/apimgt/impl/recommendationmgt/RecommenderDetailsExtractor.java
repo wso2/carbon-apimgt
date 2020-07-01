@@ -148,7 +148,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 }
 
                 if (!APIConstants.ADD_API.equals(publishingDetailType) && userName != null
-                        && !userName.equals(APIConstants.WSO2_ANONYMOUS_USER) && requestTenantDomain != null) {
+                        && !APIConstants.WSO2_ANONYMOUS_USER.equals(userName) && requestTenantDomain != null) {
                     updateRecommendationsCache(userName, requestTenantDomain);
                 }
             }
@@ -255,7 +255,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             log.error("Username cannot be null");
             return;
         }
-        if (!userName.equals(APIConstants.WSO2_ANONYMOUS_USER)) {
+        if (!APIConstants.WSO2_ANONYMOUS_USER.equals(userName)) {
             String userID = getUserId(userName);
             String apiName = api.getName();
             JSONObject obj = new JSONObject();
@@ -276,7 +276,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             log.error("Username cannot be null");
             return;
         }
-        if (!userName.equals(APIConstants.WSO2_ANONYMOUS_USER)) {
+        if (!APIConstants.WSO2_ANONYMOUS_USER.equals(userName)) {
             String userID = getUserId(userName);
             query = query.split("&", 2)[0];
             JSONObject obj = new JSONObject();
