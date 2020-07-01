@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
@@ -82,4 +84,22 @@ public class SystemScopesMappingUtil {
         return scopeDTOs;
     }
 
+    /**
+     * Extract scope and roles and create JSONObject
+     * @param body          body of a Role Scope  Mapping
+     * @return JSONObject   role scope mapping data
+     */
+    public static JSONObject createJsonObjectOfScopeMapping(ScopeListDTO body)
+            throws APIManagementException {
+        JSONObject responseJson = new JSONObject();
+        JSONArray scopeJson = new JSONArray();
+        for (ScopeDTO scope : body.getList()) {
+            JSONObject scopeRoleJson = new JSONObject();
+            scopeRoleJson.put("Name", scope.getName());
+            scopeRoleJson.put("Roles", scope.getRoles());
+            scopeJson.put(scopeRoleJson);
+        }
+        responseJson.put("Scope", scopeJson);
+        return responseJson;
+    }
 }

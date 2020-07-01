@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,6 +11,8 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.simple.JSONObject;
 
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -34,6 +38,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.Base64;
 import java.util.Map;
 
+import javax.cache.Caching;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -81,7 +86,8 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
         return null;
     }
 
-    public Response updateRolesForScope(ScopeListDTO body, MessageContext messageContext) throws APIManagementException {
+    public Response updateRolesForScope(ScopeListDTO body, MessageContext messageContext)
+            throws APIManagementException {
         String tenantDomain = MultitenantUtils.getTenantDomain(RestApiUtil.getLoggedInUsername());
         //read from tenant-conf.json
         JsonObject existingTenantConfObject = new JsonObject();
@@ -89,38 +95,34 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
             APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
             String existingTenantConf = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
                     APIConstants.API_TENANT_CONF_LOCATION);
-             existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
+            existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
         } catch (RegistryException | UserStoreException e) {
             APIUtil.handleException("Couldn't read tenant configuration from tenant registry", e);
         }
+        JSONObject responseJson = SystemScopesMappingUtil.createJsonObjectOfScopeMapping(body);
+        //Here we are removing RESTAPIScopes from the existing tenant-conf
+        // Adding new RESTAPIScopes to the existing tenant-conf.
+        existingTenantConfObject.remove(APIConstants.REST_API_SCOPES_CONFIG);
+        JsonElement jsonElement = new JsonParser().parse(responseJson.toJSONString());
+        existingTenantConfObject.add(APIConstants.REST_API_SCOPES_CONFIG, jsonElement);
         try {
-
-            JSONObject responseJson = new JSONObject();
-            JSONArray scopeJson = new JSONArray();
-
-            for(int i = 0; i < body.getList().size(); i++) {
-                JSONObject scopeRoleJson = new JSONObject();
-                scopeRoleJson.put("Name", body.getList().get(i).getName());
-                scopeRoleJson.put("Roles", body.getList().get(i).getRoles());
-                scopeJson.put(scopeRoleJson);
+            ObjectMapper mapper = new ObjectMapper();
+            String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(existingTenantConfObject.toString());
+            APIUtil.updateTenantConf(existingTenantConfObject.toString(), tenantDomain);
+            if (log.isDebugEnabled()) {
+                log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
             }
-
-            responseJson.put("Scope", scopeJson);
-            //Here we are removing RESTAPIScopes from the existing tenant-conf
-            // Adding new RESTAPIScopes to the existing tenant-conf.
-            existingTenantConfObject.remove("RESTAPIScopes");
-            Gson gson = new Gson();
-            existingTenantConfObject.add("RESTAPIScopes",
-                    gson.fromJson(responseJson.toString(), JsonElement.class));
-            APIUtil.updateTenantConf(existingTenantConfObject.toString(),tenantDomain);
-            Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
-                    .getTenantDomain(RestApiUtil.getLoggedInUsername()));
-            ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
-            return Response.ok().entity(scopeListDTO).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error when updating the list of scopes-role mapping.";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while formatting tenant-conf.json of tenant ");
         }
-        return null;
+        // Invalidate Cache
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .getCache(APIConstants.REST_API_SCOPE_CACHE)
+                .put(tenantDomain, null);
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+                .getTenantDomain(RestApiUtil.getLoggedInUsername()));
+        ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
+        return Response.ok().entity(scopeListDTO).build();
     }
 }
