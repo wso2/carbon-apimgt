@@ -287,7 +287,7 @@ class TokenManager extends React.Component {
                 return application.generateKeys(
                     keyType, keyRequest.supportedGrantTypes,
                     keyRequest.callbackUrl, keyRequest.validityTime, 
-                    keyRequest.additionalProperties, keyRequest.keyManager
+                    keyRequest.additionalProperties, selectedTab
                 );
             })
             .then((response) => {
