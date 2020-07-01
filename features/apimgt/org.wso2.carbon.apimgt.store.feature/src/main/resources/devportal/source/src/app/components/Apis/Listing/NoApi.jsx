@@ -25,7 +25,7 @@ export default function NoApi() {
         <div className={classes.root}>
             <Grid container spacing={3}>
                 <Grid item xs={12} className={classes.messageWrapper}>
-                    <img src={app.context + theme.custom.noApiImage} className={classes.messageWrapper} />
+                    <img alt='API icon' src={app.context + theme.custom.noApiImage} className={classes.messageWrapper} />
                     <Typography variant='h5' gutterBottom>
                         <FormattedMessage id='Apis.Listing.NoApi.nodata.title' defaultMessage='No APIs Available' />
                     </Typography>
