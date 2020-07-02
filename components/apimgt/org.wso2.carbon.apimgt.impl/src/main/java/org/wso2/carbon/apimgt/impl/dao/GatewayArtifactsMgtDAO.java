@@ -5,7 +5,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +25,12 @@ import java.util.List;
 public class GatewayArtifactsMgtDAO {
     private static final Log log = LogFactory.getLog(GatewayArtifactsMgtDAO.class);
     private static GatewayArtifactsMgtDAO INSTANCE = null;
+
+    /**
+     * Private constructor
+     */
+    private GatewayArtifactsMgtDAO () {
+    }
 
     /**
      * Method to get the instance of the GatewayArtifactsMgtDAO.
@@ -46,13 +56,17 @@ public class GatewayArtifactsMgtDAO {
     public void addGatewayPublishedAPIDetails(String APIId, String APIName, String version, String tenantDomain)
             throws APIManagementException {
 
-        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
-                PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_PUBLISHED_API_DETAILS)) {
-            statement.setString(1, APIId);
-            statement.setString(2, APIName);
-            statement.setString(3, version);
-            statement.setString(4, tenantDomain);
-            statement.executeUpdate();
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
+            connection.setAutoCommit(false);
+                try (PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.ADD_GW_PUBLISHED_API_DETAILS)) {
+                    statement.setString(1, APIId);
+                    statement.setString(2, APIName);
+                    statement.setString(3, version);
+                    statement.setString(4, tenantDomain);
+                    statement.executeUpdate();
+                }
+            connection.commit();
         } catch (SQLException e) {
             handleException("Failed to add API details for " + APIName, e);
         }
@@ -71,13 +85,16 @@ public class GatewayArtifactsMgtDAO {
             int streamLength, String gatewayInstruction, String query)
             throws APIManagementException {
 
-        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
-                PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setBinaryStream(1, bais, streamLength);
-            statement.setString(2, gatewayInstruction);
-            statement.setString(3, APIId);
-            statement.setString(4, gatewayLabel);
-            statement.executeUpdate();
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
+            connection.setAutoCommit(false);
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    statement.setBinaryStream(1, bais, streamLength);
+                    statement.setString(2, gatewayInstruction);
+                    statement.setString(3, APIId);
+                    statement.setString(4, gatewayLabel);
+                    statement.executeUpdate();
+                }
+            connection.commit();
         } catch (SQLException e) {
             handleException("Failed to add artifacts for " + APIId, e);
         }

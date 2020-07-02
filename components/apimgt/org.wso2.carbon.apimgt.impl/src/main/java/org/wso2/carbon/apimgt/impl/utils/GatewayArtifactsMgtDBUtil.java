@@ -36,7 +36,7 @@ public class GatewayArtifactsMgtDBUtil {
             return;
         }
 
-        synchronized (APIMgtDBUtil.class) {
+        synchronized (GatewayArtifactsMgtDBUtil.class) {
             if (artifactSynchronizerDataSource == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");
@@ -73,95 +73,5 @@ public class GatewayArtifactsMgtDBUtil {
             return artifactSynchronizerDataSource.getConnection();
         }
         throw new SQLException("Data source is not configured properly.");
-    }
-
-    /**
-     * Utility method to close the connection streams.
-     * @param preparedStatement PreparedStatement
-     * @param connection Connection
-     * @param resultSet ResultSet
-     */
-    public static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
-            ResultSet resultSet) {
-        closeConnection(connection);
-        closeResultSet(resultSet);
-        closeStatement(preparedStatement);
-    }
-
-    /**
-     * Close Connection
-     * @param dbConnection Connection
-     */
-    private static void closeConnection(Connection dbConnection) {
-        if (dbConnection != null) {
-            try {
-                dbConnection.close();
-            } catch (SQLException e) {
-                log.warn("Database error. Could not close database connection. Continuing with " +
-                        "others. - " + e.getMessage(), e);
-            }
-        }
-    }
-
-    /**
-     * Close ResultSet
-     * @param resultSet ResultSet
-     */
-    private static void closeResultSet(ResultSet resultSet) {
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                log.warn("Database error. Could not close ResultSet  - " + e.getMessage(), e);
-            }
-        }
-
-    }
-
-    /**
-     * Close PreparedStatement
-     * @param preparedStatement PreparedStatement
-     */
-    public static void closeStatement(PreparedStatement preparedStatement) {
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                log.warn("Database error. Could not close PreparedStatement. Continuing with" +
-                        " others. - " + e.getMessage(), e);
-            }
-        }
-
-    }
-
-    /**
-     * Function converts IS to String
-     * Used for handling blobs
-     * @param is - The Input Stream
-     * @return - The inputStream as a String
-     */
-    public static String getStringFromInputStream(InputStream is) {
-        String str = null;
-        try {
-            str = IOUtils.toString(is, "UTF-8");
-        } catch (IOException e) {
-            log.error("Error occurred while converting input stream to string.", e);
-        }
-        return str;
-    }
-
-    /**
-     * Set autocommit state of the connection
-     * @param dbConnection Connection
-     * @param autoCommit autoCommitState
-     */
-    public static void setAutoCommit(Connection dbConnection, boolean autoCommit) {
-        if (dbConnection != null) {
-            try {
-                dbConnection.setAutoCommit(autoCommit);
-            } catch (SQLException e) {
-                log.error("Could not set auto commit back to initial state", e);
-            }
-        }
     }
 }
