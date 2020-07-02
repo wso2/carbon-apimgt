@@ -273,13 +273,17 @@ public class K8sManager implements ContainerManager {
                     if (apiCustomResourceDefinition.getMetadata().getName().equals(apiName.toLowerCase())) {
 
                         apiCustomResourceDefinition.getSpec().setOverride(false);
+                        //update with interceptors
+                        Interceptors interceptors = new Interceptors();
+                        interceptors.setBallerina(new String[]{});
+                        interceptors.setJava(new String[]{});
+                        apiCustomResourceDefinition.getSpec().getDefinition().setInterceptors(interceptors);
                         crdClient.createOrReplace(apiCustomResourceDefinition);
                         log.info("Successfully Re-Published the [API] " + apiName);
                         return;
-                    } else {
-                        log.error("The requested custom resource for the [API] " + apiName + " was not found");
                     }
                 }
+                log.error("The requested custom resource for the [API] " + apiName + " was not found");
             } catch (KubernetesClientException e) {
                 log.error("Error occurred while Re-Publishing the [API] " + apiName, e);
             }
@@ -551,7 +555,7 @@ public class K8sManager implements ContainerManager {
                     .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
 
             return new DefaultOpenShiftClient(config);
-        } else if ((masterURL == null && saToken == null &&  namespace != null) ||
+        } else if ((properties.get(MASTER_URL) == null && properties.get(SATOKEN) == null && properties.get(NAMESPACE) != null) ||
                 ("".equals(properties.get(MASTER_URL)) && "".equals(properties.get(SATOKEN))
                         && !"".equals(properties.get(NAMESPACE)))){
             Config config = new ConfigBuilder()
