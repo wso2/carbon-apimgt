@@ -208,20 +208,20 @@ public class GatewayArtifactsMgtDAO {
      */
     public boolean isAPIArtifactExists(String APIId, String gatewayLabel) throws APIManagementException {
 
-        int count = 0;
+        boolean isExist = false;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.CHECK_ARTIFACT_EXISTS)) {
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                count = rs.getInt("COUNT");
+                isExist = true;
             }
         } catch (SQLException e) {
             handleException("Failed to check API artifact status of API with ID " + APIId + " for label "
                     + gatewayLabel, e);
         }
-        return count != 0;
+        return isExist;
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {
