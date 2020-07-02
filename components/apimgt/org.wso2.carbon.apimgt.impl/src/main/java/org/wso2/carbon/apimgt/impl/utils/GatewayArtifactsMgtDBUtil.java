@@ -17,7 +17,6 @@ public class GatewayArtifactsMgtDBUtil {
 
     private static final Log log = LogFactory.getLog(GatewayArtifactsMgtDBUtil.class);
     private static volatile DataSource artifactSynchronizerDataSource = null;
-    private static final String DATA_SOURCE_NAME = "DataSourceName";
 
     /**
      * Initializes the data source
@@ -49,7 +48,7 @@ public class GatewayArtifactsMgtDBUtil {
                                 "source: " + artifactSynchronizerDataSourceName, e);
                     }
                 } else {
-                    log.error("AS" + artifactSynchronizerDataSourceName + " not defined in api-manager.xml.");
+                    log.error(artifactSynchronizerDataSourceName + " not defined in api-manager.xml.");
                 }
             }
         }

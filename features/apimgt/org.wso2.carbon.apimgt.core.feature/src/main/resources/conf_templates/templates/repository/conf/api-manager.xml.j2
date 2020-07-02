@@ -1218,6 +1218,9 @@
         {% if apim.sync_runtime_artifacts.gateway.artifact_retriever is defined %}
         <ArtifactRetriever>{{apim.sync_runtime_artifacts.gateway.artifact_retriever}}</ArtifactRetriever>
         {% endif %}
+        {% if apim.sync_runtime_artifacts.gateway.deployment_retry_duartion is defined %}
+        <RetryDuration>{{apim.sync_runtime_artifacts.gateway.deployment_retry_duartion}}</RetryDuration>
+        {% endif %}
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 

@@ -14,6 +14,7 @@ public class GatewayArtifactSynchronizerProperties {
     private String retrieverName = APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME;
     private Set<String> gatewayLabels = new HashSet<>();
     private String artifactSynchronizerDataSource = "jdbc/WSO2AS_DB" ;
+    private long retryDuartion = 15000 ;
 
     public String getSaverName() {
 
@@ -85,4 +86,13 @@ public class GatewayArtifactSynchronizerProperties {
         this.saveArtifactsEnabled = saveArtifactsEnabled;
     }
 
+    public long getRetryDuartion() {
+
+        return retryDuartion;
+    }
+
+    public void  setRetryDuartion(long retryDuartion) {
+
+        this.retryDuartion = retryDuartion;
+    }
 }

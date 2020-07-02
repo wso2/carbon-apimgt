@@ -1639,6 +1639,15 @@ public class APIManagerConfiguration {
             log.debug("Artifact retriever Element is not set. Set to default DB Retriever");
         }
 
+        OMElement retryDurationElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.RETRY_DUARTION));
+        if (retrieverElement != null) {
+            long retryDuration = Long.valueOf(retryDurationElement.getText());
+            gatewayArtifactSynchronizerProperties.setRetryDuartion(retryDuration);
+        } else {
+            log.debug("Retry Duration Element is not set. Set to default duaration");
+        }
+
         OMElement gatewayLabelElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABELS_CONFIG));
         if (gatewayLabelElement != null) {

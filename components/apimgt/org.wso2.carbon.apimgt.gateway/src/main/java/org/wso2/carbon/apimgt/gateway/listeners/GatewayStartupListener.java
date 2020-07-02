@@ -37,8 +37,12 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     private static final Log log = LogFactory.getLog(GatewayStartupListener.class);
     private JMSTransportHandler jmsTransportHandlerForTrafficManager;
     private JMSTransportHandler jmsTransportHandlerForEventHub;
+    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
 
     public GatewayStartupListener() {
+        gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                        .getGatewayArtifactSynchronizerProperties();
         ThrottleProperties.JMSConnectionProperties jmsConnectionProperties =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getThrottleProperties()
                         .getJmsConnectionProperties();
@@ -109,7 +113,9 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     }
 
     private void deployArtifactsInGateway() {
-        long retryDuration = 10000;
+
+        long retryDuration =
+                gatewayArtifactSynchronizerProperties.getRetryDuartion();
         double reconnectionProgressionFactor = 2.0;
         long maxReconnectDuration = 1000 * 60 * 60; // 1 hour
 
