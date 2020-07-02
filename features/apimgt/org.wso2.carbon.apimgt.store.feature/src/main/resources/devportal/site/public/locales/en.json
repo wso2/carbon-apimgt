@@ -348,7 +348,7 @@
   "Base.index.go.to.public.store": "Go to public Dev Portal",
   "Base.index.logo.alt": "Dev Portal",
   "Base.index.logout": "Logout",
-  "Base.index.settingsMenu.alertConfiguration": "Alert configure",
+  "Base.index.settingsMenu.alertConfiguration": "Configure Alerts",
   "Base.index.settingsMenu.changePassword": "Change Password",
   "Base.index.sign.in": " Sign-in",
   "Change.Password.description": "Change your own password. Required fields are marked with an asterisk ( * )",
