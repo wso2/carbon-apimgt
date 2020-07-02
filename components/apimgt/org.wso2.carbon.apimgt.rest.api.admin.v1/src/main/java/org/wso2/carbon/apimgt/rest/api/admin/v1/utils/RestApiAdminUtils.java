@@ -243,7 +243,9 @@ public class RestApiAdminUtils {
             }
             zipInputStream.closeEntry();
             zipInputStream.close();
-            FileUtils.deleteDirectory(backupDirectory);
+            if (backupDirectory != null) {
+                FileUtils.deleteDirectory(backupDirectory);
+            }
         } catch (APIManagementException | IOException e) {
             revertTenantThemeImportChanges(tenantDomain, existingTenantTheme);
             throw new APIManagementException(e.getMessage(),
