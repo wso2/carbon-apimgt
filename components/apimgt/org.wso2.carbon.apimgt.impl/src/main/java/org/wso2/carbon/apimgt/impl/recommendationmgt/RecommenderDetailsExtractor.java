@@ -176,7 +176,10 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             String apiContext = api.getContext();
             String apiTags = api.getTags().toString();
             Set<URITemplate> uriTemplates = api.getUriTemplates();
-            JSONObject swaggerDef = new JSONObject(api.getSwaggerDefinition());
+            JSONObject swaggerDef = null;
+            if (api.getSwaggerDefinition() != null) {
+                swaggerDef = new JSONObject(api.getSwaggerDefinition());
+            }
             JSONArray resourceArray = new JSONArray();
             JSONObject resourceObj;
 
@@ -184,11 +187,13 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 resourceObj = new JSONObject();
                 String resource = uriTemplate.getUriTemplate();
                 String resourceMethod = uriTemplate.getHTTPVerb();
-                String summary = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod, "summary");
-                String description = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod, "description");
                 resourceObj.put("resource", resource);
-                resourceObj.put("summary", summary);
-                resourceObj.put("description", description);
+                if (swaggerDef != null) {
+                    String summary = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod, "summary");
+                    String description = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod, "description");
+                    resourceObj.put("summary", summary);
+                    resourceObj.put("description", description);
+                }
                 resourceArray.put(resourceObj);
             }
 
@@ -214,6 +219,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             payload.put(APIConstants.ACTION_STRING, APIConstants.DELETE_API);
             payload.put(APIConstants.PAYLOAD_STRING, obj);
             publishEvent(payload.toString());
+            log.info(apiName + " API published to recommendation server");
         }
     }
 
@@ -234,6 +240,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_NEW_APPLICATION);
         payload.put(APIConstants.PAYLOAD_STRING, obj);
         publishEvent(payload.toString());
+        log.info(appName + " Application published to recommendations server");
     }
 
     @Override
@@ -246,6 +253,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         payload.put(APIConstants.ACTION_STRING, APIConstants.DELETE_APPLICATION);
         payload.put(APIConstants.PAYLOAD_STRING, obj);
         publishEvent(payload.toString());
+        log.info("Delete event for Application id " + appId + " sent to recommendations server");
     }
 
     @Override
@@ -399,6 +407,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
             HttpResponse httpResponse = httpClient.execute(method);
             if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                log.info("Recommendations received for the user " + userName + " from recommendations server");
                 String contentString = EntityUtils.toString(httpResponse.getEntity());
                 if (log.isDebugEnabled()) {
                     log.debug("Recommendations received for user " + userName + " is " + contentString);
