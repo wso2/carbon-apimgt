@@ -621,12 +621,13 @@ function TryOutController(props) {
                                             />
                                         )}
                                     >
-                                        <IconButton
-                                            aria-label='Use existing Access Token or generate a new Test Key'
-                                            style={{ margin: 8, height: '48px' }}
-                                        >
-                                            <HelpOutline />
-                                        </IconButton>
+                                        <Box m={1}>
+                                            <IconButton
+                                                aria-label='Use existing Access Token or generate a new Test Key'
+                                            >
+                                                <HelpOutline />
+                                            </IconButton>
+                                        </Box>
                                     </Tooltip>
                                 </>
                             )}
