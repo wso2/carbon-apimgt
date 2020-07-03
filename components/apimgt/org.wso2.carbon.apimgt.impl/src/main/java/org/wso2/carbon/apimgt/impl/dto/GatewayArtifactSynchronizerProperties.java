@@ -13,7 +13,7 @@ public class GatewayArtifactSynchronizerProperties {
     private String saverName = APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME;
     private String retrieverName = APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME;
     private Set<String> gatewayLabels = new HashSet<>();
-    private String artifactSynchronizerDataSource = "jdbc/WSO2AS_DB" ;
+    private String artifactSynchronizerDataSource = "jdbc/WSO2AM_DB" ;
     private long retryDuartion = 15000 ;
 
     public String getSaverName() {
