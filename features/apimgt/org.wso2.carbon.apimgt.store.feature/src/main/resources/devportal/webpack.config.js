@@ -116,7 +116,19 @@ if (process.env.NODE_ENV === 'development') {
 module.exports = function(env) {
     if (env && env.analysis) {
         var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
         config.plugins.push(new BundleAnalyzerPlugin());
+
+    }
+    if (env && env.unused) {
+        var UnusedFilesWebpackPlugin = require("unused-files-webpack-plugin").UnusedFilesWebpackPlugin;
+
+        config.plugins.push(new UnusedFilesWebpackPlugin({
+            failOnUnused: process.env.NODE_ENV !== 'development',
+            patterns: ['source/src/**/*.jsx', 'source/src/**/*.js'],
+            ignore: ['babel.config.js', '**/*.txt', 'source/src/index.js'],
+          }));
+
     }
     return config;
 };
