@@ -46,9 +46,6 @@
         var systemApplicationDAO = new SystemApplicationDTO();
         // this is to support migration from admin_publisher to apim_publisher
         var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
-        if (systemApplicationDTO === null) {
-            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
-        }
         var clientId = systemApplicationDTO.getConsumerKey();
         var clientSecret = systemApplicationDTO.getConsumerSecret();
         var Base64 = org.apache.axiom.om.util.Base64;
