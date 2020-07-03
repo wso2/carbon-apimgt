@@ -3154,7 +3154,7 @@ public class SQLConstants {
     public static final String GET_PUBLISHED_GATEWAYS_FOR_API = "SELECT COUNT(*) AS COUNT FROM AM_GW_API_ARTIFACTS" +
             " WHERE API_ID = ? AND GATEWAY_INSTRUCTION = ?";
 
-    public static final String GET_GATEWAY_PUBLISHED_API_DETAILS = "SELECT * FROM AM_GW_PUBLISHED_API_DETAILS" +
+    public static final String GET_GATEWAY_PUBLISHED_API_DETAILS = "SELECT 1 FROM AM_GW_PUBLISHED_API_DETAILS" +
             " WHERE API_ID = ?";
 
     public static final String CHECK_ARTIFACT_EXISTS = "SELECT 1 FROM AM_GW_API_ARTIFACTS" +

@@ -20,7 +20,7 @@ import java.util.List;
 
 public class GatewayArtifactsMgtDAO {
     private static final Log log = LogFactory.getLog(GatewayArtifactsMgtDAO.class);
-    private static GatewayArtifactsMgtDAO INSTANCE = null;
+    private static GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = null;
 
     /**
      * Private constructor
@@ -34,10 +34,10 @@ public class GatewayArtifactsMgtDAO {
      * @return {@link GatewayArtifactsMgtDAO} instance
      */
     public static GatewayArtifactsMgtDAO getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new GatewayArtifactsMgtDAO();
+        if (gatewayArtifactsMgtDAO == null) {
+            gatewayArtifactsMgtDAO = new GatewayArtifactsMgtDAO();
         }
-        return INSTANCE;
+        return gatewayArtifactsMgtDAO;
     }
 
     /**
@@ -208,20 +208,17 @@ public class GatewayArtifactsMgtDAO {
      */
     public boolean isAPIArtifactExists(String APIId, String gatewayLabel) throws APIManagementException {
 
-        boolean isExist = false;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.CHECK_ARTIFACT_EXISTS)) {
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
             ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                isExist = true;
-            }
+            return rs.next();
         } catch (SQLException e) {
             handleException("Failed to check API artifact status of API with ID " + APIId + " for label "
                     + gatewayLabel, e);
         }
-        return isExist;
+        return false;
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {

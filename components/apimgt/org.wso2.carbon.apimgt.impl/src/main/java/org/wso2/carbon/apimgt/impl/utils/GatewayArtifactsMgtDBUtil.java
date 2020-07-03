@@ -27,29 +27,30 @@ public class GatewayArtifactsMgtDBUtil {
         if (artifactSynchronizerDataSource != null) {
             return;
         }
+        initDatasource();
+    }
 
-        synchronized (GatewayArtifactsMgtDBUtil.class) {
-            if (artifactSynchronizerDataSource == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Initializing data source");
-                }
-                GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
-                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
-                String artifactSynchronizerDataSourceName =
-                        gatewayArtifactSynchronizerProperties.getArtifactSynchronizerDataSource();
+    private static synchronized void initDatasource() throws APIManagerDatabaseException {
+        if (artifactSynchronizerDataSource == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Initializing data source");
+            }
+            GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+            String artifactSynchronizerDataSourceName =
+                    gatewayArtifactSynchronizerProperties.getArtifactSynchronizerDataSource();
 
-                if (artifactSynchronizerDataSourceName != null) {
-                    try {
-                        Context ctx = new InitialContext();
-                        artifactSynchronizerDataSource = (DataSource) ctx.lookup(artifactSynchronizerDataSourceName);
-                    } catch (NamingException e) {
-                        throw new APIManagerDatabaseException("Error while looking up the data " +
-                                "source: " + artifactSynchronizerDataSourceName, e);
-                    }
-                } else {
-                    log.error(artifactSynchronizerDataSourceName + " not defined in api-manager.xml.");
+            if (artifactSynchronizerDataSourceName != null) {
+                try {
+                    Context ctx = new InitialContext();
+                    artifactSynchronizerDataSource = (DataSource) ctx.lookup(artifactSynchronizerDataSourceName);
+                } catch (NamingException e) {
+                    throw new APIManagerDatabaseException("Error while looking up the data " +
+                            "source: " + artifactSynchronizerDataSourceName, e);
                 }
+            } else {
+                log.error(artifactSynchronizerDataSourceName + " not defined in api-manager.xml.");
             }
         }
     }
