@@ -110,6 +110,8 @@ public class GatewayArtifactsMgtDAO {
         String gatewayRuntimeArtifacts = null;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ARTIFACT)) {
+            connection.setAutoCommit(false);
+            connection.commit();
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
             statement.setString(3, gatewayInstruction);
@@ -139,6 +141,8 @@ public class GatewayArtifactsMgtDAO {
         List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_API_ARTIFACT)) {
+            connection.setAutoCommit(false);
+            connection.commit();
             statement.setString(1, label);
             statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
             ResultSet rs = statement.executeQuery();
@@ -167,7 +171,10 @@ public class GatewayArtifactsMgtDAO {
 
         int count = 0;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
-                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_PUBLISHED_GATEWAYS_FOR_API)) {
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.GET_PUBLISHED_GATEWAYS_FOR_API)) {
+            connection.setAutoCommit(false);
+            connection.commit();
             statement.setString(1, APIId);
             statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
             ResultSet rs = statement.executeQuery();
@@ -191,6 +198,8 @@ public class GatewayArtifactsMgtDAO {
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection
                         .prepareStatement(SQLConstants.GET_GATEWAY_PUBLISHED_API_DETAILS)) {
+            connection.setAutoCommit(false);
+            connection.commit();
             statement.setString(1, APIId);
             ResultSet rs = statement.executeQuery();
             return rs.next();
@@ -210,6 +219,8 @@ public class GatewayArtifactsMgtDAO {
 
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.CHECK_ARTIFACT_EXISTS)) {
+            connection.setAutoCommit(false);
+            connection.commit();
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
             ResultSet rs = statement.executeQuery();
