@@ -128,55 +128,55 @@ public class JWTGenerator extends AbstractJWTGenerator {
     public Map<String, String> populateCustomClaims(TokenValidationContext validationContext)
             throws APIManagementException {
 
+        Map<ClaimMapping, String> customClaimsWithMapping = new HashMap<>();
+        Map<String, String> customClaims;
+        Map<String, Object> properties = new HashMap<String, Object>();
+        // fix for https://github.com/wso2/product-apim/issues/4112
+        String accessToken = validationContext.getAccessToken();
+        String authCode = validationContext.getAuthorizationCode();
+        if (accessToken != null) {
+            properties.put(APIConstants.KeyManager.ACCESS_TOKEN, accessToken);
+        } else if (authCode != null) {
+            properties.put(APIConstants.KeyManager.AUTH_CODE, authCode);
+        } else {
+            customClaimsWithMapping.putAll(validationContext.getUser().getUserAttributes());
+        }
+        String username = validationContext.getValidationInfoDTO().getEndUserName();
+        int tenantId = APIUtil.getTenantId(username);
+
+        customClaims = convertClaimMap(customClaimsWithMapping, username);
+
+        if (isNotEmpty(customClaims)) {
+            if (log.isDebugEnabled()) {
+                log.debug("The custom claims are retrieved from AuthorizationGrantCache for user : "
+                        + validationContext.getValidationInfoDTO().getEndUserName());
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Custom claims are not available in the AuthorizationGrantCache. Hence will be "
+                        + "retrieved from the user store for user : "
+                        + validationContext.getValidationInfoDTO().getEndUserName());
+            }
+        }
+        // If claims are not found in AuthorizationGrantCache, they will be retrieved from the userstore.
+
+        String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
+        properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
+        String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
+        KeyManager keymanager = KeyManagerHolder.getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId),
+                keymanagerName);
+        Map<String, String> retreivedClaims = keymanager.getUserClaims(username, properties);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved claims :" + retreivedClaims);
+        }
+        customClaims.putAll(retreivedClaims);
+
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {
-            Map<ClaimMapping, String> customClaimsWithMapping = new HashMap<>();
-            Map<String, String> customClaims;
-            Map<String, String> properties = new HashMap<String, String>();
-            //fix for https://github.com/wso2/product-apim/issues/4112
-            String accessToken = validationContext.getAccessToken();
-            String authCode = validationContext.getAuthorizationCode();
-            if (accessToken != null) {
-                properties.put(APIConstants.KeyManager.ACCESS_TOKEN, accessToken);
-            } else if (authCode != null) {
-                properties.put(APIConstants.KeyManager.AUTH_CODE, authCode);
-            } else {
-                customClaimsWithMapping.putAll(validationContext.getUser().getUserAttributes());
-            }
-            String username = validationContext.getValidationInfoDTO().getEndUserName();
-            int tenantId = APIUtil.getTenantId(username);
-
-            customClaims = convertClaimMap(customClaimsWithMapping, username);
-
-            if (isNotEmpty(customClaims)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("The custom claims are retrieved from AuthorizationGrantCache for user : " +
-                            validationContext.getValidationInfoDTO().getEndUserName());
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Custom claims are not available in the AuthorizationGrantCache. Hence will be " +
-                            "retrieved from the user store for user : " +
-                            validationContext.getValidationInfoDTO().getEndUserName());
-                }
-            }
-            // If claims are not found in AuthorizationGrantCache, they will be retrieved from the userstore.
-
-            String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                    getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
-            properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
-            String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
-            KeyManager keymanager = KeyManagerHolder
-                    .getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId), keymanagerName);
-            Map<String, String> retreivedClaims = keymanager.getUserClaims(username, properties);
-            if (log.isDebugEnabled()) {
-                log.debug("Retrieved claims :" + retreivedClaims);
-            }
-            customClaims.putAll(retreivedClaims);
-            return customClaims;
-
+            customClaims.putAll(claimsRetriever.getClaims(username));
         }
-        return null;
+        return customClaims;
     }
 
     protected Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes, String username)

@@ -370,7 +370,7 @@ public interface KeyManager {
      * @return
      * @throws APIManagementException
      */
-    default Map<String, String> getUserClaims(String username, Map<String, String> properties)
+    default Map<String, String> getUserClaims(String username, Map<String, Object> properties)
             throws APIManagementException {
         return Collections.emptyMap();
     }

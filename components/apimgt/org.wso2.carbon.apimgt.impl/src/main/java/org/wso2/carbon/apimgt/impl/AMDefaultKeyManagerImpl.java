@@ -989,7 +989,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
     
     @Override
-    public Map<String, String> getUserClaims(String username, Map<String, String> properties)
+    public Map<String, String> getUserClaims(String username, Map<String, Object> properties)
             throws APIManagementException {
 
         Map<String, String> map = new HashMap<String, String>();
@@ -999,9 +999,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (tenantAwareUserName.contains(APIConstants.DOMAIN_SEPARATOR)) {
             userinfo.setDomain(tenantAwareUserName.split(APIConstants.DOMAIN_SEPARATOR)[0]);
         }
-        userinfo.setAuthCode(properties.get(APIConstants.KeyManager.AUTH_CODE));
-        userinfo.setAccessToken(properties.get(APIConstants.KeyManager.ACCESS_TOKEN));
-        userinfo.setDialectURI(properties.get(APIConstants.KeyManager.CLAIM_DIALECT));
+        userinfo.setAuthCode(properties.get(APIConstants.KeyManager.AUTH_CODE).toString());
+        userinfo.setAccessToken(properties.get(APIConstants.KeyManager.ACCESS_TOKEN).toString());
+        userinfo.setDialectURI(properties.get(APIConstants.KeyManager.CLAIM_DIALECT).toString());
         
         try {
             ClaimsList claims = userClient.generateClaims(userinfo);
