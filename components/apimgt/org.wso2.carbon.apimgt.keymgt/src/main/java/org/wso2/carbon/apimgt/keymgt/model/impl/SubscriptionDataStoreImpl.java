@@ -354,21 +354,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public void addOrUpdateSubscription(Subscription subscription) {
-
-        synchronized (subscriptionMap) {
-            Subscription retrievedSubscription = subscriptionMap.get(subscription.getCacheKey());
-            if (retrievedSubscription == null) {
-                subscriptionMap.put(subscription.getCacheKey(), subscription);
-            } else {
-                if (subscription.getTimeStamp() < retrievedSubscription.getTimeStamp()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Drop the Event " + subscription.toString() + " since the event timestamp was old");
-                    }
-                } else {
-                    subscriptionMap.put(subscription.getCacheKey(), subscription);
-                }
-            }
-        }
+        subscriptionMap.put(subscription.getCacheKey(), subscription);
     }
     @Override
     public void removeSubscription(Subscription subscription) {

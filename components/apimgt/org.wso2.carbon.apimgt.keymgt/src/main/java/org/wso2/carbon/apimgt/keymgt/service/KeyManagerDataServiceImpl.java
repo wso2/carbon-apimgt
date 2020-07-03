@@ -219,7 +219,6 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         sub.setPolicyId(event.getPolicyId());
         sub.setSubscriptionId(String.valueOf(event.getSubscriptionId()));
         sub.setSubscriptionState(event.getSubscriptionState());
-        sub.setTimeStamp(event.getTimeStamp());
         if(log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + sub.toString());
