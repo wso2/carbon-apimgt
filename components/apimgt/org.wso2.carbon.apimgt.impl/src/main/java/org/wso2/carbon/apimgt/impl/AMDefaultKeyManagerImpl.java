@@ -986,34 +986,4 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.error("Exception While resolving KeyManager Server URL or Port " + e.getMessage(), e);
         }
     }
-
-    public static void main(String[] args) throws KeyManagerClientException {
-        System.setProperty("javax.net.ssl.trustStore", "/Users/chamila/WSO2/Packs/IS/wso2is-5.10.0/repository/resources/security/client-truststore.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword ", "wso2carbon");
-        System.setProperty("javax.net.ssl.keyStorePassword", "wso2carbon");
-        System.setProperty("javax.net.ssl.keyStore", "/Users/chamila/WSO2/Packs/IS/wso2is-5.10.0/repository/resources/security/wso2carbon.jks");
-
-        UserClient userclient = Feign.builder()
-                .client(new OkHttpClient())
-                .encoder(new GsonEncoder())
-                .decoder(new GsonDecoder())
-                .logger(new Slf4jLogger())
-                .requestInterceptor(new RequestInterceptor() {
-                    
-                    @Override
-                    public void apply(RequestTemplate template) {
-                        template
-                        .header(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BEARER + "dce0fd51-c944-3ea6-a137-3927b179fce3");
-                        
-                    }
-                })
-                .errorDecoder(new KMClientErrorDecoder())
-                .target(UserClient.class, "https://localhost:9443/user-info");
-        
-        UserInfoDTO userinfo = new UserInfoDTO();
-        userinfo.setUsername("admin");
-        System.out.println(userclient.generateClaims(userinfo));
-        
-        System.out.println(userclient.getClaims("admin"));
-    }
 }

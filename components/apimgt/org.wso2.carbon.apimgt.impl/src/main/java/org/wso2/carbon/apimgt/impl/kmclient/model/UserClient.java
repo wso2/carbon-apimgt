@@ -21,20 +21,15 @@ import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 
 import feign.Headers;
 import feign.Param;
-import feign.QueryMap;
 import feign.RequestLine;
 
 public interface UserClient {
     @Headers("Content-Type: application/json")
     @RequestLine("POST /claims/generate")
     ClaimsList generateClaims(UserInfoDTO userinfo) throws KeyManagerClientException;
-    
-  /*  @RequestLine("GET /claims?username={username}&domain={domain}&dialect={dialect}")
-    ClaimsList getClaims(@QueryMap String username, @QueryMap String domain, @QueryMap String dialect)
-            throws KeyManagerClientException;
-            */
-    @RequestLine("GET /claims?username={username")
-    ClaimsList getClaims(@Param(value = "username") String username)
-            throws KeyManagerClientException;
+
+    @RequestLine("GET /claims?username={username}&domain={domain}&dialect={dialect}")
+    ClaimsList getClaims(@Param("username") String username, @Param("domain") String domain,
+            @Param("dialect") String dialect) throws KeyManagerClientException;
 
 }
