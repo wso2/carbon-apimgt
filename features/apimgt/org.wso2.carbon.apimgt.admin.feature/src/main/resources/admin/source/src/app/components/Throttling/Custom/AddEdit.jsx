@@ -39,6 +39,9 @@ import Joi from '@hapi/joi';
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "CustomPolicyAddMonacoEditor" */));
 
 const useStyles = makeStyles((theme) => ({
+    root: {
+        marginBottom: theme.spacing(15),
+    },
     error: {
         color: theme.palette.error.dark,
     },
@@ -63,6 +66,7 @@ const useStyles = makeStyles((theme) => ({
     },
     buttonBox: {
         marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
     },
     saveButton: {
         marginRight: theme.spacing(2),
@@ -300,7 +304,7 @@ function AddEdit(props) {
                     defaultMessage: 'Custom Rate Limiting Policy - Define Policy',
                 })}
         >
-            <Box component='div' m={2}>
+            <Box component='div' m={2} className={classes.root}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12} lg={12}>
                         <TextField
