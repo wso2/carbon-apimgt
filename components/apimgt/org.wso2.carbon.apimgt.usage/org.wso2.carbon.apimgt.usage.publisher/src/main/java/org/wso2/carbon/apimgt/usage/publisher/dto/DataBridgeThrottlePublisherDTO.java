@@ -36,7 +36,7 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
         setContext(throttlePublisherDTO.getContext());
         setApiCreator(throttlePublisherDTO.getApiCreator());
         setApiCreatorTenantDomain(throttlePublisherDTO.getApiCreatorTenantDomain());
-        setApiResourceTemplate(throttlePublisherDTO.getApiResourceTemplate());
+        setApiResourceTemplate(DataPublisherUtil.sortGraphQLOperations(throttlePublisherDTO.getApiResourceTemplate()));
         setApiMethod(throttlePublisherDTO.getApiMethod());
         setThrottledTime(throttlePublisherDTO.getThrottledTime());
         setApplicationName(throttlePublisherDTO.getApplicationName());
