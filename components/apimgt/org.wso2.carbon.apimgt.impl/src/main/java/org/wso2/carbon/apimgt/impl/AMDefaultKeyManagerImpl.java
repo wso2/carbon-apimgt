@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.impl;
 
 import feign.Feign;
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
 import feign.Response;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -44,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.impl.dto.UserInfoDTO;
 import org.wso2.carbon.apimgt.impl.kmclient.FormEncoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
@@ -55,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ScopeClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
+import org.wso2.carbon.apimgt.impl.kmclient.model.UserClient;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.core.util.CryptoException;
@@ -89,6 +93,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private AuthClient revokeClient;
     private AccessTokenGenerator accessTokenGenerator;
     private ScopeClient scopeClient;
+    private UserClient userClient;
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
@@ -487,6 +492,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             introspectionEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
                     .concat(getTenantAwareContext().trim()).concat("/oauth2/introspect");
         }
+        
+        String userInfoEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT) != null) {
+            userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT);
+        } else {
+            userInfoEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext().trim()).concat("/user-info");
+        }
         accessTokenGenerator = new AccessTokenGenerator(tokenEndpoint, revokeEndpoint, consumerKey, consumerSecret);
 
         dcrClient = Feign.builder()
@@ -522,7 +535,15 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .logger(new Slf4jLogger())
                 .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
                 .errorDecoder(new KMClientErrorDecoder())
-                .target(ScopeClient.class, scopeEndpoint);
+                .target(ScopeClient.class, scopeEndpoint);  
+        userClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(UserClient.class, userInfoEndpoint);
     }
 
     @Override
@@ -966,4 +987,33 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
     }
 
+    public static void main(String[] args) throws KeyManagerClientException {
+        System.setProperty("javax.net.ssl.trustStore", "/Users/chamila/WSO2/Packs/IS/wso2is-5.10.0/repository/resources/security/client-truststore.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword ", "wso2carbon");
+        System.setProperty("javax.net.ssl.keyStorePassword", "wso2carbon");
+        System.setProperty("javax.net.ssl.keyStore", "/Users/chamila/WSO2/Packs/IS/wso2is-5.10.0/repository/resources/security/wso2carbon.jks");
+
+        UserClient userclient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new RequestInterceptor() {
+                    
+                    @Override
+                    public void apply(RequestTemplate template) {
+                        template
+                        .header(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BEARER + "dce0fd51-c944-3ea6-a137-3927b179fce3");
+                        
+                    }
+                })
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(UserClient.class, "https://localhost:9443/user-info");
+        
+        UserInfoDTO userinfo = new UserInfoDTO();
+        userinfo.setUsername("admin");
+        System.out.println(userclient.generateClaims(userinfo));
+        
+        System.out.println(userclient.getClaims("admin"));
+    }
 }
