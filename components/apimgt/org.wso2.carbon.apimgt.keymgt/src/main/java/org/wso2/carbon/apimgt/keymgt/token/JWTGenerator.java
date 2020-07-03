@@ -22,7 +22,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -130,21 +132,14 @@ public class JWTGenerator extends AbstractJWTGenerator {
         if (claimsRetriever != null) {
             Map<ClaimMapping, String> customClaimsWithMapping = new HashMap<>();
             Map<String, String> customClaims;
+            Map<String, String> properties = new HashMap<String, String>();
             //fix for https://github.com/wso2/product-apim/issues/4112
             String accessToken = validationContext.getAccessToken();
             String authCode = validationContext.getAuthorizationCode();
             if (accessToken != null) {
-                AuthorizationGrantCacheEntry cacheEntry = AuthorizationGrantCache.getInstance()
-                        .getValueFromCacheByToken(new AuthorizationGrantCacheKey(accessToken));
-                if (cacheEntry != null) {
-                    customClaimsWithMapping.putAll(cacheEntry.getUserAttributes());
-                }
+                properties.put(APIConstants.KeyManager.ACCESS_TOKEN, accessToken);
             } else if (authCode != null) {
-                AuthorizationGrantCacheEntry cacheEntry = AuthorizationGrantCache.getInstance()
-                        .getValueFromCacheByCode(new AuthorizationGrantCacheKey(authCode));
-                if (cacheEntry != null) {
-                    customClaimsWithMapping.putAll(cacheEntry.getUserAttributes());
-                }
+                properties.put(APIConstants.KeyManager.AUTH_CODE, authCode);
             } else {
                 customClaimsWithMapping.putAll(validationContext.getUser().getUserAttributes());
             }
@@ -167,32 +162,19 @@ public class JWTGenerator extends AbstractJWTGenerator {
             }
             // If claims are not found in AuthorizationGrantCache, they will be retrieved from the userstore.
 
-            try {
-
-                if (tenantId != -1) {
-                    UserStoreManager manager = ServiceReferenceHolder.getInstance().
-                            getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
-
-                    String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
-
-                    if (manager.isExistingUser(tenantAwareUserName)) {
-                        customClaims.putAll(claimsRetriever.getClaims(username));
-                        return customClaims;
-                    } else {
-                        if (!customClaims.isEmpty()) {
-                            return customClaims;
-                        } else {
-                            log.warn("User " + tenantAwareUserName + " cannot be found by user store manager");
-                        }
-                    }
-                } else {
-                    log.error("Tenant cannot be found for username: " + username);
-                }
-            } catch (APIManagementException e) {
-                log.error("Error while retrieving claims ", e);
-            } catch (UserStoreException e) {
-                log.error("Error while retrieving user store ", e);
+            String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                    getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
+            properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
+            String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
+            KeyManager keymanager = KeyManagerHolder
+                    .getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId), keymanagerName);
+            Map<String, String> retreivedClaims = keymanager.getUserClaims(username, properties);
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved claims :" + retreivedClaims);
             }
+            customClaims.putAll(retreivedClaims);
+            return customClaims;
+
         }
         return null;
     }
