@@ -999,10 +999,16 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (tenantAwareUserName.contains(APIConstants.DOMAIN_SEPARATOR)) {
             userinfo.setDomain(tenantAwareUserName.split(APIConstants.DOMAIN_SEPARATOR)[0]);
         }
-        userinfo.setAuthCode(properties.get(APIConstants.KeyManager.AUTH_CODE).toString());
-        userinfo.setAccessToken(properties.get(APIConstants.KeyManager.ACCESS_TOKEN).toString());
-        userinfo.setDialectURI(properties.get(APIConstants.KeyManager.CLAIM_DIALECT).toString());
-        
+        if (properties.containsKey(APIConstants.KeyManager.AUTH_CODE)) {
+            userinfo.setAuthCode(properties.get(APIConstants.KeyManager.AUTH_CODE).toString());
+        }
+        if (properties.containsKey(APIConstants.KeyManager.ACCESS_TOKEN)) {
+            userinfo.setAccessToken(properties.get(APIConstants.KeyManager.ACCESS_TOKEN).toString());
+        }
+        if (properties.containsKey(APIConstants.KeyManager.CLAIM_DIALECT)) {
+            userinfo.setDialectURI(properties.get(APIConstants.KeyManager.CLAIM_DIALECT).toString());
+        }
+
         try {
             ClaimsList claims = userClient.generateClaims(userinfo);
             if (claims != null && claims.getList() != null) {

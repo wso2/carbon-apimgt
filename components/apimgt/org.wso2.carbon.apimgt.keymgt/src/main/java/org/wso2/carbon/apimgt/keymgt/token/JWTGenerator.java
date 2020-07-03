@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.keymgt.token;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -131,7 +133,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         Map<ClaimMapping, String> customClaimsWithMapping = new HashMap<>();
         Map<String, String> customClaims;
         Map<String, Object> properties = new HashMap<String, Object>();
-        // fix for https://github.com/wso2/product-apim/issues/4112
+
         String accessToken = validationContext.getAccessToken();
         String authCode = validationContext.getAuthorizationCode();
         if (accessToken != null) {
@@ -146,23 +148,11 @@ public class JWTGenerator extends AbstractJWTGenerator {
 
         customClaims = convertClaimMap(customClaimsWithMapping, username);
 
-        if (isNotEmpty(customClaims)) {
-            if (log.isDebugEnabled()) {
-                log.debug("The custom claims are retrieved from AuthorizationGrantCache for user : "
-                        + validationContext.getValidationInfoDTO().getEndUserName());
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Custom claims are not available in the AuthorizationGrantCache. Hence will be "
-                        + "retrieved from the user store for user : "
-                        + validationContext.getValidationInfoDTO().getEndUserName());
-            }
-        }
-        // If claims are not found in AuthorizationGrantCache, they will be retrieved from the userstore.
-
         String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
-        properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
+        if (!StringUtils.isEmpty(dialectURI)) {
+            properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
+        }
         String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
         KeyManager keymanager = KeyManagerHolder.getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId),
                 keymanagerName);
