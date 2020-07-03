@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.impl;
 
 import feign.Feign;
-import feign.RequestInterceptor;
-import feign.RequestTemplate;
 import feign.Response;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -52,6 +50,8 @@ import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 import org.wso2.carbon.apimgt.impl.kmclient.model.AuthClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.BearerInterceptor;
+import org.wso2.carbon.apimgt.impl.kmclient.model.Claim;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClaimsList;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
@@ -66,6 +66,7 @@ import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -985,5 +986,33 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } catch (MalformedURLException e) {
             log.error("Exception While resolving KeyManager Server URL or Port " + e.getMessage(), e);
         }
+    }
+    
+    @Override
+    public Map<String, String> getUserClaims(String username, Map<String, String> properties)
+            throws APIManagementException {
+
+        Map<String, String> map = new HashMap<String, String>();
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+        UserInfoDTO userinfo = new UserInfoDTO();
+        userinfo.setUsername(tenantAwareUserName);
+        if (tenantAwareUserName.contains(APIConstants.DOMAIN_SEPARATOR)) {
+            userinfo.setDomain(tenantAwareUserName.split(APIConstants.DOMAIN_SEPARATOR)[0]);
+        }
+        userinfo.setAuthCode(properties.get(APIConstants.KeyManager.AUTH_CODE));
+        userinfo.setAccessToken(properties.get(APIConstants.KeyManager.ACCESS_TOKEN));
+        userinfo.setDialectURI(properties.get(APIConstants.KeyManager.CLAIM_DIALECT));
+        
+        try {
+            ClaimsList claims = userClient.generateClaims(userinfo);
+            if (claims != null && claims.getList() != null) {
+                for (Claim claim : claims.getList()) {
+                    map.put(claim.getUri(), claim.getValue());
+                }
+            }
+        } catch (KeyManagerClientException e) {
+            handleException("Error while getting user info", e);
+        }
+        return map;
     }
 }

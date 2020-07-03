@@ -962,6 +962,7 @@ public final class APIConstants {
     }
 
     public static final String EMAIL_DOMAIN_SEPARATOR = "@";
+    public static final String DOMAIN_SEPARATOR = "/";
 
     public static final String EMAIL_DOMAIN_SEPARATOR_REPLACEMENT = "-AT-";
 
@@ -2231,6 +2232,9 @@ public final class APIConstants {
         public static final String CERTIFICATE_TYPE_PEM_FILE = "PEM";
         public static final String EVENT_PUBLISHER_CONFIGURATIONS = "EventPublisherConfiguration";
         public static final String USER_INFO_ENDPOINT = "user_info_endpoint";
+        public static final String ACCESS_TOKEN = "accessToken";
+        public static final String AUTH_CODE = "authCode";
+        public static final String CLAIM_DIALECT = "dialect";
 
         public static class KeyManagerEvent {
 
