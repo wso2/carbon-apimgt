@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -996,11 +997,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
         UserInfoDTO userinfo = new UserInfoDTO();
         userinfo.setUsername(tenantAwareUserName);
-        if (tenantAwareUserName.contains(APIConstants.DOMAIN_SEPARATOR)) {
-            userinfo.setDomain(tenantAwareUserName.split(APIConstants.DOMAIN_SEPARATOR)[0]);
-        }
-        if (properties.containsKey(APIConstants.KeyManager.AUTH_CODE)) {
-            userinfo.setAuthCode(properties.get(APIConstants.KeyManager.AUTH_CODE).toString());
+        if (tenantAwareUserName.contains(CarbonConstants.DOMAIN_SEPARATOR)) {
+            userinfo.setDomain(tenantAwareUserName.split(CarbonConstants.DOMAIN_SEPARATOR)[0]);
         }
         if (properties.containsKey(APIConstants.KeyManager.ACCESS_TOKEN)) {
             userinfo.setAccessToken(properties.get(APIConstants.KeyManager.ACCESS_TOKEN).toString());

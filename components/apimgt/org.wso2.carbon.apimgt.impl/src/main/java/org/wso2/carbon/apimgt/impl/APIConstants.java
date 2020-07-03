@@ -962,7 +962,6 @@ public final class APIConstants {
     }
 
     public static final String EMAIL_DOMAIN_SEPARATOR = "@";
-    public static final String DOMAIN_SEPARATOR = "/";
 
     public static final String EMAIL_DOMAIN_SEPARATOR_REPLACEMENT = "-AT-";
 

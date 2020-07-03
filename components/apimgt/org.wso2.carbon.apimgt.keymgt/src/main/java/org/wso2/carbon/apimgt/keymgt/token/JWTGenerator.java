@@ -130,23 +130,16 @@ public class JWTGenerator extends AbstractJWTGenerator {
     public Map<String, String> populateCustomClaims(TokenValidationContext validationContext)
             throws APIManagementException {
 
-        Map<ClaimMapping, String> customClaimsWithMapping = new HashMap<>();
         Map<String, String> customClaims;
         Map<String, Object> properties = new HashMap<String, Object>();
 
         String accessToken = validationContext.getAccessToken();
-        String authCode = validationContext.getAuthorizationCode();
         if (accessToken != null) {
             properties.put(APIConstants.KeyManager.ACCESS_TOKEN, accessToken);
-        } else if (authCode != null) {
-            properties.put(APIConstants.KeyManager.AUTH_CODE, authCode);
-        } else {
-            customClaimsWithMapping.putAll(validationContext.getUser().getUserAttributes());
-        }
+        } 
+        
         String username = validationContext.getValidationInfoDTO().getEndUserName();
         int tenantId = APIUtil.getTenantId(username);
-
-        customClaims = convertClaimMap(customClaimsWithMapping, username);
 
         String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
@@ -156,11 +149,10 @@ public class JWTGenerator extends AbstractJWTGenerator {
         String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
         KeyManager keymanager = KeyManagerHolder.getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId),
                 keymanagerName);
-        Map<String, String> retreivedClaims = keymanager.getUserClaims(username, properties);
+        customClaims = keymanager.getUserClaims(username, properties);
         if (log.isDebugEnabled()) {
-            log.debug("Retrieved claims :" + retreivedClaims);
+            log.debug("Retrieved claims :" + customClaims);
         }
-        customClaims.putAll(retreivedClaims);
 
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {

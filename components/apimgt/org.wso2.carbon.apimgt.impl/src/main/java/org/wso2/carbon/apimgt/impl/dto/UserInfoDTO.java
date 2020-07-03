@@ -31,8 +31,6 @@ public class UserInfoDTO implements Serializable {
     private String domain;
     @SerializedName("dialect")
     private String dialectURI;
-    @SerializedName("authorizationCode")
-    private String authCode;
     @SerializedName("accessToken")
     private String accessToken;
     
@@ -53,12 +51,6 @@ public class UserInfoDTO implements Serializable {
     }
     public void setDialectURI(String dialectURI) {
         this.dialectURI = dialectURI;
-    }
-    public String getAuthCode() {
-        return authCode;
-    }
-    public void setAuthCode(String authCode) {
-        this.authCode = authCode;
     }
     public String getAccessToken() {
         return accessToken;
