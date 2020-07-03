@@ -327,7 +327,8 @@ public class ImportApiServiceImpl implements ImportApiService {
         apiKey.setConsumerKey(oAuthApplicationInfo.getClientId());
         apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
         apiKey.setGrantTypes((String) oAuthApplicationInfo.getParameter(GRANT_TYPES));
-        if (apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey.getGrantTypes().contains(GRANT_TYPE_CODE)) {
+        if (apiKey.getGrantTypes() != null &&
+                apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey.getGrantTypes().contains(GRANT_TYPE_CODE)) {
             apiKey.setCallbackUrl((String) oAuthApplicationInfo.getParameter(REDIRECT_URIS));
         }
 
