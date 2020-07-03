@@ -66,7 +66,7 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
                     " is not allowed to import a tenant theme";
             throw new APIManagementException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_NOT_ALLOWED,
-                            MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, tenantDomain));
+                            MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
         }
 
         APIAdmin apiAdmin = new APIAdminImpl();
@@ -83,7 +83,7 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
             return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
         } catch (IOException e) {
             throw new APIManagementException(e.getMessage(),
-                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, tenantDomain));
+                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
         }
     }
 
@@ -117,9 +117,8 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + tenantThemeArchive.getName() + "\"").build();
         } catch (IOException e) {
-            String errorMessage = "Failed to export tenant theme of tenant " + tenantDomain;
-            throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_EXPORT_FAILED, tenantDomain, tenantDomain));
+            throw new APIManagementException(e.getMessage(),
+                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_EXPORT_FAILED, tenantDomain, e.getMessage()));
         }
     }
 }

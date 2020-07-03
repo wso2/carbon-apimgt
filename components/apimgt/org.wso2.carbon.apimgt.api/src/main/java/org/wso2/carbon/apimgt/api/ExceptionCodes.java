@@ -352,10 +352,10 @@ ExceptionCodes implements ErrorHandler {
     PASSWORD_PATTERN_INVALID(901452, "Password pattern invalid", 400, "Password entered is invalid since it doesn't comply with the pattern/policy configured"),
 
     //Tenant theme related codes
-    TENANT_THEME_IMPORT_FAILED(901700, "Failed to import tenant theme", 500,
-            "Failed to import tenant theme of tenant %s"),
-    TENANT_THEME_EXPORT_FAILED(901701, "Failed to export tenant theme", 500,
-            "Failed to export tenant theme of tenant %s"),
+    TENANT_THEME_IMPORT_FAILED(901700, "Failed to import tenant theme of tenant %s", 500,
+            "%s"),
+    TENANT_THEME_EXPORT_FAILED(901701, "Failed to export tenant theme of tenant %s", 500,
+            "%s"),
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme");
 

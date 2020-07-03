@@ -249,7 +249,7 @@ public class RestApiAdminUtils {
         } catch (APIManagementException | IOException e) {
             revertTenantThemeImportChanges(tenantDomain, existingTenantTheme);
             throw new APIManagementException(e.getMessage(),
-                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, tenantDomain));
+                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
         } finally {
             IOUtils.closeQuietly(zipInputStream);
             IOUtils.closeQuietly(themeContent);
