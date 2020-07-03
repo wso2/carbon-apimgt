@@ -56,7 +56,7 @@ const styles = (theme) => ({
         marginLeft: 0,
         '& span': {
             color: theme.palette.getContrastText(theme.palette.primary.main),
-        }
+        },
     },
     cleanUpButton: {
         marginLeft: 15,
@@ -87,11 +87,13 @@ const styles = (theme) => ({
 });
 
 function TabPanel(props) {
-    const { children, value, index, ...other } = props;
+    const {
+        children, value, index, ...other
+    } = props;
 
     return (
         <div
-            role="tabpanel"
+            role='tabpanel'
             hidden={value !== index}
             id={`nav-tabpanel-${index}`}
             aria-labelledby={`nav-tab-${index}`}
@@ -104,12 +106,12 @@ function TabPanel(props) {
             )}
         </div>
     );
-};
+}
 
 TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
+    children: PropTypes.node,
+    index: PropTypes.any.isRequired,
+    value: PropTypes.any.isRequired,
 };
 
 /**
@@ -286,8 +288,8 @@ class TokenManager extends React.Component {
             .then((application) => {
                 return application.generateKeys(
                     keyType, keyRequest.supportedGrantTypes,
-                    keyRequest.callbackUrl, keyRequest.validityTime, 
-                    keyRequest.additionalProperties, selectedTab
+                    keyRequest.callbackUrl, keyRequest.validityTime,
+                    keyRequest.additionalProperties, selectedTab,
                 );
             })
             .then((response) => {
@@ -340,7 +342,7 @@ class TokenManager extends React.Component {
                     applicationKey.consumerSecret,
                     applicationKey.additionalProperties,
                     selectedTab,
-                    applicationKey.keyMappingId
+                    applicationKey.keyMappingId,
                 );
             })
             .then((response) => {
@@ -410,13 +412,13 @@ class TokenManager extends React.Component {
     /**
      * Provide consumer key and secret of an existing OAuth app to an application
      */
-    provideOAuthKeySecret(selectedTab, keyMappingId) {
-        const { providedConsumerKey, providedConsumerSecret } = this.state;
+    provideOAuthKeySecret(selectedTab) {
         const { keyType, intl } = this.props;
+        const { providedConsumerKey, providedConsumerSecret } = this.state;
 
         this.application
             .then((application) => {
-                return application.provideKeys(keyType, providedConsumerKey, providedConsumerSecret, selectedTab, keyMappingId);
+                return application.provideKeys(keyType, providedConsumerKey, providedConsumerSecret, selectedTab);
             })
             .then(() => {
                 this.setState({ providedConsumerKey: '', providedConsumerSecret: '' });
@@ -450,7 +452,7 @@ class TokenManager extends React.Component {
         } = this.props;
         const {
             keys, keyRequest, isLoading, isKeyJWT, providedConsumerKey,
-            providedConsumerSecret, generateEnabled, selectedTab, keyManagers
+            providedConsumerSecret, generateEnabled, selectedTab, keyManagers,
         } = this.state;
         if (!keys) {
             return <Loading />;
@@ -520,17 +522,17 @@ class TokenManager extends React.Component {
                 <Paper className={classes.paper}>
                     <Tabs
                         value={selectedTab}
-                        indicatorColor="primary"
-                        textColor="primary"
+                        indicatorColor='primary'
+                        textColor='primary'
                         onChange={this.handleTabChange}
-                        aria-label="key manager tabs"
+                        aria-label='key manager tabs'
                     >
-                        {keyManagers.map(keymanager => (
-                            <Tab label={keymanager.displayName || keymanager.name} value={keymanager.name} disabled={!keymanager.enabled}/>
+                        {keyManagers.map((keymanager) => (
+                            <Tab label={keymanager.displayName || keymanager.name} value={keymanager.name} disabled={!keymanager.enabled} />
                         ))}
-                        
+
                     </Tabs>
-                    {keyManagers.map(keymanager => (
+                    {keyManagers.map((keymanager) => (
                         <TabPanel value={selectedTab} index={keymanager.name}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
@@ -550,17 +552,18 @@ class TokenManager extends React.Component {
                                                     />
                                                 )
                                         }
-                                    </Typography>    
+                                    </Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails className={classes.keyConfigWrapper}>
                                     <div>
                                         <Typography className={classes.heading} variant='subtitle1'>
                                             {
-                                                keyType === 'PRODUCTION' ? 'Production ' : 'Sandbox '}
-                                                    <FormattedMessage
-                                                        defaultMessage='Key and Secret'
-                                                            id='Shared.AppsAndKeys.TokenManager.key.and.secret'
-                                                    />
+                                                keyType === 'PRODUCTION' ? 'Production ' : 'Sandbox '
+                                            }
+                                            <FormattedMessage
+                                                defaultMessage='Key and Secret'
+                                                id='Shared.AppsAndKeys.TokenManager.key.and.secret'
+                                            />
                                         </Typography>
                                         <ViewKeys
                                             selectedApp={selectedApp}
@@ -617,7 +620,7 @@ class TokenManager extends React.Component {
                                                     variant='contained'
                                                     color='primary'
                                                     className={classes.button}
-                                                    onClick={keys.size > 0 && keys.get(selectedTab) && keys.get(selectedTab).keyType === keyType  ? this.updateKeys : this.generateKeys}
+                                                    onClick={keys.size > 0 && keys.get(selectedTab) && keys.get(selectedTab).keyType === keyType ? this.updateKeys : this.generateKeys}
                                                     disabled={!generateEnabled || isLoading || !keymanager.enableTokenGeneration}
                                                 >
                                                     {keys.size > 0 && keys.get(selectedTab) && keys.get(selectedTab).keyType === keyType ? 'Update' : 'Generate Keys'}
@@ -627,7 +630,7 @@ class TokenManager extends React.Component {
                                         </ScopeValidation>
                                     </div>
                                     {
-                                        mapExistingAuthApps && !(keys.get(selectedTab).keyType === keyType) && (
+                                        mapExistingAuthApps && !(keys.size > 0 && keys.get(selectedTab).keyType === keyType) && (
                                             <Paper className={classes.paper}>
                                                 <ExpansionPanel defaultExpanded>
                                                     <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
@@ -658,7 +661,7 @@ class TokenManager extends React.Component {
                                                                     variant='contained'
                                                                     color='primary'
                                                                     className={classes.button}
-                                                                    onClick={this.provideOAuthKeySecret(selectedTab, keys.get(selectedTab).keyMappingId)}
+                                                                    onClick={() => this.provideOAuthKeySecret(selectedTab)}
                                                                     disabled={!isUserOwner}
                                                                 >
                                                                     {
@@ -691,7 +694,7 @@ class TokenManager extends React.Component {
                                                                 variant='contained'
                                                                 color='primary'
                                                                 className={classes.button}
-                                                                onClick={this.provideOAuthKeySecret(selectedTab, keys.get(selectedTab).keyMappingId)}
+                                                                onClick={() => this.provideOAuthKeySecret(selectedTab)}
                                                             >
                                                                 {
                                                                     keys.size > 0 && keys.get(selectedTab) && keys.get(selectedTab).keyType === keyType

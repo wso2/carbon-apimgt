@@ -277,19 +277,19 @@ export default class Application extends Resource {
      * @param consumerSecret    consumer secret of the OAuth app
      * @returns {*}
      */
-    provideKeys(keyType, consumerKey, consumerSecret, keyManager, keyMappingId) {
+    provideKeys(keyType, consumerKey, consumerSecret, keyManager) {
         const promisedKeys = this.client.then((client) => {
-            const requestContent = { consumerKey, consumerSecret, keyType, keyManager, keyMappingId };
+            const requestContent = { consumerKey, consumerSecret, keyType, keyManager};
             const payload = { applicationId: this.id, body: requestContent };
             return client.apis['Application Keys'].post_applications__applicationId__map_keys(payload);
         });
         return promisedKeys.then((keysResponse) => {
             if (keyType === 'PRODUCTION') {
                 this.productionKeys.set(keyManager, keysResponse.obj);
-                return this.productionKeys.get(KeyManager);
+                return this.productionKeys.get(keyManager);
             } else {
                 this.sandboxKeys.set(keyManager, keysResponse.obj);
-                return this.sandboxKeys.get(KeyManager);
+                return this.sandboxKeys.get(keyManager);
             }
         });
     }
