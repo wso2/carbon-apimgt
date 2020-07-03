@@ -57,7 +57,7 @@ const SelectAppPanel = (props) => {
             <Grid x={12} md={6} className={classes.centerItems}>
                 <TextField
                     fullWidth
-                    id='outlined-select-currency'
+                    id='selected-application'
                     select
                     label={(
                         <FormattedMessage
@@ -92,7 +92,7 @@ const SelectAppPanel = (props) => {
             <Grid x={12} md={6} className={classes.centerItems}>
                 <TextField
                     fullWidth
-                    id='outlined-select-currency'
+                    id='key-manager'
                     select
                     label={(
                         <FormattedMessage
