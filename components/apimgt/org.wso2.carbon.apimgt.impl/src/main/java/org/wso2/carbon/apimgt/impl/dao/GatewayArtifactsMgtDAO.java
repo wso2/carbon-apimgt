@@ -197,7 +197,7 @@ public class GatewayArtifactsMgtDAO {
 
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.GET_GATEWAY_PUBLISHED_API_DETAILS)) {
+                        .prepareStatement(SQLConstants.CHECK_API_EXISTS)) {
             connection.setAutoCommit(false);
             connection.commit();
             statement.setString(1, APIId);
