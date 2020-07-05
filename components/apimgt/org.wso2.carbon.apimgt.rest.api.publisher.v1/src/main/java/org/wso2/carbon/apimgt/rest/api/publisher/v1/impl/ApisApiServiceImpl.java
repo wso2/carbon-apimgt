@@ -1059,6 +1059,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Method to retrieve Security Audit Report
+     * @param apiId API ID of the API
+     * @param accept Accept header string
+     * @param messageContext Message Context string
+     * @return Response object of Security Audit
+     */
     @Override
     public Response apisApiIdAuditapiGet(String apiId, String accept, MessageContext messageContext) {
         boolean isDebugEnabled = log.isDebugEnabled();
@@ -1141,6 +1148,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Update API Definition before retrieving Security Audit Report
+     * @param apiDefinition API Definition of API
+     * @param apiToken API Token to access Security Audit
+     * @param auditUuid Respective UUID of API in Security Audit
+     * @param baseUrl Base URL to communicate with Security Audit
+     * @param isDebugEnabled Boolean whether debug is enabled
+     * @throws IOException In the event of any problems with the request
+     * @throws APIManagementException In the event of unexpected response
+     */
     private void updateAuditApi(String apiDefinition, String apiToken, String auditUuid, String baseUrl,
                                 boolean isDebugEnabled)
             throws IOException, APIManagementException {
@@ -1176,6 +1193,19 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
     }
 
+    /**
+     * Send API Definition to Security Audit for the first time
+     * @param collectionId Collection ID in which the Definition should be sent to
+     * @param apiToken API Token to access Security Audit
+     * @param apiIdentifier API Identifier object
+     * @param apiDefinition API Definition of API
+     * @param baseUrl Base URL to communicate with Security Audit
+     * @param isDebugEnabled Boolean whether debug is enabled
+     * @return String UUID of API in Security Audit
+     * @throws IOException In the event of any problems in the request
+     * @throws APIManagementException In the event of unexpected response
+     * @throws ParseException In the event of any parse errors from the response
+     */
     private String createAuditApi(String collectionId, String apiToken, APIIdentifier apiIdentifier,
                                   String apiDefinition, String baseUrl, boolean isDebugEnabled)
             throws IOException, APIManagementException, ParseException {

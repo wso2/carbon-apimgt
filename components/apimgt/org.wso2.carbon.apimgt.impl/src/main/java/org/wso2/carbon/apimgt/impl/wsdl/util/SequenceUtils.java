@@ -109,6 +109,10 @@ public class SequenceUtils {
      */
     public static void updateRestToSoapConvertedSequences(String name, String version, String provider, String seqType,
             String content) throws APIManagementException {
+
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);

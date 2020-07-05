@@ -264,8 +264,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
             //Check whether the subscription status is not empty and also not blocked
             if (body.getStatus() != null) {
-                if (body.getStatus().value() == "BLOCKED" || body.getStatus().value() == "ON_HOLD"
-                        || body.getStatus().value() == "REJECTED") {
+                if ("BLOCKED".equals(body.getStatus().value()) || "ON_HOLD".equals(body.getStatus().value())
+                        || "REJECTED".equals(body.getStatus().value())) {
                     RestApiUtil.handleBadRequest(
                             "Cannot update subscriptions with provided status", log);
                     return null;

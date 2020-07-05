@@ -4506,6 +4506,17 @@ public final class APIUtil {
                 }
             }
 
+            // create devOps role if it's creation is enabled in tenant-conf.json
+            JSONObject devOpsRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_DEVOPS_ROLE);
+            if (isRoleCreationEnabled(devOpsRoleConfig)) {
+                String devOpsRoleName = String.valueOf(devOpsRoleConfig
+                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (!StringUtils.isBlank(devOpsRoleName)) {
+                    createDevOpsRole(devOpsRoleName, tenantId);
+                }
+            }
+
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
         }
@@ -4803,6 +4814,22 @@ public final class APIUtil {
                 new Permission(APIConstants.Permissions.CONFIGURE_GOVERNANCE, UserMgtConstants.EXECUTE_ACTION),
                 new Permission(APIConstants.Permissions.RESOURCE_GOVERN, UserMgtConstants.EXECUTE_ACTION)};
         createRole(roleName, creatorPermissions, tenantId);
+    }
+
+    /**
+     * Create APIM DevOps roles with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createDevOpsRole(String roleName, int tenantId) throws APIManagementException {
+        Permission[] devOpsPermissions = new Permission[]{
+                new Permission(APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
+        };
+        createRole(roleName, devOpsPermissions, tenantId);
     }
 
     /**
@@ -9951,9 +9978,12 @@ public final class APIUtil {
             base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
                     .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
             StringBuilder jwtHeader = new StringBuilder();
-            //Sample header
-            //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
-            //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
+            /*
+            * Sample header
+            * {"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10",
+            * "kid":"a_jhNus21KVuoFx65LmkW2O_l10_RS256"}
+            * {"typ":"JWT", "alg":"[2]", "x5t":"[1]", "x5t":"[1]"}
+            * */
             jwtHeader.append("{\"typ\":\"JWT\",");
             jwtHeader.append("\"alg\":\"");
             jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
@@ -9961,9 +9991,13 @@ public final class APIUtil {
 
             jwtHeader.append("\"x5t\":\"");
             jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append('\"');
+            jwtHeader.append("\",");
 
-            jwtHeader.append('}');
+            jwtHeader.append("\"kid\":\"");
+            jwtHeader.append(getKID(base64UrlEncodedThumbPrint, getJWSCompliantAlgorithmCode(signatureAlgorithm)));
+            jwtHeader.append("\"");
+
+            jwtHeader.append("}");
             return jwtHeader.toString();
 
         } catch (Exception e) {
@@ -9985,6 +10019,17 @@ public final class APIUtil {
         } else {
             return signatureAlgorithm;
         }
+    }
+
+    /**
+     * Helper method to add kid claim into to JWT_HEADER.
+     *
+     * @param certThumbprint  thumbPrint generated for certificate
+     * @param signatureAlgorithm  relevant signature algorithm
+     * @return KID
+     */
+    private static String getKID(String certThumbprint, String signatureAlgorithm) {
+        return certThumbprint + "_" + signatureAlgorithm;
     }
 
     /**
@@ -10046,6 +10091,8 @@ public final class APIUtil {
                 subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
                 subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
                 subscriptionPolicyDTO.setTierQuotaType(subscriptionPolicy.getTierQuotaType());
+                subscriptionPolicyDTO.setGraphQLMaxDepth(subscriptionPolicy.getGraphQLMaxDepth());
+                subscriptionPolicyDTO.setGraphQLMaxComplexity(subscriptionPolicy.getGraphQLMaxComplexity());
                 subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
             }
             jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
@@ -10107,11 +10154,8 @@ public final class APIUtil {
 
         boolean isJwtToken = false;
         try {
-            org.json.JSONObject decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder()
-                    .decode(token.split("\\.")[0])));
             // Check if the decoded header contains type as 'JWT'.
-            if (APIConstants.JWT.equals(decodedHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))
-                    && (StringUtils.countMatches(token, APIConstants.DOT) == 2)) {
+            if (StringUtils.countMatches(token, APIConstants.DOT) == 2) {
                 isJwtToken = true;
             } else {
                 log.debug("Not a valid JWT token. " + getMaskedToken(token));
@@ -10301,32 +10345,6 @@ public final class APIUtil {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
-    }
-
-    public static void publishEventToStream(String streamId, String eventPublisherName, Object[] eventData) {
-
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            OutputEventAdapterService eventAdapterService =
-                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
-            Event blockingMessage = new Event(streamId, System.currentTimeMillis(),
-                    null, null, eventData);
-            ThrottleProperties throttleProperties =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration().getThrottleProperties();
-
-            if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-                eventAdapterService.publish(eventPublisherName, Collections.EMPTY_MAP, blockingMessage);
-            }
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-
     }
 
     /**
@@ -10638,6 +10656,42 @@ public final class APIUtil {
             tenantFlowStarted = true;
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
                     .publish(eventName, dynamicProperties, event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
+    public static void publishEventToTrafficManager(Map dynamicProperties, Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                    .publish(APIConstants.BLOCKING_EVENT_PUBLISHER, dynamicProperties, event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
+    public static void publishEventToEventHub(Map dynamicProperties, Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                    .publish(APIConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER, dynamicProperties, event);
         } finally {
             if (tenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();

@@ -24,6 +24,7 @@ public class ApiPolicyDTO   {
     private String name = null;
     private String quotaType = null;
     private List<ApiPolicyConditionGroupDTO> conditionGroups = new ArrayList<>();
+    private String applicableLevel = null;
 
   /**
    **/
@@ -110,6 +111,23 @@ public class ApiPolicyDTO   {
     this.conditionGroups = conditionGroups;
   }
 
+  /**
+   **/
+  public ApiPolicyDTO applicableLevel(String applicableLevel) {
+    this.applicableLevel = applicableLevel;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("applicableLevel")
+  public String getApplicableLevel() {
+    return applicableLevel;
+  }
+  public void setApplicableLevel(String applicableLevel) {
+    this.applicableLevel = applicableLevel;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -124,12 +142,13 @@ public class ApiPolicyDTO   {
         Objects.equals(tenantId, apiPolicy.tenantId) &&
         Objects.equals(name, apiPolicy.name) &&
         Objects.equals(quotaType, apiPolicy.quotaType) &&
-        Objects.equals(conditionGroups, apiPolicy.conditionGroups);
+        Objects.equals(conditionGroups, apiPolicy.conditionGroups) &&
+        Objects.equals(applicableLevel, apiPolicy.applicableLevel);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType, conditionGroups);
+    return Objects.hash(id, tenantId, name, quotaType, conditionGroups, applicableLevel);
   }
 
   @Override
@@ -142,6 +161,7 @@ public class ApiPolicyDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    conditionGroups: ").append(toIndentedString(conditionGroups)).append("\n");
+    sb.append("    applicableLevel: ").append(toIndentedString(applicableLevel)).append("\n");
     sb.append("}");
     return sb.toString();
   }

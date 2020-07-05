@@ -50,6 +50,9 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Cetificates from 'AppComponents/KeyManagers/Cetificates';
 
 const useStyles = makeStyles((theme) => ({
+    root: {
+        marginBottom: theme.spacing(10),
+    },
     error: {
         color: theme.palette.error.dark,
     },
@@ -357,7 +360,7 @@ function AddEditKeyManager(props) {
         >
 
 
-            <Box component='div' m={2}>
+            <Box component='div' m={2} className={classes.root}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12} lg={3}>
                         <Typography color='inherit' variant='subtitle2' component='div'>
@@ -685,8 +688,8 @@ function AddEditKeyManager(props) {
                                     <div className={classes.chipHelper}>
                                         {intl.formatMessage({
                                             id: 'Throttling.Advanced.AddEdit.form.claim.help',
-                                            // eslint-disable-next-line max-len
-                                            defaultMessage: 'Type Available Grant Types and press Enter/Return to add them.',
+                                            defaultMessage: 'Type Available Grant Types and '
+                                            + 'press Enter/Return to add them.',
                                         })}
                                     </div>
                                 )}

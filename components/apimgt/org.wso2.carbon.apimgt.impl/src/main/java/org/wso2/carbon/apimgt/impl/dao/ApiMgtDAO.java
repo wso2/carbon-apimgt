@@ -86,6 +86,7 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
+import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
@@ -825,7 +826,7 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         int subscriptionId = -1;
         int id = -1;
-
+        
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -846,7 +847,7 @@ public class ApiMgtDAO {
             ps.setInt(2, applicationId);
 
             resultSet = ps.executeQuery();
-
+            int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             //If the subscription already exists
             if (resultSet.next()) {
                 String subStatus = resultSet.getString("SUB_STATUS");
@@ -890,13 +891,15 @@ public class ApiMgtDAO {
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
                 preparedStForInsert = conn.prepareStatement(sqlQuery, new String[]{"subscription_id"});
             }
-
+            String tier;
             if (!isProduct) {
-                preparedStForInsert.setString(1, apiTypeWrapper.getApi().getId().getTier());
-                preparedStForInsert.setString(10, apiTypeWrapper.getApi().getId().getTier());
+                tier = apiTypeWrapper.getApi().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
             } else {
-                preparedStForInsert.setString(1, apiTypeWrapper.getApiProduct().getId().getTier());
-                preparedStForInsert.setString(10, apiTypeWrapper.getApiProduct().getId().getTier());
+                tier = apiTypeWrapper.getApiProduct().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
             }
             preparedStForInsert.setInt(2, id);
             preparedStForInsert.setInt(3, applicationId);
@@ -918,6 +921,13 @@ public class ApiMgtDAO {
 
             // finally commit transaction
             conn.commit();
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
+                    tenantId, tenantDomain , subscriptionId,id, applicationId, tier,
+                    (status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED));
+            APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -1205,6 +1215,7 @@ public class ApiMgtDAO {
                     APIIdentifier apiIdentifier = new APIIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
+                    apiIdentifier.setId(resultSet.getInt("API_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
                 subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
@@ -1258,6 +1269,7 @@ public class ApiMgtDAO {
                     APIIdentifier apiIdentifier = new APIIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
+                    apiIdentifier.setId(resultSet.getInt("API_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
                 
@@ -4671,6 +4683,10 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            if (connection.getMetaData().getDriverName().contains("MS SQL") ||
+                    connection.getMetaData().getDriverName().contains("Microsoft")) {
+                offset = start + offset;
+            }
             // sortColumn, sortOrder variable values has sanitized in jaggery level (applications-list.jag)for security.
             sqlQuery = sqlQuery.replace("$1", sortColumn);
             sqlQuery = sqlQuery.replace("$2", sortOrder);
@@ -5600,11 +5616,6 @@ public class ApiMgtDAO {
                             throw new APIManagementException(msg);
                         }
                         subscriptionIdMap.put(info.subscriptionId, subscriptionId);
-                        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                                tenantId, info.subscriptionId,apiIdentifier.getUUID(), info.applicationId, info.tierId,
-                                info.subscriptionStatus);
-                        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                     }
                     int subscriptionId = subscriptionIdMap.get(info.subscriptionId);
                     connection.setAutoCommit(false);
@@ -5652,11 +5663,6 @@ public class ApiMgtDAO {
                         int subscriptionId = addSubscription(apiTypeWrapper, applicationId, subscriptionStatus, apiIdentifier.getProviderName());
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
-                        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                                tenantId, subscriptionId, apiIdentifier.getUUID(), applicationId,
-                                rs.getString("TIER_ID"), subscriptionStatus);
-                        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                     } catch (SubscriptionAlreadyExistingException e) {
                         //Not handled as an error because same subscription can be there in many previous versions.
                         //Ex: if previous version was created by another older version and if the subscriptions are
@@ -14565,18 +14571,17 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Configure email list
-     * modify email list by adding or removing emails
+     * Add a bot detection alert subscription
+     *
+     * @param email email to be registered for the subscription
+     * @throws APIManagementException if an error occurs when adding a bot detection alert subscription
      */
-    public void addBotDataEmailConfiguration(String email) throws SQLException, APIManagementException {
-        Connection connection;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        connection = APIMgtDBUtil.getConnection();
-        connection.setAutoCommit(false);
-        try {
-            String emailListSaveQuery = SQLConstants.BotDataConstants.ADD_NOTIFICATION;
-            ps = connection.prepareStatement(emailListSaveQuery);
+    public void addBotDetectionAlertSubscription(String email) throws APIManagementException {
+
+        String query = SQLConstants.BotDataConstants.ADD_NOTIFICATION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
             UUID uuid = UUID.randomUUID();
             String randomUUIDString = uuid.toString();
             String category = "Bot-Detection";
@@ -14588,30 +14593,22 @@ public class ApiMgtDAO {
             ps.execute();
             connection.commit();
         } catch (SQLException e) {
-            connection.rollback();
-            handleException("Error while save email list.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+            handleException("Error while adding bot detection alert subscription", e);
         }
     }
 
     /**
-     * retrieve email list which configured for BotDetectedData Api alert
+     * Retrieve all bot detection alert subscriptions
+     *
+     * @throws APIManagementException if an error occurs when retrieving bot detection alert subscriptions
      */
-    public List<BotDetectionData> retrieveSavedBotDataEmailList()
-            throws APIManagementException {
+    public List<BotDetectionData> getBotDetectionAlertSubscriptions() throws APIManagementException {
 
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
         List<BotDetectionData> list = new ArrayList<>();
-
-        try {
-            String sqlQuery;
-            conn = APIMgtDBUtil.getConnection();
-            sqlQuery = SQLConstants.BotDataConstants.GET_SAVED_ALERT_EMAILS;
-            ps = conn.prepareStatement(sqlQuery);
-            resultSet = ps.executeQuery();
+        String query = SQLConstants.BotDataConstants.GET_SAVED_ALERT_EMAILS;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 BotDetectionData botDetectedData = new BotDetectionData();
                 botDetectedData.setUuid(resultSet.getString("UUID"));
@@ -14619,38 +14616,63 @@ public class ApiMgtDAO {
                 list.add(botDetectedData);
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve saved email types by tenant Name. ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            handleException("Error while retrieving bot detection alert subscriptions", e);
         }
         return list;
-
     }
 
     /**
-     * Delete email list from the database by using the tenantDomain
+     * Delete a bot detection alert subscription
+     *
+     * @param uuid uuid of the subscription
+     * @throws APIManagementException if an error occurs when deleting a bot detection alert subscription
      */
-    public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
+    public void deleteBotDetectionAlertSubscription(String uuid) throws APIManagementException {
 
-        Connection connection;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        connection = APIMgtDBUtil.getConnection();
-        connection.setAutoCommit(false);
-
-        try {
+        String query = SQLConstants.BotDataConstants.DELETE_EMAIL_BY_UUID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            String deleteEmail = SQLConstants.BotDataConstants.DELETE_EMAIL_BY_UUID;
-            ps = connection.prepareStatement(deleteEmail);
             ps.setString(1, uuid);
             ps.execute();
             connection.commit();
         } catch (SQLException e) {
-            connection.rollback();
-            handleException("Failed to delete alert email data.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+            handleException("Error while deleting bot detection alert subscription", e);
         }
+    }
+
+    /**
+     * Retrieve a bot detection alert subscription by querying a particular field (uuid or email)
+     *
+     * @param field field to be queried to obtain the bot detection alert subscription. Can be uuid or email
+     * @param value value corresponding to the field (uuid or email value)
+     * @return if subscription exist, returns the bot detection alert subscription, else returns a null object
+     * @throws APIManagementException
+     */
+    public BotDetectionData getBotDetectionAlertSubscription(String field, String value)
+            throws APIManagementException {
+
+        BotDetectionData alertSubscription = null;
+        String query = "";
+        if (AlertMgtConstants.BOT_DETECTION_UUID_FIELD.equals(field)) {
+            query = SQLConstants.BotDataConstants.GET_ALERT_SUBSCRIPTION_BY_UUID;
+        }
+        if (AlertMgtConstants.BOT_DETECTION_EMAIL_FIELD.equals(field)) {
+            query = SQLConstants.BotDataConstants.GET_ALERT_SUBSCRIPTION_BY_EMAIL;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, value);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                alertSubscription = new BotDetectionData();
+                alertSubscription.setUuid(resultSet.getString("UUID"));
+                alertSubscription.setEmail(resultSet.getString("SUBSCRIBER_ADDRESS"));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve bot detection alert subscription of " + field + ": " + value, e);
+        }
+        return alertSubscription;
     }
 
     /**

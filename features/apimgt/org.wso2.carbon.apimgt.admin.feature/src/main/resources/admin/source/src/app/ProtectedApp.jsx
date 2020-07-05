@@ -311,9 +311,9 @@ class Protected extends Component {
         return (
             <MuiThemeProvider theme={theme}>
                 <AppErrorBoundary>
-                    <Base header={header} leftMenu={leftMenu}>
-                        {settings ? (
-                            <AppContextProvider value={{ settings, user, isSuperTenant }}>
+                    {settings ? (
+                        <AppContextProvider value={{ settings, user, isSuperTenant }}>
+                            <Base header={header} leftMenu={leftMenu}>
                                 <Route>
                                     <Switch>
                                         <Redirect exact from='/' to='/dashboard' />
@@ -327,11 +327,11 @@ class Protected extends Component {
                                         <Route component={ResourceNotFound} />
                                     </Switch>
                                 </Route>
-                            </AppContextProvider>
-                        ) : (
-                            <Progress message='Loading Settings ...' />
-                        )}
-                    </Base>
+                            </Base>
+                        </AppContextProvider>
+                    ) : (
+                        <Progress message='Loading Settings ...' />
+                    )}
                     <iframe
                         title='iframeOP'
                         id='iframeOP'

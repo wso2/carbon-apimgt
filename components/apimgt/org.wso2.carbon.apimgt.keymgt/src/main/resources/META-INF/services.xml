@@ -17,15 +17,6 @@
  -->
 <serviceGroup>
 
-    <service name="APIKeyValidationService" scope="transportsession">
-        <transports><transport>https</transport></transports>
-        <schema schemaNamespace="http://org.apache.axis2/xsd" elementFormDefaultQualified="true" />
-        <description>API Key validation functionality required by the API Gateway.</description>
-        <parameter name="ServiceClass">org.wso2.carbon.apimgt.keymgt.service.APIKeyValidationService</parameter>
-        <parameter name="DoAuthentication" locked="true">true</parameter>
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage</parameter>
-    </service>
-
     <service name="APIKeyMgtRemoteUserStoreMgtService" scope="transportsession">
         <transports><transport>https</transport></transports>
         <schema schemaNamespace="http://org.apache.axis2/xsd" elementFormDefaultQualified="true" />

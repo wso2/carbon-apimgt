@@ -17,36 +17,30 @@
  */
 
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import APICategoriesCard from 'AppComponents/AdminPages/Dashboard/APICategoriesCard';
 import RateLimitingCard from 'AppComponents/AdminPages/Dashboard/RateLimitingCard';
-
-const useStyles = makeStyles(() => ({
-    rootGrid: {
-        flexGrow: 1,
-    },
-}));
+import TasksWorkflowCard from 'AppComponents/AdminPages/Dashboard/TasksWorkflowCard';
 
 /**
  * Render progress inside a container centering in the container.
  * @returns {JSX} Loading animation.
  */
 export default function Dashboard() {
-    const classes = useStyles();
     return (
-        <ContentBase title='Dashboard' pageStyle='paperLess'>
-            <div className={classes.rootGrid}>
-                <Grid container spacing={3} justify='center'>
-                    <Grid item xs={6}>
-                        <RateLimitingCard />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <APICategoriesCard />
-                    </Grid>
+        <ContentBase width='full' title='Dashboard' pageStyle='paperLess'>
+            <Grid container spacing={3} justify='center'>
+                <Grid item xs={11} md={6}>
+                    <RateLimitingCard />
                 </Grid>
-            </div>
+                <Grid item xs={11} md={6}>
+                    <APICategoriesCard />
+                </Grid>
+                <Grid item xs={11} md={6}>
+                    <TasksWorkflowCard />
+                </Grid>
+            </Grid>
         </ContentBase>
     );
 }

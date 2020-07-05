@@ -76,12 +76,10 @@ function validateIPRange(startIP, endIP) {
         let startIp = 0;
         let endIp = 0;
         for (let i = 0; i < 4; i++) {
-            // eslint-disable-next-line no-restricted-properties
-            startIp += startIPBlocks[i] * Math.pow(256, 3 - i);
+            startIp += startIPBlocks[i] * 256 ** (3 - i);
         }
         for (let i = 0; i < 4; i++) {
-            // eslint-disable-next-line no-restricted-properties
-            endIp += endIPBlocks[i] * Math.pow(256, 3 - i);
+            endIp += endIPBlocks[i] * 256 ** (3 - i);
         }
         if (startIp < endIp) {
             return true;
@@ -120,8 +118,7 @@ function reducer(state, { field, value }) {
         case 'specificIP':
         case 'startingIP':
         case 'endingIP':
-        case 'conditionalGroups':
-            nextState[field] = value;
+            nextState.ipCondition[field] = value;
             return nextState;
         default:
             return nextState;
@@ -168,11 +165,18 @@ function AddEditConditionPolicyIP(props) {
     let initialState = {
         type: 'IPCONDITION',
         invertCondition: false,
-        ipConditionType: 'IPSPECIFIC',
-        specificIP: '',
-        startingIP: null,
-        endingIP: null,
+        headerCondition: null,
+        ipCondition: {
+            ipConditionType: 'IPSPECIFIC',
+            specificIP: '',
+            startingIP: null,
+            endingIP: null,
+        },
+        jwtClaimsCondition: null,
+        queryParameterCondition: null,
     };
+
+
     if (item) {
         initialState = { ...item };
     }
@@ -181,7 +185,9 @@ function AddEditConditionPolicyIP(props) {
         dispatch({ field: e.target.name, value: e.target.value });
     };
     const {
-        ipConditionType, specificIP, startingIP, endingIP,
+        ipCondition: {
+            ipConditionType, specificIP, startingIP, endingIP,
+        },
     } = state;
     const hasErrors = (fieldName, value, validatingActive = false) => {
         let error = false;
@@ -236,9 +242,9 @@ function AddEditConditionPolicyIP(props) {
         setValidating(true);
         if (!formHasErrors(true)) {
             return ((setOpen) => {
-                callBack(row, {
+                callBack({
                     ipConditionType, specificIP, startingIP, endingIP,
-                });
+                }, item);
                 setOpen(false);
             });
         }
@@ -333,7 +339,7 @@ function AddEditConditionPolicyIP(props) {
                         className={classes.textFieldLeft}
                         margin='dense'
                         name='startingIP'
-                        value={startingIP}
+                        value={startingIP || ''}
                         onChange={onChange}
                         label={(
                             <span>
@@ -355,7 +361,7 @@ function AddEditConditionPolicyIP(props) {
                     <TextField
                         margin='dense'
                         name='endingIP'
-                        value={endingIP}
+                        value={endingIP || ''}
                         onChange={onChange}
                         label={(
                             <span>

@@ -21,7 +21,7 @@ public class DeployAPIInGatewayNotifier implements Notifier {
             org.wso2.carbon.databridge.commons.Event payload = new org.wso2.carbon.databridge.commons.Event(
                     APIConstants.NOTIFICATION_STREAM_ID, System.currentTimeMillis(),
                     null, null, objects);
-            APIUtil.publishEvent(APIConstants.NOTIFICATION_EVENT_PUBLISHER, null, payload);
+            APIUtil.publishEventToEventHub(null, payload);
             return true;
         } catch (Exception e) {
             throw new NotifierException(e);

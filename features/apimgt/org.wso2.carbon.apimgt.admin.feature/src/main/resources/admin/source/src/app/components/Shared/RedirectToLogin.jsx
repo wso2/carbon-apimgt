@@ -20,27 +20,9 @@ import React from 'react';
 import Configurations from 'Config';
 import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
+import ErrorPage from '../../errorPages/ErrorPage';
 
 const page = Configurations.app.context + '/services/auth/login';
-
-/**
- *
- * Just doing the redirection, If you want to trigger redirection to login page , Import this util method and use.
- * Note: Don't use this method inside a render method. It will cause to cancel the initial request in Chrome
- * and re-trigger same request
- * Sample usage:
- * import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin'
- *
- * componentDidMount() {
- *      doRedirectToLogin();
- * }
- * @export
- */
-export function doRedirectToLogin() {
-    AuthManager.discardUser();
-    console.log('redirecting to: ', page);
-    window.location = page;
-}
 
 /**
  * This component is created to unify the login process from react UI.
@@ -49,13 +31,32 @@ export function doRedirectToLogin() {
  * @class RedirectToLogin
  */
 class RedirectToLogin extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isError: false,
+            errorCode: '',
+        };
+    }
+
     /**
      *
      * @inheritdoc
      * @memberof RedirectToLogin
      */
     componentDidMount() {
-        doRedirectToLogin();
+        const queryString = window.location.search;
+        if (queryString.includes('?code=')) {
+            const code = queryString !== undefined ? queryString.split('=') : '';
+            this.setState({ errorCode: code[1] });
+            this.setState({ isError: true });
+        } else {
+            AuthManager.discardUser();
+            window.location = page;
+            this.setState({ isError: false });
+            return page;
+        }
+        return '';
     }
 
     /**
@@ -65,12 +66,18 @@ class RedirectToLogin extends React.Component {
      * @memberof RedirectToLogin
      */
     render() {
+        const { isError, errorCode } = this.state;
         return (
-            <FormattedMessage
-                id='Apis.Shared.RedirectToLogin.you.will.be.redirected.to'
-                defaultMessage='You will be redirected to {page}'
-                values={{ page }}
-            />
+            isError ? (
+                <ErrorPage errorCode={errorCode} />
+
+            ) : (
+                <FormattedMessage
+                    id='Apis.Shared.RedirectToLogin.you.will.be.redirected.to'
+                    defaultMessage='You will be redirected to {page}'
+                    values={{ page }}
+                />
+            )
         );
     }
 }

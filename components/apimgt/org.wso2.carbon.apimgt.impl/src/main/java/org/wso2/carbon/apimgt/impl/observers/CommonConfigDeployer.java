@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -152,10 +153,8 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         } catch (XMLStreamException e) {
             log.error("Error while parsing Lifecycle.xml", e);
         }
-        try {
-            KeyMgtRegistrationService.registerDefaultKeyManager(tenantDomain);
-        } catch (APIManagementException e) {
-            log.error("Error while creating Default Key Manager for tenant " + tenantDomain, e);
-        }
+        KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever =
+                new KeyManagerConfigurationDataRetriever(tenantDomain);
+        keyManagerConfigurationDataRetriever.startLoadKeyManagerConfigurations();
     }
 }

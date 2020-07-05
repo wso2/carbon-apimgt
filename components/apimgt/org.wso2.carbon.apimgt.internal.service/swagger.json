@@ -688,6 +688,9 @@
     },
     "Application" : {
       "properties" : {
+        "uuid" : {
+          "type" : "string"
+        },
         "id" : {
           "type" : "integer"
         },
@@ -843,6 +846,9 @@
         },
         "keyType" : {
           "type" : "string"
+        },
+        "keyManager" : {
+          "type" : "string"
         }
       }
     },
@@ -968,6 +974,9 @@
             "items" : {
               "$ref" : "#/definitions/ApiPolicyConditionGroup"
             }
+          },
+          "applicableLevel" : {
+            "type" : "string"
           }
         }
       } ]
@@ -1049,7 +1058,7 @@
         },
         "previous" : {
           "type" : "string",
-          "description" : "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned."
+          "description" : "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n"
         }
       },
       "title" : "Pagination"

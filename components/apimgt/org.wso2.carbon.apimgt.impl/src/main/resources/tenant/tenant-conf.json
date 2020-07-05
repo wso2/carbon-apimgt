@@ -96,15 +96,15 @@
       },
       {
         "Name": "apim:app_import_export",
-        "Roles": "admin"
+        "Roles": "admin,Internal/devops"
       },
       {
         "Name": "apim:api_import_export",
-        "Roles": "admin"
+        "Roles": "admin,Internal/devops"
       },
       {
         "Name": "apim:api_product_import_export",
-        "Roles": "admin"
+        "Roles": "admin,Internal/devops"
       },
       {
         "Name": "apim:label_manage",
@@ -120,11 +120,11 @@
       },
       {
         "Name": "apim:app_manage",
-        "Roles": "admin,Internal/subscriber"
+        "Roles": "admin,Internal/subscriber,Internal/devops"
       },
       {
         "Name": "apim:sub_manage",
-        "Roles": "admin,Internal/subscriber"
+        "Roles": "admin,Internal/subscriber,Internal/devops"
       },
       {
         "Name" : "apim:monetization_usage_publish",
@@ -307,6 +307,10 @@
     },
     "SubscriberRole" : {
       "CreateOnTenantLoad" : true
+    },
+    "DevOpsRole" : {
+      "CreateOnTenantLoad" : true,
+      "RoleName" : "Internal/devops"
     }
   }
 }

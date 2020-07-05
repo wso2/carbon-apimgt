@@ -367,14 +367,8 @@
        {% if apim.jwt.expiry_time is defined %}
         <JWTExpiryTime>{{apim.jwt.expiry_time}}</JWTExpiryTime>
        {% endif %}
-        {% if apim.key_manager.inmemory_sub_validation is defined %}
-        <InMemorySubscriptionValidation>
-            <Enabled>{{apim.key_manager.inmemory_sub_validation.enable}}</Enabled>
-            <ServiceURL>{{apim.key_manager.inmemory_sub_validation.service_url}}</ServiceURL>
-            <username>{{apim.key_manager.inmemory_sub_validation.username}}</username>
-            <password>{{apim.key_manager.inmemory_sub_validation.password}}</password>
-        </InMemorySubscriptionValidation>
-        {% endif %}
+     <EnableDefaultKeyManagerRegistration>{{apim.key_manager.enable_registration}}</EnableDefaultKeyManagerRegistration>
+     <EnableKeyManagerConfigurationRetriever>{{apim.key_manager.enable_retriever}}</EnableKeyManagerConfigurationRetriever>
     </APIKeyValidator>
 
 
@@ -1017,6 +1011,32 @@
             <BaseUrl>{{security_audit.base_url}}</BaseUrl>
             <Global>{{security_audit.global}}</Global>
         </APISecurityAudit>
+    {% endif %}
+
+    {% if apim.redis_config is defined %}
+        <RedisConfig>
+            {% if apim.redis_config.host is defined %}
+            <RedisHost>{{apim.redis_config.host}}</RedisHost>
+            {% endif %}
+            {% if apim.redis_config.port is defined %}
+            <RedisPort>{{apim.redis_config.port}}</RedisPort>
+            {% endif %}
+            {% if apim.redis_config.user is defined %}
+            <RedisUser>{{apim.redis_config.user}}</RedisUser>
+            {% endif %}
+            {% if apim.redis_config.password is defined %}
+            <RedisPassword>{{apim.redis_config.password}}</RedisPassword>
+            {% endif %}
+            {% if apim.redis_config.database_id is defined %}
+            <RedisDatabaseId>{{apim.redis_config.database_id}}</RedisDatabaseId>
+            {% endif %}
+            {% if apim.redis_config.connection_timeout is defined %}
+            <RedisConnectionTimeout>{{apim.redis_config.connection_timeout}}</RedisConnectionTimeout>
+            {% endif %}
+            {% if apim.redis_config.ssl is defined %}
+            <RedisIsSslEnabled>{{apim.redis_config.ssl}}</RedisIsSslEnabled>
+            {% endif %}
+        </RedisConfig>
     {% endif %}
 
     {% if apim.devportal.application_attributes is defined %}

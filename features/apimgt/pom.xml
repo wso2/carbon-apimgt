@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>6.7.37-SNAPSHOT</version>
+        <version>6.7.73-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -49,6 +49,7 @@
         <module>org.wso2.carbon.apimgt.throttling.siddhi.extension.feature</module>
         <module>org.wso2.carbon.apimgt.tracing.feature</module>
         <module>org.wso2.carbon.apimgt.tokenmgt.feature</module>
+        <module>org.wso2.carbon.apimgt.internal.service.feature</module>
     </modules>
     <build>
         <plugins>

@@ -126,7 +126,7 @@ function EndpointSecurity(props) {
             key: 'OAUTH',
             value: intl.formatMessage({
                 id: 'Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.oauth',
-                defaultMessage: 'OAuth',
+                defaultMessage: 'OAuth 2.0',
             }),
         },
     ];

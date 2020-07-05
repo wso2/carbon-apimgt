@@ -49,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SubscriptionValidationDAO {
@@ -69,7 +68,7 @@ public class SubscriptionValidationDAO {
                 PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APIS_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
-            populateAPIList(resultSet, apiList, conn);
+            populateAPIList(resultSet, apiList);
 
         } catch (SQLException e) {
             log.error("Error in loading Apis : ", e);
@@ -133,17 +132,20 @@ public class SubscriptionValidationDAO {
                 if (application == null) {
                     application = new Application();
                     application.setId(appId);
+                    application.setUuid(resultSet.getString("APP_UUID"));
                     application.setPolicy(resultSet.getString("TIER"));
                     application.setSubName(resultSet.getString("SUB_NAME"));
+                    application.setName(resultSet.getString("NAME"));
                     application.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     temp.put(appId, application);
                 }
+                String attributeName = resultSet.getString("ATTRIBUTE_NAME");
+                String attributeValue = resultSet.getString("ATTRIBUTE_VALUE");
+                if (StringUtils.isNotEmpty(attributeName) && StringUtils.isNotEmpty(attributeValue)) {
+                    application.addAttribute(attributeName, attributeValue);
+                }
                 // todo read from the aplication_group_mapping table and make it a set
 //                application.addGroupId(resultSet.getString("GROUP_ID"));
-                // todo read attributes from the aplication_attributes table and make it a map
-//                String attributeName = resultSet.getString("NAME");
-//                String attributeValue = resultSet.getString("VALUE");
-//                application.addAttribute(attributeName, attributeValue);
 
                 list.add(application);
             }
@@ -288,7 +290,7 @@ public class SubscriptionValidationDAO {
                 ps.setString(2, APIConstants.TENANT_PREFIX + tenantDomain + "%");
             }
             ResultSet resultSet = ps.executeQuery();
-            populateAPIList(resultSet, apiList, conn);
+            populateAPIList(resultSet, apiList);
 
         } catch (SQLException e) {
             log.error("Error in loading Apis for tenantId : " + tenantDomain, e);
@@ -308,7 +310,8 @@ public class SubscriptionValidationDAO {
         API api = null;
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL);) {
+                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL + " UNION "
+                        + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
             ps.setString(1, version);
             ps.setString(2, context);
             ps.setString(3, version);
@@ -328,13 +331,21 @@ public class SubscriptionValidationDAO {
                     api.setContext(resultSet.getString("CONTEXT"));
                     temp.put(apiId, api);
                 }
-
-                URLMapping urlMapping = new URLMapping();
-                urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
-                urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
-                api.addResource(urlMapping);
-
+                String urlPattern = resultSet.getString("URL_PATTERN");
+                String httpMethod = resultSet.getString("HTTP_METHOD");
+                URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
+                if (urlMapping == null) {
+                    urlMapping = new URLMapping();
+                    urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
+                    urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                    urlMapping.setHttpMethod(httpMethod);
+                    urlMapping.setUrlPattern(urlPattern);
+                    api.addResource(urlMapping);
+                }
+                String scopeName = resultSet.getString("SCOPE_NAME");
+                if (StringUtils.isNotEmpty(scopeName)) {
+                    urlMapping.addScope(scopeName);
+                }
             }
 
         } catch (SQLException e) {
@@ -344,7 +355,7 @@ public class SubscriptionValidationDAO {
         return api;
     }
 
-    private void populateAPIList(ResultSet resultSet, List<API> apiList, Connection conn) throws SQLException {
+    private void populateAPIList(ResultSet resultSet, List<API> apiList) throws SQLException {
 
         Map<Integer, API> temp = new ConcurrentHashMap<>();
         Map<Integer, URLMapping> tempUrls = new ConcurrentHashMap<>();
@@ -380,7 +391,7 @@ public class SubscriptionValidationDAO {
     private void createURLMapping(ResultSet resultSet, Map<Integer, URLMapping> tempUrls, API api) throws SQLException {
 
         int urlId = resultSet.getInt("URL_MAPPING_ID");
-        URLMapping urlMapping = null;
+        URLMapping urlMapping;
         urlMapping = tempUrls.get(urlId);
         if (urlMapping == null) {
             urlMapping = new URLMapping();
@@ -392,7 +403,10 @@ public class SubscriptionValidationDAO {
             tempUrls.put(urlId, urlMapping);
             api.addResource(urlMapping);
         }
-        urlMapping.addScope(resultSet.getString("SCOPE_NAME"));
+        String scopeName = resultSet.getString("SCOPE_NAME");
+        if (StringUtils.isNotEmpty(scopeName)) {
+            urlMapping.addScope(scopeName);
+        }
 
     }
     /*
@@ -508,6 +522,7 @@ public class SubscriptionValidationDAO {
                 keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                 keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                 keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
+                keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
                 keyMappings.add(keyMapping);
             }
 
@@ -631,8 +646,9 @@ public class SubscriptionValidationDAO {
                     apiPolicy = new APIPolicy();
                     apiPolicy.setId(policyId);
                     apiPolicy.setName(resultSet.getString("NAME"));
-                    apiPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                    apiPolicy.setQuotaType(resultSet.getString("DEFAULT_QUOTA_TYPE"));
                     apiPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    apiPolicy.setApplicableLevel(resultSet.getString("APPLICABLE_LEVEL"));
                     apiPolicies.add(apiPolicy);
                 }
                 APIPolicyConditionGroup apiPolicyConditionGroup = new APIPolicyConditionGroup();
@@ -650,6 +666,7 @@ public class SubscriptionValidationDAO {
                 ConditionDTO[] conditionDTOS = conditionGroupDTO.getConditions();
                 apiPolicyConditionGroup.setConditionDTOS(Arrays.asList(conditionDTOS));
                 apiPolicy.addConditionGroup(apiPolicyConditionGroup);
+                temp.put(policyId, apiPolicy);
             }
         }
     }
@@ -753,11 +770,11 @@ public class SubscriptionValidationDAO {
      * @return {@link ApplicationPolicy}
      * */
     public APIPolicy getApiPolicyByNameForTenant(String policyName, String tenantDomain) {
-
+        APIPolicy policy = null;
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_POLICY_SQL);
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICY_SQL);
         ) {
             int tenantId = 0;
             try {
@@ -766,13 +783,21 @@ public class SubscriptionValidationDAO {
             } catch (UserStoreException e) {
                 log.error("Error in loading ApplicationPolicy for tenantDomain : " + tenantDomain, e);
             }
-            //todo
+            ps.setInt(1, tenantId);
+            ps.setString(2, policyName);
+            ResultSet resultSet = ps.executeQuery();
+
+            List<APIPolicy> apiPolicies = new ArrayList<APIPolicy>();
+            populateApiPolicyList(apiPolicies , resultSet);
+            if (!apiPolicies.isEmpty()) {
+                policy = apiPolicies.get(0);
+            }
 
         } catch (SQLException e) {
             log.error("Error in loading application policies by policyId : " + policyName + " of " + policyName, e);
         }
 
-        return null;
+        return policy;
     }
 
     /*
@@ -871,11 +896,12 @@ public class SubscriptionValidationDAO {
                 keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                 keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                 keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
+                keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
                 return keyMapping;
             }
 
         } catch (SQLException e) {
-            log.error("Error in loading Application Key Mappinghsacfrgtghf54trtjkl;{786754w `13457868789[-876re7w4wertyi875 for consumer key : " + consumerKey, e);
+            log.error("Error in loading Application Key Mapping for consumer key : " + consumerKey, e);
         }
         return null;
     }

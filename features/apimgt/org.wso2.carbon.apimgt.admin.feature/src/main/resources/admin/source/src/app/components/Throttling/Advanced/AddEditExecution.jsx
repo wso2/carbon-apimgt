@@ -80,20 +80,46 @@ function AddEditExecution(props) {
         }
         const field = e.target.name;
         const { value } = e.target;
+        /*
+        We are preping the payload for following two cases.
+        ======== 1 =========
+        {
+            "type": "BANDWIDTHLIMIT",
+            "requestCount": null,
+            "bandwidth": {
+            "timeUnit": "min",
+            "unitTime": 1,
+            "dataAmount": 1,
+            "dataUnit": "KB"
+            }
+        }
+        ======== 2 =========
+        {
+            "type": "REQUESTCOUNTLIMIT",
+            "requestCount": {
+            "timeUnit": "min",
+            "unitTime": 1,
+            "requestCount": 5
+            },
+            "bandwidth": null
+        }
+        */
         if (field === 'defaultLimit') {
         // Handling the radio buttons.
             if (value === 'REQUESTCOUNTLIMIT') {
                 const { timeUnit: bandwidthTimeUnit, unitTime: bandwidthUnitTime } = bandwidth;
                 limit.requestCount = {
-                    type: 'REQUESTCOUNTLIMIT', bandwidthTimeUnit, bandwidthUnitTime, requestCount: 0,
+                    timeUnit: bandwidthTimeUnit, unitTime: bandwidthUnitTime, requestCount: 0,
                 };
                 limit.bandwidth = null;
+                limit.type = 'REQUESTCOUNTLIMIT';
             } else {
                 const { timeUnit: requestCountTimeUnit, unitTime: requestCountUnitTime } = requestCount;
                 limit.bandwidth = {
-                    type: 'BANDWIDTHLIMIT', requestCountTimeUnit, requestCountUnitTime, dataAmount: 0, dataUnit: 'KB',
+                    timeUnit: requestCountTimeUnit, unitTime: requestCountUnitTime, dataAmount: 0, dataUnit: 'KB',
                 };
                 limit.requestCount = null;
+                limit.type = 'BANDWIDTHLIMIT';
             }
         } else if (requestCount) {
             requestCount[field] = value;
@@ -137,7 +163,6 @@ function AddEditExecution(props) {
             <Box component='div' m={1}>
                 {requestCount && (
                     <TextField
-                        autoFocus
                         margin='dense'
                         name='requestCount'
                         value={requestCount.requestCount}
@@ -158,7 +183,6 @@ function AddEditExecution(props) {
                 {bandwidth && (
                     <Box display='flex' flexDirection='row'>
                         <TextField
-                            autoFocus
                             margin='dense'
                             name='dataAmount'
                             value={bandwidth.dataAmount}

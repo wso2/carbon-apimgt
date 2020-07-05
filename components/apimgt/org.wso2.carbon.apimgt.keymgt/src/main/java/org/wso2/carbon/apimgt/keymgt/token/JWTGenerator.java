@@ -22,15 +22,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.MethodStats;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.claim.mgt.ClaimManagementException;
 import org.wso2.carbon.claim.mgt.ClaimManagerHandler;
+import org.wso2.carbon.identity.application.common.model.Claim;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataHandler;
 import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataException;
@@ -82,11 +83,13 @@ public class JWTGenerator extends AbstractJWTGenerator {
         String applicationTier = validationContext.getValidationInfoDTO().getApplicationTier();
         String enduserTenantId = String.valueOf(APIUtil.getTenantId(endUserName));
         String apiName = validationContext.getValidationInfoDTO().getApiName();
-        Application application = getApplicationbyId(Integer.parseInt(applicationId));
+        Application application =
+                getApplicationById(validationContext.getValidationInfoDTO().getSubscriberTenantDomain(),
+                        Integer.parseInt(applicationId));
         String uuid = null;
         Map<String, String> appAttributes = null;
         if (application != null) {
-            appAttributes = application.getApplicationAttributes();
+            appAttributes = application.getAttributes();
             uuid = application.getUUID();
         }
         Map<String, String> claims = new LinkedHashMap<String, String>(20);
@@ -200,8 +203,12 @@ public class JWTGenerator extends AbstractJWTGenerator {
         Map<String, String> userClaims = new HashMap<>();
         Map<String, String> userClaimsCopy = new HashMap<>();
         for (Map.Entry<ClaimMapping, String> entry : userAttributes.entrySet()) {
-            userClaims.put(entry.getKey().getLocalClaim().getClaimUri(), entry.getValue());
-            userClaimsCopy.put(entry.getKey().getLocalClaim().getClaimUri(), entry.getValue());
+            Claim claimObject = entry.getKey().getLocalClaim();
+            if (claimObject == null) {
+                claimObject = entry.getKey().getRemoteClaim();
+            }
+            userClaims.put(claimObject.getClaimUri(), entry.getValue());
+            userClaimsCopy.put(claimObject.getClaimUri(), entry.getValue());
         }
 
         String convertClaimsFromOIDCtoConsumerDialect =

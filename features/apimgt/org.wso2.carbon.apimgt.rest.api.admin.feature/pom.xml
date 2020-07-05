@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.7.37-SNAPSHOT</version>
+        <version>6.7.73-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -73,7 +73,7 @@
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#admin#v0.16.war</destFileName>
+                                    <destFileName>api#am#admin#v0.17.war</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
@@ -104,7 +104,7 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>api#am#admin#v0.16.war</include>
+                                        <include>api#am#admin#v0.17.war</include>
                                         <include>api#am#admin.war</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
@@ -185,6 +185,9 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.util:${carbon.apimgt.version}
                                 </bundleDef>
+                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${fasterxml.jackson.version}</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-guava:${fasterxml.jackson.version}</bundleDef>
+                                <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

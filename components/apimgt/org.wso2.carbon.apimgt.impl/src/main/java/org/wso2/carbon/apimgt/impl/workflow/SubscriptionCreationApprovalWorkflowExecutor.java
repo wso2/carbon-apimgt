@@ -79,8 +79,11 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
-        log.info("Subscription Creation [Complete] Workflow Invoked. Workflow ID : " + workflowDTO
-                .getExternalWorkflowReference() + "Workflow State : " + workflowDTO.getStatus());
+        if (log.isDebugEnabled()) {
+            String logMessage = "Subscription Creation [Complete] Workflow Invoked. Workflow ID : " + workflowDTO
+                    .getExternalWorkflowReference() + " Workflow State : " + workflowDTO.getStatus();
+            log.debug(logMessage);
+        }
 
         if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();

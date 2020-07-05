@@ -27,6 +27,7 @@ public class ApplicationKeyMapping implements CacheableEntity<String> {
     private String keyType;
     private String wfState;
     private int applicationId;
+    private String keyManager;
 
     public String getConsumerKey() {
 
@@ -72,5 +73,15 @@ public class ApplicationKeyMapping implements CacheableEntity<String> {
     public String getCacheKey() {
 
         return getConsumerKey();
+    }
+
+    public void setKeyManager(String keyManager) {
+
+        this.keyManager = keyManager;
+    }
+
+    public String getKeyManager() {
+
+        return keyManager;
     }
 }

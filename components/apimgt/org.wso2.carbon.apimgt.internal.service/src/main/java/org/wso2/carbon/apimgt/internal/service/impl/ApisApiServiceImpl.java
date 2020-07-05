@@ -51,7 +51,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         APIListDTO apiListDTO;
-
+        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
                     subscriptionValidationDAO.getAllApis(xWSO2Tenant));

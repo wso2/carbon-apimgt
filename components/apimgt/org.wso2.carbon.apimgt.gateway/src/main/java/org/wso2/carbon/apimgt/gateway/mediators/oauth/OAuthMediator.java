@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators.oauth;
 
-import org.apache.commons.lang3.StringUtils;
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.codec.binary.Base64;
@@ -33,9 +33,9 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.TokenResponse;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.conf.OAuthEndpoint;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisConfig;
 import org.wso2.carbon.apimgt.impl.APIConstants.OAuthConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -49,16 +49,22 @@ import java.util.concurrent.CountDownLatch;
 public class OAuthMediator extends AbstractMediator implements ManagedLifecycle {
 
     private static final Log log = LogFactory.getLog(OAuthMediator.class);
+    private static RedisConfig redisConfig;
+    public static RedisCacheUtils redisCacheUtils;
+    public static boolean isRedisEnabled = false;
+    public static OAuthEndpoint oAuthEndpoint;
 
     // Interface methods are being implemented here
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
-        // Ignore
+        getRedisConfig();
     }
 
     @Override
     public void destroy() {
-        //Ignore
+        if (isRedisEnabled) {
+            redisCacheUtils.stopRedisCacheSession();
+        }
     }
 
     @Override
@@ -101,27 +107,34 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
 
             String decryptedClientSecret = new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret));
 
-            OAuthEndpoint oAuthEndpoint = new OAuthEndpoint();
+            oAuthEndpoint = new OAuthEndpoint();
             oAuthEndpoint.setId(uniqueIdentifier);
             oAuthEndpoint.setTokenApiUrl(tokenApiUrl);
             oAuthEndpoint.setClientId(clientId);
             oAuthEndpoint.setClientSecret(decryptedClientSecret);
             oAuthEndpoint.setUsername(username);
-            oAuthEndpoint.setPassword(password);
+            if (password != null) {
+                oAuthEndpoint.setPassword(password.toCharArray());
+            }
             oAuthEndpoint.setGrantType(grantType);
             oAuthEndpoint.setCustomParameters(customParameters);
 
             if (oAuthEndpoint != null) {
                 try {
-                    OAuthTokenGenerator tokenGenerator = new OAuthTokenGenerator();
-                    tokenGenerator.checkTokenValidity(oAuthEndpoint, latch);
+                    OAuthTokenGenerator.generateToken(oAuthEndpoint, latch);
                     latch.await();
                 } catch(InterruptedException | APISecurityException e) {
                     log.error("Could not generate access token...", e);
                 }
             }
 
-            TokenResponse tokenResponse = TokenCache.getInstance().getTokenMap().get(oAuthEndpoint.getId());
+            TokenResponse tokenResponse;
+            if (isRedisEnabled) {
+                assert oAuthEndpoint != null;
+                tokenResponse = (TokenResponse) redisCacheUtils.getObject(oAuthEndpoint.getId(), TokenResponse.class);
+            } else {
+                tokenResponse = TokenCache.getInstance().getTokenMap().get(oAuthEndpoint.getId());
+            }
             if (tokenResponse != null) {
                 String accessToken = tokenResponse.getAccessToken();
                 Map<String, Object> transportHeaders = (Map<String, Object>) ((Axis2MessageContext) messageContext)
@@ -140,21 +153,28 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     /**
-     * This method returns the OAuthEndpointSecurity Properties from the API Manager Configuration
-     * @return JSONObject OAuthEndpointSecurity properties
+     * This method retrieves the Redis Config Properties from the API Manager Configuration
+     * and passes it to an instance of RedisCacheUtils
      */
-    public JSONObject getOAuthEndpointSecurityProperties() {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String tokenRefreshInterval = configuration.getFirstProperty(APIConstants
-                .OAuthConstants.OAUTH_TOKEN_REFRESH_INTERVAL);
+    public static void getRedisConfig() {
+        JSONObject redisConfigProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getRedisConfigProperties();
 
-        JSONObject configProperties = new JSONObject();
+        redisConfig = new Gson().fromJson(String.valueOf(redisConfigProperties), RedisConfig.class);
 
-        if (StringUtils.isNotEmpty(tokenRefreshInterval)) {
-            configProperties.put(APIConstants.OAuthConstants.TOKEN_REFRESH_INTERVAL, tokenRefreshInterval);
-            return configProperties;
+        if (redisConfig != null) {
+            isRedisEnabled = redisConfig.isRedisEnabled();
+            if (isRedisEnabled) {
+                if (redisConfig.getUser() != null
+                        && redisConfig.getPassword() != null
+                        && redisConfig.getConnectionTimeout() != 0) {
+                    redisCacheUtils = new RedisCacheUtils(redisConfig.getHost(), redisConfig.getPort(),
+                            redisConfig.getConnectionTimeout(), redisConfig.getUser(),
+                            redisConfig.getPassword(), redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
+                } else {
+                    redisCacheUtils = new RedisCacheUtils(redisConfig.getHost(), redisConfig.getPort());
+                }
+            }
         }
-        return null;
     }
 }

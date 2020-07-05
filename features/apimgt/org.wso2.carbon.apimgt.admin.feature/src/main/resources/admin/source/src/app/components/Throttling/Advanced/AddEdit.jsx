@@ -64,14 +64,16 @@ function reducer(state, { field, value }) {
             if (value === 'REQUESTCOUNTLIMIT') {
                 const { defaultLimit: { bandwidth: { timeUnit, unitTime } } } = nextState;
                 nextState.defaultLimit.requestCount = {
-                    type: 'REQUESTCOUNTLIMIT', timeUnit, unitTime, requestCount: 0,
+                    timeUnit, unitTime, requestCount: 0,
                 };
+                nextState.defaultLimit.type = 'REQUESTCOUNTLIMIT';
                 nextState.defaultLimit.bandwidth = null;
             } else {
                 const { defaultLimit: { requestCount: { timeUnit, unitTime } } } = nextState;
                 nextState.defaultLimit.bandwidth = {
-                    type: 'BANDWIDTHLIMIT', timeUnit, unitTime, dataAmount: 0, dataUnit: 'KB',
+                    timeUnit, unitTime, dataAmount: 0, dataUnit: 'KB',
                 };
+                nextState.defaultLimit.bandwidth.type = 'BANDWIDTHLIMIT';
                 nextState.defaultLimit.requestCount = null;
             }
             nextState.defaultLimit[field] = value;
@@ -109,11 +111,11 @@ function AddEdit(props) {
         conditionalGroups: [],
         defaultLimit: {
             requestCount: {
-                type: 'REQUESTCOUNTLIMIT',
                 timeUnit: 'min',
-                unitTime: 0,
-                requestCount: 0,
+                unitTime: '',
+                requestCount: '',
             },
+            type: 'REQUESTCOUNTLIMIT',
             bandwidth: null,
         },
     };
@@ -204,6 +206,18 @@ function AddEdit(props) {
         const body = {
             ...state,
         };
+        body.conditionalGroups.forEach(
+            (item) => {
+                if (item.conditions.length) {
+                    item.conditions.forEach((con) => {
+                        if (con.id) {
+                            // eslint-disable-next-line no-param-reassign
+                            delete con.id;
+                        }
+                    });
+                }
+            },
+        );
         setSaving(true);
         if (id) {
             promiseAPICall = restApi
@@ -238,9 +252,10 @@ function AddEdit(props) {
             conditions: [],
             limit: {
                 requestCount: {
-                    type: 'REQUESTCOUNTLIMIT', timeUnit: 'min', unitTime: 1, requestCount: 1000,
+                    timeUnit: 'min', unitTime: 1, requestCount: 1000,
                 },
                 bandwidth: null,
+                type: 'REQUESTCOUNTLIMIT',
             },
         };
         newConditionalGroups.push(newGroup);
@@ -251,9 +266,12 @@ function AddEdit(props) {
         <ContentBase
             pageStyle='half'
             title={
-                intl.formatMessage({
-                    id: 'Throttling.Advanced.AddEdit.title.main',
-                    defaultMessage: 'Advanced Throttle Policy - Create New',
+                id ? `${intl.formatMessage({
+                    id: 'Throttling.Advanced.AddEdit.title.edit',
+                    defaultMessage: 'Advanced Throttle Policy - Edit ',
+                })} ${policyName}` : intl.formatMessage({
+                    id: 'Throttling.Advanced.AddEdit.title.new',
+                    defaultMessage: 'Advanced Throttle Policy - Create new',
                 })
             }
             help={<HelpLinks />}

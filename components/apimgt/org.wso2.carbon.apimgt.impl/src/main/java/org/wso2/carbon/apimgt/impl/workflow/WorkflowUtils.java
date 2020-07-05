@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -36,7 +37,9 @@ import java.util.UUID;
 
 public class WorkflowUtils {
 
-    public static void sendNotificationAfterWFComplete(WorkflowDTO workflowDTO, String wfType) throws APIManagementException {
+    public static void sendNotificationAfterWFComplete(WorkflowDTO workflowDTO, String wfType)
+            throws APIManagementException {
+
         if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equalsIgnoreCase(wfType)) {
             String applicationId = workflowDTO.getWorkflowReference();
             int appId = Integer.parseInt(applicationId);
@@ -45,55 +48,70 @@ public class WorkflowUtils {
             ApplicationWorkflowDTO appWFDto = (ApplicationWorkflowDTO) workflowDTO;
             appWFDto.setApplication(application);
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), appWFDto.getTenantId(),
-                    appWFDto.getApplication().getId(), appWFDto.getApplication().getName(),
-                    appWFDto.getApplication().getTokenType(), appWFDto.getApplication().getTier(),
-                    appWFDto.getApplication().getGroupId());
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(),
+                    appWFDto.getTenantId(), appWFDto.getTenantDomain(), appWFDto.getApplication().getId(),
+                    appWFDto.getApplication().getUUID(),
+                    appWFDto.getApplication().getName(), appWFDto.getApplication().getTokenType(),
+                    appWFDto.getApplication().getTier(), appWFDto.getApplication().getGroupId(),
+                    appWFDto.getApplication().getApplicationAttributes(), application.getSubscriber().getName());
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equalsIgnoreCase(wfType)) {
             ApplicationWorkflowDTO appWFDto = (ApplicationWorkflowDTO) workflowDTO;
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(), appWFDto.getTenantId(),
-                    appWFDto.getApplication().getId(), appWFDto.getApplication().getName(),
-                    appWFDto.getApplication().getTokenType(), appWFDto.getApplication().getTier(),
-                    appWFDto.getApplication().getGroupId());
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(),
+                    appWFDto.getTenantId(), appWFDto.getTenantDomain(), appWFDto.getApplication().getId(),
+                    appWFDto.getApplication().getUUID(),
+                    appWFDto.getApplication().getName(), appWFDto.getApplication().getTokenType(),
+                    appWFDto.getApplication().getTier(), appWFDto.getApplication().getGroupId(),
+                    appWFDto.getApplication().getApplicationAttributes(), "");
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equalsIgnoreCase(wfType)) {
-            SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO;
+            SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO; 
+            SubscribedAPI sub = ApiMgtDAO.getInstance()
+                    .getSubscriptionById(Integer.valueOf(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                    subWFDto.getTenantId(), Integer.valueOf(subWFDto.getWorkflowReference()), subWFDto.getApiName(),
-                    subWFDto.getApplicationId(), subWFDto.getTierName(), subWFDto.getStatus().toString());
+                    subWFDto.getTenantId(), subWFDto.getTenantDomain(),
+                    Integer.valueOf(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
+                    sub.getApplication().getId(), sub.getTier().getName(), sub.getSubCreatedStatus());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equalsIgnoreCase(wfType)) {
             SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO;
+            SubscribedAPI sub = ApiMgtDAO.getInstance()
+                    .getSubscriptionById(Integer.valueOf(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(),
-                    subWFDto.getTenantId(), Integer.valueOf(subWFDto.getWorkflowReference()), subWFDto.getApiName(),
-                    subWFDto.getApplicationId(), subWFDto.getTierName(), subWFDto.getStatus().toString());
+                    subWFDto.getTenantId(), subWFDto.getTenantDomain(),
+                    Integer.valueOf(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
+                    sub.getApplication().getId(), sub.getTier().getName(), sub.getSubCreatedStatus());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equalsIgnoreCase(wfType)) {
             SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO;
+            SubscribedAPI sub = ApiMgtDAO.getInstance()
+                    .getSubscriptionById(Integer.valueOf(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(),
-                    subWFDto.getTenantId(), Integer.valueOf(subWFDto.getWorkflowReference()), subWFDto.getApiName(),
-                    subWFDto.getApplicationId(), subWFDto.getTierName(), subWFDto.getStatus().toString());
+                    subWFDto.getTenantId(), subWFDto.getTenantDomain(),
+                    Integer.valueOf(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
+                    sub.getApplication().getId(), sub.getTier().getName(), sub.getSubCreatedStatus());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equalsIgnoreCase(wfType)) {
             APIStateWorkflowDTO apiStateWFDto = (APIStateWorkflowDTO) workflowDTO;
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), apiStateWFDto.getTenantId(),
-                    apiStateWFDto.getApiName(), Integer.valueOf(apiStateWFDto.getWorkflowReference()),
-                    apiStateWFDto.getApiVersion(), apiStateWFDto.getApiType(), apiStateWFDto.getApiContext(),
-                    apiStateWFDto.getApiProvider(), apiStateWFDto.getApiLCAction());
+                    apiStateWFDto.getTenantDomain(), apiStateWFDto.getApiName(),
+                    Integer.valueOf(apiStateWFDto.getWorkflowReference()), apiStateWFDto.getApiVersion(),
+                    apiStateWFDto.getApiType(), apiStateWFDto.getApiContext(), apiStateWFDto.getApiProvider(),
+                    apiStateWFDto.getApiLCAction());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equalsIgnoreCase(wfType)) {
             ApplicationRegistrationWorkflowDTO appRegWFDto = (ApplicationRegistrationWorkflowDTO) workflowDTO;
             ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                     UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), appRegWFDto.getTenantId(),
-                    appRegWFDto.getApplication().getId(), appRegWFDto.getApplicationInfo().getClientId(),
-                    appRegWFDto.getApplication().getTokenType());
+                    appRegWFDto.getTenantDomain(), appRegWFDto.getApplication().getId(),
+                    appRegWFDto.getApplicationInfo().getClientId(), appRegWFDto.getApplication().getTokenType(),
+                    appRegWFDto.getKeyManager());
             APIUtil.sendNotification(applicationRegistrationEvent,
                     APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equalsIgnoreCase(wfType)) {
@@ -101,8 +119,9 @@ public class WorkflowUtils {
             ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                     UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), appRegWFDto.getTenantId(),
-                    appRegWFDto.getApplication().getId(), appRegWFDto.getApplicationInfo().getClientId(),
-                    appRegWFDto.getApplication().getTokenType());
+                    appRegWFDto.getTenantDomain(), appRegWFDto.getApplication().getId(),
+                    appRegWFDto.getApplicationInfo().getClientId(), appRegWFDto.getApplication().getTokenType(),
+                    appRegWFDto.getKeyManager());
             APIUtil.sendNotification(applicationRegistrationEvent,
                     APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
         }
