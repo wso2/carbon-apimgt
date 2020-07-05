@@ -17,7 +17,6 @@ package org.wso2.carbon.apimgt.impl.token;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -104,7 +103,6 @@ public class DefaultClaimsRetrieverTestCase {
     }
 
     @Test 
-    @Ignore
     public void testGetClaimsWhenCacheEmpty() throws Exception {
 
         DefaultClaimsRetriever defaultClaimsRetriever = new DefaultClaimsRetriever();
@@ -130,7 +128,6 @@ public class DefaultClaimsRetrieverTestCase {
     }
 
     @Test
-    @Ignore
     public void testGetClaimsWhenCacheNonEmpty() throws Exception{
         DefaultClaimsRetriever defaultClaimsRetriever = new DefaultClaimsRetriever();
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_CLAIM_CACHE_EXPIRY)).thenReturn("3600");

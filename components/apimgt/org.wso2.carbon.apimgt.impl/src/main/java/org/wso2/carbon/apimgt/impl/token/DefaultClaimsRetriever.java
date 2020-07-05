@@ -33,8 +33,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.Caching;
-
-import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
