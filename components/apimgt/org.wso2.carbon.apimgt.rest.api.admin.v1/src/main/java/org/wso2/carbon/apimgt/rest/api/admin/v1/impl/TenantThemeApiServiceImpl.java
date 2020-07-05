@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -60,7 +59,6 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
             throws APIManagementException {
 
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             String errorMessage = "Super Tenant " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME +
                     " is not allowed to import a tenant theme";
@@ -69,17 +67,8 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
                             MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
         }
 
-        APIAdmin apiAdmin = new APIAdminImpl();
-        InputStream existingTenantTheme = null;
         try {
-            if (apiAdmin.isTenantThemeExist(tenantId)) {
-                existingTenantTheme = apiAdmin.getTenantTheme(tenantId);
-                apiAdmin.updateTenantTheme(tenantId, fileInputStream);
-            } else {
-                apiAdmin.addTenantTheme(tenantId, fileInputStream);
-            }
-            fileInputStream.reset();
-            RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain, existingTenantTheme);
+            RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain);
             return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
         } catch (IOException e) {
             throw new APIManagementException(e.getMessage(),

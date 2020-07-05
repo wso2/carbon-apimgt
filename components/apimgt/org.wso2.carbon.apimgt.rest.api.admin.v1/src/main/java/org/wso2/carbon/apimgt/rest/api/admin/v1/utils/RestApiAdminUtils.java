@@ -35,7 +35,11 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -160,32 +164,52 @@ public class RestApiAdminUtils {
     }
 
     /**
-     * Import the content of the provided tenant theme archive to the file system
+     * Import the content of the provided tenant theme archive to the file system and the database
      *
-     * @param themeContent content relevant to the tenant theme
-     * @param tenantDomain tenant to which the theme is imported
-     * @throws APIManagementException if an error occurs while importing the tenant theme to the file system
-     * @throws IOException            if an error occurs while deleting an incomplete tenant theme directory
+     * @param themeContentInputStream content relevant to the tenant theme
+     * @param tenantDomain            tenant to which the theme is imported
+     * @throws APIManagementException if an error occurs while importing the tenant theme
+     * @throws IOException            if an error occurs while performing file or directory related operations
      */
-    public static void importTenantTheme(InputStream themeContent, String tenantDomain, InputStream existingTenantTheme)
+    public static void importTenantTheme(InputStream themeContentInputStream, String tenantDomain)
             throws APIManagementException, IOException {
 
         ZipInputStream zipInputStream = null;
         byte[] buffer = new byte[1024];
-        File tenantThemeDirectory = null;
+        InputStream existingTenantTheme = null;
+        ByteArrayInputStream themeContent = null;
+        File tenantThemeDirectory;
         File backupDirectory = null;
 
-        String outputFolder = getTenantThemeDirectoryPath(tenantDomain);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
         try {
-            //create output directory if it does not exist
+            //convert InputStream to ByteArrayInputStream to be able to read the tenant theme content twice
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            IOUtils.copy(themeContentInputStream, baos);
+            byte[] bytes = baos.toByteArray();
+            themeContent = new ByteArrayInputStream(bytes);
+
+            APIAdmin apiAdmin = new APIAdminImpl();
+            //add or update the tenant theme in the database
+            if (apiAdmin.isTenantThemeExist(tenantId)) {
+                existingTenantTheme = apiAdmin.getTenantTheme(tenantId);
+                apiAdmin.updateTenantTheme(tenantId, themeContent);
+            } else {
+                apiAdmin.addTenantTheme(tenantId, themeContent);
+            }
+            //reset the InputStream to the initial position since it was completely read when adding to the database
+            themeContent.reset();
+
+            //import the file tenant theme to the file system
+            String outputFolder = getTenantThemeDirectoryPath(tenantDomain);
             tenantThemeDirectory = new File(outputFolder);
             if (!tenantThemeDirectory.exists()) {
                 if (!tenantThemeDirectory.mkdirs()) {
                     APIUtil.handleException("Unable to create tenant theme directory at " + outputFolder);
                 }
             } else {
-                //Copy the existing tenant theme as a backup in case a restoration is needed to take place
+                //copy the existing tenant theme as a backup in case a restoration is needed to take place
                 String tempPath = getTenantThemeBackupDirectoryPath(tenantDomain);
                 backupDirectory = new File(tempPath);
                 FileUtils.copyDirectory(tenantThemeDirectory, backupDirectory);
@@ -247,12 +271,14 @@ public class RestApiAdminUtils {
                 FileUtils.deleteDirectory(backupDirectory);
             }
         } catch (APIManagementException | IOException e) {
+            //if an error occurs, revert the changes that were done when importing a tenant theme
             revertTenantThemeImportChanges(tenantDomain, existingTenantTheme);
             throw new APIManagementException(e.getMessage(),
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
         } finally {
             IOUtils.closeQuietly(zipInputStream);
             IOUtils.closeQuietly(themeContent);
+            IOUtils.closeQuietly(themeContentInputStream);
         }
     }
 
@@ -315,7 +341,9 @@ public class RestApiAdminUtils {
             throws APIManagementException, IOException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
-        FileUtils.deleteDirectory(tenantThemeDirectory);
+        if (tenantThemeDirectory.exists()) {
+            FileUtils.deleteDirectory(tenantThemeDirectory);
+        }
         apiAdmin.deleteTenantTheme(tenantId);
     }
 
