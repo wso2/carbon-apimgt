@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
-import org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.MethodStats;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
@@ -46,6 +45,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
 
 @MethodStats
 public class JWTGenerator extends AbstractJWTGenerator {
@@ -148,9 +148,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         }
 
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
-        // Ignore user claims retrieval if it is the DefaultClaimsRetriever class. Because same thing is done
-        // keymanager.getUserClaims(username, properties) method. 
-        if (claimsRetriever != null && !(claimsRetriever instanceof DefaultClaimsRetriever)) {
+        if (claimsRetriever != null) {
             customClaims.putAll(claimsRetriever.getClaims(username));
         }
         return customClaims;
