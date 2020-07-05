@@ -1946,6 +1946,8 @@ public class APIMappingUtil {
         productDto.setTags(tagsToReturn);
 
         productDto.setEnableSchemaValidation(product.isEnabledSchemaValidation());
+        productDto.setEnableStore(product.isEnableStore());
+        productDto.setTestKey(product.getTestKey());
 
         if (APIConstants.ENABLED.equals(product.getResponseCache())) {
             productDto.setResponseCachingEnabled(Boolean.TRUE);
@@ -2150,6 +2152,7 @@ public class APIMappingUtil {
         product.setContext(context);
         context = checkAndSetVersionParam(context);
         product.setContextTemplate(context);
+        product.setTestKey(dto.getTestKey());
 
         List<String> apiProductTags = dto.getTags();
         Set<String> tagsToReturn = new HashSet<>(apiProductTags);
@@ -2157,6 +2160,10 @@ public class APIMappingUtil {
 
         if (dto.isEnableSchemaValidation() != null) {
             product.setEnableSchemaValidation(dto.isEnableSchemaValidation());
+        }
+
+        if (dto.isEnableStore() != null) {
+            product.setEnableStore(dto.isEnableStore());
         }
 
         if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
