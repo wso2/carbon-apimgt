@@ -82,7 +82,36 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     }
 
     public SortedMap<String, String> getClaims(String endUserName) throws APIManagementException {
-        return Collections.emptySortedMap();
+        String strEnabledJWTClaimCache = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.ENABLED_JWT_CLAIM_CACHE);
+        boolean enabledJWTClaimCache = true;
+        if (strEnabledJWTClaimCache != null) {
+            enabledJWTClaimCache = Boolean.valueOf(strEnabledJWTClaimCache);
+        }
+        SortedMap<String, String> claimValues;
+        if (endUserName != null) {
+            int tenantId = APIUtil.getTenantId(endUserName);
+            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
+            //check in local cache
+            String key = endUserName + ':' + tenantId;
+            ClaimCacheKey cacheKey = new ClaimCacheKey(key);
+            Object result = null;
+            if (enabledJWTClaimCache) {
+                result = getClaimsLocalCache().get(cacheKey);
+            }
+            if (result != null) {
+                return ((UserClaims) result).getClaimValues();
+            } else {
+                claimValues = APIUtil.getClaims(endUserName, tenantId, dialectURI);
+                UserClaims userClaims = new UserClaims(claimValues);
+                //add to cache
+                if (enabledJWTClaimCache) {
+                    getClaimsLocalCache().put(cacheKey, userClaims);
+                }
+                return claimValues;
+            }
+        }
+        return null;
     }
 
     /**

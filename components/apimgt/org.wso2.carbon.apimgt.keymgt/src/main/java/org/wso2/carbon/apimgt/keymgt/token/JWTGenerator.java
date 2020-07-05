@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
+import org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.MethodStats;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
@@ -39,20 +40,12 @@ import org.wso2.carbon.identity.application.common.model.Claim;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataHandler;
 import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataException;
-import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCache;
-import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheEntry;
-import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheKey;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
-import static org.apache.commons.collections.MapUtils.isNotEmpty;
 
 @MethodStats
 public class JWTGenerator extends AbstractJWTGenerator {
@@ -155,7 +148,9 @@ public class JWTGenerator extends AbstractJWTGenerator {
         }
 
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
-        if (claimsRetriever != null) {
+        // Ignore user claims retrieval if it is the DefaultClaimsRetriever class. Because same thing is done
+        // keymanager.getUserClaims(username, properties) method. 
+        if (claimsRetriever != null && !(claimsRetriever instanceof DefaultClaimsRetriever)) {
             customClaims.putAll(claimsRetriever.getClaims(username));
         }
         return customClaims;
