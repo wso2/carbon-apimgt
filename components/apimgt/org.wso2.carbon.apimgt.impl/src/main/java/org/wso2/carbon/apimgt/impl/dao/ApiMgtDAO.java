@@ -15533,14 +15533,9 @@ public class ApiMgtDAO {
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.ADD_TENANT_THEME)) {
             statement.setInt(1, tenantId);
-            if (connection.getMetaData().getDriverName().contains("PostgreSQL") || connection.getMetaData()
-                    .getDatabaseProductName().contains("DB2")) {
-                statement.setBinaryStream(2, themeContent, IOUtils.toByteArray(themeContent).length);
-            } else {
-                statement.setBinaryStream(2, themeContent);
-            }
+            statement.setBinaryStream(2, themeContent);
             statement.executeUpdate();
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             handleException("Failed to add tenant theme of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
@@ -15558,15 +15553,10 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(SQLConstants.TenantThemeConstants.UPDATE_TENANT_THEME)) {
-            if (connection.getMetaData().getDriverName().contains("PostgreSQL") || connection.getMetaData()
-                    .getDatabaseProductName().contains("DB2")) {
-                statement.setBinaryStream(1, themeContent, IOUtils.toByteArray(themeContent).length);
-            } else {
-                statement.setBinaryStream(1, themeContent);
-            }
+            statement.setBinaryStream(1, themeContent);
             statement.setInt(2, tenantId);
             statement.executeUpdate();
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             handleException("Failed to update tenant theme of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
