@@ -2056,6 +2056,8 @@ CREATE TABLE  AM_GW_PUBLISHED_API_DETAILS (
   PRIMARY KEY (API_ID)
 );
 
+-- AM_GW_PUBLISHED_API_DETAILS & AM_GW_API_ARTIFACTS are independent tables for Artifact synchronizer feature which --
+-- should not have any referential integrity constraints with other tables in AM database--
 IF NOT  EXISTS (SELECT * FROM SYS.OBJECTS WHERE OBJECT_ID = OBJECT_ID(N'[DBO].[AM_GW_API_ARTIFACTS]') AND TYPE IN (N'U'))
 CREATE TABLE  AM_GW_API_ARTIFACTS (
   API_ID varchar(255) NOT NULL,

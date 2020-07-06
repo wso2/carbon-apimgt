@@ -1225,6 +1225,9 @@
         {% if apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway is defined %}
         <PublishDirectlyToGW>{{apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway}}</PublishDirectlyToGW>
         {% endif %}
+        {% if database.sync_runtime_artifacts_db is defined %}
+        <DataSourceName>{{apim.datasource_sync_runtime_artifacts.name}}</DataSourceName>
+        {% endif %}
     </SyncRuntimeArtifactsPublisher>
     {% endif %}
 
@@ -1240,6 +1243,9 @@
         {% endif %}
         {% if apim.sync_runtime_artifacts.gateway.artifact_retriever is defined %}
         <ArtifactRetriever>{{apim.sync_runtime_artifacts.gateway.artifact_retriever}}</ArtifactRetriever>
+        {% endif %}
+        {% if apim.sync_runtime_artifacts.gateway.deployment_retry_duartion is defined %}
+        <RetryDuration>{{apim.sync_runtime_artifacts.gateway.deployment_retry_duartion}}</RetryDuration>
         {% endif %}
     </SyncRuntimeArtifactsGateway>
     {% endif %}

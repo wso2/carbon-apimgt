@@ -2304,6 +2304,7 @@ public final class APIConstants {
         public static final String ENABLE_CONFIG = "Enable";
         public static final String SAVER_CONFIG = "ArtifactSaver";
         public static final String RETRIEVER_CONFIG = "ArtifactRetriever";
+        public static final String RETRY_DUARTION = "RetryDuration";
         public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
         public static final String GATEWAY_LABELS_CONFIG = "GatewayLabels";
         public static final String LABEL_CONFIG = "Label";
@@ -2311,6 +2312,9 @@ public final class APIConstants {
         public static final String DB_RETRIEVER_NAME = "DBRetriever";
         public static final String GATEWAY_INSTRUCTION_PUBLISH = "Publish";
         public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
+        public static final String SYNAPSE_ARTIFACTS = "/synapse-artifacts";
+        public static final String GATEAY_SYNAPSE_ARTIFACTS = "/gateway-synapse-artifacts";
+        public static final String DATA_SOURCE_NAME = "DataSourceName";
 
     }
 

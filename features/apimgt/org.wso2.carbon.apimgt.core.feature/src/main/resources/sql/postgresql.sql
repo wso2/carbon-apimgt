@@ -2133,6 +2133,8 @@ CREATE TABLE  IF NOT EXISTS AM_KEY_MANAGER (
   UNIQUE (NAME,TENANT_DOMAIN)
 );
 
+-- AM_GW_PUBLISHED_API_DETAILS & AM_GW_API_ARTIFACTS are independent tables for Artifact synchronizer feature which --
+-- should not have any referential integrity constraints with other tables in AM database--
 DROP TABLE IF EXISTS AM_GW_PUBLISHED_API_DETAILS;
 CREATE TABLE IF NOT EXISTS AM_GW_PUBLISHED_API_DETAILS (
   API_ID varchar(255) NOT NULL,
