@@ -2272,7 +2272,6 @@ public final class APIUtil {
      *
      * @return URL to be used in iframe source for the check session with IDP
      */
-
     public static String getExternalIDPCheckSessionEndpoint() throws APIManagementException {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -2280,7 +2279,7 @@ public final class APIUtil {
         String oidcCheckSessionEndpoint = config.getFirstProperty(
                 APIConstants.IDENTITY_PROVIDER_OIDC_CHECK_SESSION_ENDPOINT);
         if (oidcCheckSessionEndpoint == null) {
-            return getServerURL() + "/oidc/checksession";
+            return getServerURL() + APIConstants.IDENTITY_PROVIDER_OIDC_CHECK_SESSION_URL;
         } else {
             return oidcCheckSessionEndpoint;
         }
