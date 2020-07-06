@@ -4437,6 +4437,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Check the existence of the mediation policy
+     *
      * @param mediationResourcePath mediation config content
      *
      */
