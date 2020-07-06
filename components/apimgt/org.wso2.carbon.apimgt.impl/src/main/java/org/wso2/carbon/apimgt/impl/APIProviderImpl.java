@@ -3698,11 +3698,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             authorizedRoles, docFilePath, registry);
                 }
             } catch (UserStoreException e) {
-                throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
-                        + api.getId().getApiName(), e);
+                throw new APIManagementException("Error in retrieving Tenant Information while updating the " +
+                        "visibility of documentations for the API :" + api.getId().getApiName(), e);
             }
         } catch (RegistryException e) {
-            handleException("Failed to update visibility of documentation", e);
+            handleException("Failed to update visibility of documentation" + api.getId().getApiName(), e);
         }
     }
     /**
