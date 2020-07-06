@@ -68,7 +68,7 @@ public class SubscriptionValidationDAO {
                 PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APIS_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
-            populateAPIList(resultSet, apiList, conn);
+            populateAPIList(resultSet, apiList);
 
         } catch (SQLException e) {
             log.error("Error in loading Apis : ", e);
@@ -290,7 +290,7 @@ public class SubscriptionValidationDAO {
                 ps.setString(2, APIConstants.TENANT_PREFIX + tenantDomain + "%");
             }
             ResultSet resultSet = ps.executeQuery();
-            populateAPIList(resultSet, apiList, conn);
+            populateAPIList(resultSet, apiList);
 
         } catch (SQLException e) {
             log.error("Error in loading Apis for tenantId : " + tenantDomain, e);
@@ -355,7 +355,7 @@ public class SubscriptionValidationDAO {
         return api;
     }
 
-    private void populateAPIList(ResultSet resultSet, List<API> apiList, Connection conn) throws SQLException {
+    private void populateAPIList(ResultSet resultSet, List<API> apiList) throws SQLException {
 
         Map<Integer, API> temp = new ConcurrentHashMap<>();
         Map<Integer, URLMapping> tempUrls = new ConcurrentHashMap<>();
@@ -391,7 +391,7 @@ public class SubscriptionValidationDAO {
     private void createURLMapping(ResultSet resultSet, Map<Integer, URLMapping> tempUrls, API api) throws SQLException {
 
         int urlId = resultSet.getInt("URL_MAPPING_ID");
-        URLMapping urlMapping = null;
+        URLMapping urlMapping;
         urlMapping = tempUrls.get(urlId);
         if (urlMapping == null) {
             urlMapping = new URLMapping();
@@ -403,7 +403,10 @@ public class SubscriptionValidationDAO {
             tempUrls.put(urlId, urlMapping);
             api.addResource(urlMapping);
         }
-        urlMapping.addScope(resultSet.getString("SCOPE_NAME"));
+        String scopeName = resultSet.getString("SCOPE_NAME");
+        if (StringUtils.isNotEmpty(scopeName)) {
+            urlMapping.addScope(scopeName);
+        }
 
     }
     /*
@@ -417,7 +420,7 @@ public class SubscriptionValidationDAO {
         List<Subscription> subscriptions = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTIONS_SQL);
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTIONS_SQL)
         ) {
             int tenantId = 0;
             try {
@@ -428,7 +431,7 @@ public class SubscriptionValidationDAO {
             }
             ps.setInt(1, tenantId);
 
-            try (ResultSet resultSet = ps.executeQuery();) {
+            try (ResultSet resultSet = ps.executeQuery()) {
                 populateSubscriptionsList(subscriptions, resultSet);
             }
         } catch (SQLException e) {

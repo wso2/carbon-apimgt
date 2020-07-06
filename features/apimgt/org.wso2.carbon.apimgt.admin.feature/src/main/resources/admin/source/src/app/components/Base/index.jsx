@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -60,6 +60,10 @@ const styles = (theme) => ({
     footer: {
         padding: theme.spacing(2),
         background: '#eaeff1',
+        position: 'absolute',
+        bottom: 0,
+        left: drawerWidth,
+        width: 'calc(100% - ' + drawerWidth + 'px)',
     },
 });
 

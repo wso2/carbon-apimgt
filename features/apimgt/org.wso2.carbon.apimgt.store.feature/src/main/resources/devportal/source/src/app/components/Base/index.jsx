@@ -526,7 +526,7 @@ class Layout extends React.Component {
                                                                         >
                                                                             <FormattedMessage
                                                                                 id='Base.index.settingsMenu.alertConfiguration'
-                                                                                defaultMessage='Alert configure'
+                                                                                defaultMessage='Configure Alerts'
                                                                             />
                                                                         </Link>
                                                                     </MenuItem>

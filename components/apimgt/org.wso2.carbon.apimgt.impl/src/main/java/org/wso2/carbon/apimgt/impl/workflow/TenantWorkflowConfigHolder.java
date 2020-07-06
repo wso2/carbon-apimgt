@@ -54,6 +54,9 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
     private static final QName ATT_NAME = new QName("name");
 
+    private static final String DEFAULT_SUBSCRIPTION_UPDATE_EXECUTOR_CLASS =
+            "org.wso2.carbon.apimgt.impl.workflow.SubscriptionUpdateSimpleWorkflowExecutor";
+
     private transient SecretResolver secretResolver;
 
 //    private String tenantDomain;
@@ -133,11 +136,18 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
             workflowElem = workflowExtensionsElem.getFirstChildWithName(
                     new QName(WorkflowConstants.SUBSCRIPTION_UPDATE));
-            executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
-            clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-            loadProperties(workflowElem, workFlowExecutor);
-            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE, workFlowExecutor);
+            if (workflowElem != null) {
+                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
+                clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                loadProperties(workflowElem, workFlowExecutor);
+                workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE, workFlowExecutor);
+            } else {
+                executorClass = DEFAULT_SUBSCRIPTION_UPDATE_EXECUTOR_CLASS;
+                clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE, workFlowExecutor);
+            }
 
             workflowElem = workflowExtensionsElem.getFirstChildWithName(
                     new QName(WorkflowConstants.SUBSCRIPTION_DELETION));

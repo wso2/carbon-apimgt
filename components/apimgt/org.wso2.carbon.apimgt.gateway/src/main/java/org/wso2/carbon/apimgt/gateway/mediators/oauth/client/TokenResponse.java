@@ -20,6 +20,16 @@ package org.wso2.carbon.apimgt.gateway.mediators.oauth.client;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+/**
+ * This class represents the Token Response data object designed to store and transfer
+ * the essential data returned from an OAuth-protected backend
+ */
 public class TokenResponse {
 
     @SerializedName("access_token")
@@ -28,7 +38,7 @@ public class TokenResponse {
     @SerializedName("refresh_token")
     private String refreshToken;
 
-    private String scope;
+    private Set<String> scope;
 
     @SerializedName("token_type")
     private String tokenType;
@@ -54,11 +64,11 @@ public class TokenResponse {
         this.refreshToken = refreshToken;
     }
 
-    public String getScope() {
+    public Set<String> getScope() {
         return scope;
     }
 
-    public void setScope(String scope) {
+    public void setScope(Set<String> scope) {
         this.scope = scope;
     }
 
@@ -84,5 +94,56 @@ public class TokenResponse {
 
     public void setValidTill(Long validTill) {
         this.validTill = validTill;
+    }
+
+    public TokenResponse(){
+    }
+
+    /**
+     * TokenResponse constructor to set properties from Map
+     * @param tokenMap Map containing the TokenResponse properties
+     */
+    public TokenResponse(Map<String, String> tokenMap) {
+        if (tokenMap != null) {
+            this.setAccessToken(tokenMap.get("access_token"));
+            this.setRefreshToken(tokenMap.get("refresh_token"));
+            if (tokenMap.get("scope") != null) {
+                this.setScope(Stream.of( tokenMap.get("scope").trim()
+                        .split("\\s*,\\s*") ).collect(Collectors.toSet()));
+            }
+            this.setTokenType(tokenMap.get("token_type"));
+            this.setExpiresIn(tokenMap.get("expires_in"));
+            this.setValidTill(Long.valueOf(tokenMap.get("valid_till")));
+        }
+    }
+
+    /**
+     * Method to convert TokenResponse Object to a HashMap
+     * @return HashMap with TokenResponse properties
+     */
+    public Map<String, String> toMap() {
+        Map<String, String> map = new HashMap<>();
+        map.put("access_token", getAccessToken());
+        map.put("refresh_token", getRefreshToken());
+        if (getScope() != null) {
+            map.put("scope", String.join(",", getScope()));
+        }
+        map.put("token_type", getTokenType());
+        map.put("expires_in", getExpiresIn());
+        if (getValidTill() != null) {
+            map.put("valid_till", String.valueOf(getValidTill()));
+        }
+        return map;
+    }
+
+    /**
+     * toString method for TokenResponse object
+     * @return String of TokenResponse object
+     */
+    @Override
+    public String toString() {
+        return "TokenResponse{" + "accessToken='" + accessToken + '\'' + ", refreshToken='" + refreshToken + '\''
+                + ", scope='" + scope + '\'' + ", tokenType='" + tokenType + '\'' + ", expiresIn='" + expiresIn + '\''
+                + ", validTill=" + validTill + '}';
     }
 }

@@ -102,7 +102,7 @@ public class DefaultClaimsRetrieverTestCase {
         Assert.assertEquals(DEFAULT_DIALECT_URI, dialectUri);
     }
 
-    @Test
+    @Test 
     public void testGetClaimsWhenCacheEmpty() throws Exception {
 
         DefaultClaimsRetriever defaultClaimsRetriever = new DefaultClaimsRetriever();

@@ -213,6 +213,13 @@ class APICardView extends React.Component {
                 }),
             },
             {
+                name: 'version',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.APIList.version',
+                    defaultMessage: 'Version',
+                }),
+            },
+            {
                 name: 'throttlingPolicies',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.APIList.policy',

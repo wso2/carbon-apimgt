@@ -62,7 +62,7 @@ function Delete(props) {
 
     return (
         <FormDialogBase
-            title='Delete Blacklist Policy?'
+            title='Delete Deny Policy?'
             saveButtonText='Delete'
             icon={<DeleteForeverIcon />}
             formSaveCallback={formSaveCallback}

@@ -108,6 +108,7 @@ public class APIManagerConfiguration {
     private JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
+    private static JSONObject redisConfigProperties = new JSONObject();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
     private static String tokenRevocationClassName;
@@ -308,6 +309,29 @@ public class APIManagerConfiguration {
                     }
                 }
                 persistentNotifierProperties = properties;
+            } else if ("RedisConfig".equals(localName)) {
+                OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
+                OMElement redisPort = element.getFirstChildWithName(new QName("RedisPort"));
+                OMElement redisUser = element.getFirstChildWithName(new QName("RedisUser"));
+                OMElement redisPassword = element.getFirstChildWithName(new QName("RedisPassword"));
+                OMElement redisDatabaseId = element.getFirstChildWithName(new QName("RedisDatabaseId"));
+                OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName("RedisConnectionTimeout"));
+                OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName("RedisIsSslEnabled"));
+
+                if (redisHost != null && redisPort != null) {
+                    redisConfigProperties.put("isRedisEnabled", true);
+                    redisConfigProperties.put("host", redisHost.getText());
+                    redisConfigProperties.put("port", Integer.parseInt(redisPort.getText()));
+
+                    if (redisUser != null && redisPassword != null && redisDatabaseId != null
+                            && redisConnectionTimeout != null && redisIsSslEnabled != null) {
+                        redisConfigProperties.put("user", redisUser.getText());
+                        redisConfigProperties.put("password", redisPassword.getText().toCharArray());
+                        redisConfigProperties.put("databaseId", Integer.parseInt(redisDatabaseId.getText()));
+                        redisConfigProperties.put("connectionTimeout", Integer.parseInt(redisConnectionTimeout.getText()));
+                        redisConfigProperties.put("isSslEnabled", Boolean.parseBoolean(redisIsSslEnabled.getText()));
+                    }
+                }
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
@@ -1314,6 +1338,11 @@ public class APIManagerConfiguration {
     public WorkflowProperties getWorkflowProperties() {
 
         return workflowProperties;
+    }
+
+    public JSONObject getRedisConfigProperties() {
+
+        return redisConfigProperties;
     }
 
     /**

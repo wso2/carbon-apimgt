@@ -160,6 +160,13 @@ public class JWTValidator {
                      * This is necessary for the functionality of Publisher alerts.
                      * */
                     synCtx.setProperty(APIMgtGatewayConstants.API_PUBLISHER, apiKeyValidationInfoDTO.getApiPublisher());
+                    /* GraphQL Query Analysis Information */
+                    if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+                        synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH,
+                                apiKeyValidationInfoDTO.getGraphQLMaxDepth());
+                        synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY,
+                                apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
+                    }
                     log.debug("JWT authentication successful.");
                 } else {
                     log.debug(

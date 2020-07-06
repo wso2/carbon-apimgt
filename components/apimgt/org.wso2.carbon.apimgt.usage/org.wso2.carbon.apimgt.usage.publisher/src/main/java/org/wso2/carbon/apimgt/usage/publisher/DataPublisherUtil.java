@@ -33,6 +33,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -138,5 +139,15 @@ public class DataPublisherUtil {
 
     public static String toJsonString(Map<String, String> properties) {
         return gson.toJson(properties);
+    }
+
+    public static String sortGraphQLOperations(String apiResourceTemplates) {
+        if (apiResourceTemplates == null || !apiResourceTemplates.contains(",")) {
+            return apiResourceTemplates;
+        }
+        String[] list = apiResourceTemplates.split(",");
+        // sorting alphabetical order
+        Arrays.sort(list);
+        return String.join(",", list);
     }
 }

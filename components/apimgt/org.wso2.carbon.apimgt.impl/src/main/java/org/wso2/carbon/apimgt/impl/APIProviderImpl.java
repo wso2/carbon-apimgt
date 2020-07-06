@@ -3059,6 +3059,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
                 , properties);
 
+        String extensionHandlerPosition = getExtensionHandlerPosition();
+        if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
+            vtb.addHandlerPriority(
+                    "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
+                    Collections.<String, String>emptyMap(), 0);
+        } else {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
+                    Collections.<String, String>emptyMap());
+        }
         return vtb;
     }
 

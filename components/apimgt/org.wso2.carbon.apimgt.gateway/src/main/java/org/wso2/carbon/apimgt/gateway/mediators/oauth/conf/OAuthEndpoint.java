@@ -27,7 +27,7 @@ public class OAuthEndpoint {
     private String clientId;
     private String clientSecret;
     private String username;
-    private String password;
+    private char[] password;
     private String grantType;
     private JSONObject customParameters;
 
@@ -71,11 +71,11 @@ public class OAuthEndpoint {
         this.username = username;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(char[] password) {
         this.password = password;
     }
 

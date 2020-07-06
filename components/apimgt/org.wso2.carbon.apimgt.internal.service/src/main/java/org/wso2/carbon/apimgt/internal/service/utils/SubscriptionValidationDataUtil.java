@@ -314,12 +314,17 @@ public class SubscriptionValidationDataUtil {
 
     public static String validateTenantDomain(String xWSO2Tenant, MessageContext messageContext) {
 
-
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        if (!tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-            xWSO2Tenant = tenantDomain;
+        if (xWSO2Tenant == null) {
+            return tenantDomain;
+        } else {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                return xWSO2Tenant;
+            } else {
+                return tenantDomain;
+            }
         }
-        return xWSO2Tenant;
+
     }
 
 }

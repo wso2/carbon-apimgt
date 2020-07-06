@@ -679,8 +679,9 @@ public final class APIConstants {
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
             + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
-    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
-            "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
+    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = { "internal_application_mgt_create",
+            "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view",
+            "internal_user_mgt_list" };
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
 
     public static final String TOKEN_URL = "TokenURL";
@@ -1217,6 +1218,13 @@ public final class APIConstants {
         public static final String CLIENT_CREDENTIALS = "CLIENT_CREDENTIALS";
         public static final String PASSWORD = "PASSWORD";
 
+        public static final String AUTHORIZATION_HEADER = "Authorization";
+        public static final String CONTENT_TYPE_HEADER = "Content-Type";
+        public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+        public static final String CLIENT_CRED_GRANT_TYPE = "grant_type=client_credentials";
+        public static final String PASSWORD_GRANT_TYPE = "grant_type=password";
+        public static final String REFRESH_TOKEN_GRANT_TYPE = "grant_type=refresh_token";
+
         public static final String ACCESS_TOKEN = "access_token";
         public static final String REFRESH_TOKEN = "refresh_token";
         public static final String SCOPE = "scope";
@@ -1231,15 +1239,28 @@ public final class APIConstants {
         public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
         public static final String ENDPOINT_SECURITY_USERNAME = "username";
 
-        // For configs
-        public static final String OAUTH_ENDPOINT_SECURITY = "OAuthEndpointSecurity.";
-        public static final String OAUTH_TOKEN_REFRESH_INTERVAL = OAUTH_ENDPOINT_SECURITY + "TokenRefreshInterval";
-
-        public static final String TOKEN_REFRESH_INTERVAL = "tokenRefreshInterval";
-
         private OAuthConstants() {
         }
     }
+
+    // For Redis Configuration
+    public static final String REDIS_CONFIG = "RedisConfig.";
+    public static final String CONFIG_REDIS_HOST = REDIS_CONFIG + "RedisHost";
+    public static final String CONFIG_REDIS_PORT = REDIS_CONFIG + "RedisPort";
+    public static final String CONFIG_REDIS_USER = REDIS_CONFIG + "RedisUser";
+    public static final String CONFIG_REDIS_PASSWORD = REDIS_CONFIG + "RedisPassword";
+    public static final String CONFIG_REDIS_DATABASE_ID = REDIS_CONFIG + "RedisDatabaseId";
+    public static final String CONFIG_REDIS_CONNECTION_TIMEOUT = REDIS_CONFIG + "RedisConnectionTimeout";
+    public static final String CONFIG_REDIS_IS_SSL_ENABLED = REDIS_CONFIG + "RedisIsSslEnabled";
+
+    public static final String IS_REDIS_ENABLED = "isRedisEnabled";
+    public static final String REDIS_HOST = "redisHost";
+    public static final String REDIS_PORT = "redisPort";
+    public static final String REDIS_USER = "redisUser";
+    public static final String REDIS_PASSWORD = "redisPassword";
+    public static final String REDIS_DATABASE_ID = "redisDatabaseId";
+    public static final String REDIS_CONNECTION_TIMEOUT = "redisConnectionTimeout";
+    public static final String REDIS_IS_SSL_ENABLED = "redisIsSslEnabled";
 
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
@@ -2209,6 +2230,10 @@ public final class APIConstants {
         public static final String CERTIFICATE_TYPE_JWKS_ENDPOINT = "JWKS";
         public static final String CERTIFICATE_TYPE_PEM_FILE = "PEM";
         public static final String EVENT_PUBLISHER_CONFIGURATIONS = "EventPublisherConfiguration";
+        public static final String USER_INFO_ENDPOINT = "user_info_endpoint";
+        public static final String ACCESS_TOKEN = "accessToken";
+        public static final String AUTH_CODE = "authCode";
+        public static final String CLAIM_DIALECT = "dialect";
 
         public static class KeyManagerEvent {
 
