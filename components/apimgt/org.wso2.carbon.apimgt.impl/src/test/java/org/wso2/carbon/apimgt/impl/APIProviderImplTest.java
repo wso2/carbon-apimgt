@@ -4521,8 +4521,7 @@ public class APIProviderImplTest {
         doc1.setVisibility(DocumentVisibility.API_LEVEL);
         doc1.setSourceType(DocumentSourceType.INLINE);
         doc1.setId("678ghk");
-        doc1.setFilePath("/registry/resource/_system/governance/apimgt/applicationdata/provider/"
-                + "files/provider/fileName");
+        doc1.setFilePath(APIConstants.REGISTRY_RESOURCE_URL_PREFIX + "files/provider/fileName");
 
         Documentation doc2 = new Documentation(DocumentationType.SUPPORT_FORUM, "Support Docs");
         doc2.setVisibility(DocumentVisibility.API_LEVEL);
