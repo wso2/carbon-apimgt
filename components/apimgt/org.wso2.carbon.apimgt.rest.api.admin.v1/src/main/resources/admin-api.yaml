@@ -3480,7 +3480,7 @@ paths:
           required: false
         - $ref : '#/parameters/scopeName'
       tags:
-        - Syatem Scopes
+        - System Scopes
       responses:
         200:
           description: |
