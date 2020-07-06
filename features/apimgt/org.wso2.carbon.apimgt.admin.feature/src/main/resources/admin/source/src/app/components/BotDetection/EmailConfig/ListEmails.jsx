@@ -56,8 +56,8 @@ export default function ListEmails() {
         return restApi
             .botDetectionNotifyingEmailsGet()
             .then((result) => {
-                setEmailList(result.body);
-                return result.body;
+                setEmailList(result.body.list);
+                return result.body.list;
             })
             .catch((error) => {
                 throw error;
