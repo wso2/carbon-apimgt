@@ -181,8 +181,7 @@ public interface APIAdmin  {
     /**
      * Updates an API Category
      *
-     * @param apiCategory
-     * @return
+     * @param   apiCategory
      * @throws APIManagementException
      */
     void updateCategory(APICategory apiCategory) throws APIManagementException;

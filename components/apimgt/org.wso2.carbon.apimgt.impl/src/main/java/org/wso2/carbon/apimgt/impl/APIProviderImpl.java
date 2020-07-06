@@ -6738,13 +6738,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return createdBlockConditionsDto.getUUID();
     }
 
-    /**
-     * Add Block Condition with condition status
-     *
-     * @param conditionType type of the condition (IP, Context .. )
-     * @param conditionValue value of the condition
-     * @param conditionStatus status of the condition
-     */
+    @Override
     public String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus)
             throws APIManagementException {
 
