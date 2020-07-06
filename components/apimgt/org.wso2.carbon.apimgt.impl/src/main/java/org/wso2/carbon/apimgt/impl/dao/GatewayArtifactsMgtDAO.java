@@ -106,7 +106,7 @@ public class GatewayArtifactsMgtDAO {
     public String getGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel,
             String gatewayInstruction)
             throws APIManagementException {
-
+        ResultSet rs = null;
         String gatewayRuntimeArtifacts = null;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ARTIFACT)) {
@@ -115,7 +115,7 @@ public class GatewayArtifactsMgtDAO {
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
             statement.setString(3, gatewayInstruction);
-            ResultSet rs = statement.executeQuery();
+            rs = statement.executeQuery();
             if (rs.next()) {
                 try (InputStream inputStream = rs.getBinaryStream(1)) {
                     gatewayRuntimeArtifacts = IOUtils.toString(inputStream, APIConstants.DigestAuthConstants.CHARSET);
@@ -125,6 +125,8 @@ public class GatewayArtifactsMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to get artifacts of API with ID " + APIId, e);
+        } finally {
+            GatewayArtifactsMgtDBUtil.closeResultSet(rs);
         }
         return gatewayRuntimeArtifacts;
     }
@@ -138,6 +140,7 @@ public class GatewayArtifactsMgtDAO {
     public List<String> getAllGatewayPublishedAPIArtifacts(String label)
             throws APIManagementException {
 
+        ResultSet rs =null;
         List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_API_ARTIFACT)) {
@@ -145,7 +148,7 @@ public class GatewayArtifactsMgtDAO {
             connection.commit();
             statement.setString(1, label);
             statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-            ResultSet rs = statement.executeQuery();
+            rs = statement.executeQuery();
             while (rs.next()) {
                 try (InputStream inputStream = rs.getBinaryStream(1)) {
                     String gatewayRuntimeArtifacts = IOUtils.toString(inputStream,
@@ -157,6 +160,8 @@ public class GatewayArtifactsMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to get artifacts " , e);
+        } finally {
+            GatewayArtifactsMgtDBUtil.closeResultSet(rs);
         }
         return gatewayRuntimeArtifactsArray;
     }
@@ -170,6 +175,7 @@ public class GatewayArtifactsMgtDAO {
     public boolean isAPIPublishedInAnyGateway(String APIId) throws APIManagementException {
 
         int count = 0;
+        ResultSet rs = null;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection
                         .prepareStatement(SQLConstants.GET_PUBLISHED_GATEWAYS_FOR_API)) {
@@ -177,12 +183,14 @@ public class GatewayArtifactsMgtDAO {
             connection.commit();
             statement.setString(1, APIId);
             statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-            ResultSet rs = statement.executeQuery();
+            rs = statement.executeQuery();
             while (rs.next()) {
                 count = rs.getInt("COUNT");
             }
         } catch (SQLException e) {
             handleException("Failed check whether API is published in any gateway " + APIId, e);
+        } finally {
+            GatewayArtifactsMgtDBUtil.closeResultSet(rs);
         }
         return count != 0;
     }
@@ -195,16 +203,19 @@ public class GatewayArtifactsMgtDAO {
      */
     public boolean isAPIDetailsExists(String APIId) throws APIManagementException {
 
+        ResultSet rs = null;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection
                         .prepareStatement(SQLConstants.CHECK_API_EXISTS)) {
             connection.setAutoCommit(false);
             connection.commit();
             statement.setString(1, APIId);
-            ResultSet rs = statement.executeQuery();
+            rs = statement.executeQuery();
             return rs.next();
         } catch (SQLException e) {
             handleException("Failed to check API details status of API with ID " + APIId, e);
+        } finally {
+            GatewayArtifactsMgtDBUtil.closeResultSet(rs);
         }
         return false;
     }
@@ -217,17 +228,20 @@ public class GatewayArtifactsMgtDAO {
      */
     public boolean isAPIArtifactExists(String APIId, String gatewayLabel) throws APIManagementException {
 
+        ResultSet rs = null;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.CHECK_ARTIFACT_EXISTS)) {
             connection.setAutoCommit(false);
             connection.commit();
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
-            ResultSet rs = statement.executeQuery();
+            rs = statement.executeQuery();
             return rs.next();
         } catch (SQLException e) {
             handleException("Failed to check API artifact status of API with ID " + APIId + " for label "
                     + gatewayLabel, e);
+        } finally {
+            GatewayArtifactsMgtDBUtil.closeResultSet(rs);
         }
         return false;
     }
