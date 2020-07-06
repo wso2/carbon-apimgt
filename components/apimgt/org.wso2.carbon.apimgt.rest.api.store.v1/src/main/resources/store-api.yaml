@@ -5472,6 +5472,9 @@ definitions:
       IsAnonymousModeEnabled:
         type: boolean
         default: true
+      IsPasswordChangeEnabled:
+        type: boolean
+        default: true
   #-----------------------------------------------------
   # The Application Attribute resource
   #-----------------------------------------------------

@@ -679,8 +679,9 @@ public final class APIConstants {
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
             + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
-    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
-            "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
+    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = { "internal_application_mgt_create",
+            "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view",
+            "internal_user_mgt_list" };
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
 
     public static final String TOKEN_URL = "TokenURL";
@@ -2229,6 +2230,10 @@ public final class APIConstants {
         public static final String CERTIFICATE_TYPE_JWKS_ENDPOINT = "JWKS";
         public static final String CERTIFICATE_TYPE_PEM_FILE = "PEM";
         public static final String EVENT_PUBLISHER_CONFIGURATIONS = "EventPublisherConfiguration";
+        public static final String USER_INFO_ENDPOINT = "user_info_endpoint";
+        public static final String ACCESS_TOKEN = "accessToken";
+        public static final String AUTH_CODE = "authCode";
+        public static final String CLAIM_DIALECT = "dialect";
 
         public static class KeyManagerEvent {
 
