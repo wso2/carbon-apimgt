@@ -344,6 +344,7 @@ public class RestApiPublisherUtils {
             + "\"name\":\"SOAP Request\",\"required\":true,\"in\":\"body\"},"
                 + "{\"description\":\"SOAPAction header for soap 1.1\",\"name\":\"SOAPAction\",\"type\":\"string\","
                 + "\"required\":false,\"in\":\"header\"}],\"responses\":{\"200\":{\"description\":\"OK\"}}," +
-                "\"security\":[{\"default\":[]}],\"consumes\":[\"text/xml\",\"application/soap+xml\"]}}}";
+                "\"security\":[{\"default\":[]}],\"consumes\":[\"text/xml\",\"application/soap+xml\"]," +
+                "\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\"}}}";
     }
 }
