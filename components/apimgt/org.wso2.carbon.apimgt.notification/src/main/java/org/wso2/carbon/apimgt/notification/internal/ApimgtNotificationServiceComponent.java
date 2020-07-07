@@ -27,6 +27,9 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.notification.DefaultKeyManagerEventHandlerImpl;
 
+/**
+ * This class used to activate Api manager notification bundle.
+ */
 @Component(name = "apim.notification.component", immediate = true)
 public class ApimgtNotificationServiceComponent {
 

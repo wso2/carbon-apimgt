@@ -26,6 +26,9 @@ import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 
 import java.util.Properties;
 
+/**
+ * This class implements to handle Default key management related notification events.
+ */
 public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHandler {
 
     private RevocationRequestPublisher revocationRequestPublisher;

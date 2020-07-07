@@ -23,6 +23,9 @@ import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Service holder class to keep osgi references.
+ */
 public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();

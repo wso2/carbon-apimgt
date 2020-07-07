@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.notification.handlers;
 
+import com.nimbusds.jose.util.StandardCharset;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
@@ -36,6 +37,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
 
+/**
+ * This class used to authenticate notify API with basic auth.
+ */
 public class BasicAuthNotificationHandler extends AbstractHandler implements ManagedLifecycle {
 
     private static final Log log = LogFactory.getLog(BasicAuthNotificationHandler.class);
@@ -115,8 +119,9 @@ public class BasicAuthNotificationHandler extends AbstractHandler implements Man
         } else {
             if (basicAuthHeader.contains(basicAuthKeyHeaderSegment)) {
                 try {
-                    String basicAuthKey = new String(Base64.decode(
-                            basicAuthHeader.substring(basicAuthKeyHeaderSegment.length() + 1).trim()));
+                    String basicAuthKey = new String(
+                            Base64.decode(basicAuthHeader.substring(basicAuthKeyHeaderSegment.length() + 1).trim()),
+                            StandardCharset.UTF_8);
                     if (basicAuthKey.contains(":")) {
                         return basicAuthKey.split(":");
                     } else {

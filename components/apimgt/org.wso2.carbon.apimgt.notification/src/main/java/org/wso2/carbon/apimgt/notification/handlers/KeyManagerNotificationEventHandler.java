@@ -36,6 +36,9 @@ import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
 
+/**
+ * This class used to read and handle notify event.
+ */
 public class KeyManagerNotificationEventHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(KeyManagerNotificationEventHandler.class);

@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.notification.event;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Abstract Event that have common attributes.
+ */
 public abstract class Event {
     public String eventId;
     public long timeStamp;

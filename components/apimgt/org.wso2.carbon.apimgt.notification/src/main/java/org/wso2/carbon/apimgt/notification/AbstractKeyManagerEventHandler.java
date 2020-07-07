@@ -24,6 +24,9 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 
+/**
+ *  Abstract Implementation of KeyManagerEventHandler.
+ */
 public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventHandler {
 
     public abstract boolean handleEvent(String event);
