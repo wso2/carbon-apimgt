@@ -71,7 +71,7 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
             RestApiAdminUtils.importTenantTheme(fileInputStream, tenantDomain);
             return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
         } catch (IOException e) {
-            throw new APIManagementException(e.getMessage(),
+            throw new APIManagementException(e.getMessage(), e,
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
         }
     }
@@ -106,7 +106,7 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + tenantThemeArchive.getName() + "\"").build();
         } catch (IOException e) {
-            throw new APIManagementException(e.getMessage(),
+            throw new APIManagementException(e.getMessage(), e,
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_EXPORT_FAILED, tenantDomain, e.getMessage()));
         }
     }
