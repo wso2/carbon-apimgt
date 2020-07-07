@@ -117,25 +117,44 @@ const ChangePassword = () => {
     };
 
     const handleSave = () => {
-        // todo: use intl
         const restApi = new API();
         return restApi
             .changePassword(currentPassword, newPassword)
             .then((res) => {
-                Alert.success('Successfuly changed the password');
+                Alert.success(
+                    <FormattedMessage
+                        id='Change.Password.password.changed.success'
+                        defaultMessage='Successfuly changed the password'
+                    />
+                );
                 window.history.back();
             })
             .catch((error) => {
                 const errorCode = error.response.body.code;
                 switch (errorCode) {
                     case 901450:
-                        Alert.error('Password change disabled');
+                        Alert.error(
+                            <FormattedMessage
+                                id='Change.Password.password.change.disabled'
+                                defaultMessage='Password change disabled'
+                            />
+                        );
                         break;
                     case 901451:
-                        Alert.error('Current password incorrect');
+                        Alert.error(
+                            <FormattedMessage
+                                id='Change.Password.current.password.incorrect'
+                                defaultMessage='Incorrect current password'
+                            />
+                        );
                         break;
                     case 901452:
-                        Alert.error('Password pattern invalid');
+                        Alert.error(
+                            <FormattedMessage
+                                id='Change.Password.password.pattern.invalid'
+                                defaultMessage='Invalid password pattern'
+                            />
+                        );
                         break;
                 }
             });
