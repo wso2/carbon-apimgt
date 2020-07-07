@@ -43,7 +43,7 @@ import Drawer from '@material-ui/core/Drawer';
 import { ListItemIcon, ListItem, ListItemText, List } from '@material-ui/core';
 import classNames from 'classnames';
 import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
-import Settings from 'AppComponents/Shared/SettingsContext';
+import Settings, { useSettingsContext } from 'AppComponents/Shared/SettingsContext';
 import { app } from 'Settings';
 import ReactSafeHtml from 'react-safe-html';
 import AuthManager from '../../data/AuthManager';
@@ -318,6 +318,11 @@ class Layout extends React.Component {
         }
     };
 
+    getPasswordChangeEnabled = () => {
+        const { settings: { IsPasswordChangeEnabled } } = useSettingsContext();
+        return IsPasswordChangeEnabled;
+    };
+
     /**
      * @inheritdoc
      * @returns {Component}
@@ -530,18 +535,7 @@ class Layout extends React.Component {
                                                                             />
                                                                         </Link>
                                                                     </MenuItem>
-                                                                    <MenuItem className={classes.logoutLink}>
-                                                                        <Link
-                                                                            to={'/settings/change-password/'}
-                                                                            onClick={this.handleCloseUserMenu}
-                                                                        >
-                                                                            <FormattedMessage
-                                                                                id='Base.index.settingsMenu.changePassword'
-                                                                                defaultMessage='Change Password'
-                                                                            />
-                                                                        </Link>
-                                                                    </MenuItem>
-                                                                    {/* {user.name !== 'admin' ?
+                                                                    {this.getPasswordChangeEnabled() ?
                                                                         <MenuItem className={classes.logoutLink}>
                                                                             <Link
                                                                                 to={'/settings/change-password/'}
@@ -554,7 +548,7 @@ class Layout extends React.Component {
                                                                             </Link>
                                                                         </MenuItem> :
                                                                         null
-                                                                    } */}
+                                                                    }
                                                                     <MenuItem onClick={this.doOIDCLogout} className={classes.logoutLink}>
                                                                         <FormattedMessage
                                                                             id='Base.index.logout'
