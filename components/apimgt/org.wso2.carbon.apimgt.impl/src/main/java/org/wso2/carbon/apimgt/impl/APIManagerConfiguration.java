@@ -108,6 +108,7 @@ public class APIManagerConfiguration {
     private JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
+    private static JSONObject redisConfigProperties = new JSONObject();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
     private static String tokenRevocationClassName;
@@ -308,6 +309,29 @@ public class APIManagerConfiguration {
                     }
                 }
                 persistentNotifierProperties = properties;
+            } else if ("RedisConfig".equals(localName)) {
+                OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
+                OMElement redisPort = element.getFirstChildWithName(new QName("RedisPort"));
+                OMElement redisUser = element.getFirstChildWithName(new QName("RedisUser"));
+                OMElement redisPassword = element.getFirstChildWithName(new QName("RedisPassword"));
+                OMElement redisDatabaseId = element.getFirstChildWithName(new QName("RedisDatabaseId"));
+                OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName("RedisConnectionTimeout"));
+                OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName("RedisIsSslEnabled"));
+
+                if (redisHost != null && redisPort != null) {
+                    redisConfigProperties.put("isRedisEnabled", true);
+                    redisConfigProperties.put("host", redisHost.getText());
+                    redisConfigProperties.put("port", Integer.parseInt(redisPort.getText()));
+
+                    if (redisUser != null && redisPassword != null && redisDatabaseId != null
+                            && redisConnectionTimeout != null && redisIsSslEnabled != null) {
+                        redisConfigProperties.put("user", redisUser.getText());
+                        redisConfigProperties.put("password", redisPassword.getText().toCharArray());
+                        redisConfigProperties.put("databaseId", Integer.parseInt(redisDatabaseId.getText()));
+                        redisConfigProperties.put("connectionTimeout", Integer.parseInt(redisConnectionTimeout.getText()));
+                        redisConfigProperties.put("isSslEnabled", Boolean.parseBoolean(redisIsSslEnabled.getText()));
+                    }
+                }
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
@@ -1316,6 +1340,11 @@ public class APIManagerConfiguration {
         return workflowProperties;
     }
 
+    public JSONObject getRedisConfigProperties() {
+
+        return redisConfigProperties;
+    }
+
     /**
      * To populate Monetization Additional Attributes
      *
@@ -1579,7 +1608,7 @@ public class APIManagerConfiguration {
         return eventHubConfigurationDto;
     }
 
-    private void setRuntimeArtifactsSyncPublisherConfig (OMElement omElement){
+    private void setRuntimeArtifactsSyncPublisherConfig (OMElement omElement) {
 
         OMElement enableElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_CONFIG));
@@ -1599,15 +1628,24 @@ public class APIManagerConfiguration {
             log.debug("Artifact saver Element is not set. Set to default DB Saver");
         }
 
+        OMElement dataSourceElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.DATA_SOURCE_NAME));
+        if (dataSourceElement != null) {
+            String dataSource = dataSourceElement.getText();
+            gatewayArtifactSynchronizerProperties.setArtifactSynchronizerDataSource(dataSource);
+        } else {
+            log.debug("Data Source Element is not set. Set to default Data Source");
+        }
+
         OMElement publishDirectlyToGatewayElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.PUBLISH_DIRECTLY_TO_GW_CONFIG));
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer
+                        .PUBLISH_DIRECTLY_TO_GW_CONFIG));
         if (publishDirectlyToGatewayElement != null) {
             gatewayArtifactSynchronizerProperties.setPublishDirectlyToGatewayEnabled(
                     JavaUtils.isTrueExplicitly(publishDirectlyToGatewayElement.getText()));
         } else {
             log.debug("Publish directly to gateway is not set. Set to default true");
         }
-
     }
 
     private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){
@@ -1628,6 +1666,15 @@ public class APIManagerConfiguration {
             gatewayArtifactSynchronizerProperties.setRetrieverName(artifactRetriever);
         } else {
             log.debug("Artifact retriever Element is not set. Set to default DB Retriever");
+        }
+
+        OMElement retryDurationElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.RETRY_DUARTION));
+        if (retrieverElement != null) {
+            long retryDuration = Long.valueOf(retryDurationElement.getText());
+            gatewayArtifactSynchronizerProperties.setRetryDuartion(retryDuration);
+        } else {
+            log.debug("Retry Duration Element is not set. Set to default duaration");
         }
 
         OMElement gatewayLabelElement = omElement
@@ -1685,8 +1732,8 @@ public class APIManagerConfiguration {
                             containerMgt.put(ContainerBasedConstants.CLASS_NAME,
                                     deploymentEnvs.get(containerMgt.get(ContainerBasedConstants.TYPE)));
                         }
-                    } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.CLUSTER_ID)) {
-                        containerMgtInfoObj.put(ContainerBasedConstants.CLUSTER_ID, containerMgtInfoElement.getText());
+                    } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.CLUSTER_NAME)) {
+                        containerMgtInfoObj.put(ContainerBasedConstants.CLUSTER_NAME, containerMgtInfoElement.getText());
                     } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.DISPLAY_NAME)) {
                         containerMgtInfoObj.put(ContainerBasedConstants.DISPLAY_NAME, containerMgtInfoElement.getText());
                     } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.PROPERTIES)) {
@@ -1695,32 +1742,7 @@ public class APIManagerConfiguration {
                         JSONObject propertyObj = new JSONObject();
                         while (clusterPropertiesIterator.hasNext()) {
                             OMElement propertyElement = (OMElement) clusterPropertiesIterator.next();
-
-                            if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.REPLICAS)) {
-                                propertyObj.put(ContainerBasedConstants.REPLICAS, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.INGRESS_URL)) {
-                                propertyObj.put(ContainerBasedConstants.INGRESS_URL, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.NAMESPACE)) {
-                                propertyObj.put(ContainerBasedConstants.NAMESPACE, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.SATOKEN)) {
-                                propertyObj.put(ContainerBasedConstants.SATOKEN, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.MASTER_URL)) {
-                                propertyObj.put(ContainerBasedConstants.MASTER_URL, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.JWT_SECURITY_CR_NAME)) {
-                                propertyObj.put(ContainerBasedConstants.JWT_SECURITY_CR_NAME, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME)) {
-                                propertyObj.put(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME, propertyElement.getText());
-                            } else if (propertyElement.getAttributeValue(new QName("name"))
-                                    .equals(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME)) {
-                                propertyObj.put(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME, propertyElement.getText());
-                            }
+                            propertyObj.put(propertyElement.getAttributeValue(new QName("name")), propertyElement.getText());
                         }
                         containerMgtInfoObj.put(ContainerBasedConstants.PROPERTIES, propertyObj);
                     }

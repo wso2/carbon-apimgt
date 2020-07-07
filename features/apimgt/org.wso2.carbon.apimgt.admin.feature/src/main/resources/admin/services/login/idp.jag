@@ -41,11 +41,19 @@
     var settingsAPIUrl = appUtils.getLoopbackOrigin() + SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
+    var responseFailed = false;
+    var erroLogin = serverUrl + app.context +"/error-pages?code="
+
     var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
     var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
     var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
-    var scopes = settingsResponse.data.scopes.join(" ");
+    if (settingsResponse.data) {
+         var scopes = settingsResponse.data.scopes.join(" ");
+    } else {
+        response.sendRedirect(erroLogin + "500");
+        responseFailed = true;
+    }
     var referer = request.getHeader("Referer");
     var state = "";
     // get the pathname from query param 'referrer'
@@ -61,9 +69,6 @@
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId;
     systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
-    if (systemApplicationDTO === null) {
-        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
-    }
     var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO !== null) {
         clientId = systemApplicationDTO.getConsumerKey();
@@ -71,9 +76,6 @@
         try {
             lock.acquire();
             systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
-            if (systemApplicationDTO === null) {
-                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
-            }
             if (systemApplicationDTO == null) {
                 var dcrRequestData = {
                     "callbackUrl": callbackUrl,
@@ -116,7 +118,9 @@
         "secure": true,
         "maxAge": -1
     };
-    response.addCookie(cookie);
-    response.sendRedirect(authorizeEndpoint + authRequestParams);
+    if (responseFailed === false) {
+         response.addCookie(cookie);
+         response.sendRedirect(authorizeEndpoint + authRequestParams);
+    }
 
 %>

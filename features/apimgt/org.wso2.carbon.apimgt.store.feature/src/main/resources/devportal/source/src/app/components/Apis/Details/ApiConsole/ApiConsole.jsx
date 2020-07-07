@@ -32,6 +32,7 @@ import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
 import TryOutController from './TryOutController';
+import Application from '../../../../data/Application';
 
 /**
  * @inheritdoc
@@ -91,6 +92,7 @@ class ApiConsole extends React.Component {
             keys: [],
             productionApiKey: '',
             sandboxApiKey: '',
+            selectedKeyManager: 'Default',
         };
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.updateSwagger = this.updateSwagger.bind(this);
@@ -101,6 +103,7 @@ class ApiConsole extends React.Component {
         this.setUsername = this.setUsername.bind(this);
         this.setPassword = this.setPassword.bind(this);
         this.setSelectedKeyType = this.setSelectedKeyType.bind(this);
+        this.setSectedKeyManager = this.setSelectedKeyManager.bind(this);
         this.setKeys = this.setKeys.bind(this);
         this.updateAccessToken = this.updateAccessToken.bind(this);
         this.setProductionApiKey = this.setProductionApiKey.bind(this);
@@ -244,11 +247,23 @@ class ApiConsole extends React.Component {
      * Set Password
      * @memberof ApiConsole
      */
-    setSelectedKeyType(selectedKeyType, isUpdateToken) {
+    setSelectedKeyType(selectedKeyType, isUpdateToken, selectedApplication) {
         if (isUpdateToken) {
-            this.setState({ selectedKeyType }, this.updateAccessToken);
+            this.setState({ selectedKeyType }, this.updateAccessToken(selectedApplication));
         } else {
             this.setState({ selectedKeyType });
+        }
+    }
+
+    /**
+     * Set Password
+     * @memberof ApiConsole
+     */
+    setSelectedKeyManager(selectedKeyManager, isUpdateToken, selectedApplication) {
+        if (isUpdateToken) {
+            this.setState({ selectedKeyManager }, this.updateAccessToken(selectedApplication));
+        } else {
+            this.setState({ selectedKeyManager });
         }
     }
 
@@ -260,18 +275,35 @@ class ApiConsole extends React.Component {
      * Load the access token for given key type
      * @memberof TryOutController
      */
-    updateAccessToken() {
+    updateAccessToken(selectedApplication) {
         const {
-            keys, selectedKeyType,
+            selectedKeyType, selectedKeyManager, keys,
         } = this.state;
         let accessToken;
-        if (keys.get(selectedKeyType)) {
-            ({ accessToken } = keys.get(selectedKeyType).token);
-        }
-        if (selectedKeyType === 'PRODUCTION') {
-            this.setProductionAccessToken(accessToken);
+        if (keys.get(selectedKeyManager) && keys.get(selectedKeyManager).keyType === selectedKeyType) {
+            ({ accessToken } = keys.get(selectedKeyManager).token);
+            if (selectedKeyType === 'PRODUCTION') {
+                this.setProductionAccessToken(accessToken);
+            } else {
+                this.setSandboxAccessToken(accessToken);
+            }
         } else {
-            this.setSandboxAccessToken(accessToken);
+            Application.get(selectedApplication)
+                .then((application) => {
+                    return application.getKeys(selectedKeyType);
+                })
+                .then((appKeys) => {
+                    if (appKeys.get(selectedKeyManager)
+                    && appKeys.get(selectedKeyManager).keyType === selectedKeyType) {
+                        ({ accessToken } = appKeys.get(selectedKeyManager).token);
+                    }
+                    if (appKeys.get(selectedKeyManager).keyType === 'PRODUCTION') {
+                        this.setProductionAccessToken(accessToken);
+                    } else {
+                        this.setSandboxAccessToken(accessToken);
+                    }
+                    this.setKeys(appKeys);
+                });
         }
     }
 
@@ -336,7 +368,7 @@ class ApiConsole extends React.Component {
         const {
             api, notFound, swagger, securitySchemeType, selectedEnvironment, labels, environments, scopes,
             username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
-            sandboxApiKey, productionApiKey,
+            sandboxApiKey, productionApiKey, selectedKeyManager,
         } = this.state;
         const user = AuthManager.getUser();
         const downloadSwagger = JSON.stringify({ ...swagger });
@@ -405,6 +437,8 @@ class ApiConsole extends React.Component {
                         password={password}
                         setSelectedKeyType={this.setSelectedKeyType}
                         selectedKeyType={selectedKeyType}
+                        setSelectedKeyManager={this.setSelectedKeyManager}
+                        selectedKeyManager={selectedKeyManager}
                         updateSwagger={this.updateSwagger}
                         setKeys={this.setKeys}
                         setProductionApiKey={this.setProductionApiKey}

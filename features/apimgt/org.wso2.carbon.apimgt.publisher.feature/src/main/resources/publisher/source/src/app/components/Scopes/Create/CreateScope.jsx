@@ -150,6 +150,8 @@ class CreateScope extends React.Component {
         this.validateScopeName = this.validateScopeName.bind(this);
         this.handleScopeNameInput = this.handleScopeNameInput.bind(this);
         this.validateScopeDetails = this.validateScopeDetails.bind(this);
+        this.validateScopeDisplayName = this.validateScopeDisplayName.bind(this);
+        this.handleScopeDisplayNameInput = this.handleScopeDisplayNameInput.bind(this);
         this.handleRoleAddition = this.handleRoleAddition.bind(this);
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
     }
@@ -275,6 +277,36 @@ class CreateScope extends React.Component {
     }
 
     /**
+     * Scope display name validation.
+     * @param {any} id The id of the scope name.
+     * @param {any} value The value of the scope name.
+     * @returns {boolean} whether the scope name is validated.
+     * @memberof CreateScope
+     */
+    validateScopeDisplayName(id, value) {
+        const { valid, sharedScope } = this.state;
+
+        sharedScope[id] = value;
+        valid[id].invalid = !(value && value.length > 0);
+        if (valid[id].invalid) {
+            valid[id].error = 'Scope display name cannot be empty';
+        }
+
+        if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]|(^apim:)/i.test(value)) {
+            valid[id].invalid = true;
+            valid[id].error = 'Field contains special characters';
+        }
+        if (!valid[id].invalid) {
+            valid[id].error = '';
+        }
+        this.setState({
+            valid,
+            sharedScope,
+        });
+        return valid[id].invalid;
+    }
+
+    /**
      * Add new scope
      * @memberof CreateScope
      */
@@ -285,7 +317,8 @@ class CreateScope extends React.Component {
         const {
             sharedScope, validRoles,
         } = this.state;
-        if (this.validateScopeName('name', sharedScope.name)) {
+        if (this.validateScopeName('name', sharedScope.name)
+            || this.validateScopeDisplayName('displayName', sharedScope.displayName)) {
             // return status of the validation
             return;
         }
@@ -327,6 +360,15 @@ class CreateScope extends React.Component {
      */
     handleScopeNameInput({ target: { id, value } }) {
         this.validateScopeName(id, value);
+    }
+
+    /**
+     * Handle scope display name input.
+     * @param {any} target The id and value of the target.
+     * @memberof CreateScope
+     */
+    handleScopeDisplayNameInput({ target: { id, value } }) {
+        this.validateScopeDisplayName(id, value);
     }
 
     /**
@@ -404,7 +446,10 @@ class CreateScope extends React.Component {
                                         id='displayName'
                                         label='Display Name'
                                         placeholder='Scope Display Name'
-                                        helperText={(
+                                        error={valid.displayName.invalid}
+                                        helperText={valid.displayName.invalid ? (
+                                            valid.displayName.error
+                                        ) : (
                                             <FormattedMessage
                                                 id='Scopes.Create.CreateScope.short.description.display.name'
                                                 defaultMessage='Enter Scope Display Name ( Ex: creator )'
@@ -417,7 +462,7 @@ class CreateScope extends React.Component {
                                             shrink: true,
                                         }}
                                         value={sharedScope.displayName || ''}
-                                        onChange={this.validateScopeDetails}
+                                        onChange={this.handleScopeDisplayNameInput}
                                     />
                                 </FormControl>
                                 <FormControl margin='normal' classes={{ root: classes.descriptionForm }}>

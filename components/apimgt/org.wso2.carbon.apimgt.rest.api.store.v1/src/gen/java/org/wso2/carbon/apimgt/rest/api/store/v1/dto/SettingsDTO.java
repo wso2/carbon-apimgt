@@ -28,6 +28,7 @@ public class SettingsDTO   {
     private Boolean isUnlimitedTierPaid = false;
     private SettingsIdentityProviderDTO identityProvider = null;
     private Boolean isAnonymousModeEnabled = true;
+    private Boolean isPasswordChangeEnabled = true;
 
   /**
    **/
@@ -199,6 +200,23 @@ public class SettingsDTO   {
     this.isAnonymousModeEnabled = isAnonymousModeEnabled;
   }
 
+  /**
+   * Get store Password Change Enabled
+   **/
+  public SettingsDTO isPasswordChangeEnabled(Boolean isPasswordChangeEnabled) {
+    this.isPasswordChangeEnabled = isPasswordChangeEnabled;
+    return this;
+  }
+
+  @ApiModelProperty(value = "")
+  @JsonProperty("IsPasswordChangeEnabled")
+  public Boolean isIsPasswordChangeEnabled() {
+    return isPasswordChangeEnabled;
+  }
+  public void setIsPasswordChangeEnabled(Boolean isPasswordChangeEnabled) {
+    this.isPasswordChangeEnabled = isPasswordChangeEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -218,12 +236,13 @@ public class SettingsDTO   {
         Objects.equals(recommendationEnabled, settings.recommendationEnabled) &&
         Objects.equals(isUnlimitedTierPaid, settings.isUnlimitedTierPaid) &&
         Objects.equals(identityProvider, settings.identityProvider) &&
-        Objects.equals(isAnonymousModeEnabled, settings.isAnonymousModeEnabled);
+        Objects.equals(isAnonymousModeEnabled, settings.isAnonymousModeEnabled) &&
+        Objects.equals(isPasswordChangeEnabled, settings.isPasswordChangeEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled);
   }
 
   @Override
@@ -241,6 +260,7 @@ public class SettingsDTO   {
     sb.append("    isUnlimitedTierPaid: ").append(toIndentedString(isUnlimitedTierPaid)).append("\n");
     sb.append("    identityProvider: ").append(toIndentedString(identityProvider)).append("\n");
     sb.append("    isAnonymousModeEnabled: ").append(toIndentedString(isAnonymousModeEnabled)).append("\n");
+    sb.append("    isPasswordChangeEnabled: ").append(toIndentedString(isPasswordChangeEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

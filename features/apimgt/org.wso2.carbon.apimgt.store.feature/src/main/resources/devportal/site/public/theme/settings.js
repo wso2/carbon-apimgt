@@ -9,6 +9,7 @@ const Settings = {
             host: 'localhost',
         },
         subscriptionLimit: 1000,
+        subscribeApplicationLimit: 5000,
         isPassive: true,
         singleLogout: {
             enabled: true, // If enabled, user will be logged out from the App when logged out from the IDP (eg: SSO logout from a different App).
@@ -26,5 +27,13 @@ const Settings = {
         'urn:ietf:params:oauth:grant-type:jwt-bearer': 'JWT',
         kerberos: 'Kerberos',
         'urn:ietf:params:oauth:grant-type:device_code': 'Device Code',
+    },
+    passwordChange: {
+        guidelinesEnabled: false,
+        policyList: [
+            'Policy 1',
+            'Policy 2',
+            'Policy 3',
+        ],
     },
 };

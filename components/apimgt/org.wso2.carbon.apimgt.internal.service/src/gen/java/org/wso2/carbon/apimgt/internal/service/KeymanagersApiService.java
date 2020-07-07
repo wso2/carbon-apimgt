@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface KeymanagersApiService {
-      public Response keymanagersGet(MessageContext messageContext) throws APIManagementException;
+      public Response keymanagersGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
 }

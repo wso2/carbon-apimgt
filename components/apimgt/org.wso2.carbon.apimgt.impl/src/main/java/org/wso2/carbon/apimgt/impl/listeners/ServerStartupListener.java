@@ -17,10 +17,15 @@
 
 package org.wso2.carbon.apimgt.impl.listeners;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -38,13 +43,28 @@ public class ServerStartupListener implements ServerStartupObserver {
 
     @Override
     public void completedServerStartup() {
+
         copyToExtensions();
-        try {
-            KeyMgtRegistrationService.registerDefaultKeyManager(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        } catch (APIManagementException e) {
-            log.error("Error while registering Default Key Manager for SuperTenant", e);
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            String defaultKeyManagerRegistration =
+                    apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_DEFAULT_KEY_MANAGER_REGISTRATION);
+            if (StringUtils.isNotEmpty(defaultKeyManagerRegistration) &&
+                    JavaUtils.isTrueExplicitly(defaultKeyManagerRegistration)) {
+                try {
+                    KeyMgtRegistrationService.registerDefaultKeyManager(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                } catch (APIManagementException e) {
+                    log.error("Error while registering Default Key Manager for SuperTenant", e);
+                }
+            }
+            String enableKeyManagerRetrieval =
+                    apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_KEY_MANAGER_RETRIVAL);
+            if (JavaUtils.isTrueExplicitly(enableKeyManagerRetrieval)) {
+                startConfigureKeyManagerConfigurations();
+            }
         }
-        startConfigureKeyManagerConfigurations();
     }
 
     /**
@@ -58,8 +78,8 @@ public class ServerStartupListener implements ServerStartupObserver {
         String authenticationEndpointDir = "authenticationendpoint";
         String accountRecoveryEndpointDir = "accountrecoveryendpoint";
         String headerJspFile = "header.jsp";
-        String footerJspFile = "footer.jsp";
-        String titleJspFile = "title.jsp";
+        String footerJspFile = "product-footer.jsp";
+        String titleJspFile = "product-title.jsp";
         String cookiePolicyContentJspFile = "cookie-policy-content.jsp";
         String privacyPolicyContentJspFile = "privacy-policy-content.jsp";
         try {
@@ -122,9 +142,11 @@ public class ServerStartupListener implements ServerStartupObserver {
             throw new IOException("An error occurred while copying file to directory", ex);
         }
     }
-    private void startConfigureKeyManagerConfigurations(){
-        KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever  =
-                new KeyManagerConfigurationDataRetriever();
+
+    private void startConfigureKeyManagerConfigurations() {
+
+        KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever =
+                new KeyManagerConfigurationDataRetriever(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         keyManagerConfigurationDataRetriever.startLoadKeyManagerConfigurations();
     }
 

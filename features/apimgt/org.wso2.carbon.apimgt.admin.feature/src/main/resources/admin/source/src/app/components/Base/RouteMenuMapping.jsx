@@ -19,16 +19,12 @@
 import React from 'react';
 import PeopleIcon from '@material-ui/icons/People';
 import DnsRoundedIcon from '@material-ui/icons/DnsRounded';
-import PermMediaOutlinedIcon from '@material-ui/icons/PhotoSizeSelectActual';
-import PublicIcon from '@material-ui/icons/Public';
 import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
-import TimerIcon from '@material-ui/icons/Timer';
 import SettingsIcon from '@material-ui/icons/Settings';
 import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 import HomeIcon from '@material-ui/icons/Home';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
-import DemoTable from 'AppComponents/AdminPages/Microgateways/List';
 import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
 import SubscriptionThrottlingPolicies from 'AppComponents/Throttling/Subscription/index';
 import APICategories from 'AppComponents/APICategories/ListApiCategories';
@@ -42,12 +38,13 @@ import ListDetectedBotData from 'AppComponents/BotDetection/DetectedBotData/List
 import ListEmails from 'AppComponents/BotDetection/EmailConfig/ListEmails';
 import KeyManagers from 'AppComponents/KeyManagers';
 import ManageAlerts from 'AppComponents/ManageAlerts/ManageAlerts.jsx';
+import ListRoles from 'AppComponents//RolePermissions/ListRoles.jsx';
+
 import GamesIcon from '@material-ui/icons/Games';
 import CategoryIcon from '@material-ui/icons/Category';
 import AndroidIcon from '@material-ui/icons/Android';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PolicyIcon from '@material-ui/icons/Policy';
-import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import BlockIcon from '@material-ui/icons/Block';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import ApplicationCreation from 'AppComponents/Workflow/ApplicationCreation';
@@ -55,7 +52,11 @@ import SubscriptionCreation from 'AppComponents/Workflow/SubscriptionCreation';
 import RegistrationCreation from 'AppComponents/Workflow/RegistrationCreation';
 import APIStateChange from 'AppComponents/Workflow/APIStateChange';
 import UserCreation from 'AppComponents/Workflow/UserCreation';
-
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
+import SecurityIcon from '@material-ui/icons/Security';
+import TouchAppIcon from '@material-ui/icons/TouchApp';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import AccountTreeIcon from '@material-ui/icons/AccountTree';
 
 const RouteMenuMapping = (intl) => [
     {
@@ -115,7 +116,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/throttling/subscription',
                 component: SubscriptionThrottlingPolicies,
-                icon: <ShoppingBasketIcon />,
+                icon: <AssignmentTurnedInIcon />,
                 addEditPageDetails: [
                     {
                         id: intl.formatMessage({
@@ -194,7 +195,7 @@ const RouteMenuMapping = (intl) => [
         }),
         path: '/settings/key-managers',
         component: KeyManagers,
-        icon: <PhonelinkSetupIcon />,
+        icon: <SecurityIcon />,
         addEditPageDetails: [
             {
                 id: intl.formatMessage({
@@ -278,13 +279,13 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/tasks/subscription-creation',
                 component: SubscriptionCreation,
-                icon: <PermMediaOutlinedIcon />,
+                icon: <TouchAppIcon />,
             },
             {
                 id: 'Application Registration',
                 path: '/tasks/application-registration',
                 component: RegistrationCreation,
-                icon: <PublicIcon />,
+                icon: <VpnKeyIcon />,
             },
             {
                 id: 'API State Change',
@@ -315,8 +316,8 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Scope Mapping',
                 }),
                 path: '/settings/scope-mapping',
-                component: DemoTable,
-                icon: <TimerIcon />,
+                component: ListRoles,
+                icon: <AccountTreeIcon />,
             },
             {
                 id: intl.formatMessage({

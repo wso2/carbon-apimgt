@@ -31,7 +31,7 @@ public class Subscription implements CacheableEntity<String> {
     private Integer apiId = null;
     private Integer appId = null;
     private String subscriptionState = null;
-
+    private long timeStamp;
     public String getSubscriptionId() {
 
         return subscriptionId;
@@ -86,5 +86,28 @@ public class Subscription implements CacheableEntity<String> {
     public String getCacheKey() {
 
         return SubscriptionDataStoreUtil.getSubscriptionCacheKey(getAppId(), getApiId());
+    }
+
+    public long getTimeStamp() {
+
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+
+        this.timeStamp = timeStamp;
+    }
+
+    @Override
+    public String toString() {
+
+        return "Subscription{" +
+                "subscriptionId='" + subscriptionId + '\'' +
+                ", policyId='" + policyId + '\'' +
+                ", apiId=" + apiId +
+                ", appId=" + appId +
+                ", subscriptionState='" + subscriptionState + '\'' +
+                ", timeStamp=" + timeStamp +
+                '}';
     }
 }

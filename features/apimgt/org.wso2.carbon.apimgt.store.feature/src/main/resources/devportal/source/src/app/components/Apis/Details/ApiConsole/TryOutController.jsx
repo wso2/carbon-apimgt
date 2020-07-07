@@ -101,19 +101,18 @@ function TryOutController(props) {
     const {
         securitySchemeType, selectedEnvironment, environments, labels,
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
+        selectedKeyManager, setSelectedKeyManager,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
         setSecurityScheme, setUsername, setPassword, username, password,
         setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey, environmentObject, setURLs, api,
     } = props;
     const classes = styles();
-
     const [showToken, setShowToken] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [notFound, setNotFound] = useState(false);
     const [subscriptions, setSubscriptions] = useState([]);
     const [selectedApplication, setSelectedApplication] = useState([]);
     const [keyManagers, setKeyManagers] = useState([]);
-    const [selectedKeyManager, setSelectedKeyManager] = useState('Default');
     const apiID = api.id;
     const restApi = new Api();
 
@@ -124,39 +123,52 @@ function TryOutController(props) {
         let keys;
         let selectedKeyTypes = 'PRODUCTION';
         let accessToken;
-        const promiseSubscriptions = restApi.getSubscriptions(apiID);
-        promiseSubscriptions.then((subscriptionsResponse) => {
-            if (subscriptionsResponse !== null) {
-                subscriptionsList = subscriptionsResponse.obj.list.filter((item) => item.status === 'UNBLOCKED'
-                || item.status === 'PROD_ONLY_BLOCKED');
+        if (api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() !== 'prototyped') {
+            const promiseSubscriptions = restApi.getSubscriptions(apiID);
+            promiseSubscriptions.then((subscriptionsResponse) => {
+                if (subscriptionsResponse !== null) {
+                    subscriptionsList = subscriptionsResponse.obj.list.filter((item) => item.status === 'UNBLOCKED'
+                        || item.status === 'PROD_ONLY_BLOCKED');
 
-                if (subscriptionsList && subscriptionsList.length > 0) {
-                    newSelectedApplication = subscriptionsList[0].applicationId;
-                    Application.get(newSelectedApplication)
-                        .then((application) => {
-                            return application.getKeys();
-                        })
-                        .then((appKeys) => {
-                            if (appKeys.get(selectedKeyManager)
-                                && appKeys.get(selectedKeyManager).keyType === 'SANDBOX') {
-                                selectedKeyTypes = 'SANDBOX';
-                                ({ accessToken } = appKeys.get(selectedKeyManager).token);
-                            } else if (appKeys.get(selectedKeyManager)
-                                && appKeys.get(selectedKeyManager).keyType === 'PRODUCTION') {
-                                selectedKeyTypes = 'PRODUCTION';
-                                ({ accessToken } = appKeys.get(selectedKeyManager).token);
-                            }
-                            setSelectedApplication(newSelectedApplication);
-                            setSubscriptions(subscriptionsList);
-                            setKeys(appKeys);
-                            setSelectedEnvironment(selectedEnvironments, false);
-                            setSelectedKeyType(selectedKeyTypes, false);
-                            if (selectedKeyType === 'PRODUCTION') {
-                                setProductionAccessToken(accessToken);
-                            } else {
-                                setSandboxAccessToken(accessToken);
-                            }
-                        });
+                    if (subscriptionsList && subscriptionsList.length > 0) {
+                        newSelectedApplication = subscriptionsList[0].applicationId;
+                        Application.get(newSelectedApplication)
+                            .then((application) => {
+                                return application.getKeys();
+                            })
+                            .then((appKeys) => {
+                                if (appKeys.get(selectedKeyManager)
+                                    && appKeys.get(selectedKeyManager).keyType === 'SANDBOX') {
+                                    selectedKeyTypes = 'SANDBOX';
+                                    ({ accessToken } = appKeys.get(selectedKeyManager).token);
+                                } else if (appKeys.get(selectedKeyManager)
+                                    && appKeys.get(selectedKeyManager).keyType === 'PRODUCTION') {
+                                    selectedKeyTypes = 'PRODUCTION';
+                                    ({ accessToken } = appKeys.get(selectedKeyManager).token);
+                                }
+                                setSelectedApplication(newSelectedApplication);
+                                setSubscriptions(subscriptionsList);
+                                setKeys(appKeys);
+                                setSelectedEnvironment(selectedEnvironments, false);
+                                setSelectedKeyType(selectedKeyTypes, false);
+                                if (selectedKeyType === 'PRODUCTION') {
+                                    setProductionAccessToken(accessToken);
+                                } else {
+                                    setSandboxAccessToken(accessToken);
+                                }
+                            });
+                    } else {
+                        setSelectedApplication(newSelectedApplication);
+                        setSubscriptions(subscriptionsList);
+                        setKeys(keys);
+                        setSelectedEnvironment(selectedEnvironment, false);
+                        if (selectedKeyType === 'PRODUCTION') {
+                            setProductionAccessToken(accessToken);
+                        } else {
+                            setSandboxAccessToken(accessToken);
+                        }
+                        setSelectedKeyType(selectedKeyType, false);
+                    }
                 } else {
                     setSelectedApplication(newSelectedApplication);
                     setSubscriptions(subscriptionsList);
@@ -169,43 +181,32 @@ function TryOutController(props) {
                     }
                     setSelectedKeyType(selectedKeyType, false);
                 }
-            } else {
-                setSelectedApplication(newSelectedApplication);
-                setSubscriptions(subscriptionsList);
-                setKeys(keys);
-                setSelectedEnvironment(selectedEnvironment, false);
-                if (selectedKeyType === 'PRODUCTION') {
-                    setProductionAccessToken(accessToken);
-                } else {
-                    setSandboxAccessToken(accessToken);
-                }
-                setSelectedKeyType(selectedKeyType, false);
-            }
-        }).catch((error) => {
-            if (process.env.NODE_ENV !== 'production') {
-                console.error(error);
-            }
-            const { status } = error;
-            if (status === 404) {
-                setNotFound(true);
-            }
-        });
-        const promisedKeyManagers = restApi.getKeyManagers();
-        promisedKeyManagers
-            .then((response) => {
-                const responseKeyManagerList = [];
-                response.body.list.map((item) => responseKeyManagerList.push(item));
-                setKeyManagers(responseKeyManagerList);
-            })
-            .catch((error) => {
+            }).catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
+                    console.error(error);
                 }
                 const { status } = error;
                 if (status === 404) {
                     setNotFound(true);
                 }
             });
+            const promisedKeyManagers = restApi.getKeyManagers();
+            promisedKeyManagers
+                .then((response) => {
+                    const responseKeyManagerList = [];
+                    response.body.list.map((item) => responseKeyManagerList.push(item));
+                    setKeyManagers(responseKeyManagerList);
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const { status } = error;
+                    if (status === 404) {
+                        setNotFound(true);
+                    }
+                });
+        }
     }, []);
 
 
@@ -213,33 +214,35 @@ function TryOutController(props) {
      * Generate access token
      * */
     function generateAccessToken() {
-        setIsUpdating(true);
-        const applicationPromise = Application.get(selectedApplication);
-        applicationPromise
-            .then((application) => application.generateToken(
-                selectedKeyManager,
-                selectedKeyType,
-                3600,
-                scopes,
-            ))
-            .then((response) => {
-                console.log('token generated successfully ' + response);
-                setShowToken(false);
-                if (selectedKeyType === 'PRODUCTION') {
-                    setProductionAccessToken(response.accessToken);
-                } else {
-                    setSandboxAccessToken(response.accessToken);
-                }
-                setIsUpdating(false);
-            })
-            .catch((error) => {
-                console.error(error);
-                const { status } = error;
-                if (status === 404) {
-                    setNotFound(true);
-                }
-                setIsUpdating(false);
-            });
+        if (api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() !== 'prototyped') {
+            setIsUpdating(true);
+            const applicationPromise = Application.get(selectedApplication);
+            applicationPromise
+                .then((application) => application.generateToken(
+                    selectedKeyManager,
+                    selectedKeyType,
+                    3600,
+                    scopes,
+                ))
+                .then((response) => {
+                    console.log('token generated successfully ' + response);
+                    setShowToken(false);
+                    if (selectedKeyType === 'PRODUCTION') {
+                        setProductionAccessToken(response.accessToken);
+                    } else {
+                        setSandboxAccessToken(response.accessToken);
+                    }
+                    setIsUpdating(false);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    const { status } = error;
+                    if (status === 404) {
+                        setNotFound(true);
+                    }
+                    setIsUpdating(false);
+                });
+        }
     }
 
     /**
@@ -299,13 +302,14 @@ function TryOutController(props) {
             }
             Application.get(selectedApplication)
                 .then((application) => {
-                    return application.getKeys();
+                    return application.getKeys(keyType);
                 })
                 .then((appKeys) => {
-                    if (appKeys.get(keyType)) {
-                        ({ accessToken } = appKeys.get(keyType).token);
+                    if (appKeys.get(selectedKeyManager)
+                    && appKeys.get(selectedKeyManager).keyType === selectedKeyType) {
+                        ({ accessToken } = appKeys.get(selectedKeyManager).token);
                     }
-                    if (appKeys.get(keyType) === 'PRODUCTION') {
+                    if (appKeys.get(selectedKeyManager).keyType === 'PRODUCTION') {
                         setProductionAccessToken(accessToken);
                     } else {
                         setSandboxAccessToken(accessToken);
@@ -343,13 +347,13 @@ function TryOutController(props) {
                 setSelectedApplication(value);
                 break;
             case 'selectedKeyManager':
-                setSelectedKeyManager(value);
+                setSelectedKeyManager(value, true, selectedApplication);
                 break;
             case 'selectedKeyType':
                 if (!productionAccessToken || !sandboxAccessToken) {
-                    setSelectedKeyType(value, true);
+                    setSelectedKeyType(value, true, selectedApplication);
                 } else {
-                    setSelectedKeyType(value, false);
+                    setSelectedKeyType(value, false, selectedApplication);
                 }
                 break;
             case 'securityScheme':
@@ -386,14 +390,20 @@ function TryOutController(props) {
     let isApiKeyEnabled = false;
     let isBasicAuthEnabled = false;
     let isOAuthEnabled = false;
+    let isTestKeyEnabled = false;
     let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
     let prefix = 'Bearer';
     if (api && api.securityScheme) {
         isApiKeyEnabled = api.securityScheme.includes('api_key');
         isBasicAuthEnabled = api.securityScheme.includes('basic_auth');
         isOAuthEnabled = api.securityScheme.includes('oauth2');
+        isTestKeyEnabled = api.securityScheme.includes('test_auth');
         if (isApiKeyEnabled && securitySchemeType === 'API-KEY') {
             authorizationHeader = 'apikey';
+            prefix = '';
+        }
+        if (isTestKeyEnabled && securitySchemeType === 'TEST') {
+            authorizationHeader = 'testKey';
             prefix = '';
         }
     }
@@ -409,18 +419,22 @@ function TryOutController(props) {
         <IntlProvider locale='en'>
             <Grid x={12} md={6} className={classes.centerItems}>
                 <Box>
-                    <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
-                        <FormattedMessage
-                            id='api.console.security.heading'
-                            defaultMessage='Security'
-                        />
-                    </Typography>
-                    <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
-                        <FormattedMessage
-                            id='api.console.security.type.heading'
-                            defaultMessage='Security Type'
-                        />
-                    </Typography>
+                    {securitySchemeType !== 'TEST' && (
+                        <>
+                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
+                                <FormattedMessage
+                                    id='api.console.security.heading'
+                                    defaultMessage='Security'
+                                />
+                            </Typography>
+                            <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
+                                <FormattedMessage
+                                    id='api.console.security.type.heading'
+                                    defaultMessage='Security Type'
+                                />
+                            </Typography>
+                        </>
+                    )}
                     {(isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && (
                         <FormControl component='fieldset'>
                             <RadioGroup
@@ -473,17 +487,18 @@ function TryOutController(props) {
             <Grid xs={12} md={12} item>
                 <Box display='block'>
                     {user && subscriptions
-                        && subscriptions.length > 0 && securitySchemeType !== 'BASIC' && (
-                        <SelectAppPanel
-                            subscriptions={subscriptions}
-                            handleChanges={handleChanges}
-                            selectedApplication={selectedApplication}
-                            selectedKeyManager={selectedKeyManager}
-                            selectedKeyType={selectedKeyType}
-                            keyManagers={keyManagers}
-                        />
-                    )}
-                    {subscriptions && subscriptions.length === 0 && (
+                        && subscriptions.length > 0 && securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST'
+                        && (
+                            <SelectAppPanel
+                                subscriptions={subscriptions}
+                                handleChanges={handleChanges}
+                                selectedApplication={selectedApplication}
+                                selectedKeyManager={selectedKeyManager}
+                                selectedKeyType={selectedKeyType}
+                                keyManagers={keyManagers}
+                            />
+                        )}
+                    {subscriptions && subscriptions.length === 0 && securitySchemeType !== 'TEST' && (
                         <Box display='flex' justifyContent='center'>
                             <Typography variant='body1' gutterBottom>
                                 <FormattedMessage
@@ -495,7 +510,7 @@ function TryOutController(props) {
                     )}
                     <Box display='block' justifyContent='center'>
                         <Grid x={8} md={6} className={classes.tokenType} item>
-                            {securitySchemeType === 'BASIC' ? (
+                            {securitySchemeType === 'BASIC' && (
                                 <>
                                     <Grid x={12} md={12} item>
                                         <TextField
@@ -528,7 +543,8 @@ function TryOutController(props) {
                                         />
                                     </Grid>
                                 </>
-                            ) : (
+                            )}
+                            {securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST' && (
                                 <TextField
                                     fullWidth
                                     margin='normal'
@@ -573,7 +589,7 @@ function TryOutController(props) {
                                     }}
                                 />
                             )}
-                            {securitySchemeType !== 'BASIC' && (
+                            {securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST' && (
                                 <>
                                     <Button
                                         onClick={securitySchemeType === 'API-KEY' ? generateApiKey

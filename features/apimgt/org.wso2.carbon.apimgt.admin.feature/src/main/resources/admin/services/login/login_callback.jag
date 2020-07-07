@@ -46,9 +46,6 @@
         var systemApplicationDAO = new SystemApplicationDTO();
         // this is to support migration from admin_publisher to apim_publisher
         var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
-        if (systemApplicationDTO === null) {
-            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
-        }
         var clientId = systemApplicationDTO.getConsumerKey();
         var clientSecret = systemApplicationDTO.getConsumerSecret();
         var Base64 = org.apache.axiom.om.util.Base64;
@@ -58,115 +55,123 @@
         var tokenEndpoint = appUtils.getLoopbackOrigin() + TOKEN_URL_SUFFIX;
         var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
 
-        response.contentType = "application/json";
-        var tokenResponse = JSON.parse(result.data);
+        var erroLogin = serverUrl + app.context +"/error-pages?code=";
+        var responseFailed = false;
+        if (JSON.parse(result.data).error != null) {
+            responseFailed = true; 
+        } else {
+            response.contentType = "application/json";
+            var tokenResponse = JSON.parse(result.data);
 
-        var tokenLength = tokenResponse.access_token.length;
-        var accessToken = String(tokenResponse.access_token);
+            var tokenLength = tokenResponse.access_token.length;
+            var accessToken = String(tokenResponse.access_token);
 
-        var idTokenLength = tokenResponse.id_token.length;
-        var idToken = String(tokenResponse.id_token);
+            var idTokenLength = tokenResponse.id_token.length;
+            var idToken = String(tokenResponse.id_token);
 
-        var idTokenPart1 = idToken.substring(0, idTokenLength / 2);
-        var idTokenPart2 = idToken.substring(idTokenLength / 2, idTokenLength);
+            var idTokenPart1 = idToken.substring(0, idTokenLength / 2);
+            var idTokenPart2 = idToken.substring(idTokenLength / 2, idTokenLength);
 
-        var accessTokenPart1 = accessToken.substring(0, tokenLength / 2);
-        var accessTokenPart2 = accessToken.substring(tokenLength / 2, tokenLength);
+            var accessTokenPart1 = accessToken.substring(0, tokenLength / 2);
+            var accessTokenPart2 = accessToken.substring(tokenLength / 2, tokenLength);
 
-        var refreshToken = String(tokenResponse.refresh_token);
-        tokenLength = tokenResponse.refresh_token.length;
-        var refreshTokenPart1 = refreshToken.substring(0, tokenLength / 2);
-        var refreshTokenPart2 = refreshToken.substring(tokenLength / 2, tokenLength);
+            var refreshToken = String(tokenResponse.refresh_token);
+            tokenLength = tokenResponse.refresh_token.length;
+            var refreshTokenPart1 = refreshToken.substring(0, tokenLength / 2);
+            var refreshTokenPart2 = refreshToken.substring(tokenLength / 2, tokenLength);
 
-        // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/admin
-        // because partial HTTP only cookie is required for get the user information from access token,
-        // hence setting the HTTP only access token path to App context
-        var cookie = {
-            'name': 'AM_ACC_TOKEN_DEFAULT_P2',
-            'value': accessTokenPart2,
-            'path': app.context + "/",
-            "httpOnly": true,
-            "secure": true,
-            "maxAge": Integer(tokenResponse.expires_in)
-        };
-        response.addCookie(cookie);
+            // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/admin
+            // because partial HTTP only cookie is required for get the user information from access token,
+            // hence setting the HTTP only access token path to App context
+            var cookie = {
+                'name': 'AM_ACC_TOKEN_DEFAULT_P2',
+                'value': accessTokenPart2,
+                'path': app.context + "/",
+                "httpOnly": true,
+                "secure": true,
+                "maxAge": Integer(tokenResponse.expires_in)
+            };
+            response.addCookie(cookie);
 
-        cookie = {
-            'name': 'AM_ACC_TOKEN_DEFAULT_P2',
-            'value': accessTokenPart2,
-            'path': "/api/am/admin/",
-            "httpOnly": true,
-            "secure": true,
-            "maxAge": Integer(tokenResponse.expires_in)
-        };
-        response.addCookie(cookie);
+            cookie = {
+                'name': 'AM_ACC_TOKEN_DEFAULT_P2',
+                'value': accessTokenPart2,
+                'path': "/api/am/admin/",
+                "httpOnly": true,
+                "secure": true,
+                "maxAge": Integer(tokenResponse.expires_in)
+            };
+            response.addCookie(cookie);
 
-        cookie = {
-            'name': 'AM_REF_TOKEN_DEFAULT_P2',
-            'value': refreshTokenPart2,
-            'path': app.context + "/",
-            "httpOnly": true,
-            "secure": true,
-            "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
-        };
-        response.addCookie(cookie);
+            cookie = {
+                'name': 'AM_REF_TOKEN_DEFAULT_P2',
+                'value': refreshTokenPart2,
+                'path': app.context + "/",
+                "httpOnly": true,
+                "secure": true,
+                "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
+            };
+            response.addCookie(cookie);
 
-        cookie = {
-            'name': 'WSO2_AM_TOKEN_1_Default',
-            'value': accessTokenPart1,
-            'path': app.context + "/",
-            "secure": true,
-            "maxAge": Integer(tokenResponse.expires_in)
-        };
-        response.addCookie(cookie);
+            cookie = {
+                'name': 'WSO2_AM_TOKEN_1_Default',
+                'value': accessTokenPart1,
+                'path': app.context + "/",
+                "secure": true,
+                "maxAge": Integer(tokenResponse.expires_in)
+            };
+            response.addCookie(cookie);
 
-        cookie = {
-            'name': 'WSO2_AM_REFRESH_TOKEN_1_Default',
-            'value': refreshTokenPart1,
-            'path': app.context + "/",
-            "secure": true,
-            "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
-        };
-        response.addCookie(cookie);
+            cookie = {
+                'name': 'WSO2_AM_REFRESH_TOKEN_1_Default',
+                'value': refreshTokenPart1,
+                'path': app.context + "/",
+                "secure": true,
+                "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
+            };
+            response.addCookie(cookie);
 
-        cookie = {
-            'name': 'AM_ID_TOKEN_DEFAULT_P2',
-            'value': idTokenPart2,
-            'path': app.context + "/services/logout",
-            "secure": true,
-            "maxAge": Integer(tokenResponse.expires_in)
-        };
-        response.addCookie(cookie);
+            cookie = {
+                'name': 'AM_ID_TOKEN_DEFAULT_P2',
+                'value': idTokenPart2,
+                'path': app.context + "/services/logout",
+                "secure": true,
+                "maxAge": Integer(tokenResponse.expires_in)
+            };
+            response.addCookie(cookie);
 
-        cookie = {
-            'name': 'AM_ID_TOKEN_DEFAULT_P1',
-            'value': idTokenPart1,
-            'path': app.context + "/services/logout",
-            "secure": true,
-            "maxAge": Integer(tokenResponse.expires_in)
-        };
-        response.addCookie(cookie);
+            cookie = {
+                'name': 'AM_ID_TOKEN_DEFAULT_P1',
+                'value': idTokenPart1,
+                'path': app.context + "/services/logout",
+                "secure": true,
+                "maxAge": Integer(tokenResponse.expires_in)
+            };
+            response.addCookie(cookie);
 
-        cookie = {
-            'name': 'admin_session_state',
-            'value': request.getParameter("session_state", "UTF-8"),
-            'path': app.context + "/",
-            "secure": true,
-            "maxAge": Integer(-1)
-        };
-        response.addCookie(cookie);
+            cookie = {
+                'name': 'admin_session_state',
+                'value': request.getParameter("session_state", "UTF-8"),
+                'path': app.context + "/",
+                "secure": true,
+                "maxAge": Integer(-1)
+            };
+            response.addCookie(cookie);
+        }
 
-        var state = request.getParameter("state");
-        if (state !== null) {
-            state = decodeURIComponent(state);
-            if ( state !== '/') {
-                response.sendRedirect(app.context + state);
+            var state = request.getParameter("state");
+            if (responseFailed === true) {
+                response.sendRedirect(erroLogin + "500");    
+            } else if (state !== null) {
+                state = decodeURIComponent(state);
+                if ( state !== '/') {
+                    response.sendRedirect(app.context + state);
+                } else {
+                    response.sendRedirect(app.context);
+                }
             } else {
                 response.sendRedirect(app.context);
             }
-        } else {
-            response.sendRedirect(app.context);
         }
-    }
 }());
 %>

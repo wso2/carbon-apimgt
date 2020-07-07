@@ -35,7 +35,6 @@ import Configurations from 'Config';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
 
-
 /**
  * Render a list
  * @returns {JSX} Header AppBar components.
@@ -54,7 +53,7 @@ export default function ListDetectedBotData() {
         return restApi
             .getDetectedBotData()
             .then((result) => {
-                return (result.body);
+                return (result.body.list);
             })
             .catch((error) => {
                 throw (error);
@@ -63,13 +62,17 @@ export default function ListDetectedBotData() {
 
     const columProps = [
         {
-            name: 'recordtime',
+            name: 'recordedTime',
             label: intl.formatMessage({
                 id: 'AdminPages.BotDetection.detected.data.table.header.label.record.time',
                 defaultMessage: 'Record Time',
             }),
             options: {
                 sort: true,
+                customBodyRender: (value) => {
+                    const date = new Date(value);
+                    return date.toUTCString();
+                },
             },
         },
         {
@@ -93,18 +96,13 @@ export default function ListDetectedBotData() {
             },
         },
         {
-            name: 'headersSet',
+            name: 'headerSet',
             label: intl.formatMessage({
                 id: 'AdminPages.BotDetection.detected.data.table.header.label.headers.set',
                 defaultMessage: 'Headers Set',
             }),
             options: {
                 sort: true,
-                customBodyRender: (value) => {
-                    return (
-                        value.join(', ')
-                    );
-                },
             },
         },
         {
@@ -131,7 +129,7 @@ export default function ListDetectedBotData() {
             },
         },
         {
-            name: 'clientIP',
+            name: 'clientIp',
             label: intl.formatMessage({
                 id: 'AdminPages.BotDetection.detected.data.table.header.label.client.ip',
                 defaultMessage: 'Client IP',
@@ -216,12 +214,12 @@ export default function ListDetectedBotData() {
                         breakingLine: <br />,
                     }}
                     defaultMessage={'Bot detection is enabled. There is no detected bot data. '
-                    + 'When a bot attack is detected, you will be informed via email. '
-                    + 'Set the email to be informed with, '
-                    + '{breakingLine}{breakingLine}'
-                    + 'Bot Detection Data > Configure Emails '
-                    + '{breakingLine}{breakingLine}'
-                    + 'on the left side menu.'}
+                        + 'When a bot attack is detected, you will be informed via email. '
+                        + 'Set the email to be informed with, '
+                        + '{breakingLine}{breakingLine}'
+                        + 'Bot Detection Data > Configure Emails '
+                        + '{breakingLine}{breakingLine}'
+                        + 'on the left side menu.'}
                 />
             </Typography>
         ),
@@ -244,10 +242,10 @@ export default function ListDetectedBotData() {
                     }}
                     defaultMessage={
                         'If you enable WSO2 API Manager Analytics with WSO2 API Manager, '
-                    + 'you can enable email notifications for all unauthorized API calls that '
-                    + 'you receive and also view the bot detection data easily via the Admin Portal.'
-                    + '{breakingLine}{breakingLine}'
-                    + 'Follow documentations on help to enable Analytics and get started.'
+                        + 'you can enable email notifications for all unauthorized API calls that '
+                        + 'you receive and also view the bot detection data easily via the Admin Portal.'
+                        + '{breakingLine}{breakingLine}'
+                        + 'Follow documentations on help to enable Analytics and get started.'
                     }
                 />
             </Typography>

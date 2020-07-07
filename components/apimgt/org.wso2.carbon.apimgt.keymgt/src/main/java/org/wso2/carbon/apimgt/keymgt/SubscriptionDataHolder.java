@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * */
 public class SubscriptionDataHolder {
 
-    private Map<String, SubscriptionDataStore> subscriptionStore =
+    protected Map<String, SubscriptionDataStore> subscriptionStore =
             new ConcurrentHashMap<>();
     private static SubscriptionDataHolder instance = new SubscriptionDataHolder();
 

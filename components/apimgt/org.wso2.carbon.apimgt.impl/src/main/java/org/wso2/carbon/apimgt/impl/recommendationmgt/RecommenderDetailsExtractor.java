@@ -55,7 +55,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     private static final Logger log = LoggerFactory.getLogger(RecommenderDetailsExtractor.class);
     private static String streamID = "org.wso2.apimgt.recommendation.event.stream:1.0.0";
     private boolean tenantFlowStarted = false;
-    private boolean superAdminTenantFlowStarted = false;
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     private int applicationId;
@@ -149,7 +148,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 }
 
                 if (!APIConstants.ADD_API.equals(publishingDetailType) && userName != null
-                        && userName != APIConstants.WSO2_ANONYMOUS_USER && requestTenantDomain != null) {
+                        && !APIConstants.WSO2_ANONYMOUS_USER.equals(userName) && requestTenantDomain != null) {
                     updateRecommendationsCache(userName, requestTenantDomain);
                 }
             }
@@ -177,7 +176,10 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             String apiContext = api.getContext();
             String apiTags = api.getTags().toString();
             Set<URITemplate> uriTemplates = api.getUriTemplates();
-            JSONObject swaggerDef = new JSONObject(api.getSwaggerDefinition());
+            JSONObject swaggerDef = null;
+            if (api.getSwaggerDefinition() != null) {
+                swaggerDef = new JSONObject(api.getSwaggerDefinition());
+            }
             JSONArray resourceArray = new JSONArray();
             JSONObject resourceObj;
 
@@ -185,11 +187,13 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 resourceObj = new JSONObject();
                 String resource = uriTemplate.getUriTemplate();
                 String resourceMethod = uriTemplate.getHTTPVerb();
-                String summary = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod, "summary");
-                String description = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod, "description");
                 resourceObj.put("resource", resource);
-                resourceObj.put("summary", summary);
-                resourceObj.put("description", description);
+                if (swaggerDef != null) {
+                    String summary = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod, "summary");
+                    String description = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod, "description");
+                    resourceObj.put("summary", summary);
+                    resourceObj.put("description", description);
+                }
                 resourceArray.put(resourceObj);
             }
 
@@ -215,6 +219,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             payload.put(APIConstants.ACTION_STRING, APIConstants.DELETE_API);
             payload.put(APIConstants.PAYLOAD_STRING, obj);
             publishEvent(payload.toString());
+            log.info(apiName + " API published to recommendation server");
         }
     }
 
@@ -235,6 +240,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_NEW_APPLICATION);
         payload.put(APIConstants.PAYLOAD_STRING, obj);
         publishEvent(payload.toString());
+        log.info(appName + " Application published to recommendations server");
     }
 
     @Override
@@ -247,12 +253,17 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         payload.put(APIConstants.ACTION_STRING, APIConstants.DELETE_APPLICATION);
         payload.put(APIConstants.PAYLOAD_STRING, obj);
         publishEvent(payload.toString());
+        log.info("Delete event for Application id " + appId + " sent to recommendations server");
     }
 
     @Override
     public void publishClickedApi(ApiTypeWrapper api, String userName) {
 
-        if (userName != APIConstants.WSO2_ANONYMOUS_USER) {
+        if (userName == null) {
+            log.error("Username cannot be null");
+            return;
+        }
+        if (!APIConstants.WSO2_ANONYMOUS_USER.equals(userName)) {
             String userID = getUserId(userName);
             String apiName = api.getName();
             JSONObject obj = new JSONObject();
@@ -269,7 +280,11 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     @Override
     public void publishSearchQueries(String query, String username) {
 
-        if (userName != APIConstants.WSO2_ANONYMOUS_USER) {
+        if (username == null) {
+            log.error("Username cannot be null");
+            return;
+        }
+        if (!APIConstants.WSO2_ANONYMOUS_USER.equals(userName)) {
             String userID = getUserId(userName);
             query = query.split("&", 2)[0];
             JSONObject obj = new JSONObject();
@@ -392,6 +407,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
             HttpResponse httpResponse = httpClient.execute(method);
             if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                log.info("Recommendations received for the user " + userName + " from recommendations server");
                 String contentString = EntityUtils.toString(httpResponse.getEntity());
                 if (log.isDebugEnabled()) {
                     log.debug("Recommendations received for user " + userName + " is " + contentString);

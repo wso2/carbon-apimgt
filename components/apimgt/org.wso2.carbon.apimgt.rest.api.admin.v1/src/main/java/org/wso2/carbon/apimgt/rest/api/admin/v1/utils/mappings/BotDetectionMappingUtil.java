@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionDataDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionDataListDTO;
 
@@ -60,5 +62,38 @@ public class BotDetectionMappingUtil {
         botDetectionDataDTO.setMessageBody(botDetectionData.getMessageBody());
         botDetectionDataDTO.setClientIp(botDetectionData.getClientIp());
         return botDetectionDataDTO;
+    }
+
+    /**
+     * Converts a list of Bot Detection Alert Subscription model objects into a list DTO
+     *
+     * @param alertSubscriptionList list of Bot Detection Alert Subscriptions
+     * @return A List DTO of converted Bot Detection Alert Subscriptions
+     */
+    public static BotDetectionAlertSubscriptionListDTO fromAlertSubscriptionListToListDTO(
+            List<BotDetectionData> alertSubscriptionList) {
+
+        BotDetectionAlertSubscriptionListDTO listDTO = new BotDetectionAlertSubscriptionListDTO();
+        List<BotDetectionAlertSubscriptionDTO> alertSubscriptionDTOs = new ArrayList<>();
+        for (BotDetectionData alertSubscription : alertSubscriptionList) {
+            alertSubscriptionDTOs.add(fromAlertSubscriptionToDTO(alertSubscription));
+        }
+        listDTO.setList(alertSubscriptionDTOs);
+        listDTO.setCount(alertSubscriptionDTOs.size());
+        return listDTO;
+    }
+
+    /**
+     * Converts a single Bot Detection Alert Subscription model into a Bot Detection Alert Subscription DTO
+     *
+     * @param alertSubscription Bot Detection Alert Subscription model object
+     * @return Converted Bot Detection Alert Subscription DTO object
+     */
+    public static BotDetectionAlertSubscriptionDTO fromAlertSubscriptionToDTO(BotDetectionData alertSubscription) {
+
+        BotDetectionAlertSubscriptionDTO alertSubscriptionDTO = new BotDetectionAlertSubscriptionDTO();
+        alertSubscriptionDTO.setUuid(alertSubscription.getUuid());
+        alertSubscriptionDTO.setEmail(alertSubscription.getEmail());
+        return alertSubscriptionDTO;
     }
 }

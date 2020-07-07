@@ -34,8 +34,12 @@
             serverUrl = utils.getServerURL();
         }
     }
+    var postLogoutRedirectURI = appUtils.getTenantBasedLogoutCallBack();
+    if (postLogoutRedirectURI == null) {
+         postLogoutRedirectURI = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
+    }
     if (request.getParameter("error") === "login_required" ) {
-            response.sendRedirect(serverUrl + app.context+"/logout");
+            response.sendRedirect(postLogoutRedirectURI);
     } else if (request.getParameter("code") != null) {
         var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
         if (loginCallbackUrl == null) {

@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -308,6 +309,7 @@ public class APIAdminImpl implements APIAdmin {
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain)
             throws APIManagementException {
 
+        KeyMgtRegistrationService.registerDefaultKeyManager(tenantDomain);
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
                 apiMgtDAO.getKeyManagerConfigurationsByTenant(tenantDomain);
         Iterator<KeyManagerConfigurationDTO> iterator = keyManagerConfigurationsByTenant.iterator();
@@ -425,38 +427,31 @@ public class APIAdminImpl implements APIAdmin {
         return keyManagerConfiguration;
     }
 
-    /**
-     * configure email list to which the alert needs to be sent
-     */
-    public void addBotDataEmailConfiguration(String email) throws APIManagementException, SQLException {
+    @Override
+    public void addBotDetectionAlertSubscription(String email) throws APIManagementException {
 
-        apiMgtDAO.addBotDataEmailConfiguration(email);
+        apiMgtDAO.addBotDetectionAlertSubscription(email);
     }
 
-    /**
-     * retrieve the configured email list
-     */
-    public List<BotDetectionData> retrieveSavedBotDataEmailList() throws APIManagementException {
+    @Override
+    public List<BotDetectionData> getBotDetectionAlertSubscriptions() throws APIManagementException {
 
-        List<BotDetectionData> list;
-        list = apiMgtDAO.retrieveSavedBotDataEmailList();
-        return list;
+        return apiMgtDAO.getBotDetectionAlertSubscriptions();
     }
 
-    /**
-     * remove all configured email list
-     */
-    public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
+    @Override
+    public void deleteBotDetectionAlertSubscription(String uuid) throws APIManagementException {
 
-        apiMgtDAO.deleteBotDataEmailList(uuid);
+        apiMgtDAO.deleteBotDetectionAlertSubscription(uuid);
     }
 
-    /**
-     * Retrieve all bot detected data
-     *
-     * @return list of bot detected data
-     * @throws APIManagementException
-     */
+    @Override
+    public BotDetectionData getBotDetectionAlertSubscription(String field, String value) throws APIManagementException {
+
+        return apiMgtDAO.getBotDetectionAlertSubscription(field, value);
+    }
+
+    @Override
     public List<BotDetectionData> retrieveBotDetectionData() throws APIManagementException {
 
         List<BotDetectionData> botDetectionDatalist = new ArrayList<>();

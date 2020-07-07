@@ -56,7 +56,6 @@ function AddEdit(props) {
 
     let id = null;
     let initialState = {
-        name: '',
         description: '',
     };
 
@@ -81,6 +80,10 @@ function AddEdit(props) {
         let error;
         switch (fieldName) {
             case 'name':
+                if (value === undefined) {
+                    error = false;
+                    break;
+                }
                 if (value === '') {
                     error = 'Name is Empty';
                 } else if (/\s/.test(value)) {
@@ -98,7 +101,13 @@ function AddEdit(props) {
     };
     const getAllFormErrors = () => {
         let errorText = '';
-        const NameErrors = hasErrors('name', name);
+        let NameErrors;
+        if (name === undefined) {
+            dispatch({ field: 'name', value: '' });
+            NameErrors = hasErrors('name', '');
+        } else {
+            NameErrors = hasErrors('name', name);
+        }
         if (NameErrors) {
             errorText += NameErrors + '\n';
         }

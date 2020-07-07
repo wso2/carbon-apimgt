@@ -40,6 +40,7 @@ import InfoBar from './InfoBar';
 import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
 import Wizard from './Credentials/Wizard/Wizard';
+import User from '../../../data/User';
 
 
 const ApiConsole = lazy(() => import('./ApiConsole/ApiConsole' /* webpackChunkName: "APIConsole" */));
@@ -238,9 +239,15 @@ class Details extends React.Component {
                     }
                 });
             const user = AuthManager.getUser();
+            if(user === null){
+                const user1 = new User();
+                this.setState({open:user1.isSideBarOpen});
+            }
             if (user != null) {
+                this.setState({open:user.isSideBarOpen});
                 existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
-                promisedApplications = restApi.getAllApplications();
+                const subscriptionLimit = Settings.app.subscribeApplicationLimit || 5000;
+                promisedApplications = restApi.getAllApplications(null, subscriptionLimit);
 
                 Promise.all([existingSubscriptions, promisedApplications])
                     .then((response) => {
@@ -256,7 +263,7 @@ class Details extends React.Component {
                                 policy: element.throttlingPolicy,
                                 status: element.status,
                                 subscriptionId: element.subscriptionId,
-                                label: appIdToNameMapping[element.applicationId],
+                                label: element.applicationInfo.name,
                             };
                         });
 
@@ -289,6 +296,7 @@ class Details extends React.Component {
             }
         };
 
+
         this.state = {
             active: 'overview',
             overviewHiden: false,
@@ -299,7 +307,6 @@ class Details extends React.Component {
             applicationsAvailable: [],
             item: 1,
             xo: null,
-            open: true,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
@@ -317,11 +324,21 @@ class Details extends React.Component {
     }
 
     handleDrawerOpen() {
-        this.setState({ open: true });
+        this.setState({ open: true });  
+        const user = AuthManager.getUser();
+        if(user != null){
+            user.isSideBarOpen = true;
+            AuthManager.setUser(user);
+        }
     };
 
     handleDrawerClose() {
         this.setState({ open: false });
+        const user = AuthManager.getUser();
+        if(user != null){
+            user.isSideBarOpen = false;
+            AuthManager.setUser(user);
+        }
     };
 
     /**
@@ -346,7 +363,7 @@ class Details extends React.Component {
         } = this.props;
         const user = AuthManager.getUser();
         const { apiUuid } = match.params;
-        const { api, notFound, open } = this.state;
+        const { api, notFound , open} = this.state;
         const {
             custom: {
                 leftMenu: {
@@ -484,13 +501,13 @@ class Details extends React.Component {
                     )}
                     {open ? (
                         <div onClick={this.handleDrawerClose}
-                            style={{ width:100, paddingLeft: '15px', position: 'absolute',bottom: 0, cursor:'pointer'}}
+                            style={{ width:100, paddingLeft: '15px', position: 'absolute',bottom: 0, cursor: 'pointer',}}
                         >
                             <ArrowBackIosIcon fontSize='medium' style={{ color: 'white' }} />
                         </div>
                     ) : (
                         <div onClick={this.handleDrawerOpen}
-                            style={{ paddingLeft: '15px', position: 'absolute', bottom: 0, cursor:'pointer'}}
+                            style={{ paddingLeft: '15px', position: 'absolute', bottom: 0, cursor: 'pointer',}}
                         >
                             <ArrowForwardIosIcon fontSize='medium' style={{ color: 'white' }} />
                         </div>
@@ -515,10 +532,8 @@ class Details extends React.Component {
                     >
                         <LoadableSwitch 
                             api={api} 
-                            updateSubscriptionData={this.updateSubscriptionData} 
-                            open={open}
+                            updateSubscriptionData={this.updateSubscriptionData}
                         />
-                        {console.log(open)}
                     </div>
                 </div>
             </ApiContext.Provider>

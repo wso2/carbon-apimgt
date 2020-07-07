@@ -22,7 +22,9 @@ import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Entity for keeping API related information.
@@ -127,5 +129,12 @@ public class API implements CacheableEntity<String> {
     public void setApiType(String apiType) {
 
         this.apiType = apiType;
+    }
+
+    @Override
+    public String toString() {
+        return "API [apiId=" + apiId + ", provider=" + provider + ", name=" + name + ", version=" + version
+                + ", context=" + context + ", policy=" + policy + ", apiType=" + apiType + ", urlMappings="
+                + urlMappings + "]";
     }
 }

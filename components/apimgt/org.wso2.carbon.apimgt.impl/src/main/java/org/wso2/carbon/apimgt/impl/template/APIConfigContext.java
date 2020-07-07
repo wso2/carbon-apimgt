@@ -100,6 +100,8 @@ public class APIConfigContext extends ConfigContext {
         } else {
             context.put("enableStore", Boolean.FALSE);
         }
+        // API test key
+        context.put("testKey", api.getTestKey());
     }
 
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {

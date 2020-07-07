@@ -66,8 +66,7 @@ public class KeyManagerHolder {
             tenantKeyManagerDto = new TenantKeyManagerDto();
         }
         if (tenantKeyManagerDto.getKeyManagerByName(name) != null) {
-            throw new APIManagementException("Key Manager " + keyManagerConfiguration.getName() + " already " +
-                    "initialized in tenant " + keyManagerConfiguration.getTenantDomain());
+            log.error("Key Manager " + name + " already initialized in tenant " + tenantDomain);
         }
         if (keyManagerConfiguration.isEnabled()) {
             KeyManager keyManager = null;
@@ -79,6 +78,7 @@ public class KeyManagerHolder {
                     try {
                         keyManager = (KeyManager) Class
                                 .forName(keyManagerConnectorConfiguration.getImplementation()).newInstance();
+                        keyManager.setTenantDomain(tenantDomain);
                         keyManager.loadConfiguration(keyManagerConfiguration);
                     } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                         throw new APIManagementException("Error while loading keyManager configuration", e);

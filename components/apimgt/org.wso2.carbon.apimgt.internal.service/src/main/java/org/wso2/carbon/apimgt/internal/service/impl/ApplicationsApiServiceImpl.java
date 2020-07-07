@@ -39,7 +39,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(application)
             ).build();
         }
-
+        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
                     subscriptionValidationDAO.getAllApplications(xWSO2Tenant)))

@@ -25,7 +25,7 @@ package org.wso2.carbon.apimgt.api.model.subscription;
  */
 public interface CacheableEntity<K> {
 
-    String DELEM_PERIOD = ".";
+    String DELEM_PERIOD = ":";
 
     /**
      * Gets the Cache Key of an entity.

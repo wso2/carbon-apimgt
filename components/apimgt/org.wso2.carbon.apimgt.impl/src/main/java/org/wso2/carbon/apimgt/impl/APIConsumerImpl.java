@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -25,6 +26,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -81,6 +83,7 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -133,6 +136,8 @@ import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.mgt.UserAdmin;
+import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -168,6 +173,7 @@ import java.util.regex.Pattern;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
+import javax.ws.rs.BadRequestException;
 import javax.wsdl.Definition;
 
 /**
@@ -2999,17 +3005,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             // only send the notification if approved
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+            int id = apiMgtDAO.getAPIID(identifier, null);
             if (wfDTO != null) {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId, subscriptionId,
-                            identifier.getUUID(), applicationId, identifier.getTier(), subscriptionStatus);
+                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
+                            tenantDomain, subscriptionId, id, applicationId, identifier.getTier(),
+                            subscriptionStatus);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId, subscriptionId,
-                        identifier.getUUID(), applicationId, identifier.getTier(), subscriptionStatus);
+                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
+                        tenantDomain, subscriptionId, id, applicationId, identifier.getTier(),
+                        subscriptionStatus);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
 
@@ -3175,17 +3184,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
             // only send the notification if approved
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+            int id = apiMgtDAO.getAPIID(identifier, null);
             if (wfDTO != null) {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, subscriptionId,
-                            identifier.getUUID(), applicationId, identifier.getTier(), subscriptionStatus);
+                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
+                            tenantDomain, subscriptionId, id, applicationId, requestedThrottlingPolicy,
+                            subscriptionStatus);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, subscriptionId,
-                        identifier.getUUID(), applicationId, identifier.getTier(), subscriptionStatus);
+                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
+                        tenantDomain, subscriptionId, id, applicationId, requestedThrottlingPolicy,
+                        subscriptionStatus);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
 
@@ -3427,14 +3439,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (wfDTO != null) {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId, subscription.getSubscriptionId(),
-                            identifier.getUUID(),application.getId(), identifier.getTier(), subscription.getSubStatus());
+                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
+                            tenantDomain, subscription.getSubscriptionId(), 0, application.getId(),
+                            identifier.getTier(), subscription.getSubStatus());
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId, subscription.getSubscriptionId(),
-                        identifier.getUUID(),application.getId(), identifier.getTier(), subscription.getSubStatus());
+                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
+                        tenantDomain, subscription.getSubscriptionId(), subscribedAPI.getIdentifier().getId(),
+                        application.getId(), identifier.getTier(), subscription.getSubStatus());
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         } else {
@@ -3662,15 +3676,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
         if (wfDTO != null) {
             if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(), System.currentTimeMillis()
-                        , APIConstants.EventType.APPLICATION_CREATE.name(), tenantId, applicationId, application.getName(), application.getTokenType(),
-                        application.getTier(), application.getGroupId());
+                ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
+                        tenantDomain, applicationId, application.getUUID(), application.getName(),
+                        application.getTokenType(),
+                        application.getTier(), application.getGroupId(), application.getApplicationAttributes(), userId);
                 APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
             }
         } else {
-            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(), System.currentTimeMillis()
-                    , APIConstants.EventType.APPLICATION_CREATE.name(), tenantId, applicationId, application.getName(), application.getTokenType(),
-                    application.getTier(), application.getGroupId());
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
+                    tenantDomain, applicationId, application.getUUID(), application.getName(),
+                    application.getTokenType(), application.getTier(), application.getGroupId(),
+                    application.getApplicationAttributes(), userId);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         return applicationId;
@@ -3820,10 +3838,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
-
-        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(), System.currentTimeMillis()
-                , APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId, application.getId(), application.getName(),
-                application.getTokenType(), application.getTier(), application.getGroupId());
+        
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId, tenantDomain,
+                application.getId(), application.getUUID(), application.getName(), application.getTokenType(),
+                application.getTier(), application.getGroupId(), application.getApplicationAttributes(),
+                existingApp.getSubscriber().getName());
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
@@ -4008,15 +4029,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
         if (wfDTO != null) {
             if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus()) || wfDTO.getStatus() == null) {
-                ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(), System.currentTimeMillis()
-                        , APIConstants.EventType.APPLICATION_DELETE.name(), tenantId, applicationId, application.getName(), application.getTokenType(),
-                        application.getTier(), application.getGroupId());
+                ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(), tenantId,
+                        tenantDomain, applicationId, application.getUUID(), application.getName(),
+                        application.getTokenType(),
+                        application.getTier(), application.getGroupId(), Collections.EMPTY_MAP, username);
                 APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
             }
         } else {
-            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(), System.currentTimeMillis()
-                    , APIConstants.EventType.APPLICATION_DELETE.name(), tenantId, applicationId, application.getName(), application.getTokenType(),
-                    application.getTier(), application.getGroupId());
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_DELETE.name(), tenantId,
+                    tenantDomain, applicationId, application.getUUID(), application.getName(),
+                    application.getTokenType(),
+                    application.getTier(), application.getGroupId(), Collections.EMPTY_MAP, username);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
     }
@@ -4215,15 +4240,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (wfDTO != null) {
                     if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
-                                UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
-                                tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
-                        APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                                UUID.randomUUID().toString(), System.currentTimeMillis(),
+                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                                application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
+                        APIUtil.sendNotification(applicationRegistrationEvent,
+                                APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                     }
                 } else {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
-                            UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
-                            tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
-                    APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                            UUID.randomUUID().toString(), System.currentTimeMillis(),
+                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                            application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
+                    APIUtil.sendNotification(applicationRegistrationEvent,
+                            APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                 }
             } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
                 // get the workflow state once the executor is executed.
@@ -4234,15 +4263,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (wfDTO != null) {
                     if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
-                                UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
-                                tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
-                        APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                                UUID.randomUUID().toString(), System.currentTimeMillis(),
+                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                                application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
+                        APIUtil.sendNotification(applicationRegistrationEvent,
+                                APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                     }
                 } else {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
-                            UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
-                            tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
-                    APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                            UUID.randomUUID().toString(), System.currentTimeMillis(),
+                            APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
+                            application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
+                    APIUtil.sendNotification(applicationRegistrationEvent,
+                            APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                 }
             }
             return keyDetails;
@@ -5432,18 +5465,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
-        String baseUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        EventHubConfigurationDto eventHubConfigurationDto = config.getEventHubConfigurationDto();
+        String baseUrl = eventHubConfigurationDto.getServiceUrl() + APIConstants.INTERNAL_WEB_APP_EP;
         String apiKeyRevokeEp = baseUrl + APIConstants.API_KEY_REVOKE_PATH;
         HttpPost method = new HttpPost(apiKeyRevokeEp);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         URL keyMgtURL = null;
         try {
             keyMgtURL = new URL(apiKeyRevokeEp);
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-            String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+
+            String username = config.getFirstProperty(eventHubConfigurationDto.getUsername());
+            String password = config.getFirstProperty(eventHubConfigurationDto.getPassword());
             byte[] credentials = Base64.encodeBase64((username + ":" + password).getBytes
                     (StandardCharsets.UTF_8));
             int keyMgtPort = keyMgtURL.getPort();
@@ -5757,5 +5791,49 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return null;
+    }
+
+    /**
+     * Change user's password
+     *
+     * @param currentPassword Current password of the user
+     * @param newPassword     New password of the user
+     */
+    @Override
+    public void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException {
+        //check whether EnablePasswordChange configuration is set to 'true'
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        boolean enableChangePassword =
+                Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_CHANGE_PASSWORD));
+        if (!enableChangePassword) {
+            throw new APIManagementException("Password change operation is disabled in the system",
+                    ExceptionCodes.PASSWORD_CHANGE_DISABLED);
+        }
+
+        UserAdmin userAdmin = new UserAdmin();
+        try {
+            userAdmin.changePasswordByUser(userNameWithoutChange, currentPassword, newPassword);
+        } catch (UserAdminException e) {
+            String genericErrorMessage = "Error occurred while changing the user password";
+            if (log.isDebugEnabled()) {
+                log.debug(genericErrorMessage, e);
+            }
+            //filter the exception message
+            String exceptionMessage = e.getMessage();
+            if (exceptionMessage.matches("(?i:.*\\b(current)\\b.*\\b(password)\\b.*\\b(incorrect)\\b.*)")) {
+                String errorMessage = "The current user password entered is incorrect";
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.CURRENT_PASSWORD_INCORRECT);
+            } else if ((exceptionMessage.matches("(?i:.*\\b(password)\\b.*\\b(length)\\b.*)")) ||
+                    (ExceptionUtils.getStackTrace(e).contains("PolicyViolationException"))
+            ) {
+                String errorMessage = "The new password entered is invalid since it doesn't comply with the password " +
+                        "pattern/policy configured";
+                throw new APIManagementException(errorMessage, ExceptionCodes.PASSWORD_PATTERN_INVALID);
+            } else {
+                throw new APIManagementException(genericErrorMessage);
+            }
+        }
     }
 }

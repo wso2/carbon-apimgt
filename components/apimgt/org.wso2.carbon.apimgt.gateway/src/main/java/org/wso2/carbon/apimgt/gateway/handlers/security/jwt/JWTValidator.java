@@ -143,55 +143,49 @@ public class JWTValidator {
                 // validate scopes
                 validateScopes(synCtx, openAPI, jwtValidationInfo);
                 // Validate subscriptions
-                net.minidev.json.JSONObject api =
-                        GatewayUtils.validateAPISubscription(apiContext, apiVersion, jwtValidationInfo,
-                                jwtHeader, true);
 
-                /*
-                 * Set api.ut.apiPublisher of the subscribed api to the message context.
-                 * This is necessary for the functionality of Publisher alerts.
-                 * */
+
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-                if (api != null) {
-                    synCtx.setProperty(APIMgtGatewayConstants.API_PUBLISHER, api.get("publisher"));
-                } else {
-                    boolean validateSubscriptionViaKM = Boolean.parseBoolean(getApiManagerConfiguration()
-                            .getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION));
-                    if (validateSubscriptionViaKM) {
-                        log.debug("Begin subscription validation via Key Manager");
-                        apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(synCtx, jwtValidationInfo);
+                
+                log.debug("Begin subscription validation via Key Manager");
+                apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(synCtx, jwtValidationInfo);
 
-                        if (log.isDebugEnabled()) {
-                            log.debug("Subscription validation via Key Manager. Status: " +
-                                    apiKeyValidationInfoDTO.isAuthorized());
-                        }
-                        if (apiKeyValidationInfoDTO.isAuthorized()) {
-                            synCtx.setProperty(APIMgtGatewayConstants.API_PUBLISHER,
-                                    apiKeyValidationInfoDTO.getApiPublisher());
-                            log.debug("JWT authentication successful.");
-                        } else {
-                            log.debug(
-                                    "User is NOT authorized to access the Resource. API Subscription validation " +
-                                            "failed.");
-                            throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
-                                    "User is NOT authorized to access the Resource. API Subscription validation " +
-                                            "failed.");
-                        }
-                    } else {
-                        log.debug("Ignored subscription validation");
-                    }
+                if (log.isDebugEnabled()) {
+                    log.debug("Subscription validation via Key Manager. Status: "
+                            + apiKeyValidationInfoDTO.isAuthorized());
                 }
+                if (apiKeyValidationInfoDTO.isAuthorized()) {
+                    /*
+                     * Set api.ut.apiPublisher of the subscribed api to the message context.
+                     * This is necessary for the functionality of Publisher alerts.
+                     * */
+                    synCtx.setProperty(APIMgtGatewayConstants.API_PUBLISHER, apiKeyValidationInfoDTO.getApiPublisher());
+                    /* GraphQL Query Analysis Information */
+                    if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+                        synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH,
+                                apiKeyValidationInfoDTO.getGraphQLMaxDepth());
+                        synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY,
+                                apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
+                    }
+                    log.debug("JWT authentication successful.");
+                } else {
+                    log.debug(
+                            "User is NOT authorized to access the Resource. API Subscription validation " + "failed.");
+                    throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
+                            "User is NOT authorized to access the Resource. API Subscription validation " + "failed.");
+                }
+            
                 log.debug("JWT authentication successful.");
                 String endUserToken = null;
                 try {
                     if (jwtGenerationEnabled) {
                         JWTInfoDto jwtInfoDto =
                                 GatewayUtils
-                                        .generateJWTInfoDto(jwtValidationInfo, api, apiKeyValidationInfoDTO, synCtx);
+                                        .generateJWTInfoDto(jwtValidationInfo, null, apiKeyValidationInfoDTO, synCtx);
                         endUserToken = generateAndRetrieveJWTToken(tokenSignature, jwtInfoDto);
                     }
                     return GatewayUtils
-                            .generateAuthenticationContext(tokenSignature, jwtValidationInfo, api,
+                            .generateAuthenticationContext(tokenSignature, jwtValidationInfo, null,
                                     apiKeyValidationInfoDTO,
                                     getApiLevelPolicy(), endUserToken, true);
                 } catch (ParseException e) {

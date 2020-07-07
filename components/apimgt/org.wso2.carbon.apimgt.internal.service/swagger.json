@@ -144,7 +144,13 @@
       "get" : {
         "summary" : "An Array of key managers configured",
         "description" : "this will provide key managers configured\n",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "An array of key managers",
@@ -470,6 +476,74 @@
           }
         }
       }
+    },
+    "/synapse-artifacts" : {
+      "get" : {
+        "tags" : [ "Retrieving Synapse artifacts" ],
+        "summary" : "Get all the synapse artifacts for a given API UUID and gateway label",
+        "description" : "This will provide access to synapse artifacts in database.\n",
+        "parameters" : [ {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Api ID\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "gatewayLabel",
+          "in" : "query",
+          "description" : "**Search condition**.\n label associated with the API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "gatewayInstruction",
+          "in" : "query",
+          "description" : "**Search condition**.\n Publish/Remove\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "String of gatewayRuntimeArtifacts",
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/gateway-synapse-artifacts" : {
+      "get" : {
+        "tags" : [ "Retrieving All Synapse artifacts" ],
+        "summary" : "Get all synapse artifacts for a given gateway label",
+        "description" : "This will provide access to the synapse artifacts in database.\n",
+        "parameters" : [ {
+          "name" : "gatewayLabel",
+          "in" : "query",
+          "description" : "**Search condition**.\n label associated with the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of gatewayRuntimeArtifacts",
+            "schema" : {
+              "$ref" : "#/definitions/SynapseArtifactList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions" : {
@@ -667,6 +741,37 @@
         }
       }
     },
+    "synapseArtifact" : {
+      "properties" : {
+        "apiId" : {
+          "type" : "string"
+        },
+        "apiName" : {
+          "type" : "string",
+          "description" : "API Provider name."
+        },
+        "version" : {
+          "type" : "string",
+          "description" : "version of the API"
+        },
+        "tenantDomain" : {
+          "type" : "string",
+          "description" : "tenantDomain of the API"
+        },
+        "gatewayLabel" : {
+          "type" : "string",
+          "description" : "label of the API"
+        },
+        "gatewayInstruction" : {
+          "type" : "string",
+          "description" : "Publish/Remove"
+        },
+        "bytesEncodedAsString" : {
+          "type" : "string",
+          "description" : "bytes"
+        }
+      }
+    },
     "ApplicationList" : {
       "properties" : {
         "count" : {
@@ -688,6 +793,9 @@
     },
     "Application" : {
       "properties" : {
+        "uuid" : {
+          "type" : "string"
+        },
         "id" : {
           "type" : "integer"
         },
@@ -814,6 +922,25 @@
         }
       }
     },
+    "SynapseArtifactList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Synapse Artifacts returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "SynapseArtifactList"
+    },
     "ApplicationKeyMappingList" : {
       "properties" : {
         "count" : {
@@ -842,6 +969,9 @@
           "type" : "string"
         },
         "keyType" : {
+          "type" : "string"
+        },
+        "keyManager" : {
           "type" : "string"
         }
       }
@@ -968,6 +1098,9 @@
             "items" : {
               "$ref" : "#/definitions/ApiPolicyConditionGroup"
             }
+          },
+          "applicableLevel" : {
+            "type" : "string"
           }
         }
       } ]
@@ -1049,7 +1182,7 @@
         },
         "previous" : {
           "type" : "string",
-          "description" : "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned."
+          "description" : "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n"
         }
       },
       "title" : "Pagination"

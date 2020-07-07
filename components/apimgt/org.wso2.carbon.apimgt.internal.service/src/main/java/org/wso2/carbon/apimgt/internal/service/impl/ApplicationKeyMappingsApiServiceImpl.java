@@ -35,6 +35,7 @@ public class ApplicationKeyMappingsApiServiceImpl implements ApplicationKeyMappi
     public Response applicationKeyMappingsGet(String xWSO2Tenant, String consumerKey, MessageContext messageContext) {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
+        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
 
         if (StringUtils.isNotEmpty(consumerKey)) {
             ApplicationKeyMapping keyMapping = subscriptionValidationDAO.getApplicationKeyMapping(consumerKey);

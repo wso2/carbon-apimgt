@@ -41,6 +41,10 @@ public class AlertMgtConstants {
     public static final String APPLICATION_ID_KEY = "applicationId";
     public static final String REQUEST_COUNT_KEY = "requestCount";
 
+    //Bot detection alert subscription related constants
+    public static final String BOT_DETECTION_UUID_FIELD = "uuid";
+    public static final String BOT_DETECTION_EMAIL_FIELD = "email";
+
     public static Map<String, String> alertTypeConfigMap;
     static {
         alertTypeConfigMap = new HashMap<>();

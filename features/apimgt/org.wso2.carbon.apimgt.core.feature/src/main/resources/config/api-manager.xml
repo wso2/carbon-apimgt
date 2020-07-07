@@ -731,7 +731,7 @@
     	<ServerPassword>${admin.password}</ServerPassword>
     	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.16/workflows/update-workflow-status</WorkflowCallbackAPI>
         <TokenEndPoint>https://localhost:${https.nio.port}/token</TokenEndPoint>
-        <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.16/register</DCREndPoint>
+        <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.17/register</DCREndPoint>
         <DCREndPointUser>${admin.username}</DCREndPointUser>
         <DCREndPointPassword>${admin.password}</DCREndPointPassword>
     </WorkflowConfigurations>
@@ -784,4 +784,8 @@
         <ClientCertificateHeader>X-WSO2-CLIENT-CERTIFICATE</ClientCertificateHeader>
         <EnableClientCertificateValidation>true</EnableClientCertificateValidation>
     </MutualSSL>
+
+    <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
+     change his/her password via devportal. By default this feature is enabled.-->
+    <EnableChangePassword>true</EnableChangePassword>
 </APIManager>

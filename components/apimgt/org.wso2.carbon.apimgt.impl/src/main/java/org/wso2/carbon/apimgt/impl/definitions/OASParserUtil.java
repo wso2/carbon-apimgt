@@ -597,9 +597,10 @@ public class OASParserUtil {
     private static void setRefOfParameters(List<Parameter> parameters, SwaggerUpdateContext context) {
         if (parameters != null) {
             for (Parameter parameter : parameters) {
-                Content content = parameter.getContent();
-
-                extractReferenceFromContent(content, context);
+                String ref = parameter.getSchema().get$ref();
+                if (ref != null) {
+                    addToReferenceObjectMap(ref, context);
+                }
             }
         }
     }

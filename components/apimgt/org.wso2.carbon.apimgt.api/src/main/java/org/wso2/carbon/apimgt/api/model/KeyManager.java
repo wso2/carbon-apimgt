@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -361,4 +362,16 @@ public interface KeyManager {
      * @param tenantDomain tenantDomain
      */
     public void setTenantDomain(String tenantDomain);
+    
+    /**
+     * Method to retrieve user claims
+     * @param username username
+     * @param properties any additional properties
+     * @return
+     * @throws APIManagementException
+     */
+    default Map<String, String> getUserClaims(String username, Map<String, Object> properties)
+            throws APIManagementException {
+        return Collections.emptyMap();
+    }
 }

@@ -40,9 +40,7 @@ export default class User {
         this._scopes = [];
         this._idToken = id_token;
         this._remember = remember;
-        this.state = {
-            isSideBarOpen: true,
-        };
+        this._isSideBarOpen = true;
         User._userMap.set(environment, this);
     }
 
@@ -91,11 +89,11 @@ export default class User {
 
 
     get isSideBarOpen(){
-        return this.state.isSideBarOpen;
+        return this._isSideBarOpen;
     }
 
     set isSideBarOpen(isSideBarOpen) {
-        this.state.isSideBarOpen = isSideBarOpen;
+        this._isSideBarOpen = isSideBarOpen;
     }
 
     /**
@@ -116,7 +114,7 @@ export default class User {
             scopes: this._scopes,
             idToken: this._idToken,
             remember: this._remember,
-            isSideBarOpen: this.state.isSideBarOpen,
+            isSideBarOpen: this._isSideBarOpen,
         };
     }
 

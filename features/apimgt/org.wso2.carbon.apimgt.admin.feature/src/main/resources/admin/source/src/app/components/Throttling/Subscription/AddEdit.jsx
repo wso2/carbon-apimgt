@@ -49,6 +49,9 @@ import API from 'AppData/api';
 import Joi from '@hapi/joi';
 
 const useStyles = makeStyles((theme) => ({
+    root: {
+        marginBottom: theme.spacing(10),
+    },
     error: {
         color: theme.palette.error.dark,
     },
@@ -537,7 +540,7 @@ function AddEdit(props) {
                 })
             }
         >
-            <Box component='div' m={2}>
+            <Box component='div' m={2} className={classes.root}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12} lg={3}>
                         <Box display='flex' flexDirection='row' alignItems='center'>
@@ -827,6 +830,78 @@ function AddEdit(props) {
                                         <MenuItem value='min'>Requests/min</MenuItem>
                                     </Select>
                                 </FormControl>
+                            </Box>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+
+                    {/* GraphQL */}
+                    <Grid item xs={12} md={12} lg={3}>
+                        <Box display='flex' flexDirection='row' alignItems='center'>
+                            <Box flex='1'>
+                                <Typography color='inherit' variant='subtitle2' component='div'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.GraphQL'
+                                        defaultMessage='GraphQL'
+                                    />
+                                </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.AddEdit.graphql.add.description'
+                                        defaultMessage={'Provide the Maximum Complexity and Maximum depth'
+                                        + ' values for GraphQL APIs using this policy.'}
+                                    />
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
+                        <Box component='div' m={1}>
+                            <Box display='flex' flexDirection='row' alignItems='center'>
+                                <Box flex='1'>
+                                    <TextField
+                                        margin='dense'
+                                        name='maxComplexity'
+                                        value={maxComplexity}
+                                        type='number'
+                                        onChange={onChange}
+                                        label={(
+                                            <span>
+                                                <FormattedMessage
+                                                    id='Throttling.Subscription.AddEdit.form.max.complexity'
+                                                    defaultMessage='Max Complexity'
+                                                />
+                                            </span>
+                                        )}
+                                        fullWidth
+                                        variant='outlined'
+                                    />
+                                </Box>
+                            </Box>
+                            <Box display='flex' flexDirection='row' alignItems='center'>
+                                <Box flex='1'>
+                                    <TextField
+                                        margin='dense'
+                                        name='maxDepth'
+                                        type='number'
+                                        value={maxDepth}
+                                        onChange={onChange}
+                                        label={(
+                                            <span>
+                                                <FormattedMessage
+                                                    id='Throttling.Subscription.AddEdit.form.max.depth'
+                                                    defaultMessage='Max Depth'
+                                                />
+                                            </span>
+                                        )}
+                                        fullWidth
+                                        variant='outlined'
+                                    />
+                                </Box>
                             </Box>
                         </Box>
                     </Grid>
@@ -1134,8 +1209,8 @@ function AddEdit(props) {
                                                         id={index}
                                                         name='name'
                                                         label={intl.formatMessage({
-                                                            id: `Throttling.Subscription.Properties.Properties.
-                                                                        show.add.property.property.name`,
+                                                            id: 'Throttling.Subscription.Properties.Properties.'
+                                                                        + 'show.add.property.property.name',
                                                             defaultMessage: 'Name',
                                                         })}
                                                         margin='dense'
@@ -1268,77 +1343,6 @@ function AddEdit(props) {
                                     <FormControlLabel value='allow' control={<Radio />} label='Allow' />
                                     <FormControlLabel value='deny' control={<Radio />} label='Deny' />
                                 </RadioGroup>
-                            </Box>
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Box marginTop={2} marginBottom={2}>
-                            <hr className={classes.hr} />
-                        </Box>
-                    </Grid>
-                    {/* GraphQL */}
-                    <Grid item xs={12} md={12} lg={3}>
-                        <Box display='flex' flexDirection='row' alignItems='center'>
-                            <Box flex='1'>
-                                <Typography color='inherit' variant='subtitle2' component='div'>
-                                    <FormattedMessage
-                                        id='Throttling.Subscription.GraphQL'
-                                        defaultMessage='GraphQL'
-                                    />
-                                </Typography>
-                                <Typography color='inherit' variant='caption' component='p'>
-                                    <FormattedMessage
-                                        id='Throttling.Subscription.AddEdit.graphql.add.description'
-                                        defaultMessage={'Provide the Maximum Complexity and Maximum depth'
-                                        + ' values for GraphQL APIs using this policy.'}
-                                    />
-                                </Typography>
-                            </Box>
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={9}>
-                        <Box component='div' m={1}>
-                            <Box display='flex' flexDirection='row' alignItems='center'>
-                                <Box flex='1'>
-                                    <TextField
-                                        margin='dense'
-                                        name='maxComplexity'
-                                        value={maxComplexity}
-                                        type='number'
-                                        onChange={onChange}
-                                        label={(
-                                            <span>
-                                                <FormattedMessage
-                                                    id='Throttling.Subscription.AddEdit.form.max.complexity'
-                                                    defaultMessage='Max Complexity'
-                                                />
-                                            </span>
-                                        )}
-                                        fullWidth
-                                        variant='outlined'
-                                    />
-                                </Box>
-                            </Box>
-                            <Box display='flex' flexDirection='row' alignItems='center'>
-                                <Box flex='1'>
-                                    <TextField
-                                        margin='dense'
-                                        name='maxDepth'
-                                        type='number'
-                                        value={maxDepth}
-                                        onChange={onChange}
-                                        label={(
-                                            <span>
-                                                <FormattedMessage
-                                                    id='Throttling.Subscription.AddEdit.form.max.depth'
-                                                    defaultMessage='Max Depth'
-                                                />
-                                            </span>
-                                        )}
-                                        fullWidth
-                                        variant='outlined'
-                                    />
-                                </Box>
                             </Box>
                         </Box>
                     </Grid>

@@ -46,14 +46,14 @@ function AddEditConditionPolicy(props) {
     let initValue = '';
     if (item) {
         if (item.type === CON_CONSTS.HEADERCONDITION) {
-            initName = item.headerName;
-            initValue = item.headerValue;
+            initName = item.headerCondition.headerName;
+            initValue = item.headerCondition.headerValue;
         } else if (item.type === CON_CONSTS.QUERYPARAMETERCONDITION) {
-            initName = item.parameterName;
-            initValue = item.parameterValue;
+            initName = item.queryParameterCondition.parameterName;
+            initValue = item.queryParameterCondition.parameterValue;
         } else if (item.type === CON_CONSTS.JWTCLAIMSCONDITION) {
-            initName = item.claimUrl;
-            initValue = item.attribute;
+            initName = item.jwtClaimsCondition.claimUrl;
+            initValue = item.jwtClaimsCondition.attribute;
         }
     }
 

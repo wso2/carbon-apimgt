@@ -18,8 +18,10 @@
 
 package org.wso2.carbon.apimgt.internal.service.utils;
 
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
@@ -28,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationAttributeDTO;
@@ -43,6 +46,10 @@ import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
+import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,18 +65,21 @@ public class SubscriptionValidationDataUtil {
             apidto = new APIDTO();
             apidto.setApiId(model.getApiId());
             apidto.setVersion(model.getVersion());
+            apidto.setName(model.getName());
             apidto.setContext(model.getContext());
             apidto.setPolicy(model.getPolicy());
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
-            List<URLMapping> urlMappings = model.getAllResources();
+            apidto.setName(model.getName());
+            Map<String,URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
-            for (URLMapping urlMapping : urlMappings) {
+            for (URLMapping urlMapping : urlMappings.values()) {
                 URLMappingDTO urlMappingDTO = new URLMappingDTO();
                 urlMappingDTO.setAuthScheme(urlMapping.getAuthScheme());
                 urlMappingDTO.setHttpMethod(urlMapping.getHttpMethod());
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
+                urlMappingDTO.setScopes(urlMapping.getScopes());
                 urlMappingsDTO.add(urlMappingDTO);
             }
             apidto.setUrlMappings(urlMappingsDTO);
@@ -88,14 +98,16 @@ public class SubscriptionValidationDataUtil {
             apidto.setPolicy(model.getPolicy());
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
-            List<URLMapping> urlMappings = model.getAllResources();
+            apidto.setName(model.getName());
+            Map<String,URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
-            for (URLMapping urlMapping : urlMappings) {
+            for (URLMapping urlMapping : urlMappings.values()) {
                 URLMappingDTO urlMappingDTO = new URLMappingDTO();
                 urlMappingDTO.setAuthScheme(urlMapping.getAuthScheme());
                 urlMappingDTO.setHttpMethod(urlMapping.getHttpMethod());
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
+                urlMappingDTO.setScopes(urlMapping.getScopes());
                 urlMappingsDTO.add(urlMappingDTO);
             }
             apidto.setUrlMappings(urlMappingsDTO);
@@ -143,7 +155,7 @@ public class SubscriptionValidationDataUtil {
                     applicationDTO.getGroupIds().add(groupIdDTO);
                 }
 
-                Map<String, String> attributes = appModel.getAttributesMap();
+                Map<String, String> attributes = appModel.getAttributes();
                 for (String attrib : attributes.keySet()) {
                     ApplicationAttributeDTO applicationAttributeDTO = new ApplicationAttributeDTO();
                     applicationAttributeDTO.setName(attrib);
@@ -242,12 +254,36 @@ public class SubscriptionValidationDataUtil {
                 policyDTO.setName(apiPolicyModel.getName());
                 policyDTO.setQuotaType(apiPolicyModel.getQuotaType());
                 policyDTO.setTenantId(apiPolicyModel.getTenantId());
-
+                policyDTO.setApplicableLevel(apiPolicyModel.getApplicableLevel());
                 apiPolicyListDTO.getList().add(policyDTO);
 
+                List<APIPolicyConditionGroup> retrievedGroups = apiPolicyModel.getConditionGroups();
+                List<ApiPolicyConditionGroupDTO> condGroups = new ArrayList<ApiPolicyConditionGroupDTO>();
+                for (APIPolicyConditionGroup retGroup : retrievedGroups) {
+                    ApiPolicyConditionGroupDTO group = new ApiPolicyConditionGroupDTO();
+                    group.setConditionGroupId(retGroup.getConditionGroupId());
+                    group.setQuotaType(retGroup.getQuotaType());
+                    group.setPolicyId(retGroup.getPolicyId());
+
+                    List<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO> condition = 
+                            new ArrayList<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO>();
+
+                    List<ConditionDTO> retrievedConditions = retGroup.getConditionDTOS();
+                    for (ConditionDTO retrievedCondition : retrievedConditions) {
+                        org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO conditionDTO = 
+                                new org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO();
+                        conditionDTO.setConditionType(retrievedCondition.getConditionType());
+                        conditionDTO.setIsInverted(retrievedCondition.isInverted());
+                        conditionDTO.setName(retrievedCondition.getConditionName());
+                        conditionDTO.setValue(retrievedCondition.getConditionValue());
+                        condition.add(conditionDTO);
+                    }
+                    group.setCondition(condition);
+                    condGroups.add(group);
+                }
+                policyDTO.setConditionGroups(condGroups);
             }
             apiPolicyListDTO.setCount(model.size());
-
         } else {
             apiPolicyListDTO.setCount(0);
         }
@@ -259,12 +295,12 @@ public class SubscriptionValidationDataUtil {
 
         ApplicationKeyMappingListDTO applicationKeyMappingListDTO = new ApplicationKeyMappingListDTO();
         if (model != null) {
-            for (ApplicationKeyMapping applicationPolicyModel : model) {
+            for (ApplicationKeyMapping applicationKeyMapping : model) {
                 ApplicationKeyMappingDTO applicationKeyMappingDTO = new ApplicationKeyMappingDTO();
-                applicationKeyMappingDTO.setApplicationId(applicationPolicyModel.getApplicationId());
-                applicationKeyMappingDTO.setConsumerKey(applicationPolicyModel.getConsumerKey());
-                applicationKeyMappingDTO.setKeyType(applicationPolicyModel.getKeyType());
-
+                applicationKeyMappingDTO.setApplicationId(applicationKeyMapping.getApplicationId());
+                applicationKeyMappingDTO.setConsumerKey(applicationKeyMapping.getConsumerKey());
+                applicationKeyMappingDTO.setKeyType(applicationKeyMapping.getKeyType());
+                applicationKeyMappingDTO.setKeyManager(applicationKeyMapping.getKeyManager());
                 applicationKeyMappingListDTO.getList().add(applicationKeyMappingDTO);
 
             }
@@ -274,6 +310,21 @@ public class SubscriptionValidationDataUtil {
             applicationKeyMappingListDTO.setCount(0);
         }
         return applicationKeyMappingListDTO;
+    }
+
+    public static String validateTenantDomain(String xWSO2Tenant, MessageContext messageContext) {
+
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (xWSO2Tenant == null) {
+            return tenantDomain;
+        } else {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                return xWSO2Tenant;
+            } else {
+                return tenantDomain;
+            }
+        }
+
     }
 
 }

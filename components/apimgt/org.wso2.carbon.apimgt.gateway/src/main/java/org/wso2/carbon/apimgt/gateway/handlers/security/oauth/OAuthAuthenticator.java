@@ -223,59 +223,11 @@ public class OAuthAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_GENERAL_ERROR,APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
                 }
             }
+            //TODO temporarily added. remove this once scope validation is moved to use inmemory maps
+            openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
             // Find the resource authentication scheme based on the token type
-            if (isJwtToken) {
-                // If a JWT token
-                openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
-                if (openAPI == null && !APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                    log.error("Swagger is missing in the gateway. " +
-                            "Therefore, JWT authentication cannot be performed.");
-                    return new AuthenticationResponse(false, isMandatory, true,
-                            APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF,
-                            "JWT authentication cannot be performed.");
-                }
-                List<VerbInfoDTO> verbInfoList;
 
-                if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                    HashMap<String, Boolean> operationAuthSchemeMappingList =
-                            (HashMap<String, Boolean>) synCtx.getProperty(APIConstants.OPERATION_AUTH_SCHEME_MAPPING);
-                    HashMap<String, String> operationThrottlingMappingList =
-                            (HashMap<String, String>) synCtx.getProperty(APIConstants.OPERATION_THROTTLING_MAPPING);
-
-                    String[] operationList = matchingResource.split(",");
-                    verbInfoList = new ArrayList<>(1);
-                    authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
-                    for (String operation: operationList) {
-                        boolean operationAuthSchemeEnabled = operationAuthSchemeMappingList.get(operation);
-                        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-                        if (operationAuthSchemeEnabled) {
-                            verbInfoDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
-                            authenticationScheme = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                        } else {
-                            verbInfoDTO.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
-                        }
-                        verbInfoDTO.setHttpVerb(httpMethod);
-                        verbInfoDTO.setThrottling(operationThrottlingMappingList.get(operation));
-                        verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + operation + ":" + httpMethod);
-                        verbInfoList.add(verbInfoDTO);
-                    }
-                } else {
-                    authenticationScheme = OpenAPIUtils.getResourceAuthenticationScheme(openAPI, synCtx);
-                    verbInfoList = new ArrayList<>(1);
-                    VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-                    verbInfoDTO.setHttpVerb(httpMethod);
-                    verbInfoDTO.setAuthType(authenticationScheme);
-                    verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
-                    verbInfoDTO.setContentAware(OpenAPIUtils.isContentAwareTierAvailable(openAPI, synCtx));
-                    verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + matchingResource + ":" + httpMethod);
-                    verbInfoList.add(verbInfoDTO);
-                }
-
-                synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
-            } else {
-                // If an OAuth token
-                authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
-            }
+            authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
         } catch (APISecurityException ex) {
             return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
         }

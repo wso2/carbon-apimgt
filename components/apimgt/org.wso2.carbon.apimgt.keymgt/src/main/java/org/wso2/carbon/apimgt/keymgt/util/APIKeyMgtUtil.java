@@ -65,17 +65,6 @@ public class APIKeyMgtUtil {
 
     private static final String AUTHENTICATOR_NAME = ResourceConstants.SAML2_SSO_AUTHENTICATOR_NAME;
 
-    public static String getTenantDomainFromTenantId(int tenantId) throws APIKeyMgtException {
-        try {
-            TenantManager tenantManager = APIKeyMgtDataHolder.getRealmService().getTenantManager();
-            return tenantManager.getDomain(tenantId);
-        } catch (UserStoreException e) {
-            String errorMsg = "Error when getting the Tenant domain name for the given Tenant Id";
-            log.error(errorMsg, e);
-            throw new APIKeyMgtException(errorMsg, e);
-        }
-    }
-
     public static Map<String,String> constructParameterMap(OAuth2TokenValidationRequestDTO.TokenValidationContextParam[] params){
         Map<String,String> paramMap = null;
         if(params != null){

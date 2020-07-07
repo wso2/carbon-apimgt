@@ -19,21 +19,22 @@
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 public class BlockingConditionRetrieverWrapper extends BlockingConditionRetriever {
-    private ThrottleProperties throttleProperties;
+    private EventHubConfigurationDto eventHubConfigurationDto;
     private ThrottleDataHolder throttleDataHolder;
 
-    public BlockingConditionRetrieverWrapper(ThrottleProperties throttleProperties, ThrottleDataHolder
+    public BlockingConditionRetrieverWrapper(EventHubConfigurationDto eventHubConfigurationDto, ThrottleDataHolder
             throttleDataHolder) {
-        this.throttleProperties = throttleProperties;
+        this.eventHubConfigurationDto = eventHubConfigurationDto;
         this.throttleDataHolder = throttleDataHolder;
     }
 
     @Override
-    protected ThrottleProperties getThrottleProperties() {
-        return throttleProperties;
+    protected EventHubConfigurationDto getEventHubConfiguration() {
+        return eventHubConfigurationDto;
     }
 
     @Override

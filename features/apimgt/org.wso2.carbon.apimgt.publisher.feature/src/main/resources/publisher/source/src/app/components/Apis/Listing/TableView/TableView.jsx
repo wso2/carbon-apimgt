@@ -151,11 +151,6 @@ class TableView extends React.Component {
                         backgroundColor: 'transparent',
                     },
                 },
-                MUIDataTableHeadCell: {
-                    fixedHeader: {
-                        zIndex: -1,
-                    },
-                },
             },
         };
         if (listType === 'grid') {

@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class InMemoryAPIDeployer {
                     } else {
                         log.error("Error retrieving artifacts for API " + apiId + ". Storage returned null");
                     }
-                } catch (AxisFault | ArtifactSynchronizerException e) {
+                } catch (IOException | ArtifactSynchronizerException e) {
                     log.error("Error deploying " + apiId + " in Gateway", e);
                 }
             } else {
@@ -117,7 +118,7 @@ public class InMemoryAPIDeployer {
                         }
                     }
                     return true;
-                } catch (ArtifactSynchronizerException e ) {
+                } catch (ArtifactSynchronizerException | IOException e ) {
                     log.error("Error  deploying APIs to the Gateway " + e );
                 }
             } else {
@@ -150,7 +151,7 @@ public class InMemoryAPIDeployer {
                     } else {
                         log.error("Error retrieving artifacts for API " + apiId + ". Storage returned null");
                     }
-                } catch (AxisFault | ArtifactSynchronizerException e) {
+                } catch (ArtifactSynchronizerException | IOException e) {
                     log.error("Error undeploying " + apiId + " in Gateway", e);
                 }
             } else {
@@ -180,7 +181,7 @@ public class InMemoryAPIDeployer {
                     } else {
                         log.error("Error retrieving artifacts for API " + apiId + ". Storage returned null");
                     }
-                } catch (ArtifactSynchronizerException e) {
+                } catch (ArtifactSynchronizerException | IOException e) {
                     log.error("Error retrieving artifacts of " + apiId + " from storage", e);
                 }
             } else {
@@ -191,7 +192,7 @@ public class InMemoryAPIDeployer {
     }
 
     public Map <String, String> getGatewayAPIAttributes(String apiname, String version, String tenatDomain) {
-        Map <String, String> apiAttributes = null;
+        Map<String, String> apiAttributes = null;
         if (artifactRetriever != null) {
             try {
                 apiAttributes = artifactRetriever.retrieveAttributes(apiname, version, tenatDomain);
@@ -203,5 +204,4 @@ public class InMemoryAPIDeployer {
         }
         return apiAttributes;
     }
-
 }

@@ -121,6 +121,7 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_PUBLISHER_ROLE = "PublisherRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE = "CreatorRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_DEVOPS_ROLE = "DevOpsRole";
     public static final String ANALYTICS_ROLE = "Internal/analytics";
     public static final String API_TENANT_CONF_ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
 
@@ -380,6 +381,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
 
     public static final String API_OVERVIEW_ENABLE_STORE = "overview_enableStore";
+
+    public static final String API_OVERVIEW_TESTKEY = "overview_testKey";
 
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
@@ -661,6 +664,10 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
     public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
+    public static final String ENABLE_DEFAULT_KEY_MANAGER_REGISTRATION = API_KEY_VALIDATOR +
+            "EnableDefaultKeyManagerRegistration";
+    public static final String ENABLE_KEY_MANAGER_RETRIVAL  = API_KEY_VALIDATOR+
+            "EnableKeyManagerConfigurationRetriever";
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER + "KeyManagerClientImpl";
@@ -672,8 +679,9 @@ public final class APIConstants {
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
             + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
-    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
-            "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
+    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = { "internal_application_mgt_create",
+            "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view",
+            "internal_user_mgt_list" };
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
 
     public static final String TOKEN_URL = "TokenURL";
@@ -905,8 +913,7 @@ public final class APIConstants {
 
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
-    public static final String TOKEN_REVOCATION_EVENT_PUBLISHER = "tokenRevocationPublisher";
-    public static final String CACHE_INVALIDATION_EVENT_PUBLISHER = "cacheInvalidationEventPublisher";
+    public static final String EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER = "eventHubNotificationEventPublisher";
     public static final String NOTIFICATION_EVENT_PUBLISHER = "notificationPublisher";
 
     public static final int AM_CREATOR_APIMGT_EXECUTION_ID = 200;
@@ -1154,12 +1161,11 @@ public final class APIConstants {
     public static final String GRAPHQL_PAYLOAD = "GRAPHQL_PAYLOAD";
     public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
     public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "GraphQLAccessControlPolicy";
-    public static final String QUERY_ANALYSIS_DEPTH = "depth";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
     public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
     public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
-    public static final String CHECK_ENABLED = "enabled";
-    public static final String DEFAULT_DEPTH_ROLE = "default";
+    public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
+    public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
@@ -1212,6 +1218,13 @@ public final class APIConstants {
         public static final String CLIENT_CREDENTIALS = "CLIENT_CREDENTIALS";
         public static final String PASSWORD = "PASSWORD";
 
+        public static final String AUTHORIZATION_HEADER = "Authorization";
+        public static final String CONTENT_TYPE_HEADER = "Content-Type";
+        public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+        public static final String CLIENT_CRED_GRANT_TYPE = "grant_type=client_credentials";
+        public static final String PASSWORD_GRANT_TYPE = "grant_type=password";
+        public static final String REFRESH_TOKEN_GRANT_TYPE = "grant_type=refresh_token";
+
         public static final String ACCESS_TOKEN = "access_token";
         public static final String REFRESH_TOKEN = "refresh_token";
         public static final String SCOPE = "scope";
@@ -1226,15 +1239,28 @@ public final class APIConstants {
         public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
         public static final String ENDPOINT_SECURITY_USERNAME = "username";
 
-        // For configs
-        public static final String OAUTH_ENDPOINT_SECURITY = "OAuthEndpointSecurity.";
-        public static final String OAUTH_TOKEN_REFRESH_INTERVAL = OAUTH_ENDPOINT_SECURITY + "TokenRefreshInterval";
-
-        public static final String TOKEN_REFRESH_INTERVAL = "tokenRefreshInterval";
-
         private OAuthConstants() {
         }
     }
+
+    // For Redis Configuration
+    public static final String REDIS_CONFIG = "RedisConfig.";
+    public static final String CONFIG_REDIS_HOST = REDIS_CONFIG + "RedisHost";
+    public static final String CONFIG_REDIS_PORT = REDIS_CONFIG + "RedisPort";
+    public static final String CONFIG_REDIS_USER = REDIS_CONFIG + "RedisUser";
+    public static final String CONFIG_REDIS_PASSWORD = REDIS_CONFIG + "RedisPassword";
+    public static final String CONFIG_REDIS_DATABASE_ID = REDIS_CONFIG + "RedisDatabaseId";
+    public static final String CONFIG_REDIS_CONNECTION_TIMEOUT = REDIS_CONFIG + "RedisConnectionTimeout";
+    public static final String CONFIG_REDIS_IS_SSL_ENABLED = REDIS_CONFIG + "RedisIsSslEnabled";
+
+    public static final String IS_REDIS_ENABLED = "isRedisEnabled";
+    public static final String REDIS_HOST = "redisHost";
+    public static final String REDIS_PORT = "redisPort";
+    public static final String REDIS_USER = "redisUser";
+    public static final String REDIS_PASSWORD = "redisPassword";
+    public static final String REDIS_DATABASE_ID = "redisDatabaseId";
+    public static final String REDIS_CONNECTION_TIMEOUT = "redisConnectionTimeout";
+    public static final String REDIS_IS_SSL_ENABLED = "redisIsSslEnabled";
 
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
@@ -2013,12 +2039,12 @@ public final class APIConstants {
 
     public static class RestApiConstants {
         public static final String REST_API_DEFAULT_VERSION = "v1";
-        public static final String REST_API_OLD_VERSION = "v0.16";
+        public static final String REST_API_OLD_VERSION = "v0.17";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
                 REST_API_PUBLISHER_CONTEXT + REST_API_DEFAULT_VERSION;
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
-        public static final String REST_API_ADMIN_VERSION = "v0.16";
+        public static final String REST_API_ADMIN_VERSION = "v0.17";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
         public static final String REST_API_ADMIN_IMPORT_API_RESOURCE = "/import/api";
         public static final String IMPORT_API_PRESERVE_PROVIDER = "preserveProvider";
@@ -2204,6 +2230,10 @@ public final class APIConstants {
         public static final String CERTIFICATE_TYPE_JWKS_ENDPOINT = "JWKS";
         public static final String CERTIFICATE_TYPE_PEM_FILE = "PEM";
         public static final String EVENT_PUBLISHER_CONFIGURATIONS = "EventPublisherConfiguration";
+        public static final String USER_INFO_ENDPOINT = "user_info_endpoint";
+        public static final String ACCESS_TOKEN = "accessToken";
+        public static final String AUTH_CODE = "authCode";
+        public static final String CLAIM_DIALECT = "dialect";
 
         public static class KeyManagerEvent {
 
@@ -2274,6 +2304,7 @@ public final class APIConstants {
         public static final String ENABLE_CONFIG = "Enable";
         public static final String SAVER_CONFIG = "ArtifactSaver";
         public static final String RETRIEVER_CONFIG = "ArtifactRetriever";
+        public static final String RETRY_DUARTION = "RetryDuration";
         public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
         public static final String GATEWAY_LABELS_CONFIG = "GatewayLabels";
         public static final String LABEL_CONFIG = "Label";
@@ -2281,6 +2312,9 @@ public final class APIConstants {
         public static final String DB_RETRIEVER_NAME = "DBRetriever";
         public static final String GATEWAY_INSTRUCTION_PUBLISH = "Publish";
         public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
+        public static final String SYNAPSE_ARTIFACTS = "/synapse-artifacts";
+        public static final String GATEAY_SYNAPSE_ARTIFACTS = "/gateway-synapse-artifacts";
+        public static final String DATA_SOURCE_NAME = "DataSourceName";
         public static final String SYNAPSE_ARTIFACTS = "synapse-artifacts";
 
     }
@@ -2291,4 +2325,19 @@ public final class APIConstants {
         public static final String CONTAINER_MANAGEMENT_INFO ="ContainerMgtInfo";
 
     }
+    public static class TopicNames {
+        //APIM default topic names
+        public static final String TOPIC_THROTTLE_DATA = "throttleData";
+        public static final String TOPIC_TOKEN_REVOCATION = "tokenRevocation";
+        public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
+        public static final String TOPIC_KEY_MANAGER = "keyManager";
+        public static final String TOPIC_NOTIFICATION = "notification";
+    }
+    public enum PolicyType {
+        API,
+        APPLICATION,
+        SUBSCRIPTION
+    }
+
+    public static final String ENABLE_CHANGE_PASSWORD = "EnableChangePassword";
 }
