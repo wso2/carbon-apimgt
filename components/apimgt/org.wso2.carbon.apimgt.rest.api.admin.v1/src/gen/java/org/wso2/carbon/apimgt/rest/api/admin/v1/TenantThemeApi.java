@@ -68,6 +68,7 @@ TenantThemeApiService delegate = new TenantThemeApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Ok. Tenant Theme Imported Successfully. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. Not Authorized to import. ", response = ErrorDTO.class),
+        @ApiResponse(code = 413, message = "Payload Too Large. Tenant Theme file size exceeds the allowed limit. ", response = Void.class),
         @ApiResponse(code = 500, message = "Internal Server Error. Error in importing Theme. ", response = ErrorDTO.class) })
     public Response importTenantTheme( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) throws APIManagementException{
         return delegate.importTenantTheme(fileInputStream, fileDetail, securityContext);

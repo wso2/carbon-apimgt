@@ -263,7 +263,7 @@ public class RestApiAdminUtils {
         } catch (APIManagementException | IOException e) {
             //if an error occurs, revert the changes that were done when importing a tenant theme
             revertTenantThemeImportChanges(tenantDomain, existingTenantTheme);
-            throw new APIManagementException(e.getMessage(),
+            throw new APIManagementException(e.getMessage(), e,
                     ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
         } finally {
             IOUtils.closeQuietly(zipInputStream);

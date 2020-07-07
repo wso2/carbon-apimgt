@@ -3620,6 +3620,10 @@ paths:
             Not Authorized to import.
           schema:
             $ref: '#/definitions/Error'
+        413:
+          description: |
+            Payload Too Large.
+            Tenant Theme file size exceeds the allowed limit.
         500:
           description: |
             Internal Server Error.
