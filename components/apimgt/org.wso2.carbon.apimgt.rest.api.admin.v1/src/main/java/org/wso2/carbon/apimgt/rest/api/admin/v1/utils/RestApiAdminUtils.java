@@ -35,11 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -177,31 +173,25 @@ public class RestApiAdminUtils {
         ZipInputStream zipInputStream = null;
         byte[] buffer = new byte[1024];
         InputStream existingTenantTheme = null;
-        ByteArrayInputStream themeContent = null;
+        InputStream themeContent = null;
         File tenantThemeDirectory;
         File backupDirectory = null;
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
         try {
-            //convert InputStream to ByteArrayInputStream to be able to read the tenant theme content twice
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            IOUtils.copy(themeContentInputStream, baos);
-            byte[] bytes = baos.toByteArray();
-            themeContent = new ByteArrayInputStream(bytes);
-
             APIAdmin apiAdmin = new APIAdminImpl();
             //add or update the tenant theme in the database
             if (apiAdmin.isTenantThemeExist(tenantId)) {
                 existingTenantTheme = apiAdmin.getTenantTheme(tenantId);
-                apiAdmin.updateTenantTheme(tenantId, themeContent);
+                apiAdmin.updateTenantTheme(tenantId, themeContentInputStream);
             } else {
-                apiAdmin.addTenantTheme(tenantId, themeContent);
+                apiAdmin.addTenantTheme(tenantId, themeContentInputStream);
             }
-            //reset the InputStream to the initial position since it was completely read when adding to the database
-            themeContent.reset();
+            //retrieve the tenant theme from the database to import it to the file system
+            themeContent = apiAdmin.getTenantTheme(tenantId);
 
-            //import the file tenant theme to the file system
+            //import the tenant theme to the file system
             String outputFolder = getTenantThemeDirectoryPath(tenantDomain);
             tenantThemeDirectory = new File(outputFolder);
             if (!tenantThemeDirectory.exists()) {
