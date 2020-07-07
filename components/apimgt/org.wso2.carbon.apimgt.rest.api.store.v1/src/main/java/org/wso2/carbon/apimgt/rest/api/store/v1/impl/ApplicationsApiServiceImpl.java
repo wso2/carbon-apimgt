@@ -393,8 +393,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                 if (payload.has(APIConstants.JwtTokenConstants.EXPIRY_TIME)) {
                                     expiryTime = APIUtil.getExpiryifJWT(apiKey);
                                 }
+                                String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
                                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                                apiConsumer.revokeAPIKey(apiKey, expiryTime, tenantDomain);
+                                apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
                                 return Response.ok().build();
                             } else {
                                 if (log.isDebugEnabled()) {

@@ -14678,30 +14678,58 @@ public class ApiMgtDAO {
     /**
      * Persist revoked jwt signatures to database.
      *
+     * @param eventId
      * @param jwtSignature signature of jwt token.
-     * @param tenantId tenant id of the jwt subject.
      * @param expiryTime   expiry time of the token.
+     * @param tenantId tenant id of the jwt subject.
      */
-    public void addRevokedJWTSignature(String jwtSignature, String type ,
+    public void addRevokedJWTSignature(String eventId, String jwtSignature, String type,
                                        Long expiryTime, int tenantId) throws APIManagementException {
 
         if (StringUtils.isEmpty(type)) {
             type = APIConstants.DEFAULT;
         }
         String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement
-                     (addJwtSignature)) {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
-            ps.setString(1, UUID.randomUUID().toString());
-            ps.setString(2, jwtSignature);
-            ps.setLong(3, expiryTime);
-            ps.setInt(4, tenantId);
-            ps.setString(5, type);
-            ps.execute();
-            conn.commit();
+            try (PreparedStatement ps = conn.prepareStatement(addJwtSignature)) {
+                ps.setString(1, eventId);
+                ps.setString(2, jwtSignature);
+                ps.setLong(3, expiryTime);
+                ps.setInt(4, tenantId);
+                ps.setString(5, type);
+                ps.execute();
+                conn.commit();
+            } catch (SQLIntegrityConstraintViolationException e) {
+                boolean isRevokedTokenExist = isRevokedJWTSignatureExist(conn, eventId);
+
+                if (isRevokedTokenExist) {
+                    log.warn("Revoked Token already persisted");
+                } else {
+                    handleException("Failed to add Revoked Token Event" + APIUtil.getMaskedToken(jwtSignature), e);
+                }
+            }catch (SQLException e){
+                conn.rollback();
+            }
         } catch (SQLException e) {
             handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Check revoked Token Identifier exist
+     *
+     * @param eventId
+
+     */
+    private boolean isRevokedJWTSignatureExist(Connection conn, String eventId) throws SQLException {
+
+        String checkRevokedTokenExist = SQLConstants.RevokedJWTConstants.CHECK_REVOKED_TOKEN_EXIST;
+        try (PreparedStatement ps = conn.prepareStatement(checkRevokedTokenExist)) {
+            ps.setString(1, eventId);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                return resultSet.next();
+            }
         }
     }
 

@@ -355,14 +355,14 @@ public interface KeyManager {
      * This method returns the type of key manager
      * @return keymanager type
      */
-    public String getType();
+    String getType();
 
     /**
      *  This method used to set the tenant Domain of KeyManager instance used
      * @param tenantDomain tenantDomain
      */
-    public void setTenantDomain(String tenantDomain);
-    
+    void setTenantDomain(String tenantDomain);
+
     /**
      * Method to retrieve user claims
      * @param username username
