@@ -40,8 +40,6 @@ import Paper from '@material-ui/core/Paper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { FormattedMessage } from 'react-intl';
 import Drawer from '@material-ui/core/Drawer';
-import { ListItemIcon, ListItem, ListItemText, List } from '@material-ui/core';
-import classNames from 'classnames';
 import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
 import Settings, { useSettingsContext } from 'AppComponents/Shared/SettingsContext';
 import { app } from 'Settings';
