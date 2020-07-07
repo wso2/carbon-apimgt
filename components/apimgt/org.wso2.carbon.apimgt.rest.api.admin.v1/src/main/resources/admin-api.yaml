@@ -3469,6 +3469,7 @@ paths:
       x-wso2-curl: "curl -k -X GET \"https://localhost:9443/api/am/admin/v1/system-scopes/YXBpbTpzdWJzY3JpYmU?username=john\" -H \"accept: application/json\" -H \"Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
       x-wso2-request: "GET https://localhost:9443/api/am/admin/v1/system-scopes/Base64urlEncode(apim:subscribe)?username=john Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
       x-wso2-response: "{\n  \"name\":\"apim:subscribe\"  \n}\n"
+      operationId: systemScopesScopeNameGet
       summary: Retrieve scopes for a particular user
       description: |
         This operation will return the scope list of particular user
@@ -3510,6 +3511,7 @@ paths:
         - OAuth2Security:
             - apim:scope_manage
             - apim:admin
+      operationId: systemScopesGet
       summary: |
         Get the list of role scope mapping.
       description: |
