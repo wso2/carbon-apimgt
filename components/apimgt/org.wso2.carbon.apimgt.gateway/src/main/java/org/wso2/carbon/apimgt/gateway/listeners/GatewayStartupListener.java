@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -38,6 +39,7 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     private JMSTransportHandler jmsTransportHandlerForTrafficManager;
     private JMSTransportHandler jmsTransportHandlerForEventHub;
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
+    private boolean isAPIsDeployedInSyncMode = false;
 
     public GatewayStartupListener() {
         gatewayArtifactSynchronizerProperties =
@@ -59,7 +61,6 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
 
     @Override
     public void completingServerStartup() {
-
     }
 
     private boolean deployArtifactsAtStartup() {
@@ -69,13 +70,22 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
         boolean flag = false;
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-            flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(gatewayArtifactSynchronizerProperties.getGatewayLabels());
+            flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(gatewayArtifactSynchronizerProperties
+                    .getGatewayLabels());
         }
         return flag;
     }
 
     @Override
     public void completedServerStartup() {
+        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
+            if (gatewayArtifactSynchronizerProperties.getGatewayStartup()
+                    .equals(APIConstants.GatewayArtifactSynchronizer.GATEWAY_STARTUP_SYNC)) {
+                deployAPIsInSyncMode();
+            } else {
+                deployAPIsInAsyncMode();
+            }
+        }
         jmsTransportHandlerForTrafficManager
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
         jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
@@ -84,8 +94,13 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
                 new APIMgtGatewayCacheMessageListener());
         jmsTransportHandlerForEventHub
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
-        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-            startListener();
+    }
+
+    private void deployAPIsInSyncMode() {
+        isAPIsDeployedInSyncMode = deployArtifactsAtStartup();
+        if (!isAPIsDeployedInSyncMode) {
+            log.error("Unable to deploy synapse artifacts at gateway");
+            deployAPIsInAsyncMode();
         }
     }
 
@@ -105,7 +120,7 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     }
 
 
-    public void startListener() {
+    public void deployAPIsInAsyncMode() {
         new Thread(this).start();
     }
 

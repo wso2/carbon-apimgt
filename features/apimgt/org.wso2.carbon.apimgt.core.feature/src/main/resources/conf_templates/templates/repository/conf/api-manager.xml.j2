@@ -1247,6 +1247,9 @@
         {% if apim.sync_runtime_artifacts.gateway.deployment_retry_duartion is defined %}
         <RetryDuration>{{apim.sync_runtime_artifacts.gateway.deployment_retry_duartion}}</RetryDuration>
         {% endif %}
+        {% if apim.sync_runtime_artifacts.gateway.gateway_startup is defined %}
+        <GatewayStartupMode>{{apim.sync_runtime_artifacts.gateway.gateway_startup}}</GatewayStartupMode>
+        {% endif %}
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 

@@ -1677,6 +1677,15 @@ public class APIManagerConfiguration {
             log.debug("Retry Duration Element is not set. Set to default duaration");
         }
 
+        OMElement startupConfigElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.STARTUP_CONFIG));
+        if (startupConfigElement!= null) {
+            String serverStartup = startupConfigElement.getText();
+            gatewayArtifactSynchronizerProperties.setGatewayStartup(serverStartup);
+        } else {
+            log.debug("Retry Duration Element is not set. Set to default duaration");
+        }
+
         OMElement gatewayLabelElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABELS_CONFIG));
         if (gatewayLabelElement != null) {
