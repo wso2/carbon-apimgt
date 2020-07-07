@@ -59,7 +59,7 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
 
     @Override
     public void completingServerStartup() {
-        startListener();
+
     }
 
     private boolean deployArtifactsAtStartup() {
@@ -84,7 +84,9 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
                 new APIMgtGatewayCacheMessageListener());
         jmsTransportHandlerForEventHub
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
-
+        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
+            startListener();
+        }
     }
 
 
