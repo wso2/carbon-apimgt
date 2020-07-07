@@ -48,7 +48,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -354,6 +356,8 @@ public final class APIUtil {
     }
 
     private static String hostAddress = null;
+    private static final int timeoutInSeconds = 15;
+    private static final int retries = 15;
 
     /**
      * To initialize the publisherRoleCache configurations, based on configurations.
@@ -542,6 +546,42 @@ public final class APIUtil {
                 usedByProduct.setUUID(apiProductPath);
             }
         }
+    }
+
+    /**
+     * This method is used to execute an HTTP request
+     *
+     * @param method       HttpRequest Type
+     * @param httpClient   HttpClient
+     * @return HTTPResponse
+     * @throws IOException
+     */
+    public static CloseableHttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient) throws IOException {
+        CloseableHttpResponse httpResponse = null;
+        int retryCount = 0;
+        boolean retry;
+        do {
+            try {
+                httpResponse = (CloseableHttpResponse) httpClient.execute(method);
+                retry = false;
+            } catch (IOException ex) {
+                retryCount++;
+                if (retryCount < retries) {
+                    retry = true;
+                    log.warn("Failed retrieving from remote endpoint: " + ex.getMessage()
+                            + ". Retrying after " + timeoutInSeconds +
+                            " seconds.");
+                    try {
+                        Thread.sleep(timeoutInSeconds * 1000);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+                } else {
+                    throw ex;
+                }
+            }
+        } while (retry);
+        return httpResponse;
     }
 
     /**

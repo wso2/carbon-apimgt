@@ -2904,12 +2904,15 @@ CREATE TABLE AM_KEY_MANAGER (
   DESCRIPTION VARCHAR(256) NULL,
   TYPE VARCHAR(45) NULL,
   CONFIGURATION BLOB NULL,
-  ENABLED INT NULL,
+  ENABLED CHAR(1) DEFAULT 1,
   TENANT_DOMAIN VARCHAR(100) NULL,
   PRIMARY KEY (UUID),
   UNIQUE (NAME,TENANT_DOMAIN)
 )
  /
+
+-- AM_GW_PUBLISHED_API_DETAILS & AM_GW_API_ARTIFACTS are independent tables for Artifact synchronizer feature which --
+-- should not have any referential integrity constraints with other tables in AM database--
 
 CREATE TABLE AM_GW_PUBLISHED_API_DETAILS (
   API_ID varchar(255) NOT NULL,

@@ -1608,7 +1608,7 @@ public class APIManagerConfiguration {
         return eventHubConfigurationDto;
     }
 
-    private void setRuntimeArtifactsSyncPublisherConfig (OMElement omElement){
+    private void setRuntimeArtifactsSyncPublisherConfig (OMElement omElement) {
 
         OMElement enableElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_CONFIG));
@@ -1628,15 +1628,24 @@ public class APIManagerConfiguration {
             log.debug("Artifact saver Element is not set. Set to default DB Saver");
         }
 
+        OMElement dataSourceElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.DATA_SOURCE_NAME));
+        if (dataSourceElement != null) {
+            String dataSource = dataSourceElement.getText();
+            gatewayArtifactSynchronizerProperties.setArtifactSynchronizerDataSource(dataSource);
+        } else {
+            log.debug("Data Source Element is not set. Set to default Data Source");
+        }
+
         OMElement publishDirectlyToGatewayElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.PUBLISH_DIRECTLY_TO_GW_CONFIG));
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer
+                        .PUBLISH_DIRECTLY_TO_GW_CONFIG));
         if (publishDirectlyToGatewayElement != null) {
             gatewayArtifactSynchronizerProperties.setPublishDirectlyToGatewayEnabled(
                     JavaUtils.isTrueExplicitly(publishDirectlyToGatewayElement.getText()));
         } else {
             log.debug("Publish directly to gateway is not set. Set to default true");
         }
-
     }
 
     private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){
@@ -1657,6 +1666,15 @@ public class APIManagerConfiguration {
             gatewayArtifactSynchronizerProperties.setRetrieverName(artifactRetriever);
         } else {
             log.debug("Artifact retriever Element is not set. Set to default DB Retriever");
+        }
+
+        OMElement retryDurationElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.RETRY_DUARTION));
+        if (retrieverElement != null) {
+            long retryDuration = Long.valueOf(retryDurationElement.getText());
+            gatewayArtifactSynchronizerProperties.setRetryDuartion(retryDuration);
+        } else {
+            log.debug("Retry Duration Element is not set. Set to default duaration");
         }
 
         OMElement gatewayLabelElement = omElement
