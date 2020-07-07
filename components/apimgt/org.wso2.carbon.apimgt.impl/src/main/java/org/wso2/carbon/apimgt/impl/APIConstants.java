@@ -2313,9 +2313,11 @@ public final class APIConstants {
         public static final String GATEWAY_INSTRUCTION_PUBLISH = "Publish";
         public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
         public static final String SYNAPSE_ARTIFACTS = "/synapse-artifacts";
+        public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
         public static final String GATEAY_SYNAPSE_ARTIFACTS = "/gateway-synapse-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
-        public static final String SYNAPSE_ARTIFACTS = "synapse-artifacts";
+        public static final String API_ID = "apiId";
+        public static final String LABEL = "label";
 
     }
 

@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.ApiArtifactApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -43,12 +44,11 @@ import java.util.Map;
 public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
 
     private static final Log log = LogFactory.getLog(ApiArtifactApiServiceImpl.class);
-
-    private ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
     private final String SUPER_TENAT_DOMAIN = "carbon.super";
 
     @Override
-    public Response apiArtifactGet(String apiName, String version , String tenantDomain, MessageContext messageContext) {
+    public Response apiArtifactGet(String apiName, String version , String tenantDomain,
+            MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         if (tenantDomain == null){
@@ -56,11 +56,10 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
         }
 
         Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version, tenantDomain);
-        String apiId = apiAttributes.get("apiId");
-        String label = apiAttributes.get("label");
+        String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
+        String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
 
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
-        String definition = null;
         JSONObject responseObj = new JSONObject();
 
         if (gatewayAPIDTO != null) {
@@ -125,7 +124,6 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
 
-            responseObj.put("Definition", definition);
             String responseStringObj = String.valueOf(responseObj);
             return Response.ok().entity(responseStringObj).build();
         } else {

@@ -121,7 +121,7 @@ public class DBRetriever implements ArtifactRetriever {
         CloseableHttpResponse httpResponse = null;
         try {
             String endcodedVersion= URLEncoder.encode(version, APIConstants.DigestAuthConstants.CHARSET);
-            String path = APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ARTIFACTS + "?apiName=" + apiName +
+            String path = APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ATTRIBUTES + "?apiName=" + apiName +
                     "&tenantDomain="+ tenantDomain + "&version=" + endcodedVersion;
             String endpoint = baseURL + path;
             httpResponse = invokeService(endpoint);
@@ -129,15 +129,16 @@ public class DBRetriever implements ArtifactRetriever {
             if (httpResponse.getEntity() != null ) {
                 responseString = EntityUtils.toString(httpResponse.getEntity(),
                         APIConstants.DigestAuthConstants.CHARSET);
+                httpResponse.close();
             } else {
                 throw new ArtifactSynchronizerException("HTTP response is empty");
             }
             Map <String, String> apiAttribute = new HashMap<>();
             JSONObject artifactObject = new JSONObject(responseString);
-            String apiId = (String)artifactObject.get("apiId");
-            String label = (String)artifactObject.get("label");
-            apiAttribute.put("apiId", apiId);
-            apiAttribute.put("label", label);
+            String apiId = (String)artifactObject.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
+            String label = (String)artifactObject.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
+            apiAttribute.put(APIConstants.GatewayArtifactSynchronizer.API_ID, apiId);
+            apiAttribute.put(APIConstants.GatewayArtifactSynchronizer.LABEL, label);
             return apiAttribute;
         } catch (IOException e) {
             String msg = "Error while executing the http client";

@@ -191,13 +191,22 @@ public class InMemoryAPIDeployer {
         return gatewayAPIDTO;
     }
 
-    public Map <String, String> getGatewayAPIAttributes(String apiname, String version, String tenatDomain) {
+
+    /**
+     * Retrieve artifacts from the storage
+     *
+     *@param apiName - Name of the API
+     *@param version - version of the API
+     *@param tenantDomain - Tenant Domain of the API
+     * @return Map that contains the UUID and label of the API
+     */
+    public Map <String, String> getGatewayAPIAttributes(String apiName, String version, String tenantDomain) {
         Map<String, String> apiAttributes = null;
         if (artifactRetriever != null) {
             try {
-                apiAttributes = artifactRetriever.retrieveAttributes(apiname, version, tenatDomain);
+                apiAttributes = artifactRetriever.retrieveAttributes(apiName, version, tenantDomain);
             } catch (ArtifactSynchronizerException e) {
-                log.error("Error retrieving artifacts of " + apiname + " from storage", e);
+                log.error("Error retrieving artifacts of " + apiName + " from storage", e);
             }
         } else {
             log.error("Artifact retriever not found");
