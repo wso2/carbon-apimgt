@@ -3535,6 +3535,81 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The 'Role Alias' Collection API Resource
+  ######################################################
+  /system-scopes/role-aliases:
+    #-----------------------------------------------------
+    # Retrieve role alias mappings for system scope roles
+    #-----------------------------------------------------
+    get:
+      summary: Retreive role alias mappings
+      operationId: systemScopesRoleAliasesGet
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:scope_manage
+      description: |
+        This operation can be used to retreive role alias mapping for system scope roles
+      tags:
+        - System Scopes
+      responses:
+        200:
+          description: |
+            OK.
+            The list of role mappings are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/RoleAliasList'
+        404:
+          description: |
+            Not Found.
+            Requested alias does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Add a new role alias mapping for system roles
+    #-----------------------------------------------------
+    put:
+      summary: Add a new role alias
+      operationId: systemScopesRoleAliasesPut
+      security:
+        - OAuth2Security:
+            - apim:scope_manage
+            - apim:admin
+      description: |
+        This operation can be used to add a new role alias mapping for system scope roles
+      parameters:
+        - in: body
+          name: body
+          description:
+            role-alias mapping
+          required: true
+          schema:
+            $ref: '#/definitions/RoleAliasList'
+      tags:
+        - System Scopes
+      responses:
+        200:
+          description: |
+            OK.
+            Role mapping alias returned
+          schema:
+            $ref: '#/definitions/RoleAliasList'
+        400:
+          description: |
+            Bad Request.
+            Invalid Request or request validation failure.
+        500:
+          description: |
+            Internal Server Error
+            An internal server error occurred while updating the roles.
+
 ######################################################
 # The Tenant Theme resource APIs
 ######################################################
@@ -5442,6 +5517,39 @@ definitions:
         type: string
         description: The IP of the client
         example: 127.0.0.1
+
+  #-----------------------------------------------
+  # The Role Alias resource definition.
+  #-----------------------------------------------
+  RoleAliasList:
+    title: Role alias list
+    properties:
+      count:
+        type: integer
+        description: The number of role aliases
+        example: 3
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/RoleAlias'
+
+  #-----------------------------------------------
+  # The Role Alias resource definition.
+  #-----------------------------------------------
+  RoleAlias:
+    title: Role alias
+    properties:
+      role:
+        type: string
+        description: The original role
+        example: "Internal/subscriber"
+      aliases:
+        schema:
+          type: array
+          items:
+            type: string
+        description: The role mapping for role alias
+        example: ["Subscriber","TestAlias"]
 
 #-----------------------------------------------------
 # END-OF-FILE
