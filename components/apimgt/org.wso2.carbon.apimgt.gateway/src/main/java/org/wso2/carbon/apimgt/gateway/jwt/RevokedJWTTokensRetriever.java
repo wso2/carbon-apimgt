@@ -28,6 +28,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.gateway.dto.RevokedJWTTokenDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -63,7 +64,8 @@ public class RevokedJWTTokensRetriever extends TimerTask {
 
         try {
             // The resource resides in the throttle web app. Hence reading throttle configs
-            String url = getEventHubConfiguration().getServiceUrl() + "/revokedjwt";
+            String url = getEventHubConfiguration().getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP).concat(
+                    "/revokedjwt");
             HttpGet method = new HttpGet(url);
             byte[] credentials = Base64.encodeBase64((getEventHubConfiguration().getUsername() + ":" +
                     getEventHubConfiguration().getPassword()).getBytes(StandardCharsets.UTF_8));

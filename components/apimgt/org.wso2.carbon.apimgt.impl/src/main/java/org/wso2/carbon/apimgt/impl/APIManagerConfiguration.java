@@ -1536,8 +1536,7 @@ public class APIManagerConfiguration {
             eventHubConfigurationDto.setEnabled(true);
             OMElement serviceUrl = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.SERVICE_URL));
             if (serviceUrl != null) {
-                eventHubConfigurationDto.setServiceUrl(
-                        APIUtil.replaceSystemProperty(serviceUrl.getText()).concat(APIConstants.INTERNAL_WEB_APP_EP));
+                eventHubConfigurationDto.setServiceUrl(APIUtil.replaceSystemProperty(serviceUrl.getText()));
             }
             OMElement initDelay = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.INIT_DELAY));
             if (initDelay != null) {

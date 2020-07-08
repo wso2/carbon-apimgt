@@ -29,7 +29,7 @@ public interface TokenRevocationNotifier {
      * Method to send the revoked token on realtime
      *
      * @param revokedToken revoked token to be sent
-     * @param properties realtime notifier properties read from the config
+     * @param properties additional properties to send
      */
     void sendMessageOnRealtime(String revokedToken, Properties properties);
 
@@ -37,8 +37,15 @@ public interface TokenRevocationNotifier {
      * Method to send the revoked token to the persistent storage
      *
      * @param revokedToken token to be revoked
-     * @param properties persistent notifier properties read from the config
+     * @param properties additional properties to send.
      */
     void sendMessageToPersistentStorage(String revokedToken, Properties properties);
+
+    /**
+     * Initialization properties from configuration
+     * @param realTimeNotifierProperties
+     * @param persistentNotifierProperties
+     */
+    void init(Properties realTimeNotifierProperties, Properties persistentNotifierProperties);
 
 }

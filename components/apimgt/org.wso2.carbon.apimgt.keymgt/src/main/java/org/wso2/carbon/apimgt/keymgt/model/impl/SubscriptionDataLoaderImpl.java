@@ -376,7 +376,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     private String invokeService(String path, String tenantDomain) throws DataLoadingException, IOException {
 
-        String serviceURLStr = getEventHubConfigurationDto.getServiceUrl();
+        String serviceURLStr = getEventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
         HttpGet method = new HttpGet(serviceURLStr + path);
 
             URL serviceURL = new URL(serviceURLStr + path);
