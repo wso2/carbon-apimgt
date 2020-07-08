@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -79,8 +78,8 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     @Override
     public void completedServerStartup() {
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-            if (gatewayArtifactSynchronizerProperties.getGatewayStartup()
-                    .equals(APIConstants.GatewayArtifactSynchronizer.GATEWAY_STARTUP_SYNC)) {
+            if (APIConstants.GatewayArtifactSynchronizer.GATEWAY_STARTUP_SYNC
+                    .equals(gatewayArtifactSynchronizerProperties.getGatewayStartup())) {
                 deployAPIsInSyncMode();
             } else {
                 deployAPIsInAsyncMode();

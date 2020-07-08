@@ -1683,7 +1683,7 @@ public class APIManagerConfiguration {
             String serverStartup = startupConfigElement.getText();
             gatewayArtifactSynchronizerProperties.setGatewayStartup(serverStartup);
         } else {
-            log.debug("Retry Duration Element is not set. Set to default duaration");
+            log.debug("Gateway Startup mode is not set. Set to Sync Mode");
         }
 
         OMElement gatewayLabelElement = omElement
