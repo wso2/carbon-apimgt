@@ -2965,10 +2965,10 @@ public class ApiMgtDAO {
         }
     }
 
-    public void updateSubscriptionStatusAndTier(int subscriptionId, String status, String requestedThrottlingTier) throws APIManagementException {
+    public void updateSubscriptionStatusAndTier(int subscriptionId, String status) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
-
+        SubscribedAPI subscribedAPI = getSubscriptionById(subscriptionId);
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -2978,7 +2978,7 @@ public class ApiMgtDAO {
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, null);
-            ps.setString(2, requestedThrottlingTier);
+            ps.setString(2, subscribedAPI.getRequestedTier().getName());
             ps.setString(3, status);
             ps.setInt(4, subscriptionId);
             ps.execute();

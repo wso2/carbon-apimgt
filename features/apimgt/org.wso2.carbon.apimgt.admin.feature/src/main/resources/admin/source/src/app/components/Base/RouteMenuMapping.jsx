@@ -49,6 +49,7 @@ import BlockIcon from '@material-ui/icons/Block';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import ApplicationCreation from 'AppComponents/Workflow/ApplicationCreation';
 import SubscriptionCreation from 'AppComponents/Workflow/SubscriptionCreation';
+import SubscriptionUpdate from 'AppComponents/Workflow/SubscriptionUpdate';
 import RegistrationCreation from 'AppComponents/Workflow/RegistrationCreation';
 import APIStateChange from 'AppComponents/Workflow/APIStateChange';
 import UserCreation from 'AppComponents/Workflow/UserCreation';
@@ -279,6 +280,15 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/tasks/subscription-creation',
                 component: SubscriptionCreation,
+                icon: <TouchAppIcon />,
+            },
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.subscription.update',
+                    defaultMessage: 'Subscription Update',
+                }),
+                path: '/tasks/subscription-update',
+                component: SubscriptionUpdate,
                 icon: <TouchAppIcon />,
             },
             {
