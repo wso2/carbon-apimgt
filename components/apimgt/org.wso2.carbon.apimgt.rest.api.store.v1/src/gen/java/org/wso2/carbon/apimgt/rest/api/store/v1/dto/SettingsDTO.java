@@ -29,6 +29,10 @@ public class SettingsDTO   {
     private SettingsIdentityProviderDTO identityProvider = null;
     private Boolean isAnonymousModeEnabled = true;
     private Boolean isPasswordChangeEnabled = true;
+    private String userStorePasswordPattern = null;
+    private String passwordPolicyPattern = null;
+    private Integer passwordPolicyMinLength = null;
+    private Integer passwordPolicyMaxLength = null;
 
   /**
    **/
@@ -201,13 +205,13 @@ public class SettingsDTO   {
   }
 
   /**
-   * Get store Password Change Enabled
    **/
   public SettingsDTO isPasswordChangeEnabled(Boolean isPasswordChangeEnabled) {
     this.isPasswordChangeEnabled = isPasswordChangeEnabled;
     return this;
   }
 
+  
   @ApiModelProperty(value = "")
   @JsonProperty("IsPasswordChangeEnabled")
   public Boolean isIsPasswordChangeEnabled() {
@@ -215,6 +219,78 @@ public class SettingsDTO   {
   }
   public void setIsPasswordChangeEnabled(Boolean isPasswordChangeEnabled) {
     this.isPasswordChangeEnabled = isPasswordChangeEnabled;
+  }
+
+  /**
+   * The &#39;PasswordJavaRegEx&#39; cofigured in the UserStoreManager
+   **/
+  public SettingsDTO userStorePasswordPattern(String userStorePasswordPattern) {
+    this.userStorePasswordPattern = userStorePasswordPattern;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The 'PasswordJavaRegEx' cofigured in the UserStoreManager")
+  @JsonProperty("userStorePasswordPattern")
+  public String getUserStorePasswordPattern() {
+    return userStorePasswordPattern;
+  }
+  public void setUserStorePasswordPattern(String userStorePasswordPattern) {
+    this.userStorePasswordPattern = userStorePasswordPattern;
+  }
+
+  /**
+   * The regex configured in the Password Policy property &#39;passwordPolicy.pattern&#39;
+   **/
+  public SettingsDTO passwordPolicyPattern(String passwordPolicyPattern) {
+    this.passwordPolicyPattern = passwordPolicyPattern;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The regex configured in the Password Policy property 'passwordPolicy.pattern'")
+  @JsonProperty("passwordPolicyPattern")
+  public String getPasswordPolicyPattern() {
+    return passwordPolicyPattern;
+  }
+  public void setPasswordPolicyPattern(String passwordPolicyPattern) {
+    this.passwordPolicyPattern = passwordPolicyPattern;
+  }
+
+  /**
+   * If Password Policy Feature is enabled, the property &#39;passwordPolicy.min.length&#39; is returned as the &#39;passwordPolicyMinLength&#39;. If password policy is not enabled, default value -1 will be returned. And it should be noted that the regex pattern(s) returned in &#39;passwordPolicyPattern&#39; and &#39;userStorePasswordPattern&#39; properties too will affect the minimum password length allowed and an intersection of all conditions will be considered finally to validate the password.
+   **/
+  public SettingsDTO passwordPolicyMinLength(Integer passwordPolicyMinLength) {
+    this.passwordPolicyMinLength = passwordPolicyMinLength;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "If Password Policy Feature is enabled, the property 'passwordPolicy.min.length' is returned as the 'passwordPolicyMinLength'. If password policy is not enabled, default value -1 will be returned. And it should be noted that the regex pattern(s) returned in 'passwordPolicyPattern' and 'userStorePasswordPattern' properties too will affect the minimum password length allowed and an intersection of all conditions will be considered finally to validate the password.")
+  @JsonProperty("passwordPolicyMinLength")
+  public Integer getPasswordPolicyMinLength() {
+    return passwordPolicyMinLength;
+  }
+  public void setPasswordPolicyMinLength(Integer passwordPolicyMinLength) {
+    this.passwordPolicyMinLength = passwordPolicyMinLength;
+  }
+
+  /**
+   * If Password Policy Feature is enabled, the property &#39;passwordPolicy.max.length&#39; is returned as the &#39;passwordPolicyMaxLength&#39;. If password policy is not enabled, default value -1 will be returned. And it should be noted that the regex pattern(s) returned in &#39;passwordPolicyPattern&#39; and &#39;userStorePasswordPattern&#39; properties too will affect the maximum password length allowed and an intersection of all conditions will be considered finally to validate the password.
+   **/
+  public SettingsDTO passwordPolicyMaxLength(Integer passwordPolicyMaxLength) {
+    this.passwordPolicyMaxLength = passwordPolicyMaxLength;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "If Password Policy Feature is enabled, the property 'passwordPolicy.max.length' is returned as the 'passwordPolicyMaxLength'. If password policy is not enabled, default value -1 will be returned. And it should be noted that the regex pattern(s) returned in 'passwordPolicyPattern' and 'userStorePasswordPattern' properties too will affect the maximum password length allowed and an intersection of all conditions will be considered finally to validate the password.")
+  @JsonProperty("passwordPolicyMaxLength")
+  public Integer getPasswordPolicyMaxLength() {
+    return passwordPolicyMaxLength;
+  }
+  public void setPasswordPolicyMaxLength(Integer passwordPolicyMaxLength) {
+    this.passwordPolicyMaxLength = passwordPolicyMaxLength;
   }
 
 
@@ -237,12 +313,16 @@ public class SettingsDTO   {
         Objects.equals(isUnlimitedTierPaid, settings.isUnlimitedTierPaid) &&
         Objects.equals(identityProvider, settings.identityProvider) &&
         Objects.equals(isAnonymousModeEnabled, settings.isAnonymousModeEnabled) &&
-        Objects.equals(isPasswordChangeEnabled, settings.isPasswordChangeEnabled);
+        Objects.equals(isPasswordChangeEnabled, settings.isPasswordChangeEnabled) &&
+        Objects.equals(userStorePasswordPattern, settings.userStorePasswordPattern) &&
+        Objects.equals(passwordPolicyPattern, settings.passwordPolicyPattern) &&
+        Objects.equals(passwordPolicyMinLength, settings.passwordPolicyMinLength) &&
+        Objects.equals(passwordPolicyMaxLength, settings.passwordPolicyMaxLength);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength);
   }
 
   @Override
@@ -261,6 +341,10 @@ public class SettingsDTO   {
     sb.append("    identityProvider: ").append(toIndentedString(identityProvider)).append("\n");
     sb.append("    isAnonymousModeEnabled: ").append(toIndentedString(isAnonymousModeEnabled)).append("\n");
     sb.append("    isPasswordChangeEnabled: ").append(toIndentedString(isPasswordChangeEnabled)).append("\n");
+    sb.append("    userStorePasswordPattern: ").append(toIndentedString(userStorePasswordPattern)).append("\n");
+    sb.append("    passwordPolicyPattern: ").append(toIndentedString(passwordPolicyPattern)).append("\n");
+    sb.append("    passwordPolicyMinLength: ").append(toIndentedString(passwordPolicyMinLength)).append("\n");
+    sb.append("    passwordPolicyMaxLength: ").append(toIndentedString(passwordPolicyMaxLength)).append("\n");
     sb.append("}");
     return sb.toString();
   }

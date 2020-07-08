@@ -2389,5 +2389,11 @@ public final class APIConstants {
         public static final String TENANT_DOMAIN = "tenant_domain";
     }
 
+    //Constants related to user password
     public static final String ENABLE_CHANGE_PASSWORD = "EnableChangePassword";
+    public static final String IS_PASSWORD_POLICY_ENABLED_PROPERTY = "passwordPolicy.enable";
+    public static final String PASSWORD_POLICY_MIN_LENGTH_PROPERTY = "passwordPolicy.min.length";
+    public static final String PASSWORD_POLICY_MAX_LENGTH_PROPERTY = "passwordPolicy.max.length";
+    public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
+    public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
 }
