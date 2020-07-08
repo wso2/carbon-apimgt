@@ -73,22 +73,22 @@ securityDefinitions:
     scopes:
       openid: Authorize access to user details
       apim:admin: Manage all admin operations
-      apim:tier_view: View throttling policies
-      apim:tier_manage: Update and delete throttling policies
-      apim:bl_view: View deny policies
-      apim:bl_manage: Update and delete deny policies
+      apim:tier_view: View tiers
+      apim:tier_manage: Update and delete tiers
+      apim:bl_view: View blocking conditions
+      apim:bl_manage: Update and delete blocking conditions
       apim:mediation_policy_view: View mediation policies
-      apim:mediation_policy_create: Create and update mediation policies
-      apim:app_owner_change: Retrieve and manage applications
+      apim:mediation_policy_create: Create mediation policies
+      apim:app_owner_change: Retrieve and manage applications #TODO: Verify Description
       apim:app_import_export: Import and export applications related operations
       apim:api_import_export: Import and export APIs related operations
       apim:api_product_import_export: Import and export API Products related operations
-      apim:label_manage: Manage microgateway labels
-      apim:label_read: Retrieve microgateway labels
-      apim:monetization_usage_publish: Retrieve and publish Monetization related usage records
-      apim:api_workflow_approve: Manage workflows
-      apim:bot_data: Retrieve bot detection data
-      apim:tenantInfo: Retrieve tenant related information
+      apim:label_manage: Manage labels
+      apim:label_read: Retrieve labels
+      apim:monetization_usage_publish: Retrieve and publish Monetization related usage records #TODO: Verify Description
+      apim:api_workflow_approve: Manage workflows #TODO: Verify Description
+      apim:bot_data: Manage emails  #TODO: Verify Description
+      apim:tenantInfo: Retrieve tenant related information  #TODO: Verify Description
       apim:tenant_theme_manage: Manage tenant themes
       apim:admin_operations: Manage API categories
       apim:admin_settings: Retrieve admin settings
@@ -3535,114 +3535,24 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-    #--------------------------------------------------
-    # Update the roles for scopes
-    #--------------------------------------------------
-    put:
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:scope_manage
-      summary: |
-        Update Roles For Scope
-      operationId: updateRolesForScope
-      description: |
-        This operation is used to update the roles for all scopes
-      parameters:
-        - in: body
-          name: body
-          description: |
-            Key Manager object with updated information
-          required: true
-          schema:
-            $ref: '#/definitions/ScopeList'
-      tags:
-        - System Scopes
-      responses:
-        200:
-          description: |
-            OK.
-            Successful response with the newly added roles.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-          schema:
-            $ref: '#/definitions/ScopeList'
-        400:
-          description: |
-            Bad Request.
-            Invalid Request or request validation failure.
-        500:
-          description: |
-            Internal Server Error
-            An internal server error occurred while updating the roles.
-          schema:
-            $ref: '#/definitions/Error'
-
 ######################################################
 # The Tenant Theme resource APIs
 ######################################################
-  /tenant-theme:
-    #-----------------------------------------------------
-    # Export Tenant Theme
-    #-----------------------------------------------------
-    get:
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:tenant_theme_manage
-      operationId: exportTenantTheme
-      produces:
-        - application/zip
-      summary: Export a DevPortal Tenant Theme
-      description: |
-        This operation can be used to export a DevPortal tenant theme as a zip file.
-      tags:
-        - Tenant Theme
-      responses:
-        200:
-          description: |
-            OK.
-            Tenant Theme Exported Successfully.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-          schema:
-            type: file
-        403:
-          description: |
-            Forbidden.
-            Not Authorized to export.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            Requested tenant theme does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: |
-            Internal Server Error.
-            Error in exporting tenant theme.
-          schema:
-            $ref: '#/definitions/Error'
+  /tenant-theme/import:
 
-    #-----------------------------------------------------
-    # Import Tenant Theme
-    #-----------------------------------------------------
-    put:
+    post:
       security:
         - OAuth2Security:
             - apim:admin
             - apim:tenant_theme_manage
-      operationId: importTenantTheme
       consumes:
         - multipart/form-data
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer
+      ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/tenant-theme/import"
+      x-wso2-request: |
+        POST https://localhost:9443/api/am/admin/v1/tenant-theme/import
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nTenant Theme imported successfully."
       summary: Import a DevPortal Tenant Theme
       description: |
         This operation can be used to import a DevPortal tenant theme.
@@ -3653,30 +3563,23 @@ paths:
             Zip archive consisting of tenant theme configuration
           required: true
           type: file
-      tags:
-        - Tenant Theme
       responses:
         200:
           description: |
             Ok.
-            Tenant Theme Imported Successfully.
+            Theme Imported Successfully.
         403:
           description: |
             Forbidden.
             Not Authorized to import.
           schema:
             $ref: '#/definitions/Error'
-        413:
-          description: |
-            Payload Too Large.
-            Tenant Theme file size exceeds the allowed limit.
         500:
           description: |
             Internal Server Error.
             Error in importing Theme.
           schema:
             $ref: '#/definitions/Error'
-
   ######################################################
   # The "Key Manager Collection" resource API
   ######################################################
@@ -5522,23 +5425,23 @@ definitions:
       messageID:
         type: string
         description: The message ID
-        example: 'urn:uuid:1ed6d2de-29df-4fed-a96a-46d2329dce65'
+        example: urn:uuid:1ed6d2de-29df-4fed-a96a-46d2329dce65
       apiMethod:
         type: string
         description: The api method
-        example: 'GET'
+        example: GET
       headerSet:
         type: string
         description: The header set
-        example: '[Accept=*/*, Host=localhost:8243, User-Agent=curl/7.58.0]'
+        example: [Accept=*/*, Host=localhost:8243, User-Agent=curl/7.58.0]
       messageBody:
         type: string
         description: The content of the message body
-        example: '<soapenv:Body xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"/>'
+        example: <soapenv:Body xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"/>
       clientIp:
         type: string
         description: The IP of the client
-        example: '127.0.0.1'
+        example: 127.0.0.1
 
 #-----------------------------------------------------
 # END-OF-FILE
