@@ -25,7 +25,7 @@ export default class CustomIcon extends React.Component{
                 </g>
             </svg>
         } else if ( icon === 'api') {
-            return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 8.4666662 8.466666"
+            return <svg aria-label="api icon" xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 8.4666662 8.466666"
              className={className}>
                 <g transform="translate(82.262 -41.963)">
                     <g transform="matrix(.83117 0 0 .83117 193.242 4.456)" fill={strokeColor}
