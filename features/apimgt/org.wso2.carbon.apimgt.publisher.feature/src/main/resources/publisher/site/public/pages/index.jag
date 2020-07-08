@@ -20,6 +20,11 @@
 <html lang="en">
 <%
     var app = require("/site/public/conf/settings.js").AppConfig.app;
+    var manifest = require("/site/public/dist/manifest.json");
+    var indexKey = 'index.js';
+    var swaggerKey = 'swaggerWorkerInit.js';
+    var indexBundle = manifest[indexKey].split("dist/")[1];
+    var swaggerBundle = manifest[swaggerKey].split("dist/")[1];
 %>
 
 <head>
@@ -45,8 +50,8 @@
     <script src="<%= app.context %>/site/public/conf/defaultTheme.js"></script>
     <script src="<%= app.context %>/site/public/conf/portalSettings.js"></script>
     <script src="<%= app.context %>/services/settings/settings.js"></script>
-    <script src="<%= app.context %>/site/public/dist/index.bundle.js"></script>
-    <script src="<%= app.context %>/site/public/dist/swaggerWorkerInit.bundle.js"></script>
+    <script src="<%= app.context %>/site/public/dist/<%= indexBundle %>"></script>
+    <script src="<%= app.context %>/site/public/dist/<%= swaggerBundle %>"></script>
     <link rel="stylesheet" href="<%= app.context %>/site/public/fonts/iconfont/material-icons.css">
 </body>
 
