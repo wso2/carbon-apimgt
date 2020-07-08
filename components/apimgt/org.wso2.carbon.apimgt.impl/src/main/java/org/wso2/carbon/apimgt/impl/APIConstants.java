@@ -2315,7 +2315,7 @@ public final class APIConstants {
         public static final String SYNAPSE_ARTIFACTS = "/synapse-artifacts";
         public static final String GATEAY_SYNAPSE_ARTIFACTS = "/gateway-synapse-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
-        public static final String STARTUP_CONFIG = "GatewayStartupMode";
+        public static final String DATA_RETRIEVAL_MODE= "DataRetrievalMode";
         public static final String GATEWAY_STARTUP_SYNC = "sync";
         public static final String GATEWAY_STARTUP_ASYNC= "async";
     }
