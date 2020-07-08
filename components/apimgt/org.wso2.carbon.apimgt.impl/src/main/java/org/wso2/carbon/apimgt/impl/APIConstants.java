@@ -1771,6 +1771,7 @@ public final class APIConstants {
         public static final String PROVIDER = "provider";
         public static final String OWNER = "owner";
         public static final String TIER = "tier";
+        public static final String REQUESTED_TIER = "requested_tier";
         public static final String CALLBACK = "callbackURL";
         public static final String GROUPS = "groups";
         public static final String STATUS = "status";
