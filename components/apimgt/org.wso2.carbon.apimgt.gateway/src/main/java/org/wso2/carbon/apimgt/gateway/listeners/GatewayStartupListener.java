@@ -99,7 +99,7 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
         isAPIsDeployedInSyncMode = deployArtifactsAtStartup();
         if (!isAPIsDeployedInSyncMode) {
             log.error("Unable to deploy synapse artifacts at gateway");
-            deployAPIsInAsyncMode();
+            deployAPIsInSyncMode();
         }
     }
 
