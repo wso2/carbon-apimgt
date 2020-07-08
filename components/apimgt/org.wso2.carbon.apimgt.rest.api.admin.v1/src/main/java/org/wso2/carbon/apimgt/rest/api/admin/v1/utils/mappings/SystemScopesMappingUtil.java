@@ -140,7 +140,7 @@ public class SystemScopesMappingUtil {
     /**
      * Extract roles and aliases and create JSONObject
      *
-     * @param body
+     * @param body          RoleAliasListDTO as request body
      * @return JSONObject   role-alias data
      */
     public static JSONObject createJsonObjectOfRoleMapping(RoleAliasListDTO body) {
@@ -154,7 +154,7 @@ public class SystemScopesMappingUtil {
     /**
      * Extract roles and aliases and create MAP from JSONObject
      *
-     * @param roleMapping JSONObject
+     * @param roleMapping from tenant-conf in JSONObject format
      * @return Converted MAP of role alias list
      */
     public static Map<String, List<String>> createMapOfRoleMapping(JSONObject roleMapping) {
