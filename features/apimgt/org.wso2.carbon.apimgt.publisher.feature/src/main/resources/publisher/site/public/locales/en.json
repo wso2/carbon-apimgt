@@ -176,7 +176,7 @@
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.delete.error": "Error while deleting certificate",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.delete.success": "Certificate Deleted Successfully",
   "Apis.Details.Configuration.components.APISecurity.allOptional": "Please select at least one API security level as 'Mandatory'!",
-  "Apis.Details.Configuration.components.APISecurity.api.unsecured": "Application level security is not required since API has no secured resources",                                        has no secured resources",
+  "Apis.Details.Configuration.components.APISecurity.api.unsecured": "Application level security is not required since API\n                                        has no secured resources",
   "Apis.Details.Configuration.components.APISecurity.application.mandatory": "Choose whether Application level security is mandatory or optional",
   "Apis.Details.Configuration.components.APISecurity.emptySchemas": "Please select at least one API security method!",
   "Apis.Details.Configuration.components.APISecurity.http.mandatory": "Choose whether Transport level security is mandatory or\n                                        optional",
