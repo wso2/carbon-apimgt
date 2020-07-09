@@ -15547,4 +15547,113 @@ public class ApiMgtDAO {
             handleException("Failed to remove resource scopes for: " + apiIdentifier, e);
         }
     }
+
+    /**
+     * Adds a tenant theme to the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     * @throws APIManagementException if an error occurs when adding a tenant theme to the database
+     */
+    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.ADD_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            statement.setBinaryStream(2, themeContent);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to add tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
+
+    /**
+     * Updates an existing tenant theme in the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     * @throws APIManagementException if an error occurs when updating an existing tenant theme in the database
+     */
+    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.TenantThemeConstants.UPDATE_TENANT_THEME)) {
+            statement.setBinaryStream(1, themeContent);
+            statement.setInt(2, tenantId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to update tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
+
+    /**
+     * Retrieves a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @return content of the tenant theme
+     * @throws APIManagementException if an error occurs when retrieving a tenant theme from the database
+     */
+    public InputStream getTenantTheme(int tenantId) throws APIManagementException {
+
+        InputStream tenantThemeContent = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                tenantThemeContent = resultSet.getBinaryStream("THEME");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+        return tenantThemeContent;
+    }
+
+    /**
+     * Checks whether a tenant theme exist for a particular tenant
+     *
+     * @param tenantId tenant ID of user
+     * @return true if a tenant theme exist for a particular tenant ID, false otherwise
+     * @throws APIManagementException if an error occurs when determining whether a tenant theme exists for a given
+     *                                tenant ID
+     */
+    public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            ResultSet resultSet = statement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            handleException("Failed to check whether tenant theme exist for tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+        return false;
+    }
+
+    /**
+     * Deletes a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
+     */
+    public void deleteTenantTheme(int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.DELETE_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
 }
