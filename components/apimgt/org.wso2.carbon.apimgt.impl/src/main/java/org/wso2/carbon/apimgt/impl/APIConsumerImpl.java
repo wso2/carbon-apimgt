@@ -3159,9 +3159,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
                 subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
+                subsLogObject.put(APIConstants.AuditLogConstants.REQUESTED_TIER, requestedThrottlingPolicy);
 
                 APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
-                        APIConstants.AuditLogConstants.CREATED, this.username);
+                        APIConstants.AuditLogConstants.UPDATED, this.username);
 
                 if (workflowResponse == null) {
                     workflowResponse = new GeneralWorkflowResponse();
