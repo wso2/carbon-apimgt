@@ -612,6 +612,17 @@ public class RestApiUtil {
     }
 
     /**
+     * Check if the specified throwable e is happened as the provided meta information related to api is corrupted
+     *
+     * @param e throwable to check
+     * @return true if the specified throwable e is happened as the provided meta information is corrupted, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToMetaInfoIsCorrupted(Throwable e) {
+        return detailedMessageMatches(e, "Error while reading API meta information from path");
+    }
+
+    /**
      * Check if the specified throwable e is happened as the updated/new resource conflicting with an already existing
      * resource
      *
@@ -663,6 +674,18 @@ public class RestApiUtil {
     public static boolean rootCauseMessageMatches (Throwable e, String message) {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause.getMessage().contains(message);
+    }
+
+    /**
+     * Check if the message of the detailed message of 'e' matches with the specified message
+     *
+     * @param e       throwable to check
+     * @param message error message
+     * @return true if the message of the root cause of 'e' matches with 'message'
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean detailedMessageMatches(Throwable e, String message) {
+        return e.getMessage().contains(message);
     }
 
     /**
@@ -877,6 +900,21 @@ public class RestApiUtil {
         NotFoundException notFoundException = buildNotFoundException(description);
         log.error(description, t);
         throw notFoundException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param description description of the error
+     * @param t           Throwable instance
+     * @param log         Log instance
+     * @throws BadRequestException
+     */
+    public static void handleMetaInformationFailureError(String description, Throwable t, Log log)
+            throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(description);
+        log.error(description, t);
+        throw badRequestException;
     }
 
     /**

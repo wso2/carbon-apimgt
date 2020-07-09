@@ -112,6 +112,9 @@ public class ImportApiServiceImpl implements ImportApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError("Requested " + RestApiConstants.RESOURCE_API + " not found",
                         e, log);
+            } else if (RestApiUtil.isDueToMetaInfoIsCorrupted(e)) {
+                RestApiUtil.handleMetaInformationFailureError("Error while reading API meta information from path.",
+                        e, log);
             }
             RestApiUtil.handleInternalServerError("Error while importing API", e, log);
         }
