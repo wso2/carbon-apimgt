@@ -11078,10 +11078,12 @@ public final class APIUtil {
                                 //get class name from the api-manager.xml
                                 if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString().equalsIgnoreCase(
                                         ((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).toString())) {
-                                    containerMgtObj.put(ContainerBasedConstants.CLASS_NAME, ((JSONObject) apimConfig).get(ContainerBasedConstants.CLASS_NAME));
+                                    containerMgtObj.put(ContainerBasedConstants.CLASS_NAME,
+                                            ((JSONObject) apimConfig).get(ContainerBasedConstants.CLASS_NAME));
                                 }
                             }
-                            containerMgtObj.put(ContainerBasedConstants.TYPE, containerMgtDetails.get(ContainerBasedConstants.TYPE));
+                            containerMgtObj.put(ContainerBasedConstants.TYPE,
+                                    containerMgtDetails.get(ContainerBasedConstants.TYPE));
                         }
                         containerMgt.add(containerMgtObj);
                     }
