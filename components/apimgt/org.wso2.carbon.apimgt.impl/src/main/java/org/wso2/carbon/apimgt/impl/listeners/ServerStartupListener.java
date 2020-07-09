@@ -49,16 +49,6 @@ public class ServerStartupListener implements ServerStartupObserver {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         if (apiManagerConfiguration != null) {
-            String defaultKeyManagerRegistration =
-                    apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_DEFAULT_KEY_MANAGER_REGISTRATION);
-            if (StringUtils.isNotEmpty(defaultKeyManagerRegistration) &&
-                    JavaUtils.isTrueExplicitly(defaultKeyManagerRegistration)) {
-                try {
-                    KeyMgtRegistrationService.registerDefaultKeyManager(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-                } catch (APIManagementException e) {
-                    log.error("Error while registering Default Key Manager for SuperTenant", e);
-                }
-            }
             String enableKeyManagerRetrieval =
                     apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_KEY_MANAGER_RETRIVAL);
             if (JavaUtils.isTrueExplicitly(enableKeyManagerRetrieval)) {
