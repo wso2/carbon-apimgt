@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.impl.dto.KMRegisterProfileDTO;
 import org.wso2.carbon.apimgt.impl.dto.TokenHandlingDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -137,7 +138,6 @@ public final class KeyMgtRegistrationService {
             ApiMgtDAO instance = ApiMgtDAO.getInstance();
             if (instance.getKeyManagerConfigurationByName(tenantDomain, APIConstants.KeyManager.DEFAULT_KEY_MANAGER) ==
                     null) {
-
                 APIManagerConfigurationService apiManagerConfigurationService =
                         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
 
@@ -146,7 +146,6 @@ public final class KeyMgtRegistrationService {
                 keyManagerConfigurationDTO.setEnabled(true);
                 keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
                 keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
-                keyManagerConfigurationDTO.setType(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE);
                 keyManagerConfigurationDTO.setDescription(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION);
                 if (apiManagerConfigurationService != null &&
                         apiManagerConfigurationService.getAPIManagerConfiguration() != null) {
@@ -156,6 +155,15 @@ public final class KeyMgtRegistrationService {
                             .getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
                     String serviceURl = apiManagerConfigurationService.getAPIManagerConfiguration()
                             .getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
+                    String defaultKeyManagerType =
+                            apiManagerConfigurationService.getAPIManagerConfiguration()
+                                    .getFirstProperty(APIConstants.DEFAULT_KEY_MANAGER_TYPE);
+                    if (StringUtils.isNotEmpty(defaultKeyManagerType)) {
+                        keyManagerConfigurationDTO.setType(defaultKeyManagerType);
+                    } else {
+                        keyManagerConfigurationDTO.setType(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE);
+                    }
+                    keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.AUTHSERVER_URL, serviceURl);
                     OAuthApplicationInfo oAuthApplicationInfo =
                             registerKeyMgtApplication(tenantDomain, serviceURl, username, password);
                     if (oAuthApplicationInfo != null) {

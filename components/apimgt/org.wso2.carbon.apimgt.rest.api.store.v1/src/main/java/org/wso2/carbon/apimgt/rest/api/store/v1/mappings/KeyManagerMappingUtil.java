@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerListDTO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,6 +65,32 @@ public class KeyManagerMappingUtil {
             keyManagerInfoDTO.setRevokeEndpoint(
                     jsonObject.get(APIConstants.KeyManager.REVOKE_ENDPOINT).getAsString());
         }
+        Map<String,String> additionalProperties = new HashMap<>();
+        if (keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT)) {
+            additionalProperties.put(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT,
+                    (String) keyManagerConfigurationDTO.getAdditionalProperties()
+                            .get(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT));
+        }
+        if (keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.PRODUCTION_REVOKE_ENDPOINT)) {
+            additionalProperties.put(APIConstants.KeyManager.PRODUCTION_REVOKE_ENDPOINT,
+                    (String) keyManagerConfigurationDTO.getAdditionalProperties()
+                            .get(APIConstants.KeyManager.PRODUCTION_REVOKE_ENDPOINT));
+        }
+        if (keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.SANDBOX_TOKEN_ENDPOINT)) {
+            additionalProperties.put(APIConstants.KeyManager.SANDBOX_TOKEN_ENDPOINT,
+                    (String) keyManagerConfigurationDTO.getAdditionalProperties()
+                            .get(APIConstants.KeyManager.SANDBOX_TOKEN_ENDPOINT));
+        }
+        if (keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT)) {
+            additionalProperties.put(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT,
+                    (String) keyManagerConfigurationDTO.getAdditionalProperties()
+                            .get(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT));
+        }
+        keyManagerInfoDTO.setAdditionalProperties(additionalProperties);
         keyManagerInfoDTO
                 .setApplicationConfiguration(fromKeyManagerConfigurationDto(keyManagerConfigurationDTO.getType()));
         return keyManagerInfoDTO;

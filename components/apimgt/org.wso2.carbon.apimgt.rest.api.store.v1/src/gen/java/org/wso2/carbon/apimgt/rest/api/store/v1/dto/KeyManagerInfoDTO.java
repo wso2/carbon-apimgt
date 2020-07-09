@@ -34,7 +34,7 @@ public class KeyManagerInfoDTO   {
     private Boolean enableOAuthAppCreation = true;
     private Boolean enableMapOAuthConsumerApps = false;
     private List<KeyManagerApplicationConfigurationDTO> applicationConfiguration = new ArrayList<>();
-    private List<Object> additionalProperties = new ArrayList<>();
+    private Object additionalProperties = null;
 
   /**
    **/
@@ -313,7 +313,7 @@ public class KeyManagerInfoDTO   {
 
   /**
    **/
-  public KeyManagerInfoDTO additionalProperties(List<Object> additionalProperties) {
+  public KeyManagerInfoDTO additionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
@@ -321,10 +321,10 @@ public class KeyManagerInfoDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("additionalProperties")
-  public List<Object> getAdditionalProperties() {
+  public Object getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(List<Object> additionalProperties) {
+  public void setAdditionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
