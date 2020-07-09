@@ -4550,7 +4550,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns all applications created by given user Id
+     * Returns all applications created by given user Id or considering both the user Id and the application name
      *
      * @param userId
      * @return
@@ -4561,7 +4561,6 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-        String appName = null;
         Application[] applications = null;
 
         String sqlQuery = SQLConstants.GET_APPLICATIONS_BY_OWNER;

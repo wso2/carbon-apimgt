@@ -1853,6 +1853,12 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+        - name: name
+          in: query
+          description: |
+            Application Name
+          required: false
+          type: string
         - name: tenantDomain
           in: query
           description: |

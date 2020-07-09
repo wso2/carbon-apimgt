@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -65,7 +66,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String ifNoneMatch,
-                                    String appTenantDomain, MessageContext messageContext) {
+                                    String name, String appTenantDomain, MessageContext messageContext) {
 
         // To store the initial value of the user (specially if it is null or empty)
         String givenUser = user;
@@ -91,13 +92,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(user);
 
                 // If no user is passed, get the applications for the tenant (not only for the user)
-                if (givenUser == null || StringUtils.isEmpty(givenUser)) {
+                if ((givenUser == null || StringUtils.isEmpty(givenUser)) &&
+                        (name == null || StringUtils.isEmpty(name))) {
                     APIAdmin apiAdmin = new APIAdminImpl();
                     int tenantId = APIUtil.getTenantId(user);
                     allMatchedApps = apiAdmin.getApplicationsByTenantIdWithPagination(tenantId, 0, limit, "", "",
                             APIConstants.APPLICATION_NAME, RestApiConstants.DEFAULT_SORT_ORDER).toArray(new Application[0]);
-                } else {
+                } else if (givenUser != null && (name == null || StringUtils.isEmpty(name))) {
                     allMatchedApps = apiConsumer.getApplicationsByOwner(user);
+                } else {
+                    allMatchedApps = apiConsumer.getApplicationsWithPagination(new Subscriber(user), "",
+                            offset, limit, name, APIConstants.APPLICATION_NAME, RestApiConstants.DEFAULT_SORT_ORDER);
                 }
             } else { // flow at migration process
                 if (StringUtils.isEmpty(appTenantDomain)) {
