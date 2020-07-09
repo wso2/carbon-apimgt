@@ -55,7 +55,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
             if (existence) {
                 scopeSettingsDTO.setName(decodedScope);
             } else {
-                throw new APIManagementException("Scope Not Found. Scope : " + decodedScope +
+                throw new APIManagementException("Scope Not Found. Scope : " + decodedScope,
                         ExceptionCodes.SCOPE_NOT_FOUND);
             }
         } else {
@@ -113,7 +113,6 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
         RoleAliasListDTO roleAliasListDTO = new RoleAliasListDTO();
         //read from tenant-conf.json
         JsonObject existingTenantConfObject = new JsonObject();
-
         try {
             APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
             String existingTenantConf = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
