@@ -2978,7 +2978,11 @@ public class ApiMgtDAO {
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, null);
-            ps.setString(2, subscribedAPI.getRequestedTier().getName());
+            if (subscribedAPI.getRequestedTier().getName() == null ) {
+                ps.setString(2, subscribedAPI.getTier().getName());
+            } else {
+                ps.setString(2, subscribedAPI.getRequestedTier().getName());
+            }
             ps.setString(3, status);
             ps.setInt(4, subscriptionId);
             ps.execute();
