@@ -1,0 +1,24 @@
+{
+  "list": [
+    {
+      "tag": "publisher",
+      "scope": "apim:api_publish",
+      "roles": "admin,Internal/publisher"
+    },
+    {
+      "tag": "publisher",
+      "scope": "apim:subscription_view",
+      "roles": "admin,Internal/publisher,newRole"
+    },
+    {
+      "tag": "store",
+      "scope": "apim:subscription_view",
+      "roles": "admin,Internal/publisher,newRole"
+    },
+    {
+      "tag": "store",
+      "scope": "newapim:subscription_view",
+      "roles": "admin,Internal/publisher,newRole,newNewRole"
+    }
+  ]
+}

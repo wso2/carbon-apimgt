@@ -1,0 +1,32 @@
+{
+  "securityDefinitions": {
+    "OAuth2Security": {
+      "scopes": {
+        "openid": "Authorize access to user details",
+        "apim:api_view": "View API",
+        "apim:api_create": "Create API",
+        "apim:api_delete": "Delete API",
+        "apim:api_publish": "Publish API",
+        "apim:subscription_view": "View Subscription",
+        "apim:subscription_block": "Block Subscription",
+        "apim:external_services_discover": "Discover External Services",
+        "apim:threat_protection_policy_create": "Create threat protection policies",
+        "apim:threat_protection_policy_manage": "Update and delete threat protection policies",
+        "apim:document_create": "Create API documents",
+        "apim:document_manage": "Update and delete API documents",
+        "apim:mediation_policy_view": "View mediation policies",
+        "apim:mediation_policy_create": "Create mediation policies",
+        "apim:mediation_policy_manage": "Update and delete mediation policies",
+        "apim:client_certificates_view": "View client certificates",
+        "apim:client_certificates_add": "Add client certificates",
+        "apim:client_certificates_update": "Update and delete client certificates",
+        "apim:ep_certificates_view": "View backend endpoint certificates",
+        "apim:ep_certificates_add": "Add backend endpoint certificates",
+        "apim:ep_certificates_update": "Update and delete backend endpoint certificates",
+        "apim:publisher_settings": "Retrieve store settings",
+        "apim:pub_alert_manage": "Get/ subscribe/ configure publisher alerts",
+        "apim:shared_scope_manage": "Manage shared scopes"
+      }
+    }
+  }
+}
