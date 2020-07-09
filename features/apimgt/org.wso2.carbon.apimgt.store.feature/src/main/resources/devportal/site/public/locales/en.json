@@ -356,6 +356,8 @@
   "Change.Password.password.change.disabled": "Password change disabled",
   "Change.Password.password.changed.success": "Successfuly changed the password",
   "Change.Password.password.empty": "Password is empty",
+  "Change.Password.password.length.long": "Password is too long!",
+  "Change.Password.password.length.short": "Password is too short!",
   "Change.Password.password.mismatch": "Password doesn't match",
   "Change.Password.password.pattern.invalid": "Invalid password pattern",
   "Change.Password.password.policy": "Password policy:",
