@@ -142,7 +142,7 @@ export default function ListMG() {
         pageStyle: 'half',
         title: intl.formatMessage({
             id: 'Throttling.Advanced.List.title.main',
-            defaultMessage: 'Advanced Rated Limiting Policies',
+            defaultMessage: 'Advanced Rate Limiting Policies',
         }),
     };
 

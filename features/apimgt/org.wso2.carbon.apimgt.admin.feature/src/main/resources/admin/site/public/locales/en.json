@@ -405,7 +405,7 @@
   "Throttling.Advanced.List.help.link.one": "Introducing Throttling Use-Cases",
   "Throttling.Advanced.List.help.link.two": "Adding a new advanced throttling policy",
   "Throttling.Advanced.List.search.default": "Search by Advanced Policy name",
-  "Throttling.Advanced.List.title.main": "Advanced Rated Limiting Policies",
+  "Throttling.Advanced.List.title.main": "Advanced Rate Limiting Policies",
   "Throttling.Application.Policy..List.search.default": "Search by Application Policy name",
   "Throttling.Application.Policy.List.addButtonProps.title": "Add Policy",
   "Throttling.Application.Policy.List.addButtonProps.triggerButtonText": "Add Policy",

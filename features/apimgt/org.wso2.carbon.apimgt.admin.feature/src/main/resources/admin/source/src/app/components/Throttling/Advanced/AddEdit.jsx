@@ -108,7 +108,7 @@ function AddEdit(props) {
     const [saving, setSaving] = useState(false);
     const intl = useIntl();
     const { match: { params: { id } }, history } = props;
-    const editMode = id !== 'create';
+    const editMode = id !== undefined;
     const initialState = {
         policyName: '',
         description: '',
