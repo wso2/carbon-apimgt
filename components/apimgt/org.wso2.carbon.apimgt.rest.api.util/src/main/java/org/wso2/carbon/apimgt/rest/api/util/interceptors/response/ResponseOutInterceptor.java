@@ -28,7 +28,6 @@ import org.apache.cxf.phase.Phase;
 import javax.ws.rs.core.MultivaluedMap;
 
 public class ResponseOutInterceptor extends AbstractPhaseInterceptor<Message> {
-    private static final Log log = LogFactory.getLog(ResponseOutInterceptor.class);
     private static final String X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
 
     public ResponseOutInterceptor() {
