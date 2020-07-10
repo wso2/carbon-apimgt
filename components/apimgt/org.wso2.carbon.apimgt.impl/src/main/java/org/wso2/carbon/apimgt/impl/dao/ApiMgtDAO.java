@@ -2965,10 +2965,10 @@ public class ApiMgtDAO {
         }
     }
 
-    public void updateSubscriptionStatusAndTier(int subscriptionId, String status, String requestedThrottlingTier) throws APIManagementException {
+    public void updateSubscriptionStatusAndTier(int subscriptionId, String status) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
-
+        SubscribedAPI subscribedAPI = getSubscriptionById(subscriptionId);
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -2978,7 +2978,11 @@ public class ApiMgtDAO {
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, null);
-            ps.setString(2, requestedThrottlingTier);
+            if (subscribedAPI.getRequestedTier().getName() == null ) {
+                ps.setString(2, subscribedAPI.getTier().getName());
+            } else {
+                ps.setString(2, subscribedAPI.getRequestedTier().getName());
+            }
             ps.setString(3, status);
             ps.setInt(4, subscriptionId);
             ps.execute();
@@ -14678,30 +14682,58 @@ public class ApiMgtDAO {
     /**
      * Persist revoked jwt signatures to database.
      *
+     * @param eventId
      * @param jwtSignature signature of jwt token.
-     * @param tenantId tenant id of the jwt subject.
      * @param expiryTime   expiry time of the token.
+     * @param tenantId tenant id of the jwt subject.
      */
-    public void addRevokedJWTSignature(String jwtSignature, String type ,
+    public void addRevokedJWTSignature(String eventId, String jwtSignature, String type,
                                        Long expiryTime, int tenantId) throws APIManagementException {
 
         if (StringUtils.isEmpty(type)) {
             type = APIConstants.DEFAULT;
         }
         String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement
-                     (addJwtSignature)) {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
-            ps.setString(1, UUID.randomUUID().toString());
-            ps.setString(2, jwtSignature);
-            ps.setLong(3, expiryTime);
-            ps.setInt(4, tenantId);
-            ps.setString(5, type);
-            ps.execute();
-            conn.commit();
+            try (PreparedStatement ps = conn.prepareStatement(addJwtSignature)) {
+                ps.setString(1, eventId);
+                ps.setString(2, jwtSignature);
+                ps.setLong(3, expiryTime);
+                ps.setInt(4, tenantId);
+                ps.setString(5, type);
+                ps.execute();
+                conn.commit();
+            } catch (SQLIntegrityConstraintViolationException e) {
+                boolean isRevokedTokenExist = isRevokedJWTSignatureExist(conn, eventId);
+
+                if (isRevokedTokenExist) {
+                    log.warn("Revoked Token already persisted");
+                } else {
+                    handleException("Failed to add Revoked Token Event" + APIUtil.getMaskedToken(jwtSignature), e);
+                }
+            }catch (SQLException e){
+                conn.rollback();
+            }
         } catch (SQLException e) {
             handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Check revoked Token Identifier exist
+     *
+     * @param eventId
+
+     */
+    private boolean isRevokedJWTSignatureExist(Connection conn, String eventId) throws SQLException {
+
+        String checkRevokedTokenExist = SQLConstants.RevokedJWTConstants.CHECK_REVOKED_TOKEN_EXIST;
+        try (PreparedStatement ps = conn.prepareStatement(checkRevokedTokenExist)) {
+            ps.setString(1, eventId);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                return resultSet.next();
+            }
         }
     }
 
@@ -15517,6 +15549,115 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to remove resource scopes for: " + apiIdentifier, e);
+        }
+    }
+
+    /**
+     * Adds a tenant theme to the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     * @throws APIManagementException if an error occurs when adding a tenant theme to the database
+     */
+    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.ADD_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            statement.setBinaryStream(2, themeContent);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to add tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
+
+    /**
+     * Updates an existing tenant theme in the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     * @throws APIManagementException if an error occurs when updating an existing tenant theme in the database
+     */
+    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.TenantThemeConstants.UPDATE_TENANT_THEME)) {
+            statement.setBinaryStream(1, themeContent);
+            statement.setInt(2, tenantId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to update tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
+
+    /**
+     * Retrieves a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @return content of the tenant theme
+     * @throws APIManagementException if an error occurs when retrieving a tenant theme from the database
+     */
+    public InputStream getTenantTheme(int tenantId) throws APIManagementException {
+
+        InputStream tenantThemeContent = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                tenantThemeContent = resultSet.getBinaryStream("THEME");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+        return tenantThemeContent;
+    }
+
+    /**
+     * Checks whether a tenant theme exist for a particular tenant
+     *
+     * @param tenantId tenant ID of user
+     * @return true if a tenant theme exist for a particular tenant ID, false otherwise
+     * @throws APIManagementException if an error occurs when determining whether a tenant theme exists for a given
+     *                                tenant ID
+     */
+    public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            ResultSet resultSet = statement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            handleException("Failed to check whether tenant theme exist for tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+        return false;
+    }
+
+    /**
+     * Deletes a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
+     */
+    public void deleteTenantTheme(int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.DELETE_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
     }
 }

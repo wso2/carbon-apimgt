@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -15,15 +15,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.token;
 
+package org.wso2.carbon.apimgt.impl.keymgt;
+
+import org.apache.axiom.om.OMElement;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-/**
- * API Key revocation service interface
- */
-public interface APIKeyRevokeService {
+public interface KeyManagerEventHandler {
 
-    void revokeAPIKey(String token, long expiryTime, int tenantId) throws APIManagementException;
+    boolean handleEvent(OMElement event) throws APIManagementException;
+
+    String getType();
 
 }

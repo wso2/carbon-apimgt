@@ -95,22 +95,25 @@ export default function TasksWorkflowCard() {
         const promiseStateChange = restApi.workflowsGet('AM_API_STATE');
         const promiseAppCreation = restApi.workflowsGet('AM_APPLICATION_CREATION');
         const promiseSubCreation = restApi.workflowsGet('AM_SUBSCRIPTION_CREATION');
+        const promiseSubUpdate = restApi.workflowsGet('AM_SUBSCRIPTION_UPDATE');
         const promiseRegProd = restApi.workflowsGet('AM_APPLICATION_REGISTRATION_PRODUCTION');
         const promiseRegSb = restApi.workflowsGet('AM_APPLICATION_REGISTRATION_SANDBOX');
         Promise.all([promiseUserSign, promiseStateChange, promiseAppCreation, promiseSubCreation,
-            promiseRegProd, promiseRegSb])
+            promiseSubUpdate, promiseRegProd, promiseRegSb])
             .then(([resultUserSign, resultStateChange, resultAppCreation, resultSubCreation,
-                resultRegProd, resultRegSb]) => {
+                resultSubUpdate, resultRegProd, resultRegSb]) => {
                 const userCreation = resultUserSign.body.list;
                 const stateChange = resultStateChange.body.list;
                 const applicationCreation = resultAppCreation.body.list;
                 const subscriptionCreation = resultSubCreation.body.list;
+                const subscriptionUpdate = resultSubUpdate.body.list;
                 const registration = resultRegProd.body.list.concat(resultRegSb.body.list);
                 setAllTasksSet({
                     userCreation,
                     stateChange,
                     applicationCreation,
                     subscriptionCreation,
+                    subscriptionUpdate,
                     registration,
                 });
             });
@@ -213,6 +216,15 @@ export default function TasksWorkflowCard() {
                     defaultMessage: 'Subscription Creation',
                 }),
                 count: allTasksSet.subscriptionCreation.length,
+            },
+            {
+                icon: PermMediaOutlinedIcon,
+                path: '/tasks/subscription-update',
+                name: intl.formatMessage({
+                    id: 'Dashboard.tasksWorkflow.compactTasks.subscriptionUpdate.name',
+                    defaultMessage: 'Subscription Update',
+                }),
+                count: allTasksSet.subscriptionUpdate.length,
             },
             {
                 icon: PublicIcon,
@@ -430,6 +442,43 @@ export default function TasksWorkflowCard() {
         });
     };
 
+    // Fewer task component's subscription creation task element
+    const getSubscriptionUpdateFewerTaskComponent = () => {
+        // Subscription Update tasks related component generation
+        return allTasksSet.subscriptionUpdate.map((task) => {
+            return (
+                <Box display='flex' alignItems='center' mt={1}>
+                    <Box flexGrow={1}>
+                        <Typography variant='subtitle2'>
+                            {task.properties.apiName + '-' + task.properties.apiVersion}
+                        </Typography>
+                        <Box display='flex'>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                {task.properties.applicationName + ','}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.fewerTasks.card.subscription.subscribedBy'
+                                    defaultMessage='Subscribed by'
+                                />
+                            </Typography>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                &nbsp;
+                                {task.properties.subscriber}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                {moment(task.createdTime).fromNow()}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    {getApproveRejectButtons(task.referenceId)}
+                </Box>
+            );
+        });
+    };
+
     // Fewer task component's registration creation task element
     const getRegistrationCreationFewerTaskComponent = () => {
         // Registration Creation tasks related component generation
@@ -544,6 +593,7 @@ export default function TasksWorkflowCard() {
                     {getApplicationCreationFewerTaskComponent()}
                     {getUserCreationFewerTaskComponent()}
                     {getSubscriptionCreationFewerTaskComponent()}
+                    {getSubscriptionUpdateFewerTaskComponent()}
                     {getRegistrationCreationFewerTaskComponent()}
                     {getStateChangeFewerTaskComponent()}
                 </CardContent>

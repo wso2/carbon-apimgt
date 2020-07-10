@@ -1,0 +1,103 @@
+<!--
+  ~ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ you may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>apimgt</artifactId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <version>6.7.93-SNAPSHOT</version>
+    </parent>
+    <artifactId>org.wso2.carbon.apimgt.notification</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>bundle</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Private-Package>
+                            org.wso2.carbon.apimgt.notification.internal
+                        </Private-Package>
+                        <Export-Package>
+                            org.wso2.carbon.apimgt.notification.*;
+                        </Export-Package>
+                        <Import-Package>
+                            !javax.xml.soap,
+                            javax.xml.stream.*; version="${javax.xml.stream.imp.pkg.version}",
+                            org.apache.axiom.*; version="${axiom.osgi.version.range}",
+                            org.apache.axis2; version="${axis2.osgi.version.range}",
+                            org.apache.axis2.description; version="${axis2.osgi.version.range}",
+                            org.apache.axis2.engine; version="${axis2.osgi.version.range}",
+                            org.apache.axis2.rpc.receivers; version="${axis2.osgi.version.range}",
+                            org.apache.axis2.context; version="${axis2.osgi.version.range}",
+                            org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
+                            org.apache.synapse.core,
+                            org.apache.synapse.core.axis2,
+                            org.apache.axis2.transport.base,
+                            org.wso2.carbon.core; version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}",
+                            org.apache.axis2.*; version="${imp.pkg.version.axis2}",
+                            org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.wso2.carbon.context,
+                            *;resolution:=optional
+                        </Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+<dependencies>
+    <dependency>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.synapse</groupId>
+        <artifactId>synapse-core</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
+    </dependency>
+</dependencies>
+
+</project>

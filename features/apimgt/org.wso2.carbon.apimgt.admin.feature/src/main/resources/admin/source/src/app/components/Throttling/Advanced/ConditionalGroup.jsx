@@ -85,6 +85,9 @@ const useStyles = makeStyles((theme) => ({
         border: 'solid 1px #efefef',
         width: '100%',
     },
+    descriptionBox: {
+        marginLeft: theme.spacing(1),
+    },
 }));
 
 /**
@@ -570,6 +573,7 @@ function ConditionalGroup(props) {
                             id: 'Throttling.Advanced.ConditionalGroups.form.description',
                             defaultMessage: 'Description',
                         })}
+                        className={classes.descriptionBox}
                         fullWidth
                         multiline
                         helperText={intl.formatMessage({

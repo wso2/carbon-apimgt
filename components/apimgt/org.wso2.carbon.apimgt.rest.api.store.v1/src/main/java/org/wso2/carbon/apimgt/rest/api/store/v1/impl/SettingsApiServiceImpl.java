@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.List;
