@@ -59,50 +59,61 @@ function apiCall() {
         });
 }
 
-const columProps = [
-    {
-        name: 'policyName',
-        options: {
-            customBodyRender: (value, tableMeta) => {
-                if (typeof tableMeta.rowData === 'object') {
-                    const artifactId = tableMeta.rowData[tableMeta.rowData.length - 2];
-                    return <RouterLink to={`/throttling/advanced/${artifactId}`}>{value}</RouterLink>;
-                } else {
-                    return <div />;
-                }
-            },
-            filter: false,
-            sort: true,
-        },
-    },
-    {
-        name: 'quotaPolicy',
-        label: 'Quota Policy',
-    },
-    {
-        name: 'quota',
-        label: 'Quota',
-    },
-    {
-        name: 'unitTime',
-        label: 'Unit Time',
-    },
-    { // Id column has to be always the last.
-        name: 'policyId',
-        options: {
-            display: false,
-        },
-    },
-
-];
-
-
 /**
  * Render a list
  * @returns {JSX} Header AppBar components.
  */
 export default function ListMG() {
     const intl = useIntl();
+    const columProps = [
+        {
+            name: 'policyName',
+            label: intl.formatMessage({
+                id: 'Admin.Throttling.Advanced.Throttling.policy.table.header.name',
+                defaultMessage: 'Name',
+            }),
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    if (typeof tableMeta.rowData === 'object') {
+                        const artifactId = tableMeta.rowData[tableMeta.rowData.length - 2];
+                        return <RouterLink to={`/throttling/advanced/${artifactId}`}>{value}</RouterLink>;
+                    } else {
+                        return <div />;
+                    }
+                },
+                filter: false,
+                sort: true,
+            },
+        },
+        {
+            name: 'quotaPolicy',
+            label: intl.formatMessage({
+                id: 'Admin.Throttling.Advanced.Throttling.policy.table.header.quota.policy',
+                defaultMessage: 'Quota Policy',
+            }),
+        },
+        {
+            name: 'quota',
+            label: intl.formatMessage({
+                id: 'Admin.Throttling.Advanced.Throttling.policy.table.header.quota',
+                defaultMessage: 'Quota',
+            }),
+        },
+        {
+            name: 'unitTime',
+            label: intl.formatMessage({
+                id: 'Admin.Throttling.Advanced.Throttling.policy.table.header.unit.time',
+                defaultMessage: 'Unit Time',
+            }),
+        },
+        { // Id column has to be always the last.
+            name: 'policyId',
+            options: {
+                display: false,
+            },
+        },
+    ];
+
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
             id: 'Throttling.Advanced.List.addButtonProps.triggerButtonText',
@@ -117,7 +128,7 @@ export default function ListMG() {
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
             id: 'Throttling.Advanced.List.search.default',
-            defaultMessage: 'Search by policy name',
+            defaultMessage: 'Search by Advanced Policy name',
         }),
         active: true,
     };
@@ -131,7 +142,7 @@ export default function ListMG() {
         pageStyle: 'half',
         title: intl.formatMessage({
             id: 'Throttling.Advanced.List.title.main',
-            defaultMessage: 'Advanced Throttling Policies',
+            defaultMessage: 'Advanced Rated Limiting Policies',
         }),
     };
 

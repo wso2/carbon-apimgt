@@ -192,7 +192,7 @@ const RouteMenuMapping = (intl) => [
     {
         id: intl.formatMessage({
             id: 'Base.RouteMenuMapping.keymanagers',
-            defaultMessage: 'KeyManagers',
+            defaultMessage: 'Key Managers',
         }),
         path: '/settings/key-managers',
         component: KeyManagers,
