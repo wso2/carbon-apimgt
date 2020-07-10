@@ -42,7 +42,7 @@ const styles = (theme) => ({
         color: theme.palette.getContrastText(theme.palette.background.default),
     },
     boxWrapper: {
-        '& span, & h5, & label, & td, & li, & div, & input, & p.MuiFormHelperText-root': {
+        '& h5, & label, & td, & li, & div, & input, & p.MuiFormHelperText-root': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
         }
     }

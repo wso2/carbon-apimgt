@@ -336,11 +336,9 @@ class ViewKeys extends React.Component {
                                                 text={consumerKey}
                                                 onCopy={() => this.onCopy('keyCopied')}
                                             >
-                                                <Icon
-                                                    color='secondary'
-                                                >
-                                                    description
-                                                        </Icon>
+                                                <IconButton aria-label='Copy to clipboard'>
+                                                    <Icon color='secondary' > description </Icon>
+                                                </IconButton>
                                             </CopyToClipboard>
                                         </Tooltip>
                                     </InputAdornment>
@@ -393,7 +391,9 @@ class ViewKeys extends React.Component {
                                                     text={consumerSecret}
                                                     onCopy={() => this.onCopy('secretCopied')}
                                                 >
-                                                    <Icon color='secondary'>description</Icon>
+                                                    <IconButton aria-label='Copy to clipboard'>
+                                                        <Icon color='secondary'>description</Icon>
+                                                    </IconButton>
                                                 </CopyToClipboard>
                                             </Tooltip>
                                         </InputAdornment>
@@ -529,7 +529,9 @@ class ViewKeys extends React.Component {
                                                         text={accessToken}
                                                         onCopy={() => this.onCopy('tokenCopied')}
                                                     >
-                                                        <Icon color='secondary'>description</Icon>
+                                                        <IconButton aria-label='Copy to clipboard'>
+                                                            <Icon color='secondary'>description</Icon>
+                                                        </IconButton>
                                                     </CopyToClipboard>
                                                 </Tooltip>
                                             </InputAdornment>
