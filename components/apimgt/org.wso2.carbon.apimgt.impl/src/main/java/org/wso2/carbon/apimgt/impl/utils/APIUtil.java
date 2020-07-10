@@ -357,7 +357,7 @@ public final class APIUtil {
 
     private static String hostAddress = null;
     private static final int timeoutInSeconds = 15;
-    private static final int retries = 15;
+    private static final int retries = 2;
 
     /**
      * To initialize the publisherRoleCache configurations, based on configurations.

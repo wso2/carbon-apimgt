@@ -1676,6 +1676,15 @@ public class APIManagerConfiguration {
             log.debug("Retry Duration Element is not set. Set to default duaration");
         }
 
+        OMElement dataRetrievalModeElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.DATA_RETRIEVAL_MODE));
+        if (dataRetrievalModeElement!= null) {
+            String dataRetrievalMode= dataRetrievalModeElement.getText();
+            gatewayArtifactSynchronizerProperties.setGatewayStartup(dataRetrievalMode);
+        } else {
+            log.debug("Gateway Startup mode is not set. Set to Sync Mode");
+        }
+
         OMElement gatewayLabelElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABELS_CONFIG));
         if (gatewayLabelElement != null) {
