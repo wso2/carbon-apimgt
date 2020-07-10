@@ -464,14 +464,14 @@ public final class APIConstants {
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
     public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
-    public static final String JWT_AS_OPAQUE_TOKEN = OAUTH_CONFIGS + "JWTAsOpaqueToken";
     public static final String APPLICATION_TOKEN_SCOPE = OAUTH_CONFIGS + "ApplicationTokenScope";
     public static final String WHITELISTED_SCOPES = OAUTH_CONFIGS + "ScopeWhitelist.Scope";
     public static final String TOKEN_ENDPOINT_NAME = OAUTH_CONFIGS + "TokenEndPointName";
     public static final String REVOKE_API_URL = OAUTH_CONFIGS + "RevokeAPIURL";
     public static final String ENCRYPT_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EncryptPersistedTokens";
     public static final String HASH_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EnableTokenHashMode";
-
+    public static final String TOKEN_ENDPOINT_CONTEXT = OAUTH_CONFIGS +"TokenEndPointName";
+    public static final String REVOKE_ENDPOINT_CONTEXT = OAUTH_CONFIGS +"RevokeEndpointName";
     public static final String DEFAULT_MODIFIED_ENDPOINT_PASSWORD = "*****"; //5 stars
     public static final String REGISTRY_HIDDEN_ENDPOINT_PROPERTY = "registry.HiddenEpProperty";
     public static final String OVERVIEW_ELEMENT = "overview";
@@ -565,6 +565,8 @@ public final class APIConstants {
     public static final String KEY_MANAGER_CONSUMER_KEY = "consumer_key";
     public static final String KEY_MANAGER_CONSUMER_SECRET = "consumer_secret";
     public static final String REVOKED_TOKEN_TYPE = "type";
+    public static final String IDENTITY_REVOKE_ENDPOINT = "/oauth2/revoke";
+    public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
 
     public static String DELEM_COLON = ":";
 
@@ -675,6 +677,7 @@ public final class APIConstants {
             "EnableDefaultKeyManagerRegistration";
     public static final String ENABLE_KEY_MANAGER_RETRIVAL = API_KEY_VALIDATOR +
             "EnableKeyManagerConfigurationRetriever";
+    public static final String DEFAULT_KEY_MANAGER_TYPE = API_KEY_VALIDATOR + "DefaultKeyManagerType";
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER + "KeyManagerClientImpl";
@@ -2271,6 +2274,11 @@ public final class APIConstants {
         public static final String ACCESS_TOKEN = "accessToken";
         public static final String AUTH_CODE = "authCode";
         public static final String CLAIM_DIALECT = "dialect";
+        public static final String DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT = "/oauth2/token/.well-known/openid-configuration";
+        public static final String PRODUCTION_TOKEN_ENDPOINT = "production_token_endpoint";
+        public static final String SANDBOX_TOKEN_ENDPOINT = "sandbox_token_endpoint";
+        public static final String PRODUCTION_REVOKE_ENDPOINT = "production_revoke_endpoint";
+        public static final String SANDBOX_REVOKE_ENDPOINT = "sandbox_revoke_endpoint";
 
         public static class KeyManagerEvent {
 

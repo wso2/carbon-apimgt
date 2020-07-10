@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.impl.dto.KMRegisterProfileDTO;
 import org.wso2.carbon.apimgt.impl.dto.TokenHandlingDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -133,44 +134,53 @@ public final class KeyMgtRegistrationService {
 
     public static void registerDefaultKeyManager(String tenantDomain) throws APIManagementException {
 
-        ApiMgtDAO instance = ApiMgtDAO.getInstance();
-        if (instance.getKeyManagerConfigurationByName(tenantDomain, APIConstants.KeyManager.DEFAULT_KEY_MANAGER) ==
-                null) {
+        synchronized (KeyMgtRegistrationService.class.getName().concat(tenantDomain)) {
+            ApiMgtDAO instance = ApiMgtDAO.getInstance();
+            if (instance.getKeyManagerConfigurationByName(tenantDomain, APIConstants.KeyManager.DEFAULT_KEY_MANAGER) ==
+                    null) {
+                APIManagerConfigurationService apiManagerConfigurationService =
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
 
-            APIManagerConfigurationService apiManagerConfigurationService =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
-
-            KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
-            keyManagerConfigurationDTO.setName(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
-            keyManagerConfigurationDTO.setEnabled(true);
-            keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
-            keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
-            keyManagerConfigurationDTO.setType(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE);
-            keyManagerConfigurationDTO.setDescription(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION);
-            if (apiManagerConfigurationService != null &&
-                    apiManagerConfigurationService.getAPIManagerConfiguration() != null) {
-                String username = apiManagerConfigurationService.getAPIManagerConfiguration()
-                        .getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-                String password = apiManagerConfigurationService.getAPIManagerConfiguration()
-                        .getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-                String serviceURl = apiManagerConfigurationService.getAPIManagerConfiguration()
-                        .getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
-                OAuthApplicationInfo oAuthApplicationInfo =
-                        registerKeyMgtApplication(tenantDomain, serviceURl, username, password);
-                if (oAuthApplicationInfo != null) {
-                    keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_CONSUMER_KEY,
-                            oAuthApplicationInfo.getClientId());
-                    keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_CONSUMER_SECRET,
-                            oAuthApplicationInfo.getClientSecret());
+                KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                keyManagerConfigurationDTO.setName(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+                keyManagerConfigurationDTO.setEnabled(true);
+                keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
+                keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                keyManagerConfigurationDTO.setDescription(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION);
+                if (apiManagerConfigurationService != null &&
+                        apiManagerConfigurationService.getAPIManagerConfiguration() != null) {
+                    String username = apiManagerConfigurationService.getAPIManagerConfiguration()
+                            .getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+                    String password = apiManagerConfigurationService.getAPIManagerConfiguration()
+                            .getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+                    String serviceURl = apiManagerConfigurationService.getAPIManagerConfiguration()
+                            .getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
+                    String defaultKeyManagerType =
+                            apiManagerConfigurationService.getAPIManagerConfiguration()
+                                    .getFirstProperty(APIConstants.DEFAULT_KEY_MANAGER_TYPE);
+                    if (StringUtils.isNotEmpty(defaultKeyManagerType)) {
+                        keyManagerConfigurationDTO.setType(defaultKeyManagerType);
+                    } else {
+                        keyManagerConfigurationDTO.setType(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE);
+                    }
+                    keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.AUTHSERVER_URL, serviceURl);
+                    OAuthApplicationInfo oAuthApplicationInfo =
+                            registerKeyMgtApplication(tenantDomain, serviceURl, username, password);
+                    if (oAuthApplicationInfo != null) {
+                        keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_CONSUMER_KEY,
+                                oAuthApplicationInfo.getClientId());
+                        keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_CONSUMER_SECRET,
+                                oAuthApplicationInfo.getClientSecret());
+                    }
                 }
+                TokenHandlingDto tokenHandlingDto = new TokenHandlingDto();
+                tokenHandlingDto.setEnable(true);
+                tokenHandlingDto.setType(TokenHandlingDto.TypeEnum.REFERENCE);
+                tokenHandlingDto.setValue(APIConstants.KeyManager.UUID_REGEX);
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
+                        new Gson().toJson(Arrays.asList(tokenHandlingDto)));
+                instance.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             }
-            TokenHandlingDto tokenHandlingDto = new TokenHandlingDto();
-            tokenHandlingDto.setEnable(true);
-            tokenHandlingDto.setType(TokenHandlingDto.TypeEnum.REFERENCE);
-            tokenHandlingDto.setValue(APIConstants.KeyManager.UUID_REGEX);
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
-                    new Gson().toJson(Arrays.asList(tokenHandlingDto)));
-            instance.addKeyManagerConfiguration(keyManagerConfigurationDTO);
         }
     }
 }

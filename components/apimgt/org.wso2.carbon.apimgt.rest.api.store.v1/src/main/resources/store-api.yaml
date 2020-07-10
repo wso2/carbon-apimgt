@@ -5852,9 +5852,7 @@ definitions:
         items:
           $ref: '#/definitions/KeyManagerApplicationConfiguration'
       additionalProperties:
-        type: array
-        items:
-          type: object
+        type: object
   #-----------------------------------------------------
   # The KeyManager Configuration
   #-----------------------------------------------------
