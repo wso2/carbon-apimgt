@@ -101,14 +101,14 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
         syncModeDeploymentCount ++;
         isAPIsDeployedInSyncMode = deployArtifactsAtStartup();
         if (!isAPIsDeployedInSyncMode) {
-            log.error("Unable to deploy synapse artifacts at gateway.");
+            log.error("Deployment attempt : " + syncModeDeploymentCount + " was unsuccessful") ;
             if (!(syncModeDeploymentCount > retryCount)) {
                 deployAPIsInSyncMode();
             } else {
                 log.error("Maximum retry limit exceeded. Server is starting without deploying all synapse artifacts");
             }
         } else {
-            log.info("Deployment successful in the attempt of  " + syncModeDeploymentCount);
+            log.info("Deployment attempt : " + syncModeDeploymentCount + " was successful");
         }
     }
 
