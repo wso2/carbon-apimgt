@@ -11060,29 +11060,33 @@ public final class APIUtil {
                 JSONArray containerMgtInfoFromTenant = new JSONArray();
                 JSONObject containerMgtObj = new JSONObject();
                 JSONArray containerMgtInfo = (JSONArray) (tenantConf.get(ContainerBasedConstants.CONTAINER_MANAGEMENT));
-                for (Object containerMgtInfoObj : containerMgtInfo) {
-                    JSONObject containerMgtDetails = (JSONObject) containerMgtInfoObj;
-                    JSONArray clustersInfo = (JSONArray) containerMgtDetails.
-                            get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
-                    for (Object clusterInfo : clustersInfo) {
-                        //check if the clusters defined in tenant-conf.json
-                        if (!"".equals(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME))) {
-                            containerMgtInfoFromTenant.add(clusterInfo);
-                        }
-                    }
-                    if (!containerMgtInfoFromTenant.isEmpty()) {
-                        containerMgtObj.put(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO, containerMgtInfoFromTenant);
-                        for (Object apimConfig : containerMgtFromToml) {
-                            //get class name from the api-manager.xml
-                            if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString()
-                                    .equalsIgnoreCase(((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).toString())) {
-                                containerMgtObj.put(ContainerBasedConstants.CLASS_NAME, ((JSONObject) apimConfig)
-                                        .get(ContainerBasedConstants.CLASS_NAME));
+                if (containerMgtInfo != null) {
+                    for (Object containerMgtInfoObj : containerMgtInfo) {
+                        JSONObject containerMgtDetails = (JSONObject) containerMgtInfoObj;
+                        JSONArray clustersInfo = (JSONArray) containerMgtDetails.
+                                get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
+                        for (Object clusterInfo : clustersInfo) {
+                            //check if the clusters defined in tenant-conf.json
+                            if (!"".equals(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME))) {
+                                containerMgtInfoFromTenant.add(clusterInfo);
                             }
                         }
-                        containerMgtObj.put(ContainerBasedConstants.TYPE, containerMgtDetails.get(ContainerBasedConstants.TYPE));
+                        if (!containerMgtInfoFromTenant.isEmpty()) {
+                            containerMgtObj
+                                    .put(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO, containerMgtInfoFromTenant);
+                            for (Object apimConfig : containerMgtFromToml) {
+                                //get class name from the api-manager.xml
+                                if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString().equalsIgnoreCase(
+                                        ((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).toString())) {
+                                    containerMgtObj.put(ContainerBasedConstants.CLASS_NAME,
+                                            ((JSONObject) apimConfig).get(ContainerBasedConstants.CLASS_NAME));
+                                }
+                            }
+                            containerMgtObj.put(ContainerBasedConstants.TYPE,
+                                    containerMgtDetails.get(ContainerBasedConstants.TYPE));
+                        }
+                        containerMgt.add(containerMgtObj);
                     }
-                    containerMgt.add(containerMgtObj);
                 }
                 return containerMgt;
             } catch (RegistryException e) {
