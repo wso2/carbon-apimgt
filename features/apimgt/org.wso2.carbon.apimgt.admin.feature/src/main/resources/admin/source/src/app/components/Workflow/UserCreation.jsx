@@ -253,7 +253,7 @@ function ListLabels() {
                     return (
                         <div>
                             <Tooltip title={format}>
-                                <Typography color='textSecondary'>
+                                <Typography color='textPrimary' variant='h7'>
                                     {time}
                                 </Typography>
                             </Tooltip>
@@ -315,7 +315,7 @@ function ListLabels() {
     const searchActive = true;
     const searchPlaceholder = intl.formatMessage({
         id: 'Workflow.ListUserCreation.search.default',
-        defaultMessage: 'Search by workflow request description',
+        defaultMessage: 'Search by Tenant name or domain',
     });
 
     const filterData = (event) => {

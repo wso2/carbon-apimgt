@@ -271,7 +271,7 @@ function ListLabels() {
                             {properties.apiProvider}
                             <br />
                             <Tooltip title={format}>
-                                <Typography color='textSecondary'>
+                                <Typography color='textSecondary' variant='caption'>
                                     {time}
                                 </Typography>
                             </Tooltip>
@@ -333,7 +333,7 @@ function ListLabels() {
     const searchActive = true;
     const searchPlaceholder = intl.formatMessage({
         id: 'Workflow.apistatechange.search.default',
-        defaultMessage: 'Search by workflow request description',
+        defaultMessage: 'Search by API, Request state, Current state or Creator',
     });
 
     const filterData = (event) => {
