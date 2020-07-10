@@ -1497,4 +1497,12 @@ public interface APIProvider extends APIManager {
      * @return a list of Deploymentstatus objects in different cloud environments
      */
     List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
+
+    /**
+     * Replace new RESTAPI Role mappings to tenant-conf.
+     *
+     * @param responseJson New object of role-scope mapping
+     * @throws APIManagementException If failed to replace the new tenant-conf.
+     */
+    void editTenantConfOfRoleScopeMapping(JSONObject responseJson, String username) throws APIManagementException;
 }
