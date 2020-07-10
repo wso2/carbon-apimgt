@@ -39,6 +39,8 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     private JMSTransportHandler jmsTransportHandlerForEventHub;
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
     private boolean isAPIsDeployedInSyncMode = false;
+    private int syncModeDeploymentCount = 0;
+    private int retryCount = 10;
 
     public GatewayStartupListener() {
         gatewayArtifactSynchronizerProperties =
@@ -96,10 +98,17 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     }
 
     private void deployAPIsInSyncMode() {
+        syncModeDeploymentCount ++;
         isAPIsDeployedInSyncMode = deployArtifactsAtStartup();
         if (!isAPIsDeployedInSyncMode) {
-            log.error("Unable to deploy synapse artifacts at gateway");
-            deployAPIsInSyncMode();
+            log.error("Unable to deploy synapse artifacts at gateway.");
+            if (!(syncModeDeploymentCount > retryCount)) {
+                deployAPIsInSyncMode();
+            } else {
+                log.error("Maximum retry limit exceeded. Server is starting without deploying all synapse artifacts");
+            }
+        } else {
+            log.info("Deployment successful in the attempt of  " + syncModeDeploymentCount);
         }
     }
 
