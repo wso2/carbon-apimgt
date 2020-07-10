@@ -59,7 +59,15 @@ function reducer(state, { field, value }) {
 }
 
 const ChangePassword = () => {
-    const { settings: { IsPasswordChangeEnabled } } = useSettingsContext();
+    const {
+        settings: {
+            IsPasswordChangeEnabled,
+            userStorePasswordPattern,
+            passwordPolicyPattern,
+            passwordPolicyMinLength,
+            passwordPolicyMaxLength,
+        }
+    } = useSettingsContext();
     const classes = useStyles();
     const username = AuthManager.getUser().name;
     const initialState = {
@@ -84,11 +92,18 @@ const ChangePassword = () => {
     };
 
     const validatePasswordChange = () => {
-        // todo: update password validation policy
-        const schema = Joi.string().empty();
-        const validationError = schema.validate(newPassword).error;
-        if (validationError) {
-            const errorType = validationError.details[0].type;
+        // Validate against min, max legths if available.
+        // also check whether empty.
+        let legthCheckSchema = Joi.string().empty();
+        if (passwordPolicyMinLength && passwordPolicyMinLength !== -1) {
+            legthCheckSchema = legthCheckSchema.min(passwordPolicyMinLength);
+        }
+        if (passwordPolicyMaxLength && passwordPolicyMaxLength !== -1) {
+            legthCheckSchema = legthCheckSchema.max(passwordPolicyMaxLength);
+        }
+        const LengthValidationError = legthCheckSchema.validate(newPassword).error;
+        if (LengthValidationError) {
+            const errorType = LengthValidationError.details[0].type;
             if (errorType === 'string.empty') {
                 return (
                     <FormattedMessage
@@ -96,8 +111,57 @@ const ChangePassword = () => {
                         defaultMessage='Password is empty'
                     />
                 );
+            } else if (errorType === 'string.min') {
+                return (
+                    <FormattedMessage
+                        id='Change.Password.password.length.short'
+                        defaultMessage='Password is too short!'
+                    />
+                );
+            } else if (errorType === 'string.max') {
+                return (
+                    <FormattedMessage
+                        id='Change.Password.password.length.long'
+                        defaultMessage='Password is too long!'
+                    />
+                );
             }
         }
+
+        // Validate against user store password pattern regex, if available.
+        if (userStorePasswordPattern) {
+            const userStoreSchema = Joi.string().pattern(new RegExp(userStorePasswordPattern));
+            const userStoreValidationError = userStoreSchema.validate(newPassword).error;
+            if (userStoreValidationError) {
+                const errorType = userStoreValidationError.details[0].type;
+                if (errorType === 'string.pattern.base') {
+                    return (
+                        <FormattedMessage
+                            id='Change.Password.password.pattern.invalid'
+                            defaultMessage='Invalid password pattern'
+                        />
+                    );
+                }
+            }
+        }
+
+        // Validate against password policy pattern regex, if available.
+        if (passwordPolicyPattern) {
+            const passwordPolicySchema = Joi.string().pattern(new RegExp(passwordPolicyPattern));
+            const passwordPolicyValidationError = passwordPolicySchema.validate(newPassword).error;
+            if (passwordPolicyValidationError) {
+                const errorType = passwordPolicyValidationError.details[0].type;
+                if (errorType === 'string.pattern.base') {
+                    return (
+                        <FormattedMessage
+                            id='Change.Password.password.pattern.invalid'
+                            defaultMessage='Invalid password pattern'
+                        />
+                    );
+                }
+            }
+        }
+
         return false;
     };
 
