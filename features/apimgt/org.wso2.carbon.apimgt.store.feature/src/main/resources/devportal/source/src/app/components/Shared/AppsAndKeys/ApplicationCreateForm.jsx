@@ -181,39 +181,6 @@ const ApplicationCreate = (props) => {
                 ))}
             </TextField>
             <TextField
-                classes={{
-                    root: classes.mandatoryStarSelect,
-                }}
-                required
-                fullWidth
-                id='outlined-select-currency'
-                select
-                label={(
-                    <FormattedMessage
-                        defaultMessage='Token Type'
-                        id='Shared.AppsAndKeys.ApplicationCreateForm.token.type'
-                    />
-                )}
-                value={applicationRequest.tokenType}
-                name='tokenType'
-                onChange={handleChange}
-                helperText={(
-                    <FormattedMessage
-                        defaultMessage='Select token type'
-                        id='Shared.AppsAndKeys.ApplicationCreateForm.select.token.type'
-                    />
-                )}
-                margin='normal'
-                variant='outlined'
-            >
-                {Object.entries(Application.TOKEN_TYPES).map(([key, value]) => (
-                    <MenuItem key={value.displayName} value={key}>
-                        {value.displayName}
-                    </MenuItem>
-                ))}
-            </TextField>
-
-            <TextField
                 margin='normal'
                 variant='outlined'
                 fullWidth

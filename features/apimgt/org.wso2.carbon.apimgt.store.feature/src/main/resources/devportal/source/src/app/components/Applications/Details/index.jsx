@@ -53,7 +53,7 @@ const styles = (theme) => {
             leftMenu: { width, position },
         },
     } = theme;
-    const shiftToLeft = position === 'vertical-left' ? width : 0;
+    const shiftToLeft = position === 'vertical-left' ? (width - 4) : 0;
     const shiftToRight = position === 'vertical-right' ? width : 0;
     const leftMenuPaddingLeft = position === 'horizontal' ? theme.spacing(3) : 0;
 
@@ -204,29 +204,17 @@ class Details extends Component {
         return (
             <Paper>
                 {secScheme === 'oauth' && (
-                    <div className={classes.root}>
-                        <div className={classes.titleWrapper}>
-                            <Typography variant='h5' className={classes.keyTitle}>
-                                {this.toTitleCase(keyType)}
-                                <FormattedMessage
-                                    id='Applications.Details.oauth2.keys.title'
-                                    defaultMessage=' OAuth2 Tokens'
-                                />
-                            </Typography>
-                        </div>
-                        <div className={classes.contentWrapper}>
-                            <TokenManager
-                                keyType={keyType}
-                                selectedApp={{
-                                    appId: application.applicationId,
-                                    label: application.name,
-                                    tokenType: application.tokenType,
-                                    owner: application.owner,
-                                    hashEnabled: application.hashEnabled,
-                                }}
-                            />
-                        </div>
-                    </div>
+                    <TokenManager
+                        keyType={keyType}
+                        selectedApp={{
+                            appId: application.applicationId,
+                            label: application.name,
+                            tokenType: application.tokenType,
+                            owner: application.owner,
+                            hashEnabled: application.hashEnabled,
+                        }}
+                    />
+                       
                 )}
                 {secScheme === 'apikey' && (
                     <div className={classes.root}>
