@@ -73,22 +73,22 @@ securityDefinitions:
     scopes:
       openid: Authorize access to user details
       apim:admin: Manage all admin operations
-      apim:tier_view: View tiers
-      apim:tier_manage: Update and delete tiers
-      apim:bl_view: View blocking conditions
-      apim:bl_manage: Update and delete blocking conditions
+      apim:tier_view: View throttling policies
+      apim:tier_manage: Update and delete throttling policies
+      apim:bl_view: View deny policies
+      apim:bl_manage: Update and delete deny policies
       apim:mediation_policy_view: View mediation policies
-      apim:mediation_policy_create: Create mediation policies
-      apim:app_owner_change: Retrieve and manage applications #TODO: Verify Description
+      apim:mediation_policy_create: Create and update mediation policies
+      apim:app_owner_change: Retrieve and manage applications
       apim:app_import_export: Import and export applications related operations
       apim:api_import_export: Import and export APIs related operations
       apim:api_product_import_export: Import and export API Products related operations
-      apim:label_manage: Manage labels
-      apim:label_read: Retrieve labels
-      apim:monetization_usage_publish: Retrieve and publish Monetization related usage records #TODO: Verify Description
-      apim:api_workflow_approve: Manage workflows #TODO: Verify Description
-      apim:bot_data: Manage emails  #TODO: Verify Description
-      apim:tenantInfo: Retrieve tenant related information  #TODO: Verify Description
+      apim:label_manage: Manage microgateway labels
+      apim:label_read: Retrieve microgateway labels
+      apim:monetization_usage_publish: Retrieve and publish Monetization related usage records
+      apim:api_workflow_approve: Manage workflows
+      apim:bot_data: Retrieve bot detection data
+      apim:tenantInfo: Retrieve tenant related information
       apim:tenant_theme_manage: Manage tenant themes
       apim:admin_operations: Manage API categories
       apim:admin_settings: Retrieve admin settings

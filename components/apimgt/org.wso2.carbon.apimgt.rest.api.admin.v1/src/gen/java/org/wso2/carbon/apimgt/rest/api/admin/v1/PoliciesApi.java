@@ -62,7 +62,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @ApiOperation(value = "Delete a global mediation policy", notes = "This operation can be used to delete an existing global mediation policy providing the Id of the mediation policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies")
+            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create and update mediation policies")
         })
     }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -100,7 +100,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @ApiOperation(value = "Update a global mediation policy", notes = "This operation can be used to update an existing global mediation policy. ", response = MediationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies")
+            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create and update mediation policies")
         })
     }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -120,7 +120,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @ApiOperation(value = "Add a global mediation policy", notes = "This operation can be used to add a new global mediation policy. ", response = MediationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies")
+            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create and update mediation policies")
         })
     }, tags={ "Mediation Policy (Collection)" })
     @ApiResponses(value = { 
