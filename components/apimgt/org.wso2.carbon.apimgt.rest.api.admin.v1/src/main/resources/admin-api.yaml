@@ -5476,23 +5476,23 @@ definitions:
       messageID:
         type: string
         description: The message ID
-        example: urn:uuid:1ed6d2de-29df-4fed-a96a-46d2329dce65
+        example: 'urn:uuid:1ed6d2de-29df-4fed-a96a-46d2329dce65'
       apiMethod:
         type: string
         description: The api method
-        example: GET
+        example: 'GET'
       headerSet:
         type: string
         description: The header set
-        example: [Accept=*/*, Host=localhost:8243, User-Agent=curl/7.58.0]
+        example: '[Accept=*/*, Host=localhost:8243, User-Agent=curl/7.58.0]'
       messageBody:
         type: string
         description: The content of the message body
-        example: <soapenv:Body xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"/>
+        example: '<soapenv:Body xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"/>'
       clientIp:
         type: string
         description: The IP of the client
-        example: 127.0.0.1
+        example: '127.0.0.1'
 
 #-----------------------------------------------------
 # END-OF-FILE
