@@ -269,7 +269,6 @@ class TokenManager extends React.Component {
                     // processing promisedKeyManagers response
                     const responseKeyManagerList = [];
                     response[0].body.list.map((item) => responseKeyManagerList.push(item));
-                    this.setState({});
 
                     // Selecting a key manager from the list of key managers.
                     let { selectedTab } = this.state;
@@ -589,7 +588,7 @@ class TokenManager extends React.Component {
 
         return (
             <>
-                <StyledTabs
+                {(keyManagers && keyManagers.length > 1) && (<StyledTabs
                     value={selectedTab}
                     indicatorColor='primary'
                     textColor='primary'
@@ -599,7 +598,7 @@ class TokenManager extends React.Component {
                     {keyManagers.map((keymanager) => (
                         <StyledTab label={keymanager.displayName || keymanager.name} value={keymanager.name} disabled={!keymanager.enabled} />
                     ))}
-                </StyledTabs>
+                </StyledTabs>)}
                 <div className={classes.root}>
                     <Box mb={1}>
                         <Typography variant='h5' className={classes.keyTitle}>
@@ -611,7 +610,7 @@ class TokenManager extends React.Component {
                         </Typography>
                     </Box>
 
-                    {(keyManagers && keyManagers.length > 1) && keyManagers.map(keymanager => (
+                    {(keyManagers && keyManagers.length > 0) && keyManagers.map(keymanager => (
                         <TabPanel value={selectedTab} index={keymanager.name} className={classes.tabPanel}>
                             <Typography className={classes.heading} variant='h6' component='h6' className={classes.subTitle}>
                                 <FormattedMessage

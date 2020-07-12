@@ -63,7 +63,9 @@ const styles = theme => ({
     },
     checkboxWrapperColumn: {
         display: 'flex',
+        flexWrap: 'wrap',
         flexDirection: 'row',
+        whiteSpace: 'nowrap',
     },
     group: {
         flexDirection: 'row',
@@ -334,7 +336,6 @@ const KeyConfiguration = (props) => {
 
                             </TableCell>
                             <TableCell>
-                                <div className={classes.checkboxWrapper}>
                                     <div className={classes.checkboxWrapperColumn}>
                                         {Object.keys(grantTypeDisplayListMap).map((key) => {
                                             const value = grantTypeDisplayListMap[key];
@@ -357,7 +358,6 @@ const KeyConfiguration = (props) => {
                                             );
                                         })}
                                     </div>
-                                </div>
                                 <FormHelperText>
                                     <FormattedMessage
                                         defaultMessage={`The application can use the following grant types to generate 
