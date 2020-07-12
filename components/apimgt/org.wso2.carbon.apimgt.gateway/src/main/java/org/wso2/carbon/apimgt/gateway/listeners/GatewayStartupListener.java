@@ -38,6 +38,9 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     private JMSTransportHandler jmsTransportHandlerForTrafficManager;
     private JMSTransportHandler jmsTransportHandlerForEventHub;
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
+    private boolean isAPIsDeployedInSyncMode = false;
+    private int syncModeDeploymentCount = 0;
+    private int retryCount = 10;
 
     public GatewayStartupListener() {
         gatewayArtifactSynchronizerProperties =
@@ -59,7 +62,6 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
 
     @Override
     public void completingServerStartup() {
-        startListener();
     }
 
     private boolean deployArtifactsAtStartup() {
@@ -69,13 +71,22 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
         boolean flag = false;
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-            flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(gatewayArtifactSynchronizerProperties.getGatewayLabels());
+            flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(gatewayArtifactSynchronizerProperties
+                    .getGatewayLabels());
         }
         return flag;
     }
 
     @Override
     public void completedServerStartup() {
+        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
+            if (APIConstants.GatewayArtifactSynchronizer.GATEWAY_STARTUP_SYNC
+                    .equals(gatewayArtifactSynchronizerProperties.getGatewayStartup())) {
+                deployAPIsInSyncMode();
+            } else {
+                deployAPIsInAsyncMode();
+            }
+        }
         jmsTransportHandlerForTrafficManager
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
         jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
@@ -84,7 +95,21 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
                 new APIMgtGatewayCacheMessageListener());
         jmsTransportHandlerForEventHub
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
+    }
 
+    private void deployAPIsInSyncMode() {
+        syncModeDeploymentCount ++;
+        isAPIsDeployedInSyncMode = deployArtifactsAtStartup();
+        if (!isAPIsDeployedInSyncMode) {
+            log.error("Deployment attempt : " + syncModeDeploymentCount + " was unsuccessful") ;
+            if (!(syncModeDeploymentCount > retryCount)) {
+                deployAPIsInSyncMode();
+            } else {
+                log.error("Maximum retry limit exceeded. Server is starting without deploying all synapse artifacts");
+            }
+        } else {
+            log.info("Deployment attempt : " + syncModeDeploymentCount + " was successful");
+        }
     }
 
 
@@ -103,7 +128,7 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     }
 
 
-    public void startListener() {
+    public void deployAPIsInAsyncMode() {
         new Thread(this).start();
     }
 

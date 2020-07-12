@@ -22,11 +22,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import feign.Client;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
-import feign.slf4j.Slf4jLogger;
+import feign.okhttp.OkHttpClient;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -156,13 +155,10 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.kmclient.FormEncoder;
-import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
-import org.wso2.carbon.apimgt.impl.kmclient.model.BearerInterceptor;
-import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIDConnectDiscoveryClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
-import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
@@ -368,7 +364,7 @@ public final class APIUtil {
 
     private static String hostAddress = null;
     private static final int timeoutInSeconds = 15;
-    private static final int retries = 15;
+    private static final int retries = 2;
 
     /**
      * To initialize the publisherRoleCache configurations, based on configurations.
@@ -10840,9 +10836,9 @@ public final class APIUtil {
                 .getApplicationAccessTokenValidityPeriodInSeconds();
         APIManagerConfigurationService config =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
-        String issuerIdentifier = OAuthServerConfiguration
-                .getInstance().getOpenIDConnectIDTokenIssuerIdentifier();
+        String issuerIdentifier = OAuthServerConfiguration.getInstance().getOpenIDConnectIDTokenIssuerIdentifier();
         if (config != null) {
+            OpenIdConnectConfiguration openIdConnectConfigurations = null;
             APIManagerConfiguration apiManagerConfiguration = config.getAPIManagerConfiguration();
             String enableTokenEncryption =
                     apiManagerConfiguration.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE);
@@ -10853,6 +10849,13 @@ public final class APIUtil {
                     keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
                             apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
                 }
+                String keyManagerUrl =
+                        (String) keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.AUTHSERVER_URL);
+                openIdConnectConfigurations = APIUtil.getOpenIdConnectConfigurations(
+                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                                .concat(getTenantAwareContext(keyManagerConfigurationDTO.getTenantDomain()))
+                                .concat(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT));
+
                 if (!keyManagerConfigurationDTO.getAdditionalProperties()
                         .containsKey(APIConstants.KEY_MANAGER_USERNAME)) {
                     keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_USERNAME,
@@ -10865,120 +10868,189 @@ public final class APIUtil {
                 }
                 if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
                     keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
-                            apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_API_URL));
+                            keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                                    .concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
                 }
                 if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.TOKEN_URL)) {
-                    String revokeUrl = apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_API_URL);
-                    String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
-                    keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL, tokenUrl);
+                    keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL,
+                            keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                                    .concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
                 }
 
             }
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                .containsKey(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE,
-                    new ArrayList<>(availableGrantTypes));
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_HASH)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_HASH, clientSecretHashEnabled);
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                .containsKey(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION,true);
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                .containsKey(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS)) {
-            keyManagerConfigurationDTO
-                    .addProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, isMapExistingAuthAppsEnabled());
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, true);
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                .containsKey(APIConstants.KeyManager.TOKEN_ENDPOINT)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
-                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                .containsKey(APIConstants.KeyManager.REVOKE_ENDPOINT)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
-                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.REVOKE_URL));
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
-                APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,
-                    String.valueOf(validityPeriod));
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
-                APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION, true);
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
-                APIConstants.KeyManager.SELF_VALIDATE_JWT)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.SELF_VALIDATE_JWT, true);
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
-                APIConstants.KeyManager.ISSUER)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ISSUER, issuerIdentifier);
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
-                APIConstants.KeyManager.CLAIM_MAPPING)){
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CLAIM_MAPPING, getDefaultClaimMappings());
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                .containsKey(APIConstants.KeyManager.CERTIFICATE_TYPE)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CERTIFICATE_TYPE,
-                    APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE);
-        }
-        if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                .containsKey(APIConstants.KeyManager.CERTIFICATE_VALUE)) {
-            try {
-                Certificate certificate = CertificateMgtUtils.getInstance()
-                        .getPublicCertificate(keyManagerConfigurationDTO.getTenantDomain());
-                String x509certificateContent = null;
-                if (certificate != null) {
-                    x509certificateContent = getX509certificateContent(certificate);
-
-                }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE,
+                        new ArrayList<>(availableGrantTypes));
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_HASH)) {
                 keyManagerConfigurationDTO
-                        .addProperty(APIConstants.KeyManager.CERTIFICATE_VALUE, x509certificateContent);
-            } catch (APIManagementException e) {
-                log.error("Error while adding public key into keyManagerConfiguration");
-            } catch (java.security.cert.CertificateEncodingException e) {
-                log.error("Error while reading encoded data");
+                        .addProperty(APIConstants.KeyManager.ENABLE_TOKEN_HASH, clientSecretHashEnabled);
             }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, true);
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS)) {
+                keyManagerConfigurationDTO
+                        .addProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, isMapExistingAuthAppsEnabled());
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, true);
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.TOKEN_ENDPOINT)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
+                        keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.REVOKE_ENDPOINT)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
+                        keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.REVOKE_URL));
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                    APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,
+                        String.valueOf(validityPeriod));
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                    APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION, true);
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                    APIConstants.KeyManager.SELF_VALIDATE_JWT)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.SELF_VALIDATE_JWT, true);
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                    APIConstants.KeyManager.ISSUER)) {
+                if (openIdConnectConfigurations != null) {
+                    keyManagerConfigurationDTO
+                            .addProperty(APIConstants.KeyManager.ISSUER, openIdConnectConfigurations.getIssuer());
+                } else {
+                    keyManagerConfigurationDTO
+                            .addProperty(APIConstants.KeyManager.ISSUER, issuerIdentifier);
+                }
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                    APIConstants.KeyManager.CLAIM_MAPPING)) {
+                keyManagerConfigurationDTO
+                        .addProperty(APIConstants.KeyManager.CLAIM_MAPPING, getDefaultClaimMappings());
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.CERTIFICATE_TYPE)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CERTIFICATE_TYPE,
+                        APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE);
+            }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.CERTIFICATE_VALUE)) {
+                try {
+                    Certificate certificate = CertificateMgtUtils.getInstance()
+                            .getPublicCertificate(keyManagerConfigurationDTO.getTenantDomain());
+                    String x509certificateContent = null;
+                    if (certificate != null) {
+                        x509certificateContent = getX509certificateContent(certificate);
+
+                    }
+                    keyManagerConfigurationDTO
+                            .addProperty(APIConstants.KeyManager.CERTIFICATE_VALUE, x509certificateContent);
+                } catch (APIManagementException e) {
+                    log.error("Error while adding public key into keyManagerConfiguration");
+                } catch (java.security.cert.CertificateEncodingException e) {
+                    log.error("Error while reading encoded data");
+                }
+            }
+            String revokeEndpointContext =
+                    apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_ENDPOINT_CONTEXT);
+            String tokenEndpointContext = apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_ENDPOINT_CONTEXT);
+
+            if (StringUtils.isEmpty(tokenEndpointContext)) {
+                tokenEndpointContext = "/token";
+            }
+            if (StringUtils.isNotEmpty(revokeEndpointContext)) {
+                revokeEndpointContext = "/revoke";
+            }
+            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT,
+                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(tokenEndpointContext));
+            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_TOKEN_ENDPOINT,
+                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(tokenEndpointContext));
+            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_REVOKE_ENDPOINT,
+                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(revokeEndpointContext));
+            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT,
+                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(revokeEndpointContext));
         }
         return keyManagerConfigurationDTO;
     }
 
-    public static String getTokenEndpoint(){
-        Map<String, Environment> environments = APIUtil.getEnvironments();
-        if (environments.isEmpty()) {
-            return "https://localhost:8243";
-        } else {
-            String tokenEndpoint = null;
-            for (Map.Entry<String, Environment> entry : environments.entrySet()) {
-                Environment environment = environments.get(entry.getKey());
-                String apiGatewayEndpoint = environment.getApiGatewayEndpoint();
-                String[] gatewayEndpoints = apiGatewayEndpoint.split(",");
-                if (gatewayEndpoints.length >0){
-                    for (String gatewayEndpoint : gatewayEndpoints){
-                        if (gatewayEndpoint.contains("https")){
-                            tokenEndpoint =  gatewayEndpoint;
-                            break;
-                        }
-                    }
+    public static String getTokenEndpointsByType(String type) {
+
+        APIManagerConfiguration config =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        Map<String, String> map = new HashMap<>();
+
+        String productionUrl = "";
+        String sandboxUrl = "";
+        String hybridUrl = "";
+
+        // Set URL for a given default env
+        for (Environment environment : environments.values()) {
+            String environmentUrl = getHttpsEnvironmentUrl(environment);
+            String environmentType = environment.getType();
+            boolean isDefault = environment.isDefault();
+
+            if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environmentType)) {
+                if (isDefault) {
+                    map.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, environmentUrl);
+                } else {
+                    hybridUrl = environmentUrl;
                 }
-                if (environment.isDefault()) {
-                    return tokenEndpoint;
+            } else if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environmentType)) {
+                if (isDefault) {
+                    map.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, environmentUrl);
+                } else {
+                    productionUrl = environmentUrl;
                 }
+            } else if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environmentType)) {
+                if (isDefault) {
+                    map.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, environmentUrl);
+                } else {
+                    sandboxUrl = environmentUrl;
+                }
+            } else {
+                log.warn("Invalid gateway environment type : " + environmentType +
+                        " has been configured in api-manager.xml");
             }
-            return tokenEndpoint;
         }
+        // If no default envs are specified, set URL from each of the configured env types at random
+        if (map.isEmpty()) {
+            if (StringUtils.isNotEmpty(productionUrl)) {
+                map.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionUrl);
+            }
+            if (StringUtils.isNotEmpty(sandboxUrl)) {
+                map.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxUrl);
+            }
+            if (StringUtils.isNotEmpty(hybridUrl)) {
+                map.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridUrl);
+            }
+        }
+        if (map.containsKey(APIConstants.GATEWAY_ENV_TYPE_HYBRID)){
+            return map.get(APIConstants.GATEWAY_ENV_TYPE_HYBRID);
+        }
+        return map.get(type);
     }
+
+    private static String getHttpsEnvironmentUrl(Environment environment) {
+        for (String url : environment.getApiGatewayEndpoint().split(",")) {
+            if (url.startsWith(APIConstants.HTTPS_PROTOCOL)) {
+                return url;
+            }
+        }
+        return "";
+    }
+
 
     public static Map<String, KeyManagerConnectorConfiguration> getKeyManagerConfigurations() {
 
@@ -11083,29 +11155,33 @@ public final class APIUtil {
                 JSONArray containerMgtInfoFromTenant = new JSONArray();
                 JSONObject containerMgtObj = new JSONObject();
                 JSONArray containerMgtInfo = (JSONArray) (tenantConf.get(ContainerBasedConstants.CONTAINER_MANAGEMENT));
-                for (Object containerMgtInfoObj : containerMgtInfo) {
-                    JSONObject containerMgtDetails = (JSONObject) containerMgtInfoObj;
-                    JSONArray clustersInfo = (JSONArray) containerMgtDetails.
-                            get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
-                    for (Object clusterInfo : clustersInfo) {
-                        //check if the clusters defined in tenant-conf.json
-                        if (!"".equals(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME))) {
-                            containerMgtInfoFromTenant.add(clusterInfo);
-                        }
-                    }
-                    if (!containerMgtInfoFromTenant.isEmpty()) {
-                        containerMgtObj.put(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO, containerMgtInfoFromTenant);
-                        for (Object apimConfig : containerMgtFromToml) {
-                            //get class name from the api-manager.xml
-                            if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString()
-                                    .equalsIgnoreCase(((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).toString())) {
-                                containerMgtObj.put(ContainerBasedConstants.CLASS_NAME, ((JSONObject) apimConfig)
-                                        .get(ContainerBasedConstants.CLASS_NAME));
+                if (containerMgtInfo != null) {
+                    for (Object containerMgtInfoObj : containerMgtInfo) {
+                        JSONObject containerMgtDetails = (JSONObject) containerMgtInfoObj;
+                        JSONArray clustersInfo = (JSONArray) containerMgtDetails.
+                                get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
+                        for (Object clusterInfo : clustersInfo) {
+                            //check if the clusters defined in tenant-conf.json
+                            if (!"".equals(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME))) {
+                                containerMgtInfoFromTenant.add(clusterInfo);
                             }
                         }
-                        containerMgtObj.put(ContainerBasedConstants.TYPE, containerMgtDetails.get(ContainerBasedConstants.TYPE));
+                        if (!containerMgtInfoFromTenant.isEmpty()) {
+                            containerMgtObj
+                                    .put(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO, containerMgtInfoFromTenant);
+                            for (Object apimConfig : containerMgtFromToml) {
+                                //get class name from the api-manager.xml
+                                if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString().equalsIgnoreCase(
+                                        ((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).toString())) {
+                                    containerMgtObj.put(ContainerBasedConstants.CLASS_NAME,
+                                            ((JSONObject) apimConfig).get(ContainerBasedConstants.CLASS_NAME));
+                                }
+                            }
+                            containerMgtObj.put(ContainerBasedConstants.TYPE,
+                                    containerMgtDetails.get(ContainerBasedConstants.TYPE));
+                        }
+                        containerMgt.add(containerMgtObj);
                     }
-                    containerMgt.add(containerMgtObj);
                 }
                 return containerMgt;
             } catch (RegistryException e) {
@@ -11139,8 +11215,7 @@ public final class APIUtil {
 
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
-                    return x509Certificate;
+                return X509Certificate.getInstance(inputStream);
             } catch (IOException | javax.security.cert.CertificateException e) {
                 String msg = "Error while converting into X509Certificate";
                 log.error(msg, e);
@@ -11149,5 +11224,21 @@ public final class APIUtil {
         }
         return null;
     }
+
+    public static OpenIdConnectConfiguration getOpenIdConnectConfigurations(String url) {
+
+        OpenIDConnectDiscoveryClient openIDConnectDiscoveryClient =
+                Feign.builder().client(new OkHttpClient()).encoder(new GsonEncoder()).decoder(new GsonDecoder())
+                        .target(OpenIDConnectDiscoveryClient.class, url);
+        return openIDConnectDiscoveryClient.getOpenIdConnectConfiguration();
+    }
+    private static String getTenantAwareContext(String tenantDomain) {
+
+        if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            return "/t/".concat(tenantDomain);
+        }
+        return "";
+    }
+
 }
 

@@ -59,6 +59,8 @@
     "^device_.*",
     "openid"
   ],
+  "apim.oauth_config.token_endpoint_context": "/token",
+  "apim.oauth_config.revoke_endpoint_context":"/revoke",
   "apim.devportal.login_username_case_insensitive": true,
   "apim.devportal.url": "https://localhost:${mgt.transport.https.port}/devportal",
   "apim.devportal.enable_application_sharing": false,

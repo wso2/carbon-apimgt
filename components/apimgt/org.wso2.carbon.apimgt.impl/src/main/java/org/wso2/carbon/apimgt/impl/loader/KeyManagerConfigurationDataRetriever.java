@@ -42,7 +42,8 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                     apiManagerConfiguration.getEventHubConfigurationDto();
             if (eventHubConfigurationDto != null && eventHubConfigurationDto.isEnabled()) {
                 try {
-                    String url = eventHubConfigurationDto.getServiceUrl() + "/keymanagers";
+                    String url = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP)
+                            .concat("/keymanagers");
                     byte[] credentials = Base64.encodeBase64((eventHubConfigurationDto.getUsername() + ":" +
                             eventHubConfigurationDto.getPassword()).getBytes());
                     HttpGet method = new HttpGet(url);
