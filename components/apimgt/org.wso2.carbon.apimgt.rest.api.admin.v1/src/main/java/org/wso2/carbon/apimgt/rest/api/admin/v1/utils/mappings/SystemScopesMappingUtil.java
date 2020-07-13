@@ -19,10 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-<<<<<<< HEAD
 import org.json.JSONArray;
-=======
->>>>>>> Removed unnecessary imports.
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasDTO;
