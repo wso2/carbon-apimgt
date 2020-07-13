@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApiService;
@@ -52,6 +53,41 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error. An internal server error occurred while retrieving the role scope mapping. ", response = ErrorDTO.class) })
     public Response systemScopesGet() throws APIManagementException{
         return delegate.systemScopesGet(securityContext);
+    }
+
+    @GET
+    @Path("/role-aliases")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve role alias mappings", notes = "This operation can be used to retreive role alias mapping ", response = RoleAliasListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage scope"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "System Scopes",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The list of role mappings are returned. ", response = RoleAliasListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested alias does not exist. ", response = ErrorDTO.class) })
+    public Response systemScopesRoleAliasesGet() throws APIManagementException{
+        return delegate.systemScopesRoleAliasesGet(securityContext);
+    }
+
+    @PUT
+    @Path("/role-aliases")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Add a new role alias", notes = "This operation can be used to add a new role alias mapping for system scope roles ", response = RoleAliasListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage scope"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "System Scopes",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Role mapping alias returned ", response = RoleAliasListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid Request or request validation failure. ", response = Void.class),
+        @ApiResponse(code = 500, message = "Internal Server Error An internal server error occurred while updating the roles. ", response = Void.class) })
+    public Response systemScopesRoleAliasesPut(@ApiParam(value = "role-alias mapping" ,required=true) RoleAliasListDTO body) throws APIManagementException{
+        return delegate.systemScopesRoleAliasesPut(body, securityContext);
     }
 
     @GET

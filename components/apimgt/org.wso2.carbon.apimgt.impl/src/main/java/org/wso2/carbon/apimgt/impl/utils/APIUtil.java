@@ -11213,7 +11213,6 @@ public final class APIUtil {
         }
         return null;
     }
-  
     /**
      * Replace new RESTAPI Role mappings to tenant-conf.
      *
@@ -11255,6 +11254,43 @@ public final class APIUtil {
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                 .getCache(APIConstants.REST_API_SCOPE_CACHE)
                 .put(tenantDomain, null);
+    }
+
+    /**
+     * Replace new RoleMappings  to tenant-conf.
+     *
+     * @param newRoleMappingJson New object of role-alias mapping
+     * @throws APIManagementException If failed to replace the new tenant-conf.
+     */
+    public static void updateTenantConfRoleAliasMapping(JSONObject newRoleMappingJson, String username)
+            throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        //read from tenant-conf.json
+        JsonObject existingTenantConfObject = new JsonObject();
+        try {
+            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+            String existingTenantConf = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
+            existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
+        } catch (RegistryException e) {
+            APIUtil.handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (UserStoreException e) {
+            APIUtil.handleException("Couldn't read tenant configuration from User Store", e);
+        }
+        existingTenantConfObject.remove(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
+        JsonElement jsonElement = new JsonParser().parse(String.valueOf(newRoleMappingJson));
+        existingTenantConfObject.add(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG, jsonElement);
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(existingTenantConfObject.toString());
+            APIUtil.updateTenantConf(existingTenantConfObject.toString(), tenantDomain);
+            if (log.isDebugEnabled()) {
+                log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
+            }
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while formatting tenant-conf.json of tenant: " + tenantDomain, e);
+        }
     }
 
     public static OpenIdConnectConfiguration getOpenIdConnectConfigurations(String url) {
