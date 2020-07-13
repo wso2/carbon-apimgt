@@ -16,10 +16,9 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
@@ -77,9 +76,6 @@ const tokens = (props) => {
         const { target: currentTarget } = event;
 
         switch (field) {
-            case 'timeout':
-                newRequest.timeout = currentTarget.value;
-                break;
             case 'scopesSelected':
                 newRequest.scopesSelected = currentTarget.value;
                 break;
@@ -92,39 +88,11 @@ const tokens = (props) => {
         updateAccessTokenRequest(newRequest);
     };
     const {
-        classes, intl, accessTokenRequest, subscriptionScopes,
+        classes, accessTokenRequest, subscriptionScopes,
     } = props;
 
     return (
-        <React.Fragment>
-            <FormControl margin='normal' className={classes.FormControl}>
-                <TextField
-                    required
-                    label={intl.formatMessage({
-                        defaultMessage: 'Access token validity period',
-                        id: 'Shared.AppsAndKeys.Tokens.access.token',
-                    })}
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                    helperText={intl.formatMessage({
-                        defaultMessage: 'You can set an expiration period to determine the validity period of '
-                                + 'the token after generation. Set this to a negative value to ensure that the '
-                                + 'token never expires.',
-                        id: 'Shared.AppsAndKeys.Tokens.you.can.set',
-                    })}
-                    fullWidth
-                    name='timeout'
-                    onChange={e => handleChange('timeout', e)}
-                    placeholder={intl.formatMessage({
-                        defaultMessage: 'Enter time in milliseconds',
-                        id: 'Shared.AppsAndKeys.Tokens.enter.time',
-                    })}
-                    value={accessTokenRequest.timeout}
-                    autoFocus
-                    className={classes.inputText}
-                />
-            </FormControl>
+        <>
             <FormControl
                 margin='normal'
                 className={classes.FormControlOdd}
@@ -172,10 +140,10 @@ const tokens = (props) => {
                     />
                 </Typography>
             </FormControl>
-        </React.Fragment>
+        </>
     );
 };
 tokens.contextTypes = {
     intl: PropTypes.shape({}).isRequired,
 };
-export default injectIntl(withStyles(styles)(tokens));
+export default withStyles(styles)(tokens);

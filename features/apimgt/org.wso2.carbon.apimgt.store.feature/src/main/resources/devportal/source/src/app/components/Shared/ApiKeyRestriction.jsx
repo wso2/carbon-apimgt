@@ -16,7 +16,7 @@
  * under the License.
  */
 import React, { useState } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl, FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
@@ -35,7 +35,6 @@ import Box from "@material-ui/core/Box";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControl from "@material-ui/core/FormControl";
-import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import Validation from 'AppData/Validation';
 
@@ -49,6 +48,8 @@ const styles = (theme) => ({
     margin: theme.spacing(1),
     padding: theme.spacing(1),
     borderColor: theme.palette.text.secondary,
+    marginLeft: 20,
+    borderColor: '#cccccc',
   },
   Fab: {
     marginLeft: theme.spacing(2),
@@ -139,8 +140,11 @@ const apiKeyRestrictions = (props) => {
   return (
     <React.Fragment>
       <Box border={1} borderRadius={5} className={classes.outterBox}>
-        <Typography variant="h5" component="h6">
-          Key Restrictions
+        <Typography variant="body1">
+          <FormattedMessage
+              defaultMessage='Key Restrictions'
+              id='Shared.ApiKeyRestriction.key.restrictions'
+          />
         </Typography>
         <FormControl component="fieldset">
           <RadioGroup

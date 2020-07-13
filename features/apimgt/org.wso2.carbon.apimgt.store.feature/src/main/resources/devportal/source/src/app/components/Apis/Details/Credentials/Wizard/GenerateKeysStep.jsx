@@ -18,31 +18,27 @@
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import Icon from '@material-ui/core/Icon';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
-import KeyConfiguration from 'AppComponents/Shared/AppsAndKeys/KeyConfiguration';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import Alert from 'AppComponents/Shared/Alert';
 import Application from 'AppData/Application';
 import API from 'AppData/api';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import cloneDeep from 'lodash.clonedeep';
 import ButtonPanel from './ButtonPanel';
-import Paper from '@material-ui/core/Paper';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
+import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
+import Settings from 'Settings';
 
 const useStyles = makeStyles((theme) => ({
     keyConfigWrapper: {
         paddingLeft: theme.spacing(4),
+        flexDirection: 'column',
     },
     radioWrapper: {
         flexDirection: 'row',
@@ -51,6 +47,34 @@ const useStyles = makeStyles((theme) => ({
         background: 'none',
         marginBottom: theme.spacing(2),
         marginTop: theme.spacing(2),
+    },
+    subTitle: {
+        fontWeight: 400,
+    },
+    tabPanel: {
+        '& .MuiBox-root': {
+            padding: 0,
+        }
+    },
+    hr: {
+        border: 'solid 1px #efefef',
+    },
+    muiFormGroupRoot: {
+        flexDirection: 'row',
+    },
+    table: {
+        minWidth: '100%',
+        '& td, & th': {
+            padding: theme.spacing(),
+        }
+    },
+    leftCol: {
+        width: 200,
+    },
+    iconAligner: {
+        display: 'flex',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
     },
 }));
 
@@ -66,21 +90,21 @@ function TabPanel(props) {
             {...other}
         >
             {value === index && (
-                <Box p={3}>
-                    <Typography>{children}</Typography>
-                </Box>
+                <>{children}</>
             )}
         </div>
     );
 };
 
 TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
+    children: PropTypes.node,
+    index: PropTypes.any.isRequired,
+    value: PropTypes.any.isRequired,
 };
 
 const generateKeysStep = (props) => {
+    const intl = useIntl();
+
     const keyStates = {
         COMPLETED: 'COMPLETED',
         APPROVED: 'APPROVED',
@@ -88,24 +112,21 @@ const generateKeysStep = (props) => {
         REJECTED: 'REJECTED',
     };
     const [selectedType, setSelectedType] = useState('PRODUCTION');
-    const [notFound, setNotFound] = useState(false);
     const [nextActive, setNextActive] = useState(true);
     const [isUserOwner, setIsUserOwner] = useState(false);
-    const [keyManagers, setKeyManagers] = useState([]);
+    const [keyManager, setKeyManager] = useState(null);
     const [selectedTab, setSelectedTab] = useState('Default');
 
     const [keyRequest, setKeyRequest] = useState({
-        keyType: 'PRODUCTION',
-        serverSupportedGrantTypes: [],
+        keyType: 'SANDBOX',
         supportedGrantTypes: [],
         callbackUrl: '',
-        validityTime: 3600,
         additionalProperties: {},
         keyManager: '',
     });
 
     const {
-        currentStep, createdApp, incrementStep, setCreatedKeyType, intl,
+        currentStep, createdApp, incrementStep, setCreatedKeyType,
         setStepStatus, stepStatuses, setCreatedSelectedTab
     } = props;
 
@@ -127,7 +148,7 @@ const generateKeysStep = (props) => {
     * @param {*} currentTab current tab
     * @memberof Wizard
     */
-   const handleTabChange = (event, newSelectedTab) => {
+    const handleTabChange = (event, newSelectedTab) => {
         setSelectedTab(newSelectedTab);
     };
 
@@ -139,33 +160,40 @@ const generateKeysStep = (props) => {
             .then((response) => {
                 const responseKeyManagerList = [];
                 response.body.list.map((item) => responseKeyManagerList.push(item));
-                setKeyManagers(responseKeyManagerList);
+
+                // Selecting a key manager from the list of key managers.
+                let selectedKeyManager;
+                if (responseKeyManagerList.length > 0) {
+                    const responseKeyManagerList_default = responseKeyManagerList.filter(x => x.name === 'Default');
+                    selectedKeyManager = responseKeyManagerList_default.length > 0 ? responseKeyManagerList_default[0]
+                        : responseKeyManagerList[0];
+                }
+                setKeyManager(selectedKeyManager);
+
+                // Setting key request
+                try {
+                    const newKeyRequest = { ...keyRequest };
+                    newKeyRequest.keyManager = selectedKeyManager.name;
+                    newKeyRequest.supportedGrantTypes = selectedKeyManager.availableGrantTypes;
+                    if (selectedKeyManager.availableGrantTypes.includes('implicit')
+                        || selectedKeyManager.availableGrantTypes.includes('authorization_code')) {
+                        newKeyRequest.callbackUrl = 'http://localhost';
+                    }
+                    if (!selectedKeyManager.availableGrantTypes.includes('client_credentials')) {
+                        setNextActive(false);
+                    }
+                    setKeyRequest(newKeyRequest);
+                } catch (e) {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.error.keymanager',
+                        defaultMessage: 'Error while selecting the key manager',
+                    }));
+                }
+
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-        const promisedSettings = api.getSettings();
-        promisedSettings
-            .then((response) => {
-                const newRequest = cloneDeep(keyRequest);
-                newRequest.serverSupportedGrantTypes = response.obj.grantTypes;
-                newRequest.supportedGrantTypes = response.obj.grantTypes.filter((item) => item !== 'authorization_code'
-                    && item !== 'implicit');
-                setKeyRequest(newRequest);
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    setNotFound({ notFound: true });
                 }
             });
     }, []);
@@ -174,7 +202,7 @@ const generateKeysStep = (props) => {
         Application.get(createdApp.value).then((application) => {
             return application.generateKeys(
                 keyRequest.keyType, keyRequest.supportedGrantTypes,
-                keyRequest.callbackUrl, keyRequest.validityTime, 
+                keyRequest.callbackUrl,
                 keyRequest.additionalProperties, keyRequest.keyManager
             );
         }).then((response) => {
@@ -197,86 +225,112 @@ const generateKeysStep = (props) => {
             }
         });
     };
+
+
     const classes = useStyles();
 
     return (
         <>
-            <div className={classes.keyConfigWrapper}>
-                <FormControl component='fieldset' className={classes.formControl}>
-                    <FormLabel component='legend'>
-                        <FormattedMessage
-                            defaultMessage='Key Type'
-                            id='Apis.Details.Credentials.Wizard.GenerateKeysStep.keyType'
-                        />
-                    </FormLabel>
-                    <RadioGroup value={selectedType} onChange={handleRadioChange} classes={{ root: classes.radioWrapper }}>
-                        <FormControlLabel
-                            value='PRODUCTION'
-                            control={<Radio />}
-                            label={intl.formatMessage({
-                                defaultMessage: 'PRODUCTION',
-                                id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.production',
-                            })}
-                        />
-                        <FormControlLabel
-                            value='SANDBOX'
-                            control={<Radio />}
-                            label={intl.formatMessage({
-                                defaultMessage: 'SANDBOX',
-                                id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.sandbox',
-                            })}
-                        />
-                    </RadioGroup>
-                </FormControl>
-                <Paper className={classes.paper}>
-                    <Tabs
-                        value={selectedTab}
-                        indicatorColor="primary"
-                        textColor="primary"
-                        onChange={handleTabChange}
-                        aria-label="key manager tabs"
-                    >
-                        {keyManagers.map(keymanager => (
-                            <Tab label={keymanager.name} value={keymanager.name} disabled={!keymanager.enabled}/>
-                        ))}
-                        
-                    </Tabs>
-                    {keyManagers.map(keymanager => (
-                        <TabPanel value={selectedTab} index={keymanager.name}>
-                            <ExpansionPanel defaultExpanded>
-                                <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
-                                    <Typography className={classes.heading} variant='subtitle1'>
-                                        <FormattedMessage
-                                            defaultMessage='Key Configuration'
-                                            id='Shared.AppsAndKeys.TokenManager.key.configuration'
-                                        />
-                                    </Typography>    
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails className={classes.keyConfigWrapper}>
-                                    <KeyConfiguration
-                                        updateKeyRequest={setKeyRequest}
-                                        keyRequest={keyRequest}
-                                        keyType={selectedType}
-                                        isUserOwner={isUserOwner}
-                                        setGenerateEnabled={setNextActive}
-                                        keyManagerConfig={keymanager}
-                                        selectedTab={selectedTab}
-                                        isKeysAvailable={false}
-                                    />
-                                    <ButtonPanel
-                                        classes={classes}
-                                        currentStep={currentStep}
-                                        handleCurrentStep={generateKeys}
-                                        nextActive={nextActive}
-                                    />
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
-                        </TabPanel>
-                    ))}
-                </Paper>    
-            </div>    
+            <Box component='div' marginLeft={4}>
+                <Grid container spacing={2}>
+                    {keyManager && (<>
+                        <Grid item xs={12} md={12} lg={3}>
+                            <Typography color='inherit' variant='subtitle2' component='div'>
+                                <FormattedMessage
+                                    defaultMessage='Key Configuration'
+                                    id='Apis.Details.Credentials.Wizard.GenerateKeysStep.key.configuration'
+                                />
+                            </Typography>
+                            <Typography color='inherit' variant='caption' component='p'>
+                                <FormHelperText><FormattedMessage
+                                    defaultMessage={'These configurations are set for the purpose of the wizard.' +
+                                        'You have more control over them when you go to the application view. '}
+                                    id='Apis.Details.Credentials.Wizard.GenerateKeysStep.key.configuration.help'
+                                /></FormHelperText>
+
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={12} lg={9}>
+                            <Table className={classes.table}>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell component='th' scope='row' className={classes.leftCol}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Credentials.Wizard.GenerateKeysStep.config.km.name'
+                                                defaultMessage='Key Manager'
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <div>{keyManager.displayName || keyManager.name}</div>
+                                            <Typography variant="caption" component='div'>{keyManager.description}</Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell component='th' scope='row' className={classes.leftCol}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Credentials.Wizard.GenerateKeysStep.list.environment'
+                                                defaultMessage='Environment'
+                                            />
+                                        </TableCell>
+                                        <TableCell>Sandbox</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell component='th' scope='row' className={classes.leftCol}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Credentials.Wizard.GenerateKeysStep.list.tokenEndpoint'
+                                                defaultMessage='Token Endpoint'
+                                            />
+                                        </TableCell>
+                                        <TableCell>{keyManager.tokenEndpoint}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell component='th' scope='row' className={classes.leftCol}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Credentials.Wizard.GenerateKeysStep.list.revokeEndpoint'
+                                                defaultMessage='Revoke Endpoint'
+                                            />
+                                        </TableCell>
+                                        <TableCell>{keyManager.revokeEndpoint}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell component='th' scope='row' className={classes.leftCol}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Credentials.Wizard.GenerateKeysStep.list.userInfoEndpoint'
+                                                defaultMessage='User Info Endpoint'
+                                            />
+                                        </TableCell>
+                                        <TableCell>{keyManager.userInfoEndpoint}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell component='th' scope='row' className={classes.leftCol}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Credentials.Wizard.GenerateKeysStep.list.grantTypes'
+                                                defaultMessage='Grant Types'
+                                            />
+                                        </TableCell>
+                                        <TableCell>{keyManager.availableGrantTypes.map(gt => (<span>{Settings.grantTypes[gt] || gt}, </span>))}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </Grid>
+                    </>)}
+                </Grid>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <Box component='span' m={1}>
+                            <ButtonPanel
+                                classes={classes}
+                                currentStep={currentStep}
+                                handleCurrentStep={generateKeys}
+                                nextActive={nextActive}
+                            />
+                        </Box>
+
+                    </Grid>
+                </Grid>
+            </Box>
         </>
     );
 };
 
-export default injectIntl(generateKeysStep);
+export default generateKeysStep;
