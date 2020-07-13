@@ -5678,8 +5678,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                             containerManager.changeLCStatePublishedToCreated(
                                                                     apiIdentifier, containerMgtInfoDetails);
                                                         } else if (action.equals(ContainerBasedConstants.REPUBLISH)) {
-                                                            String configmapName = apiIdentifier.getApiName().toLowerCase() +
-                                                                    apiIdentifier.getVersion();
+                                                            String configmapName = apiIdentifier.getApiName().toLowerCase() + "-swagger";
                                                             String[] configmapNames = new String[]{configmapName};
                                                             containerManager.changeLCStateBlockedToRepublished(apiIdentifier,
                                                                     containerMgtInfoDetails, configmapNames);

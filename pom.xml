@@ -1957,6 +1957,7 @@
         <velocity.version>1.7</velocity.version>
         <fasterxml.jackson.version>2.10.3</fasterxml.jackson.version>
         <fasterxml.jackson.databind.version>2.10.3</fasterxml.jackson.databind.version>
+        <fasterxml.jackson.core.version>2.9.8.wso2v1</fasterxml.jackson.core.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
         <carbon.broker.version>3.3.12</carbon.broker.version>
         <waffle-jna.version>1.6.wso2v6</waffle-jna.version>
