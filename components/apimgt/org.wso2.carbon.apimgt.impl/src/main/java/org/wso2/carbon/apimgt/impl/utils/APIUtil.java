@@ -10845,16 +10845,6 @@ public final class APIUtil {
                                 .concat(getTenantAwareContext(keyManagerConfigurationDTO.getTenantDomain()))
                                 .concat(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT));
 
-                if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                        .containsKey(APIConstants.KEY_MANAGER_USERNAME)) {
-                    keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_USERNAME,
-                            apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
-                }
-                if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                        .containsKey(APIConstants.KEY_MANAGER_PASSWORD)) {
-                    keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_PASSWORD,
-                            apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD));
-                }
                 if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
                     keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
                             keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]

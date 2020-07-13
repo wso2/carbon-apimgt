@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
@@ -71,6 +72,11 @@ public class KeyManagerHolder {
         if (keyManagerConfiguration.isEnabled()) {
             KeyManager keyManager = null;
             JWTValidator jwtValidator = null;
+            APIManagerConfiguration apiManagerConfiguration =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration();
+            String defaultKeyManagerType =
+                    apiManagerConfiguration.getFirstProperty(APIConstants.DEFAULT_KEY_MANAGER_TYPE);
             KeyManagerConnectorConfiguration keyManagerConnectorConfiguration =
                     ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfiguration(type);
             if (keyManagerConnectorConfiguration != null) {
@@ -79,6 +85,12 @@ public class KeyManagerHolder {
                         keyManager = (KeyManager) Class
                                 .forName(keyManagerConnectorConfiguration.getImplementation()).newInstance();
                         keyManager.setTenantDomain(tenantDomain);
+                        if (StringUtils.isNotEmpty(defaultKeyManagerType) && defaultKeyManagerType.equals(type)){
+                            keyManagerConfiguration.addParameter(APIConstants.KEY_MANAGER_USERNAME,
+                                    apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
+                            keyManagerConfiguration.addParameter(APIConstants.KEY_MANAGER_PASSWORD,
+                                    apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD));
+                        }
                         keyManager.loadConfiguration(keyManagerConfiguration);
                     } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                         throw new APIManagementException("Error while loading keyManager configuration", e);
