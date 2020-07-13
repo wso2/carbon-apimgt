@@ -227,7 +227,6 @@ function UploadTheme() {
                         </div>
                     </InlineMessage>
                 </Paper>
-                {console.log('fileName', fileName)}
                 {fileName && (
                     <Paper className={classes.downloadPaper}>
                         <div>
