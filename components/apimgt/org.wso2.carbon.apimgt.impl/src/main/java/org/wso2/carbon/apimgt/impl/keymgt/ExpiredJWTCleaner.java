@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.tokenmgt;
+package org.wso2.carbon.apimgt.impl.keymgt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

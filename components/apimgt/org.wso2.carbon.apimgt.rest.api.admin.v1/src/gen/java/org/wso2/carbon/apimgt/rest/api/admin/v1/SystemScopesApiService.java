@@ -24,4 +24,5 @@ import javax.ws.rs.core.SecurityContext;
 public interface SystemScopesApiService {
       public Response systemScopesGet(MessageContext messageContext) throws APIManagementException;
       public Response systemScopesScopeNameGet(String scopeName, String username, MessageContext messageContext) throws APIManagementException;
+      public Response updateRolesForScope(ScopeListDTO body, MessageContext messageContext) throws APIManagementException;
 }

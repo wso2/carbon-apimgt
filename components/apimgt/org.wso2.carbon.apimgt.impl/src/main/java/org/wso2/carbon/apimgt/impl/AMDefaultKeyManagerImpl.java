@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -44,17 +45,21 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.impl.dto.UserInfoDTO;
 import org.wso2.carbon.apimgt.impl.kmclient.FormEncoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 import org.wso2.carbon.apimgt.impl.kmclient.model.AuthClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.BearerInterceptor;
+import org.wso2.carbon.apimgt.impl.kmclient.model.Claim;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClaimsList;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ScopeClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
+import org.wso2.carbon.apimgt.impl.kmclient.model.UserClient;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.core.util.CryptoException;
@@ -62,6 +67,7 @@ import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,6 +95,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private AuthClient revokeClient;
     private AccessTokenGenerator accessTokenGenerator;
     private ScopeClient scopeClient;
+    private UserClient userClient;
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
@@ -487,6 +494,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             introspectionEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
                     .concat(getTenantAwareContext().trim()).concat("/oauth2/introspect");
         }
+        
+        String userInfoEndpoint;
+        if (configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT) != null) {
+            userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT);
+        } else {
+            userInfoEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext().trim()).concat("/user-info");
+        }
         accessTokenGenerator = new AccessTokenGenerator(tokenEndpoint, revokeEndpoint, consumerKey, consumerSecret);
 
         dcrClient = Feign.builder()
@@ -522,7 +537,15 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .logger(new Slf4jLogger())
                 .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
                 .errorDecoder(new KMClientErrorDecoder())
-                .target(ScopeClient.class, scopeEndpoint);
+                .target(ScopeClient.class, scopeEndpoint);  
+        userClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(UserClient.class, userInfoEndpoint);
     }
 
     @Override
@@ -965,5 +988,35 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.error("Exception While resolving KeyManager Server URL or Port " + e.getMessage(), e);
         }
     }
+    
+    @Override
+    public Map<String, String> getUserClaims(String username, Map<String, Object> properties)
+            throws APIManagementException {
 
+        Map<String, String> map = new HashMap<String, String>();
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+        UserInfoDTO userinfo = new UserInfoDTO();
+        userinfo.setUsername(tenantAwareUserName);
+        if (tenantAwareUserName.contains(CarbonConstants.DOMAIN_SEPARATOR)) {
+            userinfo.setDomain(tenantAwareUserName.split(CarbonConstants.DOMAIN_SEPARATOR)[0]);
+        }
+        if (properties.containsKey(APIConstants.KeyManager.ACCESS_TOKEN)) {
+            userinfo.setAccessToken(properties.get(APIConstants.KeyManager.ACCESS_TOKEN).toString());
+        }
+        if (properties.containsKey(APIConstants.KeyManager.CLAIM_DIALECT)) {
+            userinfo.setDialectURI(properties.get(APIConstants.KeyManager.CLAIM_DIALECT).toString());
+        }
+
+        try {
+            ClaimsList claims = userClient.generateClaims(userinfo);
+            if (claims != null && claims.getList() != null) {
+                for (Claim claim : claims.getList()) {
+                    map.put(claim.getUri(), claim.getValue());
+                }
+            }
+        } catch (KeyManagerClientException e) {
+            handleException("Error while getting user info", e);
+        }
+        return map;
+    }
 }

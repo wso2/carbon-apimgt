@@ -18,9 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.util.JavaUtils;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -29,11 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -83,7 +76,6 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -94,6 +86,7 @@ import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
+import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
@@ -144,10 +137,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -162,6 +152,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -173,7 +164,6 @@ import java.util.regex.Pattern;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
-import javax.ws.rs.BadRequestException;
 import javax.wsdl.Definition;
 
 /**
@@ -3169,9 +3159,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
                 subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
+                subsLogObject.put(APIConstants.AuditLogConstants.REQUESTED_TIER, requestedThrottlingPolicy);
 
                 APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
-                        APIConstants.AuditLogConstants.CREATED, this.username);
+                        APIConstants.AuditLogConstants.UPDATED, this.username);
 
                 if (workflowResponse == null) {
                     workflowResponse = new GeneralWorkflowResponse();
@@ -5465,47 +5456,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        EventHubConfigurationDto eventHubConfigurationDto = config.getEventHubConfigurationDto();
-        String baseUrl = eventHubConfigurationDto.getServiceUrl() + APIConstants.INTERNAL_WEB_APP_EP;
-        String apiKeyRevokeEp = baseUrl + APIConstants.API_KEY_REVOKE_PATH;
-        HttpPost method = new HttpPost(apiKeyRevokeEp);
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        URL keyMgtURL = null;
-        try {
-            keyMgtURL = new URL(apiKeyRevokeEp);
 
-            String username = config.getFirstProperty(eventHubConfigurationDto.getUsername());
-            String password = config.getFirstProperty(eventHubConfigurationDto.getPassword());
-            byte[] credentials = Base64.encodeBase64((username + ":" + password).getBytes
-                    (StandardCharsets.UTF_8));
-            int keyMgtPort = keyMgtURL.getPort();
-            String keyMgtProtocol = keyMgtURL.getProtocol();
-            method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
-            HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
-            JSONObject revokeRequestPayload = new JSONObject();
-            revokeRequestPayload.put("apikey", apiKey);
-            revokeRequestPayload.put("expiryTime", expiryTime);
-            revokeRequestPayload.put("tenantId", tenantId);
-            StringEntity requestEntity = new StringEntity(revokeRequestPayload.toString());
-            requestEntity.setContentType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            method.setEntity(requestEntity);
-            HttpResponse httpResponse = null;
-            httpResponse = httpClient.execute(method);
-            if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-                log.error("API Key revocation is unsuccessful with token signature " + APIUtil.getMaskedToken(apiKey));
-                throw new APIManagementException("Error while revoking API Key");
-            }
-        } catch (MalformedURLException e) {
-            String msg = "Error while constructing key manager URL " + apiKeyRevokeEp;
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (IOException e) {
-            String msg = "Error while executing the http client " + apiKeyRevokeEp;
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
+        RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
+        Properties properties = new Properties();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        properties.put(APIConstants.NotificationEvent.EVENT_ID,UUID.randomUUID().toString());
+        properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
+        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        revocationRequestPublisher.publishRevocationEvents(apiKey, expiryTime, properties);
     }
 
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {

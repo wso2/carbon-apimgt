@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: 20,
     },
     iconEven: {
-        color: theme.custom.infoBar.iconEvenColor,
+        color: theme.custom.infoBar.iconOddColor,
         width: theme.spacing(3),
     },
     iconOdd: {

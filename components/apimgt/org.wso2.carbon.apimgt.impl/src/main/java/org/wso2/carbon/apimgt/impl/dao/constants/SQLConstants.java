@@ -2415,7 +2415,7 @@ public class SQLConstants {
 
     public static final String GET_SCOPE_BY_SUBSCRIBED_API_PREFIX =
             "SELECT DISTINCT ARSM.SCOPE_NAME " +
-                    "FROM AM_API_RESOURCE_SCOPE_MAPPING AS ARSM INNER JOIN AM_API_URL_MAPPING AS AUM " +
+                    "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM INNER JOIN AM_API_URL_MAPPING AUM " +
                     "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                     "WHERE AUM.API_ID IN (";
 
@@ -2437,7 +2437,7 @@ public class SQLConstants {
             "   B.SCOPE_BINDING " +
             " FROM " +
             "   IDN_OAUTH2_SCOPE IAS " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
             " WHERE" +
             "   NAME = ? AND TENANT_ID = ?";
 
@@ -2451,7 +2451,7 @@ public class SQLConstants {
             "   B.SCOPE_BINDING " +
             " FROM " +
             "   IDN_OAUTH2_SCOPE IAS " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
             " WHERE" +
             "   NAME IN (";
 
@@ -2485,9 +2485,9 @@ public class SQLConstants {
             "SELECT "
                     + "DISTINCT A.NAME, D.SCOPE_BINDING "
                     + "FROM (("
-                    + "IDN_OAUTH2_SCOPE AS A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING AS B ON A.NAME = B.SCOPE_NAME "
-                    + "INNER JOIN AM_API_URL_MAPPING AS C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
-                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING AS D ON A.SCOPE_ID = D.SCOPE_ID) "
+                    + "IDN_OAUTH2_SCOPE A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING B ON A.NAME = B.SCOPE_NAME "
+                    + "INNER JOIN AM_API_URL_MAPPING C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
+                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING D ON A.SCOPE_ID = D.SCOPE_ID) "
                     + "WHERE C.API_ID IN (";
 
     public static final String GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL =
@@ -2496,15 +2496,15 @@ public class SQLConstants {
                     + "FROM (("
                     + "IDN_OAUTH2_SCOPE A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING B ON A.NAME = B.SCOPE_NAME "
                     + "INNER JOIN AM_API_URL_MAPPING C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
-                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING AS D ON A.SCOPE_ID = D.SCOPE_ID) "
+                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING D ON A.SCOPE_ID = D.SCOPE_ID) "
                     + "WHERE C.API_ID IN (";
 
     public static final String CLOSING_BRACE = ")";
 
     public static final String GET_SCOPES_FOR_API_LIST = "SELECT "
             + "ARSM.SCOPE_NAME, AUM.API_ID "
-            + "FROM AM_API_RESOURCE_SCOPE_MAPPING AS ARSM "
-            + "INNER JOIN AM_API_URL_MAPPING AS AUM "
+            + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM "
+            + "INNER JOIN AM_API_URL_MAPPING AUM "
             + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
             + "WHERE AUM.API_ID IN ( $paramList )";
 
@@ -3148,16 +3148,22 @@ public class SQLConstants {
     public static final String GET_API_ARTIFACT = "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE API_ID =? AND " +
             "GATEWAY_LABEL =? AND GATEWAY_INSTRUCTION = ?";
 
+    public static final String GET_API_ID = "SELECT API_ID  FROM AM_GW_PUBLISHED_API_DETAILS " +
+            "WHERE API_NAME =? AND " + "TENANT_DOMAIN =? AND API_VERSION =?";
+
+    public static final String GET_API_LABEL = "SELECT GATEWAY_LABEL  FROM AM_GW_API_ARTIFACTS " +
+            "WHERE API_ID =?";
+
     public static final String GET_ALL_API_ARTIFACT = "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE "
             + "GATEWAY_LABEL =? AND GATEWAY_INSTRUCTION = ?";
 
     public static final String GET_PUBLISHED_GATEWAYS_FOR_API = "SELECT COUNT(*) AS COUNT FROM AM_GW_API_ARTIFACTS" +
             " WHERE API_ID = ? AND GATEWAY_INSTRUCTION = ?";
 
-    public static final String GET_GATEWAY_PUBLISHED_API_DETAILS = "SELECT * FROM AM_GW_PUBLISHED_API_DETAILS" +
+    public static final String CHECK_API_EXISTS = "SELECT 1 FROM AM_GW_PUBLISHED_API_DETAILS" +
             " WHERE API_ID = ?";
 
-    public static final String CHECK_ARTIFACT_EXISTS = "SELECT COUNT(*) AS COUNT FROM AM_GW_API_ARTIFACTS" +
+    public static final String CHECK_ARTIFACT_EXISTS = "SELECT 1 FROM AM_GW_API_ARTIFACTS" +
             " WHERE API_ID = ? AND GATEWAY_LABEL = ?";
 
 
@@ -3444,6 +3450,7 @@ public class SQLConstants {
 
         public static final String ADD_JWT_SIGNATURE = "INSERT INTO AM_REVOKED_JWT (UUID, SIGNATURE," +
                 "EXPIRY_TIMESTAMP, TENANT_ID, TOKEN_TYPE) VALUES(?,?,?,?,?)";
+        public static final String CHECK_REVOKED_TOKEN_EXIST = "SELECT 1 FROM AM_REVOKED_JWT WHERE UUID = ?";
         public static final String DELETE_REVOKED_JWT = "DELETE FROM AM_REVOKED_JWT WHERE EXPIRY_TIMESTAMP < ?";
     }
 
@@ -3577,5 +3584,16 @@ public class SQLConstants {
 
         public static final String DELETE_KEY_MANAGER =
                 "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";
+    }
+
+    /**
+     * Static class to hold database queries related to AM_TENANT_THEMES table
+     */
+    public static class TenantThemeConstants {
+
+        public static final String ADD_TENANT_THEME = "INSERT INTO AM_TENANT_THEMES (TENANT_ID, THEME) VALUES (?,?)";
+        public static final String UPDATE_TENANT_THEME = "UPDATE AM_TENANT_THEMES SET THEME = ? WHERE TENANT_ID = ?";
+        public static final String DELETE_TENANT_THEME = "DELETE FROM AM_TENANT_THEMES WHERE TENANT_ID = ?";
+        public static final String GET_TENANT_THEME = "SELECT * FROM AM_TENANT_THEMES WHERE TENANT_ID = ?";
     }
 }

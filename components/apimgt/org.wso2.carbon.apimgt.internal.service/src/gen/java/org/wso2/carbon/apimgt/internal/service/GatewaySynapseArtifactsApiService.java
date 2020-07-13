@@ -10,7 +10,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.RevokeAPIKeyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactListDTO;
 
 import java.util.List;
 
@@ -20,6 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public interface ApikeyApiService {
-      public Response apikeyRevokePost(RevokeAPIKeyDTO body, MessageContext messageContext) throws APIManagementException;
+public interface GatewaySynapseArtifactsApiService {
+      public Response gatewaySynapseArtifactsGet(String gatewayLabel, MessageContext messageContext) throws APIManagementException;
 }

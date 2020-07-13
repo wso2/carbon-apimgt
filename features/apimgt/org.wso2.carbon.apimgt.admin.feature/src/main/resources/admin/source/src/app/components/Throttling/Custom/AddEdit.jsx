@@ -328,7 +328,7 @@ function AddEdit(props) {
                             helperText={validationError.policyName ? validationError.policyName : (
                                 <FormattedMessage
                                     id='Admin.Throttling.Custom.policy.add.policy.name'
-                                    defaultMessage='Name of Throttling Policy'
+                                    defaultMessage='Name of the throttle policy'
                                 />
                             )}
                         />
@@ -343,7 +343,7 @@ function AddEdit(props) {
                             helperText={(
                                 <FormattedMessage
                                     id='Admin.Throttling.Custom.policy.add.policy.description'
-                                    defaultMessage='Description of Throttling Policy'
+                                    defaultMessage='Description of the throttle policy'
                                 />
                             )}
                         />

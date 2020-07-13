@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -365,4 +366,49 @@ public interface APIAdmin  {
      */
     boolean isScopeExists(String username, String scopeName)
             throws APIManagementException;
+
+    /**
+     * Adds a tenant theme to the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     * @throws APIManagementException if an error occurs when adding a tenant theme to the database
+     */
+    void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
+
+    /**
+     * Updates an existing tenant theme in the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     * @throws APIManagementException if an error occurs when updating an existing tenant theme in the database
+     */
+    void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException;
+
+    /**
+     * Retrieves a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @return content of the tenant theme
+     * @throws APIManagementException if an error occurs when retrieving a tenant theme from the database
+     */
+    InputStream getTenantTheme(int tenantId) throws APIManagementException;
+
+    /**
+     * Checks whether a tenant theme exist for a particular tenant
+     *
+     * @param tenantId tenant ID of user
+     * @return true if a tenant theme exist for a particular tenant ID, false otherwise
+     * @throws APIManagementException if an error occurs when determining whether a tenant theme exists for a given
+     *                                tenant ID
+     */
+    boolean isTenantThemeExist(int tenantId) throws APIManagementException;
+
+    /**
+     * Deletes a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
+     */
+    void deleteTenantTheme(int tenantId) throws APIManagementException;
 }

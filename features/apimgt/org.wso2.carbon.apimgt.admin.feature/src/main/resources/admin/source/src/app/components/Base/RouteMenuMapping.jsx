@@ -42,13 +42,14 @@ import ListRoles from 'AppComponents//RolePermissions/ListRoles.jsx';
 
 import GamesIcon from '@material-ui/icons/Games';
 import CategoryIcon from '@material-ui/icons/Category';
-import AndroidIcon from '@material-ui/icons/Android';
+import BugReportIcon from '@material-ui/icons/BugReport';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PolicyIcon from '@material-ui/icons/Policy';
 import BlockIcon from '@material-ui/icons/Block';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import ApplicationCreation from 'AppComponents/Workflow/ApplicationCreation';
 import SubscriptionCreation from 'AppComponents/Workflow/SubscriptionCreation';
+import SubscriptionUpdate from 'AppComponents/Workflow/SubscriptionUpdate';
 import RegistrationCreation from 'AppComponents/Workflow/RegistrationCreation';
 import APIStateChange from 'AppComponents/Workflow/APIStateChange';
 import UserCreation from 'AppComponents/Workflow/UserCreation';
@@ -191,7 +192,7 @@ const RouteMenuMapping = (intl) => [
     {
         id: intl.formatMessage({
             id: 'Base.RouteMenuMapping.keymanagers',
-            defaultMessage: 'KeyManagers',
+            defaultMessage: 'Key Managers',
         }),
         path: '/settings/key-managers',
         component: KeyManagers,
@@ -235,7 +236,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/settings/bot-detection/bot-detected-data-list',
                 component: ListDetectedBotData,
-                icon: <AndroidIcon />,
+                icon: <BugReportIcon />,
             },
             {
                 id: intl.formatMessage({
@@ -279,6 +280,15 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/tasks/subscription-creation',
                 component: SubscriptionCreation,
+                icon: <TouchAppIcon />,
+            },
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.subscription.update',
+                    defaultMessage: 'Subscription Update',
+                }),
+                path: '/tasks/subscription-update',
+                component: SubscriptionUpdate,
                 icon: <TouchAppIcon />,
             },
             {
