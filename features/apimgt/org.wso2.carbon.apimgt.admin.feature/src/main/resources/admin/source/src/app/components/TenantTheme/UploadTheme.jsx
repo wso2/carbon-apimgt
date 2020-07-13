@@ -16,10 +16,10 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import {
     List, Button, ListItemAvatar, Typography, Toolbar, Grid, Paper, ListItem, Avatar, ListItemSecondaryAction,
 } from '@material-ui/core';
@@ -37,6 +37,8 @@ import IconButton from '@material-ui/core/IconButton';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import AlertMui from '@material-ui/lab/Alert';
+import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import Utils from 'AppData/Utils';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -61,6 +63,18 @@ const useStyles = makeStyles((theme) => ({
         overflow: 'hidden',
         marginTop: theme.spacing(2),
     },
+    downloadPaper: {
+        maxWidth: 936,
+        height: theme.spacing(8),
+        margin: 'auto',
+        marginTop: theme.spacing(2),
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingLeft: theme.spacing(2),
+        borderRadius: theme.shape.borderRadius,
+        border: 'solid 1px ' + theme.palette.secondary.main,
+    },
     main: {
         flex: 1,
         padding: theme.spacing(6, 4),
@@ -83,6 +97,13 @@ const useStyles = makeStyles((theme) => ({
     browseFileButton: {
         marginTop: theme.spacing(1),
     },
+    button: {
+        marginLeft: theme.spacing(3),
+        fontWeight: 600,
+    },
+    buttonIcon: {
+        marginRight: theme.spacing(1),
+    },
 }));
 
 
@@ -94,20 +115,45 @@ const useStyles = makeStyles((theme) => ({
 function UploadTheme() {
     const classes = useStyles();
     const [themeFile, setThemeFile] = useState([]);
+    const [fileName, setFileName] = useState();
     const [isFileAccepted, setIsFileAccepted] = useState(false);
-    const [isUplaodUnsuccessful, setIsUploadUnsuccessful] = useState(false);
-
+    const [isUploadUnsuccessful, setIsUploadUnsuccessful] = useState(false);
+    const intl = useIntl();
+    const restApi = new API();
 
     const onDrop = (acceptedFile) => {
         setIsFileAccepted(true);
         setThemeFile(acceptedFile[0]);
     };
 
+    useEffect(() => {
+        const tenantThemeContent = restApi.exportTenantTheme();
+        tenantThemeContent.then((response) => {
+            const tenantFileName = response.headers['content-disposition'].split('filename=')[1];
+            setFileName(tenantFileName.slice(1, -1));
+        });
+    }, []);
+
+    /**
+     * Downloads Tenant Theme ZIP file.
+     *
+     */
+    const handleDownloadTenantTheme = () => {
+        const tenantThemeContent = restApi.exportTenantTheme();
+        tenantThemeContent.then(Utils.forceDownload)
+            .catch(() => {
+                Alert.error(intl.formatMessage({
+                    id: 'TenantTheme.Upload.Theme.download.error',
+                    defaultMessage: 'Error downloading Tenant theme ZIP file',
+                }));
+            });
+    };
+
     const uploadThemeFile = () => {
-        const restApi = new API();
         return restApi.uploadTenantTheme(themeFile)
             .then(() => {
                 setIsUploadUnsuccessful(false);
+                setFileName(themeFile.name);
                 Alert.success(
                     <FormattedMessage
                         id='TenantTheme.Upload.Theme.upload.successful'
@@ -181,7 +227,20 @@ function UploadTheme() {
                         </div>
                     </InlineMessage>
                 </Paper>
-                {isUplaodUnsuccessful && (
+                {fileName && (
+                    <Paper className={classes.downloadPaper}>
+                        <div>
+                            <Button size='large' className={classes.button} onClick={handleDownloadTenantTheme}>
+                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                <FormattedMessage
+                                    id='TenantTheme.Upload.Theme.theme.download.definition'
+                                    defaultMessage='Download existing Tenant theme '
+                                />
+                            </Button>
+                        </div>
+                    </Paper>
+                )}
+                {isUploadUnsuccessful && (
                     <Paper className={classes.warningPaper}>
                         <AlertMui severity='warning'>
                             <FormattedMessage
