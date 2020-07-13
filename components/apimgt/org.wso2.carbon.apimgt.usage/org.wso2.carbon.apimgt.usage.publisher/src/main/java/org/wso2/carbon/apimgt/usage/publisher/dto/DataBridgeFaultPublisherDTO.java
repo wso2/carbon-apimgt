@@ -31,7 +31,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setApiVersion(faultPublisherDTO.getApiVersion());
         setApiName(faultPublisherDTO.getApiName());
         setApiResourcePath(faultPublisherDTO.getApiResourcePath());
-        setApiResourceTemplate(faultPublisherDTO.getApiResourceTemplate());
+        setApiResourceTemplate(DataPublisherUtil.sortGraphQLOperations(faultPublisherDTO.getApiResourceTemplate()));
         setApiMethod(faultPublisherDTO.getApiMethod());
         setApiVersion(faultPublisherDTO.getApiVersion());
         setErrorCode(faultPublisherDTO.getErrorCode());

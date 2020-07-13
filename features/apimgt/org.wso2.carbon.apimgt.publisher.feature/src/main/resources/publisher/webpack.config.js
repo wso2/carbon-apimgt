@@ -18,13 +18,15 @@
  */
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
 
 const config = {
     entry: { index: './source/index.jsx', swaggerWorkerInit: './source/src/app/webWorkers/swaggerWorkerInit.js' },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
-        filename: '[name].bundle.js',
-        chunkFilename: '[name].bundle.js',
+        filename: '[name].[contenthash].bundle.js',
+        chunkFilename: '[name].[contenthash].bundle.js',
         publicPath: 'site/public/dist/',
     },
     node: {
@@ -97,7 +99,11 @@ const config = {
         Config: 'AppConfig',
         Settings: 'Settings',
     },
-    plugins: [new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: [] })],
+    plugins: [
+        new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: [] }),
+        new CleanWebpackPlugin(),
+        new ManifestPlugin(),
+    ],
 };
 
 // Note: for more info about monaco plugin: https://github.com/Microsoft/monaco-editor-webpack-plugin

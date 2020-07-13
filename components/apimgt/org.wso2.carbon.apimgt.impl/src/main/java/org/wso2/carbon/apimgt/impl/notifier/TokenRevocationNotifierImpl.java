@@ -50,7 +50,9 @@ import java.util.Properties;
 public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
 
     private static final Log log = LogFactory.getLog(TokenRevocationNotifierImpl.class);
-    private final String DEFAULT_TTL = "3600";
+    protected final String DEFAULT_TTL = "3600";
+    protected Properties realTimeNotifierProperties;
+    protected Properties persistentNotifierProperties;
 
     /**
      * Method to publish the revoked token on to the realtime message broker
@@ -61,9 +63,13 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     @Override
     public void sendMessageOnRealtime(String revokedToken, Properties properties) {
         //Variables related to Realtime Notifier
-        String realtimeNotifierTTL = properties.getProperty("ttl", DEFAULT_TTL);
+        String realtimeNotifierTTL = realTimeNotifierProperties.getProperty("ttl", DEFAULT_TTL);
         long expiryTimeForJWT = Long.parseLong(properties.getProperty("expiryTime"));
-        Object[] objects = new Object[]{revokedToken, realtimeNotifierTTL, expiryTimeForJWT};
+        String eventId = properties.getProperty(APIConstants.NotificationEvent.EVENT_ID);
+        String tokenType = properties.getProperty(APIConstants.NotificationEvent.TOKEN_TYPE);
+        int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
+        Object[] objects =
+                new Object[]{eventId, revokedToken, realtimeNotifierTTL, expiryTimeForJWT, tokenType, tenantId};
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
         APIUtil.publishEventToEventHub(Collections.EMPTY_MAP, tokenRevocationMessage);
@@ -121,5 +127,12 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         } catch (IOException e) {
             log.error("Error while sending revoked token to the persistent storage :", e);
         }
+    }
+
+    @Override
+    public void init(Properties realTimeNotifierProperties, Properties persistentNotifierProperties) {
+
+        this.realTimeNotifierProperties = realTimeNotifierProperties;
+        this.persistentNotifierProperties = persistentNotifierProperties;
     }
 }

@@ -18,6 +18,8 @@
  *
  */
 var path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
 
 const config = {
     entry: {
@@ -25,8 +27,8 @@ const config = {
     },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
-        filename: '[name].bundle.js',
-        chunkFilename: '[name].bundle.js',
+        filename: '[name].[contenthash].bundle.js',
+        chunkFilename: '[name].[contenthash].bundle.js',
         publicPath: 'site/public/dist/',
     },
     watch: false,
@@ -89,7 +91,10 @@ const config = {
         Settings: 'Settings',
         MaterialIcons: 'MaterialIcons',
     },
-    plugins: [],
+    plugins: [
+        new CleanWebpackPlugin(),
+        new ManifestPlugin(),
+    ],
 };
 
 if (process.env.NODE_ENV === 'development') {

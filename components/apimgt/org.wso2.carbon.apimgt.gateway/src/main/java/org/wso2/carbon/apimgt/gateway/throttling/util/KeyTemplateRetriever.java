@@ -30,6 +30,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -63,7 +64,8 @@ public class KeyTemplateRetriever extends TimerTask {
     private String[] retrieveKeyTemplateData() {
 
         try {
-            String url = getEventHubConfiguration().getServiceUrl() + "/keyTemplates";
+            String url = getEventHubConfiguration().getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP).concat(
+                    "/keyTemplates");
             byte[] credentials = Base64.encodeBase64(
                     (getEventHubConfiguration().getUsername() + ":" + getEventHubConfiguration().getPassword())
                             .getBytes(StandardCharsets.UTF_8));

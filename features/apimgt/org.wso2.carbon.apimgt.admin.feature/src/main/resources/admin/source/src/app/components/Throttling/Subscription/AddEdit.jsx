@@ -49,6 +49,9 @@ import API from 'AppData/api';
 import Joi from '@hapi/joi';
 
 const useStyles = makeStyles((theme) => ({
+    root: {
+        marginBottom: theme.spacing(10),
+    },
     error: {
         color: theme.palette.error.dark,
     },
@@ -56,6 +59,10 @@ const useStyles = makeStyles((theme) => ({
         paddingBottom: theme.spacing(4),
     },
     radioGroup: {
+        display: 'flex',
+        flexDirection: 'row',
+    },
+    radioGroupBilling: {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
@@ -530,14 +537,17 @@ function AddEdit(props) {
     return (
         <ContentBase
             pageStyle='half'
-            title={
-                intl.formatMessage({
-                    id: 'Throttling.Subscription.AddEdit.title.main',
-                    defaultMessage: 'Subscription Rate Limiting Policy',
+            title={isEdit
+                ? intl.formatMessage({
+                    id: 'Throttling.Subscription.AddEdit.title.edit',
+                    defaultMessage: 'Subscription Rate Limiting Policy - Edit',
                 })
-            }
+                : intl.formatMessage({
+                    id: 'Throttling.Subscription.AddEdit.title.add',
+                    defaultMessage: 'Subscription Rate Limiting Policy - Create new',
+                })}
         >
-            <Box component='div' m={2}>
+            <Box component='div' m={2} className={classes.root}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12} lg={3}>
                         <Box display='flex' flexDirection='row' alignItems='center'>
@@ -943,7 +953,7 @@ function AddEdit(props) {
                                         name='billingPlan'
                                         value={billingPlan}
                                         onChange={onChange}
-                                        className={classes.radioGroup}
+                                        className={classes.radioGroupBilling}
                                     >
                                         <FormControlLabel
                                             value='FREE'
@@ -1134,7 +1144,7 @@ function AddEdit(props) {
                                 alignItems='center'
                                 className={classes.toggleSwitchPadding}
                             >
-                                <Box flex='1'>
+                                <Box flex='0.65'>
                                     <Typography color='inherit' variant='body1' component='div'>
                                         <FormattedMessage
                                             id='Throttling.Subscription.stop.quota.reach'

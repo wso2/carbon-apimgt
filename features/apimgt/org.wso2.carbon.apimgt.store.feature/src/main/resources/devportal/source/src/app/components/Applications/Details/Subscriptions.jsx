@@ -146,7 +146,12 @@ const styles = (theme) => ({
     },
     clearSearchIcon: {
         cursor: 'pointer',
-    }
+    },
+    subsTable: {
+        '& td': {
+            padding: '4px 8px',
+        },
+    },
 });
 /**
  *
@@ -440,7 +445,7 @@ class Subscriptions extends React.Component {
                                             {subscriptionsNotFound ? (
                                                 <ResourceNotFound />
                                             ) : (
-                                                    <Table>
+                                                    <Table className={classes.subsTable}>
                                                         <TableHead>
                                                             <TableRow>
                                                                 <TableCell className={classes.firstCell}>
@@ -475,12 +480,6 @@ class Subscriptions extends React.Component {
                                                                         defaultMessage='Action'
                                                                     />
                                                                 </TableCell>
-                                                                <TableCell>
-                                                                    <FormattedMessage
-                                                                        id='Applications.Details.Subscriptions.invoice'
-                                                                        defaultMessage='Invoice'
-                                                                    />
-                                                                </TableCell>
                                                             </TableRow>
                                                         </TableHead>
                                                         <TableBody>
@@ -507,8 +506,6 @@ class Subscriptions extends React.Component {
                         aria-labelledby='simple-dialog-title'
                         open={openDialog}
                         maxWidth='lg'
-                        fullWidth
-                        fullScreen
                         className={classes.subscribePop}
                     >
                         <MuiDialogTitle disableTypography className={classes.dialogTitle}>

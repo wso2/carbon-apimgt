@@ -94,14 +94,14 @@ public class SubscriptionUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
         try {
             if (subscriptionWorkflowDTO.getStatus() == WorkflowStatus.APPROVED) {
                 apiMgtDAO.updateSubscriptionStatusAndTier(Integer.parseInt(subscriptionWorkflowDTO.getWorkflowReference()),
-                        APIConstants.SubscriptionStatus.UNBLOCKED, subscriptionWorkflowDTO.getRequestedTierName());
+                        APIConstants.SubscriptionStatus.UNBLOCKED);
             } else if (subscriptionWorkflowDTO.getStatus() == WorkflowStatus.CREATED ||
                     subscriptionWorkflowDTO.getStatus() == WorkflowStatus.REGISTERED) {
                 apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(subscriptionWorkflowDTO.getWorkflowReference()),
                         APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING);
             } else if (subscriptionWorkflowDTO.getStatus() == WorkflowStatus.REJECTED) {
-                apiMgtDAO.updateSubscriptionStatusAndTier(Integer.parseInt(subscriptionWorkflowDTO.getWorkflowReference()),
-                        APIConstants.SubscriptionStatus.UNBLOCKED, subscriptionWorkflowDTO.getTierName());
+                apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(subscriptionWorkflowDTO.getWorkflowReference()),
+                        APIConstants.SubscriptionStatus.UNBLOCKED);
             }
         } catch (APIManagementException e) {
             log.error("Could not complete subscription update workflow", e);

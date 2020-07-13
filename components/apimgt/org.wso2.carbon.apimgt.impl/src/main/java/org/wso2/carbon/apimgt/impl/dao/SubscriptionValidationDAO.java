@@ -420,7 +420,7 @@ public class SubscriptionValidationDAO {
         List<Subscription> subscriptions = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTIONS_SQL);
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTIONS_SQL)
         ) {
             int tenantId = 0;
             try {
@@ -431,7 +431,7 @@ public class SubscriptionValidationDAO {
             }
             ps.setInt(1, tenantId);
 
-            try (ResultSet resultSet = ps.executeQuery();) {
+            try (ResultSet resultSet = ps.executeQuery()) {
                 populateSubscriptionsList(subscriptions, resultSet);
             }
         } catch (SQLException e) {

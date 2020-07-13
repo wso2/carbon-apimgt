@@ -71,6 +71,28 @@
         </datasource>
 {% endif%}
 
+{% if database.sync_runtime_artifacts_db is defined %}
+        <datasource>
+            <name>WSO2AS_DB</name>
+            <description>The datasource used for Artifact synchronizer feature</description>
+            <jndiConfig>
+                <name>jdbc/WSO2AS_DB</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>{{database.sync_runtime_artifacts_db.url}}</url>
+                    <username>{{database.sync_runtime_artifacts_db.username}}</username>
+                    <password>{{database.sync_runtime_artifacts_db.password}}</password>
+                    <driverClassName>{{database.sync_runtime_artifacts_db.driver}}</driverClassName>
+                    <validationQuery>{{database.sync_runtime_artifacts_db.validationQuery}}</validationQuery>
+                    {% for property_name,property_value in database.sync_runtime_artifacts_db.pool_options.items() %}
+                    <{{property_name}}>{{property_value}}</{{property_name}}>
+                    {% endfor %}
+                </configuration>
+            </definition>
+        </datasource>
+{% endif%}
+
 {% if database.config is defined %}
         <datasource>
             <name>WSO2CONFIG_DB</name>

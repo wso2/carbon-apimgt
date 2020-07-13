@@ -46,13 +46,11 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Condition;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
-import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataStoreImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
-import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -60,9 +58,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -285,10 +281,9 @@ public class APIKeyValidationService {
      * @param version API Version
      * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
      * authorized, tier information will be <pre>null</pre>
-     * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
     public ArrayList<URITemplate> getAllURITemplates(String context, String version)
-            throws APIKeyMgtException, APIManagementException {
+            throws APIManagementException {
         Timer timer6 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_URI_TEMPLATE"));
         Timer.Context timerContext6 = timer6.start();
@@ -307,6 +302,7 @@ public class APIKeyValidationService {
     }
 
     private ArrayList<URITemplate> getTemplates(String context, String version) throws APIManagementException {
+
         String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -314,30 +310,26 @@ public class APIKeyValidationService {
         ArrayList<URITemplate> templates = new ArrayList<URITemplate>();
 
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        if(store == null) {
+        if (store == null) {
             return templates;
         }
-        SubscriptionDataStoreImpl storeImpl = (SubscriptionDataStoreImpl) store; // TODO move to interface
-        API api;
-        if (storeImpl.isApisInitialized()) {
-            log.debug("SubscriptionDataStore Initialized. Reading from SubscriptionDataStore");
-            api = store.getApiByContextAndVersion(context, version);
-        } else {
-            log.debug("SubscriptionDataStore not Initialized. Reading from Rest API");
+        API api = store.getApiByContextAndVersion(context, version);
+        if (api == null) {
+            log.debug("SubscriptionDataStore didn't contains API metadata reading from rest api context: " + context +
+                    " And version " + version);
             api = new SubscriptionDataLoaderImpl().getApi(context, version);
             if (api != null) {
                 store.addOrUpdateAPI(api);
-                if(log.isDebugEnabled()) {
+                if (log.isDebugEnabled()) {
                     log.debug("Update SubscriptionDataStore api for " + api.getCacheKey());
                 }
             }
         }
-
-        if(api == null || api.getApiId() == 0) {
+        if (api == null || api.getApiId() == 0) {
             return templates;
         }
         List<URLMapping> mapping = api.getResources();
-        if(mapping == null || mapping.isEmpty()) {
+        if (mapping == null || mapping.isEmpty()) {
             return templates;
         }
         int apiTenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(api.getApiProvider()));
@@ -352,8 +344,8 @@ public class APIKeyValidationService {
             template.setAuthType(urlMapping.getAuthScheme());
             template.setUriTemplate(urlMapping.getUrlPattern());
             template.setThrottlingTier(urlMapping.getThrottlingPolicy());
-            
-            if (storeImpl.isApiPoliciesInitialized()) {
+
+            if (store.isApiPoliciesInitialized()) {
                 log.debug("SubscriptionDataStore Initialized. Reading API Policies from SubscriptionDataStore");
                 apiPolicy = store.getApiPolicyByName(urlMapping.getThrottlingPolicy(), apiTenantId);
                 if (apiPolicy == null) {
@@ -367,7 +359,7 @@ public class APIKeyValidationService {
                             log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
                         }
                     }
-                    
+
                 }
             } else {
                 log.debug("SubscriptionDataStore not Initialized. Reading API Policies from Rest API");
@@ -380,12 +372,12 @@ public class APIKeyValidationService {
                     }
                 }
             }
-            
+
             List<String> tiers = new ArrayList<String>();
             tiers.add(urlMapping.getThrottlingPolicy() + ">" + apiPolicy.isContentAware());
             template.setThrottlingTiers(tiers);
             template.setApplicableLevel(apiPolicy.getApplicableLevel());
-            
+
             List<APIPolicyConditionGroup> conditions = apiPolicy.getConditionGroups();
             List<ConditionGroupDTO> conditionGroupsList = new ArrayList<ConditionGroupDTO>();
             for (APIPolicyConditionGroup cond : conditions) {
@@ -404,7 +396,7 @@ public class APIKeyValidationService {
                 }
                 ConditionGroupDTO group = new ConditionGroupDTO();
                 group.setConditionGroupId("_condition_" + cond.getConditionGroupId());
-                group.setConditions(conditionDtoList.toArray(new ConditionDTO[] {}));
+                group.setConditions(conditionDtoList.toArray(new ConditionDTO[]{}));
                 conditionGroupsList.add(group);
             }
             ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
@@ -412,8 +404,8 @@ public class APIKeyValidationService {
             conditionGroupsList.add(defaultGroup);
             template.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
             template.setConditionGroups(conditionGroupsList.toArray(new ConditionGroupDTO[]{}));
-            
-            templates.add(template);  
+
+            templates.add(template);
         }
         return templates;
     }

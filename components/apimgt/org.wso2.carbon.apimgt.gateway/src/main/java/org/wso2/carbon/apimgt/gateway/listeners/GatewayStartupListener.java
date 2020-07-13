@@ -32,15 +32,20 @@ import org.wso2.carbon.core.ServerStartupObserver;
 /**
  * Class for loading synapse artifacts to memory on initial server startup
  */
-public class GatewayStartupListener implements ServerStartupObserver, ServerShutdownHandler {
 
-    private Log log = LogFactory.getLog(GatewayStartupListener.class);
-
+public class GatewayStartupListener implements ServerStartupObserver, Runnable, ServerShutdownHandler {
+    private static final Log log = LogFactory.getLog(GatewayStartupListener.class);
     private JMSTransportHandler jmsTransportHandlerForTrafficManager;
     private JMSTransportHandler jmsTransportHandlerForEventHub;
+    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
+    private boolean isAPIsDeployedInSyncMode = false;
+    private int syncModeDeploymentCount = 0;
+    private int retryCount = 10;
 
     public GatewayStartupListener() {
-
+        gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                        .getGatewayArtifactSynchronizerProperties();
         ThrottleProperties.JMSConnectionProperties jmsConnectionProperties =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getThrottleProperties()
                         .getJmsConnectionProperties();
@@ -57,24 +62,31 @@ public class GatewayStartupListener implements ServerStartupObserver, ServerShut
 
     @Override
     public void completingServerStartup() {
-
-        deployArtifactsAtStartup();
     }
 
-    private static void deployArtifactsAtStartup() {
-
+    private boolean deployArtifactsAtStartup() {
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+        boolean flag = false;
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-            inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(gatewayArtifactSynchronizerProperties.getGatewayLabels());
+            flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(gatewayArtifactSynchronizerProperties
+                    .getGatewayLabels());
         }
+        return flag;
     }
 
     @Override
     public void completedServerStartup() {
-
+        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
+            if (APIConstants.GatewayArtifactSynchronizer.GATEWAY_STARTUP_SYNC
+                    .equals(gatewayArtifactSynchronizerProperties.getGatewayStartup())) {
+                deployAPIsInSyncMode();
+            } else {
+                deployAPIsInAsyncMode();
+            }
+        }
         jmsTransportHandlerForTrafficManager
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
         jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
@@ -84,6 +96,22 @@ public class GatewayStartupListener implements ServerStartupObserver, ServerShut
         jmsTransportHandlerForEventHub
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
     }
+
+    private void deployAPIsInSyncMode() {
+        syncModeDeploymentCount ++;
+        isAPIsDeployedInSyncMode = deployArtifactsAtStartup();
+        if (!isAPIsDeployedInSyncMode) {
+            log.error("Deployment attempt : " + syncModeDeploymentCount + " was unsuccessful") ;
+            if (!(syncModeDeploymentCount > retryCount)) {
+                deployAPIsInSyncMode();
+            } else {
+                log.error("Maximum retry limit exceeded. Server is starting without deploying all synapse artifacts");
+            }
+        } else {
+            log.info("Deployment attempt : " + syncModeDeploymentCount + " was successful");
+        }
+    }
+
 
     @Override
     public void invoke() {
@@ -99,4 +127,40 @@ public class GatewayStartupListener implements ServerStartupObserver, ServerShut
         }
     }
 
+
+    public void deployAPIsInAsyncMode() {
+        new Thread(this).start();
+    }
+
+    @Override
+    public void run() {
+        deployArtifactsInGateway();
+    }
+
+    private void deployArtifactsInGateway() {
+
+        long retryDuration =
+                gatewayArtifactSynchronizerProperties.getRetryDuartion();
+        double reconnectionProgressionFactor = 2.0;
+        long maxReconnectDuration = 1000 * 60 * 60; // 1 hour
+
+        while (true) {
+            boolean isArtifactsDeployed = deployArtifactsAtStartup();
+            if (isArtifactsDeployed) {
+                log.info("Synapse Artifacts deployed Successfully in the Gateway");
+                break;
+            } else {
+                retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
+                if (retryDuration > maxReconnectDuration) {
+                    retryDuration = maxReconnectDuration;
+                }
+                log.error("Unable to deploy synapse artifacts at gateway. Next retry in " + (retryDuration / 1000)
+                        + " seconds");
+                try {
+                    Thread.sleep(retryDuration);
+                } catch (InterruptedException ignore) {
+                }
+            }
+        }
+    }
 }
