@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -188,5 +189,28 @@ public class InMemoryAPIDeployer {
             }
         }
         return gatewayAPIDTO;
+    }
+
+
+    /**
+     * Retrieve artifacts from the storage
+     *
+     *@param apiName - Name of the API
+     *@param version - version of the API
+     *@param tenantDomain - Tenant Domain of the API
+     * @return Map that contains the UUID and label of the API
+     */
+    public Map <String, String> getGatewayAPIAttributes(String apiName, String version, String tenantDomain) {
+        Map<String, String> apiAttributes = null;
+        if (artifactRetriever != null) {
+            try {
+                apiAttributes = artifactRetriever.retrieveAttributes(apiName, version, tenantDomain);
+            } catch (ArtifactSynchronizerException e) {
+                log.error("Error retrieving artifacts of " + apiName + " from storage", e);
+            }
+        } else {
+            log.error("Artifact retriever not found");
+        }
+        return apiAttributes;
     }
 }

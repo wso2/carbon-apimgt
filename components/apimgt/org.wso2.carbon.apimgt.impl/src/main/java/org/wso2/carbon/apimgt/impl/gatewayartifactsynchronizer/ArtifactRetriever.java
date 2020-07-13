@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is a Artifact Retriever type. this interface let users to retriever API artifacts from a storage.
@@ -46,6 +47,18 @@ public interface ArtifactRetriever {
      */
     String retrieveArtifact(String APIId, String gatewayLabel, String gatewayInstruction)
             throws ArtifactSynchronizerException, IOException;
+
+    /**
+     * This method is used to retrieve data from the storage
+     *
+     * @param apiName        - Name of the API
+     * @param version        - version of the API
+     * @param tenantDomain   - Tenant Domain of the API
+     * @return A Map conatin APIId and label associated with
+     * @throws ArtifactSynchronizerException if there are any errors when retrieving the Attributes
+     */
+    Map<String, String> retrieveAttributes(String apiName, String version, String tenantDomain)
+            throws ArtifactSynchronizerException;
 
     /**
      * This method is used to retrieve data from the storage
