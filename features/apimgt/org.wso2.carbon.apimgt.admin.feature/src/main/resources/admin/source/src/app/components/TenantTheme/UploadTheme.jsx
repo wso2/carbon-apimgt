@@ -115,7 +115,7 @@ const useStyles = makeStyles((theme) => ({
 function UploadTheme() {
     const classes = useStyles();
     const [themeFile, setThemeFile] = useState([]);
-    const [fileName, setFileName] = useState('');
+    const [fileName, setFileName] = useState();
     const [isFileAccepted, setIsFileAccepted] = useState(false);
     const [isUploadUnsuccessful, setIsUploadUnsuccessful] = useState(false);
     const intl = useIntl();
@@ -140,9 +140,7 @@ function UploadTheme() {
      */
     const handleDownloadTenantTheme = () => {
         const tenantThemeContent = restApi.exportTenantTheme();
-        tenantThemeContent.then((response) => {
-            Utils.forceDownload(response);
-        })
+        tenantThemeContent.then(Utils.forceDownload)
             .catch(() => {
                 Alert.error(intl.formatMessage({
                     id: 'TenantTheme.Upload.Theme.download.error',
@@ -229,7 +227,8 @@ function UploadTheme() {
                         </div>
                     </InlineMessage>
                 </Paper>
-                {(fileName !== '') && (
+                {console.log('fileName', fileName)}
+                {fileName && (
                     <Paper className={classes.downloadPaper}>
                         <div>
                             <Button size='large' className={classes.button} onClick={handleDownloadTenantTheme}>
