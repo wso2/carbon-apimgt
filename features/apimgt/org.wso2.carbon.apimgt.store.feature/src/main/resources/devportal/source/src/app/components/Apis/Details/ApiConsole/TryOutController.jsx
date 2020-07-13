@@ -589,7 +589,7 @@ function TryOutController(props) {
                                     }}
                                 />
                             )}
-                            {securitySchemeType === 'BASIC' && securitySchemeType !== 'TEST' && (
+                            {securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST' && (
                                 <>
                                     <Button
                                         onClick={securitySchemeType === 'API-KEY' ? generateApiKey

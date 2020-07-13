@@ -42,6 +42,9 @@ const useStyles = makeStyles((theme) => ({
     hr: {
         border: 'solid 1px #efefef',
     },
+    root: {
+        marginBottom: theme.spacing(15),
+    },
 }));
 
 
@@ -105,6 +108,7 @@ function AddEdit(props) {
     const [saving, setSaving] = useState(false);
     const intl = useIntl();
     const { match: { params: { id } }, history } = props;
+    const editMode = id !== undefined;
     const initialState = {
         policyName: '',
         description: '',
@@ -268,15 +272,15 @@ function AddEdit(props) {
             title={
                 id ? `${intl.formatMessage({
                     id: 'Throttling.Advanced.AddEdit.title.edit',
-                    defaultMessage: 'Advanced Throttle Policy - Edit ',
+                    defaultMessage: 'Advance Rate Limiting Policy - Edit ',
                 })} ${policyName}` : intl.formatMessage({
                     id: 'Throttling.Advanced.AddEdit.title.new',
-                    defaultMessage: 'Advanced Throttle Policy - Create new',
+                    defaultMessage: 'Advanced Rate Limiting Policy - Create new',
                 })
             }
             help={<HelpLinks />}
         >
-            <Box component='div' m={2}>
+            <Box component='div' m={2} className={classes.root}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12} lg={3}>
                         <Typography color='inherit' variant='subtitle2' component='div'>
@@ -299,6 +303,7 @@ function AddEdit(props) {
                                 autoFocus
                                 margin='dense'
                                 name='policyName'
+                                disabled={editMode}
                                 value={policyName}
                                 onChange={onChange}
                                 label={(

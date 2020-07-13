@@ -94,8 +94,14 @@ const createAppStep = (props) => {
 
     const createApplication = () => {
         const api = new API();
-        validateName(applicationRequest.name)
-            .then(() => api.createApplication(applicationRequest))
+        if (!applicationRequest.name || applicationRequest.name.trim() === '') {
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'Application name is required',
+                id: 'Apis.Details.Credentials.Wizard.CreateAppStep.application.name.is.required',
+            }));
+            return;
+        }
+        api.createApplication(applicationRequest)
             .then((response) => {
                 const data = response.body;
                 if (data.status === APPLICATION_STATES.APPROVED) {

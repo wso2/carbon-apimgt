@@ -31,7 +31,7 @@ public class APIPolicyConditionGroup {
     private int policyId = -1;
     private String quotaType;
     private int conditionGroupId = -1;
-    private Set<ConditionDTO> conditionDTOS;
+    private Set<Condition> condition;
 
     public int getPolicyId() {
 
@@ -63,14 +63,14 @@ public class APIPolicyConditionGroup {
         this.quotaType = quotaType;
     }
 
-    public Set<ConditionDTO> getConditionDTOS() {
+    public Set<Condition> getCondition() {
 
-        return conditionDTOS;
+        return condition;
     }
 
-    public void setConditionDTOS(Set<ConditionDTO> conditionDTOS) {
+    public void setCondition(Set<Condition> condition) {
 
-        this.conditionDTOS = conditionDTOS;
+        this.condition = condition;
     }
 
     public boolean isContentAware() {
@@ -78,8 +78,8 @@ public class APIPolicyConditionGroup {
         if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaType)) {
             return true;
         }
-        if (conditionDTOS != null) {
-            conditionDTOS.stream().anyMatch(conditionDTO ->
+        if (condition != null) {
+            condition.stream().anyMatch(conditionDTO ->
                     PolicyConstants.BANDWIDTH_TYPE.equals(quotaType)
             );
             return false;

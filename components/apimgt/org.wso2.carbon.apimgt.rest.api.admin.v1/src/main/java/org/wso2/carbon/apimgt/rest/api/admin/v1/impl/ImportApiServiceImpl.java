@@ -112,6 +112,9 @@ public class ImportApiServiceImpl implements ImportApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError("Requested " + RestApiConstants.RESOURCE_API + " not found",
                         e, log);
+            } else if (RestApiUtil.isDueToMetaInfoIsCorrupted(e)) {
+                RestApiUtil.handleMetaInformationFailureError("Error while reading API meta information from path.",
+                        e, log);
             }
             RestApiUtil.handleInternalServerError("Error while importing API", e, log);
         }
@@ -327,7 +330,8 @@ public class ImportApiServiceImpl implements ImportApiService {
         apiKey.setConsumerKey(oAuthApplicationInfo.getClientId());
         apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
         apiKey.setGrantTypes((String) oAuthApplicationInfo.getParameter(GRANT_TYPES));
-        if (apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey.getGrantTypes().contains(GRANT_TYPE_CODE)) {
+        if (apiKey.getGrantTypes() != null &&
+                apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey.getGrantTypes().contains(GRANT_TYPE_CODE)) {
             apiKey.setCallbackUrl((String) oAuthApplicationInfo.getParameter(REDIRECT_URIS));
         }
 

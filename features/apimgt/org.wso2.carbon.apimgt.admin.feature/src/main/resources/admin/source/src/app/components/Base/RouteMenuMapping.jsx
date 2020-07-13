@@ -25,7 +25,6 @@ import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 import HomeIcon from '@material-ui/icons/Home';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
-import DemoTable from 'AppComponents/AdminPages/Microgateways/List';
 import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
 import SubscriptionThrottlingPolicies from 'AppComponents/Throttling/Subscription/index';
 import APICategories from 'AppComponents/APICategories/ListApiCategories';
@@ -39,6 +38,8 @@ import ListDetectedBotData from 'AppComponents/BotDetection/DetectedBotData/List
 import ListEmails from 'AppComponents/BotDetection/EmailConfig/ListEmails';
 import KeyManagers from 'AppComponents/KeyManagers';
 import ManageAlerts from 'AppComponents/ManageAlerts/ManageAlerts.jsx';
+import ListRoles from 'AppComponents//RolePermissions/ListRoles.jsx';
+
 import GamesIcon from '@material-ui/icons/Games';
 import CategoryIcon from '@material-ui/icons/Category';
 import AndroidIcon from '@material-ui/icons/Android';
@@ -48,6 +49,7 @@ import BlockIcon from '@material-ui/icons/Block';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import ApplicationCreation from 'AppComponents/Workflow/ApplicationCreation';
 import SubscriptionCreation from 'AppComponents/Workflow/SubscriptionCreation';
+import SubscriptionUpdate from 'AppComponents/Workflow/SubscriptionUpdate';
 import RegistrationCreation from 'AppComponents/Workflow/RegistrationCreation';
 import APIStateChange from 'AppComponents/Workflow/APIStateChange';
 import UserCreation from 'AppComponents/Workflow/UserCreation';
@@ -56,7 +58,6 @@ import SecurityIcon from '@material-ui/icons/Security';
 import TouchAppIcon from '@material-ui/icons/TouchApp';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import AccountTreeIcon from '@material-ui/icons/AccountTree';
-
 
 const RouteMenuMapping = (intl) => [
     {
@@ -191,7 +192,7 @@ const RouteMenuMapping = (intl) => [
     {
         id: intl.formatMessage({
             id: 'Base.RouteMenuMapping.keymanagers',
-            defaultMessage: 'KeyManagers',
+            defaultMessage: 'Key Managers',
         }),
         path: '/settings/key-managers',
         component: KeyManagers,
@@ -282,6 +283,15 @@ const RouteMenuMapping = (intl) => [
                 icon: <TouchAppIcon />,
             },
             {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.subscription.update',
+                    defaultMessage: 'Subscription Update',
+                }),
+                path: '/tasks/subscription-update',
+                component: SubscriptionUpdate,
+                icon: <TouchAppIcon />,
+            },
+            {
                 id: 'Application Registration',
                 path: '/tasks/application-registration',
                 component: RegistrationCreation,
@@ -316,7 +326,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Scope Mapping',
                 }),
                 path: '/settings/scope-mapping',
-                component: DemoTable,
+                component: ListRoles,
                 icon: <AccountTreeIcon />,
             },
             {

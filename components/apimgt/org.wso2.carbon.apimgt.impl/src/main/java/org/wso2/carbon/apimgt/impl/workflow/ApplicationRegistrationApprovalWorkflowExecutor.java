@@ -68,8 +68,11 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
     public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
         workFlowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workFlowDTO);
-        log.info("Application Registration [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO
-                .getExternalWorkflowReference() + "Workflow State : " + workFlowDTO.getStatus());
+        if (log.isDebugEnabled()) {
+            String logMessage = "Application Registration [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO
+                    .getExternalWorkflowReference() + " Workflow State : " + workFlowDTO.getStatus();
+            log.debug(logMessage);
+        }
         if (WorkflowStatus.APPROVED.equals(workFlowDTO.getStatus())) {
             try {
                 generateKeysForApplication((ApplicationRegistrationWorkflowDTO) workFlowDTO);

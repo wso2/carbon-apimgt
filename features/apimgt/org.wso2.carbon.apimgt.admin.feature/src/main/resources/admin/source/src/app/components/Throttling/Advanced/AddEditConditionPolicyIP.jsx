@@ -76,12 +76,10 @@ function validateIPRange(startIP, endIP) {
         let startIp = 0;
         let endIp = 0;
         for (let i = 0; i < 4; i++) {
-            // eslint-disable-next-line no-restricted-properties
-            startIp += startIPBlocks[i] * Math.pow(256, 3 - i);
+            startIp += startIPBlocks[i] * 256 ** (3 - i);
         }
         for (let i = 0; i < 4; i++) {
-            // eslint-disable-next-line no-restricted-properties
-            endIp += endIPBlocks[i] * Math.pow(256, 3 - i);
+            endIp += endIPBlocks[i] * 256 ** (3 - i);
         }
         if (startIp < endIp) {
             return true;
@@ -140,6 +138,7 @@ const useStyles = makeStyles((theme) => ({
     },
     labelRoot: {
         position: 'relative',
+        marginTop: theme.spacing(1.5),
     },
     textFieldLeft: {
         paddingRight: 10,
@@ -284,12 +283,6 @@ function AddEditConditionPolicyIP(props) {
                 {description}
             </DialogContentText>
             <FormControl variant='outlined' className={classes.formControlSelect}>
-                <InputLabel classes={{ root: classes.labelRoot }}>
-                    <FormattedMessage
-                        id='Throttling.Advanced.AddEditConditionPolicyIP.ip.condition.type'
-                        defaultMessage='IP Condition Type'
-                    />
-                </InputLabel>
                 <Select
                     name='ipConditionType'
                     value={ipConditionType}
@@ -309,6 +302,12 @@ function AddEditConditionPolicyIP(props) {
                         />
                     </MenuItem>
                 </Select>
+                <InputLabel classes={{ root: classes.labelRoot }}>
+                    <FormattedMessage
+                        id='Throttling.Advanced.AddEditConditionPolicyIP.ip.condition.type'
+                        defaultMessage='IP Condition Type'
+                    />
+                </InputLabel>
             </FormControl>
             {ipConditionType === 'IPSPECIFIC' ? (
                 <Box display='flex' flexDirection='column'>

@@ -49,6 +49,8 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -481,6 +483,8 @@ public class APIMgtDAOTest {
         apiMgtDAO.addSubscriptionPolicy(policy);
         policy = (SubscriptionPolicy) getSubscriptionPolicy(policyName);
         policy.setDescription("Updated subscription description");
+        policy.setGraphQLMaxComplexity(200);
+        policy.setGraphQLMaxDepth(7);
         apiMgtDAO.updateSubscriptionPolicy(policy);
     }
     @Test
@@ -833,6 +837,8 @@ public class APIMgtDAOTest {
         policy.setDescription("Subscription policy Description");
         policy.setTenantId(6);
         policy.setBillingPlan("FREE");
+        policy.setGraphQLMaxDepth(5);
+        policy.setGraphQLMaxComplexity(100);
         policy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
         policy.setMonetizationPlanProperties(new HashMap<String, String>());
         RequestCountLimit defaultLimit = new RequestCountLimit();
@@ -1506,5 +1512,34 @@ public class APIMgtDAOTest {
         Set<Scope> scopeSet = new HashSet<Scope>();
         scopeSet.add(scope1);
         return scopeSet;
+    }
+
+    @Test
+    public void testGetGraphQLComplexityDetails() throws APIManagementException {
+        APIIdentifier apiIdentifier = new APIIdentifier("RASIKA", "API1", "1.0.0");
+        apiMgtDAO.addOrUpdateComplexityDetails(apiIdentifier, getGraphqlComplexityInfoDetails());
+        GraphqlComplexityInfo graphqlComplexityInfo = apiMgtDAO.getComplexityDetails(apiIdentifier);
+        assertEquals(2,graphqlComplexityInfo.getList().size());
+    }
+
+    private GraphqlComplexityInfo getGraphqlComplexityInfoDetails() {
+        GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();
+
+        CustomComplexityDetails customComplexity1 = new CustomComplexityDetails();
+        customComplexity1.setType("type1");
+        customComplexity1.setField("field1");
+        customComplexity1.setComplexityValue(5);
+
+        CustomComplexityDetails customComplexity2 = new CustomComplexityDetails();
+        customComplexity2.setType("type1");
+        customComplexity2.setField("field2");
+        customComplexity2.setComplexityValue(4);
+
+        List<CustomComplexityDetails> list = new ArrayList<>();
+        list.add(customComplexity1);
+        list.add(customComplexity2);
+        graphqlComplexityInfo.setList(list);
+
+        return graphqlComplexityInfo;
     }
 }

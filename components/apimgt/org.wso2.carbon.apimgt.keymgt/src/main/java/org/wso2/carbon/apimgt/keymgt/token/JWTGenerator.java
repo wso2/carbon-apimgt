@@ -19,27 +19,26 @@ package org.wso2.carbon.apimgt.keymgt.token;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.MethodStats;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.claim.mgt.ClaimManagementException;
 import org.wso2.carbon.claim.mgt.ClaimManagerHandler;
+import org.wso2.carbon.identity.application.common.model.Claim;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataHandler;
 import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataException;
-import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCache;
-import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheEntry;
-import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheKey;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,7 +46,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.commons.collections.MapUtils.isNotEmpty;
 
 @MethodStats
 public class JWTGenerator extends AbstractJWTGenerator {
@@ -82,11 +80,13 @@ public class JWTGenerator extends AbstractJWTGenerator {
         String applicationTier = validationContext.getValidationInfoDTO().getApplicationTier();
         String enduserTenantId = String.valueOf(APIUtil.getTenantId(endUserName));
         String apiName = validationContext.getValidationInfoDTO().getApiName();
-        Application application = getApplicationbyId(Integer.parseInt(applicationId));
+        Application application =
+                getApplicationById(validationContext.getValidationInfoDTO().getSubscriberTenantDomain(),
+                        Integer.parseInt(applicationId));
         String uuid = null;
         Map<String, String> appAttributes = null;
         if (application != null) {
-            appAttributes = application.getApplicationAttributes();
+            appAttributes = application.getAttributes();
             uuid = application.getUUID();
         }
         Map<String, String> claims = new LinkedHashMap<String, String>(20);
@@ -123,75 +123,35 @@ public class JWTGenerator extends AbstractJWTGenerator {
     public Map<String, String> populateCustomClaims(TokenValidationContext validationContext)
             throws APIManagementException {
 
+        Map<String, String> customClaims;
+        Map<String, Object> properties = new HashMap<String, Object>();
+
+        String accessToken = validationContext.getAccessToken();
+        if (accessToken != null) {
+            properties.put(APIConstants.KeyManager.ACCESS_TOKEN, accessToken);
+        } 
+        
+        String username = validationContext.getValidationInfoDTO().getEndUserName();
+        int tenantId = APIUtil.getTenantId(username);
+
+        String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
+        if (!StringUtils.isEmpty(dialectURI)) {
+            properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
+        }
+        String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
+        KeyManager keymanager = KeyManagerHolder.getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId),
+                keymanagerName);
+        customClaims = keymanager.getUserClaims(username, properties);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved claims :" + customClaims);
+        }
+
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {
-            Map<ClaimMapping, String> customClaimsWithMapping = new HashMap<>();
-            Map<String, String> customClaims;
-            //fix for https://github.com/wso2/product-apim/issues/4112
-            String accessToken = validationContext.getAccessToken();
-            String authCode = validationContext.getAuthorizationCode();
-            if (accessToken != null) {
-                AuthorizationGrantCacheEntry cacheEntry = AuthorizationGrantCache.getInstance()
-                        .getValueFromCacheByToken(new AuthorizationGrantCacheKey(accessToken));
-                if (cacheEntry != null) {
-                    customClaimsWithMapping.putAll(cacheEntry.getUserAttributes());
-                }
-            } else if (authCode != null) {
-                AuthorizationGrantCacheEntry cacheEntry = AuthorizationGrantCache.getInstance()
-                        .getValueFromCacheByCode(new AuthorizationGrantCacheKey(authCode));
-                if (cacheEntry != null) {
-                    customClaimsWithMapping.putAll(cacheEntry.getUserAttributes());
-                }
-            } else {
-                customClaimsWithMapping.putAll(validationContext.getUser().getUserAttributes());
-            }
-            String username = validationContext.getValidationInfoDTO().getEndUserName();
-            int tenantId = APIUtil.getTenantId(username);
-
-            customClaims = convertClaimMap(customClaimsWithMapping, username);
-
-            if (isNotEmpty(customClaims)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("The custom claims are retrieved from AuthorizationGrantCache for user : " +
-                            validationContext.getValidationInfoDTO().getEndUserName());
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Custom claims are not available in the AuthorizationGrantCache. Hence will be " +
-                            "retrieved from the user store for user : " +
-                            validationContext.getValidationInfoDTO().getEndUserName());
-                }
-            }
-            // If claims are not found in AuthorizationGrantCache, they will be retrieved from the userstore.
-
-            try {
-
-                if (tenantId != -1) {
-                    UserStoreManager manager = ServiceReferenceHolder.getInstance().
-                            getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
-
-                    String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
-
-                    if (manager.isExistingUser(tenantAwareUserName)) {
-                        customClaims.putAll(claimsRetriever.getClaims(username));
-                        return customClaims;
-                    } else {
-                        if (!customClaims.isEmpty()) {
-                            return customClaims;
-                        } else {
-                            log.warn("User " + tenantAwareUserName + " cannot be found by user store manager");
-                        }
-                    }
-                } else {
-                    log.error("Tenant cannot be found for username: " + username);
-                }
-            } catch (APIManagementException e) {
-                log.error("Error while retrieving claims ", e);
-            } catch (UserStoreException e) {
-                log.error("Error while retrieving user store ", e);
-            }
+            customClaims.putAll(claimsRetriever.getClaims(username));
         }
-        return null;
+        return customClaims;
     }
 
     protected Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes, String username)
@@ -200,8 +160,12 @@ public class JWTGenerator extends AbstractJWTGenerator {
         Map<String, String> userClaims = new HashMap<>();
         Map<String, String> userClaimsCopy = new HashMap<>();
         for (Map.Entry<ClaimMapping, String> entry : userAttributes.entrySet()) {
-            userClaims.put(entry.getKey().getLocalClaim().getClaimUri(), entry.getValue());
-            userClaimsCopy.put(entry.getKey().getLocalClaim().getClaimUri(), entry.getValue());
+            Claim claimObject = entry.getKey().getLocalClaim();
+            if (claimObject == null) {
+                claimObject = entry.getKey().getRemoteClaim();
+            }
+            userClaims.put(claimObject.getClaimUri(), entry.getValue());
+            userClaimsCopy.put(claimObject.getClaimUri(), entry.getValue());
         }
 
         String convertClaimsFromOIDCtoConsumerDialect =

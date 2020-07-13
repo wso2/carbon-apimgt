@@ -52,8 +52,7 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
-import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
-import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
@@ -79,7 +78,6 @@ public class APIHandlerServiceComponent {
     private static final Log log = LogFactory.getLog(APIHandlerServiceComponent.class);
 
     private APIKeyValidatorClientPool clientPool;
-
     private ServiceRegistration registration;
 
     @Activate
@@ -444,6 +442,24 @@ public class APIHandlerServiceComponent {
         ServiceReferenceHolder.getInstance().getArtifactRetriever().disconnect();
         ServiceReferenceHolder.getInstance().setArtifactRetriever(null);
 
+    }
+
+    @Reference(
+            name = "keymanager.data.service",
+            service = KeyManagerDataService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetKeyManagerDataService")
+    protected void setKeyManagerDataService(KeyManagerDataService keymanagerDataService) {
+
+        log.debug("Setting KeyManagerDataService");
+        ServiceReferenceHolder.getInstance().setKeyManagerDataService(keymanagerDataService);
+    }
+
+    protected void unsetKeyManagerDataService(KeyManagerDataService keymanagerDataService) {
+
+        log.debug("Un-setting KeyManagerDataService");
+        ServiceReferenceHolder.getInstance().setKeyManagerDataService(null);
     }
 }
 

@@ -69,9 +69,6 @@
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId;
     systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
-    if (systemApplicationDTO === null) {
-        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
-    }
     var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO !== null) {
         clientId = systemApplicationDTO.getConsumerKey();
@@ -79,9 +76,6 @@
         try {
             lock.acquire();
             systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
-            if (systemApplicationDTO === null) {
-                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
-            }
             if (systemApplicationDTO == null) {
                 var dcrRequestData = {
                     "callbackUrl": callbackUrl,

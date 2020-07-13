@@ -26,13 +26,13 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.keymgt.model.entity.APIList;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.entity.APIList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.APIPolicyList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
@@ -142,7 +142,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         if (responseString != null && !responseString.isEmpty()) {
             apis = (new Gson().fromJson(responseString, APIList.class)).getList();
         }
-        System.out.println("apis :" +  apis.get(0).toString());
+        if (log.isDebugEnabled()) {
+            log.debug("apis :" + apis.get(0).toString());
+        }
         return apis;
     }
 
@@ -218,7 +220,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            subscription = (new Gson().fromJson(responseString, SubscriptionList.class)).getList().get(0);
+            SubscriptionList list = new Gson().fromJson(responseString, SubscriptionList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                subscription = list.getList().get(0);
+            }
         }
         return subscription;
     }
@@ -237,7 +242,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            application = (new Gson().fromJson(responseString, ApplicationList.class)).getList().get(0);
+            ApplicationList list = new Gson().fromJson(responseString, ApplicationList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                application = list.getList().get(0);
+            }
         }
         return application;
     }
@@ -257,7 +265,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            application = (new Gson().fromJson(responseString, ApplicationKeyMappingList.class)).getList().get(0);
+            ApplicationKeyMappingList list = new Gson().fromJson(responseString, ApplicationKeyMappingList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                application = list.getList().get(0); 
+            }
         }
         return application;
     }
@@ -277,58 +288,95 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            api = (new Gson().fromJson(responseString, APIList.class)).getList().get(0);
-
+            APIList list = new Gson().fromJson(responseString, APIList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                api = list.getList().get(0);
+            }
         }
         return api;
     }
 
     @Override
-    public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws DataLoadingException {
+    public SubscriptionPolicy getSubscriptionPolicy(String policyName, String tenantDomain) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES + "?policyName=" +
                 policyName;
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
+        if (log.isDebugEnabled()) {
+            log.debug("getSubscriptionPolicy for " + policyName + " for tenant " + tenantDomain);
+        }
         String responseString;
         try {
-            responseString = invokeService(endPoint, null);
+            responseString = invokeService(endPoint, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-
-            subscriptionPolicy = (new Gson().fromJson(responseString, SubscriptionPolicyList.class)).getList().get(0);
-
+            SubscriptionPolicyList list = new Gson().fromJson(responseString, SubscriptionPolicyList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                subscriptionPolicy = list.getList().get(0);
+            }
         }
         return subscriptionPolicy;
     }
 
     @Override
-    public ApplicationPolicy getApplicationPolicy(String policyName) throws DataLoadingException {
+    public ApplicationPolicy getApplicationPolicy(String policyName, String tenantDomain) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES + "?policyName=" +
                 policyName;
         ApplicationPolicy applicationPolicy = new ApplicationPolicy();
+        if (log.isDebugEnabled()) {
+            log.debug("getApplicationPolicy for " + policyName + " for tenant " + tenantDomain);
+        }
         String responseString;
         try {
-            responseString = invokeService(endPoint, null);
+            responseString = invokeService(endPoint, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            applicationPolicy = (new Gson().fromJson(responseString, ApplicationPolicyList.class)).getList().get(0);
-
+            ApplicationPolicyList list = new Gson().fromJson(responseString, ApplicationPolicyList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                applicationPolicy = list.getList().get(0);
+            }
         }
         return applicationPolicy;
+    }
+    
+    @Override
+    public ApiPolicy getAPIPolicy(String policyName, String tenantDomain) throws DataLoadingException {
+
+        String endPoint = APIConstants.SubscriptionValidationResources.API_POLICIES + "?policyName=" +
+                policyName;
+        ApiPolicy apiPolicy = new ApiPolicy();
+        String responseString;
+        if (log.isDebugEnabled()) {
+            log.debug("getAPIPolicy for " + policyName + " for tenant " + tenantDomain);
+        }
+        try {
+            responseString = invokeService(endPoint, tenantDomain);
+        } catch (IOException e) {
+            String msg = "Error while executing the http client " + endPoint;
+            log.error(msg, e);
+            throw new DataLoadingException(msg, e);
+        }
+        if (responseString != null && !responseString.isEmpty()) {
+            APIPolicyList list = new Gson().fromJson(responseString, APIPolicyList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                apiPolicy = list.getList().get(0);
+            }
+        }
+        return apiPolicy;
     }
 
     private String invokeService(String path, String tenantDomain) throws DataLoadingException, IOException {
 
-        String serviceURLStr = getEventHubConfigurationDto.getServiceUrl();
+        String serviceURLStr = getEventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
         HttpGet method = new HttpGet(serviceURLStr + path);
 
             URL serviceURL = new URL(serviceURLStr + path);
@@ -371,7 +419,11 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 log.error("Could not retrieve subscriptions for tenantDomain : " + tenantDomain);
                 throw new DataLoadingException("Error while retrieving subscription from " + path);
             }
-            return EntityUtils.toString(httpResponse.getEntity(), UTF8);
+            String responseString = EntityUtils.toString(httpResponse.getEntity(), UTF8);
+            if (log.isDebugEnabled()) {
+                log.debug("Response : " + responseString);
+            }
+            return responseString;
 
     }
 

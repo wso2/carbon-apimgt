@@ -10,6 +10,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -23,8 +24,13 @@ import java.util.TimerTask;
 
 public class KeyManagerConfigurationDataRetriever extends TimerTask {
 
-    private Log log = LogFactory.getLog(KeyManagerConfigurationDataRetriever.class);
+    public KeyManagerConfigurationDataRetriever(String tenantDomain) {
 
+        this.tenantDomain = tenantDomain;
+    }
+
+    private Log log = LogFactory.getLog(KeyManagerConfigurationDataRetriever.class);
+    private String tenantDomain;
     @Override
     public void run() {
 
@@ -36,11 +42,13 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                     apiManagerConfiguration.getEventHubConfigurationDto();
             if (eventHubConfigurationDto != null && eventHubConfigurationDto.isEnabled()) {
                 try {
-                    String url = eventHubConfigurationDto.getServiceUrl() + "/keymanagers";
+                    String url = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP)
+                            .concat("/keymanagers");
                     byte[] credentials = Base64.encodeBase64((eventHubConfigurationDto.getUsername() + ":" +
                             eventHubConfigurationDto.getPassword()).getBytes());
                     HttpGet method = new HttpGet(url);
                     method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
+                    method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
                     URL configUrl = new URL(url);
                     int port = configUrl.getPort();
                     String protocol = configUrl.getProtocol();

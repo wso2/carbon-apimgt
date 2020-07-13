@@ -21,7 +21,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,28 +37,19 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
-import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtService;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceStub;
-import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceAPIManagementException;
-import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
-import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
-import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceUserStoreExceptionException;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import javax.cache.Cache;
 import javax.cache.Caching;
 
@@ -78,15 +68,16 @@ public class BasicAuthCredentialValidator {
      *
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    BasicAuthCredentialValidator() throws APISecurityException {
+    public BasicAuthCredentialValidator() throws APISecurityException {
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
         this.getGatewayUsernameCache();
 
         ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+        EventHubConfigurationDto eventHubConfigurationDto = config.getEventHubConfigurationDto();
+        String username = eventHubConfigurationDto.getUsername();
+        String password = eventHubConfigurationDto.getPassword();
+        String url = eventHubConfigurationDto.getServiceUrl();
         if (url == null) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "API key manager URL unspecified");
@@ -94,7 +85,7 @@ public class BasicAuthCredentialValidator {
 
         try {
             apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, url +
-                    "APIKeyMgtRemoteUserStoreMgtService");
+                    "/services/APIKeyMgtRemoteUserStoreMgtService");
             ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setCallTransportCleanup(true);

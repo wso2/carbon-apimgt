@@ -49,16 +49,6 @@ public class ServerStartupListener implements ServerStartupObserver {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         if (apiManagerConfiguration != null) {
-            String defaultKeyManagerRegistration =
-                    apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_DEFAULT_KEY_MANAGER_REGISTRATION);
-            if (StringUtils.isNotEmpty(defaultKeyManagerRegistration) &&
-                    JavaUtils.isTrueExplicitly(defaultKeyManagerRegistration)) {
-                try {
-                    KeyMgtRegistrationService.registerDefaultKeyManager(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-                } catch (APIManagementException e) {
-                    log.error("Error while registering Default Key Manager for SuperTenant", e);
-                }
-            }
             String enableKeyManagerRetrieval =
                     apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_KEY_MANAGER_RETRIVAL);
             if (JavaUtils.isTrueExplicitly(enableKeyManagerRetrieval)) {
@@ -78,8 +68,8 @@ public class ServerStartupListener implements ServerStartupObserver {
         String authenticationEndpointDir = "authenticationendpoint";
         String accountRecoveryEndpointDir = "accountrecoveryendpoint";
         String headerJspFile = "header.jsp";
-        String footerJspFile = "footer.jsp";
-        String titleJspFile = "title.jsp";
+        String footerJspFile = "product-footer.jsp";
+        String titleJspFile = "product-title.jsp";
         String cookiePolicyContentJspFile = "cookie-policy-content.jsp";
         String privacyPolicyContentJspFile = "privacy-policy-content.jsp";
         try {
@@ -142,9 +132,11 @@ public class ServerStartupListener implements ServerStartupObserver {
             throw new IOException("An error occurred while copying file to directory", ex);
         }
     }
-    private void startConfigureKeyManagerConfigurations(){
-        KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever  =
-                new KeyManagerConfigurationDataRetriever();
+
+    private void startConfigureKeyManagerConfigurations() {
+
+        KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever =
+                new KeyManagerConfigurationDataRetriever(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         keyManagerConfigurationDataRetriever.startLoadKeyManagerConfigurations();
     }
 

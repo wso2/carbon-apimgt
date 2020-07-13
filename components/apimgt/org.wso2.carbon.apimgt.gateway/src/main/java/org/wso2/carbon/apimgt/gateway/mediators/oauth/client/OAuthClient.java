@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators.oauth.client;
 
-import com.google.gson.Gson;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +26,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -37,19 +38,34 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+/**
+ * This class represents the client used to request and retrieve OAuth tokens
+ * from an OAuth-protected backend
+ */
 public class OAuthClient {
     private static final Log log = LogFactory.getLog(OAuthClient.class);
-    private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String CONTENT_TYPE_HEADER = "Content-Type";
-    private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
-    private static final String CLIENT_CRED_GRANT_TYPE = "grant_type=client_credentials";
-    private static final String PASSWORD_GRANT_TYPE = "grant_type=password";
-    private static final String REFRESH_TOKEN_GRANT_TYPE = "grant_type=refresh_token";
 
+    /**
+     * Method to generate the access token for an OAuth backend
+     * @param url The token url of the backend
+     * @param clientId The Client ID
+     * @param clientSecret The Client Secret
+     * @param username The username
+     * @param password The password
+     * @param grantType The grant type
+     * @param customParameters The custom parameters JSON Object
+     * @param refreshToken The refresh token
+     * @return TokenResponse object
+     * @throws IOException In the event of a problem parsing the response from the backend
+     * @throws APIManagementException In the event of an unexpected HTTP status code from the backend
+     */
     public static TokenResponse generateToken(String url, String clientId, String clientSecret,
-            String username, String password, String grantType, JSONObject customParameters, String refreshToken)
-            throws IOException, APIManagementException {
+            String username, char[] password, String grantType, JSONObject customParameters, String refreshToken)
+            throws IOException, APIManagementException, ParseException {
         if(log.isDebugEnabled()) {
             log.debug("Initializing token generation request: [token-endpoint] " + url);
         }
@@ -63,17 +79,17 @@ public class OAuthClient {
                 .getHttpClient(urlObject.getPort(), urlObject.getProtocol())) {
             HttpPost httpPost = new HttpPost(url);
             // Set authorization header
-            httpPost.setHeader(AUTHORIZATION_HEADER, "Basic " + credentials);
-            httpPost.setHeader(CONTENT_TYPE_HEADER, APPLICATION_X_WWW_FORM_URLENCODED);
+            httpPost.setHeader(APIConstants.OAuthConstants.AUTHORIZATION_HEADER, "Basic " + credentials);
+            httpPost.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.OAuthConstants.APPLICATION_X_WWW_FORM_URLENCODED);
             if (refreshToken != null) {
-                payload.append(REFRESH_TOKEN_GRANT_TYPE)
+                payload.append(APIConstants.OAuthConstants.REFRESH_TOKEN_GRANT_TYPE)
                         .append("&refresh_token=").append(refreshToken);
             } else if (grantType.equals(APIConstants.OAuthConstants.CLIENT_CREDENTIALS)) {
-                payload.append(CLIENT_CRED_GRANT_TYPE);
+                payload.append(APIConstants.OAuthConstants.CLIENT_CRED_GRANT_TYPE);
             } else if (grantType.equals(APIConstants.OAuthConstants.PASSWORD)) {
-                payload.append(PASSWORD_GRANT_TYPE + "&username=")
+                payload.append(APIConstants.OAuthConstants.PASSWORD_GRANT_TYPE + "&username=")
                         .append(username).append("&password=")
-                        .append(password);
+                        .append(String.valueOf(password));
             }
 
             payload = appendCustomParameters(customParameters, payload);
@@ -88,6 +104,12 @@ public class OAuthClient {
         }
     }
 
+    /**
+     * Method to append the properties from the Custom Parameters JSONObject to the payload
+     * @param customParameters Custom Parameters JSONObject
+     * @param string StringBuilder object containing the existing payload
+     * @return The StringBuilder object with the updated payload
+     */
     private static StringBuilder appendCustomParameters(JSONObject customParameters, StringBuilder string) {
         if (customParameters != null) {
             for(Object keyStr : customParameters.keySet()) {
@@ -98,8 +120,15 @@ public class OAuthClient {
         return string;
     }
 
+    /**
+     * Method to retrieve the token response sent from the backend
+     * @param response CloseableHttpResponse object
+     * @return TokenResponse object containing the details retrieved from the backend
+     * @throws APIManagementException In the event of an unexpected HTTP status code from the backend
+     * @throws IOException In the event of a problem parsing the response from the backend
+     */
     private static TokenResponse getTokenResponse(CloseableHttpResponse response)
-            throws APIManagementException, IOException {
+            throws APIManagementException, IOException, ParseException {
         int responseCode = response.getStatusLine().getStatusCode();
 
         if (!(responseCode == HttpStatus.SC_OK)) {
@@ -115,7 +144,26 @@ public class OAuthClient {
             stringBuilder.append(inputLine);
         }
 
-        TokenResponse tokenResponse = new Gson().fromJson(stringBuilder.toString(), TokenResponse.class);
+        JSONParser parser = new JSONParser();
+        JSONObject jsonResponse = (JSONObject) parser.parse(stringBuilder.toString());
+        TokenResponse tokenResponse = new TokenResponse();
+        if (jsonResponse.containsKey("access_token")) {
+            tokenResponse.setAccessToken((String) jsonResponse.get("access_token"));
+            if (jsonResponse.containsKey("refresh_token")) {
+                tokenResponse.setRefreshToken((String) jsonResponse.get("refresh_token"));
+            }
+            if (jsonResponse.containsKey("scope")) {
+                Set<String> scopeSet = Stream.of( jsonResponse.get("scope").toString().trim()
+                        .split("\\s*,\\s*") ).collect(Collectors.toSet());
+                tokenResponse.setScope(scopeSet);
+            }
+            if (jsonResponse.containsKey("token_type")) {
+                tokenResponse.setTokenType((String) jsonResponse.get("token_type"));
+            }
+            if (jsonResponse.containsKey("expires_in")) {
+                tokenResponse.setExpiresIn( jsonResponse.get("expires_in").toString());
+            }
+        }
         long currentTimeInSeconds = System.currentTimeMillis() / 1000;
         long expiryTimeInSeconds = currentTimeInSeconds + Long.parseLong(tokenResponse.getExpiresIn());
         tokenResponse.setValidTill(expiryTimeInSeconds);
@@ -124,7 +172,11 @@ public class OAuthClient {
             log.debug("Response: [status-code] " + responseCode + " [message] "
                     + stringBuilder.toString());
         }
-        return tokenResponse;
+        if (tokenResponse.getAccessToken() != null) {
+            return tokenResponse;
+        } else {
+            return null;
+        }
     }
 
 }

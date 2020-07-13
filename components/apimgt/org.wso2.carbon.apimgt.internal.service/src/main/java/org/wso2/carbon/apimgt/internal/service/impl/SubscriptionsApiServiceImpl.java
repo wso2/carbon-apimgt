@@ -36,7 +36,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         List<Subscription> subscriptionList = new ArrayList<>();
-
+        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (apiId != null && appId != null) {
             Subscription subscription = subscriptionValidationDAO.getSubscription(apiId, appId);
             if (subscription != null) {

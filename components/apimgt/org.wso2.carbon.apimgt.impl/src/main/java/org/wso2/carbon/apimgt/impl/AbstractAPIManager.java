@@ -3128,6 +3128,10 @@ public abstract class AbstractAPIManager implements APIManager {
                                 oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
                                         storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
                             }
+                            if (StringUtils.isEmpty(oAuthApplicationInfo.getClientSecret()) &&
+                                    StringUtils.isNotEmpty(storedOAuthApplicationInfo.getClientSecret())) {
+                                oAuthApplicationInfo.setClientSecret(storedOAuthApplicationInfo.getClientSecret());
+                            }
                         }
                     }
                     AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);

@@ -312,8 +312,8 @@ class Protected extends Component {
             <MuiThemeProvider theme={theme}>
                 <AppErrorBoundary>
                     {settings ? (
-                        <Base header={header} leftMenu={leftMenu}>
-                            <AppContextProvider value={{ settings, user, isSuperTenant }}>
+                        <AppContextProvider value={{ settings, user, isSuperTenant }}>
+                            <Base header={header} leftMenu={leftMenu}>
                                 <Route>
                                     <Switch>
                                         <Redirect exact from='/' to='/dashboard' />
@@ -327,8 +327,8 @@ class Protected extends Component {
                                         <Route component={ResourceNotFound} />
                                     </Switch>
                                 </Route>
-                            </AppContextProvider>
-                        </Base>
+                            </Base>
+                        </AppContextProvider>
                     ) : (
                         <Progress message='Loading Settings ...' />
                     )}

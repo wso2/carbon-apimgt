@@ -27,6 +27,7 @@
         "autosuggest-highlight": "^3.1.1",
         "base64url": "3.0.1",
         "caniuse-api": "^3.0.0",
+        "clean-webpack-plugin": "^3.0.0",
         "developer_portal": "^1.0.0",
         "downshift": "^3.1.0",
         "draft-js": "^0.10.5",
@@ -63,7 +64,6 @@
         "react-tagsinput": "3.19.0",
         "react-tap-event-plugin": "^2.0.1",
         "react-toastify": "^1.7.0",
-        "react-visibility-sensor": "^5.1.1",
         "swagger-client": "^3.9.4",
         "swagger-parser": "^7.0.1",
         "swagger-ui": "^3.25.0",
@@ -109,6 +109,7 @@
         "webpack": "v4.28.4",
         "webpack-bundle-analyzer": "^2.9.1",
         "webpack-cli": "^3.3.2",
+        "webpack-manifest-plugin": "^2.2.0",
         "worker-loader": "^2.0.0"
     }
 }

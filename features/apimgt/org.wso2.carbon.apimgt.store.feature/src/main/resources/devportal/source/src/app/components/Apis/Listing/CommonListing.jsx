@@ -141,7 +141,7 @@ const styles = (theme) => ({
         transformOrigin: 'left bottom 0',
         position: 'absolute',
         whiteSpace: 'nowrap',
-        top: theme.custom.infoBar.height * 2,
+        top: theme.custom.infoBar.height * 4,
         marginLeft: 23,
         cursor: 'pointer',
     },
@@ -308,7 +308,7 @@ class CommonListing extends React.Component {
                             <Icon>keyboard_arrow_right</Icon>
                         </div>
                         <div className={classes.rotatedText} onClick={this.toggleLeftMenu}>
-                            <FormattedMessage defaultMessage='Tag Cloud' id='Apis.Listing.Listing.ApiTagCloud.title' />
+                            <FormattedMessage defaultMessage='Tag Cloud / API Categories' id='Apis.Listing.Listing.ApiTagCloud.title' />
                         </div>
                     </div>
                 )}
@@ -332,7 +332,11 @@ class CommonListing extends React.Component {
                             </Typography>
                         </div>
                         {this.showToggle && (<div className={classes.buttonRight} id='listGridWrapper'>
-                            <IconButton className={classes.button} onClick={() => this.setListType('list')}>
+                            <IconButton
+                                aria-label='List View'
+                                className={classes.button}
+                                onClick={() => this.setListType('list')}
+                            >
                                 <Icon
                                     className={classNames(
                                         { [classes.iconSelected]: listType === 'list' },
@@ -342,7 +346,11 @@ class CommonListing extends React.Component {
                                     list
                                 </Icon>
                             </IconButton>
-                            <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
+                            <IconButton
+                                aria-label='Grid view'
+                                className={classes.button}
+                                onClick={() => this.setListType('grid')}
+                            >
                                 <Icon
                                     className={classNames(
                                         { [classes.iconSelected]: listType === 'grid' },

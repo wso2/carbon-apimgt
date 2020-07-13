@@ -147,9 +147,9 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
-        Mockito.when(gatewayTokenCache.get(signedJWT.getSignature().toString())).thenReturn("carbon.super");
+        Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
         String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getSignature().toString(), "/api1", "1.0", "/pet/findByStatus",
+                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
                         "GET");
         Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
         authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
@@ -158,7 +158,7 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWT);
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getSignature().toString());
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
     }
 
     @Test
@@ -238,9 +238,9 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
-        Mockito.when(gatewayTokenCache.get(signedJWT.getSignature().toString())).thenReturn("carbon.super");
+        Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
         String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getSignature().toString(), "/api1", "1.0", "/pet/findByStatus",
+                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
                         "GET");
         jwtValidationInfo.setIssuedTime(System.currentTimeMillis() - 100);
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis());
@@ -252,8 +252,8 @@ public class JWTValidatorTest {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         }
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWT);
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getSignature().toString());
-        Mockito.verify(invalidTokenCache, Mockito.times(1)).put(signedJWT.getSignature().toString(), "carbon.super");
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
+        Mockito.verify(invalidTokenCache, Mockito.times(1)).put(signedJWT.getJWTClaimsSet().getJWTID(), "carbon.super");
     }
 
     @Test
@@ -334,9 +334,9 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
-        Mockito.when(gatewayTokenCache.get(signedJWT.getSignature().toString())).thenReturn("abc.com");
+        Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("abc.com");
         String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getSignature().toString(), "/api1", "1.0", "/pet/findByStatus",
+                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
                         "GET");
         jwtValidationInfo.setIssuedTime(System.currentTimeMillis() - 100);
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis());
@@ -348,8 +348,8 @@ public class JWTValidatorTest {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         }
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWT);
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getSignature().toString());
-        Mockito.verify(invalidTokenCache, Mockito.times(1)).put(signedJWT.getSignature().toString(), "abc.com");
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
+        Mockito.verify(invalidTokenCache, Mockito.times(1)).put(signedJWT.getJWTClaimsSet().getJWTID(), "abc.com");
     }
 
     @Test
@@ -429,9 +429,9 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
-        Mockito.when(gatewayTokenCache.get(signedJWT.getSignature().toString())).thenReturn("carbon.super");
+        Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
         String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getSignature().toString(), "/api1", "1.0", "/pet/findByStatus",
+                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
                         "GET");
         Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
         authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
@@ -440,7 +440,7 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWT);
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getSignature().toString());
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
     }
 
     @Test
@@ -515,9 +515,9 @@ public class JWTValidatorTest {
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         }
-        Mockito.when(invalidTokenCache.get(signedJWT.getSignature().toString())).thenReturn("carbon.super");
+        Mockito.when(invalidTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
         String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getSignature().toString(), "/api1", "1.0", "/pet/findByStatus",
+                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
                         "GET");
         try {
             jwtValidator.authenticate(signedJWT, messageContext, openAPI);
@@ -527,7 +527,7 @@ public class JWTValidatorTest {
         Mockito.verify(apiKeyValidator, Mockito.never())
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getSignature().toString());
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
         Mockito.verify(gatewayKeyCache, Mockito.never()).get(cacheKey);
     }
 
@@ -629,23 +629,18 @@ public class JWTValidatorTest {
                         "-N6sqfxLw3haazPN0_xU0T1zJLPRLC5HPfZMJDMGp" +
                         "EuSe9w");
         SignedJWT tempered =
-                SignedJWT.parse("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UZG1aak00WkRrM05qWTBZemM1T" +
-                        "W1abU9EZ3dNVEUzTVdZd05ERTVNV1JsWkRnNE56YzRaQT09In0" +
-                        ".eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV" +
-                        "3YXkiLCJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbWluIiwidGllclF1b3RhVHlwZ" +
-                        "SI6InJlcXVlc3RDb3VudCIsInRpdsfsfsfffhfghfaxxZXIiOiJVbmxpbWl0ZWQiLCJuYW1lIjoiRGVmYXVsdEFwcGxpY2F0aW9uIiwiaWQiOjEsInV1aWQ" +
-                        "iOm51bGx9LCJzY29wZSI6ImFtX2FwcGxpY2F0aW9uX3Njb3BlIGRlZmF1bHQiLCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0" +
-                        "NDNcL29hdXRoMlwvdG9rZW4iLCJ0aWVySW5mbyI6e30sImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdL" +
-                        "CJjb25zdW1lcktleSI6IlhnTzM5NklIRks3ZUZZeWRycVFlNEhLR3oxa2EiLCJleHAiOjE1OTAzNDIzMTMsImlhdCI6MTU5MDMzO" +
-                        "DcxMywianRpIjoiYjg5Mzg3NjgtMjNmZC00ZGVjLThiNzAtYmVkNDVlYjdjMzNkIn0" +
-                        ".sBgeoqJn0log5EZflj_G7ADvm6B3KQ9bdfF" +
-                        "CEFVQS1U3oY9" +
-                        "-cqPwAPyOLLh95pdfjYjakkf1UtjPZjeIupwXnzg0SffIc704RoVlZocAx9Ns2XihjU6Imx2MbXq9ARmQxQkyGVkJ" +
-                        "UMTwZ8" +
-                        "-SfOnprfrhX2cMQQS8m2Lp7hcsvWFRGKxAKIeyUrbY4ihRIA5vOUrMBWYUx9Di1N7qdKA4S3e8O4KQX2VaZPBzN594c9TG" +
-                        "riiH8AuuqnrftfvidSnlRLaFJmko8-QZo8jDepwacaFhtcaPVVJFG4uYP-_" +
-                        "-N6sqfxLw3haazPN0_xU0T1zJLPRLC5HPfZMJDMGp" +
-                        "EuSe9w");
+                SignedJWT
+                        .parse("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UZG1aak00WkRrM05qWTBZemM1TW1abU9EZ3dNVE" +
+                                "UzTVdZd05ERTVNV1JsWkRnNE56YzRaQT09In0.ewogICAiYXVkIjoiaHR0cDpcL1wvb3JnLndzbzIuYXBpbWd" +
+                                "0XC9nYXRld2F5IiwKICAgInN1YiI6ImFkbWluMUBjYXJib24uc3VwZXIiLAogICAic2NvcGUiOiJhbV9hcHBsa" +
+                                "WNhdGlvbl9zY29wZSBkZWZhdWx0IiwKICAgImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dG" +
+                                "gyXC90b2tlbiIsCiAgICJjb25zdW1lcktleSI6IlhnTzM5NklIRks3ZUZZeWRycVFlNEhLR3oxa2EiLAogICA" +
+                                "iZXhwIjoxNTkwMzQyMzEzLAogICAiaWF0IjoxNTkwMzM4NzEzLAogICAianRpIjoiYjg5Mzg3NjgtMjNmZC00" +
+                                "ZGVjLThiNzAtYmVkNDVlYjdjMzNkIgp9.sBgeoqJn0log5EZflj_G7ADvm6B3KQ9bdfFCEFVQS1U3oY9-cqP" +
+                                "wAPyOLLh95pdfjYjakkf1UtjPZjeIupwXnzg0SffIc704RoVlZocAx9Ns2XihjU6Imx2MbXq9ARmQxQkyGVk" +
+                                "JUMTwZ8-SfOnprfrhX2cMQQS8m2Lp7hcsvWFRGKxAKIeyUrbY4ihRIA5vOUrMBWYUx9Di1N7qdKA4S3e8O4K" +
+                                "QX2VaZPBzN594c9TGriiH8AuuqnrftfvidSnlRLaFJmko8-QZo8jDepwacaFhtcaPVVJFG4uYP-_-N6sqf" +
+                                "xLw3haazPN0_xU0T1zJLPRLC5HPfZMJDMGpEuSe9w");
 
         JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
         JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
@@ -705,9 +700,9 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
-        Mockito.when(gatewayTokenCache.get(signedJWT.getSignature().toString())).thenReturn("carbon.super");
+        Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
         String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getSignature().toString(), "/api1", "1.0", "/pet/findByStatus",
+                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
                         "GET");
         Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
         try {
@@ -718,8 +713,8 @@ public class JWTValidatorTest {
         }
         Mockito.verify(jwtValidationService, Mockito.atLeast(2)).validateJWTToken(Mockito.any(SignedJWT.class));
 //        Mockito.verify(jwtValidationService,Mockito.only()).validateJWTToken(tempered);
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getSignature().toString());
-        Mockito.when(invalidTokenCache.get(signedJWT.getSignature().toString())).thenReturn("carbon.super");
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
+        Mockito.when(invalidTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
         try {
             authenticate = jwtValidator.authenticate(tempered, messageContext, openAPI);
             Assert.fail("tempered JWT get authenticated");
@@ -752,23 +747,19 @@ public class JWTValidatorTest {
                         "-N6sqfxLw3haazPN0_xU0T1zJLPRLC5HPfZMJDMGp" +
                         "EuSe9w");
         SignedJWT tempered =
-                SignedJWT.parse("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UZG1aak00WkRrM05qWTBZemM1T" +
-                        "W1abU9EZ3dNVEUzTVdZd05ERTVNV1JsWkRnNE56YzRaQT09In0" +
-                        ".eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV" +
-                        "3YXkiLCJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbWluIiwidGllclF1b3RhVHlwZ" +
-                        "SI6InJlcXVlc3RDb3VudCIsInRpdsfsfsfffhfghfaxxZXIiOiJVbmxpbWl0ZWQiLCJuYW1lIjoiRGVmYXVsdEFwcGxpY2F0aW9uIiwiaWQiOjEsInV1aWQ" +
-                        "iOm51bGx9LCJzY29wZSI6ImFtX2FwcGxpY2F0aW9uX3Njb3BlIGRlZmF1bHQiLCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0" +
-                        "NDNcL29hdXRoMlwvdG9rZW4iLCJ0aWVySW5mbyI6e30sImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdL" +
-                        "CJjb25zdW1lcktleSI6IlhnTzM5NklIRks3ZUZZeWRycVFlNEhLR3oxa2EiLCJleHAiOjE1OTAzNDIzMTMsImlhdCI6MTU5MDMzO" +
-                        "DcxMywianRpIjoiYjg5Mzg3NjgtMjNmZC00ZGVjLThiNzAtYmVkNDVlYjdjMzNkIn0" +
-                        ".sBgeoqJn0log5EZflj_G7ADvm6B3KQ9bdfF" +
-                        "CEFVQS1U3oY9" +
-                        "-cqPwAPyOLLh95pdfjYjakkf1UtjPZjeIupwXnzg0SffIc704RoVlZocAx9Ns2XihjU6Imx2MbXq9ARmQxQkyGVkJ" +
-                        "UMTwZ8" +
-                        "-SfOnprfrhX2cMQQS8m2Lp7hcsvWFRGKxAKIeyUrbY4ihRIA5vOUrMBWYUx9Di1N7qdKA4S3e8O4KQX2VaZPBzN594c9TG" +
-                        "riiH8AuuqnrftfvidSnlRLaFJmko8-QZo8jDepwacaFhtcaPVVJFG4uYP-_" +
-                        "-N6sqfxLw3haazPN0_xU0T1zJLPRLC5HPfZMJDMGp" +
-                        "EuSe9w");
+                SignedJWT
+                        .parse("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UZG1aak00WkRrM05qWTBZemM1TW1abU9EZ3dNVE" +
+                                "UzTVdZd05ERTVNV1JsWkRnNE56YzRaQT09In0.ewogICAiYXVkIjoiaHR0cDpcL1wvb3JnLndzbzIuYXBpbWd" +
+                                "0XC9nYXRld2F5IiwKICAgInN1YiI6ImFkbWluMUBjYXJib24uc3VwZXIiLAogICAic2NvcGUiOiJhbV9hcHBsa" +
+                                "WNhdGlvbl9zY29wZSBkZWZhdWx0IiwKICAgImlzcyI6Imh0dHBzOlwvXC9sb2NhbGhvc3Q6OTQ0M1wvb2F1dG" +
+                                "gyXC90b2tlbiIsCiAgICJjb25zdW1lcktleSI6IlhnTzM5NklIRks3ZUZZeWRycVFlNEhLR3oxa2EiLAogICA" +
+                                "iZXhwIjoxNTkwMzQyMzEzLAogICAiaWF0IjoxNTkwMzM4NzEzLAogICAianRpIjoiYjg5Mzg3NjgtMjNmZC00" +
+                                "ZGVjLThiNzAtYmVkNDVlYjdjMzNkIgp9.sBgeoqJn0log5EZflj_G7ADvm6B3KQ9bdfFCEFVQS1U3oY9-cqP" +
+                                "wAPyOLLh95pdfjYjakkf1UtjPZjeIupwXnzg0SffIc704RoVlZocAx9Ns2XihjU6Imx2MbXq9ARmQxQkyGVk" +
+                                "JUMTwZ8-SfOnprfrhX2cMQQS8m2Lp7hcsvWFRGKxAKIeyUrbY4ihRIA5vOUrMBWYUx9Di1N7qdKA4S3e8O4K" +
+                                "QX2VaZPBzN594c9TGriiH8AuuqnrftfvidSnlRLaFJmko8-QZo8jDepwacaFhtcaPVVJFG4uYP-_-N6sqf" +
+                                "xLw3haazPN0_xU0T1zJLPRLC5HPfZMJDMGpEuSe9w");
+
 
         JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
         JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
@@ -828,9 +819,9 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
-        Mockito.when(gatewayTokenCache.get(signedJWT.getSignature().toString())).thenReturn("abc.com");
+        Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("abc.com");
         String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getSignature().toString(), "/api1", "1.0", "/pet/findByStatus",
+                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
                         "GET");
         Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
         try {
@@ -840,8 +831,8 @@ public class JWTValidatorTest {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         }
         Mockito.verify(jwtValidationService, Mockito.atLeast(2)).validateJWTToken(Mockito.any(SignedJWT.class));
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getSignature().toString());
-        Mockito.when(invalidTokenCache.get(signedJWT.getSignature().toString())).thenReturn("abc.com");
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
+        Mockito.when(invalidTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("abc.com");
         try {
             jwtValidator.authenticate(tempered, messageContext, openAPI);
             Assert.fail("tempered JWT get authenticated");

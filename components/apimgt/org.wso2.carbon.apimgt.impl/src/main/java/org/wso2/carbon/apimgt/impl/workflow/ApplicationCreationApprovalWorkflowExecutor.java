@@ -77,9 +77,11 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
         try {
             if (dao.getApplicationById(Integer.parseInt(workFlowDTO.getWorkflowReference())) != null) {
                 super.complete(workFlowDTO);
-                log.info("Application Creation [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO
-                        .getExternalWorkflowReference() + "Workflow State : " + workFlowDTO.getStatus());
-
+                if (log.isDebugEnabled()) {
+                    String logMessage = "Application Creation [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO
+                            .getExternalWorkflowReference() + " Workflow State : " + workFlowDTO.getStatus();
+                    log.debug(logMessage);
+                }
                 String status = null;
                 if (WorkflowStatus.CREATED.equals(workFlowDTO.getStatus())) {
                     status = APIConstants.ApplicationStatus.APPLICATION_CREATED;

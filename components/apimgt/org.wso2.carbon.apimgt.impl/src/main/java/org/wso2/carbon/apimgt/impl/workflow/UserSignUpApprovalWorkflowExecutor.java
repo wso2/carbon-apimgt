@@ -76,7 +76,7 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         if (log.isDebugEnabled()) {
             log.debug("User Sign Up [Complete] Workflow Invoked. Workflow ID : " +
-                    workflowDTO.getExternalWorkflowReference() + "Workflow State : " +
+                    workflowDTO.getExternalWorkflowReference() + " Workflow State : " +
                     workflowDTO.getStatus());
         }
         super.complete(workflowDTO);

@@ -23,6 +23,7 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import InputLabel from '@material-ui/core/InputLabel';
 import Divider from '@material-ui/core/Divider';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchOutlined from '@material-ui/icons/SearchOutlined';
@@ -58,7 +59,9 @@ function renderInput(inputProps) {
     return (
         <React.Fragment>
             <div className={classes.searchBoxWrap}>
+                <InputLabel className={classes.ariaLabel} htmlFor='searchEnvironment'>Environment</InputLabel>
                 <NativeSelect
+                    id='searchEnvironment'
                     onChange={onDropDownChange}
                     className={classes.selectRoot}
                 >
@@ -81,6 +84,7 @@ function renderInput(inputProps) {
                         {placeholder => <option value='PROTOTYPED'>{placeholder}</option>}
                     </FormattedMessage>
                 </NativeSelect>
+                <InputLabel className={classes.ariaLabel} htmlFor='searchQuery'>Search APIs</InputLabel>
                 <TextField
                     id='searchQuery'
                     classes={{ root: classes.inputRoot }}

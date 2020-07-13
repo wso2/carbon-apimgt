@@ -27,14 +27,14 @@ import java.util.Set;
  * Entity for keeping Application related information. Represents an Application in APIM.
  */
 public class Application implements CacheableEntity<Integer> {
-
+    private String uuid;
     private int id = -1;
     private String name = null;
     private String subName = null;
     private String policy = null;
     private String tokenType = null;
     private Set<String> groupIdList = new HashSet<>();
-    private Map<String, String> attributesMap = new Hashtable<>();
+    private Map<String, String> attributes = new Hashtable<>();
 
     public int getId() {
 
@@ -101,15 +101,25 @@ public class Application implements CacheableEntity<Integer> {
         return getId();
     }
 
-    public Map<String, String> getAttributesMap() {
+    public Map<String, String> getAttributes() {
 
-        return attributesMap;
+        return attributes;
     }
 
     public void addAttribute(String name, String value) {
 
-        if (!this.attributesMap.containsKey(name)) {
-            this.attributesMap.put(name, value);
+        if (!this.attributes.containsKey(name)) {
+            this.attributes.put(name, value);
         }
+    }
+
+    public String getUuid() {
+
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+
+        this.uuid = uuid;
     }
 }

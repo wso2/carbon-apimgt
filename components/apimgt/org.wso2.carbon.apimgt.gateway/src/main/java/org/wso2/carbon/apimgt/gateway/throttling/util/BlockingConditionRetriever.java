@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.gateway.dto.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -59,7 +60,8 @@ public class BlockingConditionRetriever extends TimerTask {
     private BlockConditionsDTO retrieveBlockConditionsData() {
 
         try {
-            String url = getEventHubConfiguration().getServiceUrl() + "/block";
+            String url = getEventHubConfiguration().getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP).concat(
+                    "/block");
             byte[] credentials = Base64.encodeBase64((getEventHubConfiguration().getUsername() + ":" +
                     getEventHubConfiguration().getPassword()).getBytes
                     (StandardCharsets.UTF_8));

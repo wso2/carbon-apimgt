@@ -33,7 +33,7 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
         setApiCreatorTenantDomain(requestResponseStreamDTO.getApiCreatorTenantDomain());
         setApiCreator(requestResponseStreamDTO.getApiCreator());
         setApiResourcePath(requestResponseStreamDTO.getApiResourcePath());
-        setApiResourceTemplate(requestResponseStreamDTO.getApiResourceTemplate());
+        setApiResourceTemplate(DataPublisherUtil.sortGraphQLOperations(requestResponseStreamDTO.getApiResourceTemplate()));
         setApiTier(requestResponseStreamDTO.getApiTier());
         setApiVersion(requestResponseStreamDTO.getApiVersion());
         setApplicationConsumerKey(requestResponseStreamDTO.getApplicationConsumerKey());
@@ -43,7 +43,7 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
         setBackendTime(requestResponseStreamDTO.getBackendTime());
         setDestination(requestResponseStreamDTO.getDestination());
         setExecutionTime(requestResponseStreamDTO.getExecutionTime());
-        setMetaClientType(requestResponseStreamDTO.getMetaClientType()); 
+        setMetaClientType(requestResponseStreamDTO.getMetaClientType());
         setProtocol(requestResponseStreamDTO.getProtocol());
         setRequestTimestamp(requestResponseStreamDTO.getRequestTimestamp());
         setResponseCacheHit(requestResponseStreamDTO.isResponseCacheHit());

@@ -37,7 +37,7 @@ public class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> 
     private static final Log log = LogFactory.getLog(URLValidationInterceptor.class);
     private static String majorVersion = "v1";
     //TODO: Get latest version from swagger
-    private static String latestVersion = "v1.1";
+    private static String latestVersion = "v1.2";
     private String pathSeparator = "/";
     private final String BASE_PATH = "org.apache.cxf.message.Message.BASE_PATH";
     private final String PATH_INFO = "org.apache.cxf.message.Message.PATH_INFO";

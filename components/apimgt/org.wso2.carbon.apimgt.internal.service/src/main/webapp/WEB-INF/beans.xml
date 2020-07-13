@@ -19,7 +19,6 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.IsThrottledApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.BlockApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.RevokedjwtApi"/>
-            <bean class="org.wso2.carbon.apimgt.internal.service.ApikeyApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApisApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApplicationKeyMappingsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApplicationPoliciesApi"/>
@@ -28,6 +27,8 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.SubscriptionPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.KeymanagersApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApiPoliciesApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.SynapseArtifactsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.GatewaySynapseArtifactsApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

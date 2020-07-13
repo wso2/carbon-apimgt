@@ -40,10 +40,8 @@ import Paper from '@material-ui/core/Paper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { FormattedMessage } from 'react-intl';
 import Drawer from '@material-ui/core/Drawer';
-import { ListItemIcon, ListItem, ListItemText, List } from '@material-ui/core';
-import classNames from 'classnames';
 import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
-import Settings from 'AppComponents/Shared/SettingsContext';
+import Settings, { useSettingsContext } from 'AppComponents/Shared/SettingsContext';
 import { app } from 'Settings';
 import ReactSafeHtml from 'react-safe-html';
 import AuthManager from '../../data/AuthManager';
@@ -153,6 +151,10 @@ const styles = (theme) => {
         },
         listRoot: {
             padding: 0,
+        },
+        listRootInline: {
+            padding: 0,
+            display: 'flex',
         },
         listItemTextRoot: {
             padding: 0,
@@ -314,6 +316,11 @@ class Layout extends React.Component {
         }
     };
 
+    getPasswordChangeEnabled = () => {
+        const { settings: { IsPasswordChangeEnabled } } = useSettingsContext();
+        return IsPasswordChangeEnabled;
+    };
+
     /**
      * @inheritdoc
      * @returns {Component}
@@ -388,7 +395,7 @@ class Layout extends React.Component {
                                         <Icon className={classes.menuIcon}>menu</Icon>
                                     </IconButton>
                                 </Hidden>
-                                <Link to='/' id='logoLink'>
+                                <Link to='/' id='logoLink' aria-label='Go to home page'>
                                     <img
                                         alt={(
                                             <FormattedMessage
@@ -478,7 +485,7 @@ class Layout extends React.Component {
                                                 buttonRef={(node) => {
                                                     this.anchorEl = node;
                                                 }}
-                                                aria-owns={open ? 'menu-list-grow' : null}
+                                                aria-owns={this.openUserMenu ? 'menu-list-grow' : null}
                                                 aria-haspopup='true'
                                                 onClick={this.handleToggleUserMenu}
                                                 className={classes.userLink}
@@ -522,22 +529,11 @@ class Layout extends React.Component {
                                                                         >
                                                                             <FormattedMessage
                                                                                 id='Base.index.settingsMenu.alertConfiguration'
-                                                                                defaultMessage='Alert configure'
+                                                                                defaultMessage='Configure Alerts'
                                                                             />
                                                                         </Link>
                                                                     </MenuItem>
-                                                                    <MenuItem className={classes.logoutLink}>
-                                                                        <Link
-                                                                            to={'/settings/change-password/'}
-                                                                            onClick={this.handleCloseUserMenu}
-                                                                        >
-                                                                            <FormattedMessage
-                                                                                id='Base.index.settingsMenu.changePassword'
-                                                                                defaultMessage='Change Password'
-                                                                            />
-                                                                        </Link>
-                                                                    </MenuItem>
-                                                                    {/* {user.name !== 'admin' ?
+                                                                    {this.getPasswordChangeEnabled() ?
                                                                         <MenuItem className={classes.logoutLink}>
                                                                             <Link
                                                                                 to={'/settings/change-password/'}
@@ -550,7 +546,7 @@ class Layout extends React.Component {
                                                                             </Link>
                                                                         </MenuItem> :
                                                                         null
-                                                                    } */}
+                                                                    }
                                                                     <MenuItem onClick={this.doOIDCLogout} className={classes.logoutLink}>
                                                                         <FormattedMessage
                                                                             id='Base.index.logout'

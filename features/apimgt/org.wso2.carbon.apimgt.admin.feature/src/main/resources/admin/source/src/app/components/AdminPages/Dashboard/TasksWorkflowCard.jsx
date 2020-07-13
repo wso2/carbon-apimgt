@@ -30,12 +30,13 @@ import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import DeviceHubIcon from '@material-ui/icons/DeviceHub';
 import DnsRoundedIcon from '@material-ui/icons/DnsRounded';
-import LaunchIcon from '@material-ui/icons/Launch';
 import PeopleIcon from '@material-ui/icons/People';
 import PermMediaOutlinedIcon from '@material-ui/icons/PhotoSizeSelectActual';
 import PublicIcon from '@material-ui/icons/Public';
 import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
-import Configurations from 'Config';
+import Alert from 'AppComponents/Shared/Alert';
+import Api from 'AppData/api';
+import moment from 'moment';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -52,6 +53,16 @@ const useStyles = makeStyles((theme) => ({
         width: theme.spacing(4),
         height: theme.spacing(4),
     },
+    approveButton: {
+        textDecoration: 'none',
+        backgroundColor: theme.palette.success.light,
+        margin: theme.spacing(0.5),
+    },
+    rejectButton: {
+        textDecoration: 'none',
+        backgroundColor: theme.palette.error.light,
+        margin: theme.spacing(0.5),
+    },
 }));
 
 /**
@@ -61,92 +72,62 @@ const useStyles = makeStyles((theme) => ({
 export default function TasksWorkflowCard() {
     const classes = useStyles();
     const intl = useIntl();
-    const [tasksList, setTasksList] = useState();
-    // const restApi = new API();
-    // todo: delete dev components
-    const mockTasksList = [
-        {
-            name: 'DefaultApplication',
-            createdBy: 'Admin',
-            age: '3 hours ago',
-        },
-        {
-            name: 'DefaultApplication',
-            createdBy: 'Admin',
-            age: '3 hours ago',
-        },
-        {
-            name: 'DefaultApplication',
-            createdBy: 'Admin',
-            age: '3 hours ago',
-        },
-        {
-            name: 'DefaultApplication',
-            createdBy: 'Admin',
-            age: '3 hours ago',
-        },
-        {
-            name: 'DefaultApplication',
-            createdBy: 'Admin',
-            age: '3 hours ago',
-        },
-    ];
+    const restApi = new Api();
+    const [allTasksSet, setAllTasksSet] = useState({});
+
+    /**
+    * Calculate total task count
+    * @returns {int} total task count
+    */
+    function getAllTaskCount() {
+        let counter = 0;
+        for (const task in allTasksSet) {
+            if (allTasksSet[task]) {
+                counter += allTasksSet[task].length;
+            }
+        }
+        return counter;
+    }
+
+    // Fetch all workflow tasks
+    const fetchAllWorkFlows = () => {
+        const promiseUserSign = restApi.workflowsGet('AM_USER_SIGNUP');
+        const promiseStateChange = restApi.workflowsGet('AM_API_STATE');
+        const promiseAppCreation = restApi.workflowsGet('AM_APPLICATION_CREATION');
+        const promiseSubCreation = restApi.workflowsGet('AM_SUBSCRIPTION_CREATION');
+        const promiseSubUpdate = restApi.workflowsGet('AM_SUBSCRIPTION_UPDATE');
+        const promiseRegProd = restApi.workflowsGet('AM_APPLICATION_REGISTRATION_PRODUCTION');
+        const promiseRegSb = restApi.workflowsGet('AM_APPLICATION_REGISTRATION_SANDBOX');
+        Promise.all([promiseUserSign, promiseStateChange, promiseAppCreation, promiseSubCreation,
+            promiseSubUpdate, promiseRegProd, promiseRegSb])
+            .then(([resultUserSign, resultStateChange, resultAppCreation, resultSubCreation,
+                resultSubUpdate, resultRegProd, resultRegSb]) => {
+                const userCreation = resultUserSign.body.list;
+                const stateChange = resultStateChange.body.list;
+                const applicationCreation = resultAppCreation.body.list;
+                const subscriptionCreation = resultSubCreation.body.list;
+                const subscriptionUpdate = resultSubUpdate.body.list;
+                const registration = resultRegProd.body.list.concat(resultRegSb.body.list);
+                setAllTasksSet({
+                    userCreation,
+                    stateChange,
+                    applicationCreation,
+                    subscriptionCreation,
+                    subscriptionUpdate,
+                    registration,
+                });
+            });
+    };
 
     useEffect(() => {
-        // todo: do api calls and set tasksList
-        setTasksList(mockTasksList);
-        // setTasksList([]);
+        fetchAllWorkFlows();
     }, []);
 
-    const tasksDisabledCard = (
-        <Card className={classes.root}>
-            <CardContent>
-
-                <Box mt={2}>
-                    <DeviceHubIcon color='secondary' style={{ fontSize: 60 }} />
-                </Box>
-
-                <Typography className={classes.title} gutterBottom>
-                    <FormattedMessage
-                        id='Dashboard.tasksWorkflow.tasksDisabled.card.title'
-                        defaultMessage='Enable workflow to manage tasks'
-                    />
-                </Typography>
-
-                <Typography variant='body2' component='p'>
-                    <FormattedMessage
-                        id='Dashboard.tasksWorkflow.tasksDisabled.card.description'
-                        defaultMessage='Manage workflow tasks, increase productivity and enhance
-                        competitiveness by enabling developers to easily deploy
-                        business processes and models.'
-                    />
-                </Typography>
-
-                <Box mt={3}>
-                    <Button
-                        size='small'
-                        variant='contained'
-                        color='primary'
-                        target='_blank'
-                        href={Configurations.app.docUrl
-                            + 'learn/consume-api/manage-subscription/advanced-topics/'
-                            + 'adding-an-api-subscription-workflow/#adding-an-api-subscription-workflow'}
-                    >
-                        <FormattedMessage
-                            id='Dashboard.tasksWorkflow.tasksDisabled.card.how.to.enable.workflows.link.text'
-                            defaultMessage='How to Enable Worflows'
-                        />
-                        <LaunchIcon fontSize='inherit' />
-                    </Button>
-                </Box>
-            </CardContent>
-        </Card>
-    );
-
+    // Component to be displayed when there's no task available
+    // Note: When workflow is not enabled, this will be displayed
     const noTasksCard = (
         <Card className={classes.root}>
             <CardContent>
-
                 <Box mt={2}>
                     <DeviceHubIcon color='secondary' style={{ fontSize: 60 }} />
                 </Box>
@@ -170,6 +151,7 @@ export default function TasksWorkflowCard() {
         </Card>
     );
 
+    // Compact task card component's individual category component
     const getCompactTaskComponent = (IconComponent, path, name, numberOfTasks) => {
         return (
             <Box alignItems='center' display='flex' width='50%' my='1%'>
@@ -185,17 +167,27 @@ export default function TasksWorkflowCard() {
                         </Typography>
                     </Link>
                     <Typography variant='body2' gutterBottom>
-                        {numberOfTasks}
-                        <FormattedMessage
-                            id='Dashboard.tasksWorkflow.compactTasks.card.numberOfPendingTasks.postFix'
-                            defaultMessage=' Pending tasks'
-                        />
+                        {numberOfTasks + ' '}
+                        {numberOfTasks === 1
+                            ? (
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.compactTasks.card.numberOfPendingTasks.postFix.singular'
+                                    defaultMessage=' Pending task'
+                                />
+                            ) : (
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.compactTasks.card.numberOfPendingTasks.postFix.plural'
+                                    defaultMessage=' Pending tasks'
+                                />
+                            )}
                     </Typography>
                 </Box>
             </Box>
         );
     };
 
+    // Component to be displayed when there are more than 4 tasks available
+    // Renders the total task count, each task category remaining task count and links
     const compactTasksCard = () => {
         const compactTaskComponentDetails = [
             {
@@ -205,6 +197,7 @@ export default function TasksWorkflowCard() {
                     id: 'Dashboard.tasksWorkflow.compactTasks.userCreation.name',
                     defaultMessage: 'User Creation',
                 }),
+                count: allTasksSet.userCreation.length,
             },
             {
                 icon: DnsRoundedIcon,
@@ -213,6 +206,7 @@ export default function TasksWorkflowCard() {
                     id: 'Dashboard.tasksWorkflow.compactTasks.applicationCreation.name',
                     defaultMessage: 'Application Creation',
                 }),
+                count: allTasksSet.applicationCreation.length,
             },
             {
                 icon: PermMediaOutlinedIcon,
@@ -221,6 +215,16 @@ export default function TasksWorkflowCard() {
                     id: 'Dashboard.tasksWorkflow.compactTasks.subscriptionCreation.name',
                     defaultMessage: 'Subscription Creation',
                 }),
+                count: allTasksSet.subscriptionCreation.length,
+            },
+            {
+                icon: PermMediaOutlinedIcon,
+                path: '/tasks/subscription-update',
+                name: intl.formatMessage({
+                    id: 'Dashboard.tasksWorkflow.compactTasks.subscriptionUpdate.name',
+                    defaultMessage: 'Subscription Update',
+                }),
+                count: allTasksSet.subscriptionUpdate.length,
             },
             {
                 icon: PublicIcon,
@@ -229,6 +233,7 @@ export default function TasksWorkflowCard() {
                     id: 'Dashboard.tasksWorkflow.compactTasks.applicationRegistration.name',
                     defaultMessage: 'Application Registration',
                 }),
+                count: allTasksSet.registration.length,
             },
             {
                 icon: SettingsEthernetIcon,
@@ -237,6 +242,7 @@ export default function TasksWorkflowCard() {
                     id: 'Dashboard.tasksWorkflow.compactTasks.apiStateChange.name',
                     defaultMessage: 'API State Change',
                 }),
+                count: allTasksSet.stateChange.length,
             },
         ];
         return (
@@ -253,7 +259,7 @@ export default function TasksWorkflowCard() {
                         </Box>
                         <Box>
                             <Typography className={classes.title} gutterBottom>
-                                ##
+                                {getAllTaskCount()}
                             </Typography>
                         </Box>
                     </Box>
@@ -267,8 +273,8 @@ export default function TasksWorkflowCard() {
                         bgcolor='background.paper'
 
                     >
-                        {compactTaskComponentDetails.map((component) => {
-                            return getCompactTaskComponent(component.icon, component.path, component.name, '#');
+                        {compactTaskComponentDetails.map((c) => {
+                            return getCompactTaskComponent(c.icon, c.path, c.name, c.count);
                         })}
                     </Box>
                 </CardContent>
@@ -276,6 +282,293 @@ export default function TasksWorkflowCard() {
         );
     };
 
+    // Approve/Reject button onClick handler
+    const updateStatus = (referenceId, value) => {
+        const body = {
+            status: value,
+        };
+        restApi.updateWorkflow(referenceId, body)
+            .then(() => {
+                Alert.success(
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.card.task.update.success'
+                        defaultMessage='Task status updated successfully'
+                    />,
+                );
+            })
+            .catch(() => {
+                Alert.error(
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.card.task.update.failed'
+                        defaultMessage='Task status updated failed'
+                    />,
+                );
+            })
+            .finally(() => {
+                fetchAllWorkFlows();
+            });
+    };
+
+    // Renders the approve/reject buttons with styles
+    const getApproveRejectButtons = (referenceId) => {
+        return (
+            <Box>
+                <Button
+                    onClick={() => { updateStatus(referenceId, 'APPROVED'); }}
+                    className={classes.approveButton}
+                    variant='contained'
+                    size='small'
+                >
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.fewerTasks.card.task.accept'
+                        defaultMessage='Accept'
+                    />
+                </Button>
+                <Button
+                    onClick={() => { updateStatus(referenceId, 'REJECTED'); }}
+                    className={classes.rejectButton}
+                    variant='contained'
+                    size='small'
+                >
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.fewerTasks.card.task.reject'
+                        defaultMessage='Reject'
+                    />
+                </Button>
+            </Box>
+        );
+    };
+
+    // Fewer task component's application creation task element
+    const getApplicationCreationFewerTaskComponent = () => {
+        // Application Creation tasks related component generation
+        return allTasksSet.applicationCreation.map((task) => {
+            return (
+                <Box display='flex' alignItems='center' mt={1}>
+                    <Box flexGrow={1}>
+                        <Typography variant='subtitle2'>
+                            {task.properties.applicationName}
+                        </Typography>
+                        <Box display='flex'>
+                            <Typography variant='body2'>
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.fewerTasks.card.application.createdBy.prefix'
+                                    defaultMessage='Application Created by '
+                                />
+                            </Typography>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                &nbsp;
+                                {task.properties.userName}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                {moment(task.createdTime).fromNow()}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    {getApproveRejectButtons(task.referenceId)}
+                </Box>
+            );
+        });
+    };
+
+    // Fewer task component's user creation task element
+    const getUserCreationFewerTaskComponent = () => {
+        // User Creation tasks related component generation
+        return allTasksSet.userCreation.map((task) => {
+            return (
+                <Box display='flex' alignItems='center' mt={1}>
+                    <Box flexGrow={1}>
+                        <Typography variant='subtitle2'>
+                            {task.properties.tenantAwareUserName}
+                        </Typography>
+                        <Box display='flex'>
+                            <Typography variant='body2'>
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.fewerTasks.card.user.createdOn.prefix'
+                                    defaultMessage='User Created on '
+                                />
+                            </Typography>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                &nbsp;
+                                {task.properties.tenantDomain}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                {moment(task.createdTime).fromNow()}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    {getApproveRejectButtons(task.referenceId)}
+                </Box>
+            );
+        });
+    };
+
+    // Fewer task component's subscription creation task element
+    const getSubscriptionCreationFewerTaskComponent = () => {
+        // Subscription Creation tasks related component generation
+        return allTasksSet.subscriptionCreation.map((task) => {
+            return (
+                <Box display='flex' alignItems='center' mt={1}>
+                    <Box flexGrow={1}>
+                        <Typography variant='subtitle2'>
+                            {task.properties.apiName + '-' + task.properties.apiVersion}
+                        </Typography>
+                        <Box display='flex'>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                {task.properties.applicationName + ','}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.fewerTasks.card.subscription.subscribedBy'
+                                    defaultMessage='Subscribed by'
+                                />
+                            </Typography>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                &nbsp;
+                                {task.properties.subscriber}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                {moment(task.createdTime).fromNow()}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    {getApproveRejectButtons(task.referenceId)}
+                </Box>
+            );
+        });
+    };
+
+    // Fewer task component's subscription creation task element
+    const getSubscriptionUpdateFewerTaskComponent = () => {
+        // Subscription Update tasks related component generation
+        return allTasksSet.subscriptionUpdate.map((task) => {
+            return (
+                <Box display='flex' alignItems='center' mt={1}>
+                    <Box flexGrow={1}>
+                        <Typography variant='subtitle2'>
+                            {task.properties.apiName + '-' + task.properties.apiVersion}
+                        </Typography>
+                        <Box display='flex'>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                {task.properties.applicationName + ','}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.fewerTasks.card.subscription.subscribedBy'
+                                    defaultMessage='Subscribed by'
+                                />
+                            </Typography>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                &nbsp;
+                                {task.properties.subscriber}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                {moment(task.createdTime).fromNow()}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    {getApproveRejectButtons(task.referenceId)}
+                </Box>
+            );
+        });
+    };
+
+    // Fewer task component's registration creation task element
+    const getRegistrationCreationFewerTaskComponent = () => {
+        // Registration Creation tasks related component generation
+        return allTasksSet.registration.map((task) => {
+            let keyType;
+            if (task.properties.keyType === 'PRODUCTION') {
+                keyType = (
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.fewerTasks.card.registration.creation.keyType.Production'
+                        defaultMessage='Production'
+                    />
+                );
+            } else if (task.properties.keyType === 'SANDBOX') {
+                keyType = (
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.fewerTasks.card.registration.creation.keyType.SandBox'
+                        defaultMessage='SandBox'
+                    />
+                );
+            } else {
+                keyType = task.properties.keyType;
+            }
+            return (
+                <Box display='flex' alignItems='center' mt={1}>
+                    <Box flexGrow={1}>
+                        <Typography variant='subtitle2'>
+                            {task.properties.applicationName}
+                        </Typography>
+                        <Box display='flex'>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                {keyType}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.fewerTasks.card.registration.key.generated.by'
+                                    defaultMessage='Key generated by'
+                                />
+                            </Typography>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                &nbsp;
+                                {task.properties.userName}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                {moment(task.createdTime).fromNow()}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    {getApproveRejectButtons(task.referenceId)}
+                </Box>
+            );
+        });
+    };
+
+    // Fewer task component's api state change task element
+    const getStateChangeFewerTaskComponent = () => {
+        // State Change tasks related component generation
+        return allTasksSet.stateChange.map((task) => {
+            return (
+                <Box display='flex' alignItems='center' mt={1}>
+                    <Box flexGrow={1}>
+                        <Typography variant='subtitle2'>
+                            {task.properties.apiName + '-' + task.properties.apiVersion}
+                        </Typography>
+                        <Box display='flex'>
+                            <Typography variant='body2'>
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.fewerTasks.card.stateChangeAction.prefix'
+                                    defaultMessage='State Change Action:'
+                                />
+                                &nbsp;
+                            </Typography>
+                            <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
+                                {task.properties.action}
+                                &nbsp;
+                            </Typography>
+                            <Typography variant='body2'>
+                                {moment(task.createdTime).fromNow()}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    {getApproveRejectButtons(task.referenceId)}
+                </Box>
+            );
+        });
+    };
+
+    // Component to be displayed when there are 4 or less remaining tasks
+    // Renders some details of the task and approve/reject buttons
     const fewerTasksCard = () => {
         return (
             <Card className={classes.root} style={{ textAlign: 'left' }}>
@@ -291,67 +584,30 @@ export default function TasksWorkflowCard() {
                         </Box>
                         <Box>
                             <Typography className={classes.title} gutterBottom>
-                                #
+                                {getAllTaskCount()}
                             </Typography>
                         </Box>
                     </Box>
 
                     <Divider light />
-
-                    {tasksList.map((task) => {
-                        return (
-                            <Box display='flex' alignItems='center' mt={1}>
-                                <Box flexGrow={1}>
-                                    <Typography variant='subtitle2'>
-                                        {task.name}
-                                    </Typography>
-                                    <Box display='flex'>
-                                        <Typography variant='body2'>
-                                            <FormattedMessage
-                                                id='Dashboard.tasksWorkflow.fewerTasks.card.createdBy.prefix'
-                                                defaultMessage='Created by &nbsp;'
-                                            />
-                                        </Typography>
-                                        <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
-                                            {task.createdBy}
-                                                &nbsp;
-                                        </Typography>
-                                        <Typography variant='body2'>
-                                            {task.age}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                                <Box>
-                                    <Button>
-                                        <FormattedMessage
-                                            id='Dashboard.tasksWorkflow.fewerTasks.card.task.accept'
-                                            defaultMessage='Accept'
-                                        />
-                                    </Button>
-                                    <Button>
-                                        <FormattedMessage
-                                            id='Dashboard.tasksWorkflow.fewerTasks.card.task.reject'
-                                            defaultMessage='Reject'
-                                        />
-                                    </Button>
-                                </Box>
-                            </Box>
-                        );
-                    })}
+                    {getApplicationCreationFewerTaskComponent()}
+                    {getUserCreationFewerTaskComponent()}
+                    {getSubscriptionCreationFewerTaskComponent()}
+                    {getSubscriptionUpdateFewerTaskComponent()}
+                    {getRegistrationCreationFewerTaskComponent()}
+                    {getStateChangeFewerTaskComponent()}
                 </CardContent>
             </Card>
         );
     };
 
-    if (tasksList) {
-        if (tasksList.length === 0) {
-            return noTasksCard;
-        } else if (tasksList.length <= 4) {
-            return fewerTasksCard();
-        } else {
-            return compactTasksCard();
-        }
+    // Render the card depending on the number of all remaining tasks
+    const cnt = getAllTaskCount();
+    if (cnt > 4) {
+        return compactTasksCard();
+    } else if (cnt > 0) {
+        return fewerTasksCard();
     } else {
-        return tasksDisabledCard;
+        return noTasksCard;
     }
 }

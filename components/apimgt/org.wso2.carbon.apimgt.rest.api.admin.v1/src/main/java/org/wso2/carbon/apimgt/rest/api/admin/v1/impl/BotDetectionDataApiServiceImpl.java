@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
@@ -45,7 +46,8 @@ public class BotDetectionDataApiServiceImpl implements BotDetectionDataApiServic
     public Response getBotDetectionData(MessageContext messageContext) throws APIManagementException {
 
         if (APIUtil.isAnalyticsEnabled()) {
-            List<BotDetectionData> botDetectionDataList = new APIAdminImpl().retrieveBotDetectionData();
+            APIAdmin apiAdmin = new APIAdminImpl();
+            List<BotDetectionData> botDetectionDataList = apiAdmin.retrieveBotDetectionData();
             BotDetectionDataListDTO listDTO = BotDetectionMappingUtil.fromBotDetectionModelToDTO(botDetectionDataList);
             return Response.ok().entity(listDTO).build();
         } else {

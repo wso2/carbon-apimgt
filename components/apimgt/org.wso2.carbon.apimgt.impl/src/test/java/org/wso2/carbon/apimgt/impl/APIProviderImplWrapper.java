@@ -57,6 +57,9 @@ public class APIProviderImplWrapper extends APIProviderImpl {
         this.failedGateways = failedGateways;
     }
 
+    public int getTenantId() {
+        return tenantId;
+    }
     @Override
     protected void registerCustomQueries(UserRegistry registry, String username)
             throws RegistryException, APIManagementException {

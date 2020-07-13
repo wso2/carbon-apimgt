@@ -156,6 +156,14 @@ public class APIGatewayManager {
                 System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantId,api.getUUID(),
                 publishedGateways);
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
+
         return failedGatewaysMap;
     }
 
@@ -205,7 +213,7 @@ public class APIGatewayManager {
                 }
             } else {
                 client = new APIGatewayAdminClient(environment);
-                deployWebsocketAPI(api, client);
+                deployWebsocketAPI(api, client, isGatewayDefinedAsALabel, publishedGateways, environment);
             }
             endTime = System.currentTimeMillis();
             if (debugEnabled) {
@@ -870,10 +878,12 @@ public class APIGatewayManager {
      * @param client
      * @throws APIManagementException
      */
-    public void deployWebsocketAPI(API api, APIGatewayAdminClient client)
+    public void deployWebsocketAPI(API api, APIGatewayAdminClient client, boolean isGatewayDefinedAsALabel,
+            Set<String> publishedGateways,Environment environment)
             throws APIManagementException, JSONException {
 
         GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+        gatewayAPIDTO.setApiId(api.getUUID());
         gatewayAPIDTO.setName(api.getId().getName());
         gatewayAPIDTO.setVersion(api.getId().getVersion());
         gatewayAPIDTO.setProvider(api.getId().getProviderName());
@@ -914,8 +924,19 @@ public class APIGatewayManager {
                     gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(sandboxEndpointSequence,
                             gatewayAPIDTO.getSequenceToBeAdd()));
                 }
-                client.deployAPI(gatewayAPIDTO);
-            } catch (AxisFault e) {
+                if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()) {
+                    if (!isGatewayDefinedAsALabel) {
+                        client.deployAPI(gatewayAPIDTO);
+                    }
+                }
+
+                if (saveArtifactsToStorage) {
+                    artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO), environment.getName(),
+                            APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
+                    publishedGateways.add(environment.getName());
+                }
+
+            } catch (AxisFault | ArtifactSynchronizerException e) {
                 String msg = "Error while deploying WebsocketSequence";
                 log.error(msg, e);
                 throw new APIManagementException(msg);
@@ -945,8 +966,10 @@ public class APIGatewayManager {
             for (String environmentName : environments) {
                 Environment environment = this.environments.get(environmentName);
                 client = new APIGatewayAdminClient(environment);
+                boolean isGatewayDefinedAsALabel = api.getEnvironments() != null;
+                Set<String> publishedGateways = new HashSet<>();
                 try {
-                    gatewayManager.deployWebsocketAPI(api, client);
+                    gatewayManager.deployWebsocketAPI(api, client, isGatewayDefinedAsALabel, publishedGateways, environment);
                 } catch (JSONException ex) {
                     /*
                     didn't throw this exception to handle multiple gateway publishing

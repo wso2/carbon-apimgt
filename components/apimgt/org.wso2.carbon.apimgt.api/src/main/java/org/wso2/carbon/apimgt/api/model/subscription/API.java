@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Entity for keeping API related information.
@@ -34,23 +34,21 @@ public class API implements CacheableEntity<String> {
     private String policy = null;
     private String apiType = null;
 
-
-    private List<URLMapping> resources = new ArrayList<>();
+    private Map<String, URLMapping> resources = new HashMap<>();
 
     public void addResource(URLMapping urlMapping) {
 
-        resources.add(urlMapping);
+        String key = urlMapping.getUrlPattern().concat(DELEM_PERIOD).concat(urlMapping.getHttpMethod());
+        resources.put(key, urlMapping);
     }
 
     public boolean removeResource(URLMapping urlMapping) {
-
-        return resources.remove(urlMapping);
+        String key = urlMapping.getUrlPattern().concat(DELEM_PERIOD).concat(urlMapping.getHttpMethod());
+        resources.remove(key);
+        return true;
     }
 
-    public List<URLMapping> getAllResources() {
 
-        return resources;
-    }
 
     public int getApiId() {
 
@@ -125,5 +123,15 @@ public class API implements CacheableEntity<String> {
     public void setApiType(String apiType) {
 
         this.apiType = apiType;
+    }
+
+    public URLMapping getResource(String urlPattern, String httpMethod) {
+        String key = urlPattern.concat(DELEM_PERIOD).concat(httpMethod);
+        return resources.get(key);
+    }
+
+    public Map<String, URLMapping> getAllResources() {
+
+        return resources;
     }
 }

@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSListenerStartupShutdownListener;
@@ -120,6 +121,8 @@ public class JMSListenerComponent {
             this.registration.unregister();
         }
     }
+    
+
 
 }
 

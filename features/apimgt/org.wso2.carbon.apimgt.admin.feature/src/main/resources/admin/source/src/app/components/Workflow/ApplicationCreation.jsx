@@ -56,9 +56,6 @@ import Box from '@material-ui/core/Box';
 
 
 const useStyles = makeStyles((theme) => ({
-    searchBar: {
-        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-    },
     searchInput: {
         fontSize: theme.typography.fontSize,
     },
@@ -66,11 +63,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'block',
     },
     contentWrapper: {
-        margin: '40px 16px',
-    },
-    button: {
-        borderColor: 'rgba(255, 255, 255, 0.7)',
-        textDecoration: 'none',
+        margin: theme.spacing(2),
     },
     approveButton: {
         textDecoration: 'none',
@@ -102,10 +95,24 @@ function ListLabels() {
         return restApi
             .workflowsGet('AM_APPLICATION_CREATION')
             .then((result) => {
-                const workflowlist = result.body.list;
-                return (workflowlist);
+                const workflowlist = result.body.list.map((obj) => {
+                    return {
+                        description: obj.description,
+                        applicationName: obj.properties.applicationName,
+                        applicationTier: obj.properties.applicationTier,
+                        userName: obj.properties.userName,
+                        referenceId: obj.referenceId,
+                        createdTime: obj.createdTime,
+                        properties: obj.properties,
+                    };
+                });
+                return workflowlist;
             })
             .catch((error) => {
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.ApplicationCreation.apicall.has.errors',
+                    defaultMessage: 'Unable to get workflow pending requests for Application Creation',
+                }));
                 throw (error);
             });
     }
@@ -118,8 +125,11 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error('Unable to fetch data ' + e);
-                console.error('Unable to fetch data ' + e);
+                console.error('Unable to fetch data. ', e.message);
+                Alert.error(intl.formatMessage({
+                    id: 'Workflow.ApplicationCreation.fetch.has.errors',
+                    defaultMessage: 'Unable to fetch data.',
+                }));
             });
     };
 
@@ -128,10 +138,13 @@ function ListLabels() {
     }, []);
 
     const updateStatus = (referenceId, value) => {
-        const body = {};
-        body.status = value;
-        body.attributes = {};
-        body.description = 'Approve workflow request.';
+        const body = { status: value, attributes: {}, description: '' };
+        if (value === 'APPROVED') {
+            body.description = 'Approve workflow request.';
+        }
+        if (value === 'REJECTED') {
+            body.description = 'Reject workflow request.';
+        }
 
         const promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
         return promisedupdateWorkflow
@@ -146,7 +159,10 @@ function ListLabels() {
             .catch((error) => {
                 const { response } = error;
                 if (response.body) {
-                    response.body.description = 'Unable to complete application creation approve/reject process';
+                    Alert.error(intl.formatMessage({
+                        id: 'Workflow.ApplicationCreation.updateStatus.has.errors',
+                        defaultMessage: 'Unable to complete application creation approve/reject process. ',
+                    }));
                     throw (response.body.description);
                 }
                 return null;
@@ -167,16 +183,16 @@ function ListLabels() {
                         <Link
                             target='_blank'
                             href={Configurations.app.docUrl
-                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
+                        + 'learn/consume-api/manage-application/advanced-topics/'
+                        + 'adding-an-application-creation-workflow/#adding-an-application-creation-workflow'}
                         >
                             <ListItemText primary={(
                                 <FormattedMessage
                                     id='Workflow.ApplicationCreation.help.link.one'
-                                    defaultMessage='Create a Application Creation Request'
+                                    defaultMessage='Create a Application Creation approval workflow Request'
                                 />
                             )}
                             />
-
                         </Link>
                     </ListItem>
                 </List>
@@ -193,7 +209,7 @@ function ListLabels() {
         {
             name: 'description',
             label: intl.formatMessage({
-                id: 'Workflow.ApplicationCreation.table.header.Description',
+                id: 'Workflow.ApplicationCreation.table.header.description',
                 defaultMessage: 'Description',
             }),
             options: {
@@ -202,22 +218,14 @@ function ListLabels() {
             },
         },
         {
-            name: 'application',
+            name: 'applicationName',
             label: intl.formatMessage({
-                id: 'Workflow.ApplicationCreation.table.header.Application',
+                id: 'Workflow.ApplicationCreation.table.header.applicationName',
                 defaultMessage: 'Application',
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.applicationName}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
@@ -228,24 +236,17 @@ function ListLabels() {
             }),
             options: {
                 sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    const { properties } = dataRow;
-                    return (
-                        <div>
-                            {properties.applicationTier}
-                        </div>
-                    );
-                },
+                filter: true,
             },
         },
         {
-            name: 'creater',
+            name: 'userName',
             label: intl.formatMessage({
-                id: 'Workflow.ApplicationCreation.table.header.Creater',
+                id: 'Workflow.ApplicationCreation.table.header.userName',
                 defaultMessage: 'Created by',
             }),
             options: {
+                sort: false,
                 customBodyRender: (value, tableMeta) => {
                     const dataRow = data[tableMeta.rowIndex];
                     const { properties } = dataRow;
@@ -259,7 +260,7 @@ function ListLabels() {
                             {properties.userName}
                             <br />
                             <Tooltip title={format}>
-                                <Typography color='textSecondary'>
+                                <Typography color='textSecondary' variant='caption'>
                                     {time}
                                 </Typography>
                             </Tooltip>
@@ -318,12 +319,10 @@ function ListLabels() {
         />
     );
 
-    const EditComponent = (() => <span />);
-
     const searchActive = true;
     const searchPlaceholder = intl.formatMessage({
         id: 'Workflow.applicationcreation.search.default',
-        defaultMessage: 'Search by workflow request description',
+        defaultMessage: 'Search by Application, Throttling Policy or Creator',
     });
 
     const filterData = (event) => {
@@ -360,7 +359,6 @@ function ListLabels() {
                                     id='Workflow.ApplicationCreation.List.empty.title.applicationcreations'
                                     defaultMessage='Application Creation'
                                 />
-
                             </Typography>
                             <Typography variant='body2' color='textSecondary' component='p'>
                                 <FormattedMessage
@@ -375,7 +373,7 @@ function ListLabels() {
                     </CardActionArea>
                     <CardActions>
                         {addButtonOverride || (
-                            <EditComponent updateList={fetchData} {...addButtonProps} />
+                            <span updateList={fetchData} {...addButtonProps} />
                         )}
                     </CardActions>
                 </Card>
@@ -387,18 +385,15 @@ function ListLabels() {
             <ContentBase pageStyle='paperLess'>
                 <InlineProgress />
             </ContentBase>
-
         );
     }
     return (
-
         <>
             <ContentBase {...pageProps}>
                 {(searchActive || addButtonProps) && (
                     <AppBar className={classes.searchBar} position='static' color='default' elevation={0}>
                         <Toolbar>
                             <Grid container spacing={2} alignItems='center'>
-
                                 <Grid item>
                                     {searchActive && (<SearchIcon className={classes.block} color='inherit' />)}
                                 </Grid>
@@ -417,7 +412,7 @@ function ListLabels() {
                                 </Grid>
                                 <Grid item>
                                     {addButtonOverride || (
-                                        <EditComponent
+                                        <span
                                             updateList={fetchData}
                                             {...addButtonProps}
                                         />
@@ -438,7 +433,6 @@ function ListLabels() {
                         </Toolbar>
                     </AppBar>
                 )}
-
                 {data && data.length > 0 && (
                     <MUIDataTable
                         title={null}

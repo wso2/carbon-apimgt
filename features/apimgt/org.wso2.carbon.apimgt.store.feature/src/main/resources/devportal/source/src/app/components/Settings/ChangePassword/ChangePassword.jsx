@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-import React, { useReducer, useEffect, useState } from 'react';
+import React, { useReducer } from 'react';
 import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
 import Settings from 'Settings';
@@ -31,6 +31,7 @@ import PageNotFound from 'AppComponents/Base/Errors/PageNotFound'
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import Progress from 'AppComponents/Shared/Progress';
+import { useSettingsContext } from 'AppComponents/Shared/SettingsContext';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStarText: {
@@ -57,16 +58,16 @@ function reducer(state, { field, value }) {
     };
 }
 
-// API call to get password change enabled
-// todo: replace this with rest api call or retrieve from settings api.
-const getPasswordChangeEnabled = () => {
-    const promiseIsPwdChangeEnabled = new Promise(resolve => {
-        setTimeout(resolve({ enabled: true }), 1);
-    });
-    return promiseIsPwdChangeEnabled;
-}
-
 const ChangePassword = () => {
+    const {
+        settings: {
+            IsPasswordChangeEnabled,
+            userStorePasswordPattern,
+            passwordPolicyPattern,
+            passwordPolicyMinLength,
+            passwordPolicyMaxLength,
+        }
+    } = useSettingsContext();
     const classes = useStyles();
     const username = AuthManager.getUser().name;
     const initialState = {
@@ -76,7 +77,6 @@ const ChangePassword = () => {
     };
     const [state, dispatch] = useReducer(reducer, initialState);
     const { currentPassword, newPassword, repeatedNewPassword } = state;
-    const [passwordChangeEligible, setPasswordChangeEligible] = useState();
     const passwordChangeGuideEnabled = false || Settings.passwordChange.guidelinesEnabled;
     let passwordChangeGuide = [];
     if (passwordChangeGuideEnabled) {
@@ -91,23 +91,19 @@ const ChangePassword = () => {
         }
     };
 
-    // Check whether the user is eligible to change the password
-    useEffect(() => {
-        getPasswordChangeEnabled().then(res => {
-            if (!res.enabled) {
-                setPasswordChangeEligible(false);
-            } else {
-                setPasswordChangeEligible(true);
-            }
-        })
-    }, []);
-
     const validatePasswordChange = () => {
-        // todo: update password validation policy
-        const schema = Joi.string().empty();
-        const validationError = schema.validate(newPassword).error;
-        if (validationError) {
-            const errorType = validationError.details[0].type;
+        // Validate against min, max legths if available.
+        // also check whether empty.
+        let legthCheckSchema = Joi.string().empty();
+        if (passwordPolicyMinLength && passwordPolicyMinLength !== -1) {
+            legthCheckSchema = legthCheckSchema.min(passwordPolicyMinLength);
+        }
+        if (passwordPolicyMaxLength && passwordPolicyMaxLength !== -1) {
+            legthCheckSchema = legthCheckSchema.max(passwordPolicyMaxLength);
+        }
+        const LengthValidationError = legthCheckSchema.validate(newPassword).error;
+        if (LengthValidationError) {
+            const errorType = LengthValidationError.details[0].type;
             if (errorType === 'string.empty') {
                 return (
                     <FormattedMessage
@@ -115,8 +111,57 @@ const ChangePassword = () => {
                         defaultMessage='Password is empty'
                     />
                 );
+            } else if (errorType === 'string.min') {
+                return (
+                    <FormattedMessage
+                        id='Change.Password.password.length.short'
+                        defaultMessage='Password is too short!'
+                    />
+                );
+            } else if (errorType === 'string.max') {
+                return (
+                    <FormattedMessage
+                        id='Change.Password.password.length.long'
+                        defaultMessage='Password is too long!'
+                    />
+                );
             }
         }
+
+        // Validate against user store password pattern regex, if available.
+        if (userStorePasswordPattern) {
+            const userStoreSchema = Joi.string().pattern(new RegExp(userStorePasswordPattern));
+            const userStoreValidationError = userStoreSchema.validate(newPassword).error;
+            if (userStoreValidationError) {
+                const errorType = userStoreValidationError.details[0].type;
+                if (errorType === 'string.pattern.base') {
+                    return (
+                        <FormattedMessage
+                            id='Change.Password.password.pattern.invalid'
+                            defaultMessage='Invalid password pattern'
+                        />
+                    );
+                }
+            }
+        }
+
+        // Validate against password policy pattern regex, if available.
+        if (passwordPolicyPattern) {
+            const passwordPolicySchema = Joi.string().pattern(new RegExp(passwordPolicyPattern));
+            const passwordPolicyValidationError = passwordPolicySchema.validate(newPassword).error;
+            if (passwordPolicyValidationError) {
+                const errorType = passwordPolicyValidationError.details[0].type;
+                if (errorType === 'string.pattern.base') {
+                    return (
+                        <FormattedMessage
+                            id='Change.Password.password.pattern.invalid'
+                            defaultMessage='Invalid password pattern'
+                        />
+                    );
+                }
+            }
+        }
+
         return false;
     };
 
@@ -136,25 +181,44 @@ const ChangePassword = () => {
     };
 
     const handleSave = () => {
-        // todo: use intl
         const restApi = new API();
         return restApi
             .changePassword(currentPassword, newPassword)
             .then((res) => {
-                Alert.success('Successfuly changed the password');
+                Alert.success(
+                    <FormattedMessage
+                        id='Change.Password.password.changed.success'
+                        defaultMessage='Successfuly changed the password'
+                    />
+                );
                 window.history.back();
             })
             .catch((error) => {
                 const errorCode = error.response.body.code;
                 switch (errorCode) {
                     case 901450:
-                        Alert.error('Password change disabled');
+                        Alert.error(
+                            <FormattedMessage
+                                id='Change.Password.password.change.disabled'
+                                defaultMessage='Password change disabled'
+                            />
+                        );
                         break;
                     case 901451:
-                        Alert.error('Current password incorrect');
+                        Alert.error(
+                            <FormattedMessage
+                                id='Change.Password.current.password.incorrect'
+                                defaultMessage='Incorrect current password'
+                            />
+                        );
                         break;
                     case 901452:
-                        Alert.error('Password pattern invalid');
+                        Alert.error(
+                            <FormattedMessage
+                                id='Change.Password.password.pattern.invalid'
+                                defaultMessage='Invalid password pattern'
+                            />
+                        );
                         break;
                 }
             });
@@ -199,14 +263,13 @@ const ChangePassword = () => {
         </>
     );
 
-    if (passwordChangeEligible === undefined) {
+    if (IsPasswordChangeEnabled === undefined) {
         return <Progress />;
     }
 
     // If the user is eligible to change the password, display password change form.
     // otherwise, display page not found.
-
-    if (passwordChangeEligible) {
+    if (IsPasswordChangeEnabled) {
         return (
             <ChangePasswordBase title={title}>
                 <Box py={2} display='flex' justifyContent='center'>

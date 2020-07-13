@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +32,8 @@ public class ServiceReferenceHolder {
     private APIManagerConfigurationService amConfigurationService;
     private OutputEventAdapterService outputEventAdapterService;
     private Map<String, KeyValidationHandler> keyValidationHandlerMap = new ConcurrentHashMap<>();
+    private RealmService realmService;
+
     private ServiceReferenceHolder() {
 
     }
@@ -74,4 +77,12 @@ public class ServiceReferenceHolder {
         keyValidationHandlerMap.put(tenantDomain, defaultKeyValidationHandler);
         return defaultKeyValidationHandler;
     }
+    public RealmService getRealmService() {
+        return realmService;
+    }
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
+    }
+
 }
