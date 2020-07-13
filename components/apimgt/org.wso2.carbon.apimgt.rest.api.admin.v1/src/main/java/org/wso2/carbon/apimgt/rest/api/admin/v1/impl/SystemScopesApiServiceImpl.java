@@ -1,10 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -15,8 +10,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryService;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
@@ -28,8 +21,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SystemScopesMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
+
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Base64;
@@ -109,35 +101,11 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
     @Override
     public Response systemScopesRoleAliasesPut(RoleAliasListDTO body, MessageContext messageContext)
             throws APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(RestApiUtil.getLoggedInUsername());
         RoleAliasListDTO roleAliasListDTO = new RoleAliasListDTO();
-        //read from tenant-conf.json
-        JsonObject existingTenantConfObject = new JsonObject();
-        try {
-            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-            String existingTenantConf = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
-                    APIConstants.API_TENANT_CONF_LOCATION);
-            existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
-        } catch (RegistryException e) {
-            APIUtil.handleException("Couldn't read tenant configuration from tenant registry", e);
-        } catch (UserStoreException e) {
-            APIUtil.handleException("Couldn't read tenant configuration from User Store", e);
-        }
-        JSONObject responseJson = SystemScopesMappingUtil.createJsonObjectOfRoleMapping(body);
-        existingTenantConfObject.remove(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
-        JsonElement jsonElement = new JsonParser().parse(String.valueOf(responseJson));
-        existingTenantConfObject.add(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG, jsonElement);
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(existingTenantConfObject.toString());
-            APIUtil.updateTenantConf(existingTenantConfObject.toString(), tenantDomain);
-            if (log.isDebugEnabled()) {
-                log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
-            }
-        } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error while formatting tenant-conf.json of tenant: " + tenantDomain, e);
-        }
+        JSONObject newRoleMappingJson = SystemScopesMappingUtil.createJsonObjectOfRoleMapping(body);
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        APIUtil.updateTenantConfRoleAliasMapping(newRoleMappingJson, username);
         JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
         JSONObject roleMapping = (JSONObject) tenantConfig.get(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
         if (roleMapping != null) {
