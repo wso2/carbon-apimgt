@@ -278,7 +278,7 @@ function ListLabels() {
                             {properties.userName}
                             <br />
                             <Tooltip title={format}>
-                                <Typography color='textSecondary'>
+                                <Typography color='textSecondary' variant='caption'>
                                     {time}
                                 </Typography>
                             </Tooltip>
@@ -340,7 +340,7 @@ function ListLabels() {
     const searchActive = true;
     const searchPlaceholder = intl.formatMessage({
         id: 'Workflow.RegistrationCreation.search.default',
-        defaultMessage: 'Search by workflow request description',
+        defaultMessage: 'Search by Application, Throttling Policy, Key type or Creator',
     });
 
     const filterData = (event) => {

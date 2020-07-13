@@ -234,7 +234,7 @@ function AddEditMGLabel(props) {
                     )}
                     fullWidth
                     error={hasErrors('name', name)}
-                    helperText={hasErrors('name', name) || 'Enter Microgateway Label'}
+                    helperText={hasErrors('name', name) || 'Name of the Microgateway label'}
                     variant='outlined'
                     disabled={id}
                 />
@@ -246,7 +246,7 @@ function AddEditMGLabel(props) {
                     label='Description'
                     fullWidth
                     multiline
-                    helperText='Enter description'
+                    helperText='Description of the Microgateway label'
                     variant='outlined'
                 />
                 {(id)
@@ -264,7 +264,7 @@ function AddEditMGLabel(props) {
                         <ListInput
                             onInputListChange={handleHostChange}
                             inputLabelPrefix='Host'
-                            helperText='Enter Host'
+                            helperText='Name of the Host'
                             addButtonLabel='Add Host'
                             onValidation={handleHostValidation}
                         />
