@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.impl.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -11070,6 +11073,48 @@ public final class APIUtil {
             }
         }
         return null;
+    }
+    /**
+     * Replace new RESTAPI Role mappings to tenant-conf.
+     *
+     * @param newScopeRoleJson New object of role-scope mapping
+     * @throws APIManagementException If failed to replace the new tenant-conf.
+     */
+    public static void updateTenantConfOfRoleScopeMapping(JSONObject newScopeRoleJson, String username)
+            throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        //read from tenant-conf.json
+        JsonObject existingTenantConfObject = new JsonObject();
+        try {
+            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+            String existingTenantConf = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
+            existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
+        } catch (RegistryException e) {
+            APIUtil.handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (UserStoreException e) {
+            APIUtil.handleException("Couldn't read tenant configuration from user-store", e);
+        }
+        //Here we are removing RESTAPIScopes from the existing tenant-conf
+        // Adding new RESTAPIScopes to the existing tenant-conf.
+        existingTenantConfObject.remove(APIConstants.REST_API_SCOPES_CONFIG);
+        JsonElement jsonElement = new JsonParser().parse(newScopeRoleJson.toJSONString());
+        existingTenantConfObject.add(APIConstants.REST_API_SCOPES_CONFIG, jsonElement);
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(existingTenantConfObject.toString());
+            APIUtil.updateTenantConf(existingTenantConfObject.toString(), tenantDomain);
+            if (log.isDebugEnabled()) {
+                log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
+            }
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while formatting tenant-conf.json of tenant", e);
+        }
+        // Invalidate Cache
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .getCache(APIConstants.REST_API_SCOPE_CACHE)
+                .put(tenantDomain, null);
     }
 }
 

@@ -89,9 +89,8 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
 
     public Response updateRolesForScope(ScopeListDTO body, MessageContext messageContext)
             throws APIManagementException {
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        JSONObject responseJson = SystemScopesMappingUtil.createJsonObjectOfScopeMapping(body);
-        apiProvider.editTenantConfOfRoleScopeMapping(responseJson, RestApiUtil.getLoggedInUsername());
+        JSONObject newScopeRoleJson = SystemScopesMappingUtil.createJsonObjectOfScopeMapping(body);
+        APIUtil.updateTenantConfOfRoleScopeMapping(newScopeRoleJson, RestApiUtil.getLoggedInUsername());
         Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
                 .getTenantDomain(RestApiUtil.getLoggedInUsername()));
         ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
