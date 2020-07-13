@@ -145,7 +145,7 @@ function UploadTheme() {
         })
             .catch(() => {
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.WSDL.download.error',
+                    id: 'TenantTheme.Upload.Theme.download.error',
                     defaultMessage: 'Error downloading Tenant theme ZIP file',
                 }));
             });
