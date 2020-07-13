@@ -59,7 +59,7 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
     @Path("/role-aliases")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retreive role alias mappings", notes = "This operation can be used to retreive role alias mapping for system scope roles ", response = RoleAliasListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve role alias mappings", notes = "This operation can be used to retreive role alias mapping ", response = RoleAliasListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:scope_manage", description = "Manage scope"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
