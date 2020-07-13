@@ -3746,7 +3746,9 @@ paths:
             Internal Server Error.
             Error in importing Theme.
           schema:
-            $ref: '#/definitions/Error'  ######################################################
+            $ref: '#/definitions/Error'
+
+  ######################################################
   # The "Key Manager Collection" resource API
   ######################################################
   /key-managers:
