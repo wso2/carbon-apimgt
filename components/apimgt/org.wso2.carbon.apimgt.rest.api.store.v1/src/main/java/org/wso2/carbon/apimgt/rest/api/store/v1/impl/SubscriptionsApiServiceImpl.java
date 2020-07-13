@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -99,8 +100,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             SubscriptionListDTO subscriptionListDTO;
             if (!StringUtils.isEmpty(apiId)) {
-                // todo : FIX properly, need to done properly with backend side pagination. 
-                // todo : getSubscribedIdentifiers() method should NOT be used. Appears to be too slow. 
+                // todo : FIX properly, need to done properly with backend side pagination.
+                // todo : getSubscribedIdentifiers() method should NOT be used. Appears to be too slow.
 
                 // This will fail with an authorization failed exception if user does not have permission to access the API
                 ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, tenantDomain);
@@ -120,7 +121,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
                 subscriptionListDTO = SubscriptionMappingUtil
                         .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
-                
+
                 return Response.ok().entity(subscriptionListDTO).build();
             } else if (!StringUtils.isEmpty(applicationId)) {
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -137,7 +138,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscriptions = apiConsumer
                         .getPaginatedSubscribedAPIs(subscriber, application.getName(), offset, limit, groupId);
                 subscribedAPIList.addAll(subscriptions);
-                
+
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
                         offset);
                 return Response.ok().entity(subscriptionListDTO).build();
@@ -163,7 +164,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     /**
      * Creates a new subscriptions with the details specified in the body parameter
      *
-     * @param body        new subscription details
+     * @param body new subscription details
      * @return newly added subscription as a SubscriptionDTO if successful
      */
     @Override
@@ -175,14 +176,14 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             apiConsumer = RestApiUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
-            
-            //check whether user is permitted to access the API. If the API does not exist, 
+
+            //check whether user is permitted to access the API. If the API does not exist,
             // this will throw a APIMgtResourceNotFoundException
             if (body.getApiId() != null) {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), tenantDomain)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
                 }
-            }  else {
+            } else {
                 RestApiUtil.handleBadRequest(
                         "Request must contain either apiIdentifier or apiProductIdentifier and the relevant type", log);
                 return null;
@@ -192,6 +193,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             if (application == null) {
                 //required application not found
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                return null;
+            }
+
+            // If application creation workflow status is pending or rejected, throw a Bad request exception
+            if (application.getStatus().equals(WorkflowStatus.REJECTED.toString())
+                    || application.getStatus().equals(WorkflowStatus.CREATED.toString())) {
+                RestApiUtil.handleBadRequest("Workflow status is not Approved", log);
                 return null;
             }
 
@@ -247,7 +255,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     /**
      * Update already created subscriptions with the details specified in the body parameter
      *
-     * @param body        new subscription details
+     * @param body new subscription details
      * @return newly added subscription as a SubscriptionDTO if successful
      */
     @Override
@@ -282,7 +290,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), tenantDomain)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
                 }
-            }  else {
+            } else {
                 RestApiUtil.handleBadRequest(
                         "Request must contain either apiIdentifier or apiProductIdentifier and the relevant type", log);
                 return null;
@@ -348,7 +356,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     /**
      * Create multiple new subscriptions with the list of subscription details specified in the body parameter.
      *
-     * @param body        list of new subscription details
+     * @param body list of new subscription details
      * @return list of newly added subscription as a SubscriptionDTO if successful
      */
     @Override
@@ -428,13 +436,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     /**
      * Gets a subscription by identifier
      *
-     * @param subscriptionId  subscription identifier
-     * @param ifNoneMatch     If-None-Match header value
+     * @param subscriptionId subscription identifier
+     * @param ifNoneMatch    If-None-Match header value
      * @return matched subscription as a SubscriptionDTO
      */
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
-            MessageContext messageContext) {
+                                                   MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
@@ -481,19 +489,19 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     /**
      * Deletes the subscription matched to subscription id
      *
-     * @param subscriptionId    subscription identifier
-     * @param ifMatch           If-Match header value
+     * @param subscriptionId subscription identifier
+     * @param ifMatch        If-Match header value
      * @return 200 response if successfully deleted the subscription
      */
     @Override
     public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
-            MessageContext messageContext) {
+                                                      MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
             apiConsumer = RestApiUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
-            
+
             apiConsumer.removeSubscription(subscribedAPI);
             return Response.ok().build();
         } catch (APIManagementException e) {
