@@ -170,7 +170,7 @@ class ViewToken extends React.Component {
                     </Typography>
                 </InlineMessage>
                 <div className={classes.epWrapper}>
-                    <label for='bootstrap-input' className={classes.prodLabel}>
+                    <label for='access-token' className={classes.prodLabel}>
                         {(token.isOauth) && (
                             <FormattedMessage
                                 id='Shared.AppsAndKeys.ViewToken.access.token'
@@ -186,7 +186,7 @@ class ViewToken extends React.Component {
                     </label>
                     <TextField
                         defaultValue={token.accessToken}
-                        id='bootstrap-input'
+                        id='access-token'
                         multiline
                         fullWidth
                         rows={4}
