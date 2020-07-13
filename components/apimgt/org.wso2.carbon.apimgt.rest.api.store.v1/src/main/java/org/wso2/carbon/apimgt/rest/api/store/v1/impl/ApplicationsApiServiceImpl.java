@@ -160,6 +160,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
             }
 
+            //Validate token type
+            if (ApplicationDTO.TokenTypeEnum.OAUTH.equals(body.getTokenType())) {
+                RestApiUtil.handleBadRequest("Applications with 'OAUTH' token type are " +
+                        "not allowed to be created", log);
+            }
+
             Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
             if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
                 RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
