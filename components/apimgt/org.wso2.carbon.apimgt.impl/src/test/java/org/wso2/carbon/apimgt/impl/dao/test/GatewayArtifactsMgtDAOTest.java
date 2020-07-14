@@ -51,11 +51,6 @@ import java.util.UUID;
 @PrepareForTest( {KeyManagerHolder.class})
 public class GatewayArtifactsMgtDAOTest {
     public static GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
-    private API api;
-    private String apiName;
-    private String version;
-    private APIIdentifier apiId;
-    private String label;
 
     @Before
     public void setUp() throws Exception {
@@ -78,12 +73,6 @@ public class GatewayArtifactsMgtDAOTest {
         IdentityConfigParser.getInstance(identityConfigPath);
         OAuthServerConfiguration oAuthServerConfiguration = OAuthServerConfiguration.getInstance();
         ServiceReferenceHolder.getInstance().setOauthServerConfiguration(oAuthServerConfiguration);
-
-        apiName = "testAddGatewayPublishedAPIDetails";
-        version = "1.0.0";
-        apiId = new APIIdentifier("testGateway", apiName, version);
-        api = new API(apiId);
-        label = "Production and Sandbox";
 
 //        gatewayruntimeArtifacts = {"name":"PizzaShackAPI","version":"1.0.0","provider":"admin","tenantDomain":"carbon.super","apiId":"a7f58a46-2fa4-4d4e-b244-57dd6c03a5ae","override":true,"sequencesToBeRemove":["admin--PizzaShackAPI:v1.0.0--In","admin--PizzaShackAPI:v1.0.0--Fault","admin--PizzaShackAPI:v1.0.0--Out"],"localEntriesToBeRemove":["a7f58a46-2fa4-4d4e-b244-57dd6c03a5ae"],"endpointEntriesToBeRemove":["PizzaShackAPI--v1.0.0_APIsandboxEndpoint","PizzaShackAPI--v1.0.0_APIproductionEndpoint"]}
 //        byte[] gatewayRuntimeArtifactsAsBytes =  gatewayruntimeArtifacts.getBytes();
@@ -143,33 +132,22 @@ public class GatewayArtifactsMgtDAOTest {
     public void testAddGetGatewayPublishedAPIDetails() throws APIManagementException {
 
         String apiUUID = UUID.randomUUID().toString();
-        boolean isGatewayPublishedAPIDetailsAdded= gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiUUID,
-                apiName, version,
-                String.valueOf(MultitenantConstants.SUPER_TENANT_ID));
-        Assert.assertTrue(isGatewayPublishedAPIDetailsAdded);
-
+        String apiName = "testAddGatewayPublishedAPIDetails";
+        String version = "1.0.0";
+        String label = "Production and Sandbox";
         ByteArrayInputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
-        boolean isGatewayPublishedAPIArtifactsAdded = gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiUUID,
-                label , anyInputStream, 1,
-                APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH, SQLConstants.ADD_GW_API_ARTIFACT);
-        Assert.assertTrue(isGatewayPublishedAPIArtifactsAdded);
 
-        String gatewayPublishedAPIArtifacts =
-                gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiUUID, label,
-                        APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-        Assert.assertNotNull(gatewayPublishedAPIArtifacts);
-
-        boolean isApiPublished = gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiUUID);
-        Assert.assertTrue(isApiPublished);
-
-        boolean isApiDetailsExists = gatewayArtifactsMgtDAO.isAPIDetailsExists(apiUUID);
-        Assert.assertTrue(isApiDetailsExists);
-
-        boolean isAPIArtifactExists= gatewayArtifactsMgtDAO.isAPIArtifactExists(apiUUID, label);
-        Assert.assertTrue(isAPIArtifactExists);
-
-        List<String> gatewayRuntimeArtifactsArray = gatewayArtifactsMgtDAO.getAllGatewayPublishedAPIArtifacts(label);
-        Assert.assertTrue(gatewayRuntimeArtifactsArray.size() > 0);
+        Assert.assertTrue(gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiUUID, apiName, version,
+                String.valueOf(MultitenantConstants.SUPER_TENANT_ID)));
+        Assert.assertTrue(gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiUUID, label , anyInputStream,
+                1, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH,
+                SQLConstants.ADD_GW_API_ARTIFACT));
+        Assert.assertNotNull(gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiUUID, label,
+                APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH));
+        Assert.assertTrue(gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiUUID));
+        Assert.assertTrue(gatewayArtifactsMgtDAO.isAPIDetailsExists(apiUUID));
+        Assert.assertTrue(gatewayArtifactsMgtDAO.isAPIArtifactExists(apiUUID, label));
+        Assert.assertTrue(gatewayArtifactsMgtDAO.getAllGatewayPublishedAPIArtifacts(label).size() > 0);
 
         String apiId =
                 gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiName, version,
