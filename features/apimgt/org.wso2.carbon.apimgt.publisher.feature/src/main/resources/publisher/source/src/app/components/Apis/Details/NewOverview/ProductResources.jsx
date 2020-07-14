@@ -100,7 +100,7 @@ class ProductResources extends React.PureComponent {
                             return (
                                 <div className={classes.root}>
                                     <Typography className={classes.heading} variant='body1'>
-                                        {resource.name}
+                                        {resource.name + ' : ' + resource.version}
                                     </Typography>
                                     {Object.keys(resource.operations).map((innerKey) => {
                                         const operation = (resource.operations)[innerKey];
