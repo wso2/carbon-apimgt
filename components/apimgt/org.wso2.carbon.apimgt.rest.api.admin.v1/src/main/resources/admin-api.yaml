@@ -5169,10 +5169,9 @@ definitions:
           About scope.
         example: "Publish API"
       roles:
-        schema:
-          type: array
-          items:
-            type: string
+        type: array
+        items:
+          type: string
         description: |
           Roles for the particular scope.
         example: ["admin","Internal/publisher"]

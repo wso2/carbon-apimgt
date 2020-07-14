@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -18,7 +20,7 @@ public class ScopeDTO   {
     private String tag = null;
     private String name = null;
     private String description = null;
-    private Object roles = null;
+    private List<String> roles = new ArrayList<>();
 
   /**
    * Portal name. 
@@ -77,18 +79,18 @@ public class ScopeDTO   {
   /**
    * Roles for the particular scope. 
    **/
-  public ScopeDTO roles(Object roles) {
+  public ScopeDTO roles(List<String> roles) {
     this.roles = roles;
     return this;
   }
 
   
-  @ApiModelProperty(example = "", value = "Roles for the particular scope. ")
+  @ApiModelProperty(example = "[\"admin\",\"Internal/publisher\"]", value = "Roles for the particular scope. ")
   @JsonProperty("roles")
-  public Object getRoles() {
+  public List<String> getRoles() {
     return roles;
   }
-  public void setRoles(Object roles) {
+  public void setRoles(List<String> roles) {
     this.roles = roles;
   }
 

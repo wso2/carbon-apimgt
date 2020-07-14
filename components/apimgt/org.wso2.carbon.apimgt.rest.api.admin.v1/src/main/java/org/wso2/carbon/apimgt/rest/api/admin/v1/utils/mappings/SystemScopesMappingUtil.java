@@ -30,10 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SystemScopesMappingUtil {
 
@@ -77,7 +74,9 @@ public class SystemScopesMappingUtil {
             if (scopeRoleMapping.containsKey(mapping.getKey())) {
                 ScopeDTO roleScopeDTO = new ScopeDTO();
                 roleScopeDTO.setName(mapping.getKey());
-                roleScopeDTO.setRoles(scopeRoleMapping.get(mapping.getKey()));
+                String roles = scopeRoleMapping.get(mapping.getKey());
+                List<String> roleList = new ArrayList<String>(Arrays.asList(roles.split(",")));
+                roleScopeDTO.setRoles(roleList);
                 roleScopeDTO.setDescription(mapping.getValue().get(0));
                 roleScopeDTO.setTag(mapping.getValue().get(1));
                 scopeDTOs.add(roleScopeDTO);
