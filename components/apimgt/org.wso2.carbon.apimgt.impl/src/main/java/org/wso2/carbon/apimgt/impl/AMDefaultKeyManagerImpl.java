@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import feign.Client;
 import feign.Feign;
 import feign.Response;
 import feign.gson.GsonDecoder;
@@ -29,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.CarbonConstants;
@@ -68,17 +70,27 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import sun.security.ssl.SSLSocketFactoryImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -99,7 +111,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
-
         // OAuthApplications are created by calling to APIKeyMgtSubscriber Service
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
 
@@ -505,7 +516,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         accessTokenGenerator = new AccessTokenGenerator(tokenEndpoint, revokeEndpoint, consumerKey, consumerSecret);
 
         dcrClient = Feign.builder()
-                .client(new OkHttpClient())
+                .client(APIUtil.createNewFeignClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
@@ -513,7 +524,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .errorDecoder(new KMClientErrorDecoder())
                 .target(DCRClient.class, dcrEndpoint);
         authClient = Feign.builder()
-                .client(new OkHttpClient())
+                .client(APIUtil.createNewFeignClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
@@ -522,7 +533,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .target(AuthClient.class, tokenEndpoint);
 
         introspectionClient = Feign.builder()
-                .client(new OkHttpClient())
+                .client(APIUtil.createNewFeignClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
@@ -531,15 +542,15 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .encoder(new FormEncoder())
                 .target(IntrospectionClient.class, introspectionEndpoint);
         scopeClient = Feign.builder()
-                .client(new OkHttpClient())
+                .client(APIUtil.createNewFeignClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
                 .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
                 .errorDecoder(new KMClientErrorDecoder())
-                .target(ScopeClient.class, scopeEndpoint);  
+                .target(ScopeClient.class, scopeEndpoint);
         userClient = Feign.builder()
-                .client(new OkHttpClient())
+                .client(APIUtil.createNewFeignClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
