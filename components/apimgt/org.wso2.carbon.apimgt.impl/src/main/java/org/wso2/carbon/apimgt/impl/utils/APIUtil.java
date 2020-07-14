@@ -25,6 +25,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import feign.Client;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -61,6 +62,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ContentType;
@@ -231,6 +233,7 @@ import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
+import sun.security.ssl.SSLSocketFactoryImpl;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -7280,6 +7283,24 @@ public final class APIUtil {
 
     }
 
+    public static Client createNewFeignClient() throws APIManagementException {
+        String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
+        X509HostnameVerifier hostnameVerifier;
+        if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+        } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
+        } else {
+            hostnameVerifier = SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
+        }
+        try {
+            return new Client.Default(null, hostnameVerifier);
+        } catch (Exception e) {
+            handleException("Exception while creating SSLSocketFactoryImpl");
+        }
+        return null;
+    }
+
     private static SSLSocketFactory createSocketFactory() throws APIManagementException {
         KeyStore keyStore;
         String keyStorePath = null;
@@ -7290,9 +7311,7 @@ public final class APIUtil {
                     .getFirstProperty("Security.KeyStore.Password");
             keyStore = KeyStore.getInstance("JKS");
             keyStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
-            SSLSocketFactory sslSocketFactory = new SSLSocketFactory(keyStore, keyStorePassword);
-
-            return sslSocketFactory;
+            return new SSLSocketFactory(keyStore, keyStorePassword);
 
         } catch (KeyStoreException e) {
             handleException("Failed to read from Key Store", e);
@@ -10007,7 +10026,7 @@ public final class APIUtil {
         }
     }
 
-    /**Apiutil
+    /**
      * Utility method to generate JWT header with public certificate thumbprint for signature verification.
      *
      * @param publicCert         - The public certificate which needs to include in the header as thumbprint
@@ -10845,16 +10864,6 @@ public final class APIUtil {
                                 .concat(getTenantAwareContext(keyManagerConfigurationDTO.getTenantDomain()))
                                 .concat(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT));
 
-                if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                        .containsKey(APIConstants.KEY_MANAGER_USERNAME)) {
-                    keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_USERNAME,
-                            apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
-                }
-                if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                        .containsKey(APIConstants.KEY_MANAGER_PASSWORD)) {
-                    keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_PASSWORD,
-                            apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD));
-                }
                 if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
                     keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
                             keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
@@ -10951,26 +10960,33 @@ public final class APIUtil {
                     log.error("Error while reading encoded data");
                 }
             }
-            String revokeEndpointContext =
-                    apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_ENDPOINT_CONTEXT);
-            String tokenEndpointContext = apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_ENDPOINT_CONTEXT);
-
-            if (StringUtils.isEmpty(tokenEndpointContext)) {
-                tokenEndpointContext = "/token";
-            }
-            if (StringUtils.isNotEmpty(revokeEndpointContext)) {
-                revokeEndpointContext = "/revoke";
-            }
-            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT,
-                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(tokenEndpointContext));
-            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_TOKEN_ENDPOINT,
-                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(tokenEndpointContext));
-            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_REVOKE_ENDPOINT,
-                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(revokeEndpointContext));
-            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT,
-                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(revokeEndpointContext));
         }
         return keyManagerConfigurationDTO;
+    }
+
+    public static void setTokenAndRevokeEndpointsToDevPortal(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        String revokeEndpointContext =
+                apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_ENDPOINT_CONTEXT);
+        String tokenEndpointContext = apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_ENDPOINT_CONTEXT);
+
+        if (StringUtils.isEmpty(tokenEndpointContext)) {
+            tokenEndpointContext = "/token";
+        }
+        if (StringUtils.isNotEmpty(revokeEndpointContext)) {
+            revokeEndpointContext = "/revoke";
+        }
+        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT,
+                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(tokenEndpointContext));
+        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_TOKEN_ENDPOINT,
+                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(tokenEndpointContext));
+        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_REVOKE_ENDPOINT,
+                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(revokeEndpointContext));
+        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT,
+                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(revokeEndpointContext));
     }
 
     public static String getTokenEndpointsByType(String type) {

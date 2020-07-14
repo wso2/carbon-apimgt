@@ -293,36 +293,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public OAuthApplicationInfo getOAuthApplication(String consumerKey) throws APIManagementException {
-        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sqlQuery = SQLConstants.GET_OAUTH_APPLICATION_SQL;
 
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, consumerKey);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                oAuthApplicationInfo.setClientId(consumerKey);
-                oAuthApplicationInfo.setCallBackURL(rs.getString("CALLBACK_URL"));
-                oAuthApplicationInfo.setClientSecret(APIUtil.decryptToken(rs.getString("CONSUMER_SECRET")));
-                oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_REDIRECT_URIS, rs.getString
-                        ("CALLBACK_URL"));
-                oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_NAME, rs.getString("APP_NAME"));
-                oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT, rs.getString("GRANT_TYPES"));
-            }
-        } catch (SQLException e) {
-            handleException("Error while executing SQL for getting OAuth application info", e);
-        } catch (CryptoException e) {
-            handleException("Unable to decrypt consumer secret of consumer key " + consumerKey, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return oAuthApplicationInfo;
-    }
 
     /**
      * Get the creator of the OAuth App.
@@ -4561,7 +4532,6 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-        String appName = null;
         Application[] applications = null;
 
         String sqlQuery = SQLConstants.GET_APPLICATIONS_BY_OWNER;
