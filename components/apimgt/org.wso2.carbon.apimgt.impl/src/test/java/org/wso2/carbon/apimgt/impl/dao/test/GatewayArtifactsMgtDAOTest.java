@@ -167,21 +167,14 @@ public class GatewayArtifactsMgtDAOTest {
 
         boolean isAPIArtifactExists= gatewayArtifactsMgtDAO.isAPIArtifactExists(apiUUID, label);
         Assert.assertTrue(isAPIArtifactExists);
-    }
 
-
-    @Test
-    public void testGetAllGatewayPublishedAPIArtifacts() throws APIManagementException {
         List<String> gatewayRuntimeArtifactsArray = gatewayArtifactsMgtDAO.getAllGatewayPublishedAPIArtifacts(label);
-        Assert.assertTrue(gatewayRuntimeArtifactsArray.size() > 1);
-    }
+        Assert.assertTrue(gatewayRuntimeArtifactsArray.size() > 0);
 
-
-    @Test
-    public void testGetGatewayAPIId() throws APIManagementException {
-        String apiUUID =
+        String apiId =
                 gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiName, version,
                         String.valueOf(MultitenantConstants.SUPER_TENANT_ID));
-        Assert.assertNotNull(apiUUID);
+        Assert.assertNotNull(apiId);
     }
+
 }
