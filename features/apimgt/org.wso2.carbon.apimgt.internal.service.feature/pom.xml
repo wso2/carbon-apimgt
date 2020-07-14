@@ -49,6 +49,30 @@
             <type>war</type>
         </dependency>
         <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.uri.template</groupId>
             <artifactId>wso2-uri-templates</artifactId>
         </dependency>
@@ -146,6 +170,12 @@
                                 <bundleDef>com.fasterxml.jackson.core:jackson-core:${fasterxml.jackson.version}
                                 </bundleDef>
                                 <bundleDef>commons-codec:commons-codec</bundleDef>
+                                <bundleDef>io.github.openfeign:feign-core:${openfeign.version}</bundleDef>
+                                <bundleDef>io.github.openfeign:feign-gson:${openfeign.version}</bundleDef>
+                                <bundleDef>io.github.openfeign:feign-okhttp:${openfeign.version}</bundleDef>
+                                <bundleDef>io.github.openfeign:feign-slf4j:${openfeign.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.squareup.okio:okio</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}

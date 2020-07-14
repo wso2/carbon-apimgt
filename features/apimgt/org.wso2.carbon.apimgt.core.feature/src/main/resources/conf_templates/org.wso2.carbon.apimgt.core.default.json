@@ -151,5 +151,6 @@
   "apim.key_manager.enable_registration": true,
   "apim.key_manager.enable_retriever": true,
   "apim.event_hub.username": "$ref{apim.throttling.username}",
-  "apim.event_hub.password": "$ref{apim.throttling.password}"
+  "apim.event_hub.password": "$ref{apim.throttling.password}",
+  "apim.key_manager.type": "default"
 }
