@@ -17,12 +17,16 @@
  */
 package org.wso2.carbon.apimgt.gateway.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  *  DTO of revoked JWT token
  */
 public class RevokedJWTTokenDTO {
 
+    @SerializedName("jwt_signature")
     private String jwtSignature;
+    @SerializedName("expiry_time")
     private Long expiryTime;
 
     public void setExpiryTime(Long expiryTime) {
