@@ -10721,8 +10721,8 @@ public final class APIUtil {
                 String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
                 JSONParser parser = new JSONParser();
                 JSONObject mappings = (JSONObject) parser.parse(content);
-                if (mappings.containsKey(APIConstants.API_PUBLISHER)) {
-                    return (Map) mappings.get(APIConstants.API_PUBLISHER);
+                if (mappings.containsKey(APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER)) {
+                    return (Map) mappings.get(APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER);
                 }
             }
         } catch (RegistryException e) {

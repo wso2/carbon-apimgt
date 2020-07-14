@@ -150,6 +150,7 @@ public final class APIConstants {
     //domain mapping app keys
     public static final String API_DOMAIN_MAPPINGS_GATEWAY = "gateway";
     public static final String API_DOMAIN_MAPPINGS_STORE = "store";
+    public static final String API_DOMAIN_MAPPINGS_PUBLISHER = "publisher";
     public static final String API_DOMAIN_MAPPINGS_CONTEXT = "context";
     public static final String API_DOMAIN_MAPPINGS_LOGIN_CALLBACK = "login";
     public static final String API_DOMAIN_MAPPINGS_LOGOUT_CALLBACK = "logout";
