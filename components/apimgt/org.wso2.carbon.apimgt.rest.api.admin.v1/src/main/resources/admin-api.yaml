@@ -1912,11 +1912,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:app_import_export
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://localhost:9443/api/am/admin/v1/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4\""
-      x-wso2-request: |
-        DELETE https://localhost:9443/api/am/admin/v1/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-examples:
+        $ref: docs/examples/alerts/applications.yaml#/delete
       summary: |
         Remove an application
       description: |

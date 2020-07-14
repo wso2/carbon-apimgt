@@ -1,0 +1,13 @@
+delete:
+  - id: deleteApplication
+  - request:
+      method: DELETE
+      url: https://localhost:9443/api/am/admin/v1/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4
+      headers: |
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    response:
+      status:
+        code: 200
+        msg: OK
+      headers: |
+        Content-Type: application/json
