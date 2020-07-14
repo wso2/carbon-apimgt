@@ -515,38 +515,48 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         accessTokenGenerator = new AccessTokenGenerator(tokenEndpoint, revokeEndpoint, consumerKey, consumerSecret);
 
-        try {
-            dcrClient = APIUtil.createNewFeignClient(accessTokenGenerator)
-                    .target(DCRClient.class, dcrEndpoint);
-        } catch (Exception e) {
-            throw new APIManagementException("Error while setting SSLSocketFactoryImpl for dcrClient", e);
-        }
+        dcrClient = Feign.builder()
+                .client(APIUtil.createNewFeignClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(DCRClient.class, dcrEndpoint);
+        authClient = Feign.builder()
+                .client(APIUtil.createNewFeignClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .errorDecoder(new KMClientErrorDecoder())
+                .encoder(new FormEncoder())
+                .target(AuthClient.class, tokenEndpoint);
 
-        try {
-            authClient = APIUtil.createNewFeignClient(accessTokenGenerator)
-                    .target(AuthClient.class, tokenEndpoint);
-        } catch (Exception e) {
-            throw new APIManagementException("Error while setting SSLSocketFactoryImpl for authClient", e);
-        }
-        try {
-            introspectionClient = APIUtil.createNewFeignClient(accessTokenGenerator)
-                    .target(IntrospectionClient.class, introspectionEndpoint);
-        } catch (Exception e) {
-            throw new APIManagementException("Error while setting SSLSocketFactoryImpl for introspectionClient", e);
-        }
-        try {
-            scopeClient = APIUtil.createNewFeignClient(accessTokenGenerator)
-                    .target(ScopeClient.class, scopeEndpoint);
-        } catch (Exception e) {
-            throw new APIManagementException("Error while setting SSLSocketFactoryImpl for scopeClient", e);
-        }
-        try {
-            userClient = APIUtil.createNewFeignClient(accessTokenGenerator)
-                    .target(UserClient.class, userInfoEndpoint);
-        } catch (Exception e) {
-            throw new APIManagementException("Error while setting SSLSocketFactoryImpl for userClient", e);
-        }
-
+        introspectionClient = Feign.builder()
+                .client(APIUtil.createNewFeignClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .encoder(new FormEncoder())
+                .target(IntrospectionClient.class, introspectionEndpoint);
+        scopeClient = Feign.builder()
+                .client(APIUtil.createNewFeignClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(ScopeClient.class, scopeEndpoint);
+        userClient = Feign.builder()
+                .client(APIUtil.createNewFeignClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .errorDecoder(new KMClientErrorDecoder())
+                .target(UserClient.class, userInfoEndpoint);
     }
 
     @Override

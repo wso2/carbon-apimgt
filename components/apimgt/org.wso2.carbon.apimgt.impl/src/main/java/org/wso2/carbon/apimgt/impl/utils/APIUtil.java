@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import feign.Client;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -7279,16 +7280,22 @@ public final class APIUtil {
 
     }
 
-    public static Feign.Builder createNewFeignClient(AccessTokenGenerator accessTokenGenerator) throws Exception {
-
-        return Feign.builder()
-                .client(new Client.Default(new SSLSocketFactoryImpl(), new AllowAllHostnameVerifier()))
-                .encoder(new GsonEncoder())
-                .decoder(new GsonDecoder())
-                .logger(new Slf4jLogger())
-                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
-                .errorDecoder(new KMClientErrorDecoder())
-                .encoder(new FormEncoder());
+    public static Client createNewFeignClient() throws APIManagementException {
+        String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
+        X509HostnameVerifier hostnameVerifier;
+        if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+        } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
+        } else {
+            hostnameVerifier = SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
+        }
+        try {
+            return new Client.Default(null, hostnameVerifier);
+        } catch (Exception e) {
+            handleException("Exception while creating SSLSocketFactoryImpl");
+        }
+        return null;
     }
 
     private static SSLSocketFactory createSocketFactory() throws APIManagementException {
@@ -7301,9 +7308,7 @@ public final class APIUtil {
                     .getFirstProperty("Security.KeyStore.Password");
             keyStore = KeyStore.getInstance("JKS");
             keyStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
-            SSLSocketFactory sslSocketFactory = new SSLSocketFactory(keyStore, keyStorePassword);
-
-            return sslSocketFactory;
+            return new SSLSocketFactory(keyStore, keyStorePassword);
 
         } catch (KeyStoreException e) {
             handleException("Failed to read from Key Store", e);
