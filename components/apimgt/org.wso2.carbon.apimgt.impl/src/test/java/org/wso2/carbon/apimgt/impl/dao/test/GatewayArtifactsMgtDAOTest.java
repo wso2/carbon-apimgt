@@ -56,9 +56,6 @@ public class GatewayArtifactsMgtDAOTest {
     private String version;
     private APIIdentifier apiId;
     private String label;
-    private String apiUUID;
-    private String gatewayruntimeArtifacts;
-
 
     @Before
     public void setUp() throws Exception {
@@ -87,8 +84,6 @@ public class GatewayArtifactsMgtDAOTest {
         apiId = new APIIdentifier("testGateway", apiName, version);
         api = new API(apiId);
         label = "Production and Sandbox";
-        UUID uuid = UUID.randomUUID();
-        apiUUID = uuid.toString();
 
 //        gatewayruntimeArtifacts = {"name":"PizzaShackAPI","version":"1.0.0","provider":"admin","tenantDomain":"carbon.super","apiId":"a7f58a46-2fa4-4d4e-b244-57dd6c03a5ae","override":true,"sequencesToBeRemove":["admin--PizzaShackAPI:v1.0.0--In","admin--PizzaShackAPI:v1.0.0--Fault","admin--PizzaShackAPI:v1.0.0--Out"],"localEntriesToBeRemove":["a7f58a46-2fa4-4d4e-b244-57dd6c03a5ae"],"endpointEntriesToBeRemove":["PizzaShackAPI--v1.0.0_APIsandboxEndpoint","PizzaShackAPI--v1.0.0_APIproductionEndpoint"]}
 //        byte[] gatewayRuntimeArtifactsAsBytes =  gatewayruntimeArtifacts.getBytes();
@@ -145,28 +140,35 @@ public class GatewayArtifactsMgtDAOTest {
     }
 
     @Test
-    public void testAddGatewayPublishedAPIDetails() throws APIManagementException {
-        boolean result = gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiUUID, apiName, version,
-                String.valueOf(MultitenantConstants.SUPER_TENANT_ID));
-        Assert.assertTrue(result);
-    }
+    public void testAddGetGatewayPublishedAPIDetails() throws APIManagementException {
 
-    @Test
-    public void testAddGatewayPublishedAPIArtifacts() throws APIManagementException {
+        String apiUUID = UUID.randomUUID().toString();
+        boolean isGatewayPublishedAPIDetailsAdded= gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiUUID,
+                apiName, version,
+                String.valueOf(MultitenantConstants.SUPER_TENANT_ID));
+        Assert.assertTrue(isGatewayPublishedAPIDetailsAdded);
+
         ByteArrayInputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
-        boolean result = gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiUUID,
+        boolean isGatewayPublishedAPIArtifactsAdded = gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiUUID,
                 label , anyInputStream, 1,
                 APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH, SQLConstants.ADD_GW_API_ARTIFACT);
-        Assert.assertTrue(result);
-    }
+        Assert.assertTrue(isGatewayPublishedAPIArtifactsAdded);
 
-    @Test
-    public void testGetGatewayPublishedAPIArtifacts() throws APIManagementException {
         String gatewayPublishedAPIArtifacts =
                 gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiUUID, label,
                         APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
         Assert.assertNotNull(gatewayPublishedAPIArtifacts);
+
+        boolean isApiPublished = gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiUUID);
+        Assert.assertTrue(isApiPublished);
+
+        boolean isApiDetailsExists = gatewayArtifactsMgtDAO.isAPIDetailsExists(apiUUID);
+        Assert.assertTrue(isApiDetailsExists);
+
+        boolean isAPIArtifactExists= gatewayArtifactsMgtDAO.isAPIArtifactExists(apiUUID, label);
+        Assert.assertTrue(isAPIArtifactExists);
     }
+
 
     @Test
     public void testGetAllGatewayPublishedAPIArtifacts() throws APIManagementException {
@@ -174,23 +176,6 @@ public class GatewayArtifactsMgtDAOTest {
         Assert.assertTrue(gatewayRuntimeArtifactsArray.size() > 1);
     }
 
-    @Test
-    public void testIsAPIPublishedInAnyGateway() throws APIManagementException {
-        boolean isApiPublished = gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiUUID);
-        Assert.assertTrue(isApiPublished);
-    }
-
-    @Test
-    public void testIsAPIDetailsExists() throws APIManagementException {
-        boolean isApiPublished = gatewayArtifactsMgtDAO.isAPIDetailsExists(apiUUID);
-        Assert.assertTrue(isApiPublished);
-    }
-
-    @Test
-    public void testIsAPIArtifactExists() throws APIManagementException {
-        boolean isApiPublished = gatewayArtifactsMgtDAO.isAPIArtifactExists(apiUUID, label);
-        Assert.assertTrue(isApiPublished);
-    }
 
     @Test
     public void testGetGatewayAPIId() throws APIManagementException {
