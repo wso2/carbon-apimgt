@@ -120,7 +120,7 @@ const styles = theme => ({
         flexGrow: 1,
     },
     root: {
-        height: 80,
+        minHeight: 80,
         background: theme.custom.infoBar.background,
         color: theme.palette.getContrastText(theme.custom.infoBar.background),
         borderBottom: `solid 1px ${theme.palette.grey.A200}`,
@@ -544,21 +544,12 @@ class Listing extends Component {
                                                 defaultMessage='No Applications Available'
                                             />
                                         </Typography>
-                                        <Typography variant="body2" gutterBottom>
-                                            <FormattedMessage
-                                                id='Applications.Listing.Listing.applications.noapps.display.prefix'
-                                                defaultMessage={`An application is a logical collection of APIs. Applications
-                                                allow you to use a single access token to invoke a collection
-                                                of APIs and to subscribe to one API multiple times with different
-                                                SLA levels. The DefaultApplication is pre-created and allows unlimited
-                                                access by default.`}
-                                            />
-                                        </Typography>
+                                        
                                         <Typography variant="body2" gutterBottom>
                                             <a onClick={this.handleClickOpen} className={classes.clearSearchLink}>
                                                 <FormattedMessage
                                                     id='Applications.Listing.Listing.noapps.display.link.text'
-                                                    defaultMessage='Create New Application'
+                                                    defaultMessage='Add New Application'
                                                 />
                                             </a>
                                         </Typography>
