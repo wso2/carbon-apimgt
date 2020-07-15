@@ -194,6 +194,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         clientInfo.setClientName(applicationName);
         //todo: run tests by commenting the type
         clientInfo.setTokenType(info.getTokenType());
+        clientInfo.setApplication_owner(info.getAppOwner());
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());
@@ -475,7 +476,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             dcrEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
         } else {
             dcrEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                    .concat(getTenantAwareContext().trim()).concat("/api/identity/oauth2/dcr/v1.1/register");
+                    .concat(getTenantAwareContext().trim()).concat("/keymanager-operations/dcr/register");
         }
         String tokenEndpoint;
         if (configuration.getParameter(APIConstants.KeyManager.TOKEN_ENDPOINT) != null) {
@@ -513,7 +514,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT);
         } else {
             userInfoEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                    .concat(getTenantAwareContext().trim()).concat("/user-info");
+                    .concat(getTenantAwareContext().trim()).concat("/keymanager-operations/user-info");
         }
 
         dcrClient = Feign.builder()
