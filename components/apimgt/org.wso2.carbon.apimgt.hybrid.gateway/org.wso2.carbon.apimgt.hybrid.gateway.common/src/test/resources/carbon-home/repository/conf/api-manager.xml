@@ -574,7 +574,6 @@
         </ETagSkipList>
     </RESTAPI>
     <ThrottlingConfigurations>
-        <EnableAdvanceThrottling>true</EnableAdvanceThrottling>
         <DataPublisher>
             <Enabled>true</Enabled>
             <Type>Binary</Type>

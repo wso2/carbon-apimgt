@@ -1713,7 +1713,6 @@ public final class APIConstants {
     public static class AdvancedThrottleConstants {
 
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
-        public static final String ENABLE_ADVANCE_THROTTLING = "EnableAdvanceThrottling";
         public static final String TRAFFIC_MANAGER = "TrafficManager";
 
         public static final String DATA_PUBLISHER_CONFIGURATION = "DataPublisher";

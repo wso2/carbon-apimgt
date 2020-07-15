@@ -2867,7 +2867,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             Map<String, String> properties = new HashMap<String, String>();
 
-            boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
             if (api.getProductionMaxTps() != null) {
                 properties.put("productionMaxCount", api.getProductionMaxTps());
             }
@@ -2876,18 +2875,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 properties.put("sandboxMaxCount", api.getSandboxMaxTps());
             }
 
-            if (isGlobalThrottlingEnabled) {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
-                        , properties);
-            } else {
-                properties.put("id", "A");
-                properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
-                properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
-                properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
+                    , properties);
 
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler"
-                        , properties);
-            }
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler"
                     , Collections.<String, String>emptyMap());
@@ -3028,7 +3018,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 authProperties);
         Map<String, String> properties = new HashMap<String, String>();
 
-        boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
         if (apiProduct.getProductionMaxTps() != null) {
             properties.put("productionMaxCount", apiProduct.getProductionMaxTps());
         }
@@ -3037,18 +3026,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             properties.put("sandboxMaxCount", apiProduct.getSandboxMaxTps());
         }
 
-        if (isGlobalThrottlingEnabled) {
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
-                    , properties);
-        } else {
-            properties.put("id", "A");
-            properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
-            properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
-            properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
+                , properties);
 
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler"
-                    , properties);
-        }
 
         vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler"
                 , Collections.<String, String>emptyMap());

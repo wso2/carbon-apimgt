@@ -61,7 +61,6 @@ public class DataProcessAndPublishingAgentTest {
         ThrottleProperties throttleProperties = new ThrottleProperties();
         DataPublisher dataPublisher = Mockito.mock(DataPublisher.class);
         Mockito.when(dataPublisher.tryPublish(Mockito.any(Event.class))).thenReturn(true);
-        throttleProperties.setEnabled(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
         AuthenticationContext authenticationContext = new AuthenticationContext();
@@ -88,7 +87,6 @@ public class DataProcessAndPublishingAgentTest {
     @Test
     public void setDataReferenceWithoutApiLevelTier() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.setEnabled(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
         AuthenticationContext authenticationContext = new AuthenticationContext();
@@ -103,7 +101,6 @@ public class DataProcessAndPublishingAgentTest {
     @Test
     public void setDataReferenceWithHeaderConditionEnableWithNullHeaderMap() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.setEnabled(true);
         throttleProperties.setEnableHeaderConditions(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
@@ -130,7 +127,6 @@ public class DataProcessAndPublishingAgentTest {
     @Test
     public void setDataReferenceWithHeaderConditionEnable() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.setEnabled(true);
         throttleProperties.setEnableHeaderConditions(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
@@ -157,7 +153,6 @@ public class DataProcessAndPublishingAgentTest {
     @Test
     public void setIPCondition() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.setEnabled(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
         AuthenticationContext authenticationContext = new AuthenticationContext();
@@ -185,7 +180,6 @@ public class DataProcessAndPublishingAgentTest {
     @Test
     public void testEnableQueryParamCondition() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.setEnabled(true);
         throttleProperties.setEnableQueryParamConditions(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
@@ -216,7 +210,6 @@ public class DataProcessAndPublishingAgentTest {
     @Test
     public void testEnableQueryParamConditionWithoutQueryParams() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.setEnabled(true);
         throttleProperties.setEnableQueryParamConditions(true);
         throttleProperties.setEnableJwtConditions(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
@@ -246,7 +239,6 @@ public class DataProcessAndPublishingAgentTest {
     @Test
     public void testEnableQueryParamConditionWithJwtToken() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.setEnabled(true);
         throttleProperties.setEnableJwtConditions(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
@@ -282,7 +274,6 @@ public class DataProcessAndPublishingAgentTest {
     @Test
     public void testContentAwareTierPresent() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.setEnabled(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
         AuthenticationContext authenticationContext = new AuthenticationContext();
@@ -310,7 +301,6 @@ public class DataProcessAndPublishingAgentTest {
     @Test
     public void testContentAwareTierPresentAndContentLengthNotPresent() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.setEnabled(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
         AuthenticationContext authenticationContext = new AuthenticationContext();
@@ -342,7 +332,6 @@ public class DataProcessAndPublishingAgentTest {
     @Test
     public void testIgnoreClientPortFromXForwardedForHeader() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.setEnabled(true);
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
         AuthenticationContext authenticationContext = new AuthenticationContext();

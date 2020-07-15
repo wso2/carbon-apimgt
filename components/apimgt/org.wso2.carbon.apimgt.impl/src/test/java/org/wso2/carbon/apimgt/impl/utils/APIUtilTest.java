@@ -1365,7 +1365,6 @@ public class APIUtilTest {
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
-        Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
         Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
         Mockito.when(policy.getPolicyName()).thenReturn("policy");
         Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
@@ -1436,7 +1435,6 @@ public class APIUtilTest {
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
-        Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
         Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
         Mockito.when(policy.getPolicyName()).thenReturn("policy");
         Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
@@ -1542,7 +1540,6 @@ public class APIUtilTest {
             Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
             Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
             Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
-            Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
             Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
             Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
             Mockito.when(quotaPolicy.getLimit()).thenReturn(limit);
@@ -1637,7 +1634,6 @@ public class APIUtilTest {
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
-        Mockito.when(throttleProperties.isEnabled()).thenReturn(false);
         Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
         Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
         Mockito.when(quotaPolicy.getLimit()).thenReturn(limit);

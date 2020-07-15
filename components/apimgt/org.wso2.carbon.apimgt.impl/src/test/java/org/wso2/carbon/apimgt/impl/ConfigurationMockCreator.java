@@ -28,7 +28,6 @@ public class ConfigurationMockCreator {
     private APIManagerConfiguration configuration;
 
     ConfigurationMockCreator() {
-        throttleProperties.setEnabled(true);
         throttleProperties.setEnableUnlimitedTier(true);
         configuration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(configuration.getThrottleProperties()).thenReturn(throttleProperties);

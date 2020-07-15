@@ -1356,38 +1356,20 @@ public class APIProviderHostObject extends ScriptableObject {
         String[] tierNames;
         if (tier != null) {
             tierNames = tier.split(",");
-            if (!APIUtil.isAdvanceThrottlingEnabled()) {
-                Set<Tier> definedTiers = apiProvider.getTiers();
-                for (String tierName : tierNames) {
-                    boolean isTierValid = false;
-                    for (Tier definedTier : definedTiers) {
-                        if (tierName.equals(definedTier.getName())) {
-                            isTierValid = true;
-                            break;
-                        }
+            Policy[] definedTiers = apiProvider.getPolicies(provider, PolicyConstants.POLICY_LEVEL_SUB);
+            for (String tierName : tierNames) {
+                boolean isTierValid = false;
+                for (Policy definedTier : definedTiers) {
+                    if (tierName.equals(definedTier.getPolicyName())) {
+                        isTierValid = true;
+                        break;
                     }
-
-                    if (!isTierValid) {
-                        handleException("Specified tier " + tierName + " does not exist");
-                    }
-                    availableTier.add(new Tier(tierName));
                 }
-            } else {
-                Policy[] definedTiers = apiProvider.getPolicies(provider, PolicyConstants.POLICY_LEVEL_SUB);
-                for (String tierName : tierNames) {
-                    boolean isTierValid = false;
-                    for (Policy definedTier : definedTiers) {
-                        if (tierName.equals(definedTier.getPolicyName())) {
-                            isTierValid = true;
-                            break;
-                        }
-                    }
 
-                    if (!isTierValid) {
-                        handleException("Specified tier " + tierName + " does not exist");
-                    }
-                    availableTier.add(new Tier(tierName));
+                if (!isTierValid) {
+                    handleException("Specified tier " + tierName + " does not exist");
                 }
+                availableTier.add(new Tier(tierName));
             }
 
             api.addAvailableTiers(availableTier);
