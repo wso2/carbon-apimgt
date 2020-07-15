@@ -78,6 +78,7 @@
         "eslint-plugin-react": "^7.20.0",
         "eslint-plugin-react-hooks": "^2.5.1",
         "extract-react-intl-messages-compact": "^1.0.3",
+        "html-webpack-plugin": "^4.3.0",
         "jest": "^24.9.0",
         "less": "^2.7.2",
         "less-loader": "^4.0.4",

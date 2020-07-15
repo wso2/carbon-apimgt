@@ -18,8 +18,13 @@
  */
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+/** Used to match template delimiters. */
+const customReEscape = /<#-([\s\S]+?)#>/g;
+const customReEvaluate = /<#([\s\S]+?)#>/g;
+const customReInterpolate = /<#=([\s\S]+?)#>/g;
+
 
 const config = {
     entry: { index: './source/index.jsx' },
@@ -92,12 +97,17 @@ const config = {
         MaterialIcons: 'MaterialIcons',
         Config: 'AppConfig',
     },
-    plugins: [new MonacoWebpackPlugin({
-        languages: ['xml', 'json', 'yaml', 'sql', 'mysql'],
-        features: ['!gotoSymbol'],
-    }),
-    new CleanWebpackPlugin(),
-    new ManifestPlugin(),
+    plugins: [
+        new MonacoWebpackPlugin({
+            languages: ['xml', 'json', 'yaml', 'sql', 'mysql'],
+            features: ['!gotoSymbol'],
+        }),
+        new HtmlWebpackPlugin({
+            inject: false,
+            template: 'site/public/pages/index.jag.hbs',
+            filename: '../pages/index.jag',
+            minify: false,
+        }),
     ],
 };
 
