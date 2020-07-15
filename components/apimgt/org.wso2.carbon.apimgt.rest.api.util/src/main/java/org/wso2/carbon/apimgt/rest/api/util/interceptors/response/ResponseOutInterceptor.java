@@ -27,6 +27,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 public class ResponseOutInterceptor extends AbstractPhaseInterceptor<Message> {
     private static final String X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
+    private static final String X_XSS_PROTECTION = "X-XSS-Protection";
 
     public ResponseOutInterceptor() {
         super(Phase.PRE_PROTOCOL);
@@ -43,6 +44,7 @@ public class ResponseOutInterceptor extends AbstractPhaseInterceptor<Message> {
 
     private void setOutBoundHeaders(Message message, MultivaluedMap<String, Object> headers) {
         headers.add(X_CONTENT_TYPE_OPTIONS, "nosniff");
+        headers.add(X_XSS_PROTECTION, "1; mode=block");
         message.put(Message.PROTOCOL_HEADERS, headers);
     }
 }
