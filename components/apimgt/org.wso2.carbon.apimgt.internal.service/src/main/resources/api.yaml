@@ -447,7 +447,7 @@ paths:
     post:
       summary: Push notification events into nodes.
       description: |
-        This will provide access to push vents.
+        This pushes events to the other nodes.
       parameters:
         - $ref: '#/parameters/type'
         - name: body
@@ -476,7 +476,7 @@ parameters:
     required: true
     type: string
   type:
-    name: X-WSO2-KEY-Manager
+    name: X-WSO2-KEY-MANAGER
     in: header
     description: |
       This is used to specify the tenant domain, where the resource need to be

@@ -19,5 +19,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface NotifyApiService {
-      public Response notifyPost(String xWSO2KEYManager, String body, MessageContext messageContext) throws APIManagementException;
+      public Response notifyPost(String xWSO2KEYMANAGER, String body, MessageContext messageContext) throws APIManagementException;
 }
