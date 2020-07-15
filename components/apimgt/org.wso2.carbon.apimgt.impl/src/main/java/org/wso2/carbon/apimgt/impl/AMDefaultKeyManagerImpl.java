@@ -476,7 +476,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             dcrEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
         } else {
             dcrEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                    .concat(getTenantAwareContext().trim()).concat("/keymanager-operations/dcr/register");
+                    .concat(getTenantAwareContext().trim()).concat
+                            (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_DCR_ENDPOINT);
         }
         String tokenEndpoint;
         if (configuration.getParameter(APIConstants.KeyManager.TOKEN_ENDPOINT) != null) {
@@ -514,7 +515,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT);
         } else {
             userInfoEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                    .concat(getTenantAwareContext().trim()).concat("/keymanager-operations/user-info");
+                    .concat(getTenantAwareContext().trim()).concat
+                            (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT);
         }
 
         dcrClient = Feign.builder()
