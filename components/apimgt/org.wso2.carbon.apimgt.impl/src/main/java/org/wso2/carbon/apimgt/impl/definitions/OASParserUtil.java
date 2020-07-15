@@ -318,7 +318,9 @@ public class OASParserUtil {
                     if (sourceRequestBodies != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             RequestBody requestBody = sourceRequestBodies.get(refKey);
-                            components.addRequestBodies(refKey, requestBody);
+                            if (requestBody != null) {
+                                components.addRequestBodies(refKey, requestBody);
+                            }
                         }
                     }
                 }
@@ -329,7 +331,9 @@ public class OASParserUtil {
                     if (sourceSchemas != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Schema schema = sourceSchemas.get(refKey);
-                            components.addSchemas(refKey, schema);
+                            if (schema != null) {
+                                components.addSchemas(refKey, schema);
+                            }
                         }
                     }
                 }
@@ -340,7 +344,9 @@ public class OASParserUtil {
                     if (parameters != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Parameter parameter = parameters.get(refKey);
-                            components.addParameters(refKey, parameter);
+                            if (parameter != null) {
+                                components.addParameters(refKey, parameter);
+                            }
                         }
                     }
                 }
@@ -351,7 +357,9 @@ public class OASParserUtil {
                     if (responses != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             ApiResponse response = responses.get(refKey);
-                            components.addResponses(refKey, response);
+                            if (response != null) {
+                                components.addResponses(refKey, response);
+                            }
                         }
                     }
                 }
@@ -362,7 +370,9 @@ public class OASParserUtil {
                     if (headers != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Header header = headers.get(refKey);
-                            components.addHeaders(refKey, header);
+                            if (header != null) {
+                                components.addHeaders(refKey, header);
+                            }
                         }
                     }
                 }
