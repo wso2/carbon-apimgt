@@ -90,14 +90,6 @@
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
     </dependency>
-    <dependency>
-        <groupId>org.apache.synapse</groupId>
-        <artifactId>synapse-core</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.wso2.carbon.apimgt</groupId>
-        <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
-    </dependency>
 </dependencies>
 
 </project>
