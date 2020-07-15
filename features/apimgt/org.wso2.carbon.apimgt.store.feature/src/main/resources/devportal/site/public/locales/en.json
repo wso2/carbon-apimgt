@@ -20,6 +20,7 @@
   "Apis.Details.Comments.CommentAdd.error.blank.comment": "You cannot enter a blank comment",
   "Apis.Details.Comments.CommentAdd.something.went.wrong": "Something went wrong while adding the comment",
   "Apis.Details.Comments.CommentAdd.write.comment.help": "Write a comment",
+  "Apis.Details.Comments.CommentAdd.write.comment.label": "Write a comment",
   "Apis.Details.Comments.CommentEdit.blank.comment.error": "You cannot enter a blank comment",
   "Apis.Details.Comments.CommentEdit.btn.cancel": "Cancel",
   "Apis.Details.Comments.CommentEdit.btn.save": "Save",

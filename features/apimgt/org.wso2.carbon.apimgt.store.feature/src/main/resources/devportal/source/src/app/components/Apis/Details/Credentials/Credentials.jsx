@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Subscription from 'AppData/Subscription';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Api from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
@@ -171,6 +172,7 @@ class Credentials extends React.Component {
         throttlingPolicyList: [],
         applicationOwner: '',
         hashEnabled: false,
+        isSubscribing: false,
     };
 
     /**
@@ -215,6 +217,7 @@ class Credentials extends React.Component {
         const { subscriptionRequest } = this.state;
         const { intl } = this.props;
         const api = new Api();
+        this.setState({ isSubscribing: true });
         api.subscribe(
             subscriptionRequest.apiId,
             subscriptionRequest.applicationId,
@@ -235,10 +238,12 @@ class Credentials extends React.Component {
                     }));
                 }
                 if (updateSubscriptionData) updateSubscriptionData(this.updateData);
+                this.setState({ isSubscribing: false });
             })
             .catch((error) => {
                 console.log('Error while creating the subscription.');
                 console.error(error);
+                this.setState({ isSubscribing: false });
             });
     };
 
@@ -317,6 +322,7 @@ class Credentials extends React.Component {
             throttlingPolicyList,
             applicationOwner,
             hashEnabled,
+            isSubscribing,
         } = this.state;
         const user = AuthManager.getUser();
         const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2') &&
@@ -451,13 +457,14 @@ class Credentials extends React.Component {
                                                 color='primary'
                                                 className={classes.buttonElm}
                                                 onClick={() => this.handleSubscribe()}
-                                                disabled={!api.isSubscriptionAvailable}
+                                                disabled={!api.isSubscriptionAvailable || isSubscribing}
                                             >
                                                 <FormattedMessage
                                                     id={'Apis.Details.Credentials.'
                                                     + 'SubscibeButtonPanel.subscribe.btn'}
                                                     defaultMessage='Subscribe'
                                                 />
+                                                {isSubscribing && <CircularProgress size={24} />}
                                             </Button>
                                         </div>
                                     )}

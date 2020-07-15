@@ -35,6 +35,7 @@ import ApiKey from '../ApiKey';
 import ApiKeyRestriction from '../ApiKeyRestriction';
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = (theme) => ({
   root: {
@@ -116,6 +117,7 @@ class ApiKeyManager extends React.Component {
       restrictSchema: 'none',
       refererList: [],
       newReferer: null,
+      isGenerating: false,
     };
   }
 
@@ -153,6 +155,7 @@ class ApiKeyManager extends React.Component {
 
   generateKeys = () => {
     const { selectedApp, keyType } = this.props;
+    this.setState({isGenerating: true});
     const client = new API();
     const restrictions = {
       permittedIP: this.state.ipList.join(","),
@@ -169,6 +172,7 @@ class ApiKeyManager extends React.Component {
           apikey, open: true, showToken: true,
           ipList: [], refererList: []
         }));
+        this.setState({isGenerating: false});
       })
       .catch((error) => {
         if (process.env.NODE_ENV !== 'production') {
@@ -181,6 +185,7 @@ class ApiKeyManager extends React.Component {
             refererList: []
           });
         }
+        this.setState({isGenerating: false});
       });
   }
 
@@ -188,7 +193,7 @@ class ApiKeyManager extends React.Component {
     const { classes, keyType } = this.props;
     const {
       showToken, accessTokenRequest, open, apikey, newIP, ipList,
-      newReferer, refererList, restrictSchema
+      newReferer, refererList, restrictSchema, isGenerating,
     } = this.state;
     return (
       <Grid container direction="row" spacing={0} justify="left" alignItems="left">
@@ -250,7 +255,7 @@ class ApiKeyManager extends React.Component {
               {!showToken && (
                 <Button
                   onClick={this.generateKeys}
-                  disabled={!accessTokenRequest.timeout}
+                  disabled={!accessTokenRequest.timeout || isGenerating}
                   color="primary"
                   variant='contained'
                   className={classes.button}
@@ -259,6 +264,7 @@ class ApiKeyManager extends React.Component {
                     id="Shared.AppsAndKeys.ViewKeys.consumer.generate.btn"
                     defaultMessage="Generate"
                   />
+                   {isGenerating && <CircularProgress size={24} />}
                 </Button>
               )}
               <Button onClick={this.handleClose} color="primary" autoFocus>
