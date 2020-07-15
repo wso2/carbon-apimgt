@@ -58,28 +58,11 @@ public class GatewayArtifactsMgtDAOTest {
         APIManagerConfiguration config = new APIManagerConfiguration();
         initializeDatabase(dbConfigPath);
         config.load(dbConfigPath);
-        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(config));
-        List<Notifier> notifierList = new ArrayList<>();
-        SubscriptionsNotifier subscriptionsNotifier = new SubscriptionsNotifier();
-        notifierList.add(subscriptionsNotifier);
-        ServiceReferenceHolder.getInstance().getNotifiersMap().put(subscriptionsNotifier.getType(), notifierList);
         PowerMockito.mockStatic(KeyManagerHolder.class);
         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties().
                 setArtifactSynchronizerDataSource("java:/comp/env/jdbc/WSO2AM_DB");
         GatewayArtifactsMgtDBUtil.initialize();
         gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
-        IdentityTenantUtil.setRealmService(new TestRealmService());
-        String identityConfigPath = System.getProperty("IdentityConfigurationPath");
-        IdentityConfigParser.getInstance(identityConfigPath);
-        OAuthServerConfiguration oAuthServerConfiguration = OAuthServerConfiguration.getInstance();
-        ServiceReferenceHolder.getInstance().setOauthServerConfiguration(oAuthServerConfiguration);
-
-//        gatewayruntimeArtifacts = {"name":"PizzaShackAPI","version":"1.0.0","provider":"admin","tenantDomain":"carbon.super","apiId":"a7f58a46-2fa4-4d4e-b244-57dd6c03a5ae","override":true,"sequencesToBeRemove":["admin--PizzaShackAPI:v1.0.0--In","admin--PizzaShackAPI:v1.0.0--Fault","admin--PizzaShackAPI:v1.0.0--Out"],"localEntriesToBeRemove":["a7f58a46-2fa4-4d4e-b244-57dd6c03a5ae"],"endpointEntriesToBeRemove":["PizzaShackAPI--v1.0.0_APIsandboxEndpoint","PizzaShackAPI--v1.0.0_APIproductionEndpoint"]}
-//        byte[] gatewayRuntimeArtifactsAsBytes =  gatewayruntimeArtifacts.getBytes();
-//        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayRuntimeArtifactsAsBytes);
-//
-//        {"endpointEntriesToBeRemove":["PizzaShackAPI--v1.0.0_APIsandboxEndpoint","PizzaShackAPI--v1.0.0_APIproductionEndpoint"],"provider":"admin","sequencesToBeRemove":["admin--PizzaShackAPI:v1.0.0--In","admin--PizzaShackAPI:v1.0.0--Fault","admin--PizzaShackAPI:v1.0.0--Out"],"name":"PizzaShackAPI","override":true,"localEntriesToBeRemove":["a7f58a46-2fa4-4d4e-b244-57dd6c03a5ae"],"version":"1.0.0","tenantDomain":"carbon.super","apiId":"a7f58a46-2fa4-4d4e-b244-57dd6c03a5ae"}
-
     }
 
 
@@ -154,5 +137,4 @@ public class GatewayArtifactsMgtDAOTest {
                         String.valueOf(MultitenantConstants.SUPER_TENANT_ID));
         Assert.assertNotNull(apiId);
     }
-
 }
