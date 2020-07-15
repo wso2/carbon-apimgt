@@ -18,12 +18,14 @@
 
 package org.wso2.carbon.apimgt.impl.keymgt;
 
-import org.apache.axiom.om.OMElement;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+
+import java.util.List;
+import java.util.Map;
 
 public interface KeyManagerEventHandler {
 
-    boolean handleEvent(OMElement event) throws APIManagementException;
+    boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException;
 
     String getType();
 

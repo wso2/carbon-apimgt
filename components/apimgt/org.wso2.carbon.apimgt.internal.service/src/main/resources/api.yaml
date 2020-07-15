@@ -443,12 +443,40 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /notify:
+    post:
+      summary: Push notification events into nodes.
+      description: |
+        This will provide access to push vents.
+      parameters:
+        - $ref: '#/parameters/type'
+        - name: body
+          in: body
+          description: 'Notification event payload'
+          schema:
+            type: string
+      tags:
+        - 'Notification'
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            type: object
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
   requestedTenant:
     name: xWSO2Tenant
+    in: header
+    description: |
+      This is used to specify the tenant domain, where the resource need to be
+        retrieved from.
+    required: true
+    type: string
+  type:
+    name: X-WSO2-KEY-Manager
     in: header
     description: |
       This is used to specify the tenant domain, where the resource need to be

@@ -38,7 +38,6 @@ import org.wso2.carbon.databridge.commons.Event;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -72,7 +71,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
                 new Object[]{eventId, revokedToken, realtimeNotifierTTL, expiryTimeForJWT, tokenType, tenantId};
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
-        APIUtil.publishEventToEventHub(Collections.EMPTY_MAP, tokenRevocationMessage);
+        APIUtil.publishEventToStreamService(tokenRevocationMessage);
         log.debug("Successfully sent the revoked token notification on realtime");
     }
 
