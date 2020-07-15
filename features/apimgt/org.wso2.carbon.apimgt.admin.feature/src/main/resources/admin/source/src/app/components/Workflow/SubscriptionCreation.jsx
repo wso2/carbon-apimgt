@@ -259,7 +259,7 @@ function ListLabels() {
                             {properties.subscriber}
                             <br />
                             <Tooltip title={format}>
-                                <Typography color='textSecondary'>
+                                <Typography color='textSecondary' variant='caption'>
                                     {time}
                                 </Typography>
                             </Tooltip>
@@ -321,7 +321,7 @@ function ListLabels() {
     const searchActive = true;
     const searchPlaceholder = intl.formatMessage({
         id: 'Workflow.SubscriptionCreation.search.default',
-        defaultMessage: 'Search by workflow request description',
+        defaultMessage: 'Search by API, Application or Subscriber',
     });
 
     const filterData = (event) => {

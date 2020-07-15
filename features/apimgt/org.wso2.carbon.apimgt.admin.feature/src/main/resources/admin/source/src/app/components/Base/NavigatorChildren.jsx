@@ -46,6 +46,10 @@ function NavigatorChildren(props) {
         navigationChildren = navChildren.filter((menu) => menu.id !== 'Tenant Theme');
     }
 
+    if (!isSuperTenant) {
+        navigationChildren = navChildren.filter((menu) => menu.id !== 'Custom Policies');
+    }
+
     return (
         <>
             <ListItem className={classes.categoryHeader} button onClick={handleClick}>

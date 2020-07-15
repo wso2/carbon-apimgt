@@ -104,7 +104,6 @@ class SubscriptionPolicySelect extends React.Component {
                         <Button
                             variant='contained'
                             size='small'
-                            color='primary'
                             className={classes.buttonGap}
                             onClick={() => {
                                 handleSubscribe(applicationId, apiId, selectedPolicy);

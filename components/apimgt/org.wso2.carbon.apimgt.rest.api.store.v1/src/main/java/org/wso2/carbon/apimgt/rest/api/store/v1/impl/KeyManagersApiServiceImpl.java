@@ -7,6 +7,8 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.KeyManagersApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.KeyManagerMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -26,6 +28,11 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         try {
             List<KeyManagerConfigurationDTO> keyManagerConfigurations =
                     apiAdmin.getKeyManagerConfigurationsByTenant(tenantDomain);
+            for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
+                if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
+                    APIUtil.setTokenAndRevokeEndpointsToDevPortal(keyManagerConfiguration);
+                }
+            }
             return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(keyManagerConfigurations)).build();
         } catch (APIManagementException e) {
             RestApiUtil

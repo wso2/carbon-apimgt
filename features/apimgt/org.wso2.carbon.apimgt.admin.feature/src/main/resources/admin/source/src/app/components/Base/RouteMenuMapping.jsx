@@ -42,7 +42,7 @@ import ListRoles from 'AppComponents//RolePermissions/ListRoles.jsx';
 
 import GamesIcon from '@material-ui/icons/Games';
 import CategoryIcon from '@material-ui/icons/Category';
-import AndroidIcon from '@material-ui/icons/Android';
+import BugReportIcon from '@material-ui/icons/BugReport';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PolicyIcon from '@material-ui/icons/Policy';
 import BlockIcon from '@material-ui/icons/Block';
@@ -236,7 +236,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/settings/bot-detection/bot-detected-data-list',
                 component: ListDetectedBotData,
-                icon: <AndroidIcon />,
+                icon: <BugReportIcon />,
             },
             {
                 id: intl.formatMessage({

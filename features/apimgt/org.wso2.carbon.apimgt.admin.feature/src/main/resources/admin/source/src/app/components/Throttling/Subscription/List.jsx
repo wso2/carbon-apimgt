@@ -131,7 +131,15 @@ export default function ListSubscriptionThrottlingPolicies() {
                 defaultMessage: 'Name',
             }),
             options: {
-                filter: true,
+                customBodyRender: (value, tableMeta) => {
+                    if (typeof tableMeta.rowData === 'object') {
+                        const artifactId = tableMeta.rowData[tableMeta.rowData.length - 2];
+                        return <RouterLink to={`/throttling/subscription/${artifactId}`}>{value}</RouterLink>;
+                    } else {
+                        return <div />;
+                    }
+                },
+                filter: false,
                 sort: true,
             },
         },

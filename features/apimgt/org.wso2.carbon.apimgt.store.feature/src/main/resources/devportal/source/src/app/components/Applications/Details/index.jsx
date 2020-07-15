@@ -53,7 +53,7 @@ const styles = (theme) => {
             leftMenu: { width, position },
         },
     } = theme;
-    const shiftToLeft = position === 'vertical-left' ? width : 0;
+    const shiftToLeft = position === 'vertical-left' ? (width - 4) : 0;
     const shiftToRight = position === 'vertical-right' ? width : 0;
     const leftMenuPaddingLeft = position === 'horizontal' ? theme.spacing(3) : 0;
 
@@ -124,6 +124,17 @@ const styles = (theme) => {
         contentLoaderRightMenu: {
             paddingRight: theme.custom.leftMenu.width,
         },
+        titleWrapper: {
+            paddingLeft: 25,
+            paddingTop: 28,
+            textTransform: 'capitalize',
+        },
+        contentWrapper: {
+            paddingLeft: 25,
+        },
+        keyTitle: {
+            textTransform: 'capitalize',
+        },
     };
 };
 /**
@@ -180,35 +191,53 @@ class Details extends Component {
         history.push({ pathname: '/applications/' + match.params.application_uuid + '/' + menuLink });
         this.setState({ active: menuLink });
     };
-
+    toTitleCase = (str) => {
+        return str.replace(
+            /\w\S*/g,
+            function(txt) {
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            }
+        );
+    };
     renderManager = (application, keyType, secScheme) => {
+        const { classes } = this.props;
         return (
             <Paper>
                 {secScheme === 'oauth' && (
-                    <div>
-                        <TokenManager
-                            keyType={keyType}
-                            selectedApp={{
-                                appId: application.applicationId,
-                                label: application.name,
-                                tokenType: application.tokenType,
-                                owner: application.owner,
-                                hashEnabled: application.hashEnabled,
-                            }}
-                        />
-                    </div>
+                    <TokenManager
+                        keyType={keyType}
+                        selectedApp={{
+                            appId: application.applicationId,
+                            label: application.name,
+                            tokenType: application.tokenType,
+                            owner: application.owner,
+                            hashEnabled: application.hashEnabled,
+                        }}
+                    />
+                       
                 )}
                 {secScheme === 'apikey' && (
-                    <div>
-                        <ApiKeyManager
-                            keyType={keyType}
-                            selectedApp={{
-                                appId: application.applicationId,
-                                label: application.name,
-                                tokenType: application.tokenType,
-                                owner: application.owner,
-                            }}
-                        />
+                    <div className={classes.root}>
+                        <div className={classes.titleWrapper}>
+                            <Typography variant='h5' className={classes.keyTitle}>
+                                {this.toTitleCase(keyType)}
+                                <FormattedMessage
+                                    id='Applications.Details.api.keys.title'
+                                    defaultMessage=' API Key'
+                                />
+                            </Typography>
+                        </div>
+                        <div className={classes.contentWrapper}>
+                            <ApiKeyManager
+                                keyType={keyType}
+                                selectedApp={{
+                                    appId: application.applicationId,
+                                    label: application.name,
+                                    tokenType: application.tokenType,
+                                    owner: application.owner,
+                                }}
+                            />
+                        </div>
                     </div>
                 )}
             </Paper>
@@ -271,14 +300,14 @@ class Details extends Component {
                             )}
                         </Link>
                     )}
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.overview' defaultMessage='Overview' />} iconText='overview' route='overview' to={pathPrefix + '/overview'} open={open}/>
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.prod.keys' defaultMessage='Production Keys' />} iconText='productionkeys' route='productionkeys' to={pathPrefix + '/productionkeys/oauth'} open={open}/>
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />} route='productionkeys/oauth' to={pathPrefix + '/productionkeys/oauth'} submenu open={open}/>
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />} route='productionkeys/apikey' to={pathPrefix + '/productionkeys/apikey'} submenu open={open}/>
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.sandbox.keys' defaultMessage='Sandbox Keys' />} iconText='productionkeys' route='sandboxkeys' to={pathPrefix + '/sandboxkeys/oauth'} open={open}/>
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />} route='sandboxkeys/oauth' to={pathPrefix + '/sandboxkeys/oauth'} submenu open={open}/>
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />} route='sandboxkeys/apikey' to={pathPrefix + '/sandboxkeys/apikey'} submenu open={open}/>
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.subscriptions' defaultMessage='Subscriptions' />} iconText='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} open={open}/>
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.overview' defaultMessage='Overview' />} iconText='overview' route='overview' to={pathPrefix + '/overview'} open={open} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.prod.keys' defaultMessage='Production Keys' />} iconText='productionkeys' route='productionkeys' to={pathPrefix + '/productionkeys/oauth'} open={open} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />} route='productionkeys/oauth' to={pathPrefix + '/productionkeys/oauth'} submenu open={open} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />} route='productionkeys/apikey' to={pathPrefix + '/productionkeys/apikey'} submenu open={open} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.sandbox.keys' defaultMessage='Sandbox Keys' />} iconText='productionkeys' route='sandboxkeys' to={pathPrefix + '/sandboxkeys/oauth'} open={open} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />} route='sandboxkeys/oauth' to={pathPrefix + '/sandboxkeys/oauth'} submenu open={open} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />} route='sandboxkeys/apikey' to={pathPrefix + '/sandboxkeys/apikey'} submenu open={open} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.subscriptions' defaultMessage='Subscriptions' />} iconText='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} open={open} />
                 </div>
                 <div className={classes.content}>
                     <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />

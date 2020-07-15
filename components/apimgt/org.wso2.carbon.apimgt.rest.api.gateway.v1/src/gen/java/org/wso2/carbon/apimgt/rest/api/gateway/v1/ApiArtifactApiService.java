@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApiArtifactApiService {
-      public Response apiArtifactGet(String apiName, String label, String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response apiArtifactGet(String apiName, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException;
 }

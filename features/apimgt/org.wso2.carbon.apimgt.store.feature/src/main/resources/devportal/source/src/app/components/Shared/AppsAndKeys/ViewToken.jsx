@@ -24,6 +24,7 @@ import FileCopy from '@material-ui/icons/FileCopy';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import IconButton from '@material-ui/core/IconButton';
 import { FormattedMessage } from 'react-intl';
 import InlineMessage from '../InlineMessage';
 import ViewSecret from './ViewSecret';
@@ -169,7 +170,7 @@ class ViewToken extends React.Component {
                     </Typography>
                 </InlineMessage>
                 <div className={classes.epWrapper}>
-                    <Typography className={classes.prodLabel}>
+                    <label for='access-token' className={classes.prodLabel}>
                         {(token.isOauth) && (
                             <FormattedMessage
                                 id='Shared.AppsAndKeys.ViewToken.access.token'
@@ -182,10 +183,10 @@ class ViewToken extends React.Component {
                                 defaultMessage='API Key'
                             />
                         )}
-                    </Typography>
+                    </label>
                     <TextField
                         defaultValue={token.accessToken}
-                        id='bootstrap-input'
+                        id='access-token'
                         multiline
                         fullWidth
                         rows={4}
@@ -203,7 +204,9 @@ class ViewToken extends React.Component {
                     />
                     <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
                         <CopyToClipboard text={token.accessToken} onCopy={this.onCopy('tokenCopied')}>
-                            <FileCopy color='secondary'>file_copy</FileCopy>
+                            <IconButton aria-label='Copy to clipboard'>
+                                <FileCopy color='secondary'>file_copy</FileCopy>
+                            </IconButton>
                         </CopyToClipboard>
                     </Tooltip>
                 </div>

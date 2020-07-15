@@ -63,6 +63,7 @@ const styles = theme => ({
     },
     docSummary: {
         marginTop: theme.spacing(2),
+        color: theme.palette.text.primary,
     },
     fileAvailability: {
         marginTop: theme.spacing(1),

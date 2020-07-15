@@ -50,7 +50,7 @@ const styles = theme => ({
         alignItems: 'top',
     },
     commentAddButton: {
-        '& span.MuiButton-label span': {
+        '& span.MuiButton-label': {
             color: theme.palette.getContrastText(theme.palette.primary.main),
         },
     },
@@ -178,6 +178,10 @@ class CommentAdd extends React.Component {
                             multiline
                             className={classes.textField}
                             margin='normal'
+                            label={intl.formatMessage({
+                                defaultMessage: 'Write a comment',
+                                id: 'Apis.Details.Comments.CommentAdd.write.comment.label',
+                            })}
                             placeholder={intl.formatMessage({
                                 defaultMessage: 'Write a comment',
                                 id: 'Apis.Details.Comments.CommentAdd.write.comment.help',

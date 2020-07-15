@@ -180,7 +180,7 @@ function AddEdit(props) {
                 )}
                 fullWidth
                 error={hasErrors('name', name)}
-                helperText={hasErrors('name', name) || 'Enter API category name'}
+                helperText={hasErrors('name', name) || 'Name of the API category'}
                 variant='outlined'
                 disabled={id}
             />
@@ -192,7 +192,7 @@ function AddEdit(props) {
                 label='Description'
                 fullWidth
                 multiline
-                helperText='Enter description'
+                helperText='Description of the API category'
                 variant='outlined'
             />
         </FormDialogBase>

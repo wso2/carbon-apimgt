@@ -94,13 +94,9 @@ const subscriptionTableRow = (props) => {
                             resourcePath={resourcePaths.SINGLE_SUBSCRIPTION}
                             resourceMethod={resourceMethods.DELETE}
                         >
-                            <a
+                            <Link
                                 className={classes.button}
                                 onClick={() => handleSubscriptionDelete(
-                                    app.subscriptionId,
-                                    updateSubscriptionData,
-                                )}
-                                onKeyDown={() => handleSubscriptionDelete(
                                     app.subscriptionId,
                                     updateSubscriptionData,
                                 )}
@@ -117,16 +113,15 @@ const subscriptionTableRow = (props) => {
                                     strokeColor={theme.palette.primary.main}
                                     icon='subscriptions'
                                 />
-                            </a>
+                            </Link>
                         </ScopeValidation>
-                        <a
+                        <Link
                             className={classNames(classes.button, {
                                 [classes.activeLink]: selectedAppId
                                             && selectedKeyType === 'PRODUCTION'
                                             && app.value === selectedAppId,
                             })}
                             onClick={() => loadInfo('PRODUCTION', app.value)}
-                            onKeyDown={() => loadInfo('PRODUCTION', app.value)}
                         >
                             <span>
                                 <FormattedMessage
@@ -140,15 +135,14 @@ const subscriptionTableRow = (props) => {
                                 strokeColor={theme.palette.primary.main}
                                 icon='productionkeys'
                             />
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                             className={classNames(classes.button, {
                                 [classes.activeLink]: selectedAppId
                                             && selectedKeyType === 'SANDBOX'
                                             && app.value === selectedAppId,
                             })}
                             onClick={() => loadInfo('SANDBOX', app.value)}
-                            onKeyDown={() => loadInfo('SANDBOX', app.value)}
                         >
                             <span>
                                 <FormattedMessage
@@ -162,7 +156,7 @@ const subscriptionTableRow = (props) => {
                                 strokeColor={theme.palette.primary.main}
                                 icon='productionkeys'
                             />
-                        </a>
+                        </Link>
                     </div>
                 </td>
             </tr>

@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.impl.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import feign.Client;
 import feign.Feign;
@@ -10861,16 +10864,6 @@ public final class APIUtil {
                                 .concat(getTenantAwareContext(keyManagerConfigurationDTO.getTenantDomain()))
                                 .concat(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT));
 
-                if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                        .containsKey(APIConstants.KEY_MANAGER_USERNAME)) {
-                    keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_USERNAME,
-                            apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
-                }
-                if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                        .containsKey(APIConstants.KEY_MANAGER_PASSWORD)) {
-                    keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_PASSWORD,
-                            apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD));
-                }
                 if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
                     keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
                             keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
@@ -10967,26 +10960,33 @@ public final class APIUtil {
                     log.error("Error while reading encoded data");
                 }
             }
-            String revokeEndpointContext =
-                    apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_ENDPOINT_CONTEXT);
-            String tokenEndpointContext = apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_ENDPOINT_CONTEXT);
-
-            if (StringUtils.isEmpty(tokenEndpointContext)) {
-                tokenEndpointContext = "/token";
-            }
-            if (StringUtils.isNotEmpty(revokeEndpointContext)) {
-                revokeEndpointContext = "/revoke";
-            }
-            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT,
-                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(tokenEndpointContext));
-            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_TOKEN_ENDPOINT,
-                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(tokenEndpointContext));
-            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_REVOKE_ENDPOINT,
-                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(revokeEndpointContext));
-            keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT,
-                    getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(revokeEndpointContext));
         }
         return keyManagerConfigurationDTO;
+    }
+
+    public static void setTokenAndRevokeEndpointsToDevPortal(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        String revokeEndpointContext =
+                apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_ENDPOINT_CONTEXT);
+        String tokenEndpointContext = apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_ENDPOINT_CONTEXT);
+
+        if (StringUtils.isEmpty(tokenEndpointContext)) {
+            tokenEndpointContext = "/token";
+        }
+        if (StringUtils.isNotEmpty(revokeEndpointContext)) {
+            revokeEndpointContext = "/revoke";
+        }
+        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT,
+                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(tokenEndpointContext));
+        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_TOKEN_ENDPOINT,
+                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(tokenEndpointContext));
+        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_REVOKE_ENDPOINT,
+                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(revokeEndpointContext));
+        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT,
+                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(revokeEndpointContext));
     }
 
     public static String getTokenEndpointsByType(String type) {
@@ -11229,6 +11229,85 @@ public final class APIUtil {
         }
         return null;
     }
+    /**
+     * Replace new RESTAPI Role mappings to tenant-conf.
+     *
+     * @param newScopeRoleJson New object of role-scope mapping
+     * @throws APIManagementException If failed to replace the new tenant-conf.
+     */
+    public static void updateTenantConfOfRoleScopeMapping(JSONObject newScopeRoleJson, String username)
+            throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        //read from tenant-conf.json
+        JsonObject existingTenantConfObject = new JsonObject();
+        try {
+            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+            String existingTenantConf = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
+            existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
+        } catch (RegistryException e) {
+            APIUtil.handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (UserStoreException e) {
+            APIUtil.handleException("Couldn't read tenant configuration from user-store", e);
+        }
+        //Here we are removing RESTAPIScopes from the existing tenant-conf
+        // Adding new RESTAPIScopes to the existing tenant-conf.
+        existingTenantConfObject.remove(APIConstants.REST_API_SCOPES_CONFIG);
+        JsonElement jsonElement = new JsonParser().parse(newScopeRoleJson.toJSONString());
+        existingTenantConfObject.add(APIConstants.REST_API_SCOPES_CONFIG, jsonElement);
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(existingTenantConfObject.toString());
+            APIUtil.updateTenantConf(existingTenantConfObject.toString(), tenantDomain);
+            if (log.isDebugEnabled()) {
+                log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
+            }
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while formatting tenant-conf.json of tenant", e);
+        }
+        // Invalidate Cache
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .getCache(APIConstants.REST_API_SCOPE_CACHE)
+                .put(tenantDomain, null);
+    }
+
+    /**
+     * Replace new RoleMappings  to tenant-conf.
+     *
+     * @param newRoleMappingJson New object of role-alias mapping
+     * @throws APIManagementException If failed to replace the new tenant-conf.
+     */
+    public static void updateTenantConfRoleAliasMapping(JSONObject newRoleMappingJson, String username)
+            throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        //read from tenant-conf.json
+        JsonObject existingTenantConfObject = new JsonObject();
+        try {
+            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+            String existingTenantConf = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
+            existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
+        } catch (RegistryException e) {
+            APIUtil.handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (UserStoreException e) {
+            APIUtil.handleException("Couldn't read tenant configuration from User Store", e);
+        }
+        existingTenantConfObject.remove(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
+        JsonElement jsonElement = new JsonParser().parse(String.valueOf(newRoleMappingJson));
+        existingTenantConfObject.add(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG, jsonElement);
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(existingTenantConfObject.toString());
+            APIUtil.updateTenantConf(existingTenantConfObject.toString(), tenantDomain);
+            if (log.isDebugEnabled()) {
+                log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
+            }
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while formatting tenant-conf.json of tenant: " + tenantDomain, e);
+        }
+    }
 
     public static OpenIdConnectConfiguration getOpenIdConnectConfigurations(String url) {
 
@@ -11244,6 +11323,5 @@ public final class APIUtil {
         }
         return "";
     }
-
 }
 

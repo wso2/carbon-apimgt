@@ -551,7 +551,6 @@ class Credentials extends React.Component {
                                     >
                                         <Button
                                             color='secondary'
-                                            className={classes.buttonElm}
                                             disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL
                                                  || isOnlyBasicAuth}
                                             size='small'

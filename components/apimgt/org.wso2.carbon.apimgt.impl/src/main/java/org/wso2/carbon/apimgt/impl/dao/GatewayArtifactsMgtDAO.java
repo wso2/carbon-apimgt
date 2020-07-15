@@ -246,9 +246,70 @@ public class GatewayArtifactsMgtDAO {
         return false;
     }
 
+
+
     private void handleException(String msg, Throwable t) throws APIManagementException {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
 
+    /**
+     * Retrieve the API ID of the API
+     *
+     * @param apiName - Name of the API
+     * @param version - version of the API
+     * @param tenantDomain - Tenant Domain of the API
+     * @throws APIManagementException if an error occurs
+     */
+    public String getGatewayAPIId(String apiName, String version, String tenantDomain)
+            throws APIManagementException {
+
+        ResultSet rs = null;
+        String apiID =  null;
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ID)) {
+            connection.setAutoCommit(false);
+            connection.commit();
+            statement.setString(1, apiName);
+            statement.setString(2, tenantDomain);
+            statement.setString(3, version);
+            rs = statement.executeQuery();
+            while (rs.next()) {
+                 apiID = rs.getString("API_ID");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get artifacts " , e);
+        } finally {
+            GatewayArtifactsMgtDBUtil.closeResultSet(rs);
+        }
+        return apiID;
+    }
+
+    /**
+     * Retrieve the gateway label which the API subscribed to
+     *
+     * @param apiID - API ID  of the API
+     * @throws APIManagementException if an error occurs
+     */
+    public String getGatewayAPILabel(String apiID)
+            throws APIManagementException {
+
+        ResultSet rs = null;
+        String label =  null;
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_LABEL)) {
+            connection.setAutoCommit(false);
+            connection.commit();
+            statement.setString(1, apiID);
+            rs = statement.executeQuery();
+            while (rs.next()) {
+                label = rs.getString("GATEWAY_LABEL");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get artifacts " , e);
+        } finally {
+            GatewayArtifactsMgtDBUtil.closeResultSet(rs);
+        }
+        return label;
+    }
 }
