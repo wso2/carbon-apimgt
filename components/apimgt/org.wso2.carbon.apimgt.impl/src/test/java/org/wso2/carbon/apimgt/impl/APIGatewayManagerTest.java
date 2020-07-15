@@ -161,7 +161,7 @@ public class APIGatewayManagerTest {
         environments.put(prodEnvironmentName, prodEnvironment);
         environments.put(sandBoxEnvironmentName, sandboxEnvironment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environments);
-        Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environments);
+
         Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
         Mockito.when( ServiceReferenceHolder.getInstance().getArtifactSaver()).thenReturn(artifactSaver);
         apiIdentifier = new APIIdentifier(provider, apiName, version);
@@ -438,11 +438,9 @@ public class APIGatewayManagerTest {
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
 
         saveArtifactsToStorage = true;
-        String artifactSaverName = "DBSaver";
-        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new
-                GatewayArtifactSynchronizerProperties();
-        gatewayArtifactSynchronizerProperties.setSaverName(artifactSaverName);
-        ArtifactSaver artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
+        synchronizerProperties.setSaveArtifactsEnabled(true);
+        synchronizerProperties.setSaverName("DBSaver");
+        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
 
     }
 
