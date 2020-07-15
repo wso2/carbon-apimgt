@@ -194,7 +194,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         clientInfo.setClientName(applicationName);
         //todo: run tests by commenting the type
         clientInfo.setTokenType(info.getTokenType());
-        clientInfo.setApplication_owner(info.getAppOwner());
+        clientInfo.setApplication_owner((String) info.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME));
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());
