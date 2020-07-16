@@ -2224,6 +2224,8 @@ public final class APIConstants {
         public static final String INIT_DELAY = "InitDelay";
         public static final String INTROSPECTION_ENDPOINT = "introspection_endpoint";
         public static final String CLIENT_REGISTRATION_ENDPOINT = "client_registration_endpoint";
+        public static final String KEY_MANAGER_OPERATIONS_DCR_ENDPOINT = "/keymanager-operations/dcr/register";
+        public static final String KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT = "/keymanager-operations/user-info";
         public static final String TOKEN_ENDPOINT = "token_endpoint";
         public static final String REVOKE_ENDPOINT = "revoke_endpoint";
         public static final String SCOPE_MANAGEMENT_ENDPOINT = "scope_endpoint";
