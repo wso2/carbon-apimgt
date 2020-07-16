@@ -7118,7 +7118,6 @@ public class ApiMgtDAO {
             prepStmt.setString(7, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setString(8, api.getId().getApiName());
             prepStmt.setString(9, api.getId().getVersion());
-
             prepStmt.execute();
             //}
 
