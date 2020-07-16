@@ -1323,24 +1323,11 @@ public class OASParserUtil {
      *
      * @param swaggerContent String
      * @param api            API
-     * @param isBasepathExtractedFromSwagger boolean
      * @return API
      */
-    public static API setExtensionsToAPI(String swaggerContent, API api, boolean isBasepathExtractedFromSwagger) throws APIManagementException {
+    public static API setExtensionsToAPI(String swaggerContent, API api) throws APIManagementException {
         APIDefinition apiDefinition = getOASParser(swaggerContent);
-        return apiDefinition.setExtensionsToAPI(swaggerContent, api, isBasepathExtractedFromSwagger);
-    }
-
-    /**
-     * This method returns extension of basepath related to micro-gw
-     *
-     * @param extensions Map<String, Object>
-     * @return String
-     * @throws APIManagementException throws if an error occurred
-     */
-    public static String getBasePathFromSwagger(Map<String, Object> extensions) throws APIManagementException {
-        Object basepath = extensions.get(APIConstants.X_WSO2_BASEPATH);
-        return basepath == null ? null : basepath.toString();
+        return apiDefinition.setExtensionsToAPI(swaggerContent, api);
     }
 
     /**
