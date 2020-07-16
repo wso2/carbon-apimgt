@@ -369,80 +369,78 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         infoDTO.setType(type);
 
         // Advanced Level Throttling Related Properties
-        if (APIUtil.isAdvanceThrottlingEnabled()) {
-            String apiTier = api.getApiTier();
-            String subscriberUserId = sub.getSubscriptionId();
-            String subscriberTenant = MultitenantUtils.getTenantDomain(app.getSubName());
+        String apiTier = api.getApiTier();
+        String subscriberUserId = sub.getSubscriptionId();
+        String subscriberTenant = MultitenantUtils.getTenantDomain(app.getSubName());
 
-            ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
-                    tenantId);
-            if (appPolicy == null) {
-                try {
-                    appPolicy = new SubscriptionDataLoaderImpl()
-                            .getApplicationPolicy(app.getPolicy(), apiTenantDomain);
-                    datastore.addOrUpdateApplicationPolicy(appPolicy);
-                } catch (DataLoadingException e) {
-                    log.error("Error while loading ApplicationPolicy");
-                }
+        ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
+                tenantId);
+        if (appPolicy == null) {
+            try {
+                appPolicy = new SubscriptionDataLoaderImpl()
+                        .getApplicationPolicy(app.getPolicy(), apiTenantDomain);
+                datastore.addOrUpdateApplicationPolicy(appPolicy);
+            } catch (DataLoadingException e) {
+                log.error("Error while loading ApplicationPolicy");
             }
-            SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId(),
-                    tenantId);
-            if (subPolicy == null) {
-                try {
-                    subPolicy = new SubscriptionDataLoaderImpl()
-                            .getSubscriptionPolicy(sub.getPolicyId(), apiTenantDomain);
-                    datastore.addOrUpdateSubscriptionPolicy(subPolicy);
-                } catch (DataLoadingException e) {
-                    log.error("Error while loading SubscriptionPolicy");
-                }
-            }
-            ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), tenantId);
-
-            boolean isContentAware = false;
-            if (appPolicy.isContentAware() || subPolicy.isContentAware()
-                    || (apiPolicy != null && apiPolicy.isContentAware())) {
-                isContentAware = true;
-            }
-            infoDTO.setContentAware(isContentAware);
-
-            // TODO this must implement as a part of throttling implementation.
-            int spikeArrest = 0;
-            String apiLevelThrottlingKey = "api_level_throttling_key";
-
-            if (subPolicy.getRateLimitCount() > 0) {
-                spikeArrest = subPolicy.getRateLimitCount();
-            }
-
-            String spikeArrestUnit = null;
-
-            if (subPolicy.getRateLimitTimeUnit() != null) {
-                spikeArrestUnit = subPolicy.getRateLimitTimeUnit();
-            }
-            boolean stopOnQuotaReach = subPolicy.isStopOnQuotaReach();
-            int graphQLMaxDepth = 0;
-            if (subPolicy.getGraphQLMaxDepth() > 0) {
-                graphQLMaxDepth = subPolicy.getGraphQLMaxDepth();
-            }
-            int graphQLMaxComplexity = 0;
-            if (subPolicy.getGraphQLMaxComplexity() > 0) {
-                graphQLMaxComplexity = subPolicy.getGraphQLMaxComplexity();
-            }
-            List<String> list = new ArrayList<String>();
-            list.add(apiLevelThrottlingKey);
-            infoDTO.setSpikeArrestLimit(spikeArrest);
-            infoDTO.setSpikeArrestUnit(spikeArrestUnit);
-            infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
-            infoDTO.setSubscriberTenantDomain(subscriberTenant);
-            infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
-            infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
-            if (apiTier != null && apiTier.trim().length() > 0) {
-                infoDTO.setApiTier(apiTier);
-            }
-            // We also need to set throttling data list associated with given API. This need to have
-            // policy id and
-            // condition id list for all throttling tiers associated with this API.
-            infoDTO.setThrottlingDataList(list);
         }
+        SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId(),
+                tenantId);
+        if (subPolicy == null) {
+            try {
+                subPolicy = new SubscriptionDataLoaderImpl()
+                        .getSubscriptionPolicy(sub.getPolicyId(), apiTenantDomain);
+                datastore.addOrUpdateSubscriptionPolicy(subPolicy);
+            } catch (DataLoadingException e) {
+                log.error("Error while loading SubscriptionPolicy");
+            }
+        }
+        ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), tenantId);
+
+        boolean isContentAware = false;
+        if (appPolicy.isContentAware() || subPolicy.isContentAware()
+                || (apiPolicy != null && apiPolicy.isContentAware())) {
+            isContentAware = true;
+        }
+        infoDTO.setContentAware(isContentAware);
+
+        // TODO this must implement as a part of throttling implementation.
+        int spikeArrest = 0;
+        String apiLevelThrottlingKey = "api_level_throttling_key";
+
+        if (subPolicy.getRateLimitCount() > 0) {
+            spikeArrest = subPolicy.getRateLimitCount();
+        }
+
+        String spikeArrestUnit = null;
+
+        if (subPolicy.getRateLimitTimeUnit() != null) {
+            spikeArrestUnit = subPolicy.getRateLimitTimeUnit();
+        }
+        boolean stopOnQuotaReach = subPolicy.isStopOnQuotaReach();
+        int graphQLMaxDepth = 0;
+        if (subPolicy.getGraphQLMaxDepth() > 0) {
+            graphQLMaxDepth = subPolicy.getGraphQLMaxDepth();
+        }
+        int graphQLMaxComplexity = 0;
+        if (subPolicy.getGraphQLMaxComplexity() > 0) {
+            graphQLMaxComplexity = subPolicy.getGraphQLMaxComplexity();
+        }
+        List<String> list = new ArrayList<String>();
+        list.add(apiLevelThrottlingKey);
+        infoDTO.setSpikeArrestLimit(spikeArrest);
+        infoDTO.setSpikeArrestUnit(spikeArrestUnit);
+        infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
+        infoDTO.setSubscriberTenantDomain(subscriberTenant);
+        infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
+        infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
+        if (apiTier != null && apiTier.trim().length() > 0) {
+            infoDTO.setApiTier(apiTier);
+        }
+        // We also need to set throttling data list associated with given API. This need to have
+        // policy id and
+        // condition id list for all throttling tiers associated with this API.
+        infoDTO.setThrottlingDataList(list);
         infoDTO.setAuthorized(true);
         return infoDTO;
     }
