@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
@@ -74,7 +73,6 @@ public class APIGatewayManagerTest {
     private APIData apiData;
     private APIData defaultAPIdata;
     private APIIdentifier apiIdentifier;
-    private GatewayArtifactSynchronizerProperties  synchronizerProperties;
     private String apiName = "weatherAPI";
     private String apiUUId = "123455";
     private String provider = "admin";
@@ -88,8 +86,7 @@ public class APIGatewayManagerTest {
     private String faultSequenceName = "fault-sequence";
     private String swaggerDefinition = "swagger definition";
     private int tenantID = -1234;
-    private ArtifactSaver artifactSaver;
-    private boolean saveArtifactsToStorage = false;
+    GatewayArtifactSynchronizerProperties synchronizerProperties;
     private String testSequenceDefinition =
             "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"test-sequence\">\n"
                     + " <log level=\"custom\">\n" + "    <property name=\"Test\" value=\"Test Sequence\"/>\n"
@@ -161,9 +158,8 @@ public class APIGatewayManagerTest {
         environments.put(prodEnvironmentName, prodEnvironment);
         environments.put(sandBoxEnvironmentName, sandboxEnvironment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environments);
-
+        Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environments);
         Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
-        Mockito.when( ServiceReferenceHolder.getInstance().getArtifactSaver()).thenReturn(artifactSaver);
         apiIdentifier = new APIIdentifier(provider, apiName, version);
         TestUtils.initConfigurationContextService(false);
         gatewayManager = APIGatewayManager.getInstance();
@@ -437,9 +433,17 @@ public class APIGatewayManagerTest {
         api.setType("WS");
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
 
-        saveArtifactsToStorage = true;
+        //Test Deploy using artifact synchronizer feature
         synchronizerProperties.setSaveArtifactsEnabled(true);
-        synchronizerProperties.setSaverName("DBSaver");
+        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+
+        synchronizerProperties.setPublishDirectlyToGatewayEnabled(false);
+        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+
+        synchronizerProperties.setSaveArtifactsEnabled(false);
+        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+
+        synchronizerProperties.setPublishDirectlyToGatewayEnabled(true);
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
 
     }

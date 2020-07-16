@@ -8,32 +8,19 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.notifier.Notifier;
-import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.identity.core.util.IdentityConfigParser;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -43,14 +30,16 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( {KeyManagerHolder.class})
 public class GatewayArtifactsMgtDAOTest {
     public static GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
+    String apiUUID = "1236233";
+    String apiName = "testAddGatewayPublishedAPIDetails";
+    String version = "1.0.0";
+    String label = "Production and Sandbox";
+    ByteArrayInputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
 
     @Before
     public void setUp() throws Exception {
@@ -58,7 +47,8 @@ public class GatewayArtifactsMgtDAOTest {
         APIManagerConfiguration config = new APIManagerConfiguration();
         initializeDatabase(dbConfigPath);
         config.load(dbConfigPath);
-        PowerMockito.mockStatic(KeyManagerHolder.class);
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
+                (config));
         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties().
                 setArtifactSynchronizerDataSource("java:/comp/env/jdbc/WSO2AM_DB");
         GatewayArtifactsMgtDBUtil.initialize();
@@ -112,29 +102,48 @@ public class GatewayArtifactsMgtDAOTest {
     }
 
     @Test
-    public void testAddGetGatewayPublishedAPIDetails() throws APIManagementException {
+    public void testAddValidateGatewayPublishedAPIDetails() throws APIManagementException {
+        boolean result = gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiUUID, apiName, version,
+                String.valueOf(MultitenantConstants.SUPER_TENANT_ID));
+        Assert.assertTrue(result);
+    }
 
-        String apiUUID = UUID.randomUUID().toString();
-        String apiName = "testAddGatewayPublishedAPIDetails";
-        String version = "1.0.0";
-        String label = "Production and Sandbox";
-        ByteArrayInputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
-
-        Assert.assertTrue(gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiUUID, apiName, version,
-                String.valueOf(MultitenantConstants.SUPER_TENANT_ID)));
-        Assert.assertTrue(gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiUUID, label , anyInputStream,
+    @Test
+    public void testAddValidateGatewayPublishedAPIArtifacts() throws APIManagementException {
+        boolean result = gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiUUID, label , anyInputStream,
                 1, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH,
-                SQLConstants.ADD_GW_API_ARTIFACT));
-        Assert.assertNotNull(gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiUUID, label,
-                APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH));
-        Assert.assertTrue(gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiUUID));
-        Assert.assertTrue(gatewayArtifactsMgtDAO.isAPIDetailsExists(apiUUID));
-        Assert.assertTrue(gatewayArtifactsMgtDAO.isAPIArtifactExists(apiUUID, label));
-        Assert.assertTrue(gatewayArtifactsMgtDAO.getAllGatewayPublishedAPIArtifacts(label).size() > 0);
+                SQLConstants.ADD_GW_API_ARTIFACT);
+        Assert.assertTrue(result);
+    }
 
-        String apiId =
-                gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiName, version,
-                        String.valueOf(MultitenantConstants.SUPER_TENANT_ID));
-        Assert.assertNotNull(apiId);
+    @Test
+    public void testGetGatewayPublishedAPIArtifacts() throws APIManagementException {
+        String gatewayPublishedAPIArtifacts = gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiUUID, label,
+                        APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
+        Assert.assertNotNull(gatewayPublishedAPIArtifacts);
+    }
+
+    @Test
+    public void testGetAllGatewayPublishedAPIArtifacts() throws APIManagementException {
+        List<String> gatewayRuntimeArtifactsArray = gatewayArtifactsMgtDAO.getAllGatewayPublishedAPIArtifacts(label);
+        Assert.assertTrue(gatewayRuntimeArtifactsArray.size() > 0);
+    }
+
+    @Test
+    public void testIsAPIPublishedInAnyGateway() throws APIManagementException {
+        boolean isApiPublished = gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiUUID);
+        Assert.assertTrue(isApiPublished);
+    }
+
+    @Test
+    public void testIsAPIArtifactExists() throws APIManagementException {
+        boolean isApiArtifactsExists = gatewayArtifactsMgtDAO.isAPIArtifactExists(apiUUID, label);
+        Assert.assertTrue(isApiArtifactsExists);
+    }
+
+    @Test
+    public void testIsAPIDetailExists() throws APIManagementException {
+        boolean isApiDetailsExists = gatewayArtifactsMgtDAO.isAPIDetailsExists(apiUUID);
+        Assert.assertTrue(isApiDetailsExists);
     }
 }
