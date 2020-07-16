@@ -30,7 +30,11 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
 
 public class SystemScopesMappingUtil {
 
