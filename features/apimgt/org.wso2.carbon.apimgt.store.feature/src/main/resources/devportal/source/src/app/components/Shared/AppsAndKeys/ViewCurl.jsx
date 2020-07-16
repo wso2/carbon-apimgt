@@ -23,7 +23,6 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import FileCopy from '@material-ui/icons/FileCopy';
 import Tooltip from '@material-ui/core/Tooltip';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import Settings from 'AppComponents/Shared/SettingsContext';
 
 const useStyles = makeStyles(theme => ({
     code: {
@@ -55,9 +54,10 @@ function ViewCurl(props) {
     const {
         keys: { consumerKey, consumerSecret },
         intl,
+        keyType,
+        keyManagerConfig,
     } = props;
     const bas64Encoded = window.btoa(consumerKey + ':' + consumerSecret);
-    const { settings: { apiGatewayEndpoint } } = useContext(Settings);
     const [showReal, setShowReal] = useState(false);
     const [tokenCopied, setTokenCopied] = useState(false);
     const onCopy = () => {
@@ -72,8 +72,12 @@ function ViewCurl(props) {
         setShowReal(!showReal);
     };
 
-    const gatewayUrl = apiGatewayEndpoint ? apiGatewayEndpoint.split(',')[0] : 'https://localhost:8243';
-    const tokenURL = `${gatewayUrl}/token`;
+
+    // Check for additional properties for token endpoint and revoke endpoints.
+    const { additionalProperties } = keyManagerConfig;
+    let { tokenEndpoint } = keyManagerConfig;
+    const propPrefix = keyType.toLowerCase();
+    tokenEndpoint = additionalProperties[`${propPrefix}_token_endpoint`] || tokenEndpoint;
 
     return (
         <React.Fragment>
@@ -88,7 +92,7 @@ function ViewCurl(props) {
             <div className={classes.contentWrapper}>
                 <div className={classes.code}>
                     <div>
-                        <span className={classes.command}>curl -k -X POST </span> {tokenURL}
+                        <span className={classes.command}>curl -k -X POST </span> {tokenEndpoint}
                         <span className={classes.command}> -d </span>{' '}
                         {'"grant_type=password&username=Username&password=Password"'}
                     </div>
@@ -117,9 +121,9 @@ function ViewCurl(props) {
                         placement='right'
                     >
                         <CopyToClipboard
-                            text={`curl -k -X POST ${tokenURL} -d ` +
-                            '"grant_type=password&username=Username&password=Password" -H ' +
-                            `"Authorization: Basic ${bas64Encoded}"`}
+                            text={`curl -k -X POST ${tokenEndpoint} -d ` +
+                                '"grant_type=password&username=Username&password=Password" -H ' +
+                                `"Authorization: Basic ${bas64Encoded}"`}
                             onCopy={onCopy}
                         >
                             <FileCopy color='secondary' />
@@ -137,7 +141,7 @@ function ViewCurl(props) {
             <div className={classes.contentWrapper}>
                 <div className={classes.code}>
                     <div>
-                        <span className={classes.command}>curl -k -X POST </span> {tokenURL}
+                        <span className={classes.command}>curl -k -X POST </span> {tokenEndpoint}
                         <span className={classes.command}> -d </span>{' '}
                         {'"grant_type=client_credentials"'}
                     </div>
@@ -153,9 +157,9 @@ function ViewCurl(props) {
                 <div>
                     <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
                         <CopyToClipboard
-                            text={`curl -k -X POST ${tokenURL} -d ` +
-                            '"grant_type=client_credentials" -H' +
-                            `"Authorization: Basic ${bas64Encoded}"`}
+                            text={`curl -k -X POST ${tokenEndpoint} -d ` +
+                                '"grant_type=client_credentials" -H' +
+                                `"Authorization: Basic ${bas64Encoded}"`}
                             onCopy={onCopy}
                         >
                             <FileCopy color='secondary' />

@@ -575,7 +575,11 @@ class ViewKeys extends React.Component {
                                 )}
                                 {showCurl && (
                                     <DialogContentText>
-                                        <ViewCurl keys={{ consumerKey, consumerSecret }} />
+                                        <ViewCurl 
+                                            keys={{ consumerKey, consumerSecret }} 
+                                            keyType={keyType} 
+                                            keyManagerConfig={keyManagerConfig} 
+                                        />
                                     </DialogContentText>
                                 )}
                                 {showSecretGen && (
