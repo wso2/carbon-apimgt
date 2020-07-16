@@ -27,6 +27,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.notification.DefaultKeyManagerEventHandlerImpl;
 import org.wso2.carbon.apimgt.notification.NotificationEventService;
+import org.wso2.carbon.event.stream.core.EventStreamService;
 
 /**
  * This class used to activate Api manager notification bundle.
@@ -59,4 +60,19 @@ public class ApimgtNotificationServiceComponent {
         ServiceReferenceHolder.getInstance().removeKeyManagerEventHandlers(keyManagerEventHandler.getType());
     }
 
+    @Reference(
+            name = "apimgt.event.stream.service.reference",
+            service = org.wso2.carbon.event.stream.core.EventStreamService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetEventStreamService")
+    protected void setEventStreamService(EventStreamService eventStreamService) {
+
+        ServiceReferenceHolder.getInstance().setEventStreamService(eventStreamService);
+    }
+
+    protected void unsetEventStreamService(EventStreamService eventStreamService) {
+
+        ServiceReferenceHolder.getInstance().setEventStreamService(null);
+    }
 }

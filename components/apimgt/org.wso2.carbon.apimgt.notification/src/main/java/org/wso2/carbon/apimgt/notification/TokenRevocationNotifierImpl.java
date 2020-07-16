@@ -16,7 +16,7 @@
  *under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.notifier;
+package org.wso2.carbon.apimgt.notification;
 
 import org.apache.axis2.util.URL;
 import org.apache.commons.codec.binary.Base64;
@@ -33,6 +33,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.token.TokenRevocationNotifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.notification.internal.ServiceReferenceHolder;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 
 import java.io.IOException;
@@ -49,7 +52,7 @@ import java.util.Properties;
 public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
 
     private static final Log log = LogFactory.getLog(TokenRevocationNotifierImpl.class);
-    protected final String DEFAULT_TTL = "3600";
+    protected static final String DEFAULT_TTL = "3600";
     protected Properties realTimeNotifierProperties;
     protected Properties persistentNotifierProperties;
 
@@ -71,7 +74,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
                 new Object[]{eventId, revokedToken, realtimeNotifierTTL, expiryTimeForJWT, tokenType, tenantId};
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
-        APIUtil.publishEventToStreamService(tokenRevocationMessage);
+        publishEventToStreamService(tokenRevocationMessage);
         log.debug("Successfully sent the revoked token notification on realtime");
     }
 
@@ -84,16 +87,16 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     @Override
     public void sendMessageToPersistentStorage(String revokedToken, Properties properties) {
         //Variables related to Persistent Notifier
-        String DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME = "https://localhost:2379/v2/keys/jti/";
+        String defaultPersistentNotifierHostname = "https://localhost:2379/v2/keys/jti/";
         String persistentNotifierHostname = properties
-                .getProperty("hostname", DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME);
+                .getProperty("hostname", defaultPersistentNotifierHostname);
         String persistentNotifierTTL = properties.getProperty("ttl", DEFAULT_TTL);
-        String DEFAULT_PERSISTENT_NOTIFIER_USERNAME = "root";
+        String defaultPersistentNotifierUsername = "root";
         String persistentNotifierUsername = properties
-                .getProperty("username", DEFAULT_PERSISTENT_NOTIFIER_USERNAME);
-        String DEFAULT_PERSISTENT_NOTIFIER_PASSWORD = "root";
+                .getProperty("username", defaultPersistentNotifierUsername);
+        String defaultPersistentNotifierPassword = "root";
         String persistentNotifierPassword = properties
-                .getProperty("password", DEFAULT_PERSISTENT_NOTIFIER_PASSWORD);
+                .getProperty("password", defaultPersistentNotifierPassword);
         String etcdEndpoint = persistentNotifierHostname + revokedToken;
         URL etcdEndpointURL = new URL(etcdEndpoint);
         String etcdEndpointProtocol = etcdEndpointURL.getProtocol();
@@ -134,4 +137,21 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         this.realTimeNotifierProperties = realTimeNotifierProperties;
         this.persistentNotifierProperties = persistentNotifierProperties;
     }
+
+    private static void publishEventToStreamService(Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getEventStreamService().publish(event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
 }

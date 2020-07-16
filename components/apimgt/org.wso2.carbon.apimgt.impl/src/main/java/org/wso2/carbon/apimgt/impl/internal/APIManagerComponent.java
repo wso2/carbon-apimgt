@@ -966,20 +966,5 @@ public class APIManagerComponent {
             log.info("api-manager.xml not loaded. Wso2Event Publisher will not be enabled.");
         }
     }
-    @Reference(
-            name = "apimgt.event.stream.service.reference",
-            service = org.wso2.carbon.event.stream.core.EventStreamService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetEventStreamService")
-    protected void setEventStreamService(EventStreamService eventStreamService) {
-
-        ServiceReferenceHolder.getInstance().setEventStreamService(eventStreamService);
-    }
-
-    protected void unsetEventStreamService(EventStreamService eventStreamService) {
-
-        ServiceReferenceHolder.getInstance().setEventStreamService(null);
-    }
 }
 

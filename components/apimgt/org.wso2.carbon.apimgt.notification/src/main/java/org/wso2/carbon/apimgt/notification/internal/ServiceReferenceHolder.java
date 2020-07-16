@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.notification.internal;
 
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
+import org.wso2.carbon.event.stream.core.EventStreamService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private Map<String, KeyManagerEventHandler> keyManagerEventHandlerMap = new HashMap<>();
+    private EventStreamService eventStreamService;
 
     private ServiceReferenceHolder() {
 
@@ -55,5 +57,15 @@ public class ServiceReferenceHolder {
 
         keyManagerEventHandlerMap.remove(type);
 
+    }
+
+    public void setEventStreamService(EventStreamService eventStreamService) {
+
+        this.eventStreamService = eventStreamService;
+    }
+
+    public EventStreamService getEventStreamService() {
+
+        return eventStreamService;
     }
 }

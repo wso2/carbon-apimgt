@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
-import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
@@ -57,7 +56,6 @@ public class ServiceReferenceHolder {
     private Map<String,KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap  = new HashMap<>();
     private ArtifactSaver artifactSaver;
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
-    private EventStreamService eventStreamService;
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -214,13 +212,4 @@ public class ServiceReferenceHolder {
         this.artifactSaver = artifactSaver;
     }
 
-    public void setEventStreamService(EventStreamService eventStreamService) {
-
-        this.eventStreamService = eventStreamService;
-    }
-
-    public EventStreamService getEventStreamService() {
-
-        return eventStreamService;
-    }
 }
