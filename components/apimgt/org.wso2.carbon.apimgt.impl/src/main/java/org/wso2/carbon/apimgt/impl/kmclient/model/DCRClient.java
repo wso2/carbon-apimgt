@@ -42,4 +42,14 @@ public interface DCRClient {
     @Headers("Content-Type: application/json")
     void deleteApplication(@Param("clientId") String clientId) throws KeyManagerClientException;
 
+    @RequestLine("PUT /{clientId}/change-owner")
+    @Headers("Content-Type: application/json")
+    ClientInfo updateApplicationOwner(@Param("clientId") String clientId, @Param("ext_application_owner") String applicationOwner)
+            throws KeyManagerClientException;
+
+    @RequestLine("POST /{clientId/re-generate-consumer-secret")
+    @Headers("Content-Type: application/json")
+    ClientInfo updateApplicationSecret(@Param("clientId") String clientId)
+            throws KeyManagerClientException;
+
 }
