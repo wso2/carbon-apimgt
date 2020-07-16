@@ -89,7 +89,8 @@ public class SystemScopesMappingUtil {
 
     /**
      * Extract scope and roles and create JSONObject
-     * @param body          body of a Role Scope  Mapping
+     *
+     * @param body body of a Role Scope  Mapping
      * @return JSONObject   role scope mapping data
      */
     public static JSONObject createJsonObjectOfScopeMapping(ScopeListDTO body)
@@ -105,6 +106,7 @@ public class SystemScopesMappingUtil {
         responseJson.put("Scope", scopeJson);
         return responseJson;
     }
+
     /**
      * Convert list of role alias mapping to RoleAliasListDTO
      *
@@ -144,7 +146,9 @@ public class SystemScopesMappingUtil {
     public static JSONObject createJsonObjectOfRoleMapping(RoleAliasListDTO body) {
         JSONObject roleJson = new JSONObject();
         for (RoleAliasDTO roleAlias : body.getList()) {
-            roleJson.put(roleAlias.getRole(), roleAlias.getAliases());
+            String aliases = roleAlias.getAliases().toString()
+                    .replaceAll("\\[", "").replaceAll("\\]", "");
+            roleJson.put(roleAlias.getRole(), aliases);
         }
         return roleJson;
     }
@@ -158,9 +162,10 @@ public class SystemScopesMappingUtil {
     public static Map<String, List<String>> createMapOfRoleMapping(JSONObject roleMapping) {
         Map<String, List<String>> map = new HashMap<>();
         for (Object role : roleMapping.keySet()) {
-            List<String> result = new ArrayList<>();
             String key = (String) role;
-            result.add((String) roleMapping.get(key));
+            String aliaseString = (String) roleMapping.get(key);
+            String[] aliases = aliaseString.split(",");
+            List<String> result = Arrays.asList(aliases);
             map.put(key, result);
         }
         return map;

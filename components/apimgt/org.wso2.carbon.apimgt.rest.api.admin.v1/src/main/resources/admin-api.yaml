@@ -5636,10 +5636,9 @@ definitions:
         description: The original role
         example: "Internal/subscriber"
       aliases:
-        schema:
-          type: array
-          items:
-            type: string
+        type: array
+        items:
+          type: string
         description: The role mapping for role alias
         example: ["Subscriber","Internal/subscriber"]
 
