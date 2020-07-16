@@ -59,6 +59,9 @@ const useStyles = makeStyles((theme) => ({
         display: 'inline-flex',
         lineHeight: 1.5,
     },
+    keyManagerSelect: {
+        minWidth: 180,
+    },
 }));
 
 /**
@@ -131,6 +134,7 @@ export default function KeyManager(props) {
                                     <Select
                                         multiple
                                         value={keyManagers}
+                                        className={classes.keyManagerSelect}
                                         onChange={handleChange}
                                         renderValue={(selected) => (
                                             <div className={classes.chips}>
