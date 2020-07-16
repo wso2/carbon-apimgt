@@ -177,6 +177,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         ClientInfo clientInfo = new ClientInfo();
         JSONObject infoJson = new JSONObject(info.getJsonString());
+        String applicationOwner =  (String) info.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
         if (infoJson.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
             // this is done as there are instances where the grant string begins with a comma character.
             String grantString = infoJson.getString(ApplicationConstants.OAUTH_CLIENT_GRANT);
@@ -194,7 +195,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         clientInfo.setClientName(applicationName);
         //todo: run tests by commenting the type
         clientInfo.setTokenType(info.getTokenType());
-        clientInfo.setApplication_owner((String) info.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME));
+        clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());
