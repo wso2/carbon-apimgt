@@ -126,7 +126,7 @@
   "apim.sdk.model_package": "org.wso2.client.model.",
   "apim.sdk.api_package": "org.wso2.client.api.",
   "apim.sdk.supported_languages": ["android","java","javascript","jmeter"],
-  "apim.token.revocation.notifier_impl": "org.wso2.carbon.apimgt.impl.notifier.TokenRevocationNotifierImpl",
+  "apim.token.revocation.notifier_impl": "org.wso2.carbon.apimgt.notification.TokenRevocationNotifierImpl",
   "apim.token.revocation.enable_realtime_notifier": true,
   "apim.token.revocation.enable_persistent_notifier": false,
   "apim.token.revocation.realtime_notifier.ttl": "5000",

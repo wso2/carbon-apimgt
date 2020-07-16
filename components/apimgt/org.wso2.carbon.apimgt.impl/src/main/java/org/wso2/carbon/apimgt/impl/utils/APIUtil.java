@@ -10767,22 +10767,6 @@ public final class APIUtil {
 
     }
 
-    public static void publishEventToStreamService(Event event) {
-
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getEventStreamService().publish(event);
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-    }
-
     /**
      * Returns the user claims for the given user.
      *
