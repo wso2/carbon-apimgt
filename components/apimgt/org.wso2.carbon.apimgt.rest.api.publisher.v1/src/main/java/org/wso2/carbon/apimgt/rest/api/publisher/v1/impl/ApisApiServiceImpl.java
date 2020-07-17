@@ -3617,6 +3617,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     validationResponse =
                             APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
                 } else if (filename.endsWith(".wsdl")) {
+                    //APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
                     validationResponse = APIMWSDLReader.validateWSDLFile(fileInputStream);
                 } else {
                     RestApiUtil.handleBadRequest("Unsupported extension type of file: " + filename, log);
@@ -3820,7 +3821,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);;
                 } else if (filename.endsWith(".wsdl")) {
                     byte[] wsdlContent = APIUtil.toByteArray(fileInputStream);
-                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlContent);
+                    wsdlArchiveExtractedPath = wsdlArchiveExtractedPath.substring(0, wsdlArchiveExtractedPath.lastIndexOf('/'));
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath, url, wsdlContent);
                 } else {
                     throw new APIManagementException(ExceptionCodes.UNSUPPORTED_WSDL_FILE_EXTENSION);
                 }
