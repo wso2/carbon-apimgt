@@ -103,7 +103,7 @@ function MarkdownEditor(props) {
         docPromise
             .then(doc => {
                 Alert.info(
-                    `${doc.name} ${intl.formatMessage({
+                    `${doc.obj.name} ${intl.formatMessage({
                         id: 'Apis.Details.Documents.MarkdownEditor.update.success.message',
                         defaultMessage: 'updated successfully.',
                     })}`,
