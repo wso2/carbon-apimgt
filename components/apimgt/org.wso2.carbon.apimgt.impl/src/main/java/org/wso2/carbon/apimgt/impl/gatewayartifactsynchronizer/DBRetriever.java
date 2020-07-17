@@ -48,7 +48,7 @@ public class DBRetriever implements ArtifactRetriever {
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
     protected EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfigurationService().getAPIManagerConfiguration().getEventHubConfigurationDto();
-    private String baseURL = eventHubConfigurationDto.getServiceUrl();
+    private String baseURL = eventHubConfigurationDto.getServiceUrl() + "/internal/data/v1";
 
     @Override
     public void init() throws ArtifactSynchronizerException {
@@ -60,7 +60,6 @@ public class DBRetriever implements ArtifactRetriever {
             throws ArtifactSynchronizerException {
         CloseableHttpResponse httpResponse = null;
         try {
-            String baseURL = eventHubConfigurationDto.getServiceUrl();
             String endcodedgatewayLabel= URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);
             String path = APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ARTIFACTS + "?apiId=" + APIId +
                     "&gatewayInstruction=" + gatewayInstruction + "&gatewayLabel="+ endcodedgatewayLabel;
