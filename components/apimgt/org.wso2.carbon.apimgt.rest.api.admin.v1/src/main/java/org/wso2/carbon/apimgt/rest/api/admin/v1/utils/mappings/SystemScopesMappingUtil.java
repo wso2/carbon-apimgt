@@ -94,7 +94,7 @@ public class SystemScopesMappingUtil {
     /**
      * Extract scope and roles and create JSONObject
      *
-     * @param body body of a Role Scope  Mapping
+     * @param body          body of a Role Scope  Mapping
      * @return JSONObject   role scope mapping data
      */
     public static JSONObject createJsonObjectOfScopeMapping(ScopeListDTO body)
@@ -103,8 +103,10 @@ public class SystemScopesMappingUtil {
         JSONArray scopeJson = new JSONArray();
         for (ScopeDTO scope : body.getList()) {
             JSONObject scopeRoleJson = new JSONObject();
+            String roles = scope.getRoles().toString()
+                    .replaceAll("\\[", "").replaceAll("\\]", "");
             scopeRoleJson.put("Name", scope.getName());
-            scopeRoleJson.put("Roles", scope.getRoles());
+            scopeRoleJson.put("Roles", roles);
             scopeJson.put(scopeRoleJson);
         }
         responseJson.put("Scope", scopeJson);
