@@ -99,7 +99,7 @@ const styles = makeStyles((theme) => ({
  */
 function TryOutController(props) {
     const {
-        securitySchemeType, selectedEnvironment, environments, k8sClusters, labels,
+        securitySchemeType, selectedEnvironment, environments, containerMngEnvironments, labels,
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
         selectedKeyManager, setSelectedKeyManager,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
@@ -636,7 +636,8 @@ function TryOutController(props) {
                     <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
                         <Grid xs={12} md={6} item>
                             {((environments && environments.length > 0)
-                                        || (k8sClusters && k8sClusters.length > 0)
+                                        || (containerMngEnvironments
+                                    && containerMngEnvironments.some(env => env.clusterDetails.length > 0))
                                         || (labels && labels.length > 0))
                                     && (
                                         <>
@@ -691,26 +692,27 @@ function TryOutController(props) {
                                                             {env}
                                                         </MenuItem>
                                                     )))}
-                                                {k8sClusters && k8sClusters.length > 0 && (
-                                                    <MenuItem value='' disabled>
-                                                        <em>
-                                                            <FormattedMessage
-                                                                id='k8s.clusters'
-                                                                defaultMessage='Kubernetes Clusters'
-                                                                className={classes.menuItem}
-                                                            />
-                                                        </em>
-                                                    </MenuItem>
-                                                )}
-                                                {k8sClusters && (
-                                                    k8sClusters.map((cluster) => (
-                                                        <MenuItem
-                                                            value={cluster}
-                                                            key={cluster}
-                                                            className={classes.menuItem}
-                                                        >
-                                                            {cluster}
-                                                        </MenuItem>
+                                                {containerMngEnvironments
+                                                && containerMngEnvironments.some((env) => env.clusterDetails.length > 0)
+                                                && (
+                                                    containerMngEnvironments.map((env) => (
+                                                        <>
+                                                            <MenuItem value='' disabled>
+                                                                <em>
+                                                                    {env.deploymentEnvironmentName}
+                                                                </em>
+                                                            </MenuItem>
+                                                            {env.clusterDetails.map((cluster) => (
+                                                                <MenuItem
+                                                                    value={cluster.clusterDisplayName}
+                                                                    key={cluster.clusterDisplayName}
+                                                                    className={classes.menuItem}
+                                                                >
+                                                                    {cluster.clusterDisplayName}
+                                                                </MenuItem>
+                                                            ))}
+
+                                                        </>
                                                     ))
                                                 )}
                                                 {labels && labels.length > 0 && (

@@ -119,7 +119,7 @@ class ApiConsole extends React.Component {
         const user = AuthManager.getUser();
         let apiData;
         let environments;
-        let k8sClusters;
+        let containerMngEnvironments;
         let labels;
         let selectedEnvironment;
         let swagger;
@@ -135,14 +135,7 @@ class ApiConsole extends React.Component {
                 if (apiData.endpointURLs) {
                     environments = apiData.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
                 }
-                if (apiData.ingressURLs) {
-                    k8sClusters = apiData.ingressURLs.reduce(
-                        (clusters, env) => {
-                            env.clusterDetails.reduce((c, cluster) => {c.push(cluster.clusterName); return c}, clusters);
-                            return clusters
-                        }, []
-                    )
-                }
+                containerMngEnvironments = apiData.ingressURLs;
                 if (apiData.labels) {
                     labels = apiData.labels.map((label) => { return label.name; });
                 }
@@ -153,9 +146,10 @@ class ApiConsole extends React.Component {
                 if (environments && environments.length > 0) {
                     [selectedEnvironment] = environments;
                     return this.apiClient.getSwaggerByAPIIdAndEnvironment(apiID, selectedEnvironment);
-                } else if (k8sClusters && k8sClusters.length > 0) {
-                    [selectedEnvironment] = k8sClusters;
-                    return this.apiClient.getSwaggerByAPIIdAndLabel(apiID, selectedEnvironment);
+                } else if (containerMngEnvironments
+                    && containerMngEnvironments.some(env => env.clusterDetails.length > 0)) {
+                    const {clusterDetails: [{clusterName}]} = containerMngEnvironments.find(env => env.clusterDetails.length > 0);
+                    return this.apiClient.getSwaggerByAPIIdAndClusterName(apiID, clusterName);
                 } else if (labels && labels.length > 0) {
                     [selectedEnvironment] = labels;
                     return this.apiClient.getSwaggerByAPIIdAndLabel(apiID, selectedEnvironment);
@@ -169,7 +163,7 @@ class ApiConsole extends React.Component {
                     api: apiData,
                     swagger,
                     environments,
-                    k8sClusters,
+                    containerMngEnvironments,
                     labels,
                     productionAccessToken,
                     sandboxAccessToken,
@@ -354,7 +348,7 @@ class ApiConsole extends React.Component {
      */
     updateSwagger() {
         const {
-            selectedEnvironment, api, environments,
+            selectedEnvironment, api, environments, containerMngEnvironments
         } = this.state;
         let promiseSwagger;
 
@@ -379,7 +373,7 @@ class ApiConsole extends React.Component {
     render() {
         const { classes } = this.props;
         const {
-            api, notFound, swagger, securitySchemeType, selectedEnvironment, labels, k8sClusters, environments, scopes,
+            api, notFound, swagger, securitySchemeType, selectedEnvironment, labels, containerMngEnvironments: containerMngEnvironments, environments, scopes,
             username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
             sandboxApiKey, productionApiKey, selectedKeyManager,
         } = this.state;
@@ -442,7 +436,7 @@ class ApiConsole extends React.Component {
                         setSandboxAccessToken={this.setSandboxAccessToken}
                         swagger={swagger}
                         labels={labels}
-                        k8sClusters={k8sClusters}
+                        containerMngEnvironments={containerMngEnvironments}
                         environments={environments}
                         scopes={scopes}
                         setUsername={this.setUsername}
