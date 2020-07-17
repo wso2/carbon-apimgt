@@ -25,6 +25,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -308,6 +309,8 @@ public class ImportApiServiceImpl implements ImportApiService {
                 APIInfoListDTO skippedAPIListDTO = APIInfoMappingUtil.fromAPIInfoListToDTO(skippedAPIs);
                 return Response.created(location).status(207).entity(skippedAPIListDTO).build();
             }
+        } catch (APIMgtResourceAlreadyExistsException e) {
+            RestApiUtil.handleResourceAlreadyExistsError("Error while importing Application", e, log);
         } catch (APIManagementException | URISyntaxException | UserStoreException e) {
             RestApiUtil.handleInternalServerError("Error while importing Application", e, log);
         } catch (UnsupportedEncodingException e) {
