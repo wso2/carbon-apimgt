@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage, useIntl } from 'react-intl';
 import {
-    List, Button, ListItemAvatar, Typography, Toolbar, Grid, Paper, ListItem, Avatar, ListItemSecondaryAction,
+    List, Button, ListItemAvatar, Typography, Toolbar, Grid, Paper, ListItem, Avatar, ListItemSecondaryAction, Box,
 } from '@material-ui/core';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -29,7 +29,6 @@ import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import DropZoneLocal, { humanFileSize } from 'AppComponents/Shared/DropZoneLocal';
 import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -37,7 +36,7 @@ import IconButton from '@material-ui/core/IconButton';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import AlertMui from '@material-ui/lab/Alert';
-import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import Icon from '@material-ui/core/Icon';
 import Utils from 'AppData/Utils';
 
 const useStyles = makeStyles((theme) => ({
@@ -81,16 +80,19 @@ const useStyles = makeStyles((theme) => ({
         background: '#eaeff1',
     },
     paperUpload: {
-        maxWidth: 936,
+        maxWidth: 750,
         margin: 'auto',
         overflow: 'hidden',
         marginTop: theme.spacing(5),
     },
     uploadButtonGrid: {
         display: 'grid',
-        padding: '0px 400px 10px',
+        padding: '0px 345px 10px',
     },
     dropbox: {
+        maxWidth: 500,
+        margin: 'auto',
+        overflow: 'hidden',
         marginTop: theme.spacing(4),
         marginBottom: theme.spacing(2),
     },
@@ -102,7 +104,27 @@ const useStyles = makeStyles((theme) => ({
         fontWeight: 600,
     },
     buttonIcon: {
-        marginRight: theme.spacing(1),
+        marginLeft: theme.spacing(4),
+        fontSize: '50px',
+    },
+    uploadFilesHeading: {
+        display: 'flex',
+        justifyContent: 'center',
+        marginTop: theme.spacing(2),
+    },
+    downloadBox: {
+        display: 'flex',
+        justifyContent: 'center',
+    },
+    fileIcon: {
+        fontSize: 45,
+    },
+    fileName: {
+        marginTop: theme.spacing(1.5),
+        marginLeft: theme.spacing(5),
+    },
+    fileUploadError: {
+        marginTop: theme.spacing(2),
     },
 }));
 
@@ -153,7 +175,6 @@ function UploadTheme() {
         return restApi.uploadTenantTheme(themeFile)
             .then(() => {
                 setIsUploadUnsuccessful(false);
-                setFileName(themeFile.name);
                 Alert.success(
                     <FormattedMessage
                         id='TenantTheme.Upload.Theme.upload.successful'
@@ -180,7 +201,7 @@ function UploadTheme() {
                         <Typography color='inherit' variant='h5' component='h1'>
                             <FormattedMessage
                                 id='TenantTheme.Upload.Theme.page.heading'
-                                defaultMessage='Upload Tenant Theme'
+                                defaultMessage='Manage Tenant Theme'
                             />
                         </Typography>
                     </Grid>
@@ -214,43 +235,52 @@ function UploadTheme() {
             </Toolbar>
 
             <main className={classes.main}>
-                <Paper className={classes.paper}>
-                    <InlineMessage type='info' height={100} className={classes.emptyBox}>
-                        <div className={classes.contentWrapper}>
-                            <Typography component='p' className={classes.content}>
-                                <FormattedMessage
-                                    id='TenantTheme.Upload.Theme.info.message'
-                                    defaultMessage={'The theme should be a zip file containing CSS'
-                                    + ' and images compliant with the API Manager theme format'}
-                                />
-                            </Typography>
-                        </div>
-                    </InlineMessage>
-                </Paper>
-                {fileName && (
-                    <Paper className={classes.downloadPaper}>
-                        <div>
-                            <Button size='large' className={classes.button} onClick={handleDownloadTenantTheme}>
-                                <CloudDownloadRounded className={classes.buttonIcon} />
-                                <FormattedMessage
-                                    id='TenantTheme.Upload.Theme.theme.download.definition'
-                                    defaultMessage='Download existing Tenant theme '
-                                />
-                            </Button>
-                        </div>
-                    </Paper>
-                )}
-                {isUploadUnsuccessful && (
-                    <Paper className={classes.warningPaper}>
-                        <AlertMui severity='warning'>
+                <Paper className={classes.paperUpload}>
+                    <Grid item xs className={classes.uploadFilesHeading}>
+                        <Typography color='inherit' variant='h5' component='h1'>
+                            <FormattedMessage
+                                id='TenantTheme.Upload.Theme.upload.files'
+                                defaultMessage='Upload/Download Theme'
+                            />
+                        </Typography>
+                    </Grid>
+                    <Grid item xs className={classes.uploadFilesHeading}>
+                        <Typography component='p' className={classes.content}>
+                            <FormattedMessage
+                                id='TenantTheme.Upload.Theme.info.message'
+                                defaultMessage={'The theme should be a zip file containing CSS'
+                                    + ' and images compliant with the '}
+                            />
+                            <Link
+                                target='_blank'
+                                href={Configurations.app.docUrl
+        + 'develop/customizations/customizing-the-developer-portal/overriding-developer-portal-theme/#tenant-theming'}
+                            >
+                                API Manager theme format
+                            </Link>
+                        </Typography>
+                    </Grid>
+                    {fileName && (
+                        <Grid className={classes.uploadFilesHeading}>
+                            <Box boxShadow={2} p={1} className={classes.downloadBox}>
+                                <Icon style={{ fontSize: 40 }}>file_copy</Icon>
+                                <Typography color='inherit' variant='h6' className={classes.fileName}>
+                                    {fileName}
+                                </Typography>
+                                <Button size='small' className={classes.button} onClick={handleDownloadTenantTheme}>
+                                    <Icon style={{ fontSize: 40 }}>arrow_downward</Icon>
+                                </Button>
+                            </Box>
+                        </Grid>
+                    )}
+                    {isUploadUnsuccessful && (
+                        <AlertMui severity='warning' className={classes.fileUploadError}>
                             <FormattedMessage
                                 id='TenantTheme.Upload.Theme.warning.message'
                                 defaultMessage='Zip file contains unsupported files. Upload only supported files.'
                             />
                         </AlertMui>
-                    </Paper>
-                )}
-                <Paper className={classes.paperUpload}>
+                    )}
                     <Grid className={classes.dropbox}>
                         {(themeFile && themeFile.name) ? (
                             <List>
