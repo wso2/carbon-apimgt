@@ -20,12 +20,6 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-/** Used to match template delimiters. */
-const customReEscape = /<#-([\s\S]+?)#>/g;
-const customReEvaluate = /<#([\s\S]+?)#>/g;
-const customReInterpolate = /<#=([\s\S]+?)#>/g;
-
-
 const config = {
     entry: { index: './source/index.jsx' },
     output: {
@@ -90,6 +84,18 @@ const config = {
                 test: /\.(woff|woff2|eot|ttf|svg)$/,
                 loader: 'url-loader?limit=100000',
             },
+            // Until https://github.com/jantimon/html-webpack-plugin/issues/1483 ~tmkb
+            // This was added to generate the index.jag from a hbs template file including the hashed bundle file
+            {
+                test: /\.jag\.hbs$/,
+                loader: 'underscore-template-loader',
+                query: {
+                    engine: 'lodash',
+                    interpolate: '\\{\\[(.+?)\\]\\}',
+                    evaluate: '\\{%([\\s\\S]+?)%\\}',
+                    escape: '\\{\\{(.+?)\\}\\}',
+                },
+            },
         ],
     },
     externals: {
@@ -104,9 +110,9 @@ const config = {
         }),
         new HtmlWebpackPlugin({
             inject: false,
-            template: 'site/public/pages/index.jag.hbs',
-            filename: '../pages/index.jag',
-            minify: false,
+            template: path.resolve(__dirname, 'site/public/pages/index.jag.hbs'),
+            filename: path.resolve(__dirname, 'site/public/pages/index.jag'),
+            minify: false, // Make this true to get exploded, formatted index.jag file
         }),
     ],
 };
