@@ -623,26 +623,32 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiId API identifier
      * @param labelName name of the gateway label
      * @param environmentName name of the gateway environment
+     * @param clusterName name of the container managed cluster
      * @param ifNoneMatch If-None-Match header value
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param messageContext CXF message context
      * @return Swagger document of the API for the given label or gateway environment
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName,
+    public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName, String clusterName,
             String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
 
-            if (StringUtils.isNotEmpty(labelName) && StringUtils.isNotEmpty(environmentName)) {
-                RestApiUtil.handleBadRequest("Only one of 'labelName' or 'environmentName' can be provided", log);
+            if (StringUtils.isNotEmpty(labelName) ?
+                    StringUtils.isNotEmpty(environmentName) || StringUtils.isNotEmpty(clusterName) :
+                    StringUtils.isNotEmpty(environmentName) && StringUtils.isNotEmpty(clusterName)) {
+                RestApiUtil.handleBadRequest(
+                        "Only one of 'labelName', 'environmentName' or 'clusterName' can be provided", log
+                );
             }
 
             API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
 
-            // gets the first available environment if neither label nor environment is not provided
-            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)) {
+            // gets the first available environment if any of label, environment or cluster name is not provided
+            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)
+                    && StringUtils.isEmpty(clusterName)) {
                 Map<String, Environment> existingEnvironments = APIUtil.getEnvironments();
 
                 // find a valid environment name from API
@@ -686,6 +692,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             } else if (StringUtils.isNotEmpty(labelName)) {
                 apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(api.getId(), labelName);
+            } else if (StringUtils.isNotEmpty(clusterName)) {
+                apiSwagger = apiConsumer.getOpenAPIDefinitionForClusterName(api.getId(), clusterName);
             } else {
                 apiSwagger = apiConsumer.getOpenAPIDefinition(api.getId());
             }

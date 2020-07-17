@@ -71,6 +71,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -164,6 +165,7 @@ import java.util.regex.Pattern;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
+import javax.validation.constraints.NotNull;
 import javax.wsdl.Definition;
 
 /**
@@ -5409,29 +5411,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public String getOpenAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
             throws APIManagementException {
-        String apiTenantDomain;
-        String updatedDefinition = null;
-        Map<String,String> hostsWithSchemes;
-        String definition = super.getOpenAPIDefinition(apiId);
-        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-        if (apiId instanceof APIIdentifier) {
-            API api = getLightweightAPI((APIIdentifier) apiId);
-            //todo: use get api by id, so no need to set scopes or uri templates
-            api.setScopes(oasParser.getScopes(definition));
-            api.setUriTemplates(oasParser.getURITemplates(definition));
-            apiTenantDomain = MultitenantUtils.getTenantDomain(
-                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, environmentName);
-            api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
-        } else if (apiId instanceof APIProductIdentifier) {
-            APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
-            apiTenantDomain = MultitenantUtils.getTenantDomain(apiProduct.getId().getProviderName());
-            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, environmentName);
-            apiProduct.setContext(getBasePath(apiTenantDomain, apiProduct.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostsWithSchemes);
-        }
-        return updatedDefinition;
+        return getOpenAPIDefinitionForDeployment(apiId, environmentName, null);
+    }
+
+    @Override
+    public String getOpenAPIDefinitionForClusterName(Identifier apiId, String clusterName)
+            throws APIManagementException {
+        return getOpenAPIDefinitionForDeployment(apiId, null, clusterName);
     }
 
     @Override
@@ -5465,6 +5451,45 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         revocationRequestPublisher.publishRevocationEvents(apiKey, expiryTime, properties);
+    }
+
+    /**
+     * Get server URL updated Open API definition for given deployment (synapse gateway or container managed cluster)
+     * @param apiId Id of the API
+     * @param synapseEnvName Name of the synapse gateway environment
+     * @param clusterName Name of the container managed cluster
+     * @return Updated Open API definition
+     * @throws APIManagementException
+     */
+    private String getOpenAPIDefinitionForDeployment(Identifier apiId, String synapseEnvName, String clusterName)
+            throws APIManagementException {
+        String apiTenantDomain;
+        String updatedDefinition = null;
+        Map<String,String> hostsWithSchemes;
+        String definition = super.getOpenAPIDefinition(apiId);
+        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+        if (apiId instanceof APIIdentifier) {
+            API api = getLightweightAPI((APIIdentifier) apiId);
+            //todo: use get api by id, so no need to set scopes or uri templates
+            api.setScopes(oasParser.getScopes(definition));
+            api.setUriTemplates(oasParser.getURITemplates(definition));
+            apiTenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            if (synapseEnvName != null) {
+                hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, synapseEnvName);
+            } else {
+                hostsWithSchemes = getHostWithSchemeMappingForClusterName(clusterName);
+            }
+            api.setContext(getBasePath(apiTenantDomain, api.getContext()));
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
+        } else if (apiId instanceof APIProductIdentifier) {
+            APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
+            apiTenantDomain = MultitenantUtils.getTenantDomain(apiProduct.getId().getProviderName());
+            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, synapseEnvName);
+            apiProduct.setContext(getBasePath(apiTenantDomain, apiProduct.getContext()));
+            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostsWithSchemes);
+        }
+        return updatedDefinition;
     }
 
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {
@@ -5653,6 +5678,42 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return hostsWithSchemes;
+    }
+
+    /**
+     * Get host names with transport scheme mapping from Container Manged Clusters in api-manager.xml or from the tenant
+     * custom url config in registry.
+     *
+     * @param clusterName Name of the container manged cluster
+     * @return Host name to transport scheme mapping
+     * @throws APIManagementException if an error occurs when getting host names with schemes
+     */
+    private Map<String, String> getHostWithSchemeMappingForClusterName(@NotNull String clusterName)
+            throws APIManagementException {
+        // hostsWithSchemes
+        Map<String, String> hostsWithSchemes = new HashMap<>();
+
+        // get ingress URL from tenant configs
+        JSONArray clusterConfigs = APIUtil.getAllClustersFromConfig();
+        for (Object clusterConfig : clusterConfigs) {
+            JSONArray containerMgtInfoArray = (JSONArray) (((JSONObject) clusterConfig)
+                    .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
+            for (Object containerMgtInfoObj : containerMgtInfoArray) {
+                JSONObject containerMgtInfo = (JSONObject) containerMgtInfoObj;
+                if (clusterName.equals(containerMgtInfo.get(ContainerBasedConstants.CLUSTER_NAME))) {
+                    String ingressURL = (String) ((JSONObject)containerMgtInfo.get(ContainerBasedConstants.PROPERTIES))
+                            .get(ContainerBasedConstants.ACCESS_URL);
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL,
+                            APIConstants.HTTPS_PROTOCOL_URL_PREFIX + ingressURL);
+                    return hostsWithSchemes;
+                }
+            }
+        }
+
+        // cluster name not found
+        handleResourceNotFoundException(
+                "Container managed cluster with cluster name '" + clusterName + "' does not exist");
+        return null;
     }
 
     private String getBasePath(String apiTenantDomain, String basePath) throws APIManagementException {
