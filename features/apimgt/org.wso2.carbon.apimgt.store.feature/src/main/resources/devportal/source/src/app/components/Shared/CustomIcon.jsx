@@ -86,18 +86,18 @@ export default class CustomIcon extends React.Component{
             </svg>
         } else if ( icon === 'docs') {
             return <svg xmlns="http://www.w3.org/2000/svg"  width={width} height={height}
-            viewBox="0 0 8.7235365 8.6012734" id="svg12" className={className}>
-                <g id="layer7" transform="translate(96.939 -160.005)">
-                    <g transform="translate(-105.895 83.252)" id="g13502">
-                        <path id="path13492" d="m 10.313394,76.75522 c -0.7481907,0 -1.3505042,0.649337 -1.3505042,1.455945 v 4.182632 c 0,0.678745 -0.1020124,1.244445 0.4789962,1.407278 C 9.413435,83.683074 9.396752,83.559883 9.396752,83.432019 v -4.182631 c 0,-0.806608 1.131481,-1.985112 1.879671,-1.985112 h 4.521713 c 0.118615,0 0.23288,0.01799 0.342341,0.04866 -0.151051,-0.626389 -0.675771,-0.557722 -1.30537,-0.557722 z"
+            viewBox="0 0 8.7235365 8.6012734" className={className}>
+                <g transform="translate(96.939 -160.005)">
+                    <g transform="translate(-105.895 83.252)">
+                        <path d="m 10.313394,76.75522 c -0.7481907,0 -1.3505042,0.649337 -1.3505042,1.455945 v 4.182632 c 0,0.678745 -0.1020124,1.244445 0.4789962,1.407278 C 9.413435,83.683074 9.396752,83.559883 9.396752,83.432019 v -4.182631 c 0,-0.806608 1.131481,-1.985112 1.879671,-1.985112 h 4.521713 c 0.118615,0 0.23288,0.01799 0.342341,0.04866 -0.151051,-0.626389 -0.675771,-0.557722 -1.30537,-0.557722 z"
                         fill={strokeColor} strokeWidth="0.5" strokeLinejoin="round" />
-                        <rect ry="1.456" y="78.01" x="10.207" height="7.095" width="7.223" id="rect13494"
+                        <rect ry="1.456" y="78.01" x="10.207" height="7.095" width="7.223"
                         fill="none" stroke={strokeColor} strokeWidth="0.5" strokeLinejoin="round" />
-                        <path id="path13496" d="m 11.646271,80.642085 h 4.583673" fill="none"
+                        <path d="m 11.646271,80.642085 h 4.583673" fill="none"
                         stroke={strokeColor} strokeWidth="0.529" />
-                        <path d="m 11.646271,82.138794 h 4.583673" id="path13498" fill="none"
+                        <path d="m 11.646271,82.138794 h 4.583673" fill="none"
                         stroke={strokeColor} strokeWidth="0.529" />
-                        <path id="path13500" d="m 11.646271,83.541959 h 4.583673" fill="none"
+                        <path d="m 11.646271,83.541959 h 4.583673" fill="none"
                         stroke={strokeColor} strokeWidth="0.529" />
                     </g>
                 </g>
