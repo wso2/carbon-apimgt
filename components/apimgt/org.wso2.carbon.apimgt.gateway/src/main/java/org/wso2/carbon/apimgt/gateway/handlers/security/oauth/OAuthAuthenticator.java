@@ -215,12 +215,13 @@ public class OAuthAuthenticator implements Authenticator {
                                     APISecurityConstants.API_KEY_MANAGER_NOT_AVAILABLE_MESSAGE);
                         }
                     }
-                } catch ( ParseException  e) {
+                } catch ( ParseException | IllegalArgumentException e) {
                     log.debug("Not a JWT token. Failed to decode the token header.", e);
                 } catch (APIManagementException e) {
                     log.error("error while check validation of JWt", e);
                     return new AuthenticationResponse(false, isMandatory, true,
-                            APISecurityConstants.API_AUTH_GENERAL_ERROR,APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
             }
             //TODO temporarily added. remove this once scope validation is moved to use inmemory maps

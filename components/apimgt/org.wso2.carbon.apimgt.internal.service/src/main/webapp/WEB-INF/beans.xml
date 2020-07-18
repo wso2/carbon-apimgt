@@ -29,6 +29,8 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.ApiPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.SynapseArtifactsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.GatewaySynapseArtifactsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.SynapseAttributesApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.NotifyApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

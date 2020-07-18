@@ -36,6 +36,7 @@ import APIProduct from 'AppData/APIProduct';
 import Alert from 'AppComponents/Shared/Alert';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = {
     appBar: {
@@ -75,6 +76,7 @@ function TextEditor(props) {
     const [open, setOpen] = useState(showAtOnce);
 
     const [editorState, setEditorState] = useState(EditorState.createEmpty());
+    const [isUpdating, setIsUpdating] = useState(false);
 
     const onEditorStateChange = (newEditorState) => {
         setEditorState(newEditorState);
@@ -91,6 +93,7 @@ function TextEditor(props) {
     };
     const addContentToDoc = () => {
         const restAPI = isAPIProduct ? new APIProduct() : new Api();
+        setIsUpdating(true);
         const contentToSave = draftToHtml(convertToRaw(editorState.getCurrentContent()));
         const docPromise = restAPI.addInlineContentToDocument(api.id, docId, 'INLINE', contentToSave);
         docPromise
@@ -100,6 +103,7 @@ function TextEditor(props) {
                     defaultMessage: 'updated successfully.',
                 })}`);
                 toggleOpen();
+                setIsUpdating(false);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -109,6 +113,7 @@ function TextEditor(props) {
                     id: 'Apis.Details.Documents.TextEditor.update.error.message',
                     defaultMessage: 'update failed.',
                 })}`);
+                setIsUpdating(false);
             });
     };
     const updateDoc = () => {
@@ -152,11 +157,12 @@ function TextEditor(props) {
                         />{' '}
                         "{props.docName}"
                     </Typography>
-                    <Button className={classes.button} variant='contained' color='primary' onClick={addContentToDoc}>
+                    <Button className={classes.button} variant='contained' disabled={isUpdating} color='primary' onClick={addContentToDoc}>
                         <FormattedMessage
                             id='Apis.Details.Documents.TextEditor.update.content.button'
                             defaultMessage='Update Content'
                         />
+                        {isUpdating && <CircularProgress size={24} />}
                     </Button>
                     <Button className={classes.button} onClick={toggleOpen}>
                         <FormattedMessage

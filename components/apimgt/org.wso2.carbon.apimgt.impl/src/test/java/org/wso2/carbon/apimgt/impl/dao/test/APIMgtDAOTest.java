@@ -953,19 +953,7 @@ public class APIMgtDAOTest {
         deleteSubscriber(subscriber.getId());
     }
 
-    @Test
-    public void testGetOAuthApplicationFromConsumerKey() throws Exception {
-        OAuthApplicationInfo oAuthApplicationInfo = apiMgtDAO.getOAuthApplication("getOAuthApplication");
-        assertEquals(oAuthApplicationInfo.getCallBackURL(), "http://localhost");
-        assertEquals(oAuthApplicationInfo.getClientId(), "getOAuthApplication");
-        assertEquals(oAuthApplicationInfo.getClientSecret(), "getOAuthApplication");
-        assertEquals(oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME),
-                "admin-app1-Production");
-        assertEquals(oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT), "client_credentials");
-        Subscriber subscriber = apiMgtDAO.getOwnerForConsumerApp("getOAuthApplication");
-        assertEquals(subscriber.getTenantId(), -1234);
-        assertEquals(subscriber.getName(), "getOAuthApplication");
-    }
+
 
     @Test
     public void testDeleteSubscriptionsForapiId() throws Exception {

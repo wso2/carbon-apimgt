@@ -31,11 +31,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
-import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
-import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSListenerStartupShutdownListener;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -54,12 +50,9 @@ public class JMSListenerComponent {
 
         log.debug("Activating component...");
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-        if (configuration != null) {
-            if (!configuration.getThrottleProperties().getJmsConnectionProperties().isEnabled()) {
-                return;
-            }
-        } else {
+        if (configuration == null) {
             log.warn("API Manager Configuration not properly set.");
+            return;
         }
         JMSListenerStartupShutdownListener jmsListenerStartupShutdownListener =
                 new JMSListenerStartupShutdownListener();

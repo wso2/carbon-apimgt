@@ -408,12 +408,75 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /synapse-attributes:
+    get:
+      summary: Get API UUID and label associated with it
+      description: |
+        This will provide access to synapse artifacts in database.
+      parameters:
+        - name: apiName
+          in: query
+          description: |
+            **Search condition**.
+              API Name
+          type: string
+        - name: tenantDomain
+          in: query
+          description: |
+            **Search condition**.
+             tenantDomain associated with the API
+          type: string
+        - name: version
+          in: query
+          description: |
+            **Search condition**.
+            version of the API
+          type: string
+      tags:
+        - Retrieving Synapse artifacts
+      responses:
+        200:
+          description: An array of gatewayRuntimeArtifacts
+          schema:
+            $ref: '#/definitions/SynapseAttributes'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /notify:
+    post:
+      summary: Push notification events into nodes.
+      description: |
+        This pushes events to the other nodes.
+      parameters:
+        - $ref: '#/parameters/type'
+        - name: body
+          in: body
+          description: 'Notification event payload'
+          schema:
+            type: string
+      tags:
+        - 'Notification'
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            type: object
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
   requestedTenant:
     name: xWSO2Tenant
+    in: header
+    description: |
+      This is used to specify the tenant domain, where the resource need to be
+        retrieved from.
+    required: true
+    type: string
+  type:
+    name: X-WSO2-KEY-MANAGER
     in: header
     description: |
       This is used to specify the tenant domain, where the resource need to be
@@ -432,6 +495,15 @@ parameters:
 # The resources used by some of the APIs above within the message body
 ######################################################################
 definitions:
+  SynapseAttributes:
+    properties:
+      count:
+        type: integer
+      label:
+        type: string
+      apiId:
+        type: string
+
   ThrottledEvent:
     properties:
       throttle_key:

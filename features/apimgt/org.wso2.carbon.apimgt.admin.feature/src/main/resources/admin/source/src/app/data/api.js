@@ -694,13 +694,25 @@ class API extends Resource {
     uploadTenantTheme(file) {
         return this.client.then(
             client => {
-                return client.apis['default'].post_tenant_theme_import({
+                return client.apis['Tenant Theme'].importTenantTheme({
                     file: file,
                 });
             },
             this._requestMetaData({
                 'Content-Type': 'multipart/form-data',
             }),
+        );
+    }
+
+    /**
+     * Export a Tenant Theme
+     */
+    exportTenantTheme() {
+        return this.client.then(
+            client => {
+                return client.apis['Tenant Theme'].exportTenantTheme();
+            },
+            this._requestMetaData(),
         );
     }
 

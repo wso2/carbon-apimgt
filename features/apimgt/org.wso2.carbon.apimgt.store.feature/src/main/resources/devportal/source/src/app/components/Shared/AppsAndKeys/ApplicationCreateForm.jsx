@@ -117,6 +117,7 @@ const ApplicationCreate = (props) => {
     return (
         <form noValidate autoComplete='off' className={classes.applicationForm}>
             <TextField
+                id='application-name'
                 classes={{
                     root: classes.mandatoryStarText,
                 }}
@@ -152,7 +153,7 @@ const ApplicationCreate = (props) => {
                 }}
                 required
                 fullWidth
-                id='outlined-select-currency'
+                id='per-token-quota'
                 select
                 label={(
                     <FormattedMessage
@@ -181,6 +182,7 @@ const ApplicationCreate = (props) => {
                 ))}
             </TextField>
             <TextField
+                id='application-description'
                 margin='normal'
                 variant='outlined'
                 fullWidth

@@ -336,7 +336,7 @@ class ViewKeys extends React.Component {
                                                 onCopy={() => this.onCopy('keyCopied')}
                                                 classes={{ root: classes.iconButton }}
                                             >
-                                                <IconButton classes={{ root: classes.iconButton }}>
+                                                <IconButton aria-label='Copy to clipboard' classes={{ root: classes.iconButton }}>
                                                     <Icon color='secondary'>
                                                         file_copy
                                                     </Icon>
@@ -393,7 +393,7 @@ class ViewKeys extends React.Component {
                                                     onCopy={() => this.onCopy('secretCopied')}
                                                     classes={{ root: classes.iconButton }}
                                                 >
-                                                    <IconButton classes={{ root: classes.iconButton }}>
+                                                    <IconButton aria-label='Copy to clipboard' classes={{ root: classes.iconButton }}>
                                                         <Icon color='secondary'>file_copy</Icon>
                                                     </IconButton>
                                                 </CopyToClipboard>
@@ -531,7 +531,7 @@ class ViewKeys extends React.Component {
                                                         text={accessToken}
                                                         onCopy={() => this.onCopy('tokenCopied')}
                                                     >
-                                                        <IconButton classes={{ root: classes.iconButton }}>
+                                                        <IconButton aria-label='Copy to clipboard' classes={{ root: classes.iconButton }}>
                                                             <Icon color='secondary'>file_copy</Icon>
                                                         </IconButton>
                                                     </CopyToClipboard>
@@ -575,7 +575,11 @@ class ViewKeys extends React.Component {
                                 )}
                                 {showCurl && (
                                     <DialogContentText>
-                                        <ViewCurl keys={{ consumerKey, consumerSecret }} />
+                                        <ViewCurl 
+                                            keys={{ consumerKey, consumerSecret }} 
+                                            keyType={keyType} 
+                                            keyManagerConfig={keyManagerConfig} 
+                                        />
                                     </DialogContentText>
                                 )}
                                 {showSecretGen && (

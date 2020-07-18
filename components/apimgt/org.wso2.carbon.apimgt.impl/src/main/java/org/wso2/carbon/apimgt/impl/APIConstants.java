@@ -459,6 +459,7 @@ public final class APIConstants {
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
     public static final String HEADER_TENANT = "xWSO2Tenant";
+    public static final String X_WSO2_TENANT_HEADER = "X-WSO2-Tenant";
     public static final String AUTHORIZATION_QUERY_PARAM_DEFAULT = "access_token";
     public static final String API_KEY_HEADER_QUERY_PARAM = "apikey";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
@@ -2223,6 +2224,8 @@ public final class APIConstants {
         public static final String INIT_DELAY = "InitDelay";
         public static final String INTROSPECTION_ENDPOINT = "introspection_endpoint";
         public static final String CLIENT_REGISTRATION_ENDPOINT = "client_registration_endpoint";
+        public static final String KEY_MANAGER_OPERATIONS_DCR_ENDPOINT = "/keymanager-operations/dcr/register";
+        public static final String KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT = "/keymanager-operations/user-info";
         public static final String TOKEN_ENDPOINT = "token_endpoint";
         public static final String REVOKE_ENDPOINT = "revoke_endpoint";
         public static final String SCOPE_MANAGEMENT_ENDPOINT = "scope_endpoint";
@@ -2359,11 +2362,15 @@ public final class APIConstants {
         public static final String GATEWAY_INSTRUCTION_PUBLISH = "Publish";
         public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
         public static final String SYNAPSE_ARTIFACTS = "/synapse-artifacts";
+        public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
         public static final String GATEAY_SYNAPSE_ARTIFACTS = "/gateway-synapse-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
         public static final String DATA_RETRIEVAL_MODE= "DataRetrievalMode";
         public static final String GATEWAY_STARTUP_SYNC = "sync";
         public static final String GATEWAY_STARTUP_ASYNC= "async";
+        public static final String API_ID = "apiId";
+        public static final String LABEL = "label";
+
     }
 
     public static class ContainerMgtAttributes {

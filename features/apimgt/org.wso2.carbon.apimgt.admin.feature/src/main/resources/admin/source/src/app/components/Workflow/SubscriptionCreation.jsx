@@ -53,6 +53,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import CheckIcon from '@material-ui/icons/Check';
 import ClearIcon from '@material-ui/icons/Clear';
 import Box from '@material-ui/core/Box';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles((theme) => ({
     searchInput: {
@@ -85,6 +86,8 @@ function ListLabels() {
     const restApi = new API();
     const classes = useStyles();
     const [searchText, setSearchText] = useState('');
+    const [isUpdating, setIsUpdating] = useState(null);
+    const [buttonValue, setButtonValue] = useState();
 
     /**
      * API call to get Detected Data
@@ -137,7 +140,9 @@ function ListLabels() {
     }, []);
 
     const updateStatus = (referenceId, value) => {
+        setButtonValue(value);
         const body = { status: value, attributes: {}, description: '' };
+        setIsUpdating(true);
         if (value === 'APPROVED') {
             body.description = 'Approve workflow request.';
         }
@@ -148,12 +153,11 @@ function ListLabels() {
         const promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
         return promisedupdateWorkflow
             .then(() => {
-                return (
-                    <FormattedMessage
-                        id='Workflow.ApplicationCreation.update.success'
-                        defaultMessage='workflow status is updated successfully'
-                    />
-                );
+                setIsUpdating(false);
+                Alert.success(intl.formatMessage({
+                    id: 'Workflow.SubscriptionCreation.update.success',
+                    defaultMessage: 'Workflow status is updated successfully',
+                }));
             })
             .catch((error) => {
                 const { response } = error;
@@ -164,6 +168,7 @@ function ListLabels() {
                     }));
                     throw (response.body.description);
                 }
+                setIsUpdating(false);
                 return null;
             })
             .then(() => {
@@ -287,9 +292,14 @@ function ListLabels() {
                                     variant='contained'
                                     size='small'
                                     onClick={() => updateStatus(referenceId, 'APPROVED')}
+                                    disabled={isUpdating}
                                 >
                                     <CheckIcon />
-                                    Approve
+                                    <FormattedMessage
+                                        id='Workflow.SubscriptionCreation.table.button.approve'
+                                        defaultMessage='Approve'
+                                    />
+                                    {(isUpdating && buttonValue === 'APPROVED') && <CircularProgress size={15} /> }
                                 </Button>
                                 &nbsp;&nbsp;
                                 <Button
@@ -297,9 +307,14 @@ function ListLabels() {
                                     variant='contained'
                                     size='small'
                                     onClick={() => updateStatus(referenceId, 'REJECTED')}
+                                    disabled={isUpdating}
                                 >
                                     <ClearIcon />
-                                    Reject
+                                    <FormattedMessage
+                                        id='Workflow.SubscriptionCreation.table.button.reject'
+                                        defaultMessage='Reject'
+                                    />
+                                    {(isUpdating && buttonValue === 'REJECTED') && <CircularProgress size={15} />}
                                 </Button>
                             </Box>
                         </div>

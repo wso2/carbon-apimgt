@@ -38,7 +38,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DBRetriever implements ArtifactRetriever {
 
@@ -106,6 +108,38 @@ public class DBRetriever implements ArtifactRetriever {
                 }
             }
             return gatewayRuntimeArtifactsArray;
+        } catch (IOException e) {
+            String msg = "Error while executing the http client";
+            log.error(msg, e);
+            throw new ArtifactSynchronizerException(msg, e);
+        }
+    }
+
+    @Override
+    public Map<String, String> retrieveAttributes(String apiName, String version, String tenantDomain)
+            throws ArtifactSynchronizerException {
+        CloseableHttpResponse httpResponse = null;
+        try {
+            String endcodedVersion= URLEncoder.encode(version, APIConstants.DigestAuthConstants.CHARSET);
+            String path = APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ATTRIBUTES + "?apiName=" + apiName +
+                    "&tenantDomain="+ tenantDomain + "&version=" + endcodedVersion;
+            String endpoint = baseURL + path;
+            httpResponse = invokeService(endpoint);
+            String responseString;
+            if (httpResponse.getEntity() != null ) {
+                responseString = EntityUtils.toString(httpResponse.getEntity(),
+                        APIConstants.DigestAuthConstants.CHARSET);
+                httpResponse.close();
+            } else {
+                throw new ArtifactSynchronizerException("HTTP response is empty");
+            }
+            Map <String, String> apiAttribute = new HashMap<>();
+            JSONObject artifactObject = new JSONObject(responseString);
+            String apiId = (String)artifactObject.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
+            String label = (String)artifactObject.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
+            apiAttribute.put(APIConstants.GatewayArtifactSynchronizer.API_ID, apiId);
+            apiAttribute.put(APIConstants.GatewayArtifactSynchronizer.LABEL, label);
+            return apiAttribute;
         } catch (IOException e) {
             String msg = "Error while executing the http client";
             log.error(msg, e);

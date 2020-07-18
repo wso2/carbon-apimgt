@@ -34,6 +34,7 @@ import PropertiesIcon from '@material-ui/icons/List';
 import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import StoreIcon from '@material-ui/icons/Store';
+import DashboardIcon from '@material-ui/icons/Dashboard';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
 import {
@@ -520,8 +521,8 @@ class Details extends Component {
                                 id: 'Apis.Details.index.overview',
                                 defaultMessage: 'overview',
                             })}
-                            iconText='overview'
                             to={pathPrefix + 'overview'}
+                            Icon={<DashboardIcon />}
                         />
                         <LeftMenuItem
                             text={intl.formatMessage({

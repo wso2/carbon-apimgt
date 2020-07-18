@@ -53,6 +53,7 @@ const styles = (theme) => ({
         '& span, & h5, & label, & input, & td, & li': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
         },
+        marginBottom: theme.spacing(15),
     },
     manageAlertHeading: {
         marginBottom: theme.spacing(),

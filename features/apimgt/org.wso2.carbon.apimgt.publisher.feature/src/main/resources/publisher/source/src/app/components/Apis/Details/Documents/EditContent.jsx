@@ -21,6 +21,7 @@ import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash.isempty';
 import MarkdownEditor from './MarkdownEditor';
 import { FormattedMessage } from 'react-intl';
+import { Progress } from 'AppComponents/Shared';
 
 const TextEditor = lazy(() => import('./TextEditor' /* webpackChunkName: "EditContentTextEditor" */));
 
@@ -49,9 +50,7 @@ function EditContent(props) {
             )}
             {doc && doc.sourceType === 'INLINE' && (
                 <Suspense
-                    fallback={
-                        <FormattedMessage id='Apis.Details.Documents.EditContent.loading' defaultMessage='Loading...' />
-                    }
+                    fallback={<Progress />}
                 >
                     <TextEditor docName={doc.name} docId={doc.documentId} showAtOnce />
                 </Suspense>

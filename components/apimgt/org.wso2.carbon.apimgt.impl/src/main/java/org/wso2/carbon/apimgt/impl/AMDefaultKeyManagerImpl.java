@@ -18,8 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import feign.Client;
 import feign.Feign;
 import feign.Response;
+import feign.auth.BasicAuthRequestInterceptor;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import feign.okhttp.OkHttpClient;
@@ -29,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.CarbonConstants;
@@ -58,6 +61,7 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ScopeClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.TenantHeaderInterceptor;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.UserClient;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
@@ -68,17 +72,27 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import sun.security.ssl.SSLSocketFactoryImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -99,7 +113,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
-
         // OAuthApplications are created by calling to APIKeyMgtSubscriber Service
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
 
@@ -164,6 +177,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         ClientInfo clientInfo = new ClientInfo();
         JSONObject infoJson = new JSONObject(info.getJsonString());
+        String applicationOwner =  (String) info.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
         if (infoJson.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
             // this is done as there are instances where the grant string begins with a comma character.
             String grantString = infoJson.getString(ApplicationConstants.OAUTH_CLIENT_GRANT);
@@ -181,6 +195,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         clientInfo.setClientName(applicationName);
         //todo: run tests by commenting the type
         clientInfo.setTokenType(info.getTokenType());
+        clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());
@@ -453,8 +468,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         this.configuration = configuration;
 
-        String consumerKey = (String) configuration.getParameter(APIConstants.KEY_MANAGER_CONSUMER_KEY);
-        String consumerSecret = (String) configuration.getParameter(APIConstants.KEY_MANAGER_CONSUMER_SECRET);
+        String username = (String) configuration.getParameter(APIConstants.KEY_MANAGER_USERNAME);
+        String password = (String) configuration.getParameter(APIConstants.KEY_MANAGER_PASSWORD);
         String keyManagerServiceUrl = (String) configuration.getParameter(APIConstants.AUTHSERVER_URL);
 
         String dcrEndpoint;
@@ -462,7 +477,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             dcrEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
         } else {
             dcrEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                    .concat(getTenantAwareContext().trim()).concat("/api/identity/oauth2/dcr/v1.1/register");
+                    .concat(getTenantAwareContext().trim()).concat
+                            (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_DCR_ENDPOINT);
         }
         String tokenEndpoint;
         if (configuration.getParameter(APIConstants.KeyManager.TOKEN_ENDPOINT) != null) {
@@ -500,20 +516,21 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT);
         } else {
             userInfoEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                    .concat(getTenantAwareContext().trim()).concat("/user-info");
+                    .concat(getTenantAwareContext().trim()).concat
+                            (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT);
         }
-        accessTokenGenerator = new AccessTokenGenerator(tokenEndpoint, revokeEndpoint, consumerKey, consumerSecret);
 
         dcrClient = Feign.builder()
-                .client(new OkHttpClient())
+                .client(APIUtil.createNewFeignClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
-                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
                 .errorDecoder(new KMClientErrorDecoder())
                 .target(DCRClient.class, dcrEndpoint);
         authClient = Feign.builder()
-                .client(new OkHttpClient())
+                .client(APIUtil.createNewFeignClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
@@ -522,28 +539,31 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .target(AuthClient.class, tokenEndpoint);
 
         introspectionClient = Feign.builder()
-                .client(new OkHttpClient())
+                .client(APIUtil.createNewFeignClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
-                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
                 .errorDecoder(new KMClientErrorDecoder())
                 .encoder(new FormEncoder())
                 .target(IntrospectionClient.class, introspectionEndpoint);
         scopeClient = Feign.builder()
-                .client(new OkHttpClient())
+                .client(APIUtil.createNewFeignClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
-                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
                 .errorDecoder(new KMClientErrorDecoder())
-                .target(ScopeClient.class, scopeEndpoint);  
+                .target(ScopeClient.class, scopeEndpoint);
         userClient = Feign.builder()
-                .client(new OkHttpClient())
+                .client(APIUtil.createNewFeignClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
-                .requestInterceptor(new BearerInterceptor(accessTokenGenerator))
+                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
                 .errorDecoder(new KMClientErrorDecoder())
                 .target(UserClient.class, userInfoEndpoint);
     }
@@ -596,33 +616,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      */
     @Override
     public AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws APIManagementException {
-
-        AccessTokenInfo tokenInfo = new AccessTokenInfo();
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-
-        APIKey apiKey;
-        try {
-            apiKey = apiMgtDAO.getAccessTokenInfoByConsumerKey(consumerKey);
-            if (apiKey != null) {
-                tokenInfo.setAccessToken(apiKey.getAccessToken());
-                tokenInfo.setConsumerSecret(apiKey.getConsumerSecret());
-                tokenInfo.setValidityPeriod(apiKey.getValidityPeriod());
-                tokenInfo.setScope(apiKey.getTokenScope().split("\\s"));
-            } else {
-                tokenInfo.setAccessToken("");
-                //set default validity period
-                tokenInfo.setValidityPeriod(3600);
-            }
-            tokenInfo.setConsumerKey(consumerKey);
-
-        } catch (SQLException e) {
-            handleException("Cannot retrieve information for the given consumer key : "
-                    + consumerKey, e);
-        } catch (CryptoException e) {
-            handleException("Token decryption failed of an access token for the given consumer key : "
-                    + consumerKey, e);
-        }
-        return tokenInfo;
+        return new AccessTokenInfo();
     }
 
     @Override
