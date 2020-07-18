@@ -147,8 +147,10 @@ class ApiConsole extends React.Component {
                     [selectedEnvironment] = environments;
                     return this.apiClient.getSwaggerByAPIIdAndEnvironment(apiID, selectedEnvironment);
                 } else if (containerMngEnvironments
-                    && containerMngEnvironments.some(env => env.clusterDetails.length > 0)) {
-                    const {clusterDetails: [{clusterName}]} = containerMngEnvironments.find(env => env.clusterDetails.length > 0);
+                    && containerMngEnvironments.some((env) => env.clusterDetails.length > 0)) {
+                    const { clusterDetails: [{ clusterName }] } = containerMngEnvironments
+                        .find((env) => env.clusterDetails.length > 0);
+                    selectedEnvironment = clusterName;
                     return this.apiClient.getSwaggerByAPIIdAndClusterName(apiID, clusterName);
                 } else if (labels && labels.length > 0) {
                     [selectedEnvironment] = labels;
@@ -167,7 +169,7 @@ class ApiConsole extends React.Component {
                     labels,
                     productionAccessToken,
                     sandboxAccessToken,
-
+                    selectedEnvironment,
                 });
                 if (user != null) {
                     return this.apiClient.getSubscriptions(apiID);
@@ -343,20 +345,23 @@ class ApiConsole extends React.Component {
     }
 
     /**
-     * Load the swagger file of the selected environemnt
+     * Load the swagger file of the given environment
      * @memberof ApiConsole
      */
-    updateSwagger() {
+    updateSwagger(environment) {
         const {
-            selectedEnvironment, api, environments, containerMngEnvironments
+            api, environments, containerMngEnvironments,
         } = this.state;
         let promiseSwagger;
 
-        if (selectedEnvironment) {
-            if (environments.includes(selectedEnvironment)) {
-                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(api.id, selectedEnvironment);
+        if (environment) {
+            if (environments.includes(environment)) {
+                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(api.id, environment);
+            } else if (containerMngEnvironments.some((env) => env.clusterDetails.length > 0
+                && env.clusterDetails.some((cluster) => cluster.clusterName === environment))) {
+                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndClusterName(api.id, environment);
             } else {
-                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndLabel(api.id, selectedEnvironment);
+                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndLabel(api.id, environment);
             }
         } else {
             promiseSwagger = this.apiClient.getSwaggerByAPIId(api.id);
@@ -373,9 +378,9 @@ class ApiConsole extends React.Component {
     render() {
         const { classes } = this.props;
         const {
-            api, notFound, swagger, securitySchemeType, selectedEnvironment, labels, containerMngEnvironments: containerMngEnvironments, environments, scopes,
+            api, notFound, swagger, securitySchemeType, selectedEnvironment, labels, environments, scopes,
             username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
-            sandboxApiKey, productionApiKey, selectedKeyManager,
+            sandboxApiKey, productionApiKey, selectedKeyManager, containerMngEnvironments,
         } = this.state;
         const user = AuthManager.getUser();
         const downloadSwagger = JSON.stringify({ ...swagger });

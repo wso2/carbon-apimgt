@@ -103,7 +103,7 @@ function TryOutController(props) {
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
         selectedKeyManager, setSelectedKeyManager,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
-        setSecurityScheme, setUsername, setPassword, username, password,
+        setSecurityScheme, setUsername, setPassword, username, password, updateSwagger,
         setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey, environmentObject, setURLs, api,
     } = props;
     const classes = styles();
@@ -334,6 +334,7 @@ function TryOutController(props) {
         switch (name) {
             case 'selectedEnvironment':
                 setSelectedEnvironment(value, true);
+                updateSwagger(value);
                 if (environmentObject) {
                     const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
                     setURLs(urls);
@@ -413,6 +414,35 @@ function TryOutController(props) {
         tokenValue = selectedKeyType === 'PRODUCTION' ? productionApiKey : sandboxApiKey;
     } else {
         tokenValue = selectedKeyType === 'PRODUCTION' ? productionAccessToken : sandboxAccessToken;
+    }
+
+    // The rendering logic of container management menus items are done here
+    // because when grouping container management type and clusters with <> and </>
+    // the handleChange event is not triggered. Hence handle rendering logic here.
+    const containerMngEnvMenuItems = [];
+    if (containerMngEnvironments) {
+        containerMngEnvironments.filter((envType) => envType.clusterDetails.length > 0).forEach((envType) => {
+            // container management system type
+            containerMngEnvMenuItems.push(
+                <MenuItem value='' disabled className={classes.menuItem}>
+                    <em>
+                        {envType.deploymentEnvironmentName}
+                    </em>
+                </MenuItem>,
+            );
+            // clusters of the container management system type
+            envType.clusterDetails.forEach((cluster) => {
+                containerMngEnvMenuItems.push(
+                    <MenuItem
+                        value={cluster.clusterName}
+                        key={cluster.clusterName}
+                        className={classes.menuItem}
+                    >
+                        {cluster.clusterDisplayName}
+                    </MenuItem>,
+                );
+            });
+        });
     }
 
     return (
@@ -635,10 +665,8 @@ function TryOutController(props) {
                     </Box>
                     <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
                         <Grid xs={12} md={6} item>
-                            {((environments && environments.length > 0)
-                                        || (containerMngEnvironments
-                                    && containerMngEnvironments.some(env => env.clusterDetails.length > 0))
-                                        || (labels && labels.length > 0))
+                            {((environments && environments.length > 0) || (containerMngEnvMenuItems.length > 0)
+                                || (labels && labels.length > 0))
                                     && (
                                         <>
                                             <Typography
@@ -692,29 +720,7 @@ function TryOutController(props) {
                                                             {env}
                                                         </MenuItem>
                                                     )))}
-                                                {containerMngEnvironments
-                                                && containerMngEnvironments.some((env) => env.clusterDetails.length > 0)
-                                                && (
-                                                    containerMngEnvironments.map((env) => (
-                                                        <>
-                                                            <MenuItem value='' disabled>
-                                                                <em>
-                                                                    {env.deploymentEnvironmentName}
-                                                                </em>
-                                                            </MenuItem>
-                                                            {env.clusterDetails.map((cluster) => (
-                                                                <MenuItem
-                                                                    value={cluster.clusterDisplayName}
-                                                                    key={cluster.clusterDisplayName}
-                                                                    className={classes.menuItem}
-                                                                >
-                                                                    {cluster.clusterDisplayName}
-                                                                </MenuItem>
-                                                            ))}
-
-                                                        </>
-                                                    ))
-                                                )}
+                                                {containerMngEnvMenuItems}
                                                 {labels && labels.length > 0 && (
                                                     <MenuItem value='' disabled>
                                                         <em>
