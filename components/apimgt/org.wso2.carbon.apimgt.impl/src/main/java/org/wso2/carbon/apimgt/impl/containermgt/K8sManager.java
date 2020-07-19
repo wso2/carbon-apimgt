@@ -206,16 +206,24 @@ public class K8sManager implements ContainerManager {
 
                 APICustomResourceDefinition apiCustomResourceDefinition = crdClient.withName(apiName.toLowerCase()).get();
 
-                apiCustomResourceDefinition.getSpec().setUpdateTimeStamp(getTimeStamp());
-                apiCustomResourceDefinition.getSpec().getDefinition().setSwaggerConfigmapNames(configMapNames);
-                //update with interceptors
-                Interceptors interceptors = new Interceptors();
-                interceptors.setBallerina(new String[]{});
-                interceptors.setJava(new String[]{});
-                apiCustomResourceDefinition.getSpec().getDefinition().setInterceptors(interceptors);
+                // if API CR does not exists in the cluster, publish the API instead of re-publish
+                // (when the API is published in other deployment, select this cluster and re-publish)
+                if (apiCustomResourceDefinition == null) {
+                    applyAPICustomResourceDefinition(client, configMapNames, replicas, api.getId(), true);
+                    log.info("Successfully deployed the [API] " + api.getId().getApiName() + " in Kubernetes");
+                } else {
+                    // re-publish if API CR is exists
+                    apiCustomResourceDefinition.getSpec().setUpdateTimeStamp(getTimeStamp());
+                    apiCustomResourceDefinition.getSpec().getDefinition().setSwaggerConfigmapNames(configMapNames);
+                    //update with interceptors
+                    Interceptors interceptors = new Interceptors();
+                    interceptors.setBallerina(new String[]{});
+                    interceptors.setJava(new String[]{});
+                    apiCustomResourceDefinition.getSpec().getDefinition().setInterceptors(interceptors);
 
-                crdClient.createOrReplace(apiCustomResourceDefinition);
-                log.info("Successfully Re-deployed the [API] " + apiName);
+                    crdClient.createOrReplace(apiCustomResourceDefinition);
+                    log.info("Successfully Re-deployed the [API] " + apiName);
+                }
             } catch (KubernetesClientException e) {
                 log.error("Error occurred while re-deploying the API in Kubernetes cluster", e);
             }
