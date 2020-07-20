@@ -265,7 +265,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         ClientInfo updatedClient;
         try {
-            updatedClient = dcrClient.updateApplicationOwner(oAuthApplicationInfo.getClientId(), owner);
+            updatedClient = dcrClient.updateApplicationOwner(owner, oAuthApplicationInfo.getClientId());
             return buildDTOFromClientInfo(updatedClient, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);
