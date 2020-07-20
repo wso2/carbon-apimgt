@@ -285,7 +285,7 @@ public final class APIImportUtil {
                     Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
                     for (URITemplate uriTemplate : uriTemplates) {
                         Scope scope = uriTemplate.getScope();
-                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey())) &&
+                        if (scope != null && !(APIUtil.isAllowedScope(scope.getKey())) &&
                                 apiProvider.isScopeKeyAssignedLocally(importedApi.getId(), scope.getKey(), tenantId)) {
                             String errorMessage =
                                     "Error in adding API. Scope " + scope.getKey() +
