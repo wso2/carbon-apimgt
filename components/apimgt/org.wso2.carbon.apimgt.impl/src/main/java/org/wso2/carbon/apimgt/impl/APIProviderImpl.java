@@ -4071,6 +4071,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String inSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
             String outSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
             String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            String containerMngDeployments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
             String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
             String context_val = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
             String implementation = apiArtifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION);
@@ -4123,6 +4124,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setOutSequence(outSequence);
 
                 api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+                api.setDeploymentEnvironments(APIUtil.extractDeploymentsForAPI(containerMngDeployments));
                 api.setGatewayLabels(APIUtil.getLabelsFromAPIGovernanceArtifact(apiArtifact,
                         api.getId().getProviderName()));
                 api.setEndpointConfig(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
