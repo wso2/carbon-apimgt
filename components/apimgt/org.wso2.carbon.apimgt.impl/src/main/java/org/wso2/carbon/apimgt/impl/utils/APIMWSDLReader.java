@@ -60,14 +60,22 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.*;
-
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class is used to read the WSDL file using WSDL4J library.
@@ -121,11 +129,11 @@ public class APIMWSDLReader {
         if (log.isDebugEnabled()) {
             log.debug("Successfully extracted WSDL archive. Location: " + extractedLocation);
         }
-        WSDLProcessor processor = null;
+        WSDLProcessor processor;
         try {
             processor = getWSDLProcessor(extractedLocation);
         } catch (APIManagementException e) {
-           
+            return handleExceptionDuringValidation(e);
         }
 
         WSDLValidationResponse wsdlValidationResponse = new WSDLValidationResponse();
@@ -161,13 +169,11 @@ public class APIMWSDLReader {
             wsdlFilePath = "/" + wsdlFilePath;
         }
         APIFileUtil.extractSingleWSDLFile(inputStream, path, wsdlFilePath);
-       String finalPath  =  APIConstants.FILE_URI_PREFIX + wsdlFilePath;
+        String finalPath = APIConstants.FILE_URI_PREFIX + wsdlFilePath;
         APIMWSDLReader wsdlReader = new APIMWSDLReader(finalPath);
         WSDL11SOAPOperationExtractor soapProcessor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path, wsdlReader);
-        WSDLInfo wsdlInfo = soapProcessor.getWsdlInfo();
         try {
-            //byte[] wsdlContent = APIUtil.toByteArray(inputStream);
-            WSDLProcessor  processor = getWSDLProcessor(finalPath);
+            WSDLProcessor processor = getWSDLProcessor(finalPath);
             wsdlValidationResponse = new WSDLValidationResponse();
             if (processor.hasError()) {
                 wsdlValidationResponse.setValid(false);
@@ -188,6 +194,7 @@ public class APIMWSDLReader {
 
     /**
      * Gets WSDL definition as a byte array given the WSDL definition
+     *
      * @param wsdlDefinition generated WSDL definition
      * @return converted WSDL definition as byte array
      * @throws APIManagementException
@@ -202,7 +209,6 @@ public class APIMWSDLReader {
             throw new APIManagementException("Error occurs when change the address URL of the WSDL", e);
         }
     }
-
 
     /**
      * Extract the WSDL url and validates it
@@ -1087,7 +1093,7 @@ public class APIMWSDLReader {
             wsdlValidationResponse.setError(processor.getError());
         } else {
             wsdlValidationResponse.setValid(true);
-//            wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
+            wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
             wsdlValidationResponse.setWsdlProcessor(processor);
         }
         return wsdlValidationResponse;

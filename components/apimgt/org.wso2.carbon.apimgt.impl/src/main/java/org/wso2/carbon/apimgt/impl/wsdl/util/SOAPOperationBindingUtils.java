@@ -38,15 +38,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
-import org.wso2.carbon.apimgt.impl.wsdl.WSDL11ProcessorImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDL11SOAPOperationExtractor;
-import org.wso2.carbon.apimgt.impl.wsdl.WSDL20ProcessorImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLOperationParam;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLSOAPOperation;
@@ -61,13 +56,13 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Set;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Arrays;
+import java.util.AbstractList;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -111,20 +106,7 @@ public class SOAPOperationBindingUtils {
      * @throws APIManagementException if an error occurs when generating swagger
      */
     public static String getSoapOperationMapping(String path, String url) throws APIManagementException {
-//        byte[] wsdlContent = null;
         APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
-//        try {
-//            WSDLReader reader = APIMWSDLReader.getWsdlFactoryInstance().newWSDLReader();
-//            File folderToImport = new File(url);
-//            Collection<File> foundWSDLFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, "wsdl");
-//            if(foundWSDLFiles.isEmpty()) {
-//                throw new APIManagementException("WSDL cannot be found");
-//            }
-////            Definition definition = reader.readWSDL(null, foundWSDLFiles.iterator().next().getAbsolutePath());
-////            wsdlContent = wsdlReader.getWSDL(definition);
-//        } catch (WSDLException e) {
-//            handleException("Error in reading the wsdl file from location:" + url, e);
-//        }
         WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path, wsdlReader);
         WSDLInfo wsdlInfo = processor.getWsdlInfo();
         return getGeneratedSwaggerFromWSDL(wsdlInfo);
@@ -137,21 +119,9 @@ public class SOAPOperationBindingUtils {
      * @return swagger json string with the soap operation mapping
      * @throws APIManagementException if an error occurs when generating swagger
      */
-    public static String getSoapOperationMapping(String path, String url, byte [] wsdlContent) throws APIManagementException {
-//        byte[] wsdlContent = null;
+    public static String getSoapOperationMapping(String path, String url, byte [] wsdlContent)
+            throws APIManagementException {
         APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
-//        try {
-//            WSDLReader reader = APIMWSDLReader.getWsdlFactoryInstance().newWSDLReader();
-//            File folderToImport = new File(url);
-//            Collection<File> foundWSDLFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, "wsdl");
-//            if(foundWSDLFiles.isEmpty()) {
-//                throw new APIManagementException("WSDL cannot be found");
-//            }
-////            Definition definition = reader.readWSDL(null, foundWSDLFiles.iterator().next().getAbsolutePath());
-////            wsdlContent = wsdlReader.getWSDL(definition);
-//        } catch (WSDLException e) {
-//            handleException("Error in reading the wsdl file from location:" + url, e);
-//        }
         WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path, wsdlReader);
         WSDLInfo wsdlInfo = processor.getWsdlInfo();
         return getGeneratedSwaggerFromWSDL(wsdlInfo);

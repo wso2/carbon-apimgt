@@ -256,8 +256,8 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
     }
 
     @Override
-    public void loadXSDs(APIMWSDLReader wsdlReader, String url) throws APIManagementException {
-
+    public void loadXSDs(APIMWSDLReader wsdlReader, String url) {
+        return;
     }
 
     @Override

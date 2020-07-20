@@ -54,7 +54,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SwaggerFieldsExcludeStrategy;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.utils.CarbonUtils;
-
 import javax.wsdl.extensions.schema.SchemaImport;
 import javax.wsdl.extensions.soap12.SOAP12Operation;
 
@@ -156,7 +155,8 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
         Collection<File> foundXSDFiles = new java.util.LinkedList<>();
         if (url!= null && url.endsWith(File.pathSeparator + "extracted")) {
             File folderToImport = new File(url);
-            foundXSDFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, "xsd", false);
+            foundXSDFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, "xsd",
+                    false);
         }
         foundXSDFiles.addAll(getStandardBaseXSDs());
         Document document;
@@ -173,19 +173,23 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
         }
     }
 
-    public Document loadXsds(String ns) throws APIManagementException {
+    /**
+     * Load the schemas into the list of based schemas from the namespaces.
+     * @param ns namespace
+     * @return document
+     * @throws APIManagementException
+     */
+    public Document loadXSDsfromNamespaces(String ns) throws APIManagementException {
         Collection<File> foundXSDFiles = new java.util.LinkedList<>();
         foundXSDFiles.addAll(getStandardBaseXSDs());
         Document doc = null;
         APIMWSDLReader reader = new APIMWSDLReader(ns + ".xsd");
         for (File file : foundXSDFiles) {
             String absWSDLPath = file.getAbsolutePath();
-
             if (log.isDebugEnabled()) {
                 log.debug("Processing xsd file: " + absWSDLPath);
             }
             doc = reader.getSecuredParsedDocument(absWSDLPath);
-
             Node namespace = doc.getDocumentElement().getAttributes().getNamedItem("targetNamespace");
             if (namespace != null) {
                 basedSchemas.put(namespace.getNodeValue(), doc);
@@ -328,16 +332,18 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
         }
         if (prevNode != null) {
             try {
-                currentProperty = generateSwaggerModelForComplexType(element, model, currentProp, true, prevNode);
+                currentProperty = generateSwaggerModelForComplexType(element, model, currentProp,
+                        true, prevNode);
             } catch (APIManagementException e) {
-                e.printStackTrace();
+                log.error("", e);
             }
             setNamespaceDetails(model, element);
         } else {
             try {
-                currentProperty = generateSwaggerModelForComplexType(element, model, currentProp, false, null);
+                currentProperty = generateSwaggerModelForComplexType(element, model, currentProp,
+                        false, null);
             } catch (APIManagementException e) {
-                e.printStackTrace();
+                log.error("", e);
             }
             setNamespaceDetails(model, element);
         }
@@ -430,7 +436,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
 
         Document nsDoc = getBasedXSDofWSDL(ns);
         if (nsDoc == null) {
-            nsDoc = loadXsds(ns);
+            nsDoc = loadXSDsfromNamespaces(ns);
         }
         if (nsDoc == null) {
             log.warn("Couldn't find xsd document for namespace " + ns);

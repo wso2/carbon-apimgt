@@ -360,7 +360,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public void loadXSDs(APIMWSDLReader wsdlReader, String url) throws APIManagementException {
-
+        return;
     }
 
     /**
