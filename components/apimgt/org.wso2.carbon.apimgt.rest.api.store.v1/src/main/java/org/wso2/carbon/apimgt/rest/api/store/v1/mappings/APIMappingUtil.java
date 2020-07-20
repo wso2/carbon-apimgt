@@ -862,6 +862,8 @@ public class APIMappingUtil {
                                         .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
                                     apiDeploymentClusterInfoDTO.setClusterName(containerMgtInfo
                                             .get(ContainerBasedConstants.CLUSTER_NAME).toString());
+                                    apiDeploymentClusterInfoDTO.setClusterDisplayName(containerMgtInfo
+                                            .get(ContainerBasedConstants.DISPLAY_NAME).toString());
                                     if(((JSONObject) containerMgtInfo.get(ContainerBasedConstants.PROPERTIES))
                                             .get(ContainerBasedConstants.ACCESS_URL) != null){
                                         apiDeploymentClusterInfoDTO.setIngressURL(((JSONObject) containerMgtInfo
