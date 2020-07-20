@@ -4441,7 +4441,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param mediationResourcePath mediation config content
      *
      */
-    public void checkMediationPolicy(APIProvider apiProvider,String mediationResourcePath) throws APIManagementException {
+    public void checkMediationPolicy(APIProvider apiProvider, String mediationResourcePath) throws APIManagementException {
         if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
             RestApiUtil.handleConflict("Mediation policy already " +
                     "exists in the given resource path, cannot create new", log);
