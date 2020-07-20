@@ -28,19 +28,29 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+import java.util.Map;
 
 public class LocalEntryApiServiceImpl implements LocalEntryApiService {
 
     private static final Log log = LogFactory.getLog(LocalEntryApiServiceImpl.class);
+    private final String SUPER_TENAT_DOMAIN = "carbon.super";
 
-    public Response localEntryGet(String apiName, String label, String apiId, MessageContext messageContext){
-
+    public Response localEntryGet(String apiName, String version , String tenantDomain, MessageContext messageContext){
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
+        if (tenantDomain == null){
+            tenantDomain =SUPER_TENAT_DOMAIN;
+        }
+
+        Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version, tenantDomain);
+        String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
+        String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
+
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
         JSONObject responseObj = new JSONObject();
 

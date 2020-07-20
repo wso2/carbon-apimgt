@@ -40,7 +40,7 @@ DeployApiApiService delegate = new DeployApiApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Deploy the API in the gateway", notes = "This operation is used to deploy and API in the gateway. ", response = DeployResponseDTO.class, authorizations = {
+    @ApiOperation(value = "Deploy the API in the gateway", notes = "This operation is used to deploy an API in the gateway. ", response = DeployResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
