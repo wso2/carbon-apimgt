@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
 import MUIDataTable from 'mui-datatables';
-
+import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
 import Subscription from 'AppData/Subscription';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -34,7 +34,8 @@ const styles = (theme) => ({
     dialogWrapper: {
         '& span,& p , & h5, & label, & td, & li, & div, & input, & p.MuiFormHelperText-root': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
-        }    },
+        }
+    },
 });
 
 const columns = ['Name', 'Value'];
@@ -97,11 +98,9 @@ function Invoice(props) {
     return (
         <React.Fragment>
             <Button
-                variant='outlined'
-                size='small'
-                color='primary'
-                disabled={false}
+                color="default"
                 onClick={handlePopup}
+                startIcon={<Icon>receipt</Icon>}
             >
                 <FormattedMessage
                     id='Applications.Details.Invoice.view.btn'
@@ -115,22 +114,34 @@ function Invoice(props) {
                         data={invoice}
                         columns={columns}
                         options={options}
-                    />) }
+                    />)}
                 </Dialog>
             ) : (
-                <Dialog open={showErrorPopup} onClose={handleAlertClose} fullWidth='true' className={classes.dialogWrapper}>
-                    <DialogTitle>No Data Available</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText id='invoice-dialog-description'>
-                        Pending invoice data not found for this subscription.
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleAlertClose} color='primary'>
-                        Close
-                        </Button>
-                    </DialogActions>
-                </Dialog>)}
+                    <Dialog open={showErrorPopup} onClose={handleAlertClose} fullWidth='true' className={classes.dialogWrapper}>
+                        <DialogTitle>
+                            <FormattedMessage
+                                id='Applications.Details.Invoice.no.data.available'
+                                defaultMessage='No Data Available'
+                            /></DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id='invoice-dialog-description'>
+                                <FormattedMessage
+                                    id='Applications.Details.Invoice.pending.invoice.data'
+                                    defaultMessage='Pending invoice data not found for this subscription.'
+                                />
+
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleAlertClose} color='primary'>
+                                <FormattedMessage
+                                    id='Applications.Details.Invoice.close'
+                                    defaultMessage='Close'
+                                />
+
+                            </Button>
+                        </DialogActions>
+                    </Dialog>)}
         </React.Fragment>
     );
 }

@@ -565,6 +565,7 @@ function TryOutController(props) {
                                             defaultMessage='Enter access Token'
                                         />
                                     )}
+                                    id='accessTokenInput'
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position='end'>
@@ -609,6 +610,7 @@ function TryOutController(props) {
                                     </Button>
                                     <Tooltip
                                         placement='right'
+                                        interactive
                                         title={(
                                             <FormattedMessage
                                                 id='Apis.Details.TryOutConsole.access.token.tooltip'
@@ -619,7 +621,13 @@ function TryOutController(props) {
                                             />
                                         )}
                                     >
-                                        <HelpOutline className={classes.tooltip} />
+                                        <Box m={1}>
+                                            <IconButton
+                                                aria-label='Use existing Access Token or generate a new Test Key'
+                                            >
+                                                <HelpOutline />
+                                            </IconButton>
+                                        </Box>
                                     </Tooltip>
                                 </>
                             )}

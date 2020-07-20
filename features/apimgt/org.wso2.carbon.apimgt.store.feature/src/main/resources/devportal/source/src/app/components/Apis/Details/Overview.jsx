@@ -414,7 +414,7 @@ function Overview(props) {
                                 height={titleIconSize}
                                 icon='credentials'
                             />
-                            <Typography className={classes.heading} variant='h6'>
+                            <Typography id='APIOperationTitle' className={classes.heading} variant='h6'>
                                 {getTitleForAPIOperationType(api.type)}
                             </Typography>
                         </ExpansionPanelSummary>
@@ -426,7 +426,12 @@ function Overview(props) {
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>
                                     <Link to={'/apis/' + api.id + '/test'} className={classes.linkToTest}>
-                                        <Button size='small' color='primary'>
+                                        <Button
+                                            id='test'
+                                            size='small'
+                                            color='primary'
+                                            aria-labelledby='test APIOperationTitle'
+                                        >
                                             <FormattedMessage
                                                 id='Apis.Details.Overview.resources.show.more'
                                                 defaultMessage='Test >>'
@@ -452,7 +457,7 @@ function Overview(props) {
                                         height={titleIconSize}
                                         icon='comments'
                                     />
-                                    <Typography className={classes.heading} variant='h6'>
+                                    <Typography id='comments' className={classes.heading} variant='h6'>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.comments.title'
                                             defaultMessage='Comments'
@@ -493,7 +498,7 @@ function Overview(props) {
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>
                                     <Link to={'/apis/' + api.id + '/comments'} className={classes.button}>
-                                        <Button size='small' color='primary'>
+                                        <Button id='more' aria-labelledby='more comments' size='small' color='primary'>
                                             <FormattedMessage
                                                 id='Apis.Details.Overview.comments.show.more'
                                                 defaultMessage='Show More >>'
@@ -515,7 +520,7 @@ function Overview(props) {
                                         height={titleIconSize}
                                         icon='sdk'
                                     />
-                                    <Typography className={classes.heading} variant='h6'>
+                                    <Typography id='SDKGeneration' className={classes.heading} variant='h6'>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.sdk.generation.title'
                                             defaultMessage='SDK Generation'
@@ -541,7 +546,12 @@ function Overview(props) {
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>
                                     <Link to={'/apis/' + api.id + '/sdk'} className={classes.linkToTest}>
-                                        <Button size='small' color='primary'>
+                                        <Button
+                                            id='SDKMore'
+                                            size='small'
+                                            color='primary'
+                                            aria-labelledby='SDKMore SDKGeneration'
+                                        >
                                             <FormattedMessage
                                                 id='Apis.Details.Overview.sdk.generation.show.more'
                                                 defaultMessage='Show More >>'
@@ -566,7 +576,7 @@ function Overview(props) {
                                 icon='docs'
                             />
 
-                            <Typography className={classes.heading} variant='h6'>
+                            <Typography id='Documents' className={classes.heading} variant='h6'>
                                 <FormattedMessage
                                     id='Apis.Details.Overview.documents.title'
                                     defaultMessage='Documents'
@@ -581,7 +591,7 @@ function Overview(props) {
                         <Divider />
                         <ExpansionPanelActions className={classes.actionPanel}>
                             <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
-                                <Button size='small' color='primary'>
+                                <Button id='DMore' size='small' color='primary' aria-labelledby='DMore Documents'>
                                     <FormattedMessage
                                         id='Apis.Details.Overview.comments.show.more'
                                         defaultMessage='Show More >>'

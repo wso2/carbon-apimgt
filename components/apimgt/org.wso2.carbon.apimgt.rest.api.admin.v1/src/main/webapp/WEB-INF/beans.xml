@@ -57,6 +57,8 @@
         <jaxrs:properties>
             <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
             <entry key="map.cxf.interceptor.fault" value="true" />
+            <!-- This is added to restrict the size of attachments sent through the requests. -->
+            <entry key="attachment-max-size" value="10485760"/>
         </jaxrs:properties>
     </jaxrs:server>
 
@@ -70,6 +72,7 @@
 
     <!-- Out interceptors -->
     <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
+    <bean id="responseInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.response.ResponseOutInterceptor" />
 
     <cxf:bus>
         <cxf:inInterceptors>
@@ -83,6 +86,7 @@
         </cxf:inInterceptors>
         <cxf:outInterceptors>
             <ref bean="gZipInterceptor"/>
+            <ref bean="responseInterceptor"/>
         </cxf:outInterceptors>
     </cxf:bus>
 </beans>

@@ -21,15 +21,18 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -74,6 +77,7 @@ public class RestApiAdminUtils {
      * @return true if user is allowed to access the block condition
      */
     public static boolean isBlockConditionAccessibleToUser(String user, BlockConditionsDTO blockCondition) {
+
         String userTenantDomain = MultitenantUtils.getTenantDomain(user);
         return !StringUtils.isBlank(blockCondition.getTenantDomain()) && blockCondition.getTenantDomain()
                 .equals(userTenantDomain);
@@ -156,35 +160,56 @@ public class RestApiAdminUtils {
     }
 
     /**
-     * Extract the content of the provided tenant theme archive
+     * Import the content of the provided tenant theme archive to the file system and the database
      *
-     * @param themeFile    content relevant to the tenant theme
-     * @param tenantDomain tenant to which the theme is imported
-     * @throws APIManagementException if an error occurs while importing tenant theme
+     * @param themeContentInputStream content relevant to the tenant theme
+     * @param tenantDomain            tenant to which the theme is imported
+     * @throws APIManagementException if an error occurs while importing the tenant theme
+     * @throws IOException            if an error occurs while performing file or directory related operations
      */
-    public static void deployTenantTheme(InputStream themeFile, String tenantDomain) throws APIManagementException {
+    public static void importTenantTheme(InputStream themeContentInputStream, String tenantDomain)
+            throws APIManagementException, IOException {
 
         ZipInputStream zipInputStream = null;
         byte[] buffer = new byte[1024];
+        InputStream existingTenantTheme = null;
+        InputStream themeContent = null;
+        File tenantThemeDirectory;
+        File backupDirectory = null;
 
-        String outputFolder = "repository" + File.separator + "deployment" + File.separator + "server"
-                + File.separator + "jaggeryapps" + File.separator + "devportal" + File.separator + "site"
-                + File.separator + "public" + File.separator + "tenant_themes" + File.separator + tenantDomain;
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
         try {
-            //create output directory if it does not exist
-            File folder = new File(outputFolder);
-            if (!folder.exists()) {
-                if (!folder.mkdirs()) {
+            APIAdmin apiAdmin = new APIAdminImpl();
+            //add or update the tenant theme in the database
+            if (apiAdmin.isTenantThemeExist(tenantId)) {
+                existingTenantTheme = apiAdmin.getTenantTheme(tenantId);
+                apiAdmin.updateTenantTheme(tenantId, themeContentInputStream);
+            } else {
+                apiAdmin.addTenantTheme(tenantId, themeContentInputStream);
+            }
+            //retrieve the tenant theme from the database to import it to the file system
+            themeContent = apiAdmin.getTenantTheme(tenantId);
+
+            //import the tenant theme to the file system
+            String outputFolder = getTenantThemeDirectoryPath(tenantDomain);
+            tenantThemeDirectory = new File(outputFolder);
+            if (!tenantThemeDirectory.exists()) {
+                if (!tenantThemeDirectory.mkdirs()) {
                     APIUtil.handleException("Unable to create tenant theme directory at " + outputFolder);
                 }
             } else {
+                //copy the existing tenant theme as a backup in case a restoration is needed to take place
+                String tempPath = getTenantThemeBackupDirectoryPath(tenantDomain);
+                backupDirectory = new File(tempPath);
+                FileUtils.copyDirectory(tenantThemeDirectory, backupDirectory);
+
                 //remove existing files inside the directory
-                FileUtils.cleanDirectory(folder);
+                FileUtils.cleanDirectory(tenantThemeDirectory);
             }
 
             //get the zip file content
-            zipInputStream = new ZipInputStream(themeFile);
+            zipInputStream = new ZipInputStream(themeContent);
             //get the zipped file list entry
             ZipEntry zipEntry = zipInputStream.getNextEntry();
 
@@ -232,11 +257,102 @@ public class RestApiAdminUtils {
             }
             zipInputStream.closeEntry();
             zipInputStream.close();
-        } catch (IOException ex) {
-            APIUtil.handleException("Failed to deploy tenant theme for tenant " + tenantDomain, ex);
+            if (backupDirectory != null) {
+                FileUtils.deleteDirectory(backupDirectory);
+            }
+        } catch (APIManagementException | IOException e) {
+            //if an error occurs, revert the changes that were done when importing a tenant theme
+            revertTenantThemeImportChanges(tenantDomain, existingTenantTheme);
+            throw new APIManagementException(e.getMessage(), e,
+                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
         } finally {
             IOUtils.closeQuietly(zipInputStream);
-            IOUtils.closeQuietly(themeFile);
+            IOUtils.closeQuietly(themeContent);
+            IOUtils.closeQuietly(themeContentInputStream);
         }
+    }
+
+    /**
+     * Retrieves the directory location in the file system where the tenant theme is imported
+     *
+     * @param tenantDomain tenant to which the theme is imported
+     * @return directory location in the file system where the tenant theme is imported
+     */
+    public static String getTenantThemeDirectoryPath(String tenantDomain) {
+
+        return "repository" + File.separator + "deployment" + File.separator + "server" + File.separator + "jaggeryapps"
+                + File.separator + "devportal" + File.separator + "site" + File.separator + "public"
+                + File.separator + "tenant_themes" + File.separator + tenantDomain;
+    }
+
+    /**
+     * Retrieves the directory location in the file system where the tenant theme is temporarily backed-up
+     *
+     * @param tenantDomain tenant to which the theme is imported
+     * @return directory location in the file system where the tenant theme is temporarily backed-up
+     */
+    public static String getTenantThemeBackupDirectoryPath(String tenantDomain) {
+
+        return System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + tenantDomain;
+    }
+
+    /**
+     * Reverts the changes that occurred when importing a tenant theme
+     *
+     * @param tenantDomain        tenant to which the theme is imported
+     * @param existingTenantTheme tenant theme which existed before the current import operation
+     * @throws APIManagementException if an error occurs when reverting the changes
+     * @throws IOException            if an error occurs when reverting the changes
+     */
+    public static void revertTenantThemeImportChanges(String tenantDomain, InputStream existingTenantTheme)
+            throws APIManagementException, IOException {
+
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String tenantThemeDirectoryPath = getTenantThemeDirectoryPath(tenantDomain);
+        File tenantThemeDirectory = new File(tenantThemeDirectoryPath);
+        if (existingTenantTheme == null) {
+            removeTenantTheme(tenantId, tenantThemeDirectory);
+        } else {
+            String tenantThemeBackupDirectoryPath = getTenantThemeBackupDirectoryPath(tenantDomain);
+            File backupDirectory = new File(tenantThemeBackupDirectoryPath);
+            restoreTenantTheme(tenantId, tenantThemeDirectory, backupDirectory, existingTenantTheme);
+        }
+    }
+
+    /**
+     * Deletes a tenant theme from the file system and deletes the tenant theme from the database
+     *
+     * @param tenantId             tenant ID of the tenant to which the theme is imported
+     * @param tenantThemeDirectory directory in the file system to where the tenant theme is imported
+     * @throws APIManagementException if an error occurs when deleting the tenant theme from the database
+     * @throws IOException            if an error occurs when deleting the tenant theme directory
+     */
+    public static void removeTenantTheme(int tenantId, File tenantThemeDirectory)
+            throws APIManagementException, IOException {
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        if (tenantThemeDirectory.exists()) {
+            FileUtils.deleteDirectory(tenantThemeDirectory);
+        }
+        apiAdmin.deleteTenantTheme(tenantId);
+    }
+
+    /**
+     * Restores the tenant theme which existed before the current import operation was performed
+     *
+     * @param tenantId             tenant ID of the tenant to which the theme is imported
+     * @param tenantThemeDirectory directory in the file system to where the tenant theme is imported
+     * @param backupDirectory      directory in the file system where the tenant theme is temporarily backed-up
+     * @param existingTenantTheme  tenant theme which existed before the current import operation
+     * @throws APIManagementException if an error occurs when updating the tenant theme in the database
+     * @throws IOException            if an error occurs when restoring the tenant theme directory
+     */
+    public static void restoreTenantTheme(int tenantId, File tenantThemeDirectory, File backupDirectory,
+                                          InputStream existingTenantTheme) throws APIManagementException, IOException {
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        FileUtils.copyDirectory(backupDirectory, tenantThemeDirectory);
+        FileUtils.deleteDirectory(backupDirectory);
+        apiAdmin.updateTenantTheme(tenantId, existingTenantTheme);
     }
 }

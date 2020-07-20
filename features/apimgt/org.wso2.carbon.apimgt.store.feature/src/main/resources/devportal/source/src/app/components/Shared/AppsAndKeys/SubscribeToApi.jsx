@@ -172,14 +172,14 @@ const subscribeToApi = (props) => {
             <Grid item xs={12} md={renderSmall ? 12 : 6}>
                 {appSelected && (
                     <FormControl className={classNames(classes.FormControl, { [classes.smallDisplay]: renderSmall })}>
-                        <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
+                        <InputLabel shrink for='application-subscribe' className={classes.quotaHelp}>
                             <FormattedMessage
                                 id='Shared.AppsAndKeys.SubscribeToApi.application'
                                 defaultMessage='Application'
                             />
                         </InputLabel>
                         <Autocomplete
-                           id="combo-box-demo"
+                           id="application-subscribe"
                            options={applicationsList}
                            value={(applicationsList.length !== 0 && appSelected === '') ?
                                 applicationsList[0] : appSelected}

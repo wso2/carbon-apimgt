@@ -169,26 +169,6 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /apikey/revoke:
-    post:
-      summary: Revoke given API Key
-      description: Revoke and notify the provided API Key
-      parameters:
-        - in: body
-          name: body
-          description: |
-            API Key revoke request object
-          schema:
-            $ref: '#/definitions/RevokeAPIKey'
-      responses:
-        200:
-          description: |
-            OK.
-            Api key revoked successfully.
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
   /apis:
     get:
       summary: Get all apis
@@ -370,12 +350,133 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /synapse-artifacts:
+    get:
+      summary: Get all the synapse artifacts for a given API UUID and gateway label
+      description: |
+        This will provide access to synapse artifacts in database.
+      parameters:
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the API
+          type: string
+        - name: gatewayInstruction
+          in: query
+          description: |
+            **Search condition**.
+             Publish/Remove
+          type: string
+      tags:
+        - Retrieving Synapse artifacts
+      responses:
+        200:
+          description: String of gatewayRuntimeArtifacts
+          schema:
+            type: string
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /gateway-synapse-artifacts:
+    get:
+      summary: Get all synapse artifacts for a given gateway label
+      description: |
+        This will provide access to the synapse artifacts in database.
+      parameters:
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the API
+          type: string
+      tags:
+        - Retrieving All Synapse artifacts
+      responses:
+        200:
+          description: An array of gatewayRuntimeArtifacts
+          schema:
+            $ref: '#/definitions/SynapseArtifactList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /synapse-attributes:
+    get:
+      summary: Get API UUID and label associated with it
+      description: |
+        This will provide access to synapse artifacts in database.
+      parameters:
+        - name: apiName
+          in: query
+          description: |
+            **Search condition**.
+              API Name
+          type: string
+        - name: tenantDomain
+          in: query
+          description: |
+            **Search condition**.
+             tenantDomain associated with the API
+          type: string
+        - name: version
+          in: query
+          description: |
+            **Search condition**.
+            version of the API
+          type: string
+      tags:
+        - Retrieving Synapse artifacts
+      responses:
+        200:
+          description: An array of gatewayRuntimeArtifacts
+          schema:
+            $ref: '#/definitions/SynapseAttributes'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /notify:
+    post:
+      summary: Push notification events into nodes.
+      description: |
+        This pushes events to the other nodes.
+      parameters:
+        - $ref: '#/parameters/type'
+        - name: body
+          in: body
+          description: 'Notification event payload'
+          schema:
+            type: string
+      tags:
+        - 'Notification'
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            type: object
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
   requestedTenant:
     name: xWSO2Tenant
+    in: header
+    description: |
+      This is used to specify the tenant domain, where the resource need to be
+        retrieved from.
+    required: true
+    type: string
+  type:
+    name: X-WSO2-KEY-MANAGER
     in: header
     description: |
       This is used to specify the tenant domain, where the resource need to be
@@ -394,6 +495,15 @@ parameters:
 # The resources used by some of the APIs above within the message body
 ######################################################################
 definitions:
+  SynapseAttributes:
+    properties:
+      count:
+        type: integer
+      label:
+        type: string
+      apiId:
+        type: string
+
   ThrottledEvent:
     properties:
       throttle_key:
@@ -536,6 +646,32 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/URLMapping'
+
+  #-----------------------------------------------------
+  # synapse Artifact resource
+  #-----------------------------------------------------
+  synapseArtifact:
+    properties:
+      apiId:
+        type: string
+      apiName:
+        type: string
+        description: API Provider name.
+      version:
+        type: string
+        description: version of the API
+      tenantDomain:
+        type: string
+        description:  tenantDomain of the API
+      gatewayLabel:
+        type: string
+        description:  label of the API
+      gatewayInstruction:
+        type: string
+        description: Publish/Remove
+      bytesEncodedAsString:
+        type: string
+        description: bytes
   #-----------------------------------------------------
   # The Application List resource
   #-----------------------------------------------------
@@ -660,6 +796,24 @@ definitions:
         type: integer
       subscriptionState:
         type: string
+
+  #-----------------------------------------------------
+  # The Synapse Artifacts  List resource
+  #-----------------------------------------------------
+  SynapseArtifactList:
+    title:  SynapseArtifactList
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Synapse Artifacts returned.
+        example: 1
+      list:
+        type: array
+        items:
+          type : string
+      pagination:
+        $ref: '#/definitions/Pagination'
   #-----------------------------------------------------
   # The ApplicationKeyMapping List resource
   #-----------------------------------------------------

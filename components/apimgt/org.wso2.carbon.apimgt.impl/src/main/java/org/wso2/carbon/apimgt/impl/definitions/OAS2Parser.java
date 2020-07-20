@@ -1402,13 +1402,12 @@ public class OAS2Parser extends APIDefinition {
     /**
      * This method returns api that is attached with api extensions related to micro-gw
      *
-     * @param apiDefinition                  String
-     * @param api                            API
-     * @param isBasepathExtractedFromSwagger boolean
+     * @param apiDefinition String
+     * @param api           API
      * @return API
      */
     @Override
-    public API setExtensionsToAPI(String apiDefinition, API api, boolean isBasepathExtractedFromSwagger) throws APIManagementException {
+    public API setExtensionsToAPI(String apiDefinition, API api) throws APIManagementException {
         Swagger swagger = getSwagger(apiDefinition);
         Map<String, Object> extensions = swagger.getVendorExtensions();
         if (extensions == null) {
@@ -1459,13 +1458,7 @@ public class OAS2Parser extends APIDefinition {
         if (StringUtils.isNotBlank(throttleTier)) {
             api.setApiLevelPolicy(throttleTier);
         }
-        //Setup Basepath
-        String basePath = OASParserUtil.getBasePathFromSwagger(extensions);
-        if (StringUtils.isNotBlank(basePath) && isBasepathExtractedFromSwagger) {
-            basePath = basePath.replace("{version}", api.getId().getVersion());
-            api.setContextTemplate(basePath);
-            api.setContext(basePath);
-        }
+
         return api;
     }
 

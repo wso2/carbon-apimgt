@@ -77,6 +77,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -86,6 +87,7 @@ import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
+import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -199,6 +201,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
 
+
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -224,6 +227,7 @@ public class APIManagerComponent {
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_LIFECYCLE_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_LIFE_CYCLE_HISTORY), APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION, null);
             setupImagePermissions();
             APIMgtDBUtil.initialize();
+            GatewayArtifactsMgtDBUtil.initialize();
             configureEventPublisherProperties();
             configureNotificationEventPublisher();
             // Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager

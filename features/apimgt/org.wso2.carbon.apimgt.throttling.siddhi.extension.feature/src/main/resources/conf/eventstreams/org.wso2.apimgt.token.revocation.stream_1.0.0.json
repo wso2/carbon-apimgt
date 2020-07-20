@@ -5,6 +5,10 @@
   "description": "",
   "payloadData": [
     {
+      "name": "eventId",
+      "type": "STRING"
+    },
+    {
       "name": "revokedToken",
       "type": "STRING"
     },
@@ -15,6 +19,14 @@
     {
       "name": "expiryTime",
       "type": "LONG"
+    },
+    {
+      "name": "type",
+      "type": "STRING"
+    },
+    {
+      "name": "tenantId",
+      "type": "INT"
     }
   ]
 }

@@ -42,10 +42,14 @@ const styles = (theme) => ({
         color: theme.palette.getContrastText(theme.palette.background.default),
     },
     boxWrapper: {
-        '& span, & h5, & label, & td, & li, & div, & input, & p.MuiFormHelperText-root': {
+        '& h5, & label, & td, & li, & div, & input, & p.MuiFormHelperText-root': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
+        '& .MuiButton-containedPrimary span.MuiButton-label' : {
+            color: theme.palette.getContrastText(theme.palette.primary.main),
         }
     }
+    
 });
 
 const stepComponents = [CreateAppStep, SubscribeToAppStep, GenerateKeysStep,

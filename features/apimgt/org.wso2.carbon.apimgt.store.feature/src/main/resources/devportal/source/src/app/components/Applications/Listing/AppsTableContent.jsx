@@ -168,14 +168,8 @@ class AppsTableContent extends Component {
                                         {app.status === this.APPLICATION_STATES.APPROVED && (
                                             <Tooltip title='Edit'>
                                                 <Link to={`/applications/${app.applicationId}/edit/`}>
-                                                    <IconButton>
-                                                        <Icon aria-label={(
-                                                            <FormattedMessage
-                                                                id='Applications.Listing.AppsTableContent.edit.btn'
-                                                                defaultMessage='Edit'
-                                                            />
-                                                        )}
-                                                        >
+                                                    <IconButton aria-label='Edit'>
+                                                        <Icon>
                                                             edit
                                                         </Icon>
                                                     </IconButton>
@@ -199,12 +193,7 @@ class AppsTableContent extends Component {
                                                 data-appid={app.applicationId}
                                                 onClick={toggleDeleteConfirmation}
                                                 color='default'
-                                                aria-label={(
-                                                    <FormattedMessage
-                                                        id='Applications.Listing.AppsTableContent.delete.label'
-                                                        defaultMessage='Delete'
-                                                    />
-                                                )}
+                                                aria-label='Delete'
                                             >
                                                 <Icon>delete</Icon>
                                             </IconButton>

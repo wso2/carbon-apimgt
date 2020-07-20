@@ -293,36 +293,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public OAuthApplicationInfo getOAuthApplication(String consumerKey) throws APIManagementException {
-        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sqlQuery = SQLConstants.GET_OAUTH_APPLICATION_SQL;
 
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, consumerKey);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                oAuthApplicationInfo.setClientId(consumerKey);
-                oAuthApplicationInfo.setCallBackURL(rs.getString("CALLBACK_URL"));
-                oAuthApplicationInfo.setClientSecret(APIUtil.decryptToken(rs.getString("CONSUMER_SECRET")));
-                oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_REDIRECT_URIS, rs.getString
-                        ("CALLBACK_URL"));
-                oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_NAME, rs.getString("APP_NAME"));
-                oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT, rs.getString("GRANT_TYPES"));
-            }
-        } catch (SQLException e) {
-            handleException("Error while executing SQL for getting OAuth application info", e);
-        } catch (CryptoException e) {
-            handleException("Unable to decrypt consumer secret of consumer key " + consumerKey, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return oAuthApplicationInfo;
-    }
 
     /**
      * Get the creator of the OAuth App.
@@ -826,11 +797,11 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         int subscriptionId = -1;
         int id = -1;
-        
+
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            
+
             Identifier identifier;
 
             //Query to check if this subscription already exists
@@ -1258,7 +1229,7 @@ public class ApiMgtDAO {
 
                 int applicationId = resultSet.getInt("APPLICATION_ID");
                 Application application = getApplicationById(applicationId);
-                
+
                 if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
@@ -1272,7 +1243,7 @@ public class ApiMgtDAO {
                     apiIdentifier.setId(resultSet.getInt("API_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
-                
+
                 subscribedAPI.setUUID(resultSet.getString("UUID"));
                 subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
@@ -2965,10 +2936,10 @@ public class ApiMgtDAO {
         }
     }
 
-    public void updateSubscriptionStatusAndTier(int subscriptionId, String status, String requestedThrottlingTier) throws APIManagementException {
+    public void updateSubscriptionStatusAndTier(int subscriptionId, String status) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
-
+        SubscribedAPI subscribedAPI = getSubscriptionById(subscriptionId);
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -2978,7 +2949,11 @@ public class ApiMgtDAO {
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, null);
-            ps.setString(2, requestedThrottlingTier);
+            if (subscribedAPI.getRequestedTier().getName() == null ) {
+                ps.setString(2, subscribedAPI.getTier().getName());
+            } else {
+                ps.setString(2, subscribedAPI.getRequestedTier().getName());
+            }
             ps.setString(3, status);
             ps.setInt(4, subscriptionId);
             ps.execute();
@@ -4557,7 +4532,6 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-        String appName = null;
         Application[] applications = null;
 
         String sqlQuery = SQLConstants.GET_APPLICATIONS_BY_OWNER;
@@ -5726,6 +5700,7 @@ public class ApiMgtDAO {
             prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(8, api.getApiLevelPolicy());
+            prepStmt.setString(9, api.getType());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -7139,9 +7114,10 @@ public class ApiMgtDAO {
             prepStmt.setString(3, username);
             prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(5, api.getApiLevelPolicy());
-            prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            prepStmt.setString(7, api.getId().getApiName());
-            prepStmt.setString(8, api.getId().getVersion());
+            prepStmt.setString(6, api.getType());
+            prepStmt.setString(7, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            prepStmt.setString(8, api.getId().getApiName());
+            prepStmt.setString(9, api.getId().getVersion());
             prepStmt.execute();
             //}
 
@@ -7214,9 +7190,9 @@ public class ApiMgtDAO {
         }
         return id;
     }
-    
+
     /**
-     * Get product Id from the product name and the provider. 
+     * Get product Id from the product name and the provider.
      * @param product product identifier
      * @throws APIManagementException exception
      */
@@ -8230,7 +8206,7 @@ public class ApiMgtDAO {
             } else if (identifier instanceof APIProductIdentifier) {
                 id = ((APIProductIdentifier) identifier).getProductId();
             }
-            
+
             conn = APIMgtDBUtil.getConnection();
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
                 sqlQuery = postgreSQL;
@@ -9691,7 +9667,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, null, null);
         }
     }
-    
+
     /**
      * Check the given api name is already available in the api table under given tenant domain
      *
@@ -14029,7 +14005,7 @@ public class ApiMgtDAO {
         }
         return application;
     }
-    
+
     /**
      * Retrieve URI Templates for the given API
      * @param api API
@@ -14054,22 +14030,22 @@ public class ApiMgtDAO {
                 URITemplate template = new URITemplate();
                 String urlPattern = rs.getString("URL_PATTERN");
                 String httpMethod = rs.getString("HTTP_METHOD");
-                
+
                 template.setHTTPVerb(httpMethod);
                 template.setResourceURI(urlPattern);
                 template.setId(rs.getInt("URL_MAPPING_ID"));
 
                 //TODO populate others if needed
-                
+
                 templatesMap.put(httpMethod + ":" + urlPattern, template);
             }
-           
+
         } catch (SQLException e) {
             handleException("Error while obtaining details of the URI Template for api " + api.getId() , e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
-        
+
         return templatesMap;
     }
 
@@ -14112,7 +14088,7 @@ public class ApiMgtDAO {
         int productId = 0;
         int scopeId = 0;
         try {
-            connection = APIMgtDBUtil.getConnection();   
+            connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             String queryAddAPIProduct = SQLConstants.ADD_API_PRODUCT;
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct, new String[]{"api_id"});
@@ -14306,7 +14282,7 @@ public class ApiMgtDAO {
         }
         return productId;
     }
-    
+
     public void updateAPIProduct(APIProduct product, String username) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -14678,30 +14654,58 @@ public class ApiMgtDAO {
     /**
      * Persist revoked jwt signatures to database.
      *
+     * @param eventId
      * @param jwtSignature signature of jwt token.
-     * @param tenantId tenant id of the jwt subject.
      * @param expiryTime   expiry time of the token.
+     * @param tenantId tenant id of the jwt subject.
      */
-    public void addRevokedJWTSignature(String jwtSignature, String type ,
+    public void addRevokedJWTSignature(String eventId, String jwtSignature, String type,
                                        Long expiryTime, int tenantId) throws APIManagementException {
 
         if (StringUtils.isEmpty(type)) {
             type = APIConstants.DEFAULT;
         }
         String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement
-                     (addJwtSignature)) {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
-            ps.setString(1, UUID.randomUUID().toString());
-            ps.setString(2, jwtSignature);
-            ps.setLong(3, expiryTime);
-            ps.setInt(4, tenantId);
-            ps.setString(5, type);
-            ps.execute();
-            conn.commit();
+            try (PreparedStatement ps = conn.prepareStatement(addJwtSignature)) {
+                ps.setString(1, eventId);
+                ps.setString(2, jwtSignature);
+                ps.setLong(3, expiryTime);
+                ps.setInt(4, tenantId);
+                ps.setString(5, type);
+                ps.execute();
+                conn.commit();
+            } catch (SQLIntegrityConstraintViolationException e) {
+                boolean isRevokedTokenExist = isRevokedJWTSignatureExist(conn, eventId);
+
+                if (isRevokedTokenExist) {
+                    log.warn("Revoked Token already persisted");
+                } else {
+                    handleException("Failed to add Revoked Token Event" + APIUtil.getMaskedToken(jwtSignature), e);
+                }
+            }catch (SQLException e){
+                conn.rollback();
+            }
         } catch (SQLException e) {
             handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Check revoked Token Identifier exist
+     *
+     * @param eventId
+
+     */
+    private boolean isRevokedJWTSignatureExist(Connection conn, String eventId) throws SQLException {
+
+        String checkRevokedTokenExist = SQLConstants.RevokedJWTConstants.CHECK_REVOKED_TOKEN_EXIST;
+        try (PreparedStatement ps = conn.prepareStatement(checkRevokedTokenExist)) {
+            ps.setString(1, eventId);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                return resultSet.next();
+            }
         }
     }
 
@@ -15521,174 +15525,111 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add details of the APIs published in the Gateway
+     * Adds a tenant theme to the database
      *
-     * @param APIId        - UUID of the API
-     * @param APIName      - Name of the API
-     * @param version      - Version of the API
-     * @param tenantDomain - Tenant domain of the API
-     * @throws APIManagementException if an error occurs
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     * @throws APIManagementException if an error occurs when adding a tenant theme to the database
      */
-    public void addGatewayPublishedAPIDetails(String APIId, String APIName, String version, String tenantDomain)
-            throws APIManagementException {
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_PUBLISHED_API_DETAILS)) {
-            statement.setString(1, APIId);
-            statement.setString(2, APIName);
-            statement.setString(3, version);
-            statement.setString(4, tenantDomain);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            handleException("Failed to add API details for " + APIName, e);
-        }
-    }
-
-    /**
-     * Add or update details of the APIs published in the Gateway
-     *
-     * @param APIId        - UUID of the API
-     * @param gatewayLabel - Published gateway's label
-     * @param bais         - Byte array Input stream of the serializide gatewayAPIDTO
-     * @param streamLength - Length of the stream
-     * @throws APIManagementException if an error occurs
-     */
-    public void addGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel, ByteArrayInputStream bais,
-                                                int streamLength, String gatewayInstruction, String query)
-            throws APIManagementException {
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setBinaryStream(1, bais, streamLength);
-            statement.setString(2, gatewayInstruction);
-            statement.setString(3, APIId);
-            statement.setString(4, gatewayLabel);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            handleException("Failed to add artifacts for " + APIId, e);
-        }
-    }
-
-    /**
-     * Retrieve the blob of the API
-     *
-     * @param APIId        - UUID of the API
-     * @param gatewayLabel - Gateway label of the API
-     * @throws APIManagementException if an error occurs
-     */
-    public ByteArrayInputStream getGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel,
-                                                                String gatewayInstruction)
-            throws APIManagementException {
-
-        ByteArrayInputStream baip = null;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ARTIFACT)) {
-            statement.setString(1, APIId);
-            statement.setString(2, gatewayLabel);
-            statement.setString(3, gatewayInstruction);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                byte[] st = (byte[]) rs.getObject(1);
-                baip = new ByteArrayInputStream(st);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get artifacts of API with ID " + APIId, e);
-        }
-        return baip;
-    }
-
-    /**
-     * Retrieve the list of blobs of the APIs for a given label
-     *
-     * @param label - Gateway label of the API
-     * @throws APIManagementException if an error occurs
-     */
-    public List<ByteArrayInputStream> getAllGatewayPublishedAPIArtifacts(String label)
-            throws APIManagementException {
-
-        List<ByteArrayInputStream> baip = new ArrayList<>();
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_API_ARTIFACT)) {
-            statement.setString(1, label);
-            statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                byte[] st = (byte[]) rs.getObject(1);
-                ByteArrayInputStream byteArrayInputStream= new ByteArrayInputStream(st);
-                baip.add(byteArrayInputStream);
-            }
-            return baip;
-        } catch (SQLException e) {
-            handleException("Failed to get artifacts " , e);
-        }
-        return baip;
-    }
-
-    /**
-     * Check whether the API is published in any of the Gateways
-     *
-     * @param APIId - UUID of the API
-     * @throws APIManagementException if an error occurs
-     */
-    public boolean isAPIPublishedInAnyGateway(String APIId) throws APIManagementException {
-
-        int count = 0;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_PUBLISHED_GATEWAYS_FOR_API)) {
-            statement.setString(1, APIId);
-            statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                count = rs.getInt("COUNT");
-            }
-        } catch (SQLException e) {
-            handleException("Failed check whether API is published in any gateway " + APIId, e);
-        }
-        return count != 0;
-    }
-
-    /**
-     * Check whether the API details exists in the db
-     *
-     * @param APIId - UUID of the API
-     * @throws APIManagementException if an error occurs
-     */
-    public boolean isAPIDetailsExists(String APIId) throws APIManagementException {
+    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.GET_GATEWAY_PUBLISHED_API_DETAILS)) {
-            statement.setString(1, APIId);
-            ResultSet rs = statement.executeQuery();
-            return rs.next();
+                     .prepareStatement(SQLConstants.TenantThemeConstants.ADD_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            statement.setBinaryStream(2, themeContent);
+            statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to check API details status of API with ID " + APIId, e);
+            handleException("Failed to add tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
+
+    /**
+     * Updates an existing tenant theme in the database
+     *
+     * @param tenantId     tenant ID of user
+     * @param themeContent content of the tenant theme
+     * @throws APIManagementException if an error occurs when updating an existing tenant theme in the database
+     */
+    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.TenantThemeConstants.UPDATE_TENANT_THEME)) {
+            statement.setBinaryStream(1, themeContent);
+            statement.setInt(2, tenantId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to update tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
+
+    /**
+     * Retrieves a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @return content of the tenant theme
+     * @throws APIManagementException if an error occurs when retrieving a tenant theme from the database
+     */
+    public InputStream getTenantTheme(int tenantId) throws APIManagementException {
+
+        InputStream tenantThemeContent = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                tenantThemeContent = resultSet.getBinaryStream("THEME");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+        return tenantThemeContent;
+    }
+
+    /**
+     * Checks whether a tenant theme exist for a particular tenant
+     *
+     * @param tenantId tenant ID of user
+     * @return true if a tenant theme exist for a particular tenant ID, false otherwise
+     * @throws APIManagementException if an error occurs when determining whether a tenant theme exists for a given
+     *                                tenant ID
+     */
+    public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            ResultSet resultSet = statement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            handleException("Failed to check whether tenant theme exist for tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
         return false;
     }
 
     /**
-     * Check whether the API artifact for given label exists in the db
+     * Deletes a tenant theme from the database
      *
-     * @param APIId - UUID of the API
-     * @throws APIManagementException if an error occurs
+     * @param tenantId tenant ID of user
+     * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
      */
-    public boolean isAPIArtifactExists(String APIId, String gatewayLabel) throws APIManagementException {
+    public void deleteTenantTheme(int tenantId) throws APIManagementException {
 
-        int count = 0;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.CHECK_ARTIFACT_EXISTS)) {
-            statement.setString(1, APIId);
-            statement.setString(2, gatewayLabel);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                count = rs.getInt("COUNT");
-            }
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.DELETE_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to check API artifact status of API with ID " + APIId + " for label "
-                    + gatewayLabel, e);
+            handleException("Failed to delete tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
-        return count != 0;
     }
-
 }

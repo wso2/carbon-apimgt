@@ -37,7 +37,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
-import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtService;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceStub;
 import org.wso2.carbon.user.core.UserCoreConstants;
@@ -68,15 +68,16 @@ public class BasicAuthCredentialValidator {
      *
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    BasicAuthCredentialValidator() throws APISecurityException {
+    public BasicAuthCredentialValidator() throws APISecurityException {
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
         this.getGatewayUsernameCache();
 
         ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+        EventHubConfigurationDto eventHubConfigurationDto = config.getEventHubConfigurationDto();
+        String username = eventHubConfigurationDto.getUsername();
+        String password = eventHubConfigurationDto.getPassword();
+        String url = eventHubConfigurationDto.getServiceUrl();
         if (url == null) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "API key manager URL unspecified");
@@ -84,7 +85,7 @@ public class BasicAuthCredentialValidator {
 
         try {
             apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, url +
-                    "APIKeyMgtRemoteUserStoreMgtService");
+                    "/services/APIKeyMgtRemoteUserStoreMgtService");
             ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setCallTransportCleanup(true);

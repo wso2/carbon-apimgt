@@ -3301,6 +3301,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.getId().getApiName(), newVersion);
             API newAPI = getAPI(newId, api.getId(), oldContext);
 
+            //Set original API Type
+            newAPI.setType(api.getType());
             //Populate additional properties in the API object
             if (additionProperties.size() != 0) {
                 newAPI.setAdditionalProperties(additionProperties);
@@ -5678,8 +5680,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                             containerManager.changeLCStatePublishedToCreated(
                                                                     apiIdentifier, containerMgtInfoDetails);
                                                         } else if (action.equals(ContainerBasedConstants.REPUBLISH)) {
-                                                            String configmapName = apiIdentifier.getApiName().toLowerCase() +
-                                                                    apiIdentifier.getVersion();
+                                                            String configmapName = apiIdentifier.getApiName().toLowerCase() + "-swagger";
                                                             String[] configmapNames = new String[]{configmapName};
                                                             containerManager.changeLCStateBlockedToRepublished(apiIdentifier,
                                                                     containerMgtInfoDetails, configmapNames);
@@ -6136,7 +6137,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 executionFlows.put(policyFile, policyString);
                 apiMgtDAO.addApplicationPolicy(appPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_APP;
-                //policy id is not set. retrieving policy to get the id. 
+                //policy id is not set. retrieving policy to get the id.
                 ApplicationPolicy retrievedPolicy = apiMgtDAO.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
                 ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
@@ -6160,7 +6161,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     createMonetizationPlan(subPolicy);
                 }
                 policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
-                //policy id is not set. retrieving policy to get the id. 
+                //policy id is not set. retrieving policy to get the id.
                 SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
                 SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
@@ -6466,7 +6467,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 executionFlows.put(policyFile, policyString);
                 policiesToUndeploy.add(policyFile);
                 policyLevel = PolicyConstants.POLICY_LEVEL_APP;
-                //policy id is not set. retrieving policy to get the id. 
+                //policy id is not set. retrieving policy to get the id.
                 ApplicationPolicy retrievedPolicy = apiMgtDAO.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
                 ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
@@ -6487,7 +6488,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policiesToUndeploy.add(policyFile);
                 executionFlows.put(policyFile, policyString);
                 policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
-                //policy id is not set. retrieving policy to get the id. 
+                //policy id is not set. retrieving policy to get the id.
                 SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
                 SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),

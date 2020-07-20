@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 const DeleteConfirmation = (props) => {
     const { handleAppDelete, isDeleteOpen, toggleDeleteConfirmation } = props;
     return (
-        <Dialog open={isDeleteOpen} transition={Slide}>
+        <Dialog open={isDeleteOpen} transition={Slide} role='alertdialog'>
             <DialogTitle>
                 <FormattedMessage
                     id='Applications.Listing.DeleteConfirmation.dialog.title'
