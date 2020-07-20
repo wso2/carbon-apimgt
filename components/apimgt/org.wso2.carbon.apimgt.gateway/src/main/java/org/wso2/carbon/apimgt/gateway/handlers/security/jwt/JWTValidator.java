@@ -160,7 +160,7 @@ public class JWTValidator {
 
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO;
                 
-                log.debug("Begin subscription validation via Key Manager");
+                log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
                 apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(synCtx, jwtValidationInfo);
 
                 if (log.isDebugEnabled()) {
@@ -322,16 +322,16 @@ public class JWTValidator {
         }
 
         if (jwtValidationInfo != null && jwtValidationInfo.isValid()) {
-            log.debug("Begin subscription validation via Key Manager");
+            log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(apiContext,
                     apiVersion, jwtValidationInfo);
 
             if (log.isDebugEnabled()) {
-                log.debug("Subscription validation via Key Manager. Status: " +
+                log.debug("Subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager() + ". Status: " +
                         apiKeyValidationInfoDTO.isAuthorized());
             }
             if (apiKeyValidationInfoDTO.isAuthorized()) {
-                log.debug("JWT authentication successful.");
+                log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
                 String endUserToken = null;
                 JWTInfoDto jwtInfoDto;
                 try {
@@ -347,9 +347,9 @@ public class JWTValidator {
                             APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
                 }
             } else {
-                log.debug("User is NOT authorized to access the Resource. API Subscription validation failed.");
-                throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
-                        "User is NOT authorized to access the Resource. API Subscription validation failed.");
+                String message = "User is NOT authorized to access the Resource. API Subscription validation failed.";
+                log.debug(message);
+                throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(), message);
             }
         } else if (!jwtValidationInfo.isValid()) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
