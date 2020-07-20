@@ -31,10 +31,10 @@ var getLoopbackOrigin = function() {
     return origin; // Unless there is a port offset this is https://localhost:9443
 };
 
-function getIDPOrigin(){
+function getIDPOrigin() {
     return utils.getExternalIDPOrigin();
 }
 
-function getIDPCheckSessionEndpoint(){
+function getIDPCheckSessionEndpoint() {
     return utils.getExternalIDPCheckSessionEndpoint();
 }

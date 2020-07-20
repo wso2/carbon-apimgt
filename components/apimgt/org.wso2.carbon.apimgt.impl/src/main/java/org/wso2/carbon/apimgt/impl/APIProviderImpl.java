@@ -3700,11 +3700,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             authorizedRoles, docFilePath, registry);
                 }
             } catch (UserStoreException e) {
-                throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
-                        + api.getId().getApiName(), e);
+                throw new APIManagementException("Error in retrieving Tenant Information while updating the " +
+                        "visibility of documentations for the API :" + api.getId().getApiName(), e);
             }
         } catch (RegistryException e) {
-            handleException("Failed to update visibility of documentation", e);
+            handleException("Failed to update visibility of documentation" + api.getId().getApiName(), e);
         }
     }
     /**
@@ -3759,7 +3759,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // We need to remove the
                 // /t/tenanatdoman/registry/resource/_system/governance section
                 // to set permissions.
-                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles, filePath,
                         registry);
@@ -3959,7 +3959,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (docFilePath != null && !"".equals(docFilePath)) {
                 //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
                 //We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set permissions.
-                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),visibility, authorizedRoles, filePath, registry);
                 registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
@@ -6739,13 +6739,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return createdBlockConditionsDto.getUUID();
     }
 
-    /**
-     * Add Block Condition with condition status
-     *
-     * @param conditionType type of the condition (IP, Context .. )
-     * @param conditionValue value of the condition
-     * @param conditionStatus status of the condition
-     */
+    @Override
     public String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus)
             throws APIManagementException {
 
@@ -8373,7 +8367,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (docFilePath != null && !StringUtils.EMPTY.equals(docFilePath)) {
                 //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
                 //We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set permissions.
-                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(product.getId().getProviderName(),visibility, authorizedRoles, filePath, registry);
                 registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
@@ -8433,7 +8427,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // We need to remove the
                 // /t/tenanatdoman/registry/resource/_system/governance section
                 // to set permissions.
-                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(product.getId().getProviderName(), visibility, authorizedRoles, filePath,
                         registry);
