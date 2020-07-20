@@ -77,7 +77,15 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.net.URL;
-import java.util.*;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Collection;
+import java.util.Vector;
+import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants.ATTRIBUTE_NODE_NAME;
 import static org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants.ATTR_CONTENT_KEYWORD;
