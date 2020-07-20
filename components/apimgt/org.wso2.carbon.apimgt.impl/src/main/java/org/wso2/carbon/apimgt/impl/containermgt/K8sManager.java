@@ -29,6 +29,7 @@ import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
@@ -93,7 +94,7 @@ public class K8sManager implements ContainerManager {
         if (masterURL != null && saToken != null && !"".equals(saToken) && !"".equals(masterURL)) {
 
             String[] configmapNames = deployConfigMap(api, apiIdentifier, registry, openShiftClient, jwtSecurityCRName,
-                    oauthSecurityCRName, basicAuthSecurityCRName, false);
+                    oauthSecurityCRName, basicAuthSecurityCRName, "");
 
             if (configmapNames != null) {
                 applyAPICustomResourceDefinition(openShiftClient, configmapNames, replicas, apiIdentifier, true);
@@ -104,7 +105,7 @@ public class K8sManager implements ContainerManager {
             try {
                 //handling scenario APIM deployed in Kubernetes cluster
                 String[] configmapNames = deployConfigMap(api, apiIdentifier, registry, openShiftClient, jwtSecurityCRName,
-                        oauthSecurityCRName, basicAuthSecurityCRName, false);
+                        oauthSecurityCRName, basicAuthSecurityCRName, "");
 
                 if (configmapNames != null) {
                     applyAPICustomResourceDefinition(openShiftClient, configmapNames, replicas, apiIdentifier, true);
@@ -195,9 +196,6 @@ public class K8sManager implements ContainerManager {
                 basicSecurity = propreties.get(BASICAUTH_SECURITY_CR_NAME).toString();
             }
             try {
-                String[] configMapNames = deployConfigMap(api, apiId, registry, client,
-                        jwtSecurity, oauthSecurity, basicSecurity, true);
-
                 CustomResourceDefinition crd = client.customResourceDefinitions().withName(API_CRD_NAME).get();
 
                 NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
@@ -206,14 +204,20 @@ public class K8sManager implements ContainerManager {
 
                 APICustomResourceDefinition apiCustomResourceDefinition = crdClient.withName(apiName.toLowerCase()).get();
 
-                // if API CR does not exists in the cluster, publish the API instead of re-publish
-                // (when the API is published in other deployment, select this cluster and re-publish)
+                String[] configMapNames;
                 if (apiCustomResourceDefinition == null) {
+                    // if API CR does not exists in the cluster, publish the API instead of re-publish
+                    // (when the API is published in other deployment, select this cluster and re-publish)
+                    configMapNames = deployConfigMap(api, apiId, registry, client,
+                            jwtSecurity, oauthSecurity, basicSecurity, "");
                     applyAPICustomResourceDefinition(client, configMapNames, replicas, api.getId(), true);
                     log.info("Successfully deployed the [API] " + api.getId().getApiName() + " in Kubernetes");
                 } else {
                     // re-publish if API CR is exists
-                    apiCustomResourceDefinition.getSpec().setUpdateTimeStamp(getTimeStamp());
+                    String timeStampSuffix = getTimeStamp();
+                    configMapNames = deployConfigMap(api, apiId, registry, client,
+                            jwtSecurity, oauthSecurity, basicSecurity, timeStampSuffix);
+                    apiCustomResourceDefinition.getSpec().setUpdateTimeStamp(timeStampSuffix);
                     apiCustomResourceDefinition.getSpec().getDefinition().setSwaggerConfigmapNames(configMapNames);
                     //update with interceptors
                     Interceptors interceptors = new Interceptors();
@@ -392,13 +396,13 @@ public class K8sManager implements ContainerManager {
      * @param jwtSecurityCRName       , Security kind name related to JWT
      * @param oauthSecurityCRName     , Security kind name related to OAuth2
      * @param basicAuthSecurityCRName , Security kind name related to BasicAuth
-     * @param update                  , checks whether the configmap needs to be updated or deploy independently
+     * @param nameSuffix              , Suffix of the config map name
      * @return swaggerConfigmapNames
      * @throws APIManagementException
      * @throws ParseException
      */
     private String[] deployConfigMap(API api, APIIdentifier apiIdentifier, Registry registry, OpenShiftClient client, String jwtSecurityCRName,
-                                     String oauthSecurityCRName, String basicAuthSecurityCRName, Boolean update)
+                                     String oauthSecurityCRName, String basicAuthSecurityCRName, String nameSuffix)
             throws APIManagementException, ParseException {
 
         SwaggerCreator swaggerCreator = new SwaggerCreator(basicAuthSecurityCRName, jwtSecurityCRName,
@@ -408,9 +412,9 @@ public class K8sManager implements ContainerManager {
 
         String configmapName = apiIdentifier.getApiName().toLowerCase() + "-swagger";
 
-        if (update) {
-
-            configmapName = configmapName + "-up-" + getTimeStamp();
+        // suffixing config map names
+        if (!StringUtils.isEmpty(nameSuffix)) {
+            configmapName = configmapName + "-" + nameSuffix;
         }
 
         String[] swaggerConfigmapNames = new String[]{configmapName};
@@ -586,10 +590,9 @@ public class K8sManager implements ContainerManager {
         long time = date.getTime();
         Timestamp timestamp = new Timestamp(time);
         date.setTime(timestamp.getTime());
-        String formattedDate = new SimpleDateFormat("ddMMyyyy").format(date);
-        String formattedTime = new SimpleDateFormat("HH.mm").format(date);
-
-        return (formattedDate + "-" + formattedTime);
+        // sample timestamp format: (date)(time): 20jul2020120236
+        String formattedTimestamp = new SimpleDateFormat("ddMMMyyyyHHmmss").format(date);
+        return formattedTimestamp.toLowerCase();
     }
 
     /**

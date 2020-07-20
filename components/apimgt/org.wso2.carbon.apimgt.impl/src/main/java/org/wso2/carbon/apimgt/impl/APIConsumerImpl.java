@@ -5703,8 +5703,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (clusterName.equals(containerMgtInfo.get(ContainerBasedConstants.CLUSTER_NAME))) {
                     String ingressURL = (String) ((JSONObject)containerMgtInfo.get(ContainerBasedConstants.PROPERTIES))
                             .get(ContainerBasedConstants.ACCESS_URL);
-                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL,
-                            APIConstants.HTTPS_PROTOCOL_URL_PREFIX + ingressURL);
+                    ingressURL = ingressURL.replaceAll("/$", "");
+                    if (ingressURL.startsWith(APIConstants.HTTPS_PROTOCOL)) {
+                        hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, ingressURL);
+                    }
+                    if (ingressURL.startsWith(APIConstants.HTTP_PROTOCOL)) {
+                        hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, ingressURL);
+                    }
                     return hostsWithSchemes;
                 }
             }
