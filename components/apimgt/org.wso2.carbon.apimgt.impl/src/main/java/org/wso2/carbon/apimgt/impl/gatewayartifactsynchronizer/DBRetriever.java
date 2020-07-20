@@ -49,7 +49,7 @@ public class DBRetriever implements ArtifactRetriever {
     protected EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfigurationService().getAPIManagerConfiguration().getEventHubConfigurationDto();
     private String baseURL = eventHubConfigurationDto.getServiceUrl() +
-            APIConstants.GatewayArtifactSynchronizer.INTERNAL_BASE_URL;
+            APIConstants.INTERNAL_WEB_APP_EP ;
 
     @Override
     public void init() throws ArtifactSynchronizerException {
