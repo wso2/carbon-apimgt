@@ -540,7 +540,7 @@
 
     <RESTAPI>
         <!--Configure white-listed URIs of REST API. Accessing white-listed URIs does not require credentials (does not require Authorization header). -->
-        <ALLOWED_SCOPES>
+        <AllowedURIs>
          {% if apim.rest_api.allowed_uri is defined %}
             {% for uri in apim.rest_api.allowed_uri %}
                 <AllowedURI>
@@ -681,7 +681,7 @@
                 <URI>/api/am/store/{version}/api-categories</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
-        </ALLOWED_SCOPES>
+        </AllowedURIs>
         <ETagSkipList>
             <ETagSkipURI>
                 <URI>/api/am/store/{version}/apis</URI>
