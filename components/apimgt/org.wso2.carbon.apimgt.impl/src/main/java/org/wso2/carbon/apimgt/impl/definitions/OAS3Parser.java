@@ -183,8 +183,14 @@ public class OAS3Parser extends APIDefinition {
                 String responseConditions = getResponseConditionsSection(hasJsonPayload, hasXmlPayload);
                 String finalScript = finalGenCode + responseConditions;
                 apiResourceMediationPolicyObject.setContent(finalScript);
-                //sets script to each resource in the swagger
-                op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
+                if (op.getExtensions() != null && op.getExtensions().get
+                        (APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
+                    if (op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
+                        op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+                    }
+                } else if (op.getExtensions() == null) {
+                    op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+                }
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
             checkAndSetEmptyScope(swagger);
