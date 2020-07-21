@@ -1325,7 +1325,8 @@ public class OASParserUtil {
     public static String preProcess(String swaggerContent) throws APIManagementException {
         //Load required properties from swagger to the API
         APIDefinition apiDefinition = getOASParser(swaggerContent);
-        return apiDefinition.processOtherSchemeScopes(swaggerContent);
+        swaggerContent = apiDefinition.processOtherSchemeScopes(swaggerContent);
+        return apiDefinition.processLegacyScopes(swaggerContent);
     }
 
     /**

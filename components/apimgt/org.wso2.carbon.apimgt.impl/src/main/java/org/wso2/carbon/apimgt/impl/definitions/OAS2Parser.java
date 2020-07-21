@@ -1282,6 +1282,32 @@ public class OAS2Parser extends APIDefinition {
         return swaggerContent;
     }
 
+    @Override
+    public String processLegacyScopes(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
+        OAuth2Definition oAuth2Definition = (OAuth2Definition) swagger.getSecurityDefinitions()
+                .get(APIConstants.OAUTH2_DEFAULT_SCOPE);
+        Map<String, String> scopeBindings = new HashMap<>();
+        if (oAuth2Definition != null) {
+            if (oAuth2Definition.getVendorExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS) != null) {
+                scopeBindings = (Map<String, String>) oAuth2Definition.getVendorExtensions()
+                        .get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+            } else {
+                scopeBindings = new HashMap<>();
+            }
+        }
+        Set<Scope> scopes = getScopesFromExtensions(swagger);
+        if (scopes != null && !scopes.isEmpty()) {
+            for (Scope scope : scopes) {
+                oAuth2Definition.addScope(scope.getKey(), scope.getDescription());
+                scopeBindings.put(scope.getKey(), scope.getRoles());
+            }
+            oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+        }
+        swagger.addSecurityDefinition(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, oAuth2Definition);
+        return getSwaggerJsonString(swagger);
+    }
+
     /**
      * This method returns the oauth scopes according to the given swagger(version 2)
      *

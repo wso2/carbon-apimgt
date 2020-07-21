@@ -205,4 +205,13 @@ public abstract class APIDefinition {
     public abstract API setExtensionsToAPI(String swaggerContent, API api)
             throws APIManagementException;
 
+    /**
+     * This method will extract scopes from legacy x-wso2-security and add them to default scheme
+     * @param swaggerContent swagger definition
+     * @return
+     * @throws APIManagementException
+     */
+    public abstract String processLegacyScopes(String swaggerContent)
+            throws APIManagementException;
+
 }
