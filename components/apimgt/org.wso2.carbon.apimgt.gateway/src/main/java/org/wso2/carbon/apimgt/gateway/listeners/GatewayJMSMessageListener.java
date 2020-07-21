@@ -81,9 +81,20 @@ public class GatewayJMSMessageListener implements MessageListener {
                              * timestamp - system time of the event published
                              * event - event data
                              */
-                            handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
-                                    (Long) map.get(APIConstants.EVENT_TIMESTAMP),
-                                    (String) map.get(APIConstants.EVENT_PAYLOAD));
+                            Thread t1 = new Thread(() -> {
+                                try {
+                                    try {
+                                        Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
+                                    } catch (InterruptedException ignore) {
+                                    }
+                                    handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
+                                            (Long) map.get(APIConstants.EVENT_TIMESTAMP),
+                                            (String) map.get(APIConstants.EVENT_PAYLOAD));
+                                } catch (Exception e) {
+                                    log.error("Error while deploying throttle policies", e);
+                                }
+                            });
+                            t1.start();
                         }
                     }
 
