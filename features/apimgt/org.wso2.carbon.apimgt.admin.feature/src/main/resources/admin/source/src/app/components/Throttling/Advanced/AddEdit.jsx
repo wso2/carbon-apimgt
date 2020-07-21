@@ -76,10 +76,9 @@ function reducer(state, { field, value }) {
                 nextState.defaultLimit.bandwidth = {
                     timeUnit, unitTime, dataAmount: 0, dataUnit: 'KB',
                 };
-                nextState.defaultLimit.bandwidth.type = 'BANDWIDTHLIMIT';
+                nextState.defaultLimit.type = 'BANDWIDTHLIMIT';
                 nextState.defaultLimit.requestCount = null;
             }
-            nextState.defaultLimit[field] = value;
             return nextState;
         case 'dataUnit':
         case 'requestCount':
