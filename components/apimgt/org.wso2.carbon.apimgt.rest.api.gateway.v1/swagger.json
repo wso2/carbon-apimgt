@@ -20,11 +20,11 @@
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
   "paths" : {
-    "/deploy-api" : {
+    "/redeploy-api" : {
       "post" : {
         "tags" : [ "Deploy API" ],
         "summary" : "Deploy the API in the gateway",
-        "description" : "This operation is used to deploy an API in the gateway.\n",
+        "description" : "This operation is used to deploy an API in the gateway. If the Tenant domain is not provided carbon.super will\nbe picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -34,13 +34,13 @@
         }, {
           "name" : "version",
           "in" : "query",
-          "description" : "version of the API Gateway\n",
+          "description" : "version of the API\n",
           "required" : true,
           "type" : "string"
         }, {
           "name" : "tenantDomain",
           "in" : "query",
-          "description" : "tenantDomain of the API Gateway\n",
+          "description" : "Tenant Domain of the API\n",
           "required" : false,
           "type" : "string"
         } ],
@@ -88,7 +88,7 @@
       "post" : {
         "tags" : [ "Undeploy API" ],
         "summary" : "Uneploy the API in the gateway",
-        "description" : "This operation is used to undeploy an API in the gateway.\n",
+        "description" : "This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will\nbe picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -98,13 +98,13 @@
         }, {
           "name" : "version",
           "in" : "query",
-          "description" : "version of the API Gateway\n",
+          "description" : "version of the API\n",
           "required" : true,
           "type" : "string"
         }, {
           "name" : "tenantDomain",
           "in" : "query",
-          "description" : "tenantDomain of the API Gateway\n",
+          "description" : "Tenant Domain of the API\n",
           "required" : false,
           "type" : "string"
         } ],
@@ -152,7 +152,7 @@
       "get" : {
         "tags" : [ "Get API Artifacts" ],
         "summary" : "Get API artifact from the storage",
-        "description" : "This operation is used to get the local entries, sequences and endpoints from the storage.\n",
+        "description" : "This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain\nis not provided carbon.super will be picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -162,13 +162,13 @@
         }, {
           "name" : "version",
           "in" : "query",
-          "description" : "version of the API Gateway\n",
+          "description" : "version of the API\n",
           "required" : true,
           "type" : "string"
         }, {
           "name" : "tenantDomain",
           "in" : "query",
-          "description" : "tenantDomain of the API Gateway\n",
+          "description" : "Tenant Domain of the API\n",
           "required" : false,
           "type" : "string"
         } ],
@@ -216,7 +216,7 @@
       "get" : {
         "tags" : [ "Get API Artifacts" ],
         "summary" : "Get Local Entry from the storage",
-        "description" : "This operation is used to get local entry from the storage\n",
+        "description" : "This operation is used to get local entry from the storage.If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -226,13 +226,13 @@
         }, {
           "name" : "version",
           "in" : "query",
-          "description" : "version of the API Gateway\n",
+          "description" : "version of the API\n",
           "required" : true,
           "type" : "string"
         }, {
           "name" : "tenantDomain",
           "in" : "query",
-          "description" : "tenantDomain of the API Gateway\n",
+          "description" : "Tenant Domain of the API\n",
           "required" : false,
           "type" : "string"
         } ],
@@ -280,7 +280,7 @@
       "get" : {
         "tags" : [ "Get API Artifacts" ],
         "summary" : "Get sequences from the storage",
-        "description" : "This operation is used to get the API sequence from the storage\n",
+        "description" : "This operation is used to get the API sequence from the storage. If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -290,13 +290,13 @@
         }, {
           "name" : "version",
           "in" : "query",
-          "description" : "version of the API Gateway\n",
+          "description" : "version of the API\n",
           "required" : true,
           "type" : "string"
         }, {
           "name" : "tenantDomain",
           "in" : "query",
-          "description" : "tenantDomain of the API Gateway\n",
+          "description" : "Tenant Domain of the API\n",
           "required" : false,
           "type" : "string"
         } ],
@@ -344,7 +344,7 @@
       "get" : {
         "tags" : [ "Get API Artifacts" ],
         "summary" : "Get end-points from the storage for the API",
-        "description" : "This operation is used to get the end-points from the storage\n",
+        "description" : "This operation is used to get the end-points from the storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -354,13 +354,13 @@
         }, {
           "name" : "version",
           "in" : "query",
-          "description" : "version of the API Gateway\n",
+          "description" : "version of the API\n",
           "required" : true,
           "type" : "string"
         }, {
           "name" : "tenantDomain",
           "in" : "query",
-          "description" : "tenantDomain of the API Gateway\n",
+          "description" : "Tenant Domain of the API\n",
           "required" : false,
           "type" : "string"
         } ],

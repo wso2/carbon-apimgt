@@ -40,7 +40,7 @@ UndeployApiApiService delegate = new UndeployApiApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Uneploy the API in the gateway", notes = "This operation is used to undeploy an API in the gateway. ", response = DeployResponseDTO.class, authorizations = {
+    @ApiOperation(value = "Uneploy the API in the gateway", notes = "This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = DeployResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
@@ -51,7 +51,7 @@ UndeployApiApiService delegate = new UndeployApiApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response undeployApiPost( @NotNull @ApiParam(value = "Name of the API ",required=true)  @QueryParam("apiName") String apiName,  @NotNull @ApiParam(value = "version of the API Gateway ",required=true)  @QueryParam("version") String version,  @ApiParam(value = "tenantDomain of the API Gateway ")  @QueryParam("tenantDomain") String tenantDomain) throws APIManagementException{
+    public Response undeployApiPost( @NotNull @ApiParam(value = "Name of the API ",required=true)  @QueryParam("apiName") String apiName,  @NotNull @ApiParam(value = "version of the API ",required=true)  @QueryParam("version") String version,  @ApiParam(value = "Tenant Domain of the API ")  @QueryParam("tenantDomain") String tenantDomain) throws APIManagementException{
         return delegate.undeployApiPost(apiName, version, tenantDomain, securityContext);
     }
 }

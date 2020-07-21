@@ -39,12 +39,11 @@ import java.util.Map;
 public class LocalEntryApiServiceImpl implements LocalEntryApiService {
 
     private static final Log log = LogFactory.getLog(LocalEntryApiServiceImpl.class);
-    private final String SUPER_TENAT_DOMAIN = "carbon.super";
 
     public Response localEntryGet(String apiName, String version , String tenantDomain, MessageContext messageContext){
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        if (tenantDomain == null){
-            tenantDomain =SUPER_TENAT_DOMAIN;
+        if (tenantDomain == null) {
+            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
 
         Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version, tenantDomain);

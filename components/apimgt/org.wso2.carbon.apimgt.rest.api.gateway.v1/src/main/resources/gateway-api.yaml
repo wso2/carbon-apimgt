@@ -62,7 +62,7 @@ securityDefinitions:
 # The "API Collection" resource APIs
 ######################################################
 paths:
-  /deploy-api:
+  /redeploy-api:
 
     #-----------------------------------------------------
     # Deploy the API in the Gateway
@@ -78,7 +78,8 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Deploy the API in the gateway
       description: |
-        This operation is used to deploy an API in the gateway.
+        This operation is used to deploy an API in the gateway. If the Tenant domain is not provided carbon.super will
+        be picked as the Tenant domain.
       parameters:
         - name: apiName
           description: |
@@ -88,13 +89,13 @@ paths:
           required: true
         - name: version
           description: |
-            version of the API Gateway
+            version of the API
           in: query
           type: string
           required: true
         - name: tenantDomain
           description: |
-            tenantDomain of the API Gateway
+            Tenant Domain of the API
           in: query
           type: string
 
@@ -148,7 +149,8 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Uneploy the API in the gateway
       description: |
-        This operation is used to undeploy an API in the gateway.
+        This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will
+        be picked as the Tenant domain.
       parameters:
         - name: apiName
           description: |
@@ -158,13 +160,13 @@ paths:
           required: true
         - name: version
           description: |
-            version of the API Gateway
+            version of the API
           in: query
           type: string
           required: true
         - name: tenantDomain
           description: |
-            tenantDomain of the API Gateway
+            Tenant Domain of the API
           in: query
           type: string
 
@@ -218,7 +220,8 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Get API artifact from the storage
       description: |
-        This operation is used to get the local entries, sequences and endpoints from the storage.
+        This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain
+        is not provided carbon.super will be picked as the Tenant domain.
       parameters:
         - name: apiName
           description: |
@@ -228,13 +231,13 @@ paths:
           required: true
         - name: version
           description: |
-            version of the API Gateway
+            version of the API
           in: query
           type: string
           required: true
         - name: tenantDomain
           description: |
-            tenantDomain of the API Gateway
+            Tenant Domain of the API
           in: query
           type: string
 
@@ -288,7 +291,8 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Get Local Entry from the storage
       description: |
-        This operation is used to get local entry from the storage
+        This operation is used to get local entry from the storage.If the Tenant domain is not provided carbon.super
+        will be picked as the Tenant domain.
       parameters:
         - name: apiName
           description: |
@@ -298,13 +302,13 @@ paths:
           required: true
         - name: version
           description: |
-            version of the API Gateway
+            version of the API
           in: query
           type: string
           required: true
         - name: tenantDomain
           description: |
-            tenantDomain of the API Gateway
+            Tenant Domain of the API
           in: query
           type: string
 
@@ -357,7 +361,8 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Get sequences from the storage
       description: |
-        This operation is used to get the API sequence from the storage
+        This operation is used to get the API sequence from the storage. If the Tenant domain is not provided carbon.super
+        will be picked as the Tenant domain.
       parameters:
         - name: apiName
           description: |
@@ -367,13 +372,13 @@ paths:
           required: true
         - name: version
           description: |
-            version of the API Gateway
+            version of the API
           in: query
           type: string
           required: true
         - name: tenantDomain
           description: |
-            tenantDomain of the API Gateway
+            Tenant Domain of the API
           in: query
           type: string
 
@@ -427,7 +432,8 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Get end-points from the storage for the API
       description: |
-        This operation is used to get the end-points from the storage
+        This operation is used to get the end-points from the storage. If the Tenant domain is not provided
+        carbon.super will be picked as the Tenant domain.
       parameters:
         - name: apiName
           description: |
@@ -437,13 +443,13 @@ paths:
           required: true
         - name: version
           description: |
-            version of the API Gateway
+            version of the API
           in: query
           type: string
           required: true
         - name: tenantDomain
           description: |
-            tenantDomain of the API Gateway
+            Tenant Domain of the API
           in: query
           type: string
 
