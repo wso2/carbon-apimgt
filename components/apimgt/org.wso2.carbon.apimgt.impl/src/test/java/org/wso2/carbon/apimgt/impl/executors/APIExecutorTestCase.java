@@ -132,6 +132,7 @@ public class APIExecutorTestCase {
         Mockito.when(registryService.getGovernanceUserRegistry(USER_NAME,TENANT_ID)).thenReturn(userRegistry);
 
         PowerMockito.when(APIUtil.getAPI(genericArtifact)).thenReturn(api);
+        PowerMockito.when(APIUtil.getAPIForPublishing(genericArtifact, userRegistry)).thenReturn(api);
 
         PowerMockito.mockStatic(APIManagerFactory.class);
         PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);

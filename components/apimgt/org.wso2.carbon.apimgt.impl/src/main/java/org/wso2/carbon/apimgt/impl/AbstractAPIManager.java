@@ -2133,6 +2133,12 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain,
                                                    int start, int end, boolean isLazyLoad) throws APIManagementException {
+        return searchPaginatedAPIs(searchQuery, requestedTenantDomain, start, end, isLazyLoad, false);
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
+            boolean isLazyLoad, boolean isPublisherListing) throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         boolean isTenantFlowStarted = false;
         String[] searchQueries = searchQuery.split("&");
@@ -2232,7 +2238,8 @@ public abstract class AbstractAPIManager implements APIManager {
             } else if (searchQuery != null && searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
                 result = searchPaginatedAPIsByContent(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
             } else {
-                result = searchPaginatedAPIs(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
+                result = searchPaginatedAPIs(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad,
+                        isPublisherListing);
             }
 
         } catch (Exception e) {
@@ -2610,7 +2617,11 @@ public abstract class AbstractAPIManager implements APIManager {
     public List<String> getApiVersionsMatchingApiName(String apiName,String username) throws APIManagementException {
         return apiMgtDAO.getAPIVersionsMatchingApiName(apiName,username);
     }
-
+    
+    public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,
+            int end, boolean limitAttributes) throws APIManagementException {
+        return searchPaginatedAPIs(registry, tenantId, searchQuery, start, end, limitAttributes, false);
+    }
 
     /**
      * Returns API Search result based on the provided query. This search method supports '&' based concatenate
@@ -2624,7 +2635,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
 
     public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,
-                                                   int end, boolean limitAttributes) throws APIManagementException {
+            int end, boolean limitAttributes, boolean reducedPublisherAPIInfo) throws APIManagementException {
 
         SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
         List<Object> apiList = new ArrayList<>();
@@ -2705,7 +2716,11 @@ public abstract class AbstractAPIManager implements APIManager {
                     if (limitAttributes) {
                         resultAPI = APIUtil.getAPI(artifact);
                     } else {
-                        resultAPI = APIUtil.getAPI(artifact, registry);
+                        if(reducedPublisherAPIInfo) {
+                            resultAPI = APIUtil.getReducedPublisherAPIForListing(artifact, registry);
+                        } else {
+                            resultAPI = APIUtil.getAPI(artifact, registry);
+                        }
                     }
                     if (resultAPI != null) {
                         apiList.add(resultAPI);
@@ -2723,26 +2738,28 @@ public abstract class AbstractAPIManager implements APIManager {
             // Creating a apiIds string
             String apiIdsString = "";
             int apiCount = apiList.size();
-            for (int i = 0; i < apiCount; i++) {
-                Object api = apiList.get(i);
-                String apiId = "";
-                if (api instanceof API) {
-                    apiId = ((API) api).getId().getApplicationId();
-                } else if (api instanceof APIProduct) {
-                    apiId = ((APIProduct) api).getId().getApplicationId();
-                }
+            if (!reducedPublisherAPIInfo) {
+                for (int i = 0; i < apiCount; i++) {
+                    Object api = apiList.get(i);
+                    String apiId = "";
+                    if (api instanceof API) {
+                        apiId = ((API) api).getId().getApplicationId();
+                    } else if (api instanceof APIProduct) {
+                        apiId = ((APIProduct) api).getId().getApplicationId();
+                    }
 
-                if (apiId != null && !apiId.isEmpty()) {
-                    if (apiIdsString.isEmpty()) {
-                        apiIdsString = apiId;
-                    } else {
-                        apiIdsString = apiIdsString + "," + apiId;
+                    if (apiId != null && !apiId.isEmpty()) {
+                        if (apiIdsString.isEmpty()) {
+                            apiIdsString = apiId;
+                        } else {
+                            apiIdsString = apiIdsString + "," + apiId;
+                        }
                     }
                 }
             }
 
             // setting scope
-            if (!apiIdsString.isEmpty()) {
+            if (!apiIdsString.isEmpty() && !reducedPublisherAPIInfo) {
                 String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
                 Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString);
