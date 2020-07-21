@@ -157,6 +157,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIDConnectDiscoveryClient;
@@ -567,7 +568,8 @@ public final class APIUtil {
      * @return HTTPResponse
      * @throws IOException
      */
-    public static CloseableHttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient) throws IOException {
+    public static CloseableHttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient)
+            throws IOException, ArtifactSynchronizerException {
         CloseableHttpResponse httpResponse = null;
         int retryCount = 0;
         boolean retry;
@@ -592,7 +594,16 @@ public final class APIUtil {
                 }
             }
         } while (retry);
-        return httpResponse;
+
+        if (httpResponse.getStatusLine().getStatusCode() == 200) {
+            return httpResponse;
+        } else {
+            httpResponse.close();
+            String errorMessage = EntityUtils.toString(httpResponse.getEntity(),
+                    APIConstants.DigestAuthConstants.CHARSET);
+            throw new ArtifactSynchronizerException(errorMessage + "Eevnthub status code is:"
+                    + httpResponse.getStatusLine().getStatusCode());
+        }
     }
 
     /**
