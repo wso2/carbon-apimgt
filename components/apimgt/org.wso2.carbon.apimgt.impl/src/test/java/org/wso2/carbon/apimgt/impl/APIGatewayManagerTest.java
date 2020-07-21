@@ -86,7 +86,6 @@ public class APIGatewayManagerTest {
     private String faultSequenceName = "fault-sequence";
     private String swaggerDefinition = "swagger definition";
     private int tenantID = -1234;
-    GatewayArtifactSynchronizerProperties synchronizerProperties;
     private String testSequenceDefinition =
             "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"test-sequence\">\n"
                     + " <log level=\"custom\">\n" + "    <property name=\"Test\" value=\"Test Sequence\"/>\n"
@@ -154,7 +153,7 @@ public class APIGatewayManagerTest {
         sandboxEnvironment.setPassword("admin");
 
         Map<String, Environment> environments = new HashMap<String, Environment>(0);
-        synchronizerProperties = new GatewayArtifactSynchronizerProperties();
+        GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
         environments.put(prodEnvironmentName, prodEnvironment);
         environments.put(sandBoxEnvironmentName, sandboxEnvironment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environments);
@@ -431,19 +430,6 @@ public class APIGatewayManagerTest {
 
         //Test publishing WebSocket API
         api.setType("WS");
-        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
-
-        //Test Deploy using artifact synchronizer feature
-        synchronizerProperties.setSaveArtifactsEnabled(true);
-        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
-
-        synchronizerProperties.setPublishDirectlyToGatewayEnabled(false);
-        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
-
-        synchronizerProperties.setSaveArtifactsEnabled(false);
-        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
-
-        synchronizerProperties.setPublishDirectlyToGatewayEnabled(true);
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
 
     }
