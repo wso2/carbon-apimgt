@@ -51,7 +51,7 @@ DeployApiApiService delegate = new DeployApiApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response deployApiPost( @NotNull @ApiParam(value = "Name of the API ",required=true)  @QueryParam("apiName") String apiName,  @NotNull @ApiParam(value = "Label of the API Gateway ",required=true)  @QueryParam("label") String label,  @NotNull @ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true)  @QueryParam("apiId") String apiId) throws APIManagementException{
-        return delegate.deployApiPost(apiName, label, apiId, securityContext);
+    public Response deployApiPost( @NotNull @ApiParam(value = "Name of the API ",required=true)  @QueryParam("apiName") String apiName,  @NotNull @ApiParam(value = "version of the API Gateway ",required=true)  @QueryParam("version") String version,  @ApiParam(value = "tenantDomain of the API Gateway ")  @QueryParam("tenantDomain") String tenantDomain) throws APIManagementException{
+        return delegate.deployApiPost(apiName, version, tenantDomain, securityContext);
     }
 }

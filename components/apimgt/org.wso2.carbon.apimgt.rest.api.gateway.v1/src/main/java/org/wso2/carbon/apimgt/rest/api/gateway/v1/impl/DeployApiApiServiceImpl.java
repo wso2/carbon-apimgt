@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
@@ -26,12 +27,21 @@ import javax.ws.rs.core.Response;
 
 import org.json.JSONObject;
 
-public class DeployApiApiServiceImpl implements DeployApiApiService {
+import java.util.Map;
 
-    public Response deployApiPost(String apiName, String gatewayLabel, String apiId, MessageContext messageContext) {
+public class DeployApiApiServiceImpl implements DeployApiApiService {
+    private final String SUPER_TENAT_DOMAIN = "carbon.super";
+
+    public Response deployApiPost(String apiName, String version , String tenantDomain, MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        boolean status = inMemoryApiDeployer.deployAPI(apiId, gatewayLabel);
+        if (tenantDomain == null){
+            tenantDomain =SUPER_TENAT_DOMAIN;
+        }
+        Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version, tenantDomain);
+        String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
+        String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
+        boolean status = inMemoryApiDeployer.deployAPI(apiId, label);
 
         JSONObject responseObj = new JSONObject();
         if (status) {
