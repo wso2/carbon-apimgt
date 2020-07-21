@@ -40,7 +40,7 @@ RedeployApiApiService delegate = new RedeployApiApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Deploy the API in the gateway", notes = "This operation is used to deploy an API in the gateway. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = DeployResponseDTO.class, authorizations = {
+    @ApiOperation(value = "Re Deploy the API in the gateway", notes = "This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = DeployResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })

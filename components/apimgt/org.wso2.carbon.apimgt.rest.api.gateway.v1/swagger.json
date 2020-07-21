@@ -23,8 +23,8 @@
     "/redeploy-api" : {
       "post" : {
         "tags" : [ "Deploy API" ],
-        "summary" : "Deploy the API in the gateway",
-        "description" : "This operation is used to deploy an API in the gateway. If the Tenant domain is not provided carbon.super will\nbe picked as the Tenant domain.\n",
+        "summary" : "Re Deploy the API in the gateway",
+        "description" : "This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -79,8 +79,8 @@
         "security" : [ {
           "OAuth2Security" : [ "apim:api_publish" ]
         } ],
-        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "POST https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
+        "x-wso2-request" : "POST https://127.0.0.1:9443/api/am/gateway/v1/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response" : "HTTP/1.1 200 OK"
       }
     },
