@@ -639,7 +639,7 @@ class API extends Resource {
      */
     botDetectionNotifyingEmailsGet() {
         return this.client.then((client) => {
-            return client.apis['default'].get_botData_getEmailList(
+            return client.apis['Bot Detection Alert Subscriptions'].getBotDetectionAlertSubscriptions(
                 this._requestMetaData(),
             );
         });
@@ -657,7 +657,7 @@ class API extends Resource {
                 body: data,
                 'Content-Type': 'application/json',
             };
-            return client.apis['default'].post_botData_addEmail(
+            return client.apis['Bot Detection Alert Subscriptions'].subscribeForBotDetectionAlerts(
                 payload,
                 this._requestMetaData(),
             );
@@ -669,7 +669,7 @@ class API extends Resource {
      */
     deleteBotDetectionNotifyingEmail(id) {
         return this.client.then((client) => {
-            return client.apis['default'].delete_botData_deleteEmail(
+            return client.apis['Bot Detection Alert Subscriptions'].unsubscribeFromBotDetectionAlerts(
                 { uuid: id },
                 this._requestMetaData(),
             );
@@ -694,13 +694,25 @@ class API extends Resource {
     uploadTenantTheme(file) {
         return this.client.then(
             client => {
-                return client.apis['default'].post_tenant_theme_import({
+                return client.apis['Tenant Theme'].importTenantTheme({
                     file: file,
                 });
             },
             this._requestMetaData({
                 'Content-Type': 'multipart/form-data',
             }),
+        );
+    }
+
+    /**
+     * Export a Tenant Theme
+     */
+    exportTenantTheme() {
+        return this.client.then(
+            client => {
+                return client.apis['Tenant Theme'].exportTenantTheme();
+            },
+            this._requestMetaData(),
         );
     }
 

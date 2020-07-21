@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -64,7 +63,8 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                              * expiryTime - ExpiryTime of the token if token is JWT, otherwise expiry is set to 0
                              */
                             handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY),
-                                    (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME));
+                                    (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME),
+                                    (String) map.get(APIConstants.REVOKED_TOKEN_TYPE));
                         }
 
                     }
@@ -79,7 +79,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         }
     }
 
-    private void handleRevokedTokenMessage(String revokedToken, long expiryTime) {
+    private void handleRevokedTokenMessage(String revokedToken, long expiryTime,String tokenType) {
 
         boolean isJwtToken = false;
         if (StringUtils.isEmpty(revokedToken)) {
@@ -87,12 +87,10 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         }
 
         //handle JWT tokens
-        if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
-            revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
+        if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType) || APIConstants.JWT.equals(tokenType)) {
             ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                    .addRevokedJWTIntoMap(revokedToken, expiryTime);  // Add revoked
-            // token to
-            // revoked JWT map
+                    .addRevokedJWTIntoMap(revokedToken, expiryTime);
+            // Add revoked token to revoked JWT map
             isJwtToken = true;
         }
         ServiceReferenceHolder.getInstance().getRevokedTokenService()

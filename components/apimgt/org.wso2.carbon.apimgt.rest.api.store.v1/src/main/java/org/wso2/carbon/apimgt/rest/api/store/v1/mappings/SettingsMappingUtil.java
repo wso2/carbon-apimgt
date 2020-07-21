@@ -24,12 +24,24 @@ import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsIdentityProviderDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.application.authentication.framework.exception.FrameworkException;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
+import org.wso2.carbon.identity.application.common.model.Property;
+import org.wso2.carbon.user.api.RealmConfiguration;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,6 +65,64 @@ public class SettingsMappingUtil {
         identityProviderDTO.setExternal(APIUtil.getIdentityProviderConfig() != null);
         settingsDTO.setIdentityProvider(identityProviderDTO);
         settingsDTO.setIsAnonymousModeEnabled(anonymousEnabled);
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        boolean enableChangePassword =
+                Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_CHANGE_PASSWORD));
+        settingsDTO.setIsPasswordChangeEnabled(enableChangePassword);
+
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+
+        String userStorePasswordPattern = null;
+        String passwordPolicyPattern = null;
+        int passwordPolicyMinLength = -1;
+        int passwordPolicyMaxLength = -1;
+
+        try {
+            // Get password pattern from the UserStoreManager configuration
+            RealmConfiguration realmConfiguration = null;
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+
+            if (realmService != null && tenantId != MultitenantConstants.INVALID_TENANT_ID) {
+                UserStoreManager userStoreManager = null;
+                userStoreManager = (UserStoreManager) realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+                realmConfiguration = userStoreManager.getRealmConfiguration();
+            }
+
+            if (realmConfiguration != null) {
+                String passwordJavaRegEx = realmConfiguration.getUserStoreProperty(APIConstants.PASSWORD_JAVA_REGEX_PROPERTY);
+                if (passwordJavaRegEx != null && !passwordJavaRegEx.trim().isEmpty()) {
+                    userStorePasswordPattern = passwordJavaRegEx;
+                }
+            }
+
+            // Get password pattern from the Password policy
+            Property passwordPolicyEnabledProperty = FrameworkUtils.getResidentIdpConfiguration(
+                    APIConstants.IS_PASSWORD_POLICY_ENABLED_PROPERTY, tenantDomain);
+            boolean isPasswordPolicyEnabled = Boolean.parseBoolean(passwordPolicyEnabledProperty.getValue());
+            if (isPasswordPolicyEnabled) {
+                passwordPolicyPattern =
+                        FrameworkUtils.getResidentIdpConfiguration(APIConstants.PASSWORD_POLICY_PATTERN_PROPERTY,
+                                tenantDomain).getValue();
+                passwordPolicyMinLength = Integer.parseInt(FrameworkUtils.getResidentIdpConfiguration(
+                        APIConstants.PASSWORD_POLICY_MIN_LENGTH_PROPERTY, tenantDomain).getValue());
+                passwordPolicyMaxLength = Integer.parseInt(FrameworkUtils.getResidentIdpConfiguration(
+                        APIConstants.PASSWORD_POLICY_MAX_LENGTH_PROPERTY, tenantDomain).getValue());
+            }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error occurred in getting userRealm for the tenant: " + tenantId;
+            throw new APIManagementException(errorMessage, e);
+        } catch (FrameworkException e) {
+            String errorMessage = "Error occurred in getting Resident Idp Configurations for tenant: " + tenantId;
+            throw new APIManagementException(errorMessage, e);
+        }
+        settingsDTO.setUserStorePasswordPattern(userStorePasswordPattern);
+        settingsDTO.setPasswordPolicyPattern(passwordPolicyPattern);
+        settingsDTO.setPasswordPolicyMinLength(passwordPolicyMinLength);
+        settingsDTO.setPasswordPolicyMaxLength(passwordPolicyMaxLength);
+
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
             Map<String, Environment> environments = APIUtil.getEnvironments();

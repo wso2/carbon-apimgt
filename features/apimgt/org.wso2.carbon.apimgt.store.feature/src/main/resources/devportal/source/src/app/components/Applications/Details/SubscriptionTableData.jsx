@@ -238,12 +238,22 @@ class SubscriptionTableData extends React.Component {
                 <TableCell>{apiInfo.lifeCycleStatus}</TableCell>
                 <TableCell>{throttlingPolicy}</TableCell>
                 <TableCell>{status}</TableCell>
-                <TableCell>                   
-                        <IconButton aria-label='Edit' onClick={this.handleRequestOpenEditMenu}>
-                            <Icon>edit</Icon>
-                        </IconButton>
+                <TableCell>    
+                        <Button
+                            color="default"
+                            onClick={this.handleRequestOpenEditMenu}
+                            startIcon={<Icon>edit</Icon>}
+                        >
+                            <FormattedMessage
+                                id='Applications.Details.SubscriptionTableData.edit.text'
+                                defaultMessage='Edit'
+                            />
+                        </Button>               
                         <Dialog open={openMenuEdit} transition={Slide}>
-                            <DialogTitle>Update Subscription</DialogTitle>
+                            <DialogTitle><FormattedMessage
+                                        id='Applications.Details.SubscriptionTableData.update.subscription'
+                                        defaultMessage='Update Subscription'
+                                    /></DialogTitle>
                             <DialogContent>
                                 <DialogContentText>
                                     <FormattedMessage
@@ -320,13 +330,13 @@ class SubscriptionTableData extends React.Component {
                                 </DialogContentText>
                             </DialogContent>
                             <DialogActions>
-                                <Button dense color='primary' onClick={this.handleRequestCloseEditMenu}>
+                                <Button dense onClick={this.handleRequestCloseEditMenu}>
                                     <FormattedMessage
                                         id='Applications.Details.SubscriptionTableData.cancel'
                                         defaultMessage='Cancel'
                                     />
                                 </Button>
-                                <Button disabled={(status === 'BLOCKED' || status === 'ON_HOLD' || status === 'REJECTED')} dense color='primary' onClick={() => this.handleSubscriptionTierUpdate(apiId,
+                                <Button variant="contained" disabled={(status === 'BLOCKED' || status === 'ON_HOLD' || status === 'REJECTED')} dense color='primary' onClick={() => this.handleSubscriptionTierUpdate(apiId,
                                     subscriptionId, selectedTier, status, throttlingPolicy)}>
                                     <FormattedMessage
                                         id='Applications.Details.SubscriptionTableData.update'
@@ -339,9 +349,16 @@ class SubscriptionTableData extends React.Component {
                             resourcePath={resourcePaths.SINGLE_SUBSCRIPTION}
                             resourceMethod={resourceMethods.DELETE}
                         >
-                            <IconButton aria-label='Delete' onClick={this.handleRequestOpen}>
-                                <Icon>delete</Icon>
-                            </IconButton>
+                            <Button
+                                color="default"
+                                onClick={this.handleRequestOpen}
+                                startIcon={<Icon>delete</Icon>}
+                            >
+                                <FormattedMessage
+                                    id='Applications.Details.SubscriptionTableData.delete.text'
+                                    defaultMessage='Delete'
+                                />
+                            </Button>
                         </ScopeValidation>
 
                         <Dialog open={openMenu} transition={Slide}>
@@ -355,13 +372,13 @@ class SubscriptionTableData extends React.Component {
                                 </DialogContentText>
                             </DialogContent>
                             <DialogActions>
-                                <Button dense color='primary' onClick={this.handleRequestClose}>
+                                <Button dense onClick={this.handleRequestClose}>
                                     <FormattedMessage
                                         id='Applications.Details.SubscriptionTableData.cancel'
                                         defaultMessage='Cancel'
                                     />
                                 </Button>
-                                <Button dense color='primary' onClick={() => this.handleRequestDelete(subscriptionId)}>
+                                <Button dense variant="contained" color='primary' onClick={() => this.handleRequestDelete(subscriptionId)}>
                                     <FormattedMessage
                                         id='Applications.Details.SubscriptionTableData.delete'
                                         defaultMessage='Delete'
@@ -369,8 +386,6 @@ class SubscriptionTableData extends React.Component {
                                 </Button>
                             </DialogActions>
                         </Dialog>
-                </TableCell>
-                <TableCell>
                     <Invoice subscriptionId={subscriptionId} isMonetizedAPI={isMonetizedAPI} isDynamicUsagePolicy={isDynamicUsagePolicy} />
                 </TableCell>
             </TableRow>

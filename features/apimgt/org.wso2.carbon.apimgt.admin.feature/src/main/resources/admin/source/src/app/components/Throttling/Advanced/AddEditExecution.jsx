@@ -47,6 +47,9 @@ const useStyles = makeStyles((theme) => ({
         paddingTop: 7,
         paddingLeft: 5,
     },
+    defaultLimitLabel: {
+        marginLeft: theme.spacing(1),
+    },
 }));
 /**
  * Render the execution polcy section and default limits.
@@ -131,8 +134,7 @@ function AddEditExecution(props) {
     return (
         <>
             <Box display='flex' flexDirection='row' alignItems='center'>
-                <Box flex='1'>
-
+                <Box flex='1' className={classes.defaultLimitLabel}>
                     <FormLabel component='legend'>
                         <FormattedMessage
                             id='Throttling.Advanced.AddEditExecution.default.limit.option'
@@ -174,6 +176,7 @@ function AddEditExecution(props) {
                             />
                         )}
                         fullWidth
+                        type='number'
                         error={hasErrors('requestCount', requestCount.requestCount, validating)}
                         helperText={hasErrors('requestCount', requestCount.requestCount, validating)
                 || 'Number of requests allowed'}
@@ -187,6 +190,7 @@ function AddEditExecution(props) {
                             name='dataAmount'
                             value={bandwidth.dataAmount}
                             onChange={update}
+                            type='number'
                             label={(
                                 <FormattedMessage
                                     id='Throttling.Advanced.AddEdit.form.dataAmount.label'
@@ -221,6 +225,7 @@ function AddEditExecution(props) {
                         name='unitTime'
                         value={unitTime}
                         onChange={update}
+                        type='number'
                         label={(
                             <FormattedMessage
                                 id='Throttling.Advanced.AddEdit.form.unit.time.label'
@@ -228,7 +233,6 @@ function AddEditExecution(props) {
                             />
                         )}
                         fullWidth
-                        multiline
                         error={hasErrors('unitTime', unitTime, validating)}
                         helperText={hasErrors('unitTime', unitTime, validating) || intl.formatMessage({
                             id: 'Throttling.Advanced.AddEdit.form.unit.time.help',

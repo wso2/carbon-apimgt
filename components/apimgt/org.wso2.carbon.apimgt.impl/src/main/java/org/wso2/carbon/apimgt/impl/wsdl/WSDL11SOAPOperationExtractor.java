@@ -535,10 +535,17 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                                             if (((ArrayProperty) parentProperty).getItems() != null) {
                                                 if (parentName.equals(((ArrayProperty) parentProperty).getItems()
                                                         .getName())) {
-                                                    Property objectProperty = new ObjectProperty();
+                                                    ObjectProperty objectProperty = new ObjectProperty();
                                                     Map propertiesMap = new HashMap();
+                                                    if (((ObjectProperty) (((ArrayProperty) parentProperty).getItems()))
+                                                            .getProperties() != null) {
+                                                        propertiesMap =
+                                                                ((ObjectProperty) (((ArrayProperty) parentProperty)
+                                                                        .getItems())).getProperties();
+                                                    }
                                                     propertiesMap.put(element, createPropertyFromNode(current, true));
-                                                    ((ObjectProperty) objectProperty).setProperties(propertiesMap);
+                                                    objectProperty.setProperties(propertiesMap);
+                                                    objectProperty.setName(parentName);
                                                     ((ArrayProperty) parentProperty).setItems(objectProperty);
                                                     parentProp = parentProperty;
                                                 }

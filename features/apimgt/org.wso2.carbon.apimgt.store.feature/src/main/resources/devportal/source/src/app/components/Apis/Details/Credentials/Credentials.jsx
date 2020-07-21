@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Subscription from 'AppData/Subscription';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Api from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
@@ -62,27 +63,29 @@ const styles = (theme) => ({
         }
     },
     tableMain: {
-        width: '100%',
-        borderCollapse: 'collapse',
-        marginTop: theme.spacing(3),
-        marginLeft: theme.spacing(2),
-        marginRight: theme.spacing(1),
-        '& tr td':{
+        '& > table': {
+            width: '100%',
+            borderCollapse: 'collapse',
+            marginTop: theme.spacing(3),
+            marginLeft: theme.spacing(2),
+            marginRight: theme.spacing(1),
+        },
+        '& table > tr td':{
             paddingLeft: theme.spacing(1),
         },
-        '& tr:nth-child(even)': {
+        '&  table > tr:nth-child(even)': {
             backgroundColor: theme.custom.listView.tableBodyEvenBackgrund,
             '& td, & a, & .material-icons': {
                 color: theme.palette.getContrastText(theme.custom.listView.tableBodyEvenBackgrund),
             },
         },
-        '& tr:nth-child(odd)': {
+        '&  table > tr:nth-child(odd)': {
             backgroundColor: theme.custom.listView.tableBodyOddBackgrund,
             '& td, & a, & .material-icons': {
                 color: theme.palette.getContrastText(theme.custom.listView.tableBodyOddBackgrund),
             },
         },
-        '& th': {
+        '&  table > tr > th': {
             backgroundColor: theme.custom.listView.tableHeadBackground,
             color: theme.palette.getContrastText(theme.custom.listView.tableHeadBackground),
             paddingLeft: theme.spacing(1),
@@ -171,6 +174,7 @@ class Credentials extends React.Component {
         throttlingPolicyList: [],
         applicationOwner: '',
         hashEnabled: false,
+        isSubscribing: false,
     };
 
     /**
@@ -215,6 +219,7 @@ class Credentials extends React.Component {
         const { subscriptionRequest } = this.state;
         const { intl } = this.props;
         const api = new Api();
+        this.setState({ isSubscribing: true });
         api.subscribe(
             subscriptionRequest.apiId,
             subscriptionRequest.applicationId,
@@ -235,10 +240,12 @@ class Credentials extends React.Component {
                     }));
                 }
                 if (updateSubscriptionData) updateSubscriptionData(this.updateData);
+                this.setState({ isSubscribing: false });
             })
             .catch((error) => {
                 console.log('Error while creating the subscription.');
                 console.error(error);
+                this.setState({ isSubscribing: false });
             });
     };
 
@@ -317,6 +324,7 @@ class Credentials extends React.Component {
             throttlingPolicyList,
             applicationOwner,
             hashEnabled,
+            isSubscribing,
         } = this.state;
         const user = AuthManager.getUser();
         const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2') &&
@@ -451,13 +459,14 @@ class Credentials extends React.Component {
                                                 color='primary'
                                                 className={classes.buttonElm}
                                                 onClick={() => this.handleSubscribe()}
-                                                disabled={!api.isSubscriptionAvailable}
+                                                disabled={!api.isSubscriptionAvailable || isSubscribing}
                                             >
                                                 <FormattedMessage
                                                     id={'Apis.Details.Credentials.'
                                                     + 'SubscibeButtonPanel.subscribe.btn'}
                                                     defaultMessage='Subscribe'
                                                 />
+                                                {isSubscribing && <CircularProgress size={24} />}
                                             </Button>
                                         </div>
                                     )}
@@ -485,46 +494,48 @@ class Credentials extends React.Component {
                                         defaultMessage='( Applications Subscribed to this Api )'
                                     />
                                 </Typography>
-                                <table className={classes.tableMain}>
-                                    <tr>
-                                        <th className={classes.th}>
-                                            <FormattedMessage
-                                                id={'Apis.Details.Credentials.Credentials.'
-                                                + 'api.credentials.subscribed.apps.name'}
-                                                defaultMessage='Application Name'
+                                <div className={classes.tableMain}>
+                                    <table>
+                                        <tr>
+                                            <th className={classes.th}>
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Credentials.Credentials.'
+                                                    + 'api.credentials.subscribed.apps.name'}
+                                                    defaultMessage='Application Name'
+                                                />
+                                            </th>
+                                            <th className={classes.th}>
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Credentials.Credentials.api.'
+                                                    + 'credentials.subscribed.apps.tier'}
+                                                    defaultMessage='Throttling Tier'
+                                                />
+                                            </th>
+                                            <th className={classes.th}>
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Credentials.Credentials.'
+                                                    + 'api.credentials.subscribed.apps.status'}
+                                                    defaultMessage='Application Status'
+                                                />
+                                            </th>
+                                            <th className={classes.th} />
+                                        </tr>
+                                        {subscribedApplications.map((app, index) => (
+                                            <SubscriptionTableRow
+                                                key={index}
+                                                loadInfo={this.loadInfo}
+                                                handleSubscriptionDelete={this.handleSubscriptionDelete}
+                                                selectedAppId={selectedAppId}
+                                                updateSubscriptionData={updateSubscriptionData}
+                                                selectedKeyType={selectedKeyType}
+                                                app={app}
+                                                index={index}
+                                                applicationOwner={applicationOwner}
+                                                hashEnabled={hashEnabled}
                                             />
-                                        </th>
-                                        <th className={classes.th}>
-                                            <FormattedMessage
-                                                id={'Apis.Details.Credentials.Credentials.api.'
-                                                + 'credentials.subscribed.apps.tier'}
-                                                defaultMessage='Throttling Tier'
-                                            />
-                                        </th>
-                                        <th className={classes.th}>
-                                            <FormattedMessage
-                                                id={'Apis.Details.Credentials.Credentials.'
-                                                + 'api.credentials.subscribed.apps.status'}
-                                                defaultMessage='Application Status'
-                                            />
-                                        </th>
-                                        <th className={classes.th} />
-                                    </tr>
-                                    {subscribedApplications.map((app, index) => (
-                                        <SubscriptionTableRow
-                                            key={index}
-                                            loadInfo={this.loadInfo}
-                                            handleSubscriptionDelete={this.handleSubscriptionDelete}
-                                            selectedAppId={selectedAppId}
-                                            updateSubscriptionData={updateSubscriptionData}
-                                            selectedKeyType={selectedKeyType}
-                                            app={app}
-                                            index={index}
-                                            applicationOwner={applicationOwner}
-                                            hashEnabled={hashEnabled}
-                                        />
-                                    ))}
-                                </table>
+                                        ))}
+                                    </table>
+                                </div>
                             </>
                         )}
                     </>
@@ -551,7 +562,6 @@ class Credentials extends React.Component {
                                     >
                                         <Button
                                             color='secondary'
-                                            className={classes.buttonElm}
                                             disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL
                                                  || isOnlyBasicAuth}
                                             size='small'

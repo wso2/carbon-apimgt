@@ -85,7 +85,7 @@ public class BotDetectionDataDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "The header set")
+  @ApiModelProperty(example = "[Accept=*_/_*, Host=localhost:8243, User-Agent=curl/7.58.0]", value = "The header set")
   @JsonProperty("headerSet")
   public String getHeaderSet() {
     return headerSet;

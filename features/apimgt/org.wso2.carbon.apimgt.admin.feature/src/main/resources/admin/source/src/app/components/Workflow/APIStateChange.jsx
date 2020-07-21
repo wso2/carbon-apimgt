@@ -52,6 +52,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import CheckIcon from '@material-ui/icons/Check';
 import ClearIcon from '@material-ui/icons/Clear';
 import Box from '@material-ui/core/Box';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles((theme) => ({
     searchInput: {
@@ -82,6 +83,8 @@ function ListLabels() {
     const intl = useIntl();
     const [data, setData] = useState(null);
     const restApi = new API();
+    const [isUpdating, setIsUpdating] = useState(null);
+    const [buttonValue, setButtonValue] = useState();
 
     /**
      * API call to get Detected Data
@@ -135,7 +138,9 @@ function ListLabels() {
     }, []);
 
     const updateStatus = (referenceId, value) => {
+        setButtonValue(value);
         const body = { status: value, attributes: {}, description: '' };
+        setIsUpdating(true);
         if (value === 'APPROVED') {
             body.description = 'Approve workflow request.';
         }
@@ -146,12 +151,11 @@ function ListLabels() {
         const promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
         return promisedupdateWorkflow
             .then(() => {
-                return (
-                    <FormattedMessage
-                        id='Workflow.APIStateChange.update.success'
-                        defaultMessage='workflow status is updated successfully'
-                    />
-                );
+                setIsUpdating(false);
+                Alert.success(intl.formatMessage({
+                    id: 'Workflow.APIStateChange.update.success',
+                    defaultMessage: 'Workflow status is updated successfully.',
+                }));
             })
             .catch((error) => {
                 const { response } = error;
@@ -162,6 +166,7 @@ function ListLabels() {
                     }));
                     throw (response.body.description);
                 }
+                setIsUpdating(false);
                 return null;
             })
             .then(() => {
@@ -271,7 +276,7 @@ function ListLabels() {
                             {properties.apiProvider}
                             <br />
                             <Tooltip title={format}>
-                                <Typography color='textSecondary'>
+                                <Typography color='textSecondary' variant='caption'>
                                     {time}
                                 </Typography>
                             </Tooltip>
@@ -299,9 +304,14 @@ function ListLabels() {
                                     variant='contained'
                                     size='small'
                                     onClick={() => updateStatus(referenceId, 'APPROVED')}
+                                    disabled={isUpdating}
                                 >
                                     <CheckIcon />
-                                    Approve
+                                    <FormattedMessage
+                                        id='Workflow.APIStateChange.table.button.approve'
+                                        defaultMessage='Approve'
+                                    />
+                                    {(isUpdating && buttonValue === 'APPROVED') && <CircularProgress size={15} /> }
                                 </Button>
                                 &nbsp;&nbsp;
                                 <Button
@@ -309,9 +319,14 @@ function ListLabels() {
                                     variant='contained'
                                     size='small'
                                     onClick={() => updateStatus(referenceId, 'REJECTED')}
+                                    disabled={isUpdating}
                                 >
                                     <ClearIcon />
-                                    Reject
+                                    <FormattedMessage
+                                        id='Workflow.APIStateChange.table.button.reject'
+                                        defaultMessage='Reject'
+                                    />
+                                    {(isUpdating && buttonValue === 'REJECTED') && <CircularProgress size={15} />}
                                 </Button>
                             </Box>
                         </div>
@@ -333,7 +348,7 @@ function ListLabels() {
     const searchActive = true;
     const searchPlaceholder = intl.formatMessage({
         id: 'Workflow.apistatechange.search.default',
-        defaultMessage: 'Search by workflow request description',
+        defaultMessage: 'Search by API, Request state, Current state or Creator',
     });
 
     const filterData = (event) => {

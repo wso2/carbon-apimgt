@@ -1995,6 +1995,7 @@ public class APIMappingUtil {
                 ProductAPIDTO productAPI = new ProductAPIDTO();
                 productAPI.setApiId(uuid);
                 productAPI.setName(apiProductResource.getApiName());
+                productAPI.setVersion(apiProductResource.getApiIdentifier().getVersion());
                 List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
                 URITemplate template = apiProductResource.getUriTemplate();
 

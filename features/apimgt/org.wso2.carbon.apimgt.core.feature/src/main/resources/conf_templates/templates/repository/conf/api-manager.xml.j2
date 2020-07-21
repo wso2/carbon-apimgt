@@ -349,25 +349,11 @@
         <!-- Admin password for API key manager. -->
         <Password>{{apim.key_manager.password}}</Password>
 
-        <!-- Configurations related to enable thrift support for key-management related communication.
-             If you want to switch back to Web Service Client, change the value of "KeyValidatorClientType" to "WSClient".
-             In a distributed environment;
-             -If you are at the Gateway node, you need to point "ThriftClientPort" value to the "ThriftServerPort" value given at KeyManager node.
-             -If you need to start two API Manager instances in the same machine, you need to give different ports to "ThriftServerPort" value in two nodes.
-             -ThriftServerHost - Allows to configure a hostname for the thrift server. It uses the carbon hostname by default.
-	         -The Gateway uses this parameter to connect to the key validation thrift service. -->
-        <KeyValidatorClientType>WSClient</KeyValidatorClientType>
-        <ConnectionPool>
-            <MaxIdle>{{apim.key_manager.pool.max_idle}}</MaxIdle>
-            <InitIdleCapacity>{{apim.key_manager.pool.init_idle_capacity}}</InitIdleCapacity>
-        </ConnectionPool>
-        <!-- Specifies the implementation to be used for KeyValidationHandler. Steps for validating a token can be controlled by plugging in a
-             custom KeyValidation Handler -->
         <KeyValidationHandlerClassName>{{apim.key_manager.key_validation_handler_impl}}</KeyValidationHandlerClassName>
+        <DefaultKeyManagerType>{{apim.key_manager.type}}</DefaultKeyManagerType>
        {% if apim.jwt.expiry_time is defined %}
         <JWTExpiryTime>{{apim.jwt.expiry_time}}</JWTExpiryTime>
        {% endif %}
-     <EnableDefaultKeyManagerRegistration>{{apim.key_manager.enable_registration}}</EnableDefaultKeyManagerRegistration>
      <EnableKeyManagerConfigurationRetriever>{{apim.key_manager.enable_retriever}}</EnableKeyManagerConfigurationRetriever>
     </APIKeyValidator>
 
@@ -397,7 +383,8 @@
         </ScopeWhitelist>
 
         <!-- Name of the token API -->
-        <TokenEndPointName>/oauth2/token</TokenEndPointName>
+        <TokenEndPointName>{{apim.oauth_config.token_endpoint_context}}</TokenEndPointName>
+        <RevokeEndpointName>{{apim.oauth_config.revoke_endpoint_context}}</RevokeEndpointName>
         <!-- This the API URL for revoke API. When we revoke tokens revoke requests should go through this
              API deployed in API gateway. Then it will do cache invalidations related to revoked tokens.
              In distributed deployment we should configure this property in key manager node by pointing
@@ -413,6 +400,7 @@
         org.wso2.carbon.identity.oauth.tokenprocessor.HashingPersistenceProcessor and change the value of
         <EnableClientSecretHash> to true in the identity.xml -->
         <EnableTokenHashMode>{{apim.oauth_config.enable_token_hashing}}</EnableTokenHashMode>
+
     </OAuthConfigurations>
 
     <TokenRevocationNotifiers class="{{apim.token.revocation.notifier_impl}}">
@@ -1125,9 +1113,6 @@
     <skipRolesByRegex>{{apim.skip_roles_by_regex.regex}}</skipRolesByRegex>
     {% endif %}
 
-    <JWTAuthentication>
-        <EnableSubscriptionValidationViaKeyManager>{{apim.jwt_authenitcation.subscription_validation_via_km}}</EnableSubscriptionValidationViaKeyManager>
-    </JWTAuthentication>
     <CertificateReLoaderConfiguration>
         <Period>{{apim.certificate_reloader.period}}</Period>
     </CertificateReLoaderConfiguration>
@@ -1225,6 +1210,9 @@
         {% if apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway is defined %}
         <PublishDirectlyToGW>{{apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway}}</PublishDirectlyToGW>
         {% endif %}
+        {% if database.sync_runtime_artifacts_db is defined %}
+        <DataSourceName>{{apim.datasource_sync_runtime_artifacts.name}}</DataSourceName>
+        {% endif %}
     </SyncRuntimeArtifactsPublisher>
     {% endif %}
 
@@ -1240,6 +1228,12 @@
         {% endif %}
         {% if apim.sync_runtime_artifacts.gateway.artifact_retriever is defined %}
         <ArtifactRetriever>{{apim.sync_runtime_artifacts.gateway.artifact_retriever}}</ArtifactRetriever>
+        {% endif %}
+        {% if apim.sync_runtime_artifacts.gateway.deployment_retry_duartion is defined %}
+        <RetryDuration>{{apim.sync_runtime_artifacts.gateway.deployment_retry_duartion}}</RetryDuration>
+        {% endif %}
+        {% if apim.sync_runtime_artifacts.gateway.data_retrieval_mode is defined %}
+        <DataRetrievalMode>{{apim.sync_runtime_artifacts.data_retrieval_mode}}</DataRetrievalMode>
         {% endif %}
     </SyncRuntimeArtifactsGateway>
     {% endif %}

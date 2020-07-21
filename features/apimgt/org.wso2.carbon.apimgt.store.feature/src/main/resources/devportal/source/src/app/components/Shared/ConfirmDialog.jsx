@@ -30,6 +30,11 @@ const styles = (theme) => ({
             color: theme.palette.getContrastText(theme.palette.background.paper),
         },
     },
+    deleteConformButton: {
+        '& span.MuiButton-label': {
+            color: theme.palette.getContrastText(theme.palette.primary.main),
+        },
+    },
 });
 
 /**
@@ -63,7 +68,7 @@ class ConfirmDialog extends React.Component {
         } = this.props;
 
         return (
-            <Dialog open={open} onClose={this.handleRequestClose} className={classes.dialogWrapper}>
+            <Dialog role='alertdialog' open={open} onClose={this.handleRequestClose} className={classes.dialogWrapper}>
                 <DialogTitle>{title || <FormattedMessage id='Shared.ConfirmDialog.please.confirm' defaultMessage='Please Confirm' />}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>{message || <FormattedMessage id='Shared.ConfirmDialog.please.confirm.sure' defaultMessage='Are you sure?' />}</DialogContentText>
@@ -72,7 +77,12 @@ class ConfirmDialog extends React.Component {
                     <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.CANCEL)} color='primary'>
                         {labelCancel || <FormattedMessage id='Shared.ConfirmDialog.cancel' defaultMessage='Cancel' />}
                     </Button>
-                    <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.OK)} color='primary' variant='contained'>
+                    <Button
+                        onClick={() => this.handleRequestClose(ConfirmDialog.Action.OK)}
+                        color='primary'
+                        variant='contained'
+                        className={classes.deleteConformButton}
+                    >
                         {labelOk || <FormattedMessage id='Shared.ConfirmDialog.ok' defaultMessage='OK' />}
                     </Button>
                 </DialogActions>

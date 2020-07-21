@@ -25,6 +25,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -111,6 +112,9 @@ public class ImportApiServiceImpl implements ImportApiService {
                 RestApiUtil.handleAuthorizationFailure(errorMessage, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError("Requested " + RestApiConstants.RESOURCE_API + " not found",
+                        e, log);
+            } else if (RestApiUtil.isDueToMetaInfoIsCorrupted(e)) {
+                RestApiUtil.handleMetaInformationFailureError("Error while reading API meta information from path.",
                         e, log);
             }
             RestApiUtil.handleInternalServerError("Error while importing API", e, log);
@@ -305,6 +309,8 @@ public class ImportApiServiceImpl implements ImportApiService {
                 APIInfoListDTO skippedAPIListDTO = APIInfoMappingUtil.fromAPIInfoListToDTO(skippedAPIs);
                 return Response.created(location).status(207).entity(skippedAPIListDTO).build();
             }
+        } catch (APIMgtResourceAlreadyExistsException e) {
+            RestApiUtil.handleResourceAlreadyExistsError("Error while importing Application", e, log);
         } catch (APIManagementException | URISyntaxException | UserStoreException e) {
             RestApiUtil.handleInternalServerError("Error while importing Application", e, log);
         } catch (UnsupportedEncodingException e) {
@@ -327,7 +333,8 @@ public class ImportApiServiceImpl implements ImportApiService {
         apiKey.setConsumerKey(oAuthApplicationInfo.getClientId());
         apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
         apiKey.setGrantTypes((String) oAuthApplicationInfo.getParameter(GRANT_TYPES));
-        if (apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey.getGrantTypes().contains(GRANT_TYPE_CODE)) {
+        if (apiKey.getGrantTypes() != null &&
+                apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey.getGrantTypes().contains(GRANT_TYPE_CODE)) {
             apiKey.setCallbackUrl((String) oAuthApplicationInfo.getParameter(REDIRECT_URIS));
         }
 

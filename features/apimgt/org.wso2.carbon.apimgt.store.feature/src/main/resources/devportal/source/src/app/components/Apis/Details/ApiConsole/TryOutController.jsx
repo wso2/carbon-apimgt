@@ -99,11 +99,11 @@ const styles = makeStyles((theme) => ({
  */
 function TryOutController(props) {
     const {
-        securitySchemeType, selectedEnvironment, environments, labels,
+        securitySchemeType, selectedEnvironment, environments, containerMngEnvironments, labels,
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
         selectedKeyManager, setSelectedKeyManager,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
-        setSecurityScheme, setUsername, setPassword, username, password,
+        setSecurityScheme, setUsername, setPassword, username, password, updateSwagger,
         setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey, environmentObject, setURLs, api,
     } = props;
     const classes = styles();
@@ -334,6 +334,7 @@ function TryOutController(props) {
         switch (name) {
             case 'selectedEnvironment':
                 setSelectedEnvironment(value, true);
+                updateSwagger(value);
                 if (environmentObject) {
                     const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
                     setURLs(urls);
@@ -413,6 +414,35 @@ function TryOutController(props) {
         tokenValue = selectedKeyType === 'PRODUCTION' ? productionApiKey : sandboxApiKey;
     } else {
         tokenValue = selectedKeyType === 'PRODUCTION' ? productionAccessToken : sandboxAccessToken;
+    }
+
+    // The rendering logic of container management menus items are done here
+    // because when grouping container management type and clusters with <> and </>
+    // the handleChange event is not triggered. Hence handle rendering logic here.
+    const containerMngEnvMenuItems = [];
+    if (containerMngEnvironments) {
+        containerMngEnvironments.filter((envType) => envType.clusterDetails.length > 0).forEach((envType) => {
+            // container management system type
+            containerMngEnvMenuItems.push(
+                <MenuItem value='' disabled className={classes.menuItem}>
+                    <em>
+                        {envType.deploymentEnvironmentName}
+                    </em>
+                </MenuItem>,
+            );
+            // clusters of the container management system type
+            envType.clusterDetails.forEach((cluster) => {
+                containerMngEnvMenuItems.push(
+                    <MenuItem
+                        value={cluster.clusterName}
+                        key={cluster.clusterName}
+                        className={classes.menuItem}
+                    >
+                        {cluster.clusterDisplayName}
+                    </MenuItem>,
+                );
+            });
+        });
     }
 
     return (
@@ -565,6 +595,7 @@ function TryOutController(props) {
                                             defaultMessage='Enter access Token'
                                         />
                                     )}
+                                    id='accessTokenInput'
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position='end'>
@@ -609,6 +640,7 @@ function TryOutController(props) {
                                     </Button>
                                     <Tooltip
                                         placement='right'
+                                        interactive
                                         title={(
                                             <FormattedMessage
                                                 id='Apis.Details.TryOutConsole.access.token.tooltip'
@@ -619,7 +651,13 @@ function TryOutController(props) {
                                             />
                                         )}
                                     >
-                                        <HelpOutline className={classes.tooltip} />
+                                        <Box m={1}>
+                                            <IconButton
+                                                aria-label='Use existing Access Token or generate a new Test Key'
+                                            >
+                                                <HelpOutline />
+                                            </IconButton>
+                                        </Box>
                                     </Tooltip>
                                 </>
                             )}
@@ -627,8 +665,8 @@ function TryOutController(props) {
                     </Box>
                     <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
                         <Grid xs={12} md={6} item>
-                            {((environments && environments.length > 0)
-                                        || (labels && labels.length > 0))
+                            {((environments && environments.length > 0) || (containerMngEnvMenuItems.length > 0)
+                                || (labels && labels.length > 0))
                                     && (
                                         <>
                                             <Typography
@@ -682,6 +720,7 @@ function TryOutController(props) {
                                                             {env}
                                                         </MenuItem>
                                                     )))}
+                                                {containerMngEnvMenuItems}
                                                 {labels && labels.length > 0 && (
                                                     <MenuItem value='' disabled>
                                                         <em>

@@ -55,6 +55,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -536,7 +537,7 @@ public class APIAdminImpl implements APIAdmin {
 
         return apiMgtDAO.getAllCategories(tenantId);
     }
-
+    @Override
     public List<APICategory> getAPICategoriesOfTenant(int tenantId) throws APIManagementException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         List<APICategory> categories = getAllAPICategoriesOfTenant(tenantId);
@@ -725,5 +726,35 @@ public class APIAdminImpl implements APIAdmin {
             }
         }
         return authorizedScopes;
+    }
+
+    @Override
+    public void addTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        apiMgtDAO.addTenantTheme(tenantId, themeContent);
+    }
+
+    @Override
+    public void updateTenantTheme(int tenantId, InputStream themeContent) throws APIManagementException {
+
+        apiMgtDAO.updateTenantTheme(tenantId, themeContent);
+    }
+
+    @Override
+    public InputStream getTenantTheme(int tenantId) throws APIManagementException {
+
+        return apiMgtDAO.getTenantTheme(tenantId);
+    }
+
+    @Override
+    public boolean isTenantThemeExist(int tenantId) throws APIManagementException {
+
+        return apiMgtDAO.isTenantThemeExist(tenantId);
+    }
+
+    @Override
+    public void deleteTenantTheme(int tenantId) throws APIManagementException {
+
+        apiMgtDAO.deleteTenantTheme(tenantId);
     }
 }

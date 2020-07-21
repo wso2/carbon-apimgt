@@ -28,7 +28,7 @@ import AuthManager from '../../../../data/AuthManager';
 const styles = theme => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.primary.main),
-        '& span.MuiButton-label span': {
+        '& span.MuiButton-label': {
             color: theme.palette.getContrastText(theme.palette.primary.main),
         },
         cursor: 'pointer',

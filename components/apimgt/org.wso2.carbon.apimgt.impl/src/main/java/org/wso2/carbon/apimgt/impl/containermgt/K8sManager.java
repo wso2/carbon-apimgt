@@ -23,12 +23,13 @@ import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinitionList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
@@ -90,18 +91,31 @@ public class K8sManager implements ContainerManager {
     public void changeLCStateCreatedToPublished(API api, APIIdentifier apiIdentifier, Registry registry)
             throws ParseException, APIManagementException {
 
-        if (masterURL != null && saToken != null && !saToken.equals("") && !masterURL.equals("")) {
+        if (masterURL != null && saToken != null && !"".equals(saToken) && !"".equals(masterURL)) {
 
             String[] configmapNames = deployConfigMap(api, apiIdentifier, registry, openShiftClient, jwtSecurityCRName,
-                    oauthSecurityCRName, basicAuthSecurityCRName, false);
+                    oauthSecurityCRName, basicAuthSecurityCRName, "");
 
-            applyAPICustomResourceDefinition(openShiftClient, configmapNames, replicas, apiIdentifier, true);
-            log.info("Successfully deployed the [API] " + apiIdentifier.getApiName() + " in Kubernetes");
-
+            if (configmapNames != null) {
+                applyAPICustomResourceDefinition(openShiftClient, configmapNames, replicas, apiIdentifier, true);
+                log.info("Successfully deployed the [API] " + apiIdentifier.getApiName() + " in Kubernetes");
+            }
 
         } else {
-            log.warn("Master URL and/or Service-account Token hasn't been Provided."
-                    + " The [API] " + apiIdentifier.getApiName() + " will not be Published in Kubernetes");
+            try {
+                //handling scenario APIM deployed in Kubernetes cluster
+                String[] configmapNames = deployConfigMap(api, apiIdentifier, registry, openShiftClient, jwtSecurityCRName,
+                        oauthSecurityCRName, basicAuthSecurityCRName, "");
+
+                if (configmapNames != null) {
+                    applyAPICustomResourceDefinition(openShiftClient, configmapNames, replicas, apiIdentifier, true);
+                    log.info("Successfully deployed the [API] " + apiIdentifier.getApiName() + " in Kubernetes");
+                }
+
+            } catch (KubernetesClientException e) {
+                log.error("Master URL and/or Service-account and/or Token hasn't been Provided."
+                        + " The [API] " + apiIdentifier.getApiName() + " will not be Published in Kubernetes", e);
+            }
         }
 //        getPodStatus(openShiftClient,apiIdentifier);
     }
@@ -117,31 +131,27 @@ public class K8sManager implements ContainerManager {
 
         String apiName = apiId.getApiName();
 
-        JSONObject propreties = (JSONObject) containerMgtInfoDetails.get(PROPERTIES);
+        JSONObject properties = (JSONObject) containerMgtInfoDetails.get(PROPERTIES);
 
-        if (propreties.get(MASTER_URL) != null &&
-                propreties.get(SATOKEN) != null &&
-                propreties.get(NAMESPACE) != null) {
-            Config config = new ConfigBuilder()
-                    .withMasterUrl(propreties.get(MASTER_URL).toString().replace("\\", ""))
-                    .withOauthToken(propreties.get(SATOKEN).toString())
-                    .withNamespace(propreties.get(NAMESPACE).toString())
-                    .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
+        //get openshiftClient
+        OpenShiftClient client = getClient(properties);
+        if (client != null) {
+            try {
+                CustomResourceDefinition apiCRD = client.customResourceDefinitions().withName(API_CRD_NAME).get();
 
-            OpenShiftClient client = new DefaultOpenShiftClient(config);
-            CustomResourceDefinition apiCRD = client.customResourceDefinitions().withName(API_CRD_NAME).get();
+                NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
+                        DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
+                        DoneableAPICustomResourceDefinition>> crdClient = getCRDClient(client, apiCRD);
 
-            NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
-                    DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
-                    DoneableAPICustomResourceDefinition>> crdClient = getCRDClient(client, apiCRD);
+                crdClient.withName(apiName.toLowerCase()).cascading(true).delete();
 
-            crdClient.withName(apiName.toLowerCase()).cascading(true).delete();
-
-            log.info("Successfully deleted the [API] " + apiName);
+                log.info("Successfully deleted the [API] " + apiName);
+            } catch (KubernetesClientException e) {
+                log.error("Error occurred while deleting the API from kubernetes cluster.", e);
+            }
         } else {
-            log.error("Error occurred while deleting API from Kubernetes cluster");
+            log.error("Error occurred while establishing the connection to the Kubernetes cluster");
         }
-
     }
 
     /**
@@ -169,51 +179,62 @@ public class K8sManager implements ContainerManager {
 
         String apiName = apiId.getApiName();
         JSONObject propreties = (JSONObject) containerMgtInfoDetails.get(PROPERTIES);
-        String jwtSecurity ="";
+        String jwtSecurity = "";
         String basicSecurity = "";
         String oauthSecurity = "";
 
-        if (propreties.get(MASTER_URL) != null && propreties.get(SATOKEN) != null && propreties.get(NAMESPACE) != null) {
-            Config config = new ConfigBuilder()
-                    .withMasterUrl(propreties.get(MASTER_URL).toString().replace("\\", ""))
-                    .withOauthToken(propreties.get(SATOKEN).toString())
-                    .withNamespace(propreties.get(NAMESPACE).toString())
-                    .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
-
-            OpenShiftClient client = new DefaultOpenShiftClient(config);
-
-            if(propreties.get(JWT_SECURITY_CR_NAME) != null){
+        //get Openshift client object
+        OpenShiftClient client = getClient(propreties);
+        if (client != null) {
+            if (propreties.get(JWT_SECURITY_CR_NAME) != null) {
                 jwtSecurity = propreties.get(JWT_SECURITY_CR_NAME).toString();
             }
-            if(propreties.get(OAUTH2_SECURITY_CR_NAME) != null){
+            if (propreties.get(OAUTH2_SECURITY_CR_NAME) != null) {
                 oauthSecurity = propreties.get(OAUTH2_SECURITY_CR_NAME).toString();
             }
-            if(propreties.get(BASICAUTH_SECURITY_CR_NAME) != null){
+            if (propreties.get(BASICAUTH_SECURITY_CR_NAME) != null) {
                 basicSecurity = propreties.get(BASICAUTH_SECURITY_CR_NAME).toString();
             }
-            String[] configMapNames = deployConfigMap(api, apiId, registry, client,
-                    jwtSecurity, oauthSecurity, basicSecurity, true);
+            try {
+                CustomResourceDefinition crd = client.customResourceDefinitions().withName(API_CRD_NAME).get();
 
-            CustomResourceDefinition crd = client.customResourceDefinitions().withName(API_CRD_NAME).get();
+                NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
+                        DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
+                        DoneableAPICustomResourceDefinition>> crdClient = getCRDClient(client, crd);
 
-            NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
-                    DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
-                    DoneableAPICustomResourceDefinition>> crdClient = getCRDClient(client, crd);
+                APICustomResourceDefinition apiCustomResourceDefinition = crdClient.withName(apiName.toLowerCase()).get();
 
-            APICustomResourceDefinition apiCustomResourceDefinition = crdClient.withName(apiName.toLowerCase()).get();
+                String[] configMapNames;
+                if (apiCustomResourceDefinition == null) {
+                    // if API CR does not exists in the cluster, publish the API instead of re-publish
+                    // (when the API is published in other deployment, select this cluster and re-publish)
+                    configMapNames = deployConfigMap(api, apiId, registry, client,
+                            jwtSecurity, oauthSecurity, basicSecurity, "");
+                    applyAPICustomResourceDefinition(client, configMapNames, replicas, api.getId(), true);
+                    log.info("Successfully deployed the [API] " + api.getId().getApiName() + " in Kubernetes");
+                } else {
+                    // re-publish if API CR is exists
+                    String timeStampSuffix = getTimeStamp();
+                    configMapNames = deployConfigMap(api, apiId, registry, client,
+                            jwtSecurity, oauthSecurity, basicSecurity, timeStampSuffix);
+                    apiCustomResourceDefinition.getSpec().setUpdateTimeStamp(timeStampSuffix);
+                    apiCustomResourceDefinition.getSpec().getDefinition().setSwaggerConfigmapNames(configMapNames);
+                    //update with interceptors
+                    Interceptors interceptors = new Interceptors();
+                    interceptors.setBallerina(new String[]{});
+                    interceptors.setJava(new String[]{});
+                    apiCustomResourceDefinition.getSpec().getDefinition().setInterceptors(interceptors);
 
-            apiCustomResourceDefinition.getSpec().setUpdateTimeStamp(getTimeStamp());
-            apiCustomResourceDefinition.getSpec().getDefinition().setSwaggerConfigmapNames(configMapNames);
-            //update with interceptors
-            Interceptors interceptors = new Interceptors();
-            interceptors.setBallerina(new String[]{});
-            interceptors.setJava(new String[]{});
-            apiCustomResourceDefinition.getSpec().getDefinition().setInterceptors(interceptors);
+                    crdClient.createOrReplace(apiCustomResourceDefinition);
+                    log.info("Successfully Re-deployed the [API] " + apiName);
+                }
+            } catch (KubernetesClientException e) {
+                log.error("Error occurred while re-deploying the API in Kubernetes cluster", e);
+            }
 
-            crdClient.createOrReplace(apiCustomResourceDefinition);
-            log.info("Successfully Re-deployed the [API] " + apiName);
         } else {
-            log.error("Error occurred while re-deploying the API in Kubernetes cluster");
+            log.error("Error occurred while re-deploying the API in Kubernetes cluster. " +
+                    "could not establish the connection to the cluster");
         }
     }
 
@@ -245,39 +266,41 @@ public class K8sManager implements ContainerManager {
         String apiName = apiId.getApiName();
 
         JSONObject propreties = (JSONObject) containerMgtInfoDetails.get(ContainerBasedConstants.PROPERTIES);
+        //get openShiftClient Object
+        OpenShiftClient client = getClient(propreties);
+        if (client != null) {
+            try {
+                applyAPICustomResourceDefinition(client, configMapName, Integer.parseInt(propreties.get(REPLICAS).toString())
+                        , apiId, false);
+                CustomResourceDefinition crd = client.customResourceDefinitions().withName(API_CRD_NAME).get();
 
-        if (propreties.get(MASTER_URL) != null && propreties.get(SATOKEN) != null && propreties.get(NAMESPACE) != null) {
-            Config config = new ConfigBuilder()
-                    .withMasterUrl(propreties.get(MASTER_URL).toString().replace("\\", ""))
-                    .withOauthToken(propreties.get(SATOKEN).toString())
-                    .withNamespace(propreties.get(NAMESPACE).toString())
-                    .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
+                NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
+                        DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
+                        DoneableAPICustomResourceDefinition>> crdClient = getCRDClient(client, crd);
 
-            OpenShiftClient client = new DefaultOpenShiftClient(config);
-            applyAPICustomResourceDefinition(client, configMapName, Integer.parseInt(propreties.get(REPLICAS).toString())
-                    , apiId, false);
-            CustomResourceDefinition crd = client.customResourceDefinitions().withName(API_CRD_NAME).get();
+                List<APICustomResourceDefinition> apiCustomResourceDefinitionList = crdClient.list().getItems();
 
-            NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
-                    DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
-                    DoneableAPICustomResourceDefinition>> crdClient = getCRDClient(client, crd);
+                for (APICustomResourceDefinition apiCustomResourceDefinition : apiCustomResourceDefinitionList) {
 
-            List<APICustomResourceDefinition> apiCustomResourceDefinitionList = crdClient.list().getItems();
+                    if (apiCustomResourceDefinition.getMetadata().getName().equals(apiName.toLowerCase())) {
 
-            for (APICustomResourceDefinition apiCustomResourceDefinition : apiCustomResourceDefinitionList) {
-
-                if (apiCustomResourceDefinition.getMetadata().getName().equals(apiName.toLowerCase())) {
-
-                    apiCustomResourceDefinition.getSpec().setOverride(false);
-                    crdClient.createOrReplace(apiCustomResourceDefinition);
-                    log.info("Successfully Re-Published the [API] " + apiName);
-                    return;
+                        apiCustomResourceDefinition.getSpec().setOverride(false);
+                        //update with interceptors
+                        Interceptors interceptors = new Interceptors();
+                        interceptors.setBallerina(new String[]{});
+                        interceptors.setJava(new String[]{});
+                        apiCustomResourceDefinition.getSpec().getDefinition().setInterceptors(interceptors);
+                        crdClient.createOrReplace(apiCustomResourceDefinition);
+                        log.info("Successfully Re-Published the [API] " + apiName);
+                        return;
+                    }
                 }
+                log.error("The requested custom resource for the [API] " + apiName + " was not found");
+            } catch (KubernetesClientException e) {
+                log.error("Error occurred while Re-Publishing the [API] " + apiName, e);
             }
-
-            log.error("The requested custom resource for the [API] " + apiName + " was not found");
         } else {
-            log.error("Error occurred while re-publishing the API in Kubernetes cluster");
+            log.error("Error occurred while establishing the connection to the Kubernetes cluster");
         }
     }
 
@@ -302,62 +325,66 @@ public class K8sManager implements ContainerManager {
     private void applyAPICustomResourceDefinition(OpenShiftClient client, String[] configmapNames, int replicas,
                                                   APIIdentifier apiIdentifier, Boolean override) {
 
-        CustomResourceDefinitionList customResourceDefinitionList = client.customResourceDefinitions().list();
-        List<CustomResourceDefinition> customResourceDefinitionItems = customResourceDefinitionList.getItems();
-        CustomResourceDefinition apiCustomResourceDefinition = null;
+        if (client != null) {
+            CustomResourceDefinitionList customResourceDefinitionList = client.customResourceDefinitions().list();
+            List<CustomResourceDefinition> customResourceDefinitionItems = customResourceDefinitionList.getItems();
+            CustomResourceDefinition apiCustomResourceDefinition = null;
 
-        for (CustomResourceDefinition crd : customResourceDefinitionItems) {
-            ObjectMeta metadata = crd.getMetadata();
+            for (CustomResourceDefinition crd : customResourceDefinitionItems) {
+                ObjectMeta metadata = crd.getMetadata();
 
-            if (metadata != null && metadata.getName().equals(API_CRD_NAME)) {
+                if (metadata != null && metadata.getName().equals(API_CRD_NAME)) {
 
-                apiCustomResourceDefinition = crd;
+                    apiCustomResourceDefinition = crd;
+                }
             }
-        }
 
-        if (apiCustomResourceDefinition != null) {
-            log.info("Found [CRD] " + apiCustomResourceDefinition.getMetadata().getSelfLink());
+            if (apiCustomResourceDefinition != null) {
+                log.info("Found [CRD] " + apiCustomResourceDefinition.getMetadata().getSelfLink());
+            } else {
+
+                log.error("Custom resource definition apis.wso2.com was not found in the specified cluster");
+                return;
+            }
+
+            NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
+                    DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
+                    DoneableAPICustomResourceDefinition>> apiCrdClient = getCRDClient(client, apiCustomResourceDefinition);
+
+            // assigning values and creating API cr
+            Definition definition = new Definition();
+            Interceptors interceptors = new Interceptors();
+            interceptors.setBallerina(new String[]{});
+            interceptors.setJava(new String[]{});
+            definition.setType(SWAGGER);
+            definition.setSwaggerConfigmapNames(configmapNames);
+            definition.setInterceptors(interceptors);
+
+            APICustomResourceDefinitionSpec apiCustomResourceDefinitionSpec = new APICustomResourceDefinitionSpec();
+            apiCustomResourceDefinitionSpec.setDefinition(definition);
+            apiCustomResourceDefinitionSpec.setMode(MODE);
+            apiCustomResourceDefinitionSpec.setReplicas(replicas);
+            apiCustomResourceDefinitionSpec.setOverride(override);
+            apiCustomResourceDefinitionSpec.setUpdateTimeStamp("");
+
+            Status status = new Status();
+
+            APICustomResourceDefinition apiCustomResourceDef = new APICustomResourceDefinition();
+            apiCustomResourceDef.setSpec(apiCustomResourceDefinitionSpec);
+            apiCustomResourceDef.setStatus(status);
+            apiCustomResourceDef.setApiVersion(API_VERSION);
+            apiCustomResourceDef.setKind(CRD_KIND);
+            ObjectMeta meta = new ObjectMeta();
+            meta.setName(apiIdentifier.getApiName().toLowerCase());
+            meta.setNamespace(client.getNamespace());
+            apiCustomResourceDef.setMetadata(meta);
+            apiCrdClient.createOrReplace(apiCustomResourceDef);
+
+            log.info("Created [API-CR] apis.wso2.com/" + apiCustomResourceDef.getMetadata().getName() + " for the "
+                    + "[API] " + apiIdentifier.getApiName());
         } else {
-
-            log.error("Custom resource definition apis.wso2.com was not found in the specified cluster");
-            return;
+            log.error("Error occurred while creating [API-CR]. could not establish the connection to the cluster");
         }
-
-        NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
-                DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
-                DoneableAPICustomResourceDefinition>> apiCrdClient = getCRDClient(client, apiCustomResourceDefinition);
-
-        // assigning values and creating API cr
-        Definition definition = new Definition();
-        Interceptors interceptors = new Interceptors();
-        interceptors.setBallerina(new String[]{});
-        interceptors.setJava(new String[]{});
-        definition.setType(SWAGGER);
-        definition.setSwaggerConfigmapNames(configmapNames);
-        definition.setInterceptors(interceptors);
-
-        APICustomResourceDefinitionSpec apiCustomResourceDefinitionSpec = new APICustomResourceDefinitionSpec();
-        apiCustomResourceDefinitionSpec.setDefinition(definition);
-        apiCustomResourceDefinitionSpec.setMode(MODE);
-        apiCustomResourceDefinitionSpec.setReplicas(replicas);
-        apiCustomResourceDefinitionSpec.setOverride(override);
-        apiCustomResourceDefinitionSpec.setUpdateTimeStamp("");
-
-        Status status = new Status();
-
-        APICustomResourceDefinition apiCustomResourceDef = new APICustomResourceDefinition();
-        apiCustomResourceDef.setSpec(apiCustomResourceDefinitionSpec);
-        apiCustomResourceDef.setStatus(status);
-        apiCustomResourceDef.setApiVersion(API_VERSION);
-        apiCustomResourceDef.setKind(CRD_KIND);
-        ObjectMeta meta = new ObjectMeta();
-        meta.setName(apiIdentifier.getApiName().toLowerCase());
-        meta.setNamespace(client.getNamespace());
-        apiCustomResourceDef.setMetadata(meta);
-        apiCrdClient.createOrReplace(apiCustomResourceDef);
-
-        log.info("Created [API-CR] apis.wso2.com/" + apiCustomResourceDef.getMetadata().getName() + " for the "
-                + "[API] " + apiIdentifier.getApiName());
     }
 
     /**
@@ -369,13 +396,13 @@ public class K8sManager implements ContainerManager {
      * @param jwtSecurityCRName       , Security kind name related to JWT
      * @param oauthSecurityCRName     , Security kind name related to OAuth2
      * @param basicAuthSecurityCRName , Security kind name related to BasicAuth
-     * @param update                  , checks whether the configmap needs to be updated or deploy independently
+     * @param nameSuffix              , Suffix of the config map name
      * @return swaggerConfigmapNames
      * @throws APIManagementException
      * @throws ParseException
      */
     private String[] deployConfigMap(API api, APIIdentifier apiIdentifier, Registry registry, OpenShiftClient client, String jwtSecurityCRName,
-                                     String oauthSecurityCRName, String basicAuthSecurityCRName, Boolean update)
+                                     String oauthSecurityCRName, String basicAuthSecurityCRName, String nameSuffix)
             throws APIManagementException, ParseException {
 
         SwaggerCreator swaggerCreator = new SwaggerCreator(basicAuthSecurityCRName, jwtSecurityCRName,
@@ -385,38 +412,43 @@ public class K8sManager implements ContainerManager {
 
         String configmapName = apiIdentifier.getApiName().toLowerCase() + "-swagger";
 
-        if (update) {
-
-            configmapName = configmapName + "-up-" + getTimeStamp();
+        // suffixing config map names
+        if (!StringUtils.isEmpty(nameSuffix)) {
+            configmapName = configmapName + "-" + nameSuffix;
         }
 
         String[] swaggerConfigmapNames = new String[]{configmapName};
 
-        io.fabric8.kubernetes.client.dsl.Resource<ConfigMap, DoneableConfigMap> configMapResource = client
-                .configMaps().inNamespace(client.getNamespace()).withName(configmapName);
+        if (client != null) {
+            io.fabric8.kubernetes.client.dsl.Resource<ConfigMap, DoneableConfigMap> configMapResource = client
+                    .configMaps().inNamespace(client.getNamespace()).withName(configmapName);
 
-        ConfigMap configMap = configMapResource.createOrReplace(new ConfigMapBuilder().withNewMetadata().
-                withName(configmapName).withNamespace(namespace).endMetadata().
-                withApiVersion(V1).addToData(apiIdentifier.getApiName() + ".json", swagger).build());
+            ConfigMap configMap = configMapResource.createOrReplace(new ConfigMapBuilder().withNewMetadata().
+                    withName(configmapName).withNamespace(namespace).endMetadata().
+                    withApiVersion(V1).addToData(apiIdentifier.getApiName() + ".json", swagger).build());
 
-        log.info("Created [ConfigMap] " + configMap.getMetadata().getName() + " for [API] " + apiIdentifier.getApiName() +
-                " in Kubernetes");
+            log.info("Created [ConfigMap] " + configMap.getMetadata().getName() + " for [API] " + apiIdentifier.getApiName() +
+                    " in Kubernetes");
+            if (oauthSecurityCRName != null && swaggerCreator.isSecurityOauth2() && oauthSecurityCRName.equals("")) {
+                log.warn("OAuth2 security custom resource name has not been provided,"
+                        + " The [API] " + apiIdentifier.getApiName() + " may not be able to invoke via OAuth2 tokens");
+            }
 
-        if (oauthSecurityCRName != null && swaggerCreator.isSecurityOauth2() && oauthSecurityCRName.equals("")) {
-            log.warn("OAuth2 security custom resource name has not been provided,"
-                    + " The [API] " + apiIdentifier.getApiName() + " may not be able to invoke via OAuth2 tokens");
+            if (jwtSecurityCRName != null && swaggerCreator.isSecurityOauth2() && jwtSecurityCRName.equals("")) {
+                log.warn("JWT security custom resource name has not been provided,"
+                        + " The [API] " + apiIdentifier.getApiName() + " may not be able to invoke via JWT tokens");
+            }
+
+            if (basicAuthSecurityCRName != null && swaggerCreator.isSecurityBasicAuth() && basicAuthSecurityCRName.equals("")) {
+                log.warn("Basic-Auth security custom resource name has not been provided,"
+                        + " The [API] " + apiIdentifier.getApiName() + " may not be able to invoke via BasicAuth tokens");
+            }
+            return swaggerConfigmapNames;
+        } else {
+            log.error("Error occurred while deploying configmaps. could not establish the connection to the cluster");
         }
 
-        if (jwtSecurityCRName != null && swaggerCreator.isSecurityOauth2() && jwtSecurityCRName.equals("")) {
-            log.warn("JWT security custom resource name has not been provided,"
-                    + " The [API] " + apiIdentifier.getApiName() + " may not be able to invoke via JWT tokens");
-        }
-
-        if (basicAuthSecurityCRName != null && swaggerCreator.isSecurityBasicAuth() && basicAuthSecurityCRName.equals("")) {
-            log.warn("Basic-Auth security custom resource name has not been provided,"
-                    + " The [API] " + apiIdentifier.getApiName() + " may not be able to invoke via BasicAuth tokens");
-        }
-        return swaggerConfigmapNames;
+        return null;
     }
 
     /**
@@ -500,17 +532,51 @@ public class K8sManager implements ContainerManager {
      * Sets the openshift client( This supprots both the Openshift and Kubernetes)
      */
     private void setClient() {
-
-        if (masterURL != null && saToken != null && namespace != null) {
+        if (masterURL != null && saToken != null && namespace != null &&
+                !"".equals(saToken) && !"".equals(masterURL) && !"".equals(namespace)) {
             Config config = new ConfigBuilder().withMasterUrl(masterURL).withOauthToken(saToken).withNamespace(namespace)
                     //Get keystore password to connect with local clusters
                     .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
-
             this.openShiftClient = new DefaultOpenShiftClient(config);
+        } else if ((masterURL == null && saToken == null &&  namespace != null) ||
+                ("".equals(saToken) && "".equals(masterURL) && !"".equals(namespace))) {
+            //When APIM deployed in kubernetes cluster
+            Config config = new ConfigBuilder().withNamespace(namespace)
+                    //Get keystore password to connect with local clusters
+                    .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
+            this.openShiftClient = new DefaultOpenShiftClient(config);
+            log.info("creating client without satoken and mater URLs");
         } else {
             log.error("Failed to make the connection to the cluster");
         }
+    }
 
+
+    /**
+     * Returns an OpenshiftClient Object
+     */
+    OpenShiftClient getClient(JSONObject properties) {
+        if (properties.get(MASTER_URL) != null && properties.get(SATOKEN) != null && properties.get(NAMESPACE) != null &&
+                !"".equals(properties.get(MASTER_URL)) &&
+                !"".equals(properties.get(SATOKEN)) &&
+                !"".equals(properties.get(NAMESPACE))) {
+            Config config = new ConfigBuilder()
+                    .withMasterUrl(properties.get(MASTER_URL).toString().replace("\\", ""))
+                    .withOauthToken(properties.get(SATOKEN).toString())
+                    .withNamespace(properties.get(NAMESPACE).toString())
+                    .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
+
+            return new DefaultOpenShiftClient(config);
+        } else if ((properties.get(MASTER_URL) == null && properties.get(SATOKEN) == null && properties.get(NAMESPACE) != null) ||
+                ("".equals(properties.get(MASTER_URL)) && "".equals(properties.get(SATOKEN))
+                        && !"".equals(properties.get(NAMESPACE)))){
+            Config config = new ConfigBuilder()
+                    .withNamespace(properties.get(NAMESPACE).toString())
+                    .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
+
+            return new DefaultOpenShiftClient(config);
+        }
+        return null;
     }
 
     /**
@@ -524,10 +590,9 @@ public class K8sManager implements ContainerManager {
         long time = date.getTime();
         Timestamp timestamp = new Timestamp(time);
         date.setTime(timestamp.getTime());
-        String formattedDate = new SimpleDateFormat("ddMMyyyy").format(date);
-        String formattedTime = new SimpleDateFormat("HH.mm").format(date);
-
-        return (formattedDate + "-" + formattedTime);
+        // sample timestamp format: (date)(time): 20jul2020120236
+        String formattedTimestamp = new SimpleDateFormat("ddMMMyyyyHHmmss").format(date);
+        return formattedTimestamp.toLowerCase();
     }
 
     /**

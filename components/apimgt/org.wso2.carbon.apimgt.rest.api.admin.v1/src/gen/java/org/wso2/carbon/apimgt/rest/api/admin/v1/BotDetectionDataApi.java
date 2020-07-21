@@ -42,7 +42,7 @@ BotDetectionDataApiService delegate = new BotDetectionDataApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all bot detected data ", notes = "Get all bot detected data ", response = BotDetectionDataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
+            @AuthorizationScope(scope = "apim:bot_data", description = "Retrieve bot detection data"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={  })

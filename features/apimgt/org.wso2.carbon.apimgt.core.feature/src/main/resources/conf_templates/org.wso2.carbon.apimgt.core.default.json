@@ -8,6 +8,7 @@
   "database.apim_db.pool_options.validationInterval": "30000",
   "database.apim_db.pool_options.defaultAutoCommit": "true",
   "apim.datasource.name": "jdbc/WSO2AM_DB",
+  "apim.datasource_sync_runtime_artifacts.name": "jdbc/WSO2AS_DB",
   "apim.gateway_type": "Synapse",
   "apim.enable_secure_vault": "false",
   "apim.jwt.enable": false,
@@ -15,7 +16,7 @@
   "apim.jwt.claim_dialect": "http://wso2.org/claims",
   "apim.jwt.convert_dialect": false,
   "apim.jwt.signing_algorithm": "SHA256withRSA",
-  "apim.jwt.claims_extractor_impl": "org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever",
+  "apim.jwt.claims_extractor_impl": "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever",
   "apim.jwt.gateway_generator.impl":"org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl",
   "apim.cache.gateway_token.enable": true,
   "apim.cache.resource.enable": true,
@@ -58,6 +59,8 @@
     "^device_.*",
     "openid"
   ],
+  "apim.oauth_config.token_endpoint_context": "/token",
+  "apim.oauth_config.revoke_endpoint_context":"/revoke",
   "apim.devportal.login_username_case_insensitive": true,
   "apim.devportal.url": "https://localhost:${mgt.transport.https.port}/devportal",
   "apim.devportal.enable_application_sharing": false,
@@ -123,7 +126,7 @@
   "apim.sdk.model_package": "org.wso2.client.model.",
   "apim.sdk.api_package": "org.wso2.client.api.",
   "apim.sdk.supported_languages": ["android","java","javascript","jmeter"],
-  "apim.token.revocation.notifier_impl": "org.wso2.carbon.apimgt.impl.notifier.TokenRevocationNotifierImpl",
+  "apim.token.revocation.notifier_impl": "org.wso2.carbon.apimgt.notification.TokenRevocationNotifierImpl",
   "apim.token.revocation.enable_realtime_notifier": true,
   "apim.token.revocation.enable_persistent_notifier": false,
   "apim.token.revocation.realtime_notifier.ttl": "5000",
@@ -148,5 +151,6 @@
   "apim.key_manager.enable_registration": true,
   "apim.key_manager.enable_retriever": true,
   "apim.event_hub.username": "$ref{apim.throttling.username}",
-  "apim.event_hub.password": "$ref{apim.throttling.password}"
+  "apim.event_hub.password": "$ref{apim.throttling.password}",
+  "apim.key_manager.type": "default"
 }

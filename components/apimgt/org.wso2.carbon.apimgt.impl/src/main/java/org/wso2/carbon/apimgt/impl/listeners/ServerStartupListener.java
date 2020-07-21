@@ -49,16 +49,6 @@ public class ServerStartupListener implements ServerStartupObserver {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         if (apiManagerConfiguration != null) {
-            String defaultKeyManagerRegistration =
-                    apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_DEFAULT_KEY_MANAGER_REGISTRATION);
-            if (StringUtils.isNotEmpty(defaultKeyManagerRegistration) &&
-                    JavaUtils.isTrueExplicitly(defaultKeyManagerRegistration)) {
-                try {
-                    KeyMgtRegistrationService.registerDefaultKeyManager(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-                } catch (APIManagementException e) {
-                    log.error("Error while registering Default Key Manager for SuperTenant", e);
-                }
-            }
             String enableKeyManagerRetrieval =
                     apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_KEY_MANAGER_RETRIVAL);
             if (JavaUtils.isTrueExplicitly(enableKeyManagerRetrieval)) {
@@ -74,6 +64,7 @@ public class ServerStartupListener implements ServerStartupObserver {
         String repositoryDir = "repository";
         String resourcesDir = "resources";
         String extensionsDir = "extensions";
+        String customAssetsDir = "customAssets";
         String webappDir = "webapps";
         String authenticationEndpointDir = "authenticationendpoint";
         String accountRecoveryEndpointDir = "accountrecoveryendpoint";
@@ -86,6 +77,9 @@ public class ServerStartupListener implements ServerStartupObserver {
             String resourceExtDirectoryPath =
                     CarbonUtils.getCarbonHome() + File.separator + repositoryDir + File.separator + resourcesDir
                             + File.separator + extensionsDir;
+            String customAssetsExtDirectoryPath =
+                    CarbonUtils.getCarbonHome() + File.separator + repositoryDir + File.separator + resourcesDir
+                    + File.separator + extensionsDir + File.separator + customAssetsDir;
             String authenticationEndpointWebAppPath =
                     CarbonUtils.getCarbonRepository() + webappDir + File.separator + authenticationEndpointDir;
             String authenticationEndpointWebAppExtPath =
@@ -94,6 +88,9 @@ public class ServerStartupListener implements ServerStartupObserver {
                     CarbonUtils.getCarbonRepository() + webappDir + File.separator + accountRecoveryEndpointDir;
             String accountRecoveryWebAppExtPath = accountRecoveryWebAppPath + File.separator + extensionsDir;
             if (new File(resourceExtDirectoryPath).exists()) {
+                // delete extensions directory from the webapp folders if they exist
+                FileUtils.deleteDirectory(new File(authenticationEndpointWebAppExtPath));
+                FileUtils.deleteDirectory(new File(accountRecoveryWebAppExtPath));
                 log.info("Starting to copy identity page extensions...");
                 String headerJsp = resourceExtDirectoryPath + File.separator + headerJspFile;
                 String footerJsp = resourceExtDirectoryPath + File.separator + footerJspFile;
@@ -123,6 +120,13 @@ public class ServerStartupListener implements ServerStartupObserver {
                 if (new File(privacyPolicyContentJsp).exists()) {
                     copyFileToDirectory(privacyPolicyContentJsp, authenticationEndpointWebAppExtPath,
                             authenticationEndpointWebAppPath);
+                }
+                // copy custom asset files to the webapp directories
+                if (new File(customAssetsExtDirectoryPath).exists()) {
+                    FileUtils.copyDirectory(new File(customAssetsExtDirectoryPath),
+                            new File(authenticationEndpointWebAppExtPath + File.separator + customAssetsDir));
+                    FileUtils.copyDirectory(new File(customAssetsExtDirectoryPath),
+                            new File(accountRecoveryWebAppExtPath + File.separator + customAssetsDir));
                 }
                 log.info("Successfully completed copying identity page extensions");
             }

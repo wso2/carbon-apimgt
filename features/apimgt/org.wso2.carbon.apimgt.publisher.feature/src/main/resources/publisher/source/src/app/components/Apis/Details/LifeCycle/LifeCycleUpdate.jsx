@@ -120,6 +120,11 @@ class LifeCycleUpdate extends Component {
                         defaultMessage: 'Lifecycle state updated successfully',
                     }));
                 }
+
+                // update api in context
+                this.context.updateAPI();
+                // set true the enableStore Property
+                this.context.updateAPI({ enableStore: true });
                 /* TODO: add i18n ~tmkb */
             })
             .catch((error) => {
@@ -155,27 +160,6 @@ class LifeCycleUpdate extends Component {
             api: { id: apiUUID },
         } = this.props;
         this.updateLCStateOfAPI(apiUUID, action);
-        this.enableStore();
-    }
-
-    /**
-     *
-     * Set true the enableStore Property.
-     * @memberof disableStore
-     */
-    enableStore() {
-        const api = new API();
-        const { id } = this.props.api;
-        const promisedApi = api.get(id);
-        promisedApi
-            .then((getResponse) => {
-                const apiData = getResponse.body;
-                apiData.enableStore = true;
-                this.context.updateAPI({ enableStore: true });
-            })
-            .catch((errorResponse) => {
-                console.error(errorResponse);
-            });
     }
 
     /**

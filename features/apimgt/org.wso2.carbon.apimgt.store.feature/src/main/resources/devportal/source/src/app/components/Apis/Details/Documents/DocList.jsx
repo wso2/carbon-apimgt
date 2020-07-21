@@ -27,6 +27,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import Button from '@material-ui/core/Button';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Icon from '@material-ui/core/Icon';
@@ -107,13 +108,16 @@ const styles = (theme) => ({
     },
     docLinkRoot: {
         paddingLeft: 0,
+        color: theme.palette.text.primary,
     },
     toggler: {
         height: '100%',
-        paddingTop: 20,
+        padding: '20px 0 0 0',
         cursor: 'pointer',
         marginLeft: '-20px',
         display: 'block',
+        minWidth: 'inherit',
+        flexDirection: 'column',
     },
     togglerTextParent: {
         writingMode: 'vertical-rl',
@@ -202,7 +206,7 @@ function DocList(props) {
                             <List component='nav' className={classes.listRoot}>
                                 {documentList.map((type, indexA) => (
                                     <React.Fragment key={indexA}>
-                                        <ListItem className={classes.parentListItem}>
+                                        <ListItem component='div' className={classes.parentListItem}>
                                             <ListItemIcon classes={{ root: classes.listItemRoot }}>
                                                 <CustomIcon strokeColor='#444' width={24} height={24} icon='docs' />
                                             </ListItemIcon>
@@ -254,7 +258,7 @@ function DocList(props) {
                     </div>
                 )}
                 <div className={classes.toggleWrapper}>
-                    <a className={classes.toggler} onClick={toggleDocList} onKeyDown={toggleDocList}>
+                    <Button className={classes.toggler} onClick={toggleDocList}>
                         <div className={classes.togglerTextParent}>
                             <div className={classes.togglerText}>
                                 {showDocList ? (
@@ -271,7 +275,7 @@ function DocList(props) {
                             </div>
                         </div>
                         {showDocList ? <Icon>keyboard_arrow_left</Icon> : <Icon>keyboard_arrow_right</Icon>}
-                    </a>
+                    </Button>
                 </div>
                 <div className={classes.docView}>
                     {selectedDoc && (

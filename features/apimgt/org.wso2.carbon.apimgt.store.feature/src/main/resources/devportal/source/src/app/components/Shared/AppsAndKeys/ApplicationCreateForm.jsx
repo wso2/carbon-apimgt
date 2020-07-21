@@ -117,6 +117,7 @@ const ApplicationCreate = (props) => {
     return (
         <form noValidate autoComplete='off' className={classes.applicationForm}>
             <TextField
+                id='application-name'
                 classes={{
                     root: classes.mandatoryStarText,
                 }}
@@ -152,7 +153,7 @@ const ApplicationCreate = (props) => {
                 }}
                 required
                 fullWidth
-                id='outlined-select-currency'
+                id='per-token-quota'
                 select
                 label={(
                     <FormattedMessage
@@ -181,39 +182,7 @@ const ApplicationCreate = (props) => {
                 ))}
             </TextField>
             <TextField
-                classes={{
-                    root: classes.mandatoryStarSelect,
-                }}
-                required
-                fullWidth
-                id='outlined-select-currency'
-                select
-                label={(
-                    <FormattedMessage
-                        defaultMessage='Token Type'
-                        id='Shared.AppsAndKeys.ApplicationCreateForm.token.type'
-                    />
-                )}
-                value={applicationRequest.tokenType}
-                name='tokenType'
-                onChange={handleChange}
-                helperText={(
-                    <FormattedMessage
-                        defaultMessage='Select token type'
-                        id='Shared.AppsAndKeys.ApplicationCreateForm.select.token.type'
-                    />
-                )}
-                margin='normal'
-                variant='outlined'
-            >
-                {Object.entries(Application.TOKEN_TYPES).map(([key, value]) => (
-                    <MenuItem key={value.displayName} value={key}>
-                        {value.displayName}
-                    </MenuItem>
-                ))}
-            </TextField>
-
-            <TextField
+                id='application-description'
                 margin='normal'
                 variant='outlined'
                 fullWidth

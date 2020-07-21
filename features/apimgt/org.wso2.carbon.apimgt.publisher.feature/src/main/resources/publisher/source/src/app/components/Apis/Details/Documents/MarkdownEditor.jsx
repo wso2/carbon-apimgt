@@ -73,7 +73,7 @@ function Transition(props) {
 function MarkdownEditor(props) {
     const { intl, showAtOnce, history } = props;
     const { api, isAPIProduct } = useContext(APIContext);
-
+    const [isUpdating, setIsUpdating] = useState(false);
     const [open, setOpen] = useState(showAtOnce);
     const [code, setCode] = useState(
         intl.formatMessage({
@@ -98,16 +98,18 @@ function MarkdownEditor(props) {
     };
     const addContentToDoc = () => {
         const restAPI = new Api();
+        setIsUpdating(true);
         const docPromise = restAPI.addInlineContentToDocument(api.id, props.docId, 'MARKDOWN', code);
         docPromise
             .then(doc => {
                 Alert.info(
-                    `${doc.name} ${intl.formatMessage({
+                    `${doc.obj.name} ${intl.formatMessage({
                         id: 'Apis.Details.Documents.MarkdownEditor.update.success.message',
                         defaultMessage: 'updated successfully.',
                     })}`,
                 );
                 toggleOpen();
+                setIsUpdating(false);
             })
             .catch(error => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -117,6 +119,7 @@ function MarkdownEditor(props) {
                 if (status === 404) {
                     this.setState({ apiNotFound: true });
                 }
+                setIsUpdating(false);
             });
     };
     const updateDoc = () => {
@@ -160,11 +163,12 @@ function MarkdownEditor(props) {
                         />{' '}
                         "{props.docName}"
                     </Typography>
-                    <Button className={classes.button} variant="contained" color="primary" onClick={addContentToDoc}>
+                    <Button className={classes.button} variant="contained" disabled={isUpdating} color="primary" onClick={addContentToDoc}>
                         <FormattedMessage
                             id="Apis.Details.Documents.MarkdownEditor.update.content.button"
                             defaultMessage="Update Content"
                         />
+                        {isUpdating && <CircularProgress size={24} />}
                     </Button>
                     <Button className={classes.button} onClick={toggleOpen}>
                         <FormattedMessage

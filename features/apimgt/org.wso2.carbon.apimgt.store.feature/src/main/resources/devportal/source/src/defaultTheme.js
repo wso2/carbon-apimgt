@@ -102,7 +102,7 @@ const DefaultConfigurations = {
             get: '#02a8f4',
             post: '#8ac149',
             put: '#ff9700',
-            delete: '#fd5621',
+            delete: '#de3702',
             options: '#5f7c8a',
             patch: '#785446',
             head: '#785446',

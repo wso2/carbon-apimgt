@@ -207,39 +207,39 @@
         "Roles": "admin,Internal/analytics"
       },
       {
-        "Name": "apim_analytics:manager_dashboard:own",
+        "Name": "apim_analytics:business_analytics:own",
         "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:manager_dashboard:edit",
+        "Name": "apim_analytics:business_analytics:edit",
         "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:manager_dashboard:view",
+        "Name": "apim_analytics:business_analytics:view",
         "Roles": "admin,Internal/analytics"
       },
       {
-        "Name": "apim_analytics:publisher_dashboard:own",
+        "Name": "apim_analytics:api_analytics:own",
         "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:publisher_dashboard:edit",
+        "Name": "apim_analytics:api_analytics:edit",
         "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:publisher_dashboard:view",
+        "Name": "apim_analytics:api_analytics:view",
         "Roles": "admin,Internal/creator,Internal/publisher"
       },
       {
-        "Name": "apim_analytics:subscriber_dashboard:own",
+        "Name": "apim_analytics:application_analytics:own",
         "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:subscriber_dashboard:edit",
+        "Name": "apim_analytics:application_analytics:edit",
         "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:subscriber_dashboard:view",
+        "Name": "apim_analytics:application_analytics:view",
         "Roles": "admin,Internal/subscriber"
       },
       {
