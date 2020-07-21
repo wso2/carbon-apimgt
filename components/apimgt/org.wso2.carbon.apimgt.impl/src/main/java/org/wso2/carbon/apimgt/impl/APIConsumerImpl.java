@@ -4473,13 +4473,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         getUserRealm().getUserStoreManager().getRoleListOfUser(((UserRegistry) this.registry)
                         .getUserName());
 
-                Set<TierPermissionDTO> tierPermissions;
-
-                if (APIUtil.isAdvanceThrottlingEnabled()) {
-                    tierPermissions = apiMgtDAO.getThrottleTierPermissions(apiProviderTenantId);
-                } else {
-                    tierPermissions = apiMgtDAO.getTierPermissions(apiProviderTenantId);
-                }
+                Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getThrottleTierPermissions(apiProviderTenantId);
 
                 for (TierPermissionDTO tierPermission : tierPermissions) {
                     String type = tierPermission.getPermissionType();
@@ -4512,12 +4506,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         Set<TierPermission> tierPermissions = new HashSet<TierPermission>();
         if (tenantId != 0) {
-            Set<TierPermissionDTO> tierPermissionDtos;
-            if (APIUtil.isAdvanceThrottlingEnabled()) {
-                tierPermissionDtos = apiMgtDAO.getThrottleTierPermissions(tenantId);
-            } else {
-                tierPermissionDtos = apiMgtDAO.getTierPermissions(tenantId);
-            }
+            Set<TierPermissionDTO> tierPermissionDtos = apiMgtDAO.getThrottleTierPermissions(tenantId);
+
             for (TierPermissionDTO tierDto : tierPermissionDtos) {
                 TierPermission tierPermission = new TierPermission(tierDto.getTierName());
                 tierPermission.setRoles(tierDto.getRoles());
@@ -4543,13 +4533,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 /* Get the roles of the Current User */
                 currentUserRoles = ((UserRegistry) ((UserAwareAPIConsumer) this).registry).
                         getUserRealm().getUserStoreManager().getRoleListOfUser(((UserRegistry) this.registry).getUserName());
-                TierPermissionDTO tierPermission;
 
-                if(APIUtil.isAdvanceThrottlingEnabled()){
-                    tierPermission = apiMgtDAO.getThrottleTierPermission(tierName, tenantId);
-                }else{
-                    tierPermission = apiMgtDAO.getTierPermission(tierName, tenantId);
-                }
+                TierPermissionDTO tierPermission = apiMgtDAO.getThrottleTierPermission(tierName, tenantId);
+
                 if (tierPermission == null) {
                     return false;
                 } else {

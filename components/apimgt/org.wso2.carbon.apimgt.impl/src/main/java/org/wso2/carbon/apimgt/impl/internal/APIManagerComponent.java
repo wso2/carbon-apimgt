@@ -250,10 +250,7 @@ public class APIManagerComponent {
                 log.error("Exception when creating default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
             }
             // Adding default throttle policies
-            boolean advancedThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
-            if (advancedThrottlingEnabled) {
-                addDefaultAdvancedThrottlePolicies();
-            }
+            addDefaultAdvancedThrottlePolicies();
             // Update all NULL THROTTLING_TIER values to Unlimited
             boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
             try {
@@ -275,7 +272,7 @@ public class APIManagerComponent {
             }
             APIUtil.init();
 
-            // Activating UserPostSelfRegistration handler component
+            // Activating UserPostSelfRegistration handler componeAPITemplateBuilderImplnt
             try {
                 registration = componentContext.getBundleContext()
                         .registerService(AbstractEventHandler.class.getName(), new UserPostSelfRegistrationHandler(),
