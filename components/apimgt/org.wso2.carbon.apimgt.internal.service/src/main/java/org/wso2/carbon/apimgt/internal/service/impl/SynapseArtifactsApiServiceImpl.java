@@ -9,8 +9,6 @@ import org.wso2.carbon.apimgt.internal.service.SynapseArtifactsApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import javax.ws.rs.core.Response;
 
-
-
 public class SynapseArtifactsApiServiceImpl implements SynapseArtifactsApiService {
 
     private GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();

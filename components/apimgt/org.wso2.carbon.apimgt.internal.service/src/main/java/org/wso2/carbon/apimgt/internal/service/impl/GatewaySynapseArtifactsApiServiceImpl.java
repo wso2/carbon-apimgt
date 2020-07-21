@@ -11,8 +11,6 @@ import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactListDTO;
 import java.util.List;
 import javax.ws.rs.core.Response;
 
-
-
 public class GatewaySynapseArtifactsApiServiceImpl implements GatewaySynapseArtifactsApiService {
 
     private GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();

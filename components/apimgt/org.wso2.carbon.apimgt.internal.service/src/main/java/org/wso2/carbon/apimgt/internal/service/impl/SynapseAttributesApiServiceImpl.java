@@ -6,22 +6,11 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.internal.service.*;
-import org.wso2.carbon.apimgt.internal.service.dto.*;
-
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-
-import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SynapseAttributesDTO;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 
 public class SynapseAttributesApiServiceImpl implements SynapseAttributesApiService {
 
