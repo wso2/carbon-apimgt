@@ -734,7 +734,6 @@ public class OAS3Parser extends APIDefinition {
      */
     @Override
     public String getOASDefinitionForPublisher(API api, String oasDefinition) throws APIManagementException {
-        //oasDefinition = processOtherSchemeScopes(oasDefinition);
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         if (openAPI.getComponents() == null) {
             openAPI.setComponents(new Components());
