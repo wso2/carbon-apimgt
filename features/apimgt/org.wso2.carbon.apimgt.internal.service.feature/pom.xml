@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.7.105-SNAPSHOT</version>
+        <version>6.7.122-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -79,6 +79,10 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.notification</artifactId>
         </dependency>
     </dependencies>
 
@@ -176,6 +180,7 @@
                                 <bundleDef>io.github.openfeign:feign-slf4j:${openfeign.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okio:okio</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.notification:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}

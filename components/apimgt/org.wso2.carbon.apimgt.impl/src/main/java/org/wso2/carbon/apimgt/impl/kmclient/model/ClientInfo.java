@@ -43,6 +43,8 @@ public class ClientInfo {
     private String presetClientId;
     @SerializedName("ext_param_client_secret")
     private String presetClientSecret;
+    @SerializedName("ext_application_owner")
+    private String application_owner;
 
     public String getClientId() {
 
@@ -132,5 +134,15 @@ public class ClientInfo {
     public void setPresetClientSecret(String presetClientSecret) {
 
         this.presetClientSecret = presetClientSecret;
+    }
+
+    public String getApplication_owner() {
+
+        return application_owner;
+    }
+
+    public void setApplication_owner(String application_owner) {
+
+        this.application_owner = application_owner;
     }
 }

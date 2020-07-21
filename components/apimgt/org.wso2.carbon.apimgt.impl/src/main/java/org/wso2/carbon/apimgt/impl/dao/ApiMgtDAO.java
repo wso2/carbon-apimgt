@@ -797,11 +797,11 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         int subscriptionId = -1;
         int id = -1;
-        
+
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            
+
             Identifier identifier;
 
             //Query to check if this subscription already exists
@@ -1229,7 +1229,7 @@ public class ApiMgtDAO {
 
                 int applicationId = resultSet.getInt("APPLICATION_ID");
                 Application application = getApplicationById(applicationId);
-                
+
                 if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
@@ -1243,7 +1243,7 @@ public class ApiMgtDAO {
                     apiIdentifier.setId(resultSet.getInt("API_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
-                
+
                 subscribedAPI.setUUID(resultSet.getString("UUID"));
                 subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
@@ -5700,6 +5700,7 @@ public class ApiMgtDAO {
             prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(8, api.getApiLevelPolicy());
+            prepStmt.setString(9, api.getType());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -7111,9 +7112,10 @@ public class ApiMgtDAO {
             prepStmt.setString(3, username);
             prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(5, api.getApiLevelPolicy());
-            prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            prepStmt.setString(7, api.getId().getApiName());
-            prepStmt.setString(8, api.getId().getVersion());
+            prepStmt.setString(6, api.getType());
+            prepStmt.setString(7, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            prepStmt.setString(8, api.getId().getApiName());
+            prepStmt.setString(9, api.getId().getVersion());
             prepStmt.execute();
             //}
 
@@ -7186,9 +7188,9 @@ public class ApiMgtDAO {
         }
         return id;
     }
-    
+
     /**
-     * Get product Id from the product name and the provider. 
+     * Get product Id from the product name and the provider.
      * @param product product identifier
      * @throws APIManagementException exception
      */
@@ -8202,7 +8204,7 @@ public class ApiMgtDAO {
             } else if (identifier instanceof APIProductIdentifier) {
                 id = ((APIProductIdentifier) identifier).getProductId();
             }
-            
+
             conn = APIMgtDBUtil.getConnection();
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
                 sqlQuery = postgreSQL;
@@ -9663,7 +9665,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, null, null);
         }
     }
-    
+
     /**
      * Check the given api name is already available in the api table under given tenant domain
      *
@@ -13986,7 +13988,7 @@ public class ApiMgtDAO {
         }
         return application;
     }
-    
+
     /**
      * Retrieve URI Templates for the given API
      * @param api API
@@ -14011,22 +14013,22 @@ public class ApiMgtDAO {
                 URITemplate template = new URITemplate();
                 String urlPattern = rs.getString("URL_PATTERN");
                 String httpMethod = rs.getString("HTTP_METHOD");
-                
+
                 template.setHTTPVerb(httpMethod);
                 template.setResourceURI(urlPattern);
                 template.setId(rs.getInt("URL_MAPPING_ID"));
 
                 //TODO populate others if needed
-                
+
                 templatesMap.put(httpMethod + ":" + urlPattern, template);
             }
-           
+
         } catch (SQLException e) {
             handleException("Error while obtaining details of the URI Template for api " + api.getId() , e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
-        
+
         return templatesMap;
     }
 
@@ -14069,7 +14071,7 @@ public class ApiMgtDAO {
         int productId = 0;
         int scopeId = 0;
         try {
-            connection = APIMgtDBUtil.getConnection();   
+            connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             String queryAddAPIProduct = SQLConstants.ADD_API_PRODUCT;
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct, new String[]{"api_id"});
@@ -14263,7 +14265,7 @@ public class ApiMgtDAO {
         }
         return productId;
     }
-    
+
     public void updateAPIProduct(APIProduct product, String username) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;

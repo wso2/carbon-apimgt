@@ -1495,7 +1495,7 @@ public class APIProviderHostObject extends ScriptableObject {
                         .getTenantId(tenantDomain);
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
-                    if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
+                    if (scope != null && !(APIUtil.isAllowedScope(scope.getKey()))) {
                         if (apiProvider.isScopeKeyAssignedLocally(apiId, scope.getKey(), tenantId)) {
                             handleException("Scope " + scope.getKey() + " is already assigned by another API");
                         }
@@ -2002,7 +2002,7 @@ public class APIProviderHostObject extends ScriptableObject {
                             .getTenantId(tenantDomain);
                     for (URITemplate uriTemplate : uriTemplates) {
                         Scope scope = uriTemplate.getScope();
-                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
+                        if (scope != null && !(APIUtil.isAllowedScope(scope.getKey()))) {
                             if (apiProvider.isScopeKeyAssignedLocally(apiId, scope.getKey(), tenantId)) {
                                 handleException("Scope " + scope.getKey() + " is already assigned by another API");
                             }
@@ -4637,7 +4637,7 @@ public class APIProviderHostObject extends ScriptableObject {
             String scopeKey = (String) args[0];
             String username = (String) args[1];
 
-            if (!APIUtil.isWhiteListedScope(scopeKey)) {
+            if (!APIUtil.isAllowedScope(scopeKey)) {
                 String tenantDomain = MultitenantUtils.getTenantDomain(username);
                 //update permission cache before validate user
                 int tenantId = -1234;

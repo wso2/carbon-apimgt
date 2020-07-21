@@ -285,7 +285,7 @@ public final class APIImportUtil {
                     Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
                     for (URITemplate uriTemplate : uriTemplates) {
                         Scope scope = uriTemplate.getScope();
-                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey())) &&
+                        if (scope != null && !(APIUtil.isAllowedScope(scope.getKey())) &&
                                 apiProvider.isScopeKeyAssignedLocally(importedApi.getId(), scope.getKey(), tenantId)) {
                             String errorMessage =
                                     "Error in adding API. Scope " + scope.getKey() +
@@ -296,9 +296,8 @@ public final class APIImportUtil {
                     importedApi.setUriTemplates(uriTemplates);
                     Set<Scope> scopes = apiDefinition.getScopes(swaggerContent);
                     importedApi.setScopes(scopes);
-                    boolean isBasepathExtractedFromSwagger = true;
-                    //Setup vendor extensions to API when importing through CTL tool
-                    importedApi = OASParserUtil.setExtensionsToAPI(swaggerContent, importedApi, isBasepathExtractedFromSwagger);
+                    //Set extensions from API definition to API object
+                    importedApi = OASParserUtil.setExtensionsToAPI(swaggerContent, importedApi);
                 }
             }
             // This is required to make url templates and scopes get effected

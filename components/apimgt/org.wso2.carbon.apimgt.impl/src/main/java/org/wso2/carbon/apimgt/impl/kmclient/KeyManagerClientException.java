@@ -38,9 +38,8 @@ public class KeyManagerClientException extends Exception {
     }
 
     public KeyManagerClientException(int statusCode, String reason) {
-
-        super("Received status code: " + Integer.toString(statusCode) + " Reason: " + reason);
-
+        super("Received status code: " + statusCode + " Reason: " + reason);
+      
     }
 
 }

@@ -246,6 +246,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/labelName'
         - $ref: '#/parameters/environmentName'
+        - $ref: '#/parameters/clusterName'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/requestedTenant'
       tags:
@@ -3932,6 +3933,15 @@ parameters:
       Name of the API gateway environment.
     type: string
 
+  # API Gateway Environment Name
+  # Specified as part of the query string
+  clusterName:
+    name: clusterName
+    in: query
+    description: |
+      Name of the container managed cluster name.
+    type: string
+
   # Used for pagination:
   # The maximum number of resoures to be returned by a GET
   limit:
@@ -5982,8 +5992,14 @@ definitions:
     properties:
       clusterName:
         type: string
-        description: name of the cluster
+        description: |
+          Name of the cluster
         example: minikube
+      clusterDisplayName:
+        type: string
+        description: |
+          Display name of the cluster
+        example: Minikube Cluster
       ingressURL:
         type: string
         description: ingress URL

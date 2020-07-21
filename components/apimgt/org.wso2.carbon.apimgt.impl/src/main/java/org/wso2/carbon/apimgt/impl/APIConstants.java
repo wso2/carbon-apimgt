@@ -466,7 +466,7 @@ public final class APIConstants {
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
     public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
     public static final String APPLICATION_TOKEN_SCOPE = OAUTH_CONFIGS + "ApplicationTokenScope";
-    public static final String WHITELISTED_SCOPES = OAUTH_CONFIGS + "ScopeWhitelist.Scope";
+    public static final String ALLOWED_SCOPES = OAUTH_CONFIGS + "AllowedScopes.Scope";
     public static final String TOKEN_ENDPOINT_NAME = OAUTH_CONFIGS + "TokenEndPointName";
     public static final String REVOKE_API_URL = OAUTH_CONFIGS + "RevokeAPIURL";
     public static final String ENCRYPT_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EncryptPersistedTokens";
@@ -502,6 +502,7 @@ public final class APIConstants {
     public static final String BLOCKED = "BLOCKED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
     public static final String RESOURCE_AUTHENTICATION_SCHEME = "ResourceAuthenticationScheme";
+    public static final String GOVERNANCE = "governance";
 
     //Overview constants for CORS configuration
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
@@ -712,9 +713,9 @@ public final class APIConstants {
     public static final String USER_INFO_RECOVERY_SERVICE = "UserInformationRecoveryService";
 
     public static final String API_RESTAPI = "RESTAPI.";
-    public static final String API_RESTAPI_WHITELISTED_URI = API_RESTAPI + "WhiteListedURIs.WhiteListedURI.";
-    public static final String API_RESTAPI_WHITELISTED_URI_URI = API_RESTAPI_WHITELISTED_URI + "URI";
-    public static final String API_RESTAPI_WHITELISTED_URI_HTTPMethods = API_RESTAPI_WHITELISTED_URI + "HTTPMethods";
+    public static final String API_RESTAPI_ALLOWED_URI = API_RESTAPI + "AllowedURIs.AllowedURI.";
+    public static final String API_RESTAPI_ALLOWED_URI_URI = API_RESTAPI_ALLOWED_URI + "URI";
+    public static final String API_RESTAPI_ALLOWED_URI_HTTPMethods = API_RESTAPI_ALLOWED_URI + "HTTPMethods";
     public static final String API_RESTAPI_ETAG_SKIP_LIST = API_RESTAPI + "ETagSkipList.";
     public static final String API_RESTAPI_ETAG_SKIP_URI = API_RESTAPI_ETAG_SKIP_LIST + "ETagSkipURI.";
     public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
@@ -783,8 +784,8 @@ public final class APIConstants {
     public static final String IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT = IDENTITY_PROVIDER + "AuthorizeEndpoint";
     public static final String IDENTITY_PROVIDER_OIDC_LOGOUT_ENDPOINT = IDENTITY_PROVIDER + "OIDCLogoutEndpoint";
     public static final String IDENTITY_PROVIDER_SERVER_URL = IDENTITY_PROVIDER + "ServerURL";
-    public static final String IDENTITY_PROVIDER_OIDC_CHECK_SESSION_ENDPOINT =
-            IDENTITY_PROVIDER + "CheckSessionEndpoint";
+    public static final String IDENTITY_PROVIDER_OIDC_CHECK_SESSION_ENDPOINT = IDENTITY_PROVIDER + "CheckSessionEndpoint";
+    public static final String IDENTITY_PROVIDER_OIDC_CHECK_SESSION_URL = "/oidc/checksession";
 
     public static final String SELF_SIGN_UP = "SelfSignUp.";
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
@@ -2223,6 +2224,8 @@ public final class APIConstants {
         public static final String INIT_DELAY = "InitDelay";
         public static final String INTROSPECTION_ENDPOINT = "introspection_endpoint";
         public static final String CLIENT_REGISTRATION_ENDPOINT = "client_registration_endpoint";
+        public static final String KEY_MANAGER_OPERATIONS_DCR_ENDPOINT = "/keymanager-operations/dcr/register";
+        public static final String KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT = "/keymanager-operations/user-info";
         public static final String TOKEN_ENDPOINT = "token_endpoint";
         public static final String REVOKE_ENDPOINT = "revoke_endpoint";
         public static final String SCOPE_MANAGEMENT_ENDPOINT = "scope_endpoint";

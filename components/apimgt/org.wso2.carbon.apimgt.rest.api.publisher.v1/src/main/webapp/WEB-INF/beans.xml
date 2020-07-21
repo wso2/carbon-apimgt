@@ -75,6 +75,7 @@
 
     <!-- Out interceptors -->
     <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
+    <bean id="responseInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.response.ResponseOutInterceptor" />
 
     <cxf:bus>
         <cxf:inInterceptors>
@@ -88,6 +89,7 @@
         </cxf:inInterceptors>
         <cxf:outInterceptors>
             <ref bean="gZipInterceptor"/>
+            <ref bean="responseInterceptor"/>
         </cxf:outInterceptors>
     </cxf:bus>
 </beans>

@@ -62,7 +62,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ContentType;
@@ -233,7 +232,6 @@ import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
-import sun.security.ssl.SSLSocketFactoryImpl;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -333,7 +331,7 @@ public final class APIUtil {
     private static long tenantIdleTimeMillis;
     private static Set<String> currentLoadingTenants = new HashSet<String>();
 
-    private static volatile Set<String> whiteListedScopes;
+    private static volatile Set<String> allowedScopes;
     private static boolean isPublisherRoleCacheEnabled = true;
 
     public static final String STRICT = "Strict";
@@ -2302,7 +2300,6 @@ public final class APIUtil {
      *
      * @return Origin string of the external IDP
      */
-
     public static String getExternalIDPOrigin() throws APIManagementException {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -2320,7 +2317,6 @@ public final class APIUtil {
      *
      * @return URL to be used in iframe source for the check session with IDP
      */
-
     public static String getExternalIDPCheckSessionEndpoint() throws APIManagementException {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -2328,7 +2324,7 @@ public final class APIUtil {
         String oidcCheckSessionEndpoint = config.getFirstProperty(
                 APIConstants.IDENTITY_PROVIDER_OIDC_CHECK_SESSION_ENDPOINT);
         if (oidcCheckSessionEndpoint == null) {
-            return getServerURL() + "/oidc/checksession";
+            return getServerURL() + APIConstants.IDENTITY_PROVIDER_OIDC_CHECK_SESSION_URL;
         } else {
             return oidcCheckSessionEndpoint;
         }
@@ -7687,14 +7683,14 @@ public final class APIUtil {
      * @param scope - The scope key to check
      * @return - 'true' if the scope is white listed. 'false' if not.
      */
-    public static boolean isWhiteListedScope(String scope) {
+    public static boolean isAllowedScope(String scope) {
 
-        if (whiteListedScopes == null) {
+        if (allowedScopes == null) {
             APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
             // Read scope whitelist from Configuration.
-            List<String> whitelist = configuration.getProperty(APIConstants.WHITELISTED_SCOPES);
+            List<String> whitelist = configuration.getProperty(APIConstants.ALLOWED_SCOPES);
 
             // If whitelist is null, default scopes will be put.
             if (whitelist == null) {
@@ -7703,10 +7699,10 @@ public final class APIUtil {
                 whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
             }
 
-            whiteListedScopes = new HashSet<String>(whitelist);
+            allowedScopes = new HashSet<String>(whitelist);
         }
 
-        for (String scopeTobeSkipped : whiteListedScopes) {
+        for (String scopeTobeSkipped : allowedScopes) {
             if (scope.matches(scopeTobeSkipped)) {
                 return true;
             }

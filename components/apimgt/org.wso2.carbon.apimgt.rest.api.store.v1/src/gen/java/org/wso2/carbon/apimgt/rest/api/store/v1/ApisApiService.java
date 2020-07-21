@@ -41,7 +41,7 @@ public interface ApisApiService {
       public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdSdksLanguageGet(String apiId, String language, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName, String clusterName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdUserRatingDelete(String apiId, String xWSO2Tenant, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdUserRatingGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

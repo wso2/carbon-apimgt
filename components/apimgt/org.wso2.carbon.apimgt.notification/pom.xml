@@ -19,7 +19,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.7.105-SNAPSHOT</version>
+        <version>6.7.122-SNAPSHOT</version>
     </parent>
     <artifactId>org.wso2.carbon.apimgt.notification</artifactId>
     <modelVersion>4.0.0</modelVersion>
@@ -89,14 +89,6 @@
     <dependency>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.synapse</groupId>
-        <artifactId>synapse-core</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.wso2.carbon.apimgt</groupId>
-        <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
     </dependency>
 </dependencies>
 

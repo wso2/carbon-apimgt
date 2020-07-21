@@ -28,11 +28,11 @@ var getLoopbackOrigin = function() {
     return origin;
 };
 
-function getIDPOrigin(){
+function getIDPOrigin() {
     return utils.getExternalIDPOrigin();
 }
 
-function getIDPCheckSessionEndpoint(){
+function getIDPCheckSessionEndpoint() {
     return utils.getExternalIDPCheckSessionEndpoint();
 }
 
@@ -72,14 +72,14 @@ var getTenantBasedLogoutCallBack = function() {
     }
 };
 
-var isPerTenantServiceProviderEnabled = function(){
+var isPerTenantServiceProviderEnabled = function() {
     var tenantDomain = getTenantDomain();
 
     var perTenantServiceProviderEnabled = utils.isPerTenantServiceProviderEnabled(tenantDomain);
     return perTenantServiceProviderEnabled;
 };
 
-var getTenantDomain = function(){
+var getTenantDomain = function() {
 
     var tenantDomain = request.getParameter("tenant");
     if (tenantDomain == null) {
@@ -106,7 +106,7 @@ var getTenantBasedCustomUrl = function() {
     }
 };
 
-var getServiceProviderTenantDomain = function(){
+var getServiceProviderTenantDomain = function() {
     var tenantDomain = getTenantDomain();
     if (isPerTenantServiceProviderEnabled()) {
         return tenantDomain;
@@ -115,7 +115,7 @@ var getServiceProviderTenantDomain = function(){
     }
 };
 
-var isEnableEmailUserName = function(){
+var isEnableEmailUserName = function() {
     var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
     var carbonUtils = new CarbonUtils();
     var isEnableEmailUserName = carbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName");

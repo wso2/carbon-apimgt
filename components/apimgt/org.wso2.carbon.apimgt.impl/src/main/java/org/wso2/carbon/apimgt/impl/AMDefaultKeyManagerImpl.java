@@ -177,6 +177,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         ClientInfo clientInfo = new ClientInfo();
         JSONObject infoJson = new JSONObject(info.getJsonString());
+        String applicationOwner =  (String) info.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
         if (infoJson.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
             // this is done as there are instances where the grant string begins with a comma character.
             String grantString = infoJson.getString(ApplicationConstants.OAUTH_CLIENT_GRANT);
@@ -194,6 +195,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         clientInfo.setClientName(applicationName);
         //todo: run tests by commenting the type
         clientInfo.setTokenType(info.getTokenType());
+        clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());
@@ -475,7 +477,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             dcrEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
         } else {
             dcrEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                    .concat(getTenantAwareContext().trim()).concat("/api/identity/oauth2/dcr/v1.1/register");
+                    .concat(getTenantAwareContext().trim()).concat
+                            (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_DCR_ENDPOINT);
         }
         String tokenEndpoint;
         if (configuration.getParameter(APIConstants.KeyManager.TOKEN_ENDPOINT) != null) {
@@ -513,7 +516,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT);
         } else {
             userInfoEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                    .concat(getTenantAwareContext().trim()).concat("/user-info");
+                    .concat(getTenantAwareContext().trim()).concat
+                            (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT);
         }
 
         dcrClient = Feign.builder()

@@ -308,6 +308,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     info.setApplicationName(authenticationContext.getApplicationName());
                     info.setConsumerKey(authenticationContext.getConsumerKey());
                     info.setEndUserName(authenticationContext.getUsername());
+                    info.setApiTier(authenticationContext.getApiTier());
 
                     //This prefix is added for synapse to dispatch this request to the specific sequence
                     if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(info.getType())) {

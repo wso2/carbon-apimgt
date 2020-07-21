@@ -18,11 +18,8 @@
 import React, { useState } from 'react';
 import Box from '@material-ui/core/Box';
 import cloneDeep from 'lodash.clonedeep';
-import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -114,10 +111,10 @@ const KeyConfiguration = (props) => {
         classes, notFound, isUserOwner, keyManagerConfig, validating, updateKeyRequest, keyRequest,
     } = props;
     const {
-        selectedGrantTypes, callbackUrl, additionalProperties
+        selectedGrantTypes, callbackUrl,
     } = keyRequest;
     let {
-        applicationConfiguration, availableGrantTypes, description,
+        applicationConfiguration, availableGrantTypes, description, additionalProperties,
         enableMapOAuthConsumerApps, enableOAuthAppCreation, enableTokenEncryption, enableTokenGeneration,
         id, name, revokeEndpoint, tokenEndpoint, type, userInfoEndpoint,
     } = keyManagerConfig;
@@ -162,7 +159,7 @@ const KeyConfiguration = (props) => {
      * @param {*} event event fired
      */
     const handleChange = (field, event) => {
-        const newRequest = { ...keyRequest };
+        const newRequest = cloneDeep(keyRequest);
         const { target: currentTarget } = event;
         //newRequest.serverSupportedGrantTypes = availableGrantTypes;
         //newRequest.selectedGrantTypes = availableGrantTypes;
@@ -182,7 +179,7 @@ const KeyConfiguration = (props) => {
                 newRequest.selectedGrantTypes = newGrantTypes;
                 break;
             case 'additionalProperties':
-                let clonedAdditionalProperties = cloneDeep(newRequest.additionalProperties);
+                let clonedAdditionalProperties = newRequest.additionalProperties;
                 clonedAdditionalProperties[currentTarget.name] = currentTarget.value;
                 newRequest.additionalProperties = clonedAdditionalProperties;
                 break;
@@ -200,6 +197,16 @@ const KeyConfiguration = (props) => {
         };
         setTimeout(caller, 2000);
     }
+
+    const getPreviousValue = (config) => {
+        const { additionalProperties } = keyRequest;
+        const isPreviousValueSet =  !!(additionalProperties && additionalProperties[config.name]);
+        let defaultValue = config.default;
+        if (config.multiple && typeof defaultValue === 'string' && defaultValue === '' ) {
+            defaultValue = [];
+        }
+        return  isPreviousValueSet ? additionalProperties[config.name] : defaultValue;
+    }
     /**
      *
      *
@@ -214,6 +221,11 @@ const KeyConfiguration = (props) => {
         availableGrantTypes,
         Settings.grantTypes,
     );
+
+    // Check for additional properties for token endpoint and revoke endpoints.
+    const propPrefix = keyRequest.keyType.toLowerCase();
+    tokenEndpoint = additionalProperties[`${propPrefix}_token_endpoint`] || tokenEndpoint;
+    revokeEndpoint = additionalProperties[`${propPrefix}_revoke_endpoint`] || revokeEndpoint;
 
     return (
         <>
@@ -366,6 +378,7 @@ const KeyConfiguration = (props) => {
                                         id='Shared.AppsAndKeys.KeyConfiguration.the.application.can'
                                     />
                                 </FormHelperText>
+                                        
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -377,48 +390,48 @@ const KeyConfiguration = (props) => {
 
                             </TableCell>
                             <TableCell>
-                                <TextField
-                                    margin='dense'
-                                    id='callbackURL'
-                                    label={<FormattedMessage
-                                        defaultMessage='Callback URL'
-                                        id='Shared.AppsAndKeys.KeyConfiguration.callback.url.label'
-                                    />}
-                                    value={callbackUrl}
-                                    name='callbackURL'
-                                    onChange={e => handleChange('callbackUrl', e)}
-                                    helperText={callBackHasErrors() || <FormattedMessage
-                                        defaultMessage={`Callback URL is a redirection URI in the client
-                        application which is used by the authorization server to send the
-                        client's user-agent (usually web browser) back after granting access.`}
-                                        id='Shared.AppsAndKeys.KeyConfCiguration.callback.url.helper.text'
-                                    />}
-                                    variant='outlined'
-                                    disabled={!isUserOwner ||
-                                        (selectedGrantTypes && !selectedGrantTypes.includes('authorization_code')
-                                            && !selectedGrantTypes.includes('implicit'))
-                                    }
-                                    error={callBackHasErrors()}
-                                    placeholder={intl.formatMessage({
-                                        defaultMessage: 'http://url-to-webapp',
-                                        id: 'Shared.AppsAndKeys.KeyConfiguration.url.to.webapp',
-                                    })}
-                                />
+                                <Box maxWidth={600}>
+                                    <TextField
+                                        margin='dense'
+                                        id='callbackURL'
+                                        label={<FormattedMessage
+                                            defaultMessage='Callback URL'
+                                            id='Shared.AppsAndKeys.KeyConfiguration.callback.url.label'
+                                        />}
+                                        value={callbackUrl}
+                                        name='callbackURL'
+                                        onChange={e => handleChange('callbackUrl', e)}
+                                        helperText={callBackHasErrors() || <FormattedMessage
+                                            defaultMessage={`Callback URL is a redirection URI in the client
+                            application which is used by the authorization server to send the
+                            client's user-agent (usually web browser) back after granting access.`}
+                                            id='Shared.AppsAndKeys.KeyConfCiguration.callback.url.helper.text'
+                                        />}
+                                        variant='outlined'
+                                        disabled={!isUserOwner ||
+                                            (selectedGrantTypes && !selectedGrantTypes.includes('authorization_code')
+                                                && !selectedGrantTypes.includes('implicit'))
+                                        }
+                                        error={callBackHasErrors()}
+                                        placeholder={intl.formatMessage({
+                                            defaultMessage: 'http://url-to-webapp',
+                                            id: 'Shared.AppsAndKeys.KeyConfiguration.url.to.webapp',
+                                        })}
+                                    />
+                                </Box>
                             </TableCell>
                         </TableRow>
+                        {applicationConfiguration.length > 0 && applicationConfiguration.map(config => (
+                            <AppConfiguration
+                                config={config}
+                                previousValue={getPreviousValue(config)}
+                                isUserOwner={isUserOwner}
+                                handleChange={handleChange}
+                            />
+                        ))}
                     </TableBody>
                 </Table>
             </Box>
-
-
-            {applicationConfiguration.length > 0 && applicationConfiguration.map(config => (
-                <AppConfiguration
-                    config={config}
-                    defaultValue={config.default}
-                    isUserOwner={isUserOwner}
-                    handleChange={handleChange}
-                />
-            ))}
         </>
     );
 };
