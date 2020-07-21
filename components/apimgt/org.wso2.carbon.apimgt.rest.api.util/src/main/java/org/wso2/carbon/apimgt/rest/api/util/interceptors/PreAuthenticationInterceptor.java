@@ -53,7 +53,7 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
             path = path.replace("/" + APIConstants.RestApiConstants.REST_API_OLD_VERSION, "");
         }
         String httpMethod = (String) message.get(Message.HTTP_REQUEST_METHOD);
-        Dictionary<URITemplate,List<String>> whiteListedResourcePathsMap;
+        Dictionary<URITemplate,List<String>> allowedResourcePathsMap;
 
         //If Authorization headers are present anonymous URI check will be skipped
         ArrayList authHeaders = (ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS)))
@@ -61,16 +61,16 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
         if (authHeaders != null)
             return;
 
-        //Check if the accessing URI is white-listed and then authorization is skipped
+        //Check if the accessing URI is allowed and then authorization is skipped
         try {
-            whiteListedResourcePathsMap = RestApiUtil.getWhiteListedURIsToMethodsMap();
-            Enumeration<URITemplate> uriTemplateSet = whiteListedResourcePathsMap.keys();
+            allowedResourcePathsMap = RestApiUtil.getAllowedURIsToMethodsMap();
+            Enumeration<URITemplate> uriTemplateSet = allowedResourcePathsMap.keys();
 
             while (uriTemplateSet.hasMoreElements()) {
                 URITemplate uriTemplate = uriTemplateSet.nextElement();
                 if (uriTemplate.matches(path, new HashMap<String, String>())) {
-                    List<String> whiteListedVerbs = whiteListedResourcePathsMap.get(uriTemplate);
-                    if (whiteListedVerbs.contains(httpMethod)) {
+                    List<String> allowedVerbs = allowedResourcePathsMap.get(uriTemplate);
+                    if (allowedVerbs.contains(httpMethod)) {
                         message.put(RestApiConstants.AUTHENTICATION_REQUIRED, false);
                         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                         carbonContext.setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
@@ -82,7 +82,7 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
             }
         } catch (APIManagementException e) {
             RestApiUtil
-                    .handleInternalServerError("Unable to retrieve/process white-listed URIs for REST API", e, logger);
+                    .handleInternalServerError("Unable to retrieve/process allowed URIs for REST API", e, logger);
         }
     }
 }

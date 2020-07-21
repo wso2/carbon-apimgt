@@ -52,11 +52,11 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
      * This method is used to retrieve the authorized scopes with respect to a token.
      *
      * @param tokReqMsgCtx      token message context
-     * @param whiteListedScopes scopes to be white listed
+     * @param allowedScopes scopes to be white listed
      * @return authorized scopes list
      */
     @Override
-    public List<String> getScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> whiteListedScopes) {
+    public List<String> getScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> allowedScopes) {
 
         List<String> authorizedScopes = null;
         List<String> requestedScopes = Arrays.asList(tokReqMsgCtx.getScope());
@@ -66,9 +66,9 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
         if (appScopes != null) {
             //If no scopes can be found in the context of the application
             if (isAppScopesEmpty(appScopes, clientId)) {
-                return getAllowedScopes(whiteListedScopes, requestedScopes);
+                return getAllowedScopes(allowedScopes, requestedScopes);
             }
-            authorizedScopes = getAuthorizedScopes(authenticatedUser, requestedScopes, appScopes, whiteListedScopes);
+            authorizedScopes = getAuthorizedScopes(authenticatedUser, requestedScopes, appScopes, allowedScopes);
         }
         return authorizedScopes;
     }
@@ -77,11 +77,11 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
      * This method is used to retrieve authorized scopes with respect to an authorization callback.
      *
      * @param scopeValidationCallback Authorization callback to validate scopes
-     * @param whiteListedScopes       scopes to be white listed
+     * @param allowedScopes       scopes to be white listed
      * @return authorized scopes list
      */
     @Override
-    public List<String> getScopes(OAuthCallback scopeValidationCallback, List<String> whiteListedScopes) {
+    public List<String> getScopes(OAuthCallback scopeValidationCallback, List<String> allowedScopes) {
 
         List<String> authroizedScopes = null;
         List<String> requestedScopes = Arrays.asList(scopeValidationCallback.getRequestedScope());
@@ -91,9 +91,9 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
         if (appScopes != null) {
             //If no scopes can be found in the context of the application
             if (isAppScopesEmpty(appScopes, clientId)) {
-                return getAllowedScopes(whiteListedScopes, requestedScopes);
+                return getAllowedScopes(allowedScopes, requestedScopes);
             }
-            authroizedScopes = getAuthorizedScopes(authenticatedUser, requestedScopes, appScopes, whiteListedScopes);
+            authroizedScopes = getAuthorizedScopes(authenticatedUser, requestedScopes, appScopes, allowedScopes);
         }
         return authroizedScopes;
     }
@@ -108,7 +108,7 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
      * @return Returns a list of scopes.
      */
     private List<String> getAuthorizedScopes(AuthenticatedUser authenticatedUser, List<String> reqScopeList,
-                                             Map<String, String> appScopes, List<String> whiteListedScopes) {
+                                             Map<String, String> appScopes, List<String> allowedScopes) {
 
         boolean status;
         List<String> authorizedScopes = new ArrayList<>();
@@ -167,7 +167,7 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
                 }
 
                 //The scope string starts with 'device_'.
-                else if (appScopes.containsKey(scope) || isWhiteListedScope(whiteListedScopes, scope)) {
+                else if (appScopes.containsKey(scope) || isAllowedScope(allowedScopes, scope)) {
                     authorizedScopes.add(scope);
                 }
             }
