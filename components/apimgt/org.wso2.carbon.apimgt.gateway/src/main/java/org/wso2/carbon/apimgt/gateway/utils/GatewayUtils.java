@@ -388,6 +388,7 @@ public class GatewayUtils {
         if (sequence != null && !sequence.mediate(messageContext)) {
             // If needed user should be able to prevent the rest of the fault handling
             // logic from getting executed
+            return false;
         }
         return true;
     }
