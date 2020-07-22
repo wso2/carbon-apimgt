@@ -374,13 +374,13 @@
         {% endif %}
         <!-- Scope used for marking Application Tokens. If a token is generated with this scope, they will be treated as Application Access Tokens -->
         <ApplicationTokenScope>{{apim.oauth_config.default_app_scope}}</ApplicationTokenScope>
-        <!-- All  scopes under the ScopeWhitelist element are not validating against roles that has assigned to it.
+        <!-- All  scopes under the AllowedScopes element are not validating against roles that has assigned to it.
              By default ^device_.* and openid scopes have been white listed internally. -->
-        <ScopeWhitelist>
+        <AllowedScopes>
         {%for scope in apim.oauth_config.white_listed_scopes%}
             <Scope>{{scope}}</Scope>
         {% endfor %}
-        </ScopeWhitelist>
+        </AllowedScopes>
 
         <!-- Name of the token API -->
         <TokenEndPointName>{{apim.oauth_config.token_endpoint_context}}</TokenEndPointName>
@@ -540,148 +540,148 @@
 
     <RESTAPI>
         <!--Configure white-listed URIs of REST API. Accessing white-listed URIs does not require credentials (does not require Authorization header). -->
-        <WhiteListedURIs>
-         {% if apim.rest_api.whitelisted_uri is defined %}
-            {% for uri in apim.rest_api.whitelisted_uri %}
-                <WhiteListedURI>
+        <AllowedURIs>
+         {% if apim.rest_api.allowed_uri is defined %}
+            {% for uri in apim.rest_api.allowed_uri %}
+                <AllowedURI>
                 <URI>{{uri.uri_path}}</URI>
                 <HTTPMethods>{{uri.http_method}}</HTTPMethods>
-                </WhiteListedURI>
+                </AllowedURI>
             {% endfor %}
          {% endif %}
-             <WhiteListedURI>
+             <AllowedURI>
                 <URI>/api/am/store/{version}/tenants</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-             </WhiteListedURI>
-            <WhiteListedURI>
+             </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/publisher/{version}/swagger.json</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/swagger.json</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/admin/{version}/swagger.json</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/publisher/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/admin/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/swagger</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/wsdl</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/comments</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                  <URI>/api/am/store/{version}/apis/{apiId}/graphql-schema</URI>
                  <HTTPMethods>GET</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/documents</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/documents/{documentId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/documents/{documentId}/content</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/thumbnail</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/api-products</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/api-products/{apiId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/api-products/{apiId}/swagger</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/api-products/{apiId}/documents</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/api-products/{apiId}/documents/{documentId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/api-products/{apiId}/documents/{documentId}/content</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/api-products/{apiId}/thumbnail</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/tags</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/tiers/{tierLevel}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/tiers/{tierLevel}/{tierName}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/search</URI>
                 <HTTPMethods>GET</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/publisher/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/admin/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/endpoint-registry/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/api-categories</URI>
                 <HTTPMethods>GET</HTTPMethods>
-            </WhiteListedURI>
-        </WhiteListedURIs>
+            </AllowedURI>
+        </AllowedURIs>
         <ETagSkipList>
             <ETagSkipURI>
                 <URI>/api/am/store/{version}/apis</URI>
@@ -794,7 +794,6 @@
         </ETagSkipList>
     </RESTAPI>
     <ThrottlingConfigurations>
-        <EnableAdvanceThrottling>{{apim.throttling.enable_advanced_throttling}}</EnableAdvanceThrottling>
         <TrafficManager>
             <Type>{{apim.throttling.event_type}}</Type>
 

@@ -78,7 +78,6 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -4463,7 +4462,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         for (Scope scope : api.getScopes()) {
             String scopeName = scope.getKey();
-            if (!(APIUtil.isWhiteListedScope(scopeName))) {
+            if (!(APIUtil.isAllowedScope(scopeName))) {
                 // Check if each scope key is already assigned as a local scope to a different API which is also not a
                 // different version of the same API. If true, return error.
                 // If false, check if the scope key is already defined as a shared scope. If so, do not honor the

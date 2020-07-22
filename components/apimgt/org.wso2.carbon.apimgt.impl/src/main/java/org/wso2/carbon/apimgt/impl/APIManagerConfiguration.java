@@ -812,14 +812,6 @@ public class APIManagerConfiguration {
         OMElement throttleConfigurationElement = element.getFirstChildWithName(new QName(APIConstants
                 .AdvancedThrottleConstants.THROTTLING_CONFIGURATIONS));
         if (throttleConfigurationElement != null) {
-            // Check advance throttling enabled
-            OMElement enableAdvanceThrottlingElement = throttleConfigurationElement
-                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
-                            .ENABLE_ADVANCE_THROTTLING));
-            if (enableAdvanceThrottlingElement != null) {
-                throttleProperties.setEnabled(JavaUtils.isTrueExplicitly(enableAdvanceThrottlingElement
-                        .getText()));
-            }
             // Check unlimited tier enabled
             OMElement enableUnlimitedTierElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
@@ -861,8 +853,6 @@ public class APIManagerConfiguration {
                         (enabledSubscriptionLevelSpikeArrestElement
                                 .getText()));
             }
-            // if advance Throttling enable
-            if (throttleProperties.isEnabled()) {
                 // Reading TrafficManager configuration
                 OMElement trafficManagerConfigurationElement = throttleConfigurationElement.getFirstChildWithName(new
                         QName(APIConstants.AdvancedThrottleConstants.TRAFFIC_MANAGER));
@@ -1265,7 +1255,6 @@ public class APIManagerConfiguration {
                 }
                 throttleProperties.setBlockCondition(blockConditionRetrieverConfiguration);
 
-            }
         }
     }
 

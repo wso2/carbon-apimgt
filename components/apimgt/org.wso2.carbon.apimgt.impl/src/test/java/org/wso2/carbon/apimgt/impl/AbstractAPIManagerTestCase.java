@@ -1474,11 +1474,14 @@ public class AbstractAPIManagerTestCase {
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.getTiers()).thenReturn(tierMap1);
         PowerMockito.when(APIUtil.getTiers(Mockito.anyInt())).thenReturn(tierMap2);
-        PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(false, false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
         abstractAPIManager.tenantId = -1;
+        PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap1);
+
         Assert.assertEquals(abstractAPIManager.getTiers().size(), 1);
         abstractAPIManager.tenantId = -1234;
+        PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap2);
+
         Assert.assertEquals(abstractAPIManager.getTiers().size(), 2);
         PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap3);
         Assert.assertEquals(abstractAPIManager.getTiers().size(), 3);
@@ -1502,11 +1505,12 @@ public class AbstractAPIManagerTestCase {
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.getTiers()).thenReturn(tierMap1);
         PowerMockito.when(APIUtil.getTiers(Mockito.anyInt())).thenReturn(tierMap2);
-        PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(false, false, false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
+        PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap1);
         Assert.assertEquals(abstractAPIManager.getTiers(SAMPLE_TENANT_DOMAIN_1).size(), 1);
         Assert.assertEquals(abstractAPIManager.getTiers(SAMPLE_TENANT_DOMAIN_1).size(), 1); //verify next branch of if
         // condition
+        PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap2);
         Assert.assertEquals(abstractAPIManager.getTiers(SAMPLE_TENANT_DOMAIN_1).size(), 2);
         PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap3);
         Assert.assertEquals(abstractAPIManager.getTiers(SAMPLE_TENANT_DOMAIN_1).size(), 3);
@@ -1531,11 +1535,12 @@ public class AbstractAPIManagerTestCase {
         PowerMockito.when(APIUtil.getTenantId(Mockito.anyString())).thenReturn(-1234);
         PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn(tierMap1, tierMap2, tierMap3);
-        PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(false, true, true, true, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
+        PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap1);
         Assert.assertEquals(abstractAPIManager.getTiers(0, API_PROVIDER).size(), 1);
         Assert.assertEquals(abstractAPIManager.getTiers(0, API_PROVIDER).size(), 1); //verify next branch of if
         // condition
+        PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap2);
         Assert.assertEquals(abstractAPIManager.getTiers(1, API_PROVIDER).size(), 2);
         PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap3);
         Assert.assertEquals(abstractAPIManager.getTiers(2, API_PROVIDER).size(), 3);

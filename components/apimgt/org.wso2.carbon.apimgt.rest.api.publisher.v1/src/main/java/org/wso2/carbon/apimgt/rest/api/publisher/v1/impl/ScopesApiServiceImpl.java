@@ -62,7 +62,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
 
         boolean isScopeExist = false;
         String scopeName = new String(Base64.getUrlDecoder().decode(name));
-        if (!APIUtil.isWhiteListedScope(scopeName)) {
+        if (!APIUtil.isAllowedScope(scopeName)) {
             try {
                 APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
