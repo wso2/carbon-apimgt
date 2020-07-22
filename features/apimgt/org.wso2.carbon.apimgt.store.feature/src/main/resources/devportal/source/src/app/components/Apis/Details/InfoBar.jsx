@@ -581,8 +581,8 @@ class InfoBar extends React.Component {
                                                                 <Icon className={classes.iconOdd}>games</Icon>
                                                                 <span className={classes.iconTextWrapper}>
                                                                     <FormattedMessage
-                                                                        id='Apis.Details.InfoBar.available.mgLabels'
-                                                                        defaultMessage='Available Microgateways'
+                                                                        id='Apis.Details.InfoBar.available.gLabels'
+                                                                        defaultMessage='Available Gateways'
                                                                     />
                                                                 </span>
                                                             </div>
