@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
@@ -24,6 +24,10 @@ import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import Delete from 'AppComponents/KeyManagers/DeleteKeyManager';
 import { Link as RouterLink } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
+import Alert from 'AppComponents/Shared/Alert';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 
 /**
  * API call to get microgateway labels
@@ -46,12 +50,13 @@ function apiCall() {
  * @returns {JSX} Header AppBar components.
  */
 export default function ListKeyManagers() {
+    const [saving, setSaving] = useState(false);
     const intl = useIntl();
     const columProps = [
         {
             name: 'name',
             label: intl.formatMessage({
-                id: 'AdminPages.KeyManagers.table.header.label.name',
+                id: 'KeyManagers.ListKeyManagers.table.header.label.name',
                 defaultMessage: 'Name',
             }),
             options: {
@@ -68,7 +73,7 @@ export default function ListKeyManagers() {
         {
             name: 'description',
             label: intl.formatMessage({
-                id: 'AdminPages.KeyManagers.table.header.label.description',
+                id: 'KeyManagers.ListKeyManagers.table.header.label.description',
                 defaultMessage: 'Description',
             }),
             options: {
@@ -78,7 +83,7 @@ export default function ListKeyManagers() {
         {
             name: 'type',
             label: intl.formatMessage({
-                id: 'AdminPages.KeyManagers.table.header.label.type',
+                id: 'KeyManagers.ListKeyManagers.table.header.label.type',
                 defaultMessage: 'Type',
             }),
             options: {
@@ -86,22 +91,23 @@ export default function ListKeyManagers() {
             },
         },
         { name: 'id', options: { display: false } },
+        { name: 'enabled', options: { display: false } },
     ];
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
-            id: 'AdminPages.KeyManagers.List.addButtonProps.triggerButtonText',
+            id: 'KeyManagers.ListKeyManagers.List.addButtonProps.triggerButtonText',
             defaultMessage: 'Add KeyManager',
         }),
         /* This title is what as the title of the popup dialog box */
         title: intl.formatMessage({
-            id: 'AdminPages.KeyManagers.List.addButtonProps.title',
+            id: 'KeyManagers.ListKeyManagers.List.addButtonProps.title',
             defaultMessage: 'Add KeyManager',
         }),
     };
     const pageProps = {
         pageStyle: 'half',
         title: intl.formatMessage({
-            id: 'AdminPages.KeyManagers.List.title',
+            id: 'KeyManagers.ListKeyManagers.List.title',
             defaultMessage: 'Key Managers',
         }),
     };
@@ -109,7 +115,7 @@ export default function ListKeyManagers() {
         <RouterLink to='/settings/key-managers/create'>
             <Button variant='contained' color='primary' size='small'>
                 <FormattedMessage
-                    id='AdminPages.KeyManagers.List.addButtonProps.triggerButtonText'
+                    id='KeyManagers.ListKeyManagers.addButtonProps.triggerButtonText'
                     defaultMessage='Add KeyManager'
                 />
             </Button>
@@ -119,7 +125,7 @@ export default function ListKeyManagers() {
         content: (
             <Typography variant='body2' color='textSecondary' component='p'>
                 <FormattedMessage
-                    id='AdminPages.KeyManagers.List.empty.content.keymanagers'
+                    id='KeyManagers.ListKeyManagers.empty.content.keymanagers'
                     defaultMessage='It is possible to register an Oauth Provider.'
                 />
             </Typography>
@@ -127,12 +133,56 @@ export default function ListKeyManagers() {
         title: (
             <Typography gutterBottom variant='h5' component='h2'>
                 <FormattedMessage
-                    id='AdminPages.KeyManagers.List.empty.title'
+                    id='KeyManagers.ListKeyManagers.empty.title'
                     defaultMessage='Key Managers'
                 />
             </Typography>
         ),
     };
+    const addedActions = [
+        (props) => {
+            const { rowData, updateList } = props;
+            const updateSomething = () => {
+                const restApi = new API();
+                const kmName = rowData[0];
+                const kmId = rowData[3];
+                restApi.keyManagerGet(kmId).then((result) => {
+                    let editState;
+                    if (result.body.name !== null) {
+                        editState = {
+                            ...result.body,
+                        };
+                    }
+                    editState.enabled = !editState.enabled;
+                    restApi.updateKeyManager(kmId, editState).then(() => {
+                        Alert.success(` ${kmName} ${intl.formatMessage({
+                            id: 'KeyManagers.ListKeyManagers.edit.success',
+                            defaultMessage: ' Key Manager updated successfully.',
+                        })}`);
+                        setSaving(false);
+                        updateList();
+                    }).catch((e) => {
+                        const { response } = e;
+                        if (response.body) {
+                            Alert.error(response.body.description);
+                        }
+                        setSaving(false);
+                        updateList();
+                    });
+                });
+            };
+            const kmEnabled = rowData[4];
+
+            return (
+                <Switch
+                    checked={kmEnabled}
+                    onChange={updateSomething}
+                    color='primary'
+                    size='small'
+                />
+            );
+        },
+    ];
     return (
         <ListBase
             columProps={columProps}
@@ -142,6 +192,7 @@ export default function ListKeyManagers() {
             emptyBoxProps={emptyBoxProps}
             apiCall={apiCall}
             DeleteComponent={Delete}
+            addedActions={addedActions}
         />
     );
 }

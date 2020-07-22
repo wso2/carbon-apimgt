@@ -26,22 +26,33 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.endpoint.EndpointAdminException;
 
 import javax.ws.rs.core.Response;
+import java.util.Map;
 
 public class EndPointsApiServiceImpl implements EndPointsApiService {
 
     private static final Log log = LogFactory.getLog(EndPointsApiServiceImpl.class);
 
-    public Response endPointsGet(String apiName, String label, String apiId, MessageContext messageContext) {
+    public Response endPointsGet(String apiName, String version , String tenantDomain, MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
+        if (tenantDomain == null) {
+            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
+        }
+
+        Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version, tenantDomain);
+        String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
+        String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
+
         GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
         JSONObject responseObj = new JSONObject();
+
         if (gatewayAPIDTO != null) {
             try {
                 JSONArray endPointArray = new JSONArray();

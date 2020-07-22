@@ -81,7 +81,7 @@ public class APITokenMgtServiceComponent {
             if (configurationService != null) {
                 // Read scope whitelist from Configuration.
                 whitelist =
-                        configurationService.getAPIManagerConfiguration().getProperty(APIConstants.WHITELISTED_SCOPES);
+                        configurationService.getAPIManagerConfiguration().getProperty(APIConstants.ALLOWED_SCOPES);
                 // If whitelist is null, default scopes will be put.
                 if (whitelist == null) {
                     whitelist = new ArrayList<String>();

@@ -159,7 +159,7 @@ const KeyConfiguration = (props) => {
      * @param {*} event event fired
      */
     const handleChange = (field, event) => {
-        const newRequest = { ...keyRequest };
+        const newRequest = cloneDeep(keyRequest);
         const { target: currentTarget } = event;
         //newRequest.serverSupportedGrantTypes = availableGrantTypes;
         //newRequest.selectedGrantTypes = availableGrantTypes;
@@ -179,7 +179,7 @@ const KeyConfiguration = (props) => {
                 newRequest.selectedGrantTypes = newGrantTypes;
                 break;
             case 'additionalProperties':
-                let clonedAdditionalProperties = cloneDeep(newRequest.additionalProperties);
+                let clonedAdditionalProperties = newRequest.additionalProperties;
                 clonedAdditionalProperties[currentTarget.name] = currentTarget.value;
                 newRequest.additionalProperties = clonedAdditionalProperties;
                 break;
@@ -196,6 +196,16 @@ const KeyConfiguration = (props) => {
             setUrlCopied(false);
         };
         setTimeout(caller, 2000);
+    }
+
+    const getPreviousValue = (config) => {
+        const { additionalProperties } = keyRequest;
+        const isPreviousValueSet =  !!(additionalProperties && additionalProperties[config.name]);
+        let defaultValue = config.default;
+        if (config.multiple && typeof defaultValue === 'string' && defaultValue === '' ) {
+            defaultValue = [];
+        }
+        return  isPreviousValueSet ? additionalProperties[config.name] : defaultValue;
     }
     /**
      *
@@ -414,7 +424,7 @@ const KeyConfiguration = (props) => {
                         {applicationConfiguration.length > 0 && applicationConfiguration.map(config => (
                             <AppConfiguration
                                 config={config}
-                                defaultValue={config.default}
+                                previousValue={getPreviousValue(config)}
                                 isUserOwner={isUserOwner}
                                 handleChange={handleChange}
                             />

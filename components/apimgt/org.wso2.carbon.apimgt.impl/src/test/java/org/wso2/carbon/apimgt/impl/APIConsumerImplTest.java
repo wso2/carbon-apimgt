@@ -962,7 +962,6 @@ public class APIConsumerImplTest {
         Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class).
                 thenReturn(new String[] { "role1", "role2" });
         Assert.assertFalse(apiConsumer.isTierDeneid("tier1"));
-        PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(true, false);
         TierPermissionDTO tierPermissionDTO = new TierPermissionDTO();
         tierPermissionDTO.setRoles(new String[] { "role1" });
         Mockito.when(apiMgtDAO.getThrottleTierPermission(Mockito.anyString(), Mockito.anyInt()))
@@ -970,7 +969,6 @@ public class APIConsumerImplTest {
         Assert.assertTrue(apiConsumer.isTierDeneid("tier1"));
         tierPermissionDTO.setRoles(new String[] { "role3" });
         Assert.assertFalse(apiConsumer.isTierDeneid("tier1"));
-        Mockito.when(apiMgtDAO.getTierPermission(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierPermissionDTO);
         Assert.assertFalse(apiConsumer.isTierDeneid("tier1"));
         tierPermissionDTO.setPermissionType(APIConstants.TIER_PERMISSION_ALLOW);
         Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenReturn(new String[0]);
@@ -993,7 +991,6 @@ public class APIConsumerImplTest {
         Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class).
                 thenReturn(new String[] { "role1", "role2" });
         Assert.assertEquals(apiConsumer.getDeniedTiers().size(), 0);
-        PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(true, false);
         TierPermissionDTO tierPermissionDTO = new TierPermissionDTO();
         TierPermissionDTO tierPermissionDTO1 = new TierPermissionDTO();
         tierPermissionDTO.setRoles(new String[] { "role1" });

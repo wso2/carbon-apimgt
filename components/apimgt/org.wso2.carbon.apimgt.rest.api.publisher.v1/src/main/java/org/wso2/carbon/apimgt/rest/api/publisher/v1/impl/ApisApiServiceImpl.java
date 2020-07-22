@@ -78,7 +78,6 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -214,7 +213,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }*/
 
             Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
-                    offset, limit, false);
+                    offset, limit, false, !expand);
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
 
@@ -2264,10 +2263,19 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Lifecycle state information
      */
     private LifecycleStateDTO getLifecycleState(String apiId) {
+        return getLifecycleState(null, apiId);
+    }
+        
+    private LifecycleStateDTO getLifecycleState(APIIdentifier identifier, String apiId) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier;
+            if (identifier == null) {
+                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            } else {
+                apiIdentifier = identifier;
+            }
             Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
             if (apiLCData == null) {
                 String errorMessage = "Error while getting lifecycle state for API : " + apiId;
@@ -2279,10 +2287,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDTO currentAPI = getAPIByID(apiId);
             APIVersionStringComparator comparator = new APIVersionStringComparator();
             Set<String> versions = apiProvider.getAPIVersions(
-                    APIUtil.replaceEmailDomain(currentAPI.getProvider()), currentAPI.getName());
+                    APIUtil.replaceEmailDomain(apiIdentifier.getProviderName()), apiIdentifier.getName());
 
             for (String tempVersion : versions) {
-                if (comparator.compare(tempVersion, currentAPI.getVersion()) < 0) {
+                if (comparator.compare(tempVersion, apiIdentifier.getVersion()) < 0) {
                     apiOlderVersionExist = true;
                     break;
                 }
@@ -3927,7 +3935,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action);
 
             //returns the current lifecycle state
-            LifecycleStateDTO stateDTO = getLifecycleState(apiId);;
+            LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId);
 
             WorkflowResponseDTO workflowResponseDTO = APIMappingUtil
                     .toWorkflowResponseDTO(stateDTO, stateChangeResponse);
@@ -4463,7 +4471,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         for (Scope scope : api.getScopes()) {
             String scopeName = scope.getKey();
-            if (!(APIUtil.isWhiteListedScope(scopeName))) {
+            if (!(APIUtil.isAllowedScope(scopeName))) {
                 // Check if each scope key is already assigned as a local scope to a different API which is also not a
                 // different version of the same API. If true, return error.
                 // If false, check if the scope key is already defined as a shared scope. If so, do not honor the

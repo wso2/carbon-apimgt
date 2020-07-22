@@ -76,7 +76,6 @@ public class CommonConfigDeployerTestCase {
 
         ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
         PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(true);
 
         CommonConfigDeployer commonConfigDeployer = new CommonConfigDeployer();
         commonConfigDeployer.createdConfigurationContext(configurationContext);
@@ -120,7 +119,6 @@ public class CommonConfigDeployerTestCase {
         Mockito.when(ServiceReferenceHolder.getInstance().getRegistryService()).thenReturn(registryService);
         ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
         PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(true);
 
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.loadTenantAPIPolicy(TENANT_DOMAIN, TENANT_ID);

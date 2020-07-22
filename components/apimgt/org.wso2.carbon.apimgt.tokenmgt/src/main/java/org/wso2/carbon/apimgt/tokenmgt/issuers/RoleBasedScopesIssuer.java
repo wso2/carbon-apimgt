@@ -65,11 +65,11 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
      * This method is used to retrieve authorized scopes with respect to an authorization callback.
      *
      * @param scopeValidationCallback Authorization callback to validate scopes
-     * @param whiteListedScopes       scopes to be white listed
+     * @param allowedScopes       scopes to be white listed
      * @return authorized scopes list
      */
     @Override
-    public List<String> getScopes(OAuthCallback scopeValidationCallback, List<String> whiteListedScopes) {
+    public List<String> getScopes(OAuthCallback scopeValidationCallback, List<String> allowedScopes) {
 
         List<String> authorizedScopes = null;
         String[] requestedScopes = scopeValidationCallback.getRequestedScope();
@@ -80,10 +80,10 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
         if (appScopes != null) {
             //If no scopes can be found in the context of the application
             if (isAppScopesEmpty(appScopes, clientId)) {
-                return getAllowedScopes(whiteListedScopes, Arrays.asList(requestedScopes));
+                return getAllowedScopes(allowedScopes, Arrays.asList(requestedScopes));
             }
             String[] userRoles = getUserRoles(authenticatedUser);
-            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes, whiteListedScopes);
+            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes, allowedScopes);
         }
         return authorizedScopes;
     }
@@ -92,11 +92,11 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
      * This method is used to retrieve the authorized scopes with respect to a token.
      *
      * @param tokReqMsgCtx      token message context
-     * @param whiteListedScopes scopes to be white listed
+     * @param allowedScopes scopes to be white listed
      * @return authorized scopes list
      */
     @Override
-    public List<String> getScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> whiteListedScopes) {
+    public List<String> getScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> allowedScopes) {
 
         List<String> authorizedScopes = null;
         String[] requestedScopes = tokReqMsgCtx.getScope();
@@ -107,7 +107,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
         if (appScopes != null) {
             //If no scopes can be found in the context of the application
             if (isAppScopesEmpty(appScopes, clientId)) {
-                return getAllowedScopes(whiteListedScopes, Arrays.asList(requestedScopes));
+                return getAllowedScopes(allowedScopes, Arrays.asList(requestedScopes));
             }
 
             String grantType = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getGrantType();
@@ -133,7 +133,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
             } else {
                 userRoles = getUserRoles(authenticatedUser);
             }
-            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes, whiteListedScopes);
+            authorizedScopes = getAuthorizedScopes(userRoles, requestedScopes, appScopes, allowedScopes);
         }
         return authorizedScopes;
     }
@@ -181,11 +181,11 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
      * @param userRoles         Roles list of user
      * @param requestedScopes   Requested scopes
      * @param appScopes         Scopes of the Application
-     * @param whiteListedScopes Scopes to be whitelisted
+     * @param allowedScopes Scopes to be allowed
      * @return authorized scopes list
      */
     private List<String> getAuthorizedScopes(String[] userRoles, String[] requestedScopes,
-                                             Map<String, String> appScopes, List<String> whiteListedScopes) {
+                                             Map<String, String> appScopes, List<String> allowedScopes) {
 
         List<String> defaultScope = new ArrayList<>();
         defaultScope.add(DEFAULT_SCOPE_NAME);
@@ -229,7 +229,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
             }
             //The requested scope is defined for the context of the App but no roles have been associated with the
             //scope OR the scope string starts with 'device_'
-            else if (appScopes.containsKey(scope) || isWhiteListedScope(whiteListedScopes, scope)) {
+            else if (appScopes.containsKey(scope) || isAllowedScope(allowedScopes, scope)) {
                 authorizedScopes.add(scope);
             }
         }

@@ -1356,38 +1356,20 @@ public class APIProviderHostObject extends ScriptableObject {
         String[] tierNames;
         if (tier != null) {
             tierNames = tier.split(",");
-            if (!APIUtil.isAdvanceThrottlingEnabled()) {
-                Set<Tier> definedTiers = apiProvider.getTiers();
-                for (String tierName : tierNames) {
-                    boolean isTierValid = false;
-                    for (Tier definedTier : definedTiers) {
-                        if (tierName.equals(definedTier.getName())) {
-                            isTierValid = true;
-                            break;
-                        }
+            Policy[] definedTiers = apiProvider.getPolicies(provider, PolicyConstants.POLICY_LEVEL_SUB);
+            for (String tierName : tierNames) {
+                boolean isTierValid = false;
+                for (Policy definedTier : definedTiers) {
+                    if (tierName.equals(definedTier.getPolicyName())) {
+                        isTierValid = true;
+                        break;
                     }
-
-                    if (!isTierValid) {
-                        handleException("Specified tier " + tierName + " does not exist");
-                    }
-                    availableTier.add(new Tier(tierName));
                 }
-            } else {
-                Policy[] definedTiers = apiProvider.getPolicies(provider, PolicyConstants.POLICY_LEVEL_SUB);
-                for (String tierName : tierNames) {
-                    boolean isTierValid = false;
-                    for (Policy definedTier : definedTiers) {
-                        if (tierName.equals(definedTier.getPolicyName())) {
-                            isTierValid = true;
-                            break;
-                        }
-                    }
 
-                    if (!isTierValid) {
-                        handleException("Specified tier " + tierName + " does not exist");
-                    }
-                    availableTier.add(new Tier(tierName));
+                if (!isTierValid) {
+                    handleException("Specified tier " + tierName + " does not exist");
                 }
+                availableTier.add(new Tier(tierName));
             }
 
             api.addAvailableTiers(availableTier);
@@ -1513,7 +1495,7 @@ public class APIProviderHostObject extends ScriptableObject {
                         .getTenantId(tenantDomain);
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
-                    if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
+                    if (scope != null && !(APIUtil.isAllowedScope(scope.getKey()))) {
                         if (apiProvider.isScopeKeyAssignedLocally(apiId, scope.getKey(), tenantId)) {
                             handleException("Scope " + scope.getKey() + " is already assigned by another API");
                         }
@@ -2020,7 +2002,7 @@ public class APIProviderHostObject extends ScriptableObject {
                             .getTenantId(tenantDomain);
                     for (URITemplate uriTemplate : uriTemplates) {
                         Scope scope = uriTemplate.getScope();
-                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
+                        if (scope != null && !(APIUtil.isAllowedScope(scope.getKey()))) {
                             if (apiProvider.isScopeKeyAssignedLocally(apiId, scope.getKey(), tenantId)) {
                                 handleException("Scope " + scope.getKey() + " is already assigned by another API");
                             }
@@ -4655,7 +4637,7 @@ public class APIProviderHostObject extends ScriptableObject {
             String scopeKey = (String) args[0];
             String username = (String) args[1];
 
-            if (!APIUtil.isWhiteListedScope(scopeKey)) {
+            if (!APIUtil.isAllowedScope(scopeKey)) {
                 String tenantDomain = MultitenantUtils.getTenantDomain(username);
                 //update permission cache before validate user
                 int tenantId = -1234;

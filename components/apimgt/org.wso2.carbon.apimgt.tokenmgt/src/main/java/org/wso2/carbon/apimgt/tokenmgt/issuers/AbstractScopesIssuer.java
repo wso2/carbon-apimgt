@@ -50,20 +50,20 @@ public abstract class AbstractScopesIssuer {
      * This method is used to retrieve the authorized scopes with respect to a token.
      *
      * @param tokReqMsgCtx      token message context
-     * @param whiteListedScopes scopes to be white listed
+     * @param allowedScopes scopes to be white listed
      * @return returns authorized scopes list
      * @return authorized scopes list
      */
-    public abstract List<String> getScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> whiteListedScopes);
+    public abstract List<String> getScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> allowedScopes);
 
     /**
      * This method is used to retrieve authorized scopes with respect to an authorization callback.
      *
      * @param scopeValidationCallback Authorization callback to validate scopes
-     * @param whiteListedScopes       scopes to be white listed
+     * @param allowedScopes       scopes to be white listed
      * @return authorized scopes list
      */
-    public abstract List<String> getScopes(OAuthCallback scopeValidationCallback, List<String> whiteListedScopes);
+    public abstract List<String> getScopes(OAuthCallback scopeValidationCallback, List<String> allowedScopes);
 
     /**
      * This method is used to get the prefix of the scope issuer.
@@ -85,7 +85,7 @@ public abstract class AbstractScopesIssuer {
 
         //Iterate the requested scopes list.
         for (String scope : requestedScopes) {
-            if (isWhiteListedScope(scopeSkipList, scope)) {
+            if (isAllowedScope(scopeSkipList, scope)) {
                 authorizedScopes.add(scope);
             }
         }
@@ -102,7 +102,7 @@ public abstract class AbstractScopesIssuer {
      * @param scope - The scope key to check
      * @return - 'true' if the scope is white listed. 'false' if not.
      */
-    public boolean isWhiteListedScope(List<String> scopeSkipList, String scope) {
+    public boolean isAllowedScope(List<String> scopeSkipList, String scope) {
         for (String scopeTobeSkipped : scopeSkipList) {
             if (scope.matches(scopeTobeSkipped)) {
                 return true;

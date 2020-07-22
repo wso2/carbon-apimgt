@@ -253,12 +253,12 @@
         <!--RemoveOAuthHeadersFromOutMessage>true</RemoveOAuthHeadersFromOutMessage-->
         <!-- Scope used for marking Application Tokens. If a token is generated with this scope, they will be treated as Application Access Tokens -->
         <ApplicationTokenScope>am_application_scope</ApplicationTokenScope>
-        <!-- All  scopes under the ScopeWhitelist element are not validating against roles that has assigned to it.
+        <!-- All  scopes under the AllowedScopes element are not validating against roles that has assigned to it.
              By default ^device_.* and openid scopes have been white listed internally. -->
-        <!--ScopeWhitelist>
+        <!--AllowedScopes>
             <Scope>^device_.*</Scope>
             <Scope>openid</Scope>
-        </ScopeWhitelist-->
+        </AllowedScopes-->
         <!-- Name of the token API -->
         <TokenEndPointName>/oauth2/token</TokenEndPointName>
         <!-- This the API URL for revoke API. When we revoke tokens revoke requests should go through this
@@ -408,60 +408,60 @@
 
     <RESTAPI>
         <!--Configure white-listed URIs of REST API. Accessing white-listed URIs does not require credentials (does not require Authorization header). -->
-        <WhiteListedURIs>
-            <WhiteListedURI>
+        <AllowedURIs>
+            <AllowedURI>
                 <URI>/api/am/publisher/{version}/swagger.json</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/swagger.json</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/admin/{version}/swagger.json</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/swagger</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/documents</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/documents/{documentId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/documents/{documentId}/content</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/thumbnail</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/tags</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/tiers/{tierLevel}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/tiers/{tierLevel}/{tierName}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-        </WhiteListedURIs>
+            </AllowedURI>
+        </AllowedURIs>
         <ETagSkipList>
             <ETagSkipURI>
                 <URI>/api/am/store/{version}/apis</URI>
@@ -574,7 +574,6 @@
         </ETagSkipList>
     </RESTAPI>
     <ThrottlingConfigurations>
-        <EnableAdvanceThrottling>true</EnableAdvanceThrottling>
         <DataPublisher>
             <Enabled>true</Enabled>
             <Type>Binary</Type>

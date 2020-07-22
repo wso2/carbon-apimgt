@@ -59,30 +59,24 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         try {
             //TODO adding only the policies to data wouldn't be sufficient. Need to figure out approach after tenant story has finalized
             //Add default set of policies to database
-            if (APIUtil.isAdvanceThrottlingEnabled()) {
-                ThrottleProperties.PolicyDeployer policyDeployer = configuration.getThrottleProperties()
-                        .getPolicyDeployer();
-                //This has schedule to separate thread due to issues arise when calling this method in same thread
-                //Also this will avoid tenant login overhead as well
-                if (policyDeployer.isEnabled()) {
-                    Thread t1 = new Thread(new Runnable() {
-                        public void run() {
-                            try {
-                                APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
-                            } catch (APIManagementException e) {
-                                log.error("Error while deploying throttle policies", e);
-                            }
+            ThrottleProperties.PolicyDeployer policyDeployer = configuration.getThrottleProperties()
+                    .getPolicyDeployer();
+            //This has schedule to separate thread due to issues arise when calling this method in same thread
+            //Also this will avoid tenant login overhead as well
+            if (policyDeployer.isEnabled()) {
+                Thread t1 = new Thread(new Runnable() {
+                    public void run() {
+
+                        try {
+                            APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+                        } catch (APIManagementException e) {
+                            log.error("Error while deploying throttle policies", e);
                         }
-                    });
-                    t1.start();
-                }
-            } else {
-                try {
-                    APIUtil.loadTenantAPIPolicy(tenantDomain, tenantId);
-                } catch (Exception e) {
-                    log.error("Failed to load tiers.xml to tenant's registry", e);
-                }
+                    }
+                });
+                t1.start();
             }
+
         } catch (Exception e) {
             log.error("Failed to load default policies to tenant" + tenantDomain, e);
         }

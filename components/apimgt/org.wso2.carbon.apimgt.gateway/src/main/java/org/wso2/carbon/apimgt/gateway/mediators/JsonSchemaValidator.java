@@ -62,10 +62,10 @@ public class JsonSchemaValidator extends AbstractMediator {
         }
         Map<String, InputStream> inputStreams = null;
         org.apache.axis2.context.MessageContext axis2MC;
-        Boolean validRequest = true;
         String apiContext;
         String requestMethod;
         String contentType;
+        Boolean isValid = true;
         axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         Object contentTypeObject = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE);
         if (contentTypeObject != null) {
@@ -88,17 +88,17 @@ public class JsonSchemaValidator extends AbstractMediator {
                     InputStream inputStreamJson = inputStreams.get(ThreatProtectorConstants.JSON);
                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStreamJson);
                     apimThreatAnalyzer.analyze(bufferedInputStream, apiContext);
+                    isValid = true;
                 }
             } catch (APIMThreatAnalyzerException e) {
-                validRequest = false;
                 String message = "Request is failed due to a JSON schema validation failure: ";
                 logger.error(message, e);
-                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
+                isValid = GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
                         message + e.getMessage());
             } catch (IOException e) {
                 String message = "Error occurred while building the request: ";
                 logger.error(message, e);
-                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
+                isValid = GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
                         message + e.getMessage());
             } finally {
                 // return analyzer to the pool
@@ -110,14 +110,14 @@ public class JsonSchemaValidator extends AbstractMediator {
             }
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
-        if (validRequest) {
+        if (isValid) {
             try {
                 RelayUtils.buildMessage(axis2MC);
             } catch (IOException | XMLStreamException e) {
-                GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
+                isValid = GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
             }
         }
-        return true;
+        return isValid;
     }
 
     /**
