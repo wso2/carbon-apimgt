@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -45,12 +46,19 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
+        GatewayAPIDTO gatewayAPIDTO = null;
+        try {
+            Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version,
+                    tenantDomain);
+            String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
+            String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
+            gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
+        } catch (ArtifactSynchronizerException e) {
+            String errorMessage = "Error in fetching artifacts from storage";
+            log.error(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
 
-        Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version, tenantDomain);
-        String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
-        String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
-
-        GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
         JSONObject responseObj = new JSONObject();
 
         if (gatewayAPIDTO != null) {
