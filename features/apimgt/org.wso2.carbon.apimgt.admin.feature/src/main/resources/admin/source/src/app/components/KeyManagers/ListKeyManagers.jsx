@@ -25,8 +25,6 @@ import Delete from 'AppComponents/KeyManagers/DeleteKeyManager';
 import { Link as RouterLink } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Alert from 'AppComponents/Shared/Alert';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 
 /**
@@ -50,6 +48,7 @@ function apiCall() {
  * @returns {JSX} Header AppBar components.
  */
 export default function ListKeyManagers() {
+    // eslint-disable-next-line no-unused-vars
     const [saving, setSaving] = useState(false);
     const intl = useIntl();
     const columProps = [

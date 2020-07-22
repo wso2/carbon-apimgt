@@ -410,7 +410,7 @@ function AddEditKeyManager(props) {
                                         onChange={onChange}
                                         error={hasErrors('name', name, validating)}
                                         helperText={hasErrors('name', name, validating) || intl.formatMessage({
-                                            id: 'Throttling.Advanced.AddEdit.form.name.help',
+                                            id: 'KeyManagers.AddEditKeyManager.form.name.help',
                                             defaultMessage: 'Name of the key manager.',
                                         })}
                                     />
@@ -434,8 +434,9 @@ function AddEditKeyManager(props) {
                                                 </span>
                                             )}
                                             error={hasErrors('displayName', displayName, validating)}
-                                            helperText={hasErrors('displayName', displayName, validating) || intl.formatMessage({
-                                                id: 'Throttling.Advanced.AddEdit.form.displayName.help',
+                                            helperText={hasErrors('displayName', displayName, validating)
+                                            || intl.formatMessage({
+                                                id: 'KeyManagers.AddEditKeyManager.form.displayName.help',
                                                 defaultMessage: 'Display Name of the key manager.',
                                             })}
                                         />
@@ -458,7 +459,7 @@ function AddEditKeyManager(props) {
                                 value={description}
                                 onChange={onChange}
                                 helperText={intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.description.help',
+                                    id: 'KeyManagers.AddEditKeyManager.form.description.help',
                                     defaultMessage: 'Description of the key manager.',
                                 })}
                             />
@@ -490,7 +491,7 @@ function AddEditKeyManager(props) {
                                     {hasErrors('type', type, validating) || (
                                         <FormattedMessage
                                             defaultMessage='Select Key Manager Type'
-                                            id='Throttling.Advanced.AddEdit.form.type.help'
+                                            id='KeyManagers.AddEditKeyManager.form.type.help'
                                         />
                                     )}
                                 </FormHelperText>
@@ -513,7 +514,7 @@ function AddEditKeyManager(props) {
                                 )}
                                 error={hasErrors('issuer', issuer, validating)}
                                 helperText={hasErrors('issuer', issuer, validating) || intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.issuer.help',
+                                    id: 'KeyManagers.AddEditKeyManager.form.issuer.help',
                                     defaultMessage: 'Ex: https://localhost:9443/oauth2/token',
                                 })}
                             />
@@ -557,9 +558,12 @@ function AddEditKeyManager(props) {
                                         <span className={classes.error}>*</span>
                                     </span>
                                 )}
-                                error={hasErrors('clientRegistrationEndpoint', clientRegistrationEndpoint, validating)}
-                                helperText={hasErrors('clientRegistrationEndpoint', clientRegistrationEndpoint, validating) || intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.clientRegistrationEndpoint.help',
+                                error={hasErrors('clientRegistrationEndpoint',
+                                    clientRegistrationEndpoint, validating)}
+                                helperText={hasErrors('clientRegistrationEndpoint',
+                                    clientRegistrationEndpoint, validating)
+                                || intl.formatMessage({
+                                    id: 'KeyManagers.AddEditKeyManager.form.clientRegistrationEndpoint.help',
                                     defaultMessage: 'Ex: https://localhost:9444/client-registration/v0.17/register',
                                 })}
                             />
@@ -580,8 +584,9 @@ function AddEditKeyManager(props) {
                                     </span>
                                 )}
                                 error={hasErrors('introspectionEndpoint', introspectionEndpoint, validating)}
-                                helperText={hasErrors('introspectionEndpoint', introspectionEndpoint, validating) || intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.introspectionEndpoint.help',
+                                helperText={hasErrors('introspectionEndpoint', introspectionEndpoint, validating)
+                                || intl.formatMessage({
+                                    id: 'KeyManagers.AddEditKeyManager.form.introspectionEndpoint.help',
                                     defaultMessage: 'Ex: https://localhost:9443/oauth2/introspect',
                                 })}
                             />
@@ -602,8 +607,9 @@ function AddEditKeyManager(props) {
                                     </span>
                                 )}
                                 error={hasErrors('tokenEndpoint', tokenEndpoint, validating)}
-                                helperText={hasErrors('tokenEndpoint', tokenEndpoint, validating) || intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.tokenEndpoint.help',
+                                helperText={hasErrors('tokenEndpoint', tokenEndpoint, validating)
+                                || intl.formatMessage({
+                                    id: 'KeyManagers.AddEditKeyManager.form.tokenEndpoint.help',
                                     defaultMessage: 'Ex: https://localhost:9443/oauth2/token',
                                 })}
                             />
@@ -624,8 +630,9 @@ function AddEditKeyManager(props) {
                                     </span>
                                 )}
                                 error={hasErrors('revokeEndpoint', revokeEndpoint, validating)}
-                                helperText={hasErrors('revokeEndpoint', revokeEndpoint, validating) || intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.revokeEndpoint.help',
+                                helperText={hasErrors('revokeEndpoint', revokeEndpoint, validating)
+                                || intl.formatMessage({
+                                    id: 'KeyManagers.AddEditKeyManager.form.revokeEndpoint.help',
                                     defaultMessage: 'Ex: https://localhost:9443/oauth2/revoke',
                                 })}
                             />
@@ -643,7 +650,7 @@ function AddEditKeyManager(props) {
                                 value={userInfoEndpoint}
                                 onChange={onChange}
                                 helperText={intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.userInfoEndpoint.help',
+                                    id: 'KeyManagers.AddEditKeyManager.form.userInfoEndpoint.help',
                                     defaultMessage: 'Ex: https://localhost:9443/oauth2/userInfo',
                                 })}
                             />
@@ -661,7 +668,7 @@ function AddEditKeyManager(props) {
                                 value={authorizeEndpoint}
                                 onChange={onChange}
                                 helperText={intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.userInfoEndpoint.help',
+                                    id: 'KeyManagers.AddEditKeyManager.form.authorizeEndpoint.help',
                                     defaultMessage: 'Ex: https://localhost:9443/oauth2/userinfo',
                                 })}
                             />
@@ -679,7 +686,7 @@ function AddEditKeyManager(props) {
                                 value={scopeManagementEndpoint}
                                 onChange={onChange}
                                 helperText={intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.scopeManagementEndpoint.help',
+                                    id: 'KeyManagers.AddEditKeyManager.form.scopeManagementEndpoint.help',
                                     defaultMessage: 'Ex: https://localhost:9443/oauth2/scope',
                                 })}
                             />
@@ -720,7 +727,7 @@ function AddEditKeyManager(props) {
                                 value={consumerKeyClaim}
                                 onChange={onChange}
                                 helperText={intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.consumerKeyClaim.help',
+                                    id: 'KeyManagers.AddEditKeyManager.form.consumerKeyClaim.help',
                                     defaultMessage: 'Provide consumer key claim URIs.',
                                 })}
                             />
@@ -739,7 +746,7 @@ function AddEditKeyManager(props) {
                                 value={scopesClaim}
                                 onChange={onChange}
                                 helperText={intl.formatMessage({
-                                    id: 'Throttling.Advanced.AddEdit.form.scopesClaim.help',
+                                    id: 'KeyManagers.AddEditKeyManager.form.scopesClaim.help',
                                     defaultMessage: 'Provide scope claim URI.',
                                 })}
                             />
@@ -786,7 +793,7 @@ function AddEditKeyManager(props) {
                                 helperText={(
                                     <div className={classes.chipHelper}>
                                         {intl.formatMessage({
-                                            id: 'Throttling.Advanced.AddEdit.form.claim.help',
+                                            id: 'KeyManagers.AddEditKeyManager.form.claim.help',
                                             defaultMessage: 'Type Available Grant Types and '
                                             + 'press Enter/Return to add them.',
                                         })}
