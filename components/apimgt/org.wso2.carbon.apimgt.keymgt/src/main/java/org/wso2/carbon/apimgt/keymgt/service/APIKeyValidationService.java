@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
@@ -557,5 +558,28 @@ public class APIKeyValidationService {
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         return keyValidationHandler.validateSubscription(context, version, consumerKey,keyManager);
+    }
+
+    /**
+     * Validate scopes bound to the resource of the API being invoked against the scopes specified
+     * in the JWT token payload.
+     *
+     * @param apiContext        API Context
+     * @param apiVersion        API Version
+     * @param matchingResource  Accessed API resource
+     * @param httpMethod        API resource's HTTP method
+     * @param jwtValidationInfo Validated JWT Information
+     * @return <code>true</code> if scope validation is successful and
+     * <code>false</code> if scope validation failed
+     * @throws APIKeyMgtException in case of scope validation failure
+     */
+    public boolean validateScopes(String apiContext, String apiVersion, String matchingResource, String httpMethod,
+                                  JWTValidationInfo jwtValidationInfo, String tenantDomain)
+            throws APIKeyMgtException {
+
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
+        return keyValidationHandler.validateScopes(apiContext, apiVersion, matchingResource, httpMethod,
+                jwtValidationInfo);
     }
 }

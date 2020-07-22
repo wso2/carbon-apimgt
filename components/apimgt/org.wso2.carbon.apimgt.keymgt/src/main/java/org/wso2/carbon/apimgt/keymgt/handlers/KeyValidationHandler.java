@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 
@@ -52,6 +53,24 @@ public interface KeyValidationHandler {
      */
     boolean validateScopes(TokenValidationContext tokenValidationContext)
             throws APIKeyMgtException;
+
+    /**
+     * Validate scopes bound to the resource of the API being invoked against the scopes specified
+     * in the JWT token payload.
+     *
+     * @param apiContext        API Context
+     * @param apiVersion        API Version
+     * @param matchingResource  Accessed API resource
+     * @param httpMethod        API resource's HTTP method
+     * @param jwtValidationInfo Validated JWT Information
+     * @return <code>true</code> if scope validation is successful and
+     * <code>false</code> if scope validation failed
+     * @throws APIKeyMgtException in case of scope validation failure
+     */
+    boolean validateScopes(String apiContext, String apiVersion, String matchingResource, String httpMethod,
+                           JWTValidationInfo jwtValidationInfo)
+            throws APIKeyMgtException;
+
     /**
      * generateConsumerToken  by oAuth2TokenValidationMessageContext
      * JWT token this will use to default implementation.

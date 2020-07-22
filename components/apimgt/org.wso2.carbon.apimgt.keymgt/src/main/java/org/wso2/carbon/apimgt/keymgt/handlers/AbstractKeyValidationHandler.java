@@ -23,8 +23,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
@@ -41,10 +43,12 @@ import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class AbstractKeyValidationHandler implements KeyValidationHandler {
@@ -443,5 +447,54 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         infoDTO.setThrottlingDataList(list);
         infoDTO.setAuthorized(true);
         return infoDTO;
+    }
+
+    @Override
+    public boolean validateScopes(String apiContext, String apiVersion, String matchingResource, String httpMethod,
+                                  JWTValidationInfo jwtValidationInfo)
+            throws APIKeyMgtException {
+
+        if (jwtValidationInfo == null) {
+            throw new APIKeyMgtException("Key Validation information not set");
+        }
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        List<String> scopesList = jwtValidationInfo.getScopes();
+
+        List<String> resourceArray = new ArrayList<>(Arrays.asList(matchingResource.split(",")));
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        API api = tenantSubscriptionStore.getApiByContextAndVersion(apiContext, apiVersion);
+        boolean scopesValidated = false;
+        if (api != null) {
+            for (String resource : resourceArray) {
+                List<URLMapping> resources = api.getResources();
+                URLMapping urlMapping = null;
+                for (URLMapping mapping : resources) {
+                    if (resource.equals(mapping.getUrlPattern()) && httpMethod.equals(mapping.getHttpMethod())) {
+                        urlMapping = mapping;
+                        break;
+                    }
+                }
+                if (urlMapping != null) {
+                    if (urlMapping.getScopes().size() == 0) {
+                        scopesValidated = true;
+                        continue;
+                    }
+                    List<String> mappingScopes = urlMapping.getScopes();
+                    boolean validate = false;
+                    for (String scope : mappingScopes) {
+                        if (scopesList.contains(scope)) {
+                            scopesValidated = true;
+                            validate = true;
+                            break;
+                        }
+                    }
+                    if (!validate && urlMapping.getScopes().size() > 0) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return scopesValidated;
     }
 }

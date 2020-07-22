@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.APIKeyValidationService;
 
@@ -69,6 +70,20 @@ public class APIKeyValidatorClient {
             log.error("Error while  validate subscriptions", e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while accessing backend services for API subscription validation", e);
+        }
+    }
+
+    public boolean validateScopes(String apiContext, String apiVersion, String matchingResource, String httpMethod,
+                                  JWTValidationInfo jwtValidationInfo, String tenantDomain)
+            throws APISecurityException {
+
+        try {
+            return apiKeyValidationService.validateScopes(apiContext, apiVersion, matchingResource, httpMethod,
+                    jwtValidationInfo, tenantDomain);
+        } catch (APIKeyMgtException e) {
+            String message = "Error while accessing backend services for token scope validation";
+            log.error(message, e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, message, e);
         }
     }
 
