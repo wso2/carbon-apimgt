@@ -123,7 +123,7 @@ const Alerts = (props) => {
                     id: 'Settings.Alerts.Alerts.abnormal.request.pattern.description',
                     defaultMessage: 'This alert is triggered if there is a change in the resource access pattern of ' +
                         'a user of a particular application. These alerts could be treated as an indication of a ' +
-                        'suspicious activity made by a user over your application.',
+                        'suspicious activity by a user over your application.',
                 }),
             },
             5: {
@@ -137,7 +137,7 @@ const Alerts = (props) => {
                     defaultMessage: 'This alert is triggered if there is either a change in the request source IP ' +
                         'for a particular application by a user or if the request is from an IP used before a ' +
                         'time period of 30 days (default). These alerts could be treated as an indication of a ' +
-                        'suspicious activity made by a user over an application.',
+                        'suspicious activity by a user over an application.',
                 }),
             },
             6: {

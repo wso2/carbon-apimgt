@@ -133,10 +133,10 @@ export default function ListApplications() {
                     }}
                     defaultMessage={
                         'If required, you can transfer the ownership of your application to another user '
-                        + 'in your organization. Thereby, when transferring ownership, the new owner '
+                        + 'in your organization. When transferring ownership, the new owner '
                         + 'will have the required permission to delete or edit the respective application.'
                         + '{breakingLine}{breakingLine}'
-                        + 'Create an application with Devportal to change ownership.'
+                        + 'Create an application with the Devportal to change ownership.'
                     }
                 />
             </Typography>

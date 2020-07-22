@@ -220,7 +220,7 @@ function Overview(props) {
                 }
                 const { status } = error;
                 if (status === 404) {
-                    Alert.error('Error occured');
+                    Alert.error('Error occurred');
                 }
             });
     }, []);

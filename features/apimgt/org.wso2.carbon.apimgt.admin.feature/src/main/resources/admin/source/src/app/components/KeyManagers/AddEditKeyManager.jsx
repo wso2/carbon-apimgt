@@ -705,7 +705,7 @@ function AddEditKeyManager(props) {
                         <Typography color='inherit' variant='subtitle2' component='div'>
                             <FormattedMessage
                                 id='KeyManagers.AddEditKeyManager.cetificate'
-                                defaultMessage='Cetificates'
+                                defaultMessage='Certificates'
                             />
                         </Typography>
                         <Typography color='inherit' variant='caption' component='p'>
