@@ -91,7 +91,7 @@ function EmbadCode(props) {
                     <h2 id='simple-modal-title'>
                         <FormattedMessage
                             id='Apis.Details.Social.EmbadCode'
-                            defaultMessage='Embad'
+                            defaultMessage='Embed'
                         />
                     </h2>
                     <div className={classes.code}>

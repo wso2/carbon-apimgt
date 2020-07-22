@@ -232,7 +232,7 @@ function SampleAPIProductWizard(props) {
                                 id='Apis.Listing.SampleAPI.SampleAPIProductWizard.product.title'
                                 defaultMessage={
                                     'Creating CalculatorAPIProduct from the resources'
-                                    + 'of Math API and Calculator API'
+                                    + ' of Math API and Calculator API'
                                 }
                             />
                         </div>
