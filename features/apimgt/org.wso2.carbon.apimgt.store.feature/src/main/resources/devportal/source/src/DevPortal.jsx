@@ -75,6 +75,14 @@ class DevPortal extends React.Component {
      *  Mounting the components
      */
     componentDidMount() {
+        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } } } = Settings;
+        let tenant = null;
+        const urlParams = new URLSearchParams(window.location.search);
+        if (customUrlEnabledDomain !== 'null') {
+            tenant = customUrlEnabledDomain;
+        } else {
+            tenant = urlParams.get('tenant')
+        }
         const api = new API();
         const promisedSettings = api.getSettings();
         promisedSettings
@@ -94,8 +102,7 @@ class DevPortal extends React.Component {
                     error,
                 );
             });
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('tenant') === null || urlParams.get('tenant') === 'carbon.super') {
+        if (tenant === null || tenant === 'carbon.super') {
             const { custom: { publicTenantStore } } = this.systemTheme;
             if(publicTenantStore) {
                 const { active: publicTenantStoreActive, redirectToIfInactive } = publicTenantStore;
@@ -111,7 +118,7 @@ class DevPortal extends React.Component {
                 this.setState({ theme: this.systemTheme, redirecting: false });
             }
         } else {
-            this.setTenantTheme(urlParams.get('tenant'));
+            this.setTenantTheme(tenant);
         }
     }
     /**

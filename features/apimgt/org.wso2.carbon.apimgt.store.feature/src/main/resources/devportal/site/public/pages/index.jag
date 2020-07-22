@@ -45,13 +45,13 @@
   </div>
   <script type="text/javascript" src="<%= settings.Settings.app.context %>/site/public/theme/defaultTheme.js"></script>
   <script type="text/javascript" src="<%= settings.Settings.app.context %>/services/settings/settings.js"></script>
+  <script type="text/javascript">
+    Settings.app.customUrl.tenantDomain = '<%=appUtils.getCustomUrlEnabledDomain()%>';
+  </script>
   <script src="<%= settings.Settings.app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
   <script src="<%= settings.Settings.app.context %>/site/public/dist/<%= indexBundle %>"></script>
   <link rel="stylesheet" href="<%= settings.Settings.app.context %>/site/public/fonts/iconfont/material-icons.css">
   <link rel="stylesheet" href="<%= settings.Settings.app.context %>/site/public/css/overrides.css">
-  <script type="text/javascript">
-    Settings.app.customUrl.tenantDomain = '<%=appUtils.getCustomUrlEnabledDomain()%>';
-  </script>
 </body>
 
 </html>
