@@ -58,6 +58,7 @@ public class GatewayJMSMessageListener implements MessageListener {
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
     GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
 
     public void onMessage(Message message) {
 
@@ -76,30 +77,16 @@ public class GatewayJMSMessageListener implements MessageListener {
                         map.put(key, mapMessage.getObject(key));
                     }
                     if (APIConstants.TopicNames.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.EVENT_TYPE) !=
-                                null) {
+                        if (map.get(APIConstants.EVENT_TYPE) != null) {
                             /*
                              * This message contains notification
                              * eventType - type of the event
                              * timestamp - system time of the event published
                              * event - event data
                              */
-
-                            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
-                            final Runnable task = new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
-                                    } catch (InterruptedException e) {
-                                        // Ignore
-                                    }
-                                    handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
-                                            (Long) map.get(APIConstants.EVENT_TIMESTAMP),
-                                            (String) map.get(APIConstants.EVENT_PAYLOAD));
-                                }
-                            };
-                            scheduler.schedule(task, 1, TimeUnit.MILLISECONDS);
+                            handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
+                                    (Long) map.get(APIConstants.EVENT_TIMESTAMP),
+                                    (String) map.get(APIConstants.EVENT_PAYLOAD));
                         }
                     }
 
@@ -127,12 +114,24 @@ public class GatewayJMSMessageListener implements MessageListener {
             gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             if (!gatewayEvent.getGatewayLabels().isEmpty()) {
                 String gatewayLabel = gatewayEvent.getGatewayLabels().iterator().next();
+                Runnable task = null;
                 if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-                    inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                    task = new Runnable() {
+                        @Override
+                        public void run() {
+                            inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                        }
+                    };
                 } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-                    inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                    task = new Runnable() {
+                        @Override
+                        public void run() {
+                            inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                        }
+                    };
                 }
-                }
+                scheduler.schedule(task, 1, TimeUnit.MILLISECONDS);
+            }
         }
         if (EventType.APPLICATION_CREATE.toString().equals(eventType)
                 || EventType.APPLICATION_UPDATE.toString().equals(eventType)) {
