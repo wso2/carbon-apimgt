@@ -138,7 +138,8 @@ public class APIGatewayManager {
                     continue;
                 }
                 if (debugEnabled) {
-                    log.debug(api.getId() + "publishing to the environment of " + environment);
+                    log.debug("API with " + api.getId() + " is removing from the environment of "
+                            + environment.getName());
                 }
                 failedGatewaysMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain, false,
                         publishedGateways, failedGatewaysMap);
@@ -149,7 +150,8 @@ public class APIGatewayManager {
             for (Label label : api.getGatewayLabels()) {
                 Environment environment = getEnvironmentFromLabel(label);
                 if (debugEnabled) {
-                    log.debug(api.getId() + " publishing to the environment of " + environment);
+                    log.debug("API with " + api.getId() + " and label " + label + " is publishing to the "
+                            + "environment of " + environment.getName());
                 }
                 failedGatewaysMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain, true,
                         publishedGateways, failedGatewaysMap);
@@ -685,10 +687,11 @@ public class APIGatewayManager {
                     continue;
                 }
                 if (debugEnabled) {
-                    log.debug(api.getId() + "removing from the environment of " + environment);
+                    log.debug("API with " + api.getId() + " is removing from the environment of "
+                            + environment.getName());
                 }
-                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment, false,
-                        removedGateways, failedEnvironmentsMap);
+                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment,
+                        false, removedGateways, failedEnvironmentsMap);
             }
         }
 
@@ -696,10 +699,11 @@ public class APIGatewayManager {
             for (Label label : api.getGatewayLabels()) {
                 Environment environment = getEnvironmentFromLabel(label);
                 if (debugEnabled) {
-                    log.debug(api.getId() + "removing from the environment of " + environment);
+                    log.debug("API with " + api.getId() + " and label " + label + " is removing from the "
+                            + "environment of " + environment.getName());
                 }
-                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment, true,
-                        removedGateways, failedEnvironmentsMap);
+                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment,
+                        true, removedGateways, failedEnvironmentsMap);
             }
         }
 

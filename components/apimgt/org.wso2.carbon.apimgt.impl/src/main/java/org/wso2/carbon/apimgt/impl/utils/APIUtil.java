@@ -597,7 +597,7 @@ public final class APIUtil {
             httpResponse.close();
             String errorMessage = EntityUtils.toString(httpResponse.getEntity(),
                     APIConstants.DigestAuthConstants.CHARSET);
-            throw new ArtifactSynchronizerException(errorMessage + "Eevnthub status code is:"
+            throw new ArtifactSynchronizerException(errorMessage + "Event-Hub status code is : "
                     + httpResponse.getStatusLine().getStatusCode());
         }
     }
