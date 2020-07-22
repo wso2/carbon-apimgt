@@ -150,8 +150,7 @@ public class APIGatewayManager {
             for (Label label : api.getGatewayLabels()) {
                 Environment environment = getEnvironmentFromLabel(label);
                 if (debugEnabled) {
-                    log.debug("API with " + api.getId() + " and label " + label + " is publishing to the "
-                            + "environment of " + environment.getName());
+                    log.debug("API with " + api.getId() + " is publishing to the label " + label);
                 }
                 failedGatewaysMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain, true,
                         publishedGateways, failedGatewaysMap);
@@ -699,8 +698,7 @@ public class APIGatewayManager {
             for (Label label : api.getGatewayLabels()) {
                 Environment environment = getEnvironmentFromLabel(label);
                 if (debugEnabled) {
-                    log.debug("API with " + api.getId() + " and label " + label + " is removing from the "
-                            + "environment of " + environment.getName());
+                    log.debug("API with " + api.getId() + " is removing from the label " + label);
                 }
                 failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment,
                         true, removedGateways, failedEnvironmentsMap);

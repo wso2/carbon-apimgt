@@ -98,13 +98,12 @@ public class GatewayJMSMessageListener implements MessageListener {
             } else {
                 log.warn("Dropping the empty/null event received through jms receiver");
             }
-        } catch (JMSException | ArtifactSynchronizerException e) {
+        } catch (JMSException e) {
             log.error("JMSException occurred when processing the received message ", e);
         }
     }
 
-    private void handleNotificationMessage(String eventType, long timestamp, String encodedEvent)
-            throws ArtifactSynchronizerException {
+    private void handleNotificationMessage(String eventType, long timestamp, String encodedEvent) {
 
         byte[] eventDecoded = Base64.decodeBase64(encodedEvent);
         String eventJson = new String(eventDecoded);
@@ -117,14 +116,19 @@ public class GatewayJMSMessageListener implements MessageListener {
             gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             if (!gatewayEvent.getGatewayLabels().isEmpty()) {
                 String gatewayLabel = gatewayEvent.getGatewayLabels().iterator().next();
-                if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-                    inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
-                    if (debugEnabled) {
-                        log.debug(gatewayEvent.getEventId() + " processed and deployed in gateway");
+                try {
+                    if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
+                        inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                        if (debugEnabled) {
+                            log.debug(gatewayEvent.getEventId() + " processed and deployed in gateway");
+                        }
+                    } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
+                        inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
                     }
-                } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-                    inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                } catch ( ArtifactSynchronizerException e) {
+                    log.error("Error in deploy/undeploy artifacts");
                 }
+
             }
         }
         if (EventType.APPLICATION_CREATE.toString().equals(eventType)
