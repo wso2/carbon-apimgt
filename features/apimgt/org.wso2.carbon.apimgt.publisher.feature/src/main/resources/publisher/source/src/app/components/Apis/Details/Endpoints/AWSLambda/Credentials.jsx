@@ -317,7 +317,7 @@ export default function Credentials(props) {
                         <FormattedMessage
                             id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
                             + '.endpoint.linkToResources'}
-                            defaultMessage='Goto Resources to map ARNs'
+                            defaultMessage='Go to Resources to map ARNs'
                         />
                         <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                     </Typography>

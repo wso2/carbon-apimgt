@@ -110,7 +110,7 @@ function APICategories(props) {
                             <p>
                                 <FormattedMessage
                                     id='Api.category.dropdown.tooltip'
-                                    defaultMessage={'API categories can be added via admin portal UI or admin REST'
+                                    defaultMessage={'API categories can be added via the Admin portal UI or Admin REST'
                                         + ' API. There has to be pre-defined API categories in the environment in order'
                                         + ' to be attached to an API.'}
                                 />
