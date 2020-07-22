@@ -34,7 +34,7 @@ import AddEdit from 'AppComponents/MicrogatewayLabels/AddEditMGLabel';
 import EditIcon from '@material-ui/icons/Edit';
 
 /**
- * API call to get microgateway labels
+ * API call to get Gateway labels
  * @returns {Promise}.
  */
 function apiCall() {
@@ -60,7 +60,7 @@ export default function ListMGLabels() {
         {
             name: 'name',
             label: intl.formatMessage({
-                id: 'AdminPages.Microgateways.table.header.label.name',
+                id: 'AdminPages.Gateways.table.header.label.name',
                 defaultMessage: 'Label',
             }),
             options: {
@@ -70,7 +70,7 @@ export default function ListMGLabels() {
         {
             name: 'description',
             label: intl.formatMessage({
-                id: 'AdminPages.Microgateways.table.header.label.description',
+                id: 'AdminPages.Gateways.table.header.label.description',
                 defaultMessage: 'Description',
             }),
             options: {
@@ -80,7 +80,7 @@ export default function ListMGLabels() {
         {
             name: 'accessUrls',
             label: intl.formatMessage({
-                id: 'AdminPages.Microgateways.table.header.hosts',
+                id: 'AdminPages.Gateways.table.header.hosts',
                 defaultMessage: 'Gateway Host(s)',
             }),
             options: {
@@ -97,19 +97,19 @@ export default function ListMGLabels() {
     ];
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
-            id: 'AdminPages.Microgateways.List.addButtonProps.triggerButtonText',
-            defaultMessage: 'Add Microgateway Label',
+            id: 'AdminPages.Gateways.List.addButtonProps.triggerButtonText',
+            defaultMessage: 'Add Gateway Label',
         }),
         /* This title is what as the title of the popup dialog box */
         title: intl.formatMessage({
-            id: 'AdminPages.Microgateways.List.addButtonProps.title',
-            defaultMessage: 'Add Microgateway Label',
+            id: 'AdminPages.Gateways.List.addButtonProps.title',
+            defaultMessage: 'Add Gateway Label',
         }),
     };
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
-            id: 'AdminPages.Microgateways.List.search.default',
-            defaultMessage: 'Search Microgateway by Name, Description or Host',
+            id: 'AdminPages.Gateways.List.search.default',
+            defaultMessage: 'Search Gateway by Name, Description or Host',
         }),
         active: true,
     };
@@ -128,8 +128,8 @@ export default function ListMGLabels() {
                         >
                             <ListItemText primary={(
                                 <FormattedMessage
-                                    id='AdminPages.Microgateways.List.help.link.one'
-                                    defaultMessage='Create a Microgateway label'
+                                    id='AdminPages.Gateways.List.help.link.one'
+                                    defaultMessage='Create a Gateway label'
                                 />
                             )}
                             />
@@ -148,8 +148,8 @@ export default function ListMGLabels() {
                         >
                             <ListItemText primary={(
                                 <FormattedMessage
-                                    id='AdminPages.Microgateways.List.help.link.two'
-                                    defaultMessage='Assign the Microgateway label to an API'
+                                    id='AdminPages.Gateways.List.help.link.two'
+                                    defaultMessage='Assign the Gateway label to an API'
                                 />
                             )}
                             />
@@ -167,8 +167,8 @@ export default function ListMGLabels() {
                         >
                             <ListItemText primary={(
                                 <FormattedMessage
-                                    id='AdminPages.Microgateways.List.help.link.three'
-                                    defaultMessage='View the Microgateway labels'
+                                    id='AdminPages.Gateways.List.help.link.three'
+                                    defaultMessage='View the Gateway labels'
                                 />
                             )}
                             />
@@ -179,8 +179,8 @@ export default function ListMGLabels() {
         ),
         pageStyle: 'half',
         title: intl.formatMessage({
-            id: 'AdminPages.Microgateways.List.title',
-            defaultMessage: 'Microgateway Labels',
+            id: 'AdminPages.Gateways.List.title',
+            defaultMessage: 'Gateway Labels',
         }),
     };
 
@@ -188,8 +188,8 @@ export default function ListMGLabels() {
         content: (
             <Typography variant='body2' color='textSecondary' component='p'>
                 <FormattedMessage
-                    id='AdminPages.Microgateways.List.empty.content.microgateways'
-                    defaultMessage={'It is possible to create a Microgateway distribution for a '
+                    id='AdminPages.Gateways.List.empty.content.Gateways'
+                    defaultMessage={'It is possible to create a Gateway distribution for a '
                     + 'group of APIs. In order to group APIs, a label needs to be created and '
                     + 'attached to the APIs that need to be in a single group.'}
                 />
@@ -198,8 +198,8 @@ export default function ListMGLabels() {
         title: (
             <Typography gutterBottom variant='h5' component='h2'>
                 <FormattedMessage
-                    id='AdminPages.Microgateways.List.empty.title'
-                    defaultMessage='Microgateway Labels'
+                    id='AdminPages.Gateways.List.empty.title'
+                    defaultMessage='Gateway Labels'
                 />
             </Typography>
         ),
@@ -215,7 +215,7 @@ export default function ListMGLabels() {
             EditComponent={AddEdit}
             editComponentProps={{
                 icon: <EditIcon />,
-                title: 'Edit Microgateway Label',
+                title: 'Edit Gateway Label',
             }}
             DeleteComponent={Delete}
         />
