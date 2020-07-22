@@ -13,8 +13,11 @@ import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import clsx from 'clsx';
+import Alert from 'AppComponents/Shared/Alert';
 
 import PermissionsTree from './TreeView/PermissionsTree';
+import AdminTable from './AdminTable';
+import AdminTableHead from './AdminTableHead';
 
 const useStyles = makeStyles({
     table: {
@@ -76,7 +79,10 @@ export default function ListRoles() {
                 setPermissionMappings(roleMapping);
                 setAppMappings(appMapping);
             },
-        );
+        ).catch((error) => {
+            // TODO: Proper error handling here ~tmkb
+            Alert.error('Error while retrieving permission info');
+        });
     }, []);
     const onAddEntry = () => {
         if (permissionMappings.find((role) => role === newRole) || !newRole) {
@@ -90,6 +96,14 @@ export default function ListRoles() {
         // TODO: ~tmkb add loader
         return null;
     }
+    const headCells = [
+        {
+            id: 'roles', numeric: false, disablePadding: false, label: 'Roles',
+        },
+        {
+            id: 'permissions', numeric: false, disablePadding: false, label: 'Permissions',
+        },
+    ];
     return (
         <ContentBase>
             <TextField
@@ -111,7 +125,10 @@ export default function ListRoles() {
             >
                 <AddIcon fontSize='small' />
             </IconButton>
-
+            <AdminTable multiSelect={false}>
+                <AdminTableHead headCells={headCells} />
+            </AdminTable>
+            {/*
             <TableContainer component={Paper}>
                 <Table
                     className={clsx(classes.table)}
@@ -130,13 +147,14 @@ export default function ListRoles() {
                                     {role}
                                 </TableCell>
                                 <TableCell align='right'>
-                                    <PermissionsTree scopes={scopes} appMappings={appMappings} />
+                                    {<PermissionsTree scopes={scopes} appMappings={appMappings} />}
                                 </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                            </TableRow >
+                        ))
+}
+                    </TableBody >
+                </Table >
+            </TableContainer > */}
         </ContentBase>
     );
 }
