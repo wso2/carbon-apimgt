@@ -138,7 +138,7 @@ public class APIGatewayManager {
                     continue;
                 }
                 if (debugEnabled) {
-                    log.debug("API with " + api.getId() + " is removing from the environment of "
+                    log.debug("API with " + api.getId() + " is publishing to the environment of "
                             + environment.getName());
                 }
                 failedGatewaysMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain, false,
