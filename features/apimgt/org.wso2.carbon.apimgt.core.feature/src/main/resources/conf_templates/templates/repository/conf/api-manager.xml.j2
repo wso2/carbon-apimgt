@@ -1228,11 +1228,14 @@
         {% if apim.sync_runtime_artifacts.gateway.artifact_retriever is defined %}
         <ArtifactRetriever>{{apim.sync_runtime_artifacts.gateway.artifact_retriever}}</ArtifactRetriever>
         {% endif %}
-        {% if apim.sync_runtime_artifacts.gateway.deployment_retry_duartion is defined %}
-        <RetryDuration>{{apim.sync_runtime_artifacts.gateway.deployment_retry_duartion}}</RetryDuration>
+        {% if apim.sync_runtime_artifacts.gateway.deployment_retry_duration is defined %}
+        <RetryDuration>{{apim.sync_runtime_artifacts.gateway.deployment_retry_duration}}</RetryDuration>
         {% endif %}
         {% if apim.sync_runtime_artifacts.gateway.data_retrieval_mode is defined %}
-        <DataRetrievalMode>{{apim.sync_runtime_artifacts.data_retrieval_mode}}</DataRetrievalMode>
+        <DataRetrievalMode>{{apim.sync_runtime_artifacts.gateway.data_retrieval_mode}}</DataRetrievalMode>
+        {% endif %}
+        {% if apim.sync_runtime_artifacts.gateway.event_waiting_time is defined %}
+        <EventWaitingTime>{{apim.sync_runtime_artifacts.gateway.event_waiting_time}}</EventWaitingTime>
         {% endif %}
     </SyncRuntimeArtifactsGateway>
     {% endif %}

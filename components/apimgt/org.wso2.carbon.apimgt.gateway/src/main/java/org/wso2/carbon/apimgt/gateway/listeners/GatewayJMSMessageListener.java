@@ -43,6 +43,9 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -57,6 +60,7 @@ public class GatewayJMSMessageListener implements MessageListener {
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
     GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
 
     public void onMessage(Message message) {
 
@@ -75,8 +79,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                         map.put(key, mapMessage.getObject(key));
                     }
                     if (APIConstants.TopicNames.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.EVENT_TYPE) !=
-                                null) {
+                        if (map.get(APIConstants.EVENT_TYPE) != null) {
                             /*
                              * This message contains notification
                              * eventType - type of the event
@@ -111,24 +114,39 @@ public class GatewayJMSMessageListener implements MessageListener {
         if ((APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType))
                 && gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-            DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded),
-                    DeployAPIInGatewayEvent.class);
+            DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);
             gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             if (!gatewayEvent.getGatewayLabels().isEmpty()) {
                 String gatewayLabel = gatewayEvent.getGatewayLabels().iterator().next();
-                try {
-                    if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-                        inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
-                        if (debugEnabled) {
-                            log.debug(gatewayEvent.getEventId() + " processed and deployed in gateway");
-                        }
-                    } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-                        inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
-                    }
-                } catch ( ArtifactSynchronizerException e) {
-                    log.error("Error in deploy/undeploy artifacts");
-                }
+                Runnable task = null;
+                if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
+                    task = new Runnable() {
 
+                        @Override public void run() {
+                            try {
+                                inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                            } catch (ArtifactSynchronizerException e) {
+                                log.error("Error in deploying artifacts");
+                            }
+                        }
+                    };
+                } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
+                    task = new Runnable() {
+
+                        @Override public void run() {
+                            try {
+                                inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                            } catch (ArtifactSynchronizerException e) {
+                                log.error("Error in undeploying artifacts");
+                            }
+                        }
+                    };
+                }
+                scheduler.schedule(task, 1, TimeUnit.MILLISECONDS);
+                if (debugEnabled) {
+                    log.debug("Event with ID " + gatewayEvent.getEventId() + " is received and " +
+                            gatewayEvent.getApiId() + " is successfully deployed/undeployed");
+                }
             }
         }
         if (EventType.APPLICATION_CREATE.toString().equals(eventType)
