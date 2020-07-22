@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAP
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -49,6 +48,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -56,7 +56,8 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.cache.Cache;
 
@@ -154,7 +155,7 @@ public class JWTValidator {
         if (jwtValidationInfo != null) {
             if (jwtValidationInfo.isValid()) {
                 // Validate scopes
-                validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo);
+                validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, jwtToken);
 
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO;
@@ -368,15 +369,31 @@ public class JWTValidator {
      * @param matchingResource  Accessed API resource
      * @param httpMethod        API resource's HTTP method
      * @param jwtValidationInfo Validated JWT Information
+     * @param jwtToken          JWT Token
      * @throws APISecurityException in case of scope validation failure
      */
     private void validateScopes(String apiContext, String apiVersion, String matchingResource, String httpMethod,
-                                JWTValidationInfo jwtValidationInfo)
+                                JWTValidationInfo jwtValidationInfo, SignedJWT jwtToken)
             throws APISecurityException {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        boolean valid = this.apiKeyValidator.validateScopes(apiContext, apiVersion, matchingResource, httpMethod,
-                jwtValidationInfo, tenantDomain);
+
+        // Generate TokenValidationContext
+        TokenValidationContext tokenValidationContext = new TokenValidationContext();
+
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+        Set<String> scopeSet = new HashSet<>();
+        scopeSet.addAll(jwtValidationInfo.getScopes());
+        apiKeyValidationInfoDTO.setScopes(scopeSet);
+        tokenValidationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+
+        tokenValidationContext.setAccessToken(jwtToken.getParsedString());
+        tokenValidationContext.setHttpVerb(httpMethod);
+        tokenValidationContext.setMatchingResource(matchingResource);
+        tokenValidationContext.setContext(apiContext);
+        tokenValidationContext.setVersion(apiVersion);
+
+        boolean valid = this.apiKeyValidator.validateScopes(tokenValidationContext, tenantDomain);
         if (valid) {
             if (log.isDebugEnabled()) {
                 log.debug("Scope validation successful for the resource: " + matchingResource

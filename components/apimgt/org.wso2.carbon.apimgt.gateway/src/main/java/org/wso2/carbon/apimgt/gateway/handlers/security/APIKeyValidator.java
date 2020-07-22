@@ -45,8 +45,8 @@ import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -757,23 +757,16 @@ public class APIKeyValidator {
     }
 
     /**
-     * Validate scopes bound to the resource of the API being invoked against the scopes specified
-     * in the JWT token payload.
+     * Validate scopes bound to the resource of the API being invoked against the scopes of the token.
      *
-     * @param apiContext        API Context
-     * @param apiVersion        API Version
-     * @param matchingResource  Accessed API resource
-     * @param httpMethod        API resource's HTTP method
-     * @param jwtValidationInfo Validated JWT Information
-     * @param tenantDomain      Tenant domain
+     * @param tokenValidationContext Token validation context
+     * @param tenantDomain           Tenant domain
      * @return <code>true</code> if scope validation is successful and
      * <code>false</code> if scope validation failed
      * @throws APISecurityException in case of scope validation failure
      */
-    public boolean validateScopes(String apiContext, String apiVersion, String matchingResource, String httpMethod,
-                                  JWTValidationInfo jwtValidationInfo, String tenantDomain)
+    public boolean validateScopes(TokenValidationContext tokenValidationContext, String tenantDomain)
             throws APISecurityException {
-        return dataStore.validateScopes(apiContext, apiVersion, matchingResource, httpMethod,
-                jwtValidationInfo, tenantDomain);
+        return dataStore.validateScopes(tokenValidationContext, tenantDomain);
     }
 }
