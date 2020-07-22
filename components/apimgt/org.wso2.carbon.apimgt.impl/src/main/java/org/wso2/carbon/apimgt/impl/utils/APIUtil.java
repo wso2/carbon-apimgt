@@ -10728,9 +10728,6 @@ public final class APIUtil {
         } catch (RegistryException e) {
             String msg = "Error while retrieving publisher domain mappings from registry";
             throw new APIManagementException(msg, e);
-        } catch (ClassCastException e) {
-            String msg = "Invalid JSON found in the publisher tenant domain mappings";
-            throw new APIManagementException(msg, e);
         } catch (ParseException e) {
             String msg = "Malformed JSON found in the publisher tenant domain mappings";
             throw new APIManagementException(msg, e);

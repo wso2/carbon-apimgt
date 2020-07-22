@@ -53,7 +53,7 @@
     var logoutCallbackUrl = appUtils.getTenantBasedLogoutCallBack();
     if (logoutCallbackUrl == null) {
          logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
-     }
+    }
 
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
     if (settingsResponse.data) {

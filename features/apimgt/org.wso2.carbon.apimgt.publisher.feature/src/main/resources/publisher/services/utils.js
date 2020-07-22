@@ -70,7 +70,7 @@ var getTenantBasedLogoutCallBack = function() {
         if (publisherDomainMapping.get('logout') != null) {
             return publisherDomainMapping.get('logout');
         }
-        return "https://"+publisherDomainMapping.get('customUrl') + LOGOUT_CALLBACK_URL_SUFFIX;
+        return "https://" + publisherDomainMapping.get('customUrl') + LOGOUT_CALLBACK_URL_SUFFIX;
     } else {
         return null;
     }
