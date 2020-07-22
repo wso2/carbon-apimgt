@@ -149,7 +149,7 @@ const Alerts = (props) => {
                 description: intl.formatMessage({
                     id: 'Settings.Alerts.Alerts.tier.limit.hitting.description',
                     defaultMessage: 'This alert is triggered if at least one of the two cases below are satisfied.' +
-                        ' if a particular application gets throttled out for hitting the subscribed tier limit of ' +
+                        ' If a particular application gets throttled out for hitting the subscribed tier limit of ' +
                         'that application more than 10 times (by default) within an hour (by default) or if a ' +
                         'particular user of an application gets throttled out for hitting the subscribed tier limit ' +
                         'of a particular API more than 10 times (by default) within a day (by default)',
