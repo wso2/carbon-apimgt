@@ -754,7 +754,7 @@ public class APIGatewayManager {
                         APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
                 removedGateways.add(environment.getName());
                 if (debugEnabled) {
-                    log.debug("Status of " + api.getId() + "has been updated to DB");
+                    log.debug("Status of " + api.getId() + " has been updated to DB");
                 }
             }
         } catch (AxisFault axisFault) {
