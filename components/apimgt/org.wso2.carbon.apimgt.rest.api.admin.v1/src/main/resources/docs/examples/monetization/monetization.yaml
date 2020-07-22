@@ -1,0 +1,39 @@
+- title: Get the status of monetization usage publish
+  id: getStatusOfMonetizationUsagePublish
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/monetization/publish-usage/status
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "state": "COMPLETED",
+        "status": "SUCCESSFULL",
+        "startedTime": "1595408216000",
+        "lastPublsihedTime": "1595408216000"
+      }
+
+- title: Publish Usage Records
+  id: publishUsageRecords
+  request:
+    method: POST
+    url: https://localhost:9443/api/am/admin/v1/monetization/publish-usage
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "status": "Request Accepted",
+        "message": "Server is running the usage publisher"
+      }

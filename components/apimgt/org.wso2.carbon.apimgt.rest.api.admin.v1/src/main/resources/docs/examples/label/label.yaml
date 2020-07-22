@@ -1,0 +1,100 @@
+- title: Get all registered Labels
+  id: getAllRegisteredLabels
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/labels
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "id": "a7f392e0-afbf-4b97-b259-21531335a751",
+        "name": "internal",
+        "description": "label used for internal purpose",
+        "accessUrls": [
+          "https://localhost:9095"
+        ]
+      }
+
+- title: Add a new gateway Label
+  id: addNewGatewayLabel
+  request:
+    method: POST
+    url: https://localhost:9443/api/am/admin/v1/labels
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "name":"internal",
+        "description":"label used for internal purpose",
+        "accessUrls":[
+          "https://localhost:9095"
+        ]
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "id": "a7f392e0-afbf-4b97-b259-21531335a751",
+        "name": "internal",
+        "description": "label used for internal purpose",
+        "accessUrls": [
+          "https://localhost:9095"
+        ]
+      }
+
+- title: Update a Label by label Id
+  id: updateLabelByLabelId
+  request:
+    method: PUT
+    url: https://localhost:9443/api/am/admin/v1/labels/a7f392e0-afbf-4b97-b259-21531335a751
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "name":"internal",
+        "description":"Label used for internal purpose only",
+        "accessUrls":[
+          "https://localhost:9095",
+          "https://localhost:9096"
+        ]
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "id": "a7f392e0-afbf-4b97-b259-21531335a751",
+        "name": "internal",
+        "description": "Label used for internal purpose only",
+        "accessUrls": [
+          "https://localhost:9095",
+          "https://localhost:9096"
+        ]
+      }
+
+- title: Delete a Label by Id
+  id: deleteLabelById
+  request:
+    method: DELETE
+    url: https://localhost:9443/api/am/admin/v1/labels/a7f392e0-afbf-4b97-b259-21531335a751
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json

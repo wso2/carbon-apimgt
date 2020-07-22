@@ -1,0 +1,114 @@
+- title: Get admin settings
+  id: getAdminSettings
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/settings
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "scopes": [
+          "apim:admin",
+          "apim:admin_alert_manage",
+          "apim:admin_operations",
+          "apim:admin_settings",
+          "apim:api_import_export",
+          "apim:api_product_import_export",
+          "apim:api_workflow_approve",
+          "apim:api_workflow_view",
+          "apim:app_import_export",
+          "apim:app_owner_change",
+          "apim:bl_manage",
+          "apim:bl_view",
+          "apim:bot_data",
+          "apim:label_manage",
+          "apim:label_read",
+          "apim:mediation_policy_create",
+          "apim:mediation_policy_view",
+          "apim:monetization_usage_publish",
+          "apim:scope_manage",
+          "apim:tenantInfo",
+          "apim:tenant_theme_manage",
+          "apim:tier_manage",
+          "apim:tier_view",
+          "openid"
+        ],
+        "keyManagerConfiguration": [
+        {
+          "type": "default",
+          "configurations": []
+        },
+        {
+          "type": "WSO2IS",
+          "configurations": [
+          {
+            "name": "consumer_key",
+            "label": "Client ID",
+            "type": "input",
+            "required": true,
+            "mask": false,
+            "multiple": false,
+            "tooltip": "Client ID of service Application",
+            "values": [],
+            "default": ""
+          },
+          {
+            "name": "consumer_secret",
+            "label": "Client Secret",
+            "type": "input",
+            "required": true,
+            "mask": true,
+            "multiple": false,
+            "tooltip": "Client Secret of service Application",
+            "values": [],
+            "default": ""
+          }
+          ]
+        },
+        {
+          "type": "okta",
+          "configurations": [
+          {
+            "name": "apiKey",
+            "label": "API KEY",
+            "type": "input",
+            "required": true,
+            "mask": true,
+            "multiple": false,
+            "tooltip": "API Key Generated From Okta UI",
+            "values": [],
+            "default": ""
+          },
+          {
+            "name": "client_id",
+            "label": "Client ID",
+            "type": "input",
+            "required": true,
+            "mask": false,
+            "multiple": false,
+            "tooltip": "Client ID of service Application",
+            "values": [],
+            "default": ""
+          },
+          {
+            "name": "client_secret",
+            "label": "Client Secret",
+            "type": "input",
+            "required": true,
+            "mask": true,
+            "multiple": false,
+            "tooltip": "Client Secret of service Application",
+            "values": [],
+            "default": ""
+          }
+          ]
+        }
+        ],
+        "analyticsEnabled": false
+      }

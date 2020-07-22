@@ -1,0 +1,60 @@
+- title: Get bot detection alert subscriptions
+  id: getBotDetectionAlertSubscriptions
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/alert-subscriptions/bot-detection
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 1,
+        "list": [
+        {
+          "uuid": "cb4ac737-14d1-49c8-b823-c656164895ff",
+          "email": "abc@wso2.com"
+        }
+        ]
+      }
+
+- title: Subscribe for bot detection alerts
+  id: subscribeForBotDetectionAlerts
+  request:
+    method: POST
+    url: https://localhost:9443/api/am/admin/v1/alert-subscriptions/bot-detection
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "email": "abc@wso2.com"
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "uuid": "cb4ac737-14d1-49c8-b823-c656164895ff",
+        "email": "abc@wso2.com"
+      }
+
+- title: Unsubscribe from bot detection alerts
+  id: unsubscribeFromBotDetectionAlerts
+  request:
+    method: DELETE
+    url: https://localhost:9443/api/am/admin/v1/alert-subscriptions/bot-detection/b4ac737-14d1-49c8-b823-c656164895ff
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json

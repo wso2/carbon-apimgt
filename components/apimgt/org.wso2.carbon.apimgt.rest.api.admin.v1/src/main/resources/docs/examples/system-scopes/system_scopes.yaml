@@ -1,0 +1,924 @@
+- title: Get the list of role scope mapping
+  id: getListOfRoleScopeMapping
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/system-scopes
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 49,
+        "list": [
+        {
+          "tag": "admin",
+          "name": "apim:api_workflow_view",
+          "description": "Retrive workflow requests",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:tenant_theme_manage",
+          "description": "Manage tenant themes",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:admin",
+          "description": "Manage all admin operations",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:api_workflow_approve",
+          "description": "Manage workflows",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:scope_manage",
+          "description": "Manage scope",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:app_manage",
+          "description": "Retrieve, Manage applications",
+          "roles": [
+            "admin",
+            "Internal/subscriber",
+            "Internal/devops"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:bl_view",
+          "description": "View deny policies",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:store_settings",
+          "description": "Retrieve store settings",
+          "roles": [
+            "admin",
+            "Internal/subscriber"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:sub_alert_manage",
+          "description": "Retrieve, subscribe and configure store alert types",
+          "roles": [
+            "admin",
+            "Internal/subscriber"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:threat_protection_policy_create",
+          "description": "Create threat protection policies",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:mediation_policy_manage",
+          "description": "Update and delete mediation policies",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:ep_certificates_update",
+          "description": "Update and delete backend endpoint certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:ep_certificates_view",
+          "description": "View backend endpoint certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:admin_settings",
+          "description": "Retrieve admin settings",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:app_import_export",
+          "description": "Import and export applications related operations",
+          "roles": [
+            "admin",
+            "Internal/devops"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_publish",
+          "description": "Publish API",
+          "roles": [
+            "admin",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:client_certificates_update",
+          "description": "Update and delete client certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:api_key",
+          "description": "Generate API Keys",
+          "roles": [
+            "admin",
+            "Internal/subscriber"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:admin_alert_manage",
+          "description": "Manage admin alerts",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_view",
+          "description": "View API",
+          "roles": [
+            "admin",
+            "Internal/publisher",
+            "Internal/creator",
+            "Internal/analytics"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:mediation_policy_create",
+          "description": "Create mediation policies",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:pub_alert_manage",
+          "description": "Get/ subscribe/ configure publisher alerts",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:document_manage",
+          "description": "Update and delete API documents",
+          "roles": [
+            "admin",
+            "Internal/creator",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:admin_operations",
+          "description": "Manage API categories",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:app_owner_change",
+          "description": "Retrieve and manage applications",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:bl_manage",
+          "description": "Update and delete deny policies",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:tier_manage",
+          "description": "Update and delete throttling policies",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:label_read",
+          "description": "Retrieve microgateway labels",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:sub_manage",
+          "description": "Retrieve, Manage subscriptions",
+          "roles": [
+            "admin",
+            "Internal/subscriber",
+            "Internal/devops"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:subscribe",
+          "description": "Subscribe API",
+          "roles": [
+            "admin",
+            "Internal/subscriber"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:tier_view",
+          "description": "View throttling policies",
+          "roles": [
+            "admin",
+            "Internal/publisher",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:document_create",
+          "description": "Create API documents",
+          "roles": [
+            "admin",
+            "Internal/creator",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:threat_protection_policy_manage",
+          "description": "Update and delete threat protection policies",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:subscription_view",
+          "description": "View Subscription",
+          "roles": [
+            "admin",
+            "Internal/creator",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_create",
+          "description": "Create API",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:shared_scope_manage",
+          "description": "Manage shared scopes",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:client_certificates_add",
+          "description": "Add client certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_product_import_export",
+          "description": "Import and export API Products related operations",
+          "roles": [
+            "admin",
+            "Internal/devops"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:monetization_usage_publish",
+          "description": "Retrieve and publish Monetization related usage records",
+          "roles": [
+            "admin",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:tenantInfo",
+          "description": "Retrieve tenant related information",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_delete",
+          "description": "Delete API",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:client_certificates_view",
+          "description": "View client certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:label_manage",
+          "description": "Manage microgateway labels",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_import_export",
+          "description": "Import and export APIs related operations",
+          "roles": [
+            "admin",
+            "Internal/devops"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:publisher_settings",
+          "description": "Retrieve store settings",
+          "roles": [
+            "admin",
+            "Internal/creator",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:subscription_block",
+          "description": "Block Subscription",
+          "roles": [
+            "admin",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:mediation_policy_view",
+          "description": "View mediation policies",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:ep_certificates_add",
+          "description": "Add backend endpoint certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:bot_data",
+          "description": "Retrieve bot detection data",
+          "roles": [
+            "admin"
+          ]
+        }
+        ]
+      }
+
+- title: Update Roles For Scope
+  id: updateRolesForScope
+  request:
+    method: PUT
+    url: https://localhost:9443/api/am/admin/v1/system-scopes
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 49,
+        "list": [
+        {
+          "tag": "admin",
+          "name": "apim:api_workflow_view",
+          "description": "Retrive workflow requests",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:tenant_theme_manage",
+          "description": "Manage tenant themes",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:admin",
+          "description": "Manage all admin operations",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:api_workflow_approve",
+          "description": "Manage workflows",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:scope_manage",
+          "description": "Manage scope",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:app_manage",
+          "description": "Retrieve, Manage applications",
+          "roles": [
+            "admin",
+            "Internal/subscriber",
+            "Internal/devops"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:bl_view",
+          "description": "View deny policies",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:store_settings",
+          "description": "Retrieve store settings",
+          "roles": [
+            "admin",
+            "Internal/subscriber"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:sub_alert_manage",
+          "description": "Retrieve, subscribe and configure store alert types",
+          "roles": [
+            "admin",
+            "Internal/subscriber"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:threat_protection_policy_create",
+          "description": "Create threat protection policies",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:mediation_policy_manage",
+          "description": "Update and delete mediation policies",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:ep_certificates_update",
+          "description": "Update and delete backend endpoint certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:ep_certificates_view",
+          "description": "View backend endpoint certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:admin_settings",
+          "description": "Retrieve admin settings",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:app_import_export",
+          "description": "Import and export applications related operations",
+          "roles": [
+            "admin",
+            "Internal/devops"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_publish",
+          "description": "Publish API",
+          "roles": [
+            "admin",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:client_certificates_update",
+          "description": "Update and delete client certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:api_key",
+          "description": "Generate API Keys",
+          "roles": [
+            "admin",
+            "Internal/subscriber"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:admin_alert_manage",
+          "description": "Manage admin alerts",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_view",
+          "description": "View API",
+          "roles": [
+            "admin",
+            "Internal/publisher",
+            "Internal/creator",
+            "Internal/analytics"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:mediation_policy_create",
+          "description": "Create mediation policies",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:pub_alert_manage",
+          "description": "Get/ subscribe/ configure publisher alerts",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:document_manage",
+          "description": "Update and delete API documents",
+          "roles": [
+            "admin",
+            "Internal/creator",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:admin_operations",
+          "description": "Manage API categories",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:app_owner_change",
+          "description": "Retrieve and manage applications",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:bl_manage",
+          "description": "Update and delete deny policies",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:tier_manage",
+          "description": "Update and delete throttling policies",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:label_read",
+          "description": "Retrieve microgateway labels",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:sub_manage",
+          "description": "Retrieve, Manage subscriptions",
+          "roles": [
+            "admin",
+            "Internal/subscriber",
+            "Internal/devops"
+          ]
+        },
+        {
+          "tag": "store",
+          "name": "apim:subscribe",
+          "description": "Subscribe API",
+          "roles": [
+            "admin",
+            "Internal/subscriber"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:tier_view",
+          "description": "View throttling policies",
+          "roles": [
+            "admin",
+            "Internal/publisher",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:document_create",
+          "description": "Create API documents",
+          "roles": [
+            "admin",
+            "Internal/creator",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:threat_protection_policy_manage",
+          "description": "Update and delete threat protection policies",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:subscription_view",
+          "description": "View Subscription",
+          "roles": [
+            "admin",
+            "Internal/creator",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_create",
+          "description": "Create API",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:shared_scope_manage",
+          "description": "Manage shared scopes",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:client_certificates_add",
+          "description": "Add client certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_product_import_export",
+          "description": "Import and export API Products related operations",
+          "roles": [
+            "admin",
+            "Internal/devops"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:monetization_usage_publish",
+          "description": "Retrieve and publish Monetization related usage records",
+          "roles": [
+            "admin",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:tenantInfo",
+          "description": "Retrieve tenant related information",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_delete",
+          "description": "Delete API",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:client_certificates_view",
+          "description": "View client certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:label_manage",
+          "description": "Manage microgateway labels",
+          "roles": [
+            "admin"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:api_import_export",
+          "description": "Import and export APIs related operations",
+          "roles": [
+            "admin",
+            "Internal/devops"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:publisher_settings",
+          "description": "Retrieve store settings",
+          "roles": [
+            "admin",
+            "Internal/creator",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:subscription_block",
+          "description": "Block Subscription",
+          "roles": [
+            "admin",
+            "Internal/publisher",
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:mediation_policy_view",
+          "description": "View mediation policies",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "publisher",
+          "name": "apim:ep_certificates_add",
+          "description": "Add backend endpoint certificates",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        },
+        {
+          "tag": "admin",
+          "name": "apim:bot_data",
+          "description": "Retrieve bot detection data",
+          "roles": [
+            "admin",
+            "Internal/creator"
+          ]
+        }
+        ]
+      }
+
+- title: Retrieve scopes for a particular user
+  id: retrieveScopesForParticularUser
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/system-scopes/YXBpbTpzdWJzY3JpYmU?username=john
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "name": "apim:subscribe"
+      }

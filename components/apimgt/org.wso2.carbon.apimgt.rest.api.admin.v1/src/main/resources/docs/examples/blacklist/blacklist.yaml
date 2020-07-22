@@ -1,0 +1,112 @@
+- title: Get all blocking condtions
+  id: getAllBlockingCondtions
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/throttling/blacklist
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 1,
+        "list": [
+        {
+          "conditionId": "681de253-191f-49a6-bd81-366a20834be8",
+          "conditionType": "API",
+          "conditionValue": "/pizzashack/1.0.0",
+          "conditionStatus": false
+        }
+        ]
+      }
+
+- title: Add a blocking condition
+  id: addBlockingCondition
+  request:
+    method: POST
+    url: https://localhost:9443/api/am/admin/v1/throttling/blacklist
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "conditionType": "API",
+        "conditionValue": "/pizzashack/1.0.0",
+        "conditionStatus": "false"
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "conditionId": "9092a33f-f557-47c3-9b00-c5ff07593309",
+        "conditionType": "API",
+        "conditionValue": "/pizzashack/1.0.0",
+        "conditionStatus": false
+      }
+
+- title: Retrieves a Blocking Condition providing the condition Id
+  id: retrievesBlockingConditionByConditionId
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/throttling/blacklist/9092a33f-f557-47c3-9b00-c5ff07593309
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "conditionId": "9092a33f-f557-47c3-9b00-c5ff07593309",
+        "conditionType": "API",
+        "conditionValue": "/pizzashack/1.0.0",
+        "conditionStatus": false
+      }
+
+- title: Update a blocking condition by Id
+  id: updateBlockingConditionById
+  request:
+    method: PATCH
+    url: https://localhost:9443/api/am/admin/v1/throttling/blacklist/9092a33f-f557-47c3-9b00-c5ff07593309
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "conditionStatus": "true"
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "conditionId": "9092a33f-f557-47c3-9b00-c5ff07593309",
+        "conditionType": "API",
+        "conditionValue": "/pizzashack/1.0.0",
+        "conditionStatus": true
+      }
+
+- title: Delete a Blocking condition
+  id: deleteBlockingCondition
+  request:
+    method: DELETE
+    url: https://localhost:9443/api/am/admin/v1/throttling/blacklist/9092a33f-f557-47c3-9b00-c5ff07593309
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json

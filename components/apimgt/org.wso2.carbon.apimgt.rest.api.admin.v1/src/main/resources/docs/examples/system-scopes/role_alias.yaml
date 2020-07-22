@@ -1,0 +1,66 @@
+- title: Retrieve role alias mappings
+  id: retrieveRoleAliasMappings
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/system-scopes/role-aliases
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 1,
+        "list": [
+        {
+          "role": "creator",
+          "aliases": [
+            "creator",
+            " Internal/creator"
+          ]
+        }
+        ]
+      }
+
+- title: Add a new role alias
+  id: addNewRoleAlias
+  request:
+    method: PUT
+    url: https://localhost:9443/api/am/admin/v1/system-scopes/role-aliases
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "count": 1,
+        "list": [
+        {
+          "role": "creator",
+          "aliases": [
+            "creator",
+            " Internal/creator"
+          ]
+        }
+        ]
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 1,
+        "list": [
+        {
+          "role": "creator",
+          "aliases": [
+            "creator",
+            " Internal/creator"
+          ]
+        }
+        ]
+      }

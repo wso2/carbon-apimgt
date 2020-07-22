@@ -1,0 +1,128 @@
+- title: Get all Custom Rules
+  id: getAllCustomRules
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/throttling/policies/custom
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 1,
+        "list": [
+        {
+          "policyId": "587d6690-44d0-4ad2-a885-734ce6626424",
+          "policyName": "custom_rule",
+          "displayName": null,
+          "description": "Allow 10 requests per minute for admin user",
+          "isDeployed": true,
+          "siddhiQuery": "FROM RequestStream SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey INSERT INTO EligibilityStream; FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) SELECT throttleKey, (count(userId) >= 10) as isThrottled, expiryTimeStamp group by throttleKey INSERT ALL EVENTS into ResultStream;",
+          "keyTemplate": "$userId"
+        }
+        ]
+      }
+
+- title: Add a Custom Rule
+  id: addCustomRule
+  request:
+    method: POST
+    url: https://localhost:9443/api/am/admin/v1/throttling/policies/custom
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "policyName": "custom_rule",
+        "description": "Allow 10 requests per minute for admin user",
+        "siddhiQuery": "FROM RequestStream SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey INSERT INTO EligibilityStream; FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) SELECT throttleKey, (count(userId) >= 10) as isThrottled, expiryTimeStamp group by throttleKey INSERT ALL EVENTS into ResultStream;",
+        "keyTemplate": "$userId"
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "policyId": "587d6690-44d0-4ad2-a885-734ce6626424",
+        "policyName": "custom_rule",
+        "displayName": null,
+        "description": "Allow 10 requests per minute for admin user",
+        "isDeployed": true,
+        "siddhiQuery": "FROM RequestStream SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey INSERT INTO EligibilityStream; FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) SELECT throttleKey, (count(userId) >= 10) as isThrottled, expiryTimeStamp group by throttleKey INSERT ALL EVENTS into ResultStream;",
+        "keyTemplate": "$userId"
+      }
+
+- title: Get a Custom Rule by Id
+  id: getCustomRuleById
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/throttling/policies/custom/587d6690-44d0-4ad2-a885-734ce6626424
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "policyId": "587d6690-44d0-4ad2-a885-734ce6626424",
+        "policyName": "custom_rule",
+        "displayName": null,
+        "description": "Allow 10 requests per minute for admin user",
+        "isDeployed": true,
+        "siddhiQuery": "FROM RequestStream SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey INSERT INTO EligibilityStream; FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) SELECT throttleKey, (count(userId) >= 10) as isThrottled, expiryTimeStamp group by throttleKey INSERT ALL EVENTS into ResultStream;",
+        "keyTemplate": "$userId"
+      }
+
+- title: Update a Custom Rule by Id
+  id: updateCustomRuleById
+  request:
+    method: PUT
+    url: https://localhost:9443/api/am/admin/v1/throttling/policies/custom/587d6690-44d0-4ad2-a885-734ce6626424
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "policyName": "custom_rule",
+        "description": "Allow 100 requests per seconds for admin user",
+        "siddhiQuery": "FROM RequestStream SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey INSERT INTO EligibilityStream; FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) SELECT throttleKey, (count(userId) >= 10) as isThrottled, expiryTimeStamp group by throttleKey INSERT ALL EVENTS into ResultStream;",
+        "keyTemplate": "$userId"
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "policyId": "587d6690-44d0-4ad2-a885-734ce6626424",
+        "policyName": "custom_rule",
+        "displayName": null,
+        "description": "Allow 100 requests per seconds for admin user",
+        "isDeployed": true,
+        "siddhiQuery": "FROM RequestStream SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey INSERT INTO EligibilityStream; FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) SELECT throttleKey, (count(userId) >= 10) as isThrottled, expiryTimeStamp group by throttleKey INSERT ALL EVENTS into ResultStream;",
+        "keyTemplate": "$userId"
+      }
+
+- title: Delete a Custom Rule by Id
+  id: deleteCustomRuleById
+  request:
+    method: DELETE
+    url: https://localhost:9443/api/am/admin/v1/throttling/policies/custom/587d6690-44d0-4ad2-a885-734ce6626424
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json

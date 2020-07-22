@@ -1,0 +1,195 @@
+- title: Get all global mediation policies
+  id: getAllMediationPolicies
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/policies/mediation
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 17,
+        "next": null,
+        "previous": null,
+        "list": [
+        {
+          "name": "json_to_xml_in_message",
+          "id": "da7442e8-e01d-4217-8669-f538225bf762",
+          "type": "IN"
+        },
+        {
+          "name": "json_validator",
+          "id": "f5450e6a-e0d7-4d01-bd40-0415a36ffc72",
+          "type": "IN"
+        },
+        {
+          "name": "preserve_accept_header",
+          "id": "9ff8226c-5847-4a18-a38f-0f214632c84e",
+          "type": "IN"
+        },
+        {
+          "name": "disable_chunking",
+          "id": "a544ca3f-451e-4c4b-9d6d-1e7859cb0dc8",
+          "type": "IN"
+        },
+        {
+          "name": "regex_policy",
+          "id": "6d09436f-5ea6-46e3-ba8f-510d0b3a5552",
+          "type": "IN"
+        },
+        {
+          "name": "debug_in_flow",
+          "id": "0d0705c5-c903-43b2-af5d-826127503abc",
+          "type": "IN"
+        },
+        {
+          "name": "log_in_message",
+          "id": "04bb76e2-553c-4bf6-8ee6-5fed28aac234",
+          "type": "IN"
+        },
+        {
+          "name": "xml_validator",
+          "id": "5d9e9dfd-311d-4dd0-b22e-ca5f11be39d6",
+          "type": "IN"
+        },
+        {
+          "name": "xml_to_json_in_message",
+          "id": "774f8fd4-a18b-4bd5-91be-eeaf18207373",
+          "type": "IN"
+        },
+        {
+          "name": "disable_chunking",
+          "id": "345cec13-9650-4649-964d-b5c30f586c61",
+          "type": "OUT"
+        },
+        {
+          "name": "json_to_xml_out_message",
+          "id": "d55e2642-39fe-45d4-b54a-aafd0146a22c",
+          "type": "OUT"
+        },
+        {
+          "name": "log_out_message",
+          "id": "e31828b7-432b-401f-b6dd-34b67f401b65",
+          "type": "OUT"
+        },
+        {
+          "name": "apply_accept_header",
+          "id": "1c9337d2-7b8e-4505-a21f-3d0984d36337",
+          "type": "OUT"
+        },
+        {
+          "name": "debug_out_flow",
+          "id": "4d3755ba-2c73-4a5d-975a-31b770d89231",
+          "type": "OUT"
+        },
+        {
+          "name": "xml_to_json_out_message",
+          "id": "836f2394-0f71-4e55-bcf8-a5150d1fc3b1",
+          "type": "OUT"
+        },
+        {
+          "name": "json_fault",
+          "id": "a47b6843-273f-4119-be34-107f1916262d",
+          "type": "FAULT"
+        },
+        {
+          "name": "debug_json_fault",
+          "id": "7ba44a0b-5bf4-4903-b7db-93948cbf8346",
+          "type": "FAULT"
+        }
+        ]
+      }
+
+- title: Add a global mediation policy
+  id: addGlobalMediationPolicy
+  request:
+    method: POST
+    url: https://localhost:9443/api/am/admin/v1/policies/mediation
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "name": "add_custom_header_fault",
+        "type": "FAULT",
+        "config": "<sequence xmlns='http://ws.apache.org/ns/synapse' name='log_in_message'> <log level='full'> <property name='IN_MESSAGE' value='IN_MESSAGE_21133232'/> </log></sequence>"
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "id": "00ea9ad8-d3ee-4bbe-9261-7d7e34c91e14",
+        "name": "log_in_message",
+        "type": "FAULT",
+        "config": "<sequence xmlns='http://ws.apache.org/ns/synapse' name='log_in_message'> <log level='full'> <property name='IN_MESSAGE' value='IN_MESSAGE_21133232'/> </log></sequence>"
+      }
+
+- title: Retrieve a particular global mediation policy
+  id: retrieveParticularGlobalMediationPolicy
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/policies/mediation/00ea9ad8-d3ee-4bbe-9261-7d7e34c91e14
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "id": "00ea9ad8-d3ee-4bbe-9261-7d7e34c91e14",
+        "name": "log_in_message",
+        "type": "FAULT",
+        "config": "<sequence xmlns='http://ws.apache.org/ns/synapse' name='log_in_message'> <log level='full'> <property name='IN_MESSAGE' value='IN_MESSAGE_21133232'/> </log></sequence>"
+      }
+
+- title: Update a global mediation policy by Id
+  id: updateGlobalMediationPolicyById
+  request:
+    method: PUT
+    url: https://localhost:9443/api/am/admin/v1/policies/mediation/f806f795-29f3-4ac2-86a9-1510aad396cf
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "name": "custom_header_fault",
+        "type": "FAULT",
+        "config": "<sequence xmlns='http://ws.apache.org/ns/synapse' name='log_in_message_custom'> <log level='full'> <property name='IN_MESSAGE' value='IN_MESSAGE_21133232'/> </log></sequence>"
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "id": "f806f795-29f3-4ac2-86a9-1510aad396cf",
+        "name": "log_in_message_custom",
+        "type": "FAULT",
+        "config": "<sequence xmlns='http://ws.apache.org/ns/synapse' name='log_in_message_custom'> <log level='full'> <property name='IN_MESSAGE' value='IN_MESSAGE_21133232'/> </log></sequence>"
+      }
+
+- title: Delete a global mediation policy by Id
+  id: deleteGlobalMediationPolicyById
+  request:
+    method: DELETE
+    url: https://localhost:9443/api/am/admin/v1/policies/mediation/00ea9ad8-d3ee-4bbe-9261-7d7e34c91e14
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json

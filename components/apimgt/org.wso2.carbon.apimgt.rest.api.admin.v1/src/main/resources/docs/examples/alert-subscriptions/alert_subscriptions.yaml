@@ -1,0 +1,76 @@
+- title: Get the list of API Admin alert types subscribed by the user.
+  id: getSubscribedAlertTypes
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/alert-subscriptions
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "alerts": [
+        {
+          "id": "1",
+          "name": "AbnormalResponseTime"
+        }
+        ],
+        "emailList": [
+          "admin@wso2.com"
+        ]
+      }
+
+- title: Subscribe to an admin alert
+  id: subscribeToAlerts
+  request:
+    method: PUT
+    url: https://localhost:9443/api/am/admin/v1/alert-subscriptions
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "alerts": [
+        {
+          "id": "1",
+          "name": "AbnormalResponseTime"
+        }
+        ],
+        "emailList": [
+          "admin@wso2.com"
+        ]
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      "alerts": [
+      {
+        "id": "1",
+        "name": "AbnormalResponseTime"
+      }
+      ],
+      "emailList": [
+        "admin@wso2.com"
+      ]
+    }
+
+- title: Unsubscribe user from all the admin alert types
+  id: unsubscribeAllAlerts
+  request:
+    method: DELETE
+    url: https://localhost:9443/api/am/admin/v1/alert-subscriptions
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
