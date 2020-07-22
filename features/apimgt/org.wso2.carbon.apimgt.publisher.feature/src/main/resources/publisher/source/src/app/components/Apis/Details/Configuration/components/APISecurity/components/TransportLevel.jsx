@@ -95,7 +95,7 @@ function TransportLevel(props) {
             if (resp.status === 201) {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.add.success',
-                    defaultMessage: 'Certificate Added Successfully',
+                    defaultMessage: 'Certificate added successfully',
                 }));
                 const tmpCertificates = [...clientCertificates];
                 tmpCertificates.push({

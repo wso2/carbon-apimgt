@@ -90,7 +90,7 @@ function GeneralConfiguration(props) {
                 if (resp.status === 201) {
                     Alert.info(intl.formatMessage({
                         id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.add.success',
-                        defaultMessage: 'Certificate Added Successfully',
+                        defaultMessage: 'Certificate added successfully',
                     }));
                     const tmpCertificates = [...endpointCertificates];
                     tmpCertificates.push({

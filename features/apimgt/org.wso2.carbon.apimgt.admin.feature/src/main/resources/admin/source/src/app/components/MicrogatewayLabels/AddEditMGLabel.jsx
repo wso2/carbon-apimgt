@@ -187,7 +187,7 @@ function AddEditMGLabel(props) {
                 return (
                     <FormattedMessage
                         id='AdminPages.Microgateway.AddEdit.form.info.add.successful'
-                        defaultMessage='Microgateway Label added successfully'
+                        defaultMessage='Microgateway label added successfully'
                     />
                 );
             }
