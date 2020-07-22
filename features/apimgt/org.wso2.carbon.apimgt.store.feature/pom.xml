@@ -47,10 +47,6 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
         </dependency>
         <dependency>
@@ -244,8 +240,6 @@
                                 </importBundleDef>
                                 <importBundleDef>
                                     org.wso2.orbit.org.openapitools:openapi-generator:${openapi.generator.version}
-                                </importBundleDef>
-                                <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso
                                 </importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>

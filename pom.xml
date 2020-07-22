@@ -769,12 +769,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.jaggeryjs</groupId>
                 <artifactId>org.jaggeryjs.hostobjects.file</artifactId>
                 <version>${jaggery.version}</version>
