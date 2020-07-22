@@ -131,6 +131,13 @@ public class APIConfigContext extends ConfigContext {
         } else {
             context.put("enableSchemaValidation", Boolean.FALSE);
         }
+        if (apiProduct.isEnableStore()) {
+            context.put("enableStore", Boolean.TRUE);
+        } else {
+            context.put("enableStore", Boolean.FALSE);
+        }
+        // API test key
+        context.put("testKey", apiProduct.getTestKey());
     }
 
     public String getAPIName(API api) {
