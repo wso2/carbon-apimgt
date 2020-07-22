@@ -204,6 +204,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         API api = tenantSubscriptionStore.getApiByContextAndVersion(validationContext.getContext(),
                 validationContext.getVersion());
+        boolean scopesValidated = false;
         if (api != null) {
 
             for (String resource : resourceArray) {
@@ -217,24 +218,28 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 }
                 if (urlMapping != null) {
                     if (urlMapping.getScopes().size() == 0) {
-                        return true;
+                        scopesValidated = true;
+                        continue;
                     }
                     List<String> mappingScopes = urlMapping.getScopes();
+                    boolean validate = false;
                     for (String scope : mappingScopes) {
                         if (scopesSet.contains(scope)) {
-                            return true;
+                            scopesValidated = true;
+                            validate = true;
+                            break;
                         }
                     }
-                    if (urlMapping.getScopes().size() > 0) {
-                        apiKeyValidationInfoDTO.setAuthorized(false);
-                        apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+                    if (!validate && urlMapping.getScopes().size() > 0) {
                         return false;
                     }
                 }
             }
         }
-        apiKeyValidationInfoDTO.setAuthorized(false);
-        apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
-        return false;
+        if (!scopesValidated) {
+            apiKeyValidationInfoDTO.setAuthorized(false);
+            apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+        }
+        return scopesValidated;
     }
 }
