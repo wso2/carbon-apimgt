@@ -52,7 +52,7 @@ function reducer(state, { field, value }) {
 }
 
 /**
- * Render a pop-up dialog to add/edit an Microgateway label
+ * Render a pop-up dialog to add/edit an Gateway label
  * @param {JSON} props .
  * @returns {JSX}.
  */
@@ -179,15 +179,15 @@ function AddEditMGLabel(props) {
             if (id) {
                 return (
                     <FormattedMessage
-                        id='AdminPages.Microgateway.AddEdit.form.info.edit.successful'
-                        defaultMessage='Microgateway Label edited successfully'
+                        id='AdminPages.Gateways.AddEdit.form.info.edit.successful'
+                        defaultMessage='Gateway Label edited successfully'
                     />
                 );
             } else {
                 return (
                     <FormattedMessage
-                        id='AdminPages.Microgateway.AddEdit.form.info.add.successful'
-                        defaultMessage='Microgateway label added successfully'
+                        id='AdminPages.Gateways.AddEdit.form.info.add.successful'
+                        defaultMessage='Gateway Label added successfully'
                     />
                 );
             }
@@ -211,7 +211,7 @@ function AddEditMGLabel(props) {
             title={title}
             saveButtonText={(
                 <FormattedMessage
-                    id='AdminPages.Microgateway.AddEdit.form.save.button.label'
+                    id='AdminPages.Gateways.AddEdit.form.save.button.label'
                     defaultMessage='Save'
                 />
             )}
@@ -228,13 +228,13 @@ function AddEditMGLabel(props) {
                     onChange={onChange}
                     label={(
                         <span>
-                            <FormattedMessage id='AdminPages.Microgateway.AddEdit.form.name' defaultMessage='Name' />
+                            <FormattedMessage id='AdminPages.Gateways.AddEdit.form.name' defaultMessage='Name' />
                             <span className={classes.error}>*</span>
                         </span>
                     )}
                     fullWidth
                     error={hasErrors('name', name)}
-                    helperText={hasErrors('name', name) || 'Name of the Microgateway label'}
+                    helperText={hasErrors('name', name) || 'Name of the Gateway label'}
                     variant='outlined'
                     disabled={id}
                 />
@@ -246,7 +246,7 @@ function AddEditMGLabel(props) {
                     label='Description'
                     fullWidth
                     multiline
-                    helperText='Description of the Microgateway label'
+                    helperText='Description of the Gateway label'
                     variant='outlined'
                 />
                 {(id)

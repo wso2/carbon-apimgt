@@ -39,8 +39,8 @@ function Delete({ updateList, dataRow }) {
             .then(() => {
                 return (
                     <FormattedMessage
-                        id='AdminPages.Microgateways.Delete.form.delete.successful'
-                        defaultMessage='Microgateway Label deleted successfully'
+                        id='AdminPages.Gateways.Delete.form.delete.successful'
+                        defaultMessage='Gateway Label deleted successfully'
                     />
                 );
             })
@@ -54,15 +54,15 @@ function Delete({ updateList, dataRow }) {
 
     return (
         <FormDialogBase
-            title='Delete Microgateway Label?'
+            title='Delete Gateway Label?'
             saveButtonText='Delete'
             icon={<DeleteForeverIcon />}
             formSaveCallback={formSaveCallback}
         >
             <DialogContentText>
                 <FormattedMessage
-                    id='AdminPages.Microgateways.Delete.form.delete.confirmation.message'
-                    defaultMessage='Are you sure you want to delete this Microgateway Label?'
+                    id='AdminPages.Gateways.Delete.form.delete.confirmation.message'
+                    defaultMessage='Are you sure you want to delete this Gateway Label?'
                 />
             </DialogContentText>
         </FormDialogBase>

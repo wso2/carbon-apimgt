@@ -144,8 +144,8 @@ class Labels extends React.Component {
                                     <Grid container item xs={12} spacing={2}>
                                         <Typography className={classes.heading}>
                                             <FormattedMessage
-                                                id='Apis.Details.InfoBar.microgateway.urls'
-                                                defaultMessage='Microgateway URLs'
+                                                id='Apis.Details.InfoBar.Gateway.urls'
+                                                defaultMessage='Gateway URLs'
                                             />
                                         </Typography>
                                         {label.accessUrls.map((row) => (

@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.ApiArtifactApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -44,6 +45,7 @@ import java.util.Map;
 public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
 
     private static final Log log = LogFactory.getLog(ApiArtifactApiServiceImpl.class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
     @Override
     public Response apiArtifactGet(String apiName, String version , String tenantDomain,
@@ -53,14 +55,23 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
+        GatewayAPIDTO gatewayAPIDTO = null;
+        try {
+             Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version,
+                    tenantDomain);
+             String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
+             String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
+             gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
+            if (debugEnabled) {
+                log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
+            }
+        } catch (ArtifactSynchronizerException e) {
+            String errorMessage = "Error in fetching artifacts from storage";
+            log.error(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
 
-        Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version, tenantDomain);
-        String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
-        String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
-
-        GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
         JSONObject responseObj = new JSONObject();
-
         if (gatewayAPIDTO != null) {
             try {
                 JSONArray endPointArray = new JSONArray();

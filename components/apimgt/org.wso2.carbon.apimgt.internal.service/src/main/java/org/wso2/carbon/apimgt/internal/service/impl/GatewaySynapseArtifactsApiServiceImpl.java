@@ -14,9 +14,9 @@ import javax.ws.rs.core.Response;
 public class GatewaySynapseArtifactsApiServiceImpl implements GatewaySynapseArtifactsApiService {
 
     private GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
-
     private SynapseArtifactListDTO synapseArtifactListDTOS = new SynapseArtifactListDTO();
     private static final Log log = LogFactory.getLog(GatewaySynapseArtifactsApiServiceImpl.class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
 
     public Response gatewaySynapseArtifactsGet(String gatewayLabel, MessageContext messageContext) {
@@ -33,6 +33,9 @@ public class GatewaySynapseArtifactsApiServiceImpl implements GatewaySynapseArti
             log.error("Error retrieving artifacts for the  gateway label of  " + gatewayLabel + " "
                     + "from DB", e);
             return Response.serverError().entity(responseStringObj).build();
+        }
+        if (debugEnabled) {
+            log.debug("Successfully retrieved artifacts for " + gatewayLabel + " from DB");
         }
         synapseArtifactListDTOS.list(gatewayRuntimeArtifactsArray);
         synapseArtifactListDTOS.setCount(gatewayRuntimeArtifactsArray.size());

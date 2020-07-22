@@ -725,8 +725,8 @@ function TryOutController(props) {
                                                     <MenuItem value='' disabled>
                                                         <em>
                                                             <FormattedMessage
-                                                                id='micro.gateways'
-                                                                defaultMessage='Microgateways'
+                                                                id='gateways'
+                                                                defaultMessage='Gateways'
                                                                 className={classes.menuItem}
                                                             />
                                                         </em>
