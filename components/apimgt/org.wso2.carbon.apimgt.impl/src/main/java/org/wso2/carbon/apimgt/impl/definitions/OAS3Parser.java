@@ -1359,6 +1359,7 @@ public class OAS3Parser extends APIDefinition {
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
         if (!isDefaultGiven(swaggerContent)) {
             OpenAPI openAPI = getOpenAPI(swaggerContent);
+            openAPI = processLegacyScopes(openAPI);
             openAPI = injectOtherScopesToDefaultScheme(openAPI);
             openAPI = injectOtherResourceScopesToDefaultScheme(openAPI);
             return Json.pretty(openAPI);
@@ -1366,9 +1367,13 @@ public class OAS3Parser extends APIDefinition {
         return swaggerContent;
     }
 
-    @Override
-    public String processLegacyScopes(String swaggerContent) throws APIManagementException {
-        OpenAPI openAPI = getOpenAPI(swaggerContent);
+    /**
+     * This method will extract scopes from legacy x-wso2-security and add them to default scheme
+     * @param openAPI openAPI definition
+     * @return
+     * @throws APIManagementException
+     */
+    private OpenAPI processLegacyScopes(OpenAPI openAPI) throws APIManagementException {
         Set<Scope> scopes = getScopesFromExtensions(openAPI);
 
         if (!scopes.isEmpty()) {
@@ -1420,9 +1425,8 @@ public class OAS3Parser extends APIDefinition {
                 oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
             }
             oAuthFlow.setScopes(oas3Scopes);
-            return Json.pretty(openAPI);
         }
-        return swaggerContent;
+        return openAPI;
     }
 
     /**

@@ -1275,6 +1275,7 @@ public class OAS2Parser extends APIDefinition {
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
         if (!isDefaultGiven(swaggerContent)) {
             Swagger swagger = getSwagger(swaggerContent);
+            swagger = processLegacyScopes(swagger);
             swagger = injectOtherScopesToDefaultScheme(swagger);
             swagger = injectOtherResourceScopesToDefaultScheme(swagger);
             return getSwaggerJsonString(swagger);
@@ -1282,9 +1283,13 @@ public class OAS2Parser extends APIDefinition {
         return swaggerContent;
     }
 
-    @Override
-    public String processLegacyScopes(String swaggerContent) throws APIManagementException {
-        Swagger swagger = getSwagger(swaggerContent);
+    /**
+     * This method will extract scopes from legacy x-wso2-security and add them to default scheme
+     * @param swagger swagger definition
+     * @return
+     * @throws APIManagementException
+     */
+    private Swagger processLegacyScopes(Swagger swagger) throws APIManagementException {
         OAuth2Definition oAuth2Definition = (OAuth2Definition) swagger.getSecurityDefinitions()
                 .get(APIConstants.OAUTH2_DEFAULT_SCOPE);
         Map<String, String> scopeBindings = new HashMap<>();
@@ -1305,7 +1310,7 @@ public class OAS2Parser extends APIDefinition {
             oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
         swagger.addSecurityDefinition(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, oAuth2Definition);
-        return getSwaggerJsonString(swagger);
+        return swagger;
     }
 
     /**
