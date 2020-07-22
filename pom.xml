@@ -29,7 +29,6 @@
         <module>service-stubs/oidc-authenticator</module>
         <module>components/apimgt</module>
         <module>components/forum</module>
-        <module>components/sso-hostobject</module>
         <module>components/oidc-authenticator</module>
         <module>features/apimgt</module>
         <module>features/forum</module>
