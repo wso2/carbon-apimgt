@@ -16,7 +16,7 @@ public class GatewayArtifactSynchronizerProperties {
     private String artifactSynchronizerDataSource = "jdbc/WSO2AM_DB";
     private long retryDuartion = 15000 ;
     private String gatewayStartup = "sync";
-    private long eventWaitingTime = 5000;
+    private long eventWaitingTime = 0;
 
 
     public String getSaverName() {

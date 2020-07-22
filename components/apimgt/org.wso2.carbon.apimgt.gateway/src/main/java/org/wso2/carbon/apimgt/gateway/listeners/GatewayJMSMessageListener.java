@@ -42,6 +42,9 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -81,20 +84,18 @@ public class GatewayJMSMessageListener implements MessageListener {
                              * timestamp - system time of the event published
                              * event - event data
                              */
-                            Thread t1 = new Thread(() -> {
-                                try {
-                                    try {
-                                        Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
-                                    } catch (InterruptedException ignore) {
-                                    }
+
+                            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                            final Runnable task = new Runnable() {
+                                @Override
+                                public void run() {
                                     handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
                                             (Long) map.get(APIConstants.EVENT_TIMESTAMP),
                                             (String) map.get(APIConstants.EVENT_PAYLOAD));
-                                } catch (Exception e) {
-                                    log.error("Error while deploying throttle policies", e);
                                 }
-                            });
-                            t1.start();
+                            };
+                            scheduler.scheduleWithFixedDelay(task, gatewayArtifactSynchronizerProperties
+                                    .getEventWaitingTime(), 0, TimeUnit.MILLISECONDS);
                         }
                     }
 
