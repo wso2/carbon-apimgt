@@ -85,17 +85,21 @@ public class GatewayJMSMessageListener implements MessageListener {
                              * event - event data
                              */
 
-                            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
                             final Runnable task = new Runnable() {
                                 @Override
                                 public void run() {
+                                    try {
+                                        Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
+                                    } catch (InterruptedException e) {
+                                        // Ignore
+                                    }
                                     handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
                                             (Long) map.get(APIConstants.EVENT_TIMESTAMP),
                                             (String) map.get(APIConstants.EVENT_PAYLOAD));
                                 }
                             };
-                            scheduler.schedule(task, gatewayArtifactSynchronizerProperties.getEventWaitingTime(),
-                                    TimeUnit.MILLISECONDS);
+                            scheduler.schedule(task, 1, TimeUnit.MILLISECONDS);
                         }
                     }
 
