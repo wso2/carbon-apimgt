@@ -15396,6 +15396,7 @@ public class ApiMgtDAO {
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.GET_SHARED_SCOPE_USAGE_COUNT_BY_TENANT)) {
             statement.setInt(1, tenantId);
+            statement.setInt(2, tenantId);
             try (ResultSet rs = statement.executeQuery()) {
                 scopeList = new ArrayList<>();
                 while (rs.next()) {
