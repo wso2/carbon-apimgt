@@ -131,9 +131,6 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
         if (getUserIp() == null) {
             missingMandatoryValues.add("User IP");
         }
-        if (getUserAgent() == null) {
-            missingMandatoryValues.add("User agent");
-        }
         return missingMandatoryValues;
     }
 
