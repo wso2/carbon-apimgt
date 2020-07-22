@@ -125,7 +125,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
                     try {
                         storeAlertConfigurator
                                 .addAlertConfiguration(userName, alertDTO.getName(),
-                                        alertConfigDTO.getConfiguration());
+                                        AlertsMappingUtil.alertInfoDTOToMap(alertConfigDTO));
                     } catch (APIManagementException e) {
                         failedConfigList.add(alertConfigDTO);
                         log.error("Error while adding alert configuration " + alertConfigDTO.toString());
