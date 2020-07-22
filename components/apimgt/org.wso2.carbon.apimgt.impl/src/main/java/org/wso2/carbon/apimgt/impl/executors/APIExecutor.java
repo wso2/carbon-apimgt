@@ -128,7 +128,7 @@ public class APIExecutor implements Execution {
             if (APIConstants.API_PRODUCT.equals(type)) {
                 executed = true;
             } else {
-                API api = APIUtil.getAPI(apiArtifact);
+                API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
                 return changeLifeCycle(context, api, apiResource, registry, apiProvider, apiArtifact, targetState);
             }
         } catch (RegistryException e) {

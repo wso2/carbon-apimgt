@@ -147,7 +147,7 @@ public class DBRetriever implements ArtifactRetriever {
         }
     }
 
-    private CloseableHttpResponse invokeService(String endpoint) throws IOException {
+    private CloseableHttpResponse invokeService(String endpoint) throws IOException, ArtifactSynchronizerException {
         HttpGet method = new HttpGet(endpoint);
         URL url = new URL(endpoint);
         String username = eventHubConfigurationDto.getUsername();

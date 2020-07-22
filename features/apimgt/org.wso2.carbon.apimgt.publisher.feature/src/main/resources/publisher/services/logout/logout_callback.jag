@@ -22,6 +22,8 @@
     var app = require("/site/public/conf/settings.js").AppConfig.app;
     include("/services/constants.jag");
 
+    var appUtils = require("/services/utils.js");
+    app.context = appUtils.getTenantBasePublisherContext();
     var cookie = {
         'name': 'AM_ACC_TOKEN_DEFAULT_P2',
         'value': '',

@@ -5461,7 +5461,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             api.setUriTemplates(oasParser.getURITemplates(definition));
             apiTenantDomain = MultitenantUtils.getTenantDomain(
                     APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            if (synapseEnvName != null) {
+            if (!StringUtils.isEmpty(synapseEnvName)) {
                 hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, synapseEnvName);
             } else {
                 hostsWithSchemes = getHostWithSchemeMappingForClusterName(clusterName);

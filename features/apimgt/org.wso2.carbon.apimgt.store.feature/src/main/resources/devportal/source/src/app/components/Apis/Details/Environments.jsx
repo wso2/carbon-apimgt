@@ -591,72 +591,6 @@ class Environments extends React.Component {
                                                     </Tooltip>
                                                 </Grid>
                                             )}
-                                        {api.ingressURLs !== null && api.ingressURLs.length > 0 && (
-                                            <Typography className={classes.heading}>
-                                                <FormattedMessage
-                                                    id='Apis.Details.InfoBar.ingress.urls'
-                                                    defaultMessage='Kubernetes Access URLs'
-                                                />
-                                            </Typography>
-                                        )}
-                                        {api.ingressURLs && (
-                                            <Grid item xs={12}>
-                                                {api.ingressURLs.map((clusters, index) =>  (
-                                                        <Grid item xs={12} key={index}>
-                                                            {clusters.clusterDetails.map((cluster) => {
-                                                                return (
-                                                                    <Grid item xs={12}>
-                                                                        <Typography className={classes.heading}>
-                                                                            {cluster.clusterName}
-                                                                        </Typography>
-                                                                        <TextField
-                                                                            defaultValue={cluster.ingressURL}
-                                                                            id='bootstrap-input'
-                                                                            InputProps={{
-                                                                                disableUnderline: true,
-                                                                                readOnly: true,
-                                                                                classes: {
-                                                                                    root: classes.bootstrapRoot,
-                                                                                    input: classes.bootstrapInput,
-                                                                                },
-                                                                            }}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                                className: classes.bootstrapFormLabel,
-                                                                            }}
-                                                                        />
-                                                                        <Tooltip
-                                                                            title={
-                                                                                urlCopied
-                                                                                    ? intl.formatMessage({
-                                                                                        defaultMessage: 'Copied',
-                                                                                        id: 'Apis.Details.Environments.copied',
-                                                                                    })
-                                                                                    : intl.formatMessage({
-                                                                                        defaultMessage: 'Copy to clipboard',
-                                                                                        id: 'Apis.Details.Environments.copy.to.clipboard',
-                                                                                    })
-                                                                            }
-                                                                            placement='right'
-                                                                            className={classes.iconStyle}
-                                                                        >
-                                                                            <CopyToClipboard
-                                                                                text={endpoint.defaultVersionURLs.ws}
-                                                                                onCopy={() => this.onCopy('urlCopied')}
-                                                                            >
-                                                                                <IconButton aria-label='Copy to clipboard'>
-                                                                                    <Icon color='secondary'>file_copy</Icon>
-                                                                                </IconButton>
-                                                                            </CopyToClipboard>
-                                                                        </Tooltip>
-                                                                    </Grid>
-                                                                );
-                                                            })}
-                                                        </Grid>
-                                                    )
-                                                )}
-                                            </Grid>
-                                        )}
                                         {api.type === 'SOAP' && (
                                             <Button
                                                 size='small'
@@ -687,6 +621,86 @@ class Environments extends React.Component {
                         </Grid>
                     );
                 })}
+                {api.ingressURLs !== null && api.ingressURLs.filter((envType) => envType.clusterDetails.length > 0).map(
+                    (envType) => (
+                        envType.clusterDetails.map((cluster) => (
+                            <Grid key={cluster.clusterName} item xs={12} key={cluster.clusterName}>
+                                <ExpansionPanel>
+                                    <ExpansionPanelSummary
+                                        expandIcon={<Icon>expand_more</Icon>}
+                                        aria-controls='panel1a-content'
+                                        id='panel1a-header-cluster'
+                                    >
+                                        <div className={classes.iconAligner}>
+                                            <Icon className={classes.iconEven}>cloud</Icon>
+                                            <span className={classes.iconTextWrapper}>
+                                            <Typography className={classes.heading}>
+                                                {cluster.clusterDisplayName}
+                                            </Typography>
+                                        </span>
+                                        </div>
+                                    </ExpansionPanelSummary>
+                                    <ExpansionPanelDetails>
+                                        <Grid container item xs={12} spacing={2}>
+                                            {cluster.ingressURL !== null && (
+                                                <Typography className={classes.heading}>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.InfoBar.gateway.ingressUrls'
+                                                        defaultMessage='Cluster Ingress URLs'
+                                                    />
+                                                </Typography>
+                                            )}
+                                            {cluster.ingressURL !== null && (
+                                                <Grid item xs={12}>
+                                                    <TextField
+                                                        defaultValue={cluster.ingressURL}
+                                                        id='bootstrap-input'
+                                                        InputProps={{
+                                                            disableUnderline: true,
+                                                            readOnly: true,
+                                                            classes: {
+                                                                root: classes.bootstrapRoot,
+                                                                input: classes.bootstrapInput,
+                                                            },
+                                                        }}
+                                                        InputLabelProps={{
+                                                            shrink: true,
+                                                            className: classes.bootstrapFormLabel,
+                                                        }}
+                                                    />
+                                                    <Tooltip
+                                                        title={
+                                                            urlCopied
+                                                                ? intl.formatMessage({
+                                                                    defaultMessage: 'Copied',
+                                                                    id: 'Apis.Details.Environments.copied',
+                                                                })
+                                                                : intl.formatMessage({
+                                                                    defaultMessage: 'Copy to clipboard',
+                                                                    id: 'Apis.Details.Environments.copy.to.clipboard',
+                                                                })
+                                                        }
+                                                        placement='right'
+                                                        className={classes.iconStyle}
+                                                    >
+                                                        <CopyToClipboard
+                                                            text={cluster.ingressURL}
+                                                            onCopy={() => this.onCopy('urlCopied')}
+                                                        >
+                                                            <IconButton aria-label='Copy to clipboard'>
+                                                                <Icon color='secondary'>insert_drive_file</Icon>
+                                                            </IconButton>
+                                                        </CopyToClipboard>
+                                                    </Tooltip>
+                                                </Grid>
+                                            )}
+                                        </Grid>
+                                    </ExpansionPanelDetails>
+                                </ExpansionPanel>
+                            </Grid>
+                        ))
+                    ))
+                }
             </Grid>
         );
     }

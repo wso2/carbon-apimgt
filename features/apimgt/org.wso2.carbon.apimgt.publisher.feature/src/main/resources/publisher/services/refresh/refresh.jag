@@ -21,6 +21,11 @@
     var appUtils = require("/services/utils.js");
     var app = require("/site/public/conf/settings.js").AppConfig.app;
 
+    app.context = appUtils.getTenantBasePublisherContext();
+    var tenantDomain;
+    if (appUtils.isPerTenantServiceProviderEnabled()) {
+        tenantDomain = appUtils.getTenantDomain();
+    }
     var log = new Log();
     var cookieToken = request.getCookie("AM_REF_TOKEN_DEFAULT_P2");
     var tokenParam = request.getParameter("refresh_token", "UTF-8")
@@ -40,9 +45,9 @@
 
         var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
         var systemApplicationDAO = new SystemApplicationDTO();
-        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME,SUPER_TENANT_DOMAIN);
+        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME,tenantDomain);
         if (systemApplicationDTO === null) {
-            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD,SUPER_TENANT_DOMAIN);
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD,tenantDomain);
         }
         if (systemApplicationDTO == null) {
             log.error("Oauth application details not found for 'publisher'");
