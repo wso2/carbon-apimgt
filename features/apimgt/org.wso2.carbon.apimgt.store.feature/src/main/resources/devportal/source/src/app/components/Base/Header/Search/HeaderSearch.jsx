@@ -78,7 +78,6 @@ const styles = theme => ({
         padding: '5px 5px 5px 5px',
     },
     selectRoot: {
-        background: theme.custom.appBar.searchInputBackground,
         borderRight: '1px solid rgba(0, 0, 0, 0.42)',
         minHeight: '40px',
         padding: '5px 5px 5px 15px',
@@ -377,7 +376,7 @@ class HeaderSearch extends React.Component {
                                 <li>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option9'
-                                        defaultMessage='By Microgateway Label [ Syntax - label:xxxx ]'
+                                        defaultMessage='By Gateway Label [ Syntax - label:xxxx ]'
                                     />
                                 </li>
                                 <li>

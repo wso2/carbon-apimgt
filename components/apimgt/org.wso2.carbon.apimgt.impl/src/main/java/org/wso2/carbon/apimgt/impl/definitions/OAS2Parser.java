@@ -1275,11 +1275,47 @@ public class OAS2Parser extends APIDefinition {
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
         if (!isDefaultGiven(swaggerContent)) {
             Swagger swagger = getSwagger(swaggerContent);
+            swagger = processLegacyScopes(swagger);
             swagger = injectOtherScopesToDefaultScheme(swagger);
             swagger = injectOtherResourceScopesToDefaultScheme(swagger);
             return getSwaggerJsonString(swagger);
         }
         return swaggerContent;
+    }
+
+    /**
+     * This method will extract scopes from legacy x-wso2-security and add them to default scheme
+     * @param swagger swagger definition
+     * @return
+     * @throws APIManagementException
+     */
+    private Swagger processLegacyScopes(Swagger swagger) throws APIManagementException {
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        OAuth2Definition oAuth2Definition = new OAuth2Definition();
+        if (securityDefinitions != null) {
+            oAuth2Definition = (OAuth2Definition) swagger.getSecurityDefinitions()
+                    .get(APIConstants.OAUTH2_DEFAULT_SCOPE);
+        }
+        Map<String, String> scopeBindings = new HashMap<>();
+        if (oAuth2Definition != null) {
+            Map<String, Object> vendorExtensions = oAuth2Definition.getVendorExtensions();
+            if (vendorExtensions != null && vendorExtensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS) != null) {
+                scopeBindings = (Map<String, String>) oAuth2Definition.getVendorExtensions()
+                        .get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+            } else {
+                scopeBindings = new HashMap<>();
+            }
+        }
+        Set<Scope> scopes = getScopesFromExtensions(swagger);
+        if (scopes != null && !scopes.isEmpty()) {
+            for (Scope scope : scopes) {
+                oAuth2Definition.addScope(scope.getKey(), scope.getDescription());
+                scopeBindings.put(scope.getKey(), scope.getRoles());
+            }
+            oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+        }
+        swagger.addSecurityDefinition(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, oAuth2Definition);
+        return swagger;
     }
 
     /**

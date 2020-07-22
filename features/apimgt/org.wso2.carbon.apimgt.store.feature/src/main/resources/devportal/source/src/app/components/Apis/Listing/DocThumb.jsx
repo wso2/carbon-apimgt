@@ -204,7 +204,7 @@ class DocThumb extends React.Component {
                                 {apiVersion}
                             </Typography>
                             <Typography variant='caption' gutterBottom align='right'>
-                                <FormattedMessage defaultMessage='Api Version' id='Apis.Listing.DocThumb.apiVersion' />
+                                <FormattedMessage defaultMessage='API Version' id='Apis.Listing.DocThumb.apiVersion' />
                             </Typography>
                         </div>
                     </div>

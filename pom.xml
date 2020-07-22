@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>6.7.124-SNAPSHOT</version>
+    <version>6.7.126-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -1783,7 +1783,7 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>6.7.124-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>6.7.126-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <carbon.analytics.common.version>5.2.26</carbon.analytics.common.version>
@@ -1876,7 +1876,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-	    <synapse.version>2.1.7-wso2v168</synapse.version>
+	    <synapse.version>2.1.7-wso2v179</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -1946,7 +1946,7 @@
         <!-- apache pdfbox version -->
         <pdfbox.version>1.8.16</pdfbox.version>
 
-        <event.processor.stub.version>2.2.11</event.processor.stub.version>
+        <event.processor.stub.version>2.2.14</event.processor.stub.version>
         <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v1</swagger.inflector.oas3.version>

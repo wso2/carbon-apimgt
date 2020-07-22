@@ -204,5 +204,4 @@ public abstract class APIDefinition {
      */
     public abstract API setExtensionsToAPI(String swaggerContent, API api)
             throws APIManagementException;
-
 }

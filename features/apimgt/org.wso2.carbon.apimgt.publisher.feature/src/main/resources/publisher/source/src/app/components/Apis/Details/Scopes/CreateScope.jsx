@@ -368,7 +368,7 @@ class CreateScope extends React.Component {
                                             ) : (
                                                 <FormattedMessage
                                                     id='Apis.Details.Scopes.CreateScope.short.description.name'
-                                                    defaultMessage='Enter Scope Name ( Ex: creator )'
+                                                    defaultMessage='Enter Scope Name ( E.g.,: creator )'
                                                 />
                                             )
                                         }

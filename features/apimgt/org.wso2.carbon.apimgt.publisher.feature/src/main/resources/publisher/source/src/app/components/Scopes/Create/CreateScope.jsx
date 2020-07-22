@@ -427,7 +427,7 @@ class CreateScope extends React.Component {
                                             ) : (
                                                 <FormattedMessage
                                                     id='Scopes.Create.CreateScope.short.description.name'
-                                                    defaultMessage='Enter Scope Name ( Ex: creator )'
+                                                    defaultMessage='Enter Scope Name ( E.g.,: creator )'
                                                 />
                                             )
                                         }
@@ -452,7 +452,7 @@ class CreateScope extends React.Component {
                                         ) : (
                                             <FormattedMessage
                                                 id='Scopes.Create.CreateScope.short.description.display.name'
-                                                defaultMessage='Enter Scope Display Name ( Ex: creator )'
+                                                defaultMessage='Enter Scope Display Name ( E.g.,: creator )'
                                             />
                                         )}
                                         fullWidth

@@ -5228,10 +5228,9 @@ definitions:
           About scope.
         example: "Publish API"
       roles:
-        schema:
-          type: array
-          items:
-            type: string
+        type: array
+        items:
+          type: string
         description: |
           Roles for the particular scope.
         example: ["admin","Internal/publisher"]
@@ -5719,10 +5718,9 @@ definitions:
         description: The original role
         example: "Internal/subscriber"
       aliases:
-        schema:
-          type: array
-          items:
-            type: string
+        type: array
+        items:
+          type: string
         description: The role mapping for role alias
         example: ["Subscriber","Internal/subscriber"]
 

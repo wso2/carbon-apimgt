@@ -60,10 +60,8 @@ const styles = (theme) => ({
     footer: {
         padding: theme.spacing(2),
         background: '#eaeff1',
-        position: 'absolute',
+        position: 'relative',
         bottom: 0,
-        left: drawerWidth,
-        width: 'calc(100% - ' + drawerWidth + 'px)',
     },
 });
 

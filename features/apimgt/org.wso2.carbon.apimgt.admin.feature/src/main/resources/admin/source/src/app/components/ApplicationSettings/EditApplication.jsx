@@ -167,8 +167,8 @@ function Edit(props) {
                 helperText={(
                     <FormattedMessage
                         id='AdminPages.ApplicationSettings.Edit.form.helperText'
-                        defaultMessage={'Enter a new Owner, '
-                        + 'make sure the new owner has logged into the store at least once'}
+                        defaultMessage={'Enter a new Owner. '
+                        + 'Make sure the new owner has logged into the Developer Portal at least once'}
                     />
                 )}
                 variant='outlined'

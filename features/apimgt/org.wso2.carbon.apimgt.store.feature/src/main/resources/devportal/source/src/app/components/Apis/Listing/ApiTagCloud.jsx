@@ -82,7 +82,7 @@ function ApiTagCloud(props) {
         apisTagWithoutGroups && (
             <React.Fragment>
                 <Typography variant='h6' gutterBottom className={classes.filterTitle}>
-                    <FormattedMessage defaultMessage='Tag Cloud' id='Apis.Listing.ApiTagCloud.title' />
+                    <FormattedMessage defaultMessage='Tags' id='Apis.Listing.ApiTagCloud.title' />
                 </Typography>
                 <TagCloud
                     minSize={14}

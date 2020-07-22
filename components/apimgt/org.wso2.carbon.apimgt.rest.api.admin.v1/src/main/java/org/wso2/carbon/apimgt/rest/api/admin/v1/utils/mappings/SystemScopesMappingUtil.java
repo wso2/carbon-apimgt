@@ -31,9 +31,10 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 public class SystemScopesMappingUtil {
 
@@ -77,7 +78,9 @@ public class SystemScopesMappingUtil {
             if (scopeRoleMapping.containsKey(mapping.getKey())) {
                 ScopeDTO roleScopeDTO = new ScopeDTO();
                 roleScopeDTO.setName(mapping.getKey());
-                roleScopeDTO.setRoles(scopeRoleMapping.get(mapping.getKey()));
+                String roles = scopeRoleMapping.get(mapping.getKey());
+                List<String> roleList = new ArrayList<String>(Arrays.asList(roles.split(",")));
+                roleScopeDTO.setRoles(roleList);
                 roleScopeDTO.setDescription(mapping.getValue().get(0));
                 roleScopeDTO.setTag(mapping.getValue().get(1));
                 scopeDTOs.add(roleScopeDTO);
@@ -90,6 +93,7 @@ public class SystemScopesMappingUtil {
 
     /**
      * Extract scope and roles and create JSONObject
+     *
      * @param body          body of a Role Scope  Mapping
      * @return JSONObject   role scope mapping data
      */
@@ -99,13 +103,18 @@ public class SystemScopesMappingUtil {
         JSONArray scopeJson = new JSONArray();
         for (ScopeDTO scope : body.getList()) {
             JSONObject scopeRoleJson = new JSONObject();
-            scopeRoleJson.put("Name", scope.getName());
-            scopeRoleJson.put("Roles", scope.getRoles());
-            scopeJson.put(scopeRoleJson);
+            String roles = scope.getRoles().toString().replaceAll("\\[", "").
+                    replaceAll("\\]", "").replaceAll("\\s", "");
+            if ( !roles.isEmpty()) {
+                scopeRoleJson.put("Name", scope.getName());
+                scopeRoleJson.put("Roles", roles);
+                scopeJson.put(scopeRoleJson);
+            }
         }
         responseJson.put("Scope", scopeJson);
         return responseJson;
     }
+
     /**
      * Convert list of role alias mapping to RoleAliasListDTO
      *
@@ -145,7 +154,9 @@ public class SystemScopesMappingUtil {
     public static JSONObject createJsonObjectOfRoleMapping(RoleAliasListDTO body) {
         JSONObject roleJson = new JSONObject();
         for (RoleAliasDTO roleAlias : body.getList()) {
-            roleJson.put(roleAlias.getRole(), roleAlias.getAliases());
+            String aliases = roleAlias.getAliases().toString()
+                    .replaceAll("\\[", "").replaceAll("\\]", "");
+            roleJson.put(roleAlias.getRole(), aliases);
         }
         return roleJson;
     }
@@ -159,9 +170,10 @@ public class SystemScopesMappingUtil {
     public static Map<String, List<String>> createMapOfRoleMapping(JSONObject roleMapping) {
         Map<String, List<String>> map = new HashMap<>();
         for (Object role : roleMapping.keySet()) {
-            List<String> result = new ArrayList<>();
             String key = (String) role;
-            result.add((String) roleMapping.get(key));
+            String aliaseString = (String) roleMapping.get(key);
+            String[] aliases = aliaseString.split(",");
+            List<String> result = Arrays.asList(aliases);
             map.put(key, result);
         }
         return map;

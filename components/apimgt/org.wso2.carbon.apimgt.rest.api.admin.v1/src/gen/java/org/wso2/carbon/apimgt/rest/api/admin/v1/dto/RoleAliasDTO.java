@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -16,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class RoleAliasDTO   {
   
     private String role = null;
-    private Object aliases = null;
+    private List<String> aliases = new ArrayList<>();
 
   /**
    * The original role
@@ -39,18 +41,18 @@ public class RoleAliasDTO   {
   /**
    * The role mapping for role alias
    **/
-  public RoleAliasDTO aliases(Object aliases) {
+  public RoleAliasDTO aliases(List<String> aliases) {
     this.aliases = aliases;
     return this;
   }
 
   
-  @ApiModelProperty(example = "", value = "The role mapping for role alias")
+  @ApiModelProperty(example = "[\"Subscriber\",\"Internal/subscriber\"]", value = "The role mapping for role alias")
   @JsonProperty("aliases")
-  public Object getAliases() {
+  public List<String> getAliases() {
     return aliases;
   }
-  public void setAliases(Object aliases) {
+  public void setAliases(List<String> aliases) {
     this.aliases = aliases;
   }
 

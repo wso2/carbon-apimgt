@@ -237,7 +237,7 @@ function ListLabels() {
             name: 'applicationTier',
             label: intl.formatMessage({
                 id: 'Workflow.ApplicationCreation.table.header.ApplicationTier',
-                defaultMessage: 'Throtting Policy',
+                defaultMessage: 'Throttling Policy',
             }),
             options: {
                 sort: false,

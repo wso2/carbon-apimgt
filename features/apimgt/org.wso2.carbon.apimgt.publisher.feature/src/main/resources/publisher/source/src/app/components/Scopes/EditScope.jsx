@@ -413,7 +413,7 @@ class EditScope extends React.Component {
                                         ) : (
                                             <FormattedMessage
                                                 id='Scopes.EditScope.short.description.display.name'
-                                                defaultMessage='Enter Scope Display Name ( Ex: creator )'
+                                                defaultMessage='Enter Scope Display Name ( E.g.,: creator )'
                                             />
                                         )}
                                         InputLabelProps={{
