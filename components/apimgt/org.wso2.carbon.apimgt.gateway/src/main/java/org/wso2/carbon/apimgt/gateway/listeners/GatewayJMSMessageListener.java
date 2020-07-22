@@ -60,7 +60,7 @@ public class GatewayJMSMessageListener implements MessageListener {
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
     GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
-    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
 
     public void onMessage(Message message) {
 
@@ -114,40 +114,34 @@ public class GatewayJMSMessageListener implements MessageListener {
         if ((APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType))
                 && gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-            DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded),
-                    DeployAPIInGatewayEvent.class);
+            DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);
             gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             if (!gatewayEvent.getGatewayLabels().isEmpty()) {
                 String gatewayLabel = gatewayEvent.getGatewayLabels().iterator().next();
-                try {
-                    if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-                        inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
-                        if (debugEnabled) {
-                            log.debug(gatewayEvent.getEventId() + " processed and deployed in gateway");
-                        }
-                    } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-                        inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
-                    }
-                } catch ( ArtifactSynchronizerException e) {
-                    log.error("Error in deploy/undeploy artifacts");
                 Runnable task = null;
                 if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
                     task = new Runnable() {
-                        @Override
-                        public void run() {
-                            inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
+
+                        @Override public void run() {
+                            try {
+                                inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                            } catch (ArtifactSynchronizerException e) {
+                                log.error("Error in deploying artifacts");
+                            }
                         }
                     };
                 } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
                     task = new Runnable() {
-                        @Override
-                        public void run() {
-                            inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
+
+                        @Override public void run() {
+                            try {
+                                inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                            } catch (ArtifactSynchronizerException e) {
+                                log.error("Error in undeploying artifacts");
+                            }
                         }
                     };
                 }
-
-            }
                 scheduler.schedule(task, 1, TimeUnit.MILLISECONDS);
             }
         }
