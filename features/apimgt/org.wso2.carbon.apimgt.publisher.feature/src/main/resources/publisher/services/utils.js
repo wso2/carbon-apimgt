@@ -19,6 +19,7 @@
  */
 var app = require('/site/public/conf/settings.js').AppConfig.app;
 var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+include("/services/constants.jag");
 
 /**
  * Get the loopback (localhost) origin (scheme + hostname + port), This origin is used for making
@@ -38,3 +39,65 @@ function getIDPOrigin() {
 function getIDPCheckSessionEndpoint() {
     return utils.getExternalIDPCheckSessionEndpoint();
 }
+
+var getTenantBasePublisherContext = function() {
+    var tenantDomain = getTenantDomain();
+    var tenantContext = utils.getTenantBasedPublisherContext(tenantDomain);
+    if (tenantContext != null && tenantContext != " ") {
+        return tenantContext
+    } else {
+        return app.context;
+    }
+};
+
+var getTenantBasedLoginCallBack = function() {
+    var tenantDomain = getTenantDomain();
+    var publisherDomainMapping = utils.getTenantBasedPublisherDomainMapping(tenantDomain);
+    if (publisherDomainMapping != null) {
+        if (publisherDomainMapping.get('login') != null) {
+            return publisherDomainMapping.get('login');
+        }
+        return "https://"+publisherDomainMapping.get('customUrl') + LOGIN_CALLBACK_URL_SUFFIX;
+    }else{
+        return null;
+    }
+};
+
+var getTenantBasedLogoutCallBack = function() {
+    var tenantDomain = getTenantDomain();
+    var publisherDomainMapping = utils.getTenantBasedPublisherDomainMapping(tenantDomain);
+    if (publisherDomainMapping != null) {
+        if (publisherDomainMapping.get('logout') != null) {
+            return publisherDomainMapping.get('logout');
+        }
+        return "https://" + publisherDomainMapping.get('customUrl') + LOGOUT_CALLBACK_URL_SUFFIX;
+    } else {
+        return null;
+    }
+};
+
+var isPerTenantServiceProviderEnabled = function() {
+    var tenantDomain = getTenantDomain();
+    var perTenantServiceProviderEnabled = utils.isPerTenantServiceProviderEnabled(tenantDomain);
+    return perTenantServiceProviderEnabled;
+};
+
+var getTenantDomain = function() {
+    var tenantDomain = request.getParameter("tenant");
+    if (tenantDomain == null) {
+        tenantDomain = request.getHeader("X-WSO2-Tenant");
+        if (tenantDomain == null) {
+            tenantDomain = "carbon.super";
+        }
+    }
+    return tenantDomain;
+};
+
+var getServiceProviderTenantDomain = function() {
+    var tenantDomain = getTenantDomain();
+    if (isPerTenantServiceProviderEnabled()) {
+        return tenantDomain;
+    } else {
+        return "carbon.super";
+    }
+};

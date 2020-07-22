@@ -6701,7 +6701,7 @@ public final class APIUtil {
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
-            resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace("<tenant-id>", tenantDomain);
+            resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
             if (registry.resourceExists(resourcePath)) {
                 Resource resource = registry.get(resourcePath);
                 String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
@@ -10654,7 +10654,7 @@ public final class APIUtil {
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
-            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace("<tenant-id>", tenantDomain);
+            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
             if (registry.resourceExists(resourcePath)) {
                 Resource resource = registry.get(resourcePath);
                 String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
@@ -10687,7 +10687,7 @@ public final class APIUtil {
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
-            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace("<tenant-id>", tenantDomain);
+            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
             if (registry.resourceExists(resourcePath)) {
                 Resource resource = registry.get(resourcePath);
                 String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
@@ -10708,6 +10708,65 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return null;
+    }
+
+    public static Map getTenantBasedPublisherDomainMapping(String tenantDomain) throws APIManagementException {
+
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry();
+            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
+            if (registry.resourceExists(resourcePath)) {
+                Resource resource = registry.get(resourcePath);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                JSONParser parser = new JSONParser();
+                JSONObject mappings = (JSONObject) parser.parse(content);
+                if (mappings.containsKey(APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER)) {
+                    return (Map) mappings.get(APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER);
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving publisher domain mappings from registry";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Malformed JSON found in the publisher tenant domain mappings";
+            throw new APIManagementException(msg, e);
+        }
+        return null;
+    }
+
+    public static String getTenantBasedPublisherContext(String tenantDomain) throws APIManagementException {
+
+        String context = null;
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry();
+            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
+            if (registry.resourceExists(resourcePath)) {
+                Resource resource = registry.get(resourcePath);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                JSONParser parser = new JSONParser();
+                JSONObject mappings = (JSONObject) parser.parse(content);
+                if (mappings.containsKey(APIConstants.API_PUBLISHER)) {
+                    JSONObject publisherMapping = (JSONObject) mappings.get(APIConstants.API_PUBLISHER);
+                    if (publisherMapping.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT)) {
+                        context = (String) publisherMapping.get(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT);
+                    } else {
+                        context = "";
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving publisher domain mappings from registry";
+            throw new APIManagementException(msg, e);
+        } catch (ClassCastException e) {
+            String msg = "Invalid JSON found in the publisher tenant domain mappings";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Malformed JSON found in the publisher tenant domain mappings";
+            throw new APIManagementException(msg, e);
+        }
+        return context;
     }
 
     public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException,
@@ -11493,7 +11552,7 @@ public final class APIUtil {
         }
         return "";
     }
-    
+
     /**
      * Copy of the getAPI(GovernanceArtifact artifact, Registry registry) method with reduced DB calls for api
      * publisher list view listing.
@@ -11589,7 +11648,7 @@ public final class APIUtil {
         } catch (RegistryException e) {
             String msg = "Failed to get LastAccess time or Rating";
             throw new APIManagementException(msg, e);
-        } 
+        }
         return api;
     }
 }
