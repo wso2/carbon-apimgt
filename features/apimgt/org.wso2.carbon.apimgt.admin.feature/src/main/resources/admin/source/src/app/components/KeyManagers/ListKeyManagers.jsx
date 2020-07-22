@@ -125,8 +125,8 @@ export default function ListKeyManagers() {
         content: (
             <Typography variant='body2' color='textSecondary' component='p'>
                 <FormattedMessage
-                    id='KeyManagers.ListKeyManagers.empty.content.keymanagers'
-                    defaultMessage='It is possible to register an Oauth Provider.'
+                    id='AdminPages.KeyManagers.List.empty.content.keymanagers'
+                    defaultMessage='It is possible to register an OAuth Provider.'
                 />
             </Typography>
         ),

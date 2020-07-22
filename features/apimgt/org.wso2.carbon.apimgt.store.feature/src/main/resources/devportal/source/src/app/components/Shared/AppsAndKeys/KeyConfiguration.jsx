@@ -140,12 +140,12 @@ const KeyConfiguration = (props) => {
         }
         if (callbackUrl === '' && validating) {
             return intl.formatMessage({
-                defaultMessage: 'Call back url can not be empty when Implicit or Authorization Code grants are selected.',
+                defaultMessage: 'Call back URL can not be empty when Implicit or Authorization Code grants are selected.',
                 id: 'Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.empty.error.text'
             });
         } else if (Validation.url.validate(callbackUrl).error && validating) {
             return intl.formatMessage({
-                defaultMessage: 'Invalid url. Please enter a valid url.',
+                defaultMessage: 'Invalid URL. Please enter a valid URL.',
                 id: 'Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.url.error.text'
             });
         } else {

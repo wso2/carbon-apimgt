@@ -61,7 +61,7 @@ const SelectAppPanel = (props) => {
                     select
                     label={(
                         <FormattedMessage
-                            defaultMessage='Appplications'
+                            defaultMessage='Applications'
                             id='Apis.Details.ApiConsole.SelectAppPanel.applications'
                         />
                     )}

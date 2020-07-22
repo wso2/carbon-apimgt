@@ -100,7 +100,7 @@ function DeleteMultiple(props) {
                         id='Apis.Details.Documents.Delete.document.listing.delete.confirm.body'
                         defaultMessage={
                             'Selected documents will be deleted from the API.' +
-                            'You will not be able to undo this action.'
+                            ' You will not be able to undo this action.'
                         }
                     />
                 </DialogContentText>

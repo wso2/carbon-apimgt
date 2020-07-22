@@ -448,7 +448,7 @@ class TestConsole extends React.Component {
                         <Typography variant='caption' component='div' className={classes.helpText}>
                             <FormattedMessage
                                 id='APis.Details.tryout.help.main'
-                                defaultMessage='Test the APIs while in Development stage.'
+                                defaultMessage='Test APIs while in the Development stage.'
                             />
                         </Typography>
                         <div className={classes.messageBox}>

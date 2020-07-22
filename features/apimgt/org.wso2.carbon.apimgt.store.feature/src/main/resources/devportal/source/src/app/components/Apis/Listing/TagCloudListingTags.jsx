@@ -111,7 +111,7 @@ function TagCloudListingTags(props) {
     return apisTagCloudGroup && apisTagCloudGroup.length > 0 ? (
         <>
             {!mainPage && (<Typography variant='h6' gutterBottom className={classes.filterTitle}>
-                <FormattedMessage defaultMessage='Api Groups' id='Apis.Listing.TagCloudListingTags.title' />
+                <FormattedMessage defaultMessage='API Groups' id='Apis.Listing.TagCloudListingTags.title' />
             </Typography>)}
             <List component='nav' aria-label='main mailbox folders' className={classNames({ [classes.mainPageList]: mainPage })}>
                 {Object.keys(apisTagCloudGroup).map((key) => {
@@ -144,7 +144,7 @@ function TagCloudListingTags(props) {
     ) : (
             <>
                 {!mainPage && (<Typography variant='h6' gutterBottom className={classes.filterTitle}>
-                    <FormattedMessage defaultMessage='Api Groups' id='Apis.Listing.TagCloudListingTags.title' />
+                    <FormattedMessage defaultMessage='API Groups' id='Apis.Listing.TagCloudListingTags.title' />
                 </Typography>)}
                 <div className={classes.mainTitle}>
                     <Typography variant='subtitle1' gutterBottom align='center'>
