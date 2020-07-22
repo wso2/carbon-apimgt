@@ -97,6 +97,10 @@ function Edit(props) {
                         valid.invalid = true;
                     }
                     resolve(valid);
+                }).catch(() => {
+                    valid.error = `${owner} is not a valid Subscriber`;
+                    valid.invalid = true;
+                    resolve(valid);
                 });
         });
 
@@ -106,8 +110,7 @@ function Edit(props) {
     const formSaveCallback = () => {
         return validateOwner().then((valid) => {
             if (valid.invalid) {
-                Alert.error(valid.error);
-                return false;
+                throw valid.error;
             } else {
                 return restApi.updateApplicationOwner(id, owner)
                     .then(() => {
