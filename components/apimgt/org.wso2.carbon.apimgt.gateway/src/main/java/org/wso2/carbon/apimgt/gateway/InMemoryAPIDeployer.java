@@ -83,7 +83,7 @@ public class InMemoryAPIDeployer {
                         throw new ArtifactSynchronizerException(msg);
                     }
                 } catch (IOException | ArtifactSynchronizerException e) {
-                    String msg = "\"Error deploying \" + apiId + \" in Gateway\"";
+                    String msg = "Error deploying"  + apiId +  "in Gateway";
                     log.error(msg, e);
                     throw new ArtifactSynchronizerException(msg, e);
                 }
