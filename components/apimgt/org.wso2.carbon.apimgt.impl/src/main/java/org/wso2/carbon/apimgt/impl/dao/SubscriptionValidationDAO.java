@@ -675,14 +675,22 @@ public class SubscriptionValidationDAO {
      * @param subscriptionId : unique identifier of a subscription
      * @return {@link Subscription}
      * */
-    public Subscription getSubscription(int apiId, int appId) {
+    public Subscription getSubscription(int apiId, int appId, String tenantDomain) {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_SUBSCRIPTION_SQL);
         ) {
+            int tenantId = 0;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                log.error("Error in loading ApplicationPolicies for tenantDomain : " + tenantDomain, e);
+            }
             ps.setInt(1, apiId);
             ps.setInt(2, appId);
+            ps.setInt(3, tenantId);
 
             try (ResultSet resultSet = ps.executeQuery();) {
 
@@ -708,14 +716,22 @@ public class SubscriptionValidationDAO {
      * @param applicationId : unique identifier of an application
      * @return {@link List<Application>} a list with one element
      * */
-    public List<Application> getApplicationById(int applicationId) {
+    public List<Application> getApplicationById(int applicationId, String tenantDomain) {
 
         List<Application> applicationList = new ArrayList<>();
-
+        int tenantId = 0;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            log.error("Error in loading Application for tenantDomain : " + tenantDomain +
+                    " appId : " + applicationId, e);
+        }
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_BY_ID_SQL);
         ) {
             ps.setInt(1, applicationId);
+            ps.setInt(2, tenantId);
             ResultSet resultSet = ps.executeQuery();
             addToApplicationList(applicationList, resultSet);
 

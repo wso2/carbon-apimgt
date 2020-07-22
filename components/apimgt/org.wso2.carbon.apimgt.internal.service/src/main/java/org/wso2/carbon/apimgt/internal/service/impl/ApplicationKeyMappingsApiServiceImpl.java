@@ -23,7 +23,9 @@ import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.ApplicationKeyMappingsApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.internal.service.utils.InternalServiceDataUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,25 +37,38 @@ public class ApplicationKeyMappingsApiServiceImpl implements ApplicationKeyMappi
     public Response applicationKeyMappingsGet(String xWSO2Tenant, String consumerKey, MessageContext messageContext) {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        String validatedTenantDomain = InternalServiceDataUtil.validateTenantDomain(xWSO2Tenant);
 
         if (StringUtils.isNotEmpty(consumerKey)) {
-            ApplicationKeyMapping keyMapping = subscriptionValidationDAO.getApplicationKeyMapping(consumerKey);
-            List<ApplicationKeyMapping> applicationKeyMappings = new ArrayList<>();
-            if (keyMapping != null) {
-                applicationKeyMappings.add(keyMapping);
+            if (InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                ApplicationKeyMapping keyMapping = subscriptionValidationDAO.getApplicationKeyMapping(consumerKey);
+                List<ApplicationKeyMapping> applicationKeyMappings = new ArrayList<>();
+                if (keyMapping != null) {
+                    applicationKeyMappings.add(keyMapping);
+                }
+                return Response.ok().entity(InternalServiceDataUtil.
+                        fromApplicationKeyMappingToApplicationKeyMappingListDTO(applicationKeyMappings)).build();
             }
-            return Response.ok().entity(SubscriptionValidationDataUtil.
-                    fromApplicationKeyMappingToApplicationKeyMappingListDTO(applicationKeyMappings)).build();
         }
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
-            return Response.ok().entity(SubscriptionValidationDataUtil.
-                    fromApplicationKeyMappingToApplicationKeyMappingListDTO(subscriptionValidationDAO.
-                            getAllApplicationKeyMappings(xWSO2Tenant))).build();
+            if (InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
 
+                return Response.ok().entity(InternalServiceDataUtil.
+                        fromApplicationKeyMappingToApplicationKeyMappingListDTO(subscriptionValidationDAO.
+                                getAllApplicationKeyMappings(xWSO2Tenant))).build();
+            }
+
+        } else {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(validatedTenantDomain) &&
+                    InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                return Response.ok().entity(InternalServiceDataUtil.
+                        fromApplicationKeyMappingToApplicationKeyMappingListDTO(
+                                subscriptionValidationDAO.getAllApplicationKeyMappings())).build();
+            } else {
+                InternalServiceDataUtil.handleUnauthorizedError();
+
+            }
         }
-        return Response.ok().entity(SubscriptionValidationDataUtil.
-                fromApplicationKeyMappingToApplicationKeyMappingListDTO(
-                        subscriptionValidationDAO.getAllApplicationKeyMappings())).build();
+        return null;
     }
 }

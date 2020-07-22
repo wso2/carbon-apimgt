@@ -19,12 +19,12 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.derby.iapi.util.StringUtil;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.ApplicationPoliciesApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.internal.service.utils.InternalServiceDataUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,32 +36,43 @@ public class ApplicationPoliciesApiServiceImpl implements ApplicationPoliciesApi
     public Response applicationPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        String validatedTenantDomain = InternalServiceDataUtil.validateTenantDomain(xWSO2Tenant);
 
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             if (StringUtils.isNotEmpty(policyName)) {
-                List<ApplicationPolicy> model = new ArrayList<>();
-                ApplicationPolicy applicationPolicy = subscriptionValidationDAO.
-                        getApplicationPolicyByNameForTenant(policyName, xWSO2Tenant);
-                if (applicationPolicy != null) {
-                    model.add(applicationPolicy);
+                if (InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                    List<ApplicationPolicy> model = new ArrayList<>();
+                    ApplicationPolicy applicationPolicy = subscriptionValidationDAO.
+                            getApplicationPolicyByNameForTenant(policyName, validatedTenantDomain);
+                    if (applicationPolicy != null) {
+                        model.add(applicationPolicy);
+                    }
+                    return Response.ok().entity(InternalServiceDataUtil.
+                            fromApplicationPolicyToApplicationPolicyListDTO(model)).build();
                 }
-                return Response.ok().entity(SubscriptionValidationDataUtil.
-                        fromApplicationPolicyToApplicationPolicyListDTO(model)).build();
 
             } else {
-                return Response.ok().entity(SubscriptionValidationDataUtil.
-                        fromApplicationPolicyToApplicationPolicyListDTO(subscriptionValidationDAO.
-                                getAllApplicationPolicies(xWSO2Tenant))).build();
+                if (InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                    return Response.ok().entity(InternalServiceDataUtil.
+                            fromApplicationPolicyToApplicationPolicyListDTO(subscriptionValidationDAO.
+                                    getAllApplicationPolicies(validatedTenantDomain))).build();
+                }
             }
         } else {
             if (StringUtils.isNotEmpty(policyName)) {
                 return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
                         "X-WSo2-Tenant header is missing.").build();
+            } else {
+                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(validatedTenantDomain) &&
+                        InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                    return Response.ok().entity(InternalServiceDataUtil.
+                            fromApplicationPolicyToApplicationPolicyListDTO(subscriptionValidationDAO.
+                                    getAllApplicationPolicies())).build();
+                } else {
+                    InternalServiceDataUtil.handleUnauthorizedError();
+                }
             }
         }
-        return Response.ok().entity(SubscriptionValidationDataUtil.
-                fromApplicationPolicyToApplicationPolicyListDTO(subscriptionValidationDAO.
-                        getAllApplicationPolicies())).build();
+        return null;
     }
 }

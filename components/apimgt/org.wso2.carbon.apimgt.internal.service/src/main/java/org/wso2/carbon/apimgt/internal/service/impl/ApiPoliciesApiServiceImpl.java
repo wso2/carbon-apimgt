@@ -20,58 +20,53 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.*;
-import org.wso2.carbon.apimgt.internal.service.dto.*;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.internal.service.utils.InternalServiceDataUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 
 public class ApiPoliciesApiServiceImpl implements ApiPoliciesApiService {
 
-    public Response apiPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) {
+        public Response apiPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) {
+
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
 
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
-        if (StringUtils.isNotEmpty(xWSO2Tenant)) {
-            if (StringUtils.isNotEmpty(policyName)) {
-                List<APIPolicy> model = new ArrayList<>();
-                APIPolicy apiPolicy = subscriptionValidationDAO.
-                        getApiPolicyByNameForTenant(policyName, xWSO2Tenant);
-                if (apiPolicy != null) {
-                    model.add(apiPolicy);
+        xWSO2Tenant = InternalServiceDataUtil.validateTenantDomain(xWSO2Tenant);
+        if (InternalServiceDataUtil.isUserAuthorizedToTenant(xWSO2Tenant)) {
+            if (StringUtils.isNotEmpty(xWSO2Tenant)) {
+                if (StringUtils.isNotEmpty(policyName)) {
+                    List<APIPolicy> model = new ArrayList<>();
+                    APIPolicy apiPolicy = subscriptionValidationDAO.
+                            getApiPolicyByNameForTenant(policyName, xWSO2Tenant);
+                    if (apiPolicy != null) {
+                        model.add(apiPolicy);
+                    }
+                    return Response.ok().entity(InternalServiceDataUtil.
+                            fromApiPolicyToApiPolicyListDTO(model)).build();
+
+                } else {
+                    return Response.ok().entity(InternalServiceDataUtil.
+                            fromApiPolicyToApiPolicyListDTO(subscriptionValidationDAO.
+                                    getAllApiPolicies(xWSO2Tenant))).build();
                 }
-                return Response.ok().entity(SubscriptionValidationDataUtil.
-                        fromApiPolicyToApiPolicyListDTO(model)).build();
-
             } else {
-                return Response.ok().entity(SubscriptionValidationDataUtil.
-                        fromApiPolicyToApiPolicyListDTO(subscriptionValidationDAO.
-                                getAllApiPolicies(xWSO2Tenant))).build();
+                if (StringUtils.isNotEmpty(policyName)) {
+                    return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
+                            "X-WSo2-Tenant header is missing.").build();
+                }
             }
-        } else {
-            if (StringUtils.isNotEmpty(policyName)) {
-                return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                        "X-WSo2-Tenant header is missing.").build();
-            }
+            return Response.ok().entity(InternalServiceDataUtil.
+                    fromApiPolicyToApiPolicyListDTO(subscriptionValidationDAO.
+                            getAllApiPolicies())).build();
         }
-        return Response.ok().entity(SubscriptionValidationDataUtil.
-                fromApiPolicyToApiPolicyListDTO(subscriptionValidationDAO.
-                        getAllApiPolicies())).build();
+        return null;
     }
-
 }

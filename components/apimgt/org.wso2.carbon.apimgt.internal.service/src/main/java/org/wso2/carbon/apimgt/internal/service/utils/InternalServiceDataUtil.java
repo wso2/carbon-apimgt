@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.internal.service.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
@@ -28,6 +32,8 @@ import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
@@ -46,17 +52,21 @@ import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
-import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class SubscriptionValidationDataUtil {
+public class InternalServiceDataUtil {
+    private static final Log log = LogFactory.getLog(InternalServiceDataUtil.class);
 
     private static APIDTO fromAPItoDTO(API model) {
 
@@ -312,7 +322,7 @@ public class SubscriptionValidationDataUtil {
         return applicationKeyMappingListDTO;
     }
 
-    public static String validateTenantDomain(String xWSO2Tenant, MessageContext messageContext) {
+    public static String validateTenantDomain(String xWSO2Tenant) {
 
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         if (xWSO2Tenant == null) {
@@ -325,6 +335,96 @@ public class SubscriptionValidationDataUtil {
             }
         }
 
+    }
+
+    /*
+     * Check whether the user is allowed to access the resources by validating logged in user tenant domain and
+     * the role against super tenant
+     *
+     * @param targetTenantDomain Tenant domain of which resources are requested
+     * @return isAuthorized
+     *
+     * */
+    public static boolean isUserAuthorizedToTenant(String targetTenantDomain) {
+
+        if (StringUtils.isEmpty(targetTenantDomain)) {
+            handleUnauthorizedError();
+        }
+        String username = RestApiUtil.getLoggedInUsername();
+        boolean isCrossTenantAccess = !targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username));
+        if (isCrossTenantAccess || MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(targetTenantDomain)) {
+            String superAdminRole = null;
+            try {
+                superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
+                        getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
+            } catch (UserStoreException e) {
+                RestApiUtil.handleInternalServerError("Error in getting super admin role name", e, log);
+            }
+
+            //check whether logged in user is a super tenant user
+            String superTenantDomain = null;
+            try {
+                superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                        getSuperTenantDomain();
+            } catch (UserStoreException e) {
+                RestApiUtil.handleInternalServerError("Error in getting the super tenant domain", e, log);
+            }
+            boolean isSuperTenantUser = RestApiUtil.getLoggedInUserTenantDomain().equals(superTenantDomain);
+            if (!isSuperTenantUser) {
+                String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
+                        " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a super " +
+                        "tenant user";
+                log.error(errorMsg);
+                handleUnauthorizedError();
+            }
+
+            //check whether the user has super tenant admin role
+            boolean isSuperAdminRoleNameExist = false;
+            try {
+                isSuperAdminRoleNameExist = APIUtil.isUserInRole(username, superAdminRole);
+            } catch (UserStoreException | APIManagementException e) {
+                RestApiUtil.handleInternalServerError("Error in checking whether the user has admin role", e, log);
+            }
+
+            if (!isSuperAdminRoleNameExist) {
+                String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
+                        " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a " +
+                        "super tenant admin";
+                log.error(errorMsg);
+                handleUnauthorizedError();
+            }
+        } else {
+            String tenantAdminRole = null;
+            try {
+                tenantAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
+                        getTenantUserRealm(APIUtil.getTenantIdFromTenantDomain(targetTenantDomain)).
+                        getRealmConfiguration().getAdminRoleName();
+            } catch (UserStoreException e) {
+                RestApiUtil.handleInternalServerError("Error in getting super admin role name", e, log);
+            }
+            //check for existent of tenant admin role
+            boolean isTenantAdminRoleNameExist = false;
+            try {
+                isTenantAdminRoleNameExist = APIUtil.isUserInRole(username, tenantAdminRole);
+            } catch (UserStoreException | APIManagementException e) {
+                RestApiUtil.handleInternalServerError("Error in checking whether the user has admin role", e, log);
+            }
+            if (!isTenantAdminRoleNameExist ){
+                String errorMsg = "Tenant resource access is not allowed for this request. User " + username +
+                        " is not allowed to access resources in " + targetTenantDomain + " as the requester is not an " +
+                        "admin";
+                log.error(errorMsg);
+                handleUnauthorizedError();
+            }
+        }
+        return true;
+    }
+
+    public static void handleUnauthorizedError() {
+
+        ErrorDTO errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l,
+                "User is not allowed to access the requested resource");
+        throw new ForbiddenException(errorDTO);
     }
 
 }

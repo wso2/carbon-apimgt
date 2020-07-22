@@ -26,11 +26,13 @@ import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.internal.service.ApisApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
-import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.internal.service.utils.InternalServiceDataUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import javax.ws.rs.core.Response;
@@ -46,21 +48,31 @@ public class ApisApiServiceImpl implements ApisApiService {
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
 
         if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
-            API api = subscriptionValidationDAO.getApi(version, context);
-            return Response.ok().entity(SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api)).build();
+            String tenantDomain = APIUtil.getTenantDomainFromContext(context);
+            if (InternalServiceDataUtil.isUserAuthorizedToTenant(tenantDomain)) {
+                API api = subscriptionValidationDAO.getApi(version, context);
+                return Response.ok().entity(InternalServiceDataUtil.fromAPIToAPIListDTO(api)).build();
+            }
         }
 
-        APIListDTO apiListDTO;
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        APIListDTO apiListDTO = null;
+        String validatedTenantDomain = InternalServiceDataUtil.validateTenantDomain(xWSO2Tenant);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
-            apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                    subscriptionValidationDAO.getAllApis(xWSO2Tenant));
+            if (InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                apiListDTO = InternalServiceDataUtil.fromAPIListToAPIListDTO(
+                        subscriptionValidationDAO.getAllApis(validatedTenantDomain));
+            }
         } else {
-            apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
-                    subscriptionValidationDAO.getAllApis());
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(validatedTenantDomain) &&
+                    InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                apiListDTO = InternalServiceDataUtil.fromAPIListToAPIListDTO(
+                        subscriptionValidationDAO.getAllApis());
+            } else {
+                InternalServiceDataUtil.handleUnauthorizedError();
+            }
         }
 
-        if (APIConstants.APPLICATION_GZIP.equals(accept)) {
+        if (apiListDTO != null && APIConstants.APPLICATION_GZIP.equals(accept)) {
             try {
                 File zippedResponse = GZIPUtils.constructZippedResponse(apiListDTO);
                 return Response.ok().entity(zippedResponse)

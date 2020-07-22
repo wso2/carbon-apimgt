@@ -23,7 +23,8 @@ import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.SubscriptionPoliciesApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.internal.service.utils.InternalServiceDataUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,32 +36,45 @@ public class SubscriptionPoliciesApiServiceImpl implements SubscriptionPoliciesA
     public Response subscriptionPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        String validatedTenantDomain = InternalServiceDataUtil.validateTenantDomain(xWSO2Tenant);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             if (StringUtils.isNotEmpty(policyName)) {
-                List<SubscriptionPolicy> model = new ArrayList<>();
-                SubscriptionPolicy subscriptionPolicy = subscriptionValidationDAO.getSubscriptionPolicyByNameForTenant(
-                        policyName, xWSO2Tenant);
-                if (subscriptionPolicy != null) {
-                    model.add(subscriptionPolicy);
+                if (InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                    List<SubscriptionPolicy> model = new ArrayList<>();
+                    SubscriptionPolicy subscriptionPolicy = subscriptionValidationDAO.getSubscriptionPolicyByNameForTenant(
+                            policyName, xWSO2Tenant);
+                    if (subscriptionPolicy != null) {
+                        model.add(subscriptionPolicy);
+                    }
+                    return Response.ok().entity(InternalServiceDataUtil.
+                            fromSubscriptionPolicyToSubscriptionPolicyListDTO(model)).build();
                 }
-                return Response.ok().entity(SubscriptionValidationDataUtil.
-                        fromSubscriptionPolicyToSubscriptionPolicyListDTO(model)).build();
 
             } else {
-                return Response.ok().entity(SubscriptionValidationDataUtil.
-                        fromSubscriptionPolicyToSubscriptionPolicyListDTO(subscriptionValidationDAO.
-                                getAllSubscriptionPolicies(xWSO2Tenant))).build();
+
+                if (InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                    return Response.ok().entity(InternalServiceDataUtil.
+                            fromSubscriptionPolicyToSubscriptionPolicyListDTO(subscriptionValidationDAO.
+                                    getAllSubscriptionPolicies(validatedTenantDomain))).build();
+                }
             }
         } else {
             if (StringUtils.isNotEmpty(policyName)) {
                 return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
                         "X-WSo2-Tenant header is missing.").build();
+            } else {
+                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(validatedTenantDomain) &&
+                        InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                    return Response.ok().entity(InternalServiceDataUtil.
+                            fromSubscriptionPolicyToSubscriptionPolicyListDTO(subscriptionValidationDAO.
+                                    getAllSubscriptionPolicies())).build();
+                } else {
+                    InternalServiceDataUtil.handleUnauthorizedError();
+                }
+
             }
         }
-        return Response.ok().entity(SubscriptionValidationDataUtil.
-                fromSubscriptionPolicyToSubscriptionPolicyListDTO(subscriptionValidationDAO.
-                        getAllSubscriptionPolicies())).build();
+        return null;
 
     }
 }

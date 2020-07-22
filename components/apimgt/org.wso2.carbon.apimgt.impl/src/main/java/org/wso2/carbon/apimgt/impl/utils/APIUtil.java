@@ -7847,6 +7847,19 @@ public final class APIUtil {
         return ApiMgtDAO.getInstance().getAPIProviderByNameAndVersion(apiName, apiVersion, tenant);
     }
 
+    public static String getTenantDomainFromContext(String context) {
+
+        String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+
+        if (StringUtils.isNotEmpty(context)) {
+            int tenantDomainIndex = context.indexOf("/t/");
+            if (tenantDomainIndex != -1) {
+                String temp = context.substring(tenantDomainIndex + 3, context.length());
+                tenantDomain = temp.substring(0, temp.indexOf('/'));
+            }
+        }
+        return tenantDomain;
+    }
     /**
      * Used to generate CORS Configuration object from CORS Configuration Json
      *

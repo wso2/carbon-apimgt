@@ -23,7 +23,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.ApplicationsApiService;
-import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
+import org.wso2.carbon.apimgt.internal.service.utils.InternalServiceDataUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.List;
 import javax.ws.rs.core.Response;
@@ -34,18 +35,29 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsGet(String xWSO2Tenant, Integer appId, MessageContext messageContext) {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
+        String validatedTenantDomain = InternalServiceDataUtil.validateTenantDomain(xWSO2Tenant);
         if (appId != null && appId > 0) {
-            List<Application> application = subscriptionValidationDAO.getApplicationById(appId);
-            return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(application)
-            ).build();
+            if (InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                List<Application> application = subscriptionValidationDAO.getApplicationById(appId, validatedTenantDomain);
+                return Response.ok().entity(InternalServiceDataUtil.fromApplicationToApplicationListDTO(application)
+                ).build();
+            }
         }
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
-            return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
-                    subscriptionValidationDAO.getAllApplications(xWSO2Tenant)))
-                    .build();
+            if (InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                return Response.ok().entity(InternalServiceDataUtil.fromApplicationToApplicationListDTO(
+                        subscriptionValidationDAO.getAllApplications(xWSO2Tenant)))
+                        .build();
+            }
+        } else {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(validatedTenantDomain) &&
+                    InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {
+                return Response.ok().entity(InternalServiceDataUtil.fromApplicationToApplicationListDTO(
+                        subscriptionValidationDAO.getAllApplications())).build();
+            } else {
+                InternalServiceDataUtil.handleUnauthorizedError();
+            }
         }
-        return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
-                subscriptionValidationDAO.getAllApplications())).build();
+        return null;
     }
 }

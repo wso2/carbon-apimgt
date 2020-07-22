@@ -74,7 +74,8 @@ public class SubscriptionValidationSQLConstants {
                     "ON APP.APPLICATION_ID = ATTRIBUTES.APPLICATION_ID" +
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
-                    "   APP.APPLICATION_ID = ? ";
+                    "   APP.APPLICATION_ID = ? AND" +
+                    "   SUB.TENANT_ID = ? ";
 
     public static final String GET_ALL_SUBSCRIPTIONS_SQL =
             "SELECT " +
@@ -94,10 +95,15 @@ public class SubscriptionValidationSQLConstants {
                     "   APPLICATION_ID AS APP_ID," +
                     "   SUB_STATUS AS STATUS" +
                     " FROM " +
-                    "   AM_SUBSCRIPTION" +
+                    "   AM_SUBSCRIPTION SUBS," +
+                    "   AM_APPLICATION APP," +
+                    "   AM_SUBSCRIBER SUB" +
                     " WHERE " +
+                    "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
                     "   API_ID = ? AND " +
-                    "   APPLICATION_ID = ? ";
+                    "   APPLICATION_ID = ? AND" +
+                    "   SUB.TENANT_ID = ? ";
 
     public static final String GET_ALL_SUBSCRIPTION_POLICIES_SQL =
             "SELECT " +
