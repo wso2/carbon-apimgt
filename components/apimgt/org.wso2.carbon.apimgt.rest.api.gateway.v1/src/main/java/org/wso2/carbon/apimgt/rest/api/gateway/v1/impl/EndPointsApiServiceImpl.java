@@ -39,6 +39,7 @@ import java.util.Map;
 public class EndPointsApiServiceImpl implements EndPointsApiService {
 
     private static final Log log = LogFactory.getLog(EndPointsApiServiceImpl.class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
     public Response endPointsGet(String apiName, String version , String tenantDomain, MessageContext messageContext) {
 
@@ -53,6 +54,9 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
             String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
             String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
             gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
+            if (debugEnabled) {
+                log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
+            }
         } catch (ArtifactSynchronizerException e) {
             String errorMessage = "Error in fetching artifacts from storage";
             log.error(errorMessage, e);

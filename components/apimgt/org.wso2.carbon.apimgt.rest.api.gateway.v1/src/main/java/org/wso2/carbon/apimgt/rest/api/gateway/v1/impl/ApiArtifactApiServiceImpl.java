@@ -45,6 +45,7 @@ import java.util.Map;
 public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
 
     private static final Log log = LogFactory.getLog(ApiArtifactApiServiceImpl.class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
     @Override
     public Response apiArtifactGet(String apiName, String version , String tenantDomain,
@@ -61,6 +62,9 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
              String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
              String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
              gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
+            if (debugEnabled) {
+                log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
+            }
         } catch (ArtifactSynchronizerException e) {
             String errorMessage = "Error in fetching artifacts from storage";
             log.error(errorMessage, e);

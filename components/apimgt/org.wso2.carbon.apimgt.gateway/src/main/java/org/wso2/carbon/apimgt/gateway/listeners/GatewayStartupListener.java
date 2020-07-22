@@ -36,6 +36,7 @@ import org.wso2.carbon.core.ServerStartupObserver;
 
 public class GatewayStartupListener implements ServerStartupObserver, Runnable, ServerShutdownHandler {
     private static final Log log = LogFactory.getLog(GatewayStartupListener.class);
+    private boolean debugEnabled = log.isDebugEnabled();
     private JMSTransportHandler jmsTransportHandlerForTrafficManager;
     private JMSTransportHandler jmsTransportHandlerForEventHub;
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
@@ -103,6 +104,9 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     }
 
     private void deployAPIsInSyncMode() throws ArtifactSynchronizerException {
+        if (debugEnabled) {
+            log.debug("Deploying Artifacts in synchronous mode");
+        }
         syncModeDeploymentCount ++;
         isAPIsDeployedInSyncMode = deployArtifactsAtStartup();
         if (!isAPIsDeployedInSyncMode) {
@@ -148,8 +152,11 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
 
     private void deployArtifactsInGateway() throws ArtifactSynchronizerException {
 
-        long retryDuration =
-                gatewayArtifactSynchronizerProperties.getRetryDuartion();
+        if (debugEnabled) {
+            log.debug("Deploying Artifacts in asynchronous mode");
+        }
+
+        long retryDuration = gatewayArtifactSynchronizerProperties.getRetryDuartion();
         double reconnectionProgressionFactor = 2.0;
         long maxReconnectDuration = 1000 * 60 * 60; // 1 hour
 

@@ -13,6 +13,7 @@ public class SynapseArtifactsApiServiceImpl implements SynapseArtifactsApiServic
 
     private GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
     private static final Log log = LogFactory.getLog(SynapseArtifactsApiServiceImpl.class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
     @Override
     public Response synapseArtifactsGet( String apiId, String gatewayLabel, String gatewayInstruction,
@@ -27,6 +28,9 @@ public class SynapseArtifactsApiServiceImpl implements SynapseArtifactsApiServic
             String responseStringObj = String.valueOf(responseObj);
             log.error("Error retrieving Artifact belongs to  " + apiId + " from DB", e);
             return Response.serverError().entity(responseStringObj).build();
+        }
+        if (debugEnabled) {
+            log.debug("Successfully retrieved artifacts for " + apiId + " from DB");
         }
         return Response.ok().entity(gatewayRuntimeArtifacts).build();
     }

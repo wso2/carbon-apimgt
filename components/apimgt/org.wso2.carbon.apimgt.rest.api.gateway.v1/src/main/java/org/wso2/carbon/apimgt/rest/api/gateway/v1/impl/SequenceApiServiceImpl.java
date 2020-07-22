@@ -39,6 +39,7 @@ import java.util.Map;
 public class SequenceApiServiceImpl implements SequenceApiService {
 
     private static final Log log = LogFactory.getLog(SequenceApiServiceImpl.class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
     public Response sequenceGet(String apiName, String version , String tenantDomain, MessageContext messageContext) {
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
@@ -52,6 +53,9 @@ public class SequenceApiServiceImpl implements SequenceApiService {
             String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
             String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
             gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
+            if (debugEnabled) {
+                log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
+            }
         } catch (ArtifactSynchronizerException e) {
             String errorMessage = "Error in fetching artifacts from storage";
             log.error(errorMessage, e);

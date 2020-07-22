@@ -28,6 +28,7 @@ import javax.ws.rs.core.SecurityContext;
 public class RedeployApiApiServiceImpl implements RedeployApiApiService {
 
     private static final Log log = LogFactory.getLog(RedeployApiApiServiceImpl .class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
     public Response redeployApiPost(String apiName, String version , String tenantDomain,
             MessageContext messageContext) {
@@ -42,7 +43,6 @@ public class RedeployApiApiServiceImpl implements RedeployApiApiService {
             String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
             String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
             status = inMemoryApiDeployer.deployAPI(apiId, label);
-
         } catch (ArtifactSynchronizerException e) {
             String errorMessage = "Error in fetching artifacts from storage";
             log.error(errorMessage, e);
@@ -51,6 +51,9 @@ public class RedeployApiApiServiceImpl implements RedeployApiApiService {
 
         JSONObject responseObj = new JSONObject();
         if (status) {
+            if (debugEnabled) {
+                log.debug("Successfully deployed " + apiName + " in gateway");
+            }
             responseObj.put("Message", "Success");
             String responseStringObj = String.valueOf(responseObj);
             return Response.ok().entity(responseStringObj).build();

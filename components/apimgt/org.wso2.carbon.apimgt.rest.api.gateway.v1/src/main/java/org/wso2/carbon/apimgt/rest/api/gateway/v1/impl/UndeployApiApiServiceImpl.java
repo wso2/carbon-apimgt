@@ -33,6 +33,7 @@ import java.util.Map;
 
 public class UndeployApiApiServiceImpl implements UndeployApiApiService {
     private static final Log log = LogFactory.getLog(UndeployApiApiServiceImpl .class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
     public Response undeployApiPost(String apiName, String version , String tenantDomain,
             MessageContext messageContext) {
@@ -54,6 +55,9 @@ public class UndeployApiApiServiceImpl implements UndeployApiApiService {
         }
         JSONObject responseObj = new JSONObject();
         if (status) {
+            if (debugEnabled) {
+                log.debug("Successfully undeployed " + apiName + " in gateway");
+            }
             responseObj.put("Message", "Success");
             String responseStringObj = String.valueOf(responseObj);
             return Response.ok().entity(responseStringObj).build();
