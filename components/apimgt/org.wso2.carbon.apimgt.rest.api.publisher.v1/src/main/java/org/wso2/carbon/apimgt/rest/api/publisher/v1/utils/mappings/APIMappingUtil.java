@@ -1428,8 +1428,9 @@ public class APIMappingUtil {
                     operation.setAuthType(uriTemplate.getAuthType());
                     operation.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getKey).collect(
                             Collectors.toList()));
-                } else {
-                    operation.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
+                }
+                if (operation.getThrottlingPolicy() == null) {
+                   operation.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
                 }
             }
         }
