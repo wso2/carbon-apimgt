@@ -105,9 +105,11 @@ public class SystemScopesMappingUtil {
             JSONObject scopeRoleJson = new JSONObject();
             String roles = scope.getRoles().toString().replaceAll("\\[", "").
                     replaceAll("\\]", "").replaceAll("\\s", "");
-            scopeRoleJson.put("Name", scope.getName());
-            scopeRoleJson.put("Roles", roles);
-            scopeJson.put(scopeRoleJson);
+            if ( !roles.isEmpty()) {
+                scopeRoleJson.put("Name", scope.getName());
+                scopeRoleJson.put("Roles", roles);
+                scopeJson.put(scopeRoleJson);
+            }
         }
         responseJson.put("Scope", scopeJson);
         return responseJson;
