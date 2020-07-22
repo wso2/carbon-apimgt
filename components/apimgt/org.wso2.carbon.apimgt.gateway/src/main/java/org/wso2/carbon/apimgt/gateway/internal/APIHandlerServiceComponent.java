@@ -106,7 +106,6 @@ public class APIHandlerServiceComponent {
                 // Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();
                 bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
-                if (apiManagerConfiguration.getThrottleProperties().isEnabled()) {
                     ServiceReferenceHolder.getInstance().setThrottleDataPublisher(new ThrottleDataPublisher());
                     ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
                     APIThrottleDataServiceImpl throttleDataServiceImpl =
@@ -131,7 +130,6 @@ public class APIHandlerServiceComponent {
                         RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
                         webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
                     }
-                }
 
                 // Set APIM Gateway JWT Generator
 

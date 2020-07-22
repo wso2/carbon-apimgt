@@ -621,7 +621,6 @@ public class APIUtilTierTest {
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(amConfigService);
         Mockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
         Mockito.when(amConfig.getThrottleProperties()).thenReturn(throttleProperties);
-        Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
         Mockito.when(throttleProperties.isEnableUnlimitedTier()).thenReturn(true);
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
         Mockito.when(registryService.getGovernanceSystemRegistry()).thenReturn(userRegistry);
@@ -634,19 +633,6 @@ public class APIUtilTierTest {
 
         //IsEnabled true scenario
         Assert.assertEquals(3, APIUtil.getAllTiers().size());
-
-        // IsEnabled false scenario
-        Mockito.when(throttleProperties.isEnabled()).thenReturn(false);
-        Assert.assertEquals(0, APIUtil.getAllTiers().size());
-
-        // Error path
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenThrow(RegistryException.class);
-        try {
-            APIUtil.getAllTiers();
-            fail("Registry exception is not thrown");
-        } catch (APIManagementException e) {
-            Assert.assertEquals(APIConstants.MSG_TIER_RET_ERROR, e.getMessage());
-        }
 
     }
 

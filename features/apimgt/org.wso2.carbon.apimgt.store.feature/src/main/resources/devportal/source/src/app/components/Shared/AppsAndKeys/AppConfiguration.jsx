@@ -78,11 +78,10 @@ const styles = theme => ({
 const AppConfiguration = (props) => {
 
     const {
-        classes, config, isUserOwner, defaultValue, handleChange,
+        classes, config, isUserOwner, previousValue, handleChange,
     } = props;
 
-    const [selectedValue, setSelectedValue] = useState(defaultValue);
-    const [multipleSelectedValue, setMultipleSelectedValue] = useState([]);
+    const [selectedValue, setSelectedValue] = useState(previousValue);
 
     /**
      * This method is used to handle the updating of key generation
@@ -92,12 +91,7 @@ const AppConfiguration = (props) => {
      */
     const handleAppRequestChange = (event) => {
         const { target: currentTarget } = event;
-        if (config.multiple) {
-            setMultipleSelectedValue(currentTarget.value);
-        } else {
-            setSelectedValue(currentTarget.value);
-        }
-
+        setSelectedValue(currentTarget.value);
         handleChange('additionalProperties', event);
     }
 
@@ -147,7 +141,7 @@ const AppConfiguration = (props) => {
                                     displayEmpty
                                     name={config.name}
                                     multiple
-                                    value={multipleSelectedValue}
+                                    value={selectedValue}
                                     onChange={e => handleAppRequestChange(e)}
                                     input={<Input id='multi-select-outlined' />}
                                     renderValue={selected => (
@@ -166,7 +160,7 @@ const AppConfiguration = (props) => {
                                 >
                                     {config.values.map(key => (
                                         <MenuItem key={key} value={key}>
-                                            <Checkbox checked={multipleSelectedValue.indexOf(key) > -1} />
+                                            <Checkbox checked={selectedValue.indexOf(key) > -1} />
                                             <ListItemText primary={key} />
                                         </MenuItem>
                                     ))}
@@ -232,7 +226,7 @@ AppConfiguration.defaultProps = {
 
 AppConfiguration.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
-    defaultValue: PropTypes.any.isRequired,
+    previousValue: PropTypes.any.isRequired,
     isUserOwner: PropTypes.bool.isRequired,
     handleChange: PropTypes.func.isRequired,
     config: PropTypes.any.isRequired,

@@ -2867,7 +2867,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             Map<String, String> properties = new HashMap<String, String>();
 
-            boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
             if (api.getProductionMaxTps() != null) {
                 properties.put("productionMaxCount", api.getProductionMaxTps());
             }
@@ -2876,18 +2875,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 properties.put("sandboxMaxCount", api.getSandboxMaxTps());
             }
 
-            if (isGlobalThrottlingEnabled) {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
-                        , properties);
-            } else {
-                properties.put("id", "A");
-                properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
-                properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
-                properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
+                    , properties);
 
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler"
-                        , properties);
-            }
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler"
                     , Collections.<String, String>emptyMap());
@@ -3028,7 +3018,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 authProperties);
         Map<String, String> properties = new HashMap<String, String>();
 
-        boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
         if (apiProduct.getProductionMaxTps() != null) {
             properties.put("productionMaxCount", apiProduct.getProductionMaxTps());
         }
@@ -3037,18 +3026,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             properties.put("sandboxMaxCount", apiProduct.getSandboxMaxTps());
         }
 
-        if (isGlobalThrottlingEnabled) {
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
-                    , properties);
-        } else {
-            properties.put("id", "A");
-            properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
-            properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
-            properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
+                , properties);
 
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler"
-                    , properties);
-        }
 
         vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler"
                 , Collections.<String, String>emptyMap());
@@ -3700,11 +3680,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             authorizedRoles, docFilePath, registry);
                 }
             } catch (UserStoreException e) {
-                throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
-                        + api.getId().getApiName(), e);
+                throw new APIManagementException("Error in retrieving Tenant Information while updating the " +
+                        "visibility of documentations for the API :" + api.getId().getApiName(), e);
             }
         } catch (RegistryException e) {
-            handleException("Failed to update visibility of documentation", e);
+            handleException("Failed to update visibility of documentation" + api.getId().getApiName(), e);
         }
     }
     /**
@@ -3759,7 +3739,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // We need to remove the
                 // /t/tenanatdoman/registry/resource/_system/governance section
                 // to set permissions.
-                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles, filePath,
                         registry);
@@ -3959,7 +3939,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (docFilePath != null && !"".equals(docFilePath)) {
                 //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
                 //We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set permissions.
-                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),visibility, authorizedRoles, filePath, registry);
                 registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
@@ -4071,6 +4051,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String inSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
             String outSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
             String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            String containerMngDeployments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
             String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
             String context_val = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
             String implementation = apiArtifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION);
@@ -4123,6 +4104,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setOutSequence(outSequence);
 
                 api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+                api.setDeploymentEnvironments(APIUtil.extractDeploymentsForAPI(containerMngDeployments));
                 api.setGatewayLabels(APIUtil.getLabelsFromAPIGovernanceArtifact(apiArtifact,
                         api.getId().getProviderName()));
                 api.setEndpointConfig(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
@@ -6739,13 +6721,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return createdBlockConditionsDto.getUUID();
     }
 
-    /**
-     * Add Block Condition with condition status
-     *
-     * @param conditionType type of the condition (IP, Context .. )
-     * @param conditionValue value of the condition
-     * @param conditionStatus status of the condition
-     */
+    @Override
     public String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus)
             throws APIManagementException {
 
@@ -8373,7 +8349,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (docFilePath != null && !StringUtils.EMPTY.equals(docFilePath)) {
                 //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
                 //We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set permissions.
-                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(product.getId().getProviderName(),visibility, authorizedRoles, filePath, registry);
                 registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
@@ -8433,7 +8409,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // We need to remove the
                 // /t/tenanatdoman/registry/resource/_system/governance section
                 // to set permissions.
-                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(product.getId().getProviderName(), visibility, authorizedRoles, filePath,
                         registry);

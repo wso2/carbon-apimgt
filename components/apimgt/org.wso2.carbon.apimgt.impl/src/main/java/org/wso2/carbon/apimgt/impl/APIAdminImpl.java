@@ -537,7 +537,7 @@ public class APIAdminImpl implements APIAdmin {
 
         return apiMgtDAO.getAllCategories(tenantId);
     }
-
+    @Override
     public List<APICategory> getAPICategoriesOfTenant(int tenantId) throws APIManagementException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         List<APICategory> categories = getAllAPICategoriesOfTenant(tenantId);

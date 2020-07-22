@@ -38,8 +38,8 @@ public class KeyManagerClientException extends Exception {
     }
 
     public KeyManagerClientException(int statusCode, String reason) {
-        super(StringUtils.isNotEmpty(reason) ? "Received status code: ".concat(Integer.toString(statusCode).concat(reason)) :
-                "Received status code: ".concat(Integer.toString(statusCode)));
+        super("Received status code: " + statusCode + " Reason: " + reason);
+      
     }
 
 }

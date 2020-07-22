@@ -161,6 +161,8 @@ export default class Application extends Resource {
                 callbackUrl,
                 additionalProperties,
                 keyManager,
+                validityTime: 3600,
+                scopes: ['default'],
             };
             const payload = { applicationId: this.id, body: requestContent };
             return client.apis['Application Keys'].post_applications__applicationId__generate_keys(payload);

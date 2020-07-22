@@ -36,7 +36,6 @@
     </APIKeyValidator>
 
     <ThrottlingConfigurations>
-        <EnableAdvanceThrottling>true</EnableAdvanceThrottling>
     </ThrottlingConfigurations>
 
     <SwaggerCodegen>

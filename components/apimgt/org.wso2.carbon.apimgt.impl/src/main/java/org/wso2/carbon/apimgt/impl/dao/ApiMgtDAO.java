@@ -6780,11 +6780,9 @@ public class ApiMgtDAO {
      * returns all URL templates define for all active(PUBLISHED) APIs.
      */
     public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
-        if (APIUtil.isAdvanceThrottlingEnabled()) {
-            return getAllURITemplatesAdvancedThrottle(apiContext, version);
-        } else {
-            return getAllURITemplatesOldThrottle(apiContext, version);
-        }
+
+        return getAllURITemplatesAdvancedThrottle(apiContext, version);
+
     }
 
     public ArrayList<URITemplate> getAPIProductURITemplates(String apiContext, String version)
@@ -13097,20 +13095,12 @@ public class ApiMgtDAO {
 
         int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
         String sql;
-        boolean isAdvancedThrottleEnabled = APIUtil.isAdvanceThrottlingEnabled();
-        if (!isAdvancedThrottleEnabled) {
-            if (defaultVersionInvoked) {
-                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
-            } else {
-                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
-            }
-        } else {
+
             if (defaultVersionInvoked) {
                 sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
             } else {
                 sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
             }
-        }
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -13122,15 +13112,10 @@ public class ApiMgtDAO {
             ps.setString(1, context);
             ps.setString(2, consumerKey);
             ps.setString(3,keyManager);
-            if (!isAdvancedThrottleEnabled) {
-                if (!defaultVersionInvoked) {
-                    ps.setString(4, version);
-                }
-            } else {
-                ps.setInt(4, apiOwnerTenantId);
-                if (!defaultVersionInvoked) {
-                    ps.setString(5, version);
-                }
+
+            ps.setInt(4, apiOwnerTenantId);
+            if (!defaultVersionInvoked) {
+                ps.setString(5, version);
             }
             rs = ps.executeQuery();
             if (rs.next()) {
@@ -13168,54 +13153,52 @@ public class ApiMgtDAO {
                 infoDTO.setType(type);
 
                 //Advanced Level Throttling Related Properties
-                if (APIUtil.isAdvanceThrottlingEnabled()) {
-                    String apiTier = rs.getString("API_TIER");
-                    String subscriberUserId = rs.getString("USER_ID");
-                    String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
-                    int apiId = rs.getInt("API_ID");
-                    int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
-                    int apiTenantId = APIUtil.getTenantId(API_PROVIDER);
-                    //TODO isContentAware
-                    boolean isContentAware =
-                            isAnyPolicyContentAware(conn, apiTier, APP_TIER, SUB_TIER,
-                                    subscriberTenantId, apiTenantId, apiId);
-                    infoDTO.setContentAware(isContentAware);
+                String apiTier = rs.getString("API_TIER");
+                String subscriberUserId = rs.getString("USER_ID");
+                String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
+                int apiId = rs.getInt("API_ID");
+                int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
+                int apiTenantId = APIUtil.getTenantId(API_PROVIDER);
+                //TODO isContentAware
+                boolean isContentAware =
+                        isAnyPolicyContentAware(conn, apiTier, APP_TIER, SUB_TIER,
+                                subscriberTenantId, apiTenantId, apiId);
+                infoDTO.setContentAware(isContentAware);
 
-                    //TODO this must implement as a part of throttling implementation.
-                    int spikeArrest = 0;
-                    String apiLevelThrottlingKey = "api_level_throttling_key";
-                    if (rs.getInt("RATE_LIMIT_COUNT") > 0) {
-                        spikeArrest = rs.getInt("RATE_LIMIT_COUNT");
-                    }
-
-                    String spikeArrestUnit = null;
-                    if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
-                        spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
-                    }
-                    boolean stopOnQuotaReach = rs.getBoolean("STOP_ON_QUOTA_REACH");
-                    int graphQLMaxDepth = 0;
-                    if(rs.getInt("MAX_DEPTH") > 0) {
-                        graphQLMaxDepth = rs.getInt("MAX_DEPTH");
-                    }
-                    int graphQLMaxComplexity = 0;
-                    if(rs.getInt("MAX_COMPLEXITY") > 0) {
-                        graphQLMaxComplexity = rs.getInt("MAX_COMPLEXITY");
-                    }
-                    List<String> list = new ArrayList<String>();
-                    list.add(apiLevelThrottlingKey);
-                    infoDTO.setSpikeArrestLimit(spikeArrest);
-                    infoDTO.setSpikeArrestUnit(spikeArrestUnit);
-                    infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
-                    infoDTO.setSubscriberTenantDomain(subscriberTenant);
-                    infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
-                    infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
-                    if (apiTier != null && apiTier.trim().length() > 0) {
-                        infoDTO.setApiTier(apiTier);
-                    }
-                    //We also need to set throttling data list associated with given API. This need to have policy id and
-                    // condition id list for all throttling tiers associated with this API.
-                    infoDTO.setThrottlingDataList(list);
+                //TODO this must implement as a part of throttling implementation.
+                int spikeArrest = 0;
+                String apiLevelThrottlingKey = "api_level_throttling_key";
+                if (rs.getInt("RATE_LIMIT_COUNT") > 0) {
+                    spikeArrest = rs.getInt("RATE_LIMIT_COUNT");
                 }
+
+                String spikeArrestUnit = null;
+                if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
+                    spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
+                }
+                boolean stopOnQuotaReach = rs.getBoolean("STOP_ON_QUOTA_REACH");
+                int graphQLMaxDepth = 0;
+                if (rs.getInt("MAX_DEPTH") > 0) {
+                    graphQLMaxDepth = rs.getInt("MAX_DEPTH");
+                }
+                int graphQLMaxComplexity = 0;
+                if (rs.getInt("MAX_COMPLEXITY") > 0) {
+                    graphQLMaxComplexity = rs.getInt("MAX_COMPLEXITY");
+                }
+                List<String> list = new ArrayList<String>();
+                list.add(apiLevelThrottlingKey);
+                infoDTO.setSpikeArrestLimit(spikeArrest);
+                infoDTO.setSpikeArrestUnit(spikeArrestUnit);
+                infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
+                infoDTO.setSubscriberTenantDomain(subscriberTenant);
+                infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
+                infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
+                if (apiTier != null && apiTier.trim().length() > 0) {
+                    infoDTO.setApiTier(apiTier);
+                }
+                //We also need to set throttling data list associated with given API. This need to have policy id and
+                // condition id list for all throttling tiers associated with this API.
+                infoDTO.setThrottlingDataList(list);
                 infoDTO.setAuthorized(true);
                 return infoDTO;
             }

@@ -99,7 +99,7 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
             @AuthorizationScope(scope = "apim:scope_manage", description = "Manage scope"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
-    }, tags={ "Syatem Scopes",  })
+    }, tags={ "System Scopes",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Particular scope exists for the given user. ", response = ScopeSettingsDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),

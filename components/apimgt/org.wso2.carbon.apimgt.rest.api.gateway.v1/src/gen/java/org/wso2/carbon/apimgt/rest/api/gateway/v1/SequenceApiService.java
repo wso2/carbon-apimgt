@@ -9,8 +9,8 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.DeployResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.SequencesDTO;
 
 import java.util.List;
 
@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SequenceApiService {
-      public Response sequenceGet(String apiName, String label, String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response sequenceGet(String apiName, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException;
 }

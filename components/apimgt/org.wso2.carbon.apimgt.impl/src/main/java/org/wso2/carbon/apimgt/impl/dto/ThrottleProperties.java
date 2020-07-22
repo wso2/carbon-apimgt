@@ -22,7 +22,6 @@ import java.util.Properties;
 
 public class ThrottleProperties {
     private boolean enabledSubscriptionLevelSpikeArrest;
-    private boolean enabled = false;
     private DataPublisher dataPublisher;
     private GlobalEngineWSConnection globalEngineWSConnection;
     private DataPublisherPool dataPublisherPool;
@@ -83,14 +82,6 @@ public class ThrottleProperties {
 
     public void setThrottleDataSourceName(String throttleDataSourceName) {
         this.throttleDataSourceName = throttleDataSourceName;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
     }
 
     public DataPublisher getDataPublisher() {

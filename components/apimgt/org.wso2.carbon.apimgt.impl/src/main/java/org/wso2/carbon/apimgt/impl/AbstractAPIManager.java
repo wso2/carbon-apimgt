@@ -1987,21 +1987,8 @@ public abstract class AbstractAPIManager implements APIManager {
     public Set<Tier> getTiers() throws APIManagementException {
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
 
-        Map<String, Tier> tierMap;
-        if (!APIUtil.isAdvanceThrottlingEnabled()) {
-            if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
-                tierMap = APIUtil.getTiers();
-            } else {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
-                tierMap = APIUtil.getTiers(tenantId);
-                endTenantFlow();
-            }
-            tiers.addAll(tierMap.values());
-        } else {
-            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
-            tiers.addAll(tierMap.values());
-        }
+        Map<String, Tier> tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+        tiers.addAll(tierMap.values());
 
         return tiers;
     }
@@ -2014,22 +2001,8 @@ public abstract class AbstractAPIManager implements APIManager {
     public Set<Tier> getTiers(String tenantDomain) throws APIManagementException {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-        Map<String, Tier> tierMap;
-        if (!APIUtil.isAdvanceThrottlingEnabled()) {
-            startTenantFlow(tenantDomain);
-            int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            if (requestedTenantId == MultitenantConstants.SUPER_TENANT_ID
-                    || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
-                tierMap = APIUtil.getTiers();
-            } else {
-                tierMap = APIUtil.getTiers(requestedTenantId);
-            }
-            tiers.addAll(tierMap.values());
-            endTenantFlow();
-        } else {
-            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
-            tiers.addAll(tierMap.values());
-        }
+        Map<String, Tier> tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+        tiers.addAll(tierMap.values());
         return tiers;
     }
 
@@ -2046,22 +2019,18 @@ public abstract class AbstractAPIManager implements APIManager {
 
         String tenantDomain = getTenantDomain(username);
         Map<String, Tier> tierMap;
-        if (!APIUtil.isAdvanceThrottlingEnabled()) {
-            tierMap = APIUtil.getTiers(tierType, tenantDomain);
-            tiers.addAll(tierMap.values());
+
+        int tenantIdFromUsername = APIUtil.getTenantId(username);
+        if (tierType == APIConstants.TIER_API_TYPE) {
+            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantIdFromUsername);
+        } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
+            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantIdFromUsername);
+        } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
+            tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantIdFromUsername);
         } else {
-            int tenantIdFromUsername = APIUtil.getTenantId(username);
-            if (tierType == APIConstants.TIER_API_TYPE) {
-                tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantIdFromUsername);
-            } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
-                tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantIdFromUsername);
-            } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
-                tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantIdFromUsername);
-            } else {
-                throw new APIManagementException("No such a tier type : " + tierType);
-            }
-            tiers.addAll(tierMap.values());
+            throw new APIManagementException("No such a tier type : " + tierType);
         }
+        tiers.addAll(tierMap.values());
 
         return tiers;
     }

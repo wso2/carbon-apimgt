@@ -16,10 +16,11 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class APIDeploymentClusterInfoDTO   {
   
     private String clusterName = null;
+    private String clusterDisplayName = null;
     private String ingressURL = null;
 
   /**
-   * name of the cluster
+   * Name of the cluster 
    **/
   public APIDeploymentClusterInfoDTO clusterName(String clusterName) {
     this.clusterName = clusterName;
@@ -27,7 +28,7 @@ public class APIDeploymentClusterInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "minikube", required = true, value = "name of the cluster")
+  @ApiModelProperty(example = "minikube", required = true, value = "Name of the cluster ")
   @JsonProperty("clusterName")
   @NotNull
   public String getClusterName() {
@@ -35,6 +36,24 @@ public class APIDeploymentClusterInfoDTO   {
   }
   public void setClusterName(String clusterName) {
     this.clusterName = clusterName;
+  }
+
+  /**
+   * Display name of the cluster 
+   **/
+  public APIDeploymentClusterInfoDTO clusterDisplayName(String clusterDisplayName) {
+    this.clusterDisplayName = clusterDisplayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Minikube Cluster", value = "Display name of the cluster ")
+  @JsonProperty("clusterDisplayName")
+  public String getClusterDisplayName() {
+    return clusterDisplayName;
+  }
+  public void setClusterDisplayName(String clusterDisplayName) {
+    this.clusterDisplayName = clusterDisplayName;
   }
 
   /**
@@ -67,12 +86,13 @@ public class APIDeploymentClusterInfoDTO   {
     }
     APIDeploymentClusterInfoDTO apIDeploymentClusterInfo = (APIDeploymentClusterInfoDTO) o;
     return Objects.equals(clusterName, apIDeploymentClusterInfo.clusterName) &&
+        Objects.equals(clusterDisplayName, apIDeploymentClusterInfo.clusterDisplayName) &&
         Objects.equals(ingressURL, apIDeploymentClusterInfo.ingressURL);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(clusterName, ingressURL);
+    return Objects.hash(clusterName, clusterDisplayName, ingressURL);
   }
 
   @Override
@@ -81,6 +101,7 @@ public class APIDeploymentClusterInfoDTO   {
     sb.append("class APIDeploymentClusterInfoDTO {\n");
     
     sb.append("    clusterName: ").append(toIndentedString(clusterName)).append("\n");
+    sb.append("    clusterDisplayName: ").append(toIndentedString(clusterDisplayName)).append("\n");
     sb.append("    ingressURL: ").append(toIndentedString(ingressURL)).append("\n");
     sb.append("}");
     return sb.toString();
