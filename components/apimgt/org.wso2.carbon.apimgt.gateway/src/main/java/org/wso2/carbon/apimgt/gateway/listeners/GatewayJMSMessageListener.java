@@ -95,7 +95,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                                 }
                             };
                             scheduler.scheduleWithFixedDelay(task, gatewayArtifactSynchronizerProperties
-                                    .getEventWaitingTime(), 0, TimeUnit.MILLISECONDS);
+                                    .getEventWaitingTime(), 1, TimeUnit.MILLISECONDS);
                         }
                     }
 
