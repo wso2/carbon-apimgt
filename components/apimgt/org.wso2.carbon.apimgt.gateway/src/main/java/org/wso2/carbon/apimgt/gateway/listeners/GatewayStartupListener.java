@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -64,7 +65,7 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     public void completingServerStartup() {
     }
 
-    private boolean deployArtifactsAtStartup() {
+    private boolean deployArtifactsAtStartup() throws ArtifactSynchronizerException {
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
@@ -82,7 +83,11 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             if (APIConstants.GatewayArtifactSynchronizer.GATEWAY_STARTUP_SYNC
                     .equals(gatewayArtifactSynchronizerProperties.getGatewayStartup())) {
-                deployAPIsInSyncMode();
+                try {
+                    deployAPIsInSyncMode();
+                } catch (ArtifactSynchronizerException e) {
+                    log.error("Error in Deploying APIs togateway");
+                }
             } else {
                 deployAPIsInAsyncMode();
             }
@@ -97,7 +102,7 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
     }
 
-    private void deployAPIsInSyncMode() {
+    private void deployAPIsInSyncMode() throws ArtifactSynchronizerException {
         syncModeDeploymentCount ++;
         isAPIsDeployedInSyncMode = deployArtifactsAtStartup();
         if (!isAPIsDeployedInSyncMode) {
@@ -134,10 +139,14 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
 
     @Override
     public void run() {
-        deployArtifactsInGateway();
+        try {
+            deployArtifactsInGateway();
+        } catch (ArtifactSynchronizerException e) {
+            log.error("Error in Deploying APIs togateway");
+        }
     }
 
-    private void deployArtifactsInGateway() {
+    private void deployArtifactsInGateway() throws ArtifactSynchronizerException {
 
         long retryDuration =
                 gatewayArtifactSynchronizerProperties.getRetryDuartion();
