@@ -17,6 +17,7 @@ public class SynapseAttributesApiServiceImpl implements SynapseAttributesApiServ
     private GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
     private SynapseAttributesDTO synapseArtifactListDTOS = new SynapseAttributesDTO();
     private static final Log log = LogFactory.getLog(SynapseAttributesApiServiceImpl.class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
     @Override public Response synapseAttributesGet(String apiName, String tenantDomain, String version,
             MessageContext messageContext) {
@@ -32,6 +33,9 @@ public class SynapseAttributesApiServiceImpl implements SynapseAttributesApiServ
             String responseStringObj = String.valueOf(responseObj);
             log.error("Error retrieving apiID and label of  " + apiName+ " from DB", e);
             return Response.serverError().entity(responseStringObj).build();
+        }
+        if (debugEnabled) {
+            log.debug("Successfully retrieved artifacts for " + apiName + " from DB");
         }
         apiAttributes.add(apiId);
         apiAttributes.add(label);

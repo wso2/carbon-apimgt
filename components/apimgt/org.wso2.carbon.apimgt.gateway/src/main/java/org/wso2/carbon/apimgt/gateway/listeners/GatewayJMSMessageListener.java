@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
@@ -52,6 +53,7 @@ import javax.jms.Topic;
 public class GatewayJMSMessageListener implements MessageListener {
 
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
+    private boolean debugEnabled = log.isDebugEnabled();
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
     GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
@@ -81,6 +83,9 @@ public class GatewayJMSMessageListener implements MessageListener {
                              * timestamp - system time of the event published
                              * event - event data
                              */
+                            if (debugEnabled) {
+                                log.debug("Event received from the topic of " + jmsDestination.getTopicName());
+                            }
                             handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
                                     (Long) map.get(APIConstants.EVENT_TIMESTAMP),
                                     (String) map.get(APIConstants.EVENT_PAYLOAD));
@@ -111,12 +116,20 @@ public class GatewayJMSMessageListener implements MessageListener {
             gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             if (!gatewayEvent.getGatewayLabels().isEmpty()) {
                 String gatewayLabel = gatewayEvent.getGatewayLabels().iterator().next();
-                if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-                    inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
-                } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-                    inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                try {
+                    if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
+                        inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                        if (debugEnabled) {
+                            log.debug(gatewayEvent.getEventId() + " processed and deployed in gateway");
+                        }
+                    } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
+                        inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                    }
+                } catch ( ArtifactSynchronizerException e) {
+                    log.error("Error in deploy/undeploy artifacts");
                 }
-                }
+
+            }
         }
         if (EventType.APPLICATION_CREATE.toString().equals(eventType)
                 || EventType.APPLICATION_UPDATE.toString().equals(eventType)) {
