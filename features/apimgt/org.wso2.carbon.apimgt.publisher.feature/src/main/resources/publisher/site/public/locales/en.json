@@ -170,6 +170,7 @@
   "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": "Please refer respective APIs for endpoint information",
   "Apis.Details.Configuration.RuntimeConfiguration.section.fault": "Fault",
   "Apis.Details.Configuration.RuntimeConfiguration.topic.header": "Runtime Configurations",
+  "Apis.Details.Configuration.RuntimeConfigurationWebSocket.topic.header": "Runtime Configurations",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.add.success": "Certificate added successfully",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.alias.error": "Something went wrong while adding the API certificate",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.delete.error": "Error while deleting certificate",
