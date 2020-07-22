@@ -27,6 +27,7 @@ import java.util.Map;
  */
 public class KeyManagerConfigurationDTO implements Serializable {
 
+
     private static final long serialVersionUID = 1L;
 
     private String name;
@@ -38,6 +39,21 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private String type;
     private boolean enabled;
 
+    public KeyManagerConfigurationDTO() {
+
+    }
+
+    public KeyManagerConfigurationDTO(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+
+        this.name = keyManagerConfigurationDTO.getName();
+        this.uuid = keyManagerConfigurationDTO.getUuid();
+        this.displayName = keyManagerConfigurationDTO.getDisplayName();
+        this.description = keyManagerConfigurationDTO.getDescription();
+        this.tenantDomain = keyManagerConfigurationDTO.getTenantDomain();
+        this.additionalProperties = new HashMap<>(keyManagerConfigurationDTO.getAdditionalProperties());
+        this.type = keyManagerConfigurationDTO.getType();
+        this.enabled = keyManagerConfigurationDTO.isEnabled();
+    }
     public String getName() {
 
         return name;
