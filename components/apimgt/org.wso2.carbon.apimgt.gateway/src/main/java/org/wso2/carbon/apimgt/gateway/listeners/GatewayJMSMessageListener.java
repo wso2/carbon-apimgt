@@ -143,6 +143,10 @@ public class GatewayJMSMessageListener implements MessageListener {
                     };
                 }
                 scheduler.schedule(task, 1, TimeUnit.MILLISECONDS);
+                if (debugEnabled) {
+                    log.debug("Event with ID " + gatewayEvent.getEventId() + " is received and " +
+                            gatewayEvent.getApiId() + " is successfully deployed/undeployed");
+                }
             }
         }
         if (EventType.APPLICATION_CREATE.toString().equals(eventType)

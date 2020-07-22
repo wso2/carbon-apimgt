@@ -67,7 +67,7 @@ public class DBRetriever implements ArtifactRetriever {
         try {
             Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
         } catch (InterruptedException e) {
-            // Ignore
+            log.error("Error occurred while waiting to retrieve artifacts from event hub");
         }
         try {
             String endcodedgatewayLabel= URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);
