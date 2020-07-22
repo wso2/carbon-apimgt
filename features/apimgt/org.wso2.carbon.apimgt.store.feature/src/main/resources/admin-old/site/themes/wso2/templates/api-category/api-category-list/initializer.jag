@@ -1,8 +1,0 @@
-<%
-jagg.initializer("api-category/api-category-list", {
-      preInitialize:function () {
-        jagg.addHeaderJS("api-category/api-category-list", "jagg", "templates/api-category/api-category-list/js/manage.js");
-    }
-});
-%>
-

@@ -1,8 +1,0 @@
-<%
-jagg.block("alert-table", {
-    initializer:function (data) {
-    	
-    }
-
-});
-%>
