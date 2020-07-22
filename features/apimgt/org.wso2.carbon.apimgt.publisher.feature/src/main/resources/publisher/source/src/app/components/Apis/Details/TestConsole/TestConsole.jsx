@@ -172,6 +172,7 @@ class TestConsole extends React.Component {
         let urls;
         let httpVal;
         let httpsVal;
+        let basePath;
         const user = AuthManager.getUser();
         const promisedAPI = API.getAPIById(apiObj.id);
         promisedAPI
@@ -234,11 +235,14 @@ class TestConsole extends React.Component {
                     urls = settingsNew.environment.map((endpoints) => { return endpoints.endpoints; });
                     httpVal = urls.map((val) => { return val.http; });
                     httpsVal = urls.map((value) => { return value.https; });
+                    basePath = apiData.context + '/' + apiData.version;
                     newServer.push({ url: httpsVal + apiData.context + '/' + apiData.version });
                     newServer.push({ url: httpVal + apiData.context + '/' + apiData.version });
                 }
                 this.setState({
                     settings: newServer,
+                    host: httpsVal[0].split('//')[1],
+                    baseUrl: basePath,
                 });
             });
     }
@@ -416,7 +420,7 @@ class TestConsole extends React.Component {
         const { classes } = this.props;
         const {
             swagger, api, securitySchemeType, selectedEnvironment, productionAccessToken, sandboxAccessToken,
-            labels, environments, scopes, username, password, selectedKeyType, serverError, settings,
+            labels, environments, scopes, username, password, selectedKeyType, serverError, settings, host, baseUrl,
         } = this.state;
         if (serverError) {
             return (
@@ -425,14 +429,18 @@ class TestConsole extends React.Component {
                 </Typography>
             );
         }
-
-        if (api == null || swagger == null) {
+        if (!api || !swagger || !settings) {
             return <Progress />;
         }
-
         let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
         authorizationHeader = 'testkey';
-        swagger.servers = settings;
+        if (swagger.openapi != null) {
+            swagger.servers = settings;
+        } else {
+            swagger.host = host;
+            swagger.basePath = baseUrl;
+            swagger.schemes = ['https'];
+        }
         const isProtoTyped = api.lifeCycleStatus.toLowerCase() === 'prototyped';
         const enableForTest = api.enableStore === false;
         return (
