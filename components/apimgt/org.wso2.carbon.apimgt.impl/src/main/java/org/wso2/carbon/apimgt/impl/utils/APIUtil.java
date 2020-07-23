@@ -41,7 +41,6 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -11660,6 +11659,18 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
+    }
+
+    public static boolean isCrossTenantSubscriptionsEnabled() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String crossTenantSubscriptionProperty =
+                apiManagerConfiguration.getFirstProperty(APIConstants.API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION);
+        if (StringUtils.isNotEmpty(crossTenantSubscriptionProperty)) {
+            return Boolean.parseBoolean(crossTenantSubscriptionProperty);
+        }
+        return false;
     }
 }
 

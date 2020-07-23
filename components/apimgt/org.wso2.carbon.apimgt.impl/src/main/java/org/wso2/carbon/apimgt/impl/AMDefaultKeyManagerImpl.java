@@ -535,8 +535,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         
         String userInfoEndpoint;
-        if (configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT) != null) {
-            userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT);
+        if (configuration.getParameter(APIConstants.KeyManager.USERINFO_ENDPOINT) != null) {
+            userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USERINFO_ENDPOINT);
         } else {
             userInfoEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
                     .concat(getTenantAwareContext().trim()).concat
