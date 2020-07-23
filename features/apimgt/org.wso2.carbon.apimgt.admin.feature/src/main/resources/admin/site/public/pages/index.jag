@@ -41,7 +41,7 @@
     <script src="<%= app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
     <script src="<%= app.context %>/site/public/conf/defaultTheme.js"></script>
     <script src="<%= app.context %>/site/public/conf/settings.js"></script>
-    <script src="<%= app.context %>/site/public/dist/index.bc45ac50d2331a593fe4.bundle.js"></script>
+    <script src="<%= app.context %>/site/public/dist/index.4b13d16481ef46a6bd6c.bundle.js"></script>
     <link rel="stylesheet" href="<%= app.context %>/site/public/fonts/iconfont/material-icons.css">
 </body>
 

@@ -27,6 +27,7 @@ import Collapse from '@material-ui/core/Collapse';
 import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 import Checkbox from '@material-ui/core/Checkbox';
 import ListItemText from '@material-ui/core/ListItemText';
+import Typography from '@material-ui/core/Typography';
 
 /**
  *
@@ -117,7 +118,7 @@ const StyledTreeItem = withStyles((theme) => ({
 
 const useStyles = makeStyles({
     root: {
-        height: 264,
+        minHeight: 512,
         flexGrow: 1,
         maxWidth: 800,
     },
@@ -130,23 +131,10 @@ const useStyles = makeStyles({
  * @export
  * @returns
  */
-export default function CustomizedTreeView(props) {
-    const { scopes, appMappings } = props;
+export default function PermissionTreeView(props) {
+    const { appMappings, role, onCheck } = props;
     const classes = useStyles();
-    // const [scopes, setScopes] = useState(
-    //     scopesSet.map((s) => ({ ...s, checked: false })),
-    // );
-    const onCheck = (event) => {
-        const { name, checked } = event.target;
-        const updatedScopes = scopes.map((scope) => {
-            if (scope.Name === name) {
-                return { ...scope, checked };
-            } else {
-                return { ...scope };
-            }
-        });
-        // setScopes(updatedScopes);
-    };
+    const totalPermissions = appMappings.admin.length + appMappings.store.length + appMappings.publisher.length;
     return (
         <TreeView
             className={classes.root}
@@ -154,81 +142,39 @@ export default function CustomizedTreeView(props) {
             defaultCollapseIcon={<MinusSquare />}
             defaultExpandIcon={<PlusSquare />}
         >
-            <StyledTreeItem nodeId={0} label={`Permissions (${scopes.length})`}>
-                <StyledTreeItem nodeId={1} label='Admin'>
-                    {scopes
-                        .filter(({ Roles }) => Roles === 'admin')
-                        .map(({ Name, checked }, index) => (
-                            <StyledTreeItem
-                                endIcon={(
-                                    <Checkbox
-                                        checked={checked}
-                                        name={Name}
-                                        onChange={onCheck}
-                                        inputProps={{ 'aria-label': 'primary checkbox' }}
-                                    />
-                                )}
-                                onLabelClick={() => onCheck({ target: { name: Name, checked: !checked } })}
-                                nodeId={index + 10}
-                                label={Name}
-                            />
-                        ))}
-                </StyledTreeItem>
 
-                <StyledTreeItem nodeId={2} label='Publisher'>
-                    {scopes
-                        .filter(
-                            ({ Roles }) => Roles.includes('Internal/creator')
-                                || Roles.includes('Internal/publisher'),
-                        )
-                        .map(({ Name, checked }, index) => (
-                            <StyledTreeItem
-                                endIcon={(
-                                    <Checkbox
-                                        color='primary'
-                                        checked={checked}
-                                        name={Name}
-                                        onChange={onCheck}
-                                        inputProps={{ 'aria-label': 'primary checkbox' }}
+            <StyledTreeItem nodeId={0} label={`Permissions (${totalPermissions})`}>
+                {
+                    Object.entries(appMappings).map(([app, scopes], index) => {
+                        const nodeId = index + 1; // this is to give unique id for each nodes in the tree
+                        return (
+                            <StyledTreeItem nodeId={nodeId} label={<Typography display="block" variant="subtitle1">
+                                {app} <Typography variant="caption">({scopes.length})</Typography>
+                            </Typography>}>
+                                {scopes.map(({ name, description, roles }, index) => (
+                                    <StyledTreeItem
+                                        endIcon={(
+                                            <Checkbox
+                                                checked={roles.includes(role)}
+                                                name={name}
+                                                onChange={(e) => onCheck({ target: { name, checked: e.target.checked, role, app } })}
+                                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                                            />
+                                        )}
+                                        onLabelClick={() => onCheck({ target: { name, checked: !roles.includes(role), role, app } })}
+                                        nodeId={index + 10 * nodeId}
+                                        label={(
+                                            <ListItemText
+                                                primary={description}
+                                                secondary={name}
+                                            />
+                                        )}
                                     />
-                                )}
-                                name={Name}
-                                onLabelClick={() => onCheck({ target: { name: Name, checked: !checked } })}
-                                nodeId={index + 20}
-                                label={(
-                                    <ListItemText
-                                        primary={Name}
-                                        secondary={Name}
-                                    />
-                                )}
-                            />
-                        ))}
-                </StyledTreeItem>
-
-                <StyledTreeItem nodeId={3} label='Devportal'>
-                    {scopes
-                        .filter(({ Roles }) => Roles.includes('Internal/subscriber'))
-                        .map(({ Name, checked }, index) => (
-                            <StyledTreeItem
-                                endIcon={(
-                                    <Checkbox
-                                        checked={checked}
-                                        name={Name}
-                                        onChange={onCheck}
-                                        inputProps={{ 'aria-label': 'primary checkbox' }}
-                                    />
-                                )}
-                                onLabelClick={() => onCheck({ target: { name: Name, checked: !checked } })}
-                                nodeId={index + 30}
-                                label={(
-                                    <ListItemText
-                                        primary={Name}
-                                        secondary={Name}
-                                    />
-                                )}
-                            />
-                        ))}
-                </StyledTreeItem>
+                                ))}
+                            </StyledTreeItem>
+                        );
+                    })
+                }
             </StyledTreeItem>
         </TreeView>
     );

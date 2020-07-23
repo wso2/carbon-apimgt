@@ -1,29 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import PermissionAPI from 'AppData/PermissionScopes';
-import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
-import IconButton from '@material-ui/core/IconButton';
-import AddIcon from '@material-ui/icons/Add';
-import clsx from 'clsx';
+import Grid from '@material-ui/core/Grid';
 import Alert from 'AppComponents/Shared/Alert';
+import Progress from 'AppComponents/Shared/Progress';
 
-import PermissionsTree from './TreeView/PermissionsTree';
+import PermissionsSelector from './TreeView/PermissionsSelector';
+import PermissionTree from './TreeView/PermissionTree';
+
 import AdminTable from './AdminTable';
 import AdminTableHead from './AdminTableHead';
-
-const useStyles = makeStyles({
-    table: {
-        minWidth: 650,
-    },
-});
+import TableBody from './AdminTableBody';
+import ListAddOns from './ListAddOns';
+import AddItem from './AddItem';
 
 
 /**
@@ -40,7 +30,9 @@ function extractMappings(permissionMapping) {
         const {
             roles, tag,
         } = mapping;
+        const trimmedRoles = [];
         const rolesList = roles.split(',');
+
         if (appMapping[tag]) {
             appMapping[tag].push(mapping);
         } else {
@@ -48,13 +40,14 @@ function extractMappings(permissionMapping) {
         }
         for (const role of rolesList) {
             const trimmedRole = role.trim();
+            trimmedRoles.push(trimmedRole);
             if (roleMapping[trimmedRole]) {
                 roleMapping[trimmedRole].push(mapping);
             } else {
                 roleMapping[trimmedRole] = [mapping];
             }
         }
-        // .forEach((scope) => roles.add(scope.trim()));
+        mapping.roles = trimmedRoles;
     }
     return [roleMapping, appMapping];
 }
@@ -69,9 +62,8 @@ function extractMappings(permissionMapping) {
 export default function ListRoles() {
     const [permissionMappings, setPermissionMappings] = useState();
     const [appMappings, setAppMappings] = useState();
-
-    const classes = useStyles();
     const [newRole, setNewRole] = useState('');
+
     useEffect(() => {
         PermissionAPI.systemScopes().then(
             (data) => {
@@ -82,9 +74,10 @@ export default function ListRoles() {
         ).catch((error) => {
             // TODO: Proper error handling here ~tmkb
             Alert.error('Error while retrieving permission info');
+            console.error(error);
         });
     }, []);
-    const onAddEntry = () => {
+    const onAddRole = () => {
         if (permissionMappings.find((role) => role === newRole) || !newRole) {
             alert('Role already exsists or role empty !!');
             return;
@@ -92,9 +85,26 @@ export default function ListRoles() {
         setPermissionMappings([...permissionMappings, newRole]);
         setNewRole('');
     };
+    const permissionCheckHandler = (event) => {
+        const {
+            name: scopeName, checked, role: selectedRole, app,
+        } = event.target;
+        const newAppMappings = { ...appMappings };
+        newAppMappings[app] = newAppMappings[app].map(({ name, roles, ...rest }) => {
+            if (name === scopeName) {
+                if (checked) {
+                    return { ...rest, name, roles: [...roles, selectedRole] };
+                } else {
+                    return { ...rest, name, roles: roles.filter((role) => selectedRole !== role) };
+                }
+            } else {
+                return { name, roles, ...rest };
+            }
+        });
+        setAppMappings(newAppMappings);
+    };
     if (!permissionMappings || !appMappings) {
-        // TODO: ~tmkb add loader
-        return null;
+        return <Progress message='Resolving user ...' />;
     }
     const headCells = [
         {
@@ -105,56 +115,37 @@ export default function ListRoles() {
         },
     ];
     return (
-        <ContentBase>
-            <TextField
-                value={newRole}
-                label='New Value'
-                variant='outlined'
-                onChange={({ target: { value } }) => {
-                    setNewRole(value);
-                }}
-                onKeyDown={(event) => (event.which === 13
-                    || event.keyCode === 13
-                    || event.key === 'Enter')
-                    && onAddEntry()}
-            />
-            <IconButton
-                onClick={onAddEntry}
-                aria-label='delete'
-                className={classes.margin}
-            >
-                <AddIcon fontSize='small' />
-            </IconButton>
+        <ContentBase title='Role Permissions'>
+            <ListAddOns>
+                <Grid item>
+                    <AddItem onSave={onAddRole} title='Add new role permissions' buttonText='Add role permissions'>
+                        <TextField
+                            value={newRole}
+                            label='Role Name'
+                            variant='outlined'
+                            onChange={({ target: { value } }) => {
+                                setNewRole(value);
+                            }}
+                            onKeyDown={(event) => (event.which === 13
+                                || event.keyCode === 13
+                                || event.key === 'Enter')
+                                && onAddRole()}
+                        />
+                        {/* <PermissionTree onCheck={() => {}} role={newRole} appMappings={appMappings} /> */}
+                    </AddItem>
+                </Grid>
+            </ListAddOns>
             <AdminTable multiSelect={false}>
                 <AdminTableHead headCells={headCells} />
+                <TableBody rows={Object.entries(permissionMappings).map(([role]) => {
+                    return [role, <PermissionsSelector
+                        onCheck={permissionCheckHandler}
+                        role={role}
+                        appMappings={appMappings}
+                    />];
+                })}
+                />
             </AdminTable>
-            {/*
-            <TableContainer component={Paper}>
-                <Table
-                    className={clsx(classes.table)}
-                    aria-label='simple table'
-                >
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Role</TableCell>
-                            <TableCell align='right'>Permissions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {Object.entries(permissionMappings).map(([role, scopes]) => (
-                            <TableRow key={role}>
-                                <TableCell component='th' scope='row'>
-                                    {role}
-                                </TableCell>
-                                <TableCell align='right'>
-                                    {<PermissionsTree scopes={scopes} appMappings={appMappings} />}
-                                </TableCell>
-                            </TableRow >
-                        ))
-}
-                    </TableBody >
-                </Table >
-            </TableContainer > */}
         </ContentBase>
     );
 }
