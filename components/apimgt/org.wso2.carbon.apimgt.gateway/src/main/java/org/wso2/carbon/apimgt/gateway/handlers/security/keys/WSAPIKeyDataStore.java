@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +100,21 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
         } catch (Exception e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while accessing backend services for subscription validation", e);
+        }
+    }
+
+    @Override
+    public boolean validateScopes(TokenValidationContext tokenValidationContext, String tenantDomain)
+            throws APISecurityException {
+
+        APIKeyValidatorClient client = new APIKeyValidatorClient();
+        try {
+            return client.validateScopes(tokenValidationContext, tenantDomain);
+        } catch (APISecurityException ex) {
+            throw new APISecurityException(ex.getErrorCode(), "Resource forbidden", ex);
+        } catch (Exception e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for scope validation", e);
         }
     }
 

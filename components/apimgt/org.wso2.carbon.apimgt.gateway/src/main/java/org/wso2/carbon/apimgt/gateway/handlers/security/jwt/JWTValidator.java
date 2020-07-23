@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAP
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -49,6 +48,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -56,7 +56,8 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.cache.Cache;
 
@@ -153,11 +154,10 @@ public class JWTValidator {
 
         if (jwtValidationInfo != null) {
             if (jwtValidationInfo.isValid()) {
-                // validate scopes
-                validateScopes(synCtx, openAPI, jwtValidationInfo);
+                // Validate scopes
+                validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, jwtToken);
+
                 // Validate subscriptions
-
-
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO;
                 
                 log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
@@ -167,6 +167,7 @@ public class JWTValidator {
                     log.debug("Subscription validation via Key Manager. Status: "
                             + apiKeyValidationInfoDTO.isAuthorized());
                 }
+
                 if (apiKeyValidationInfoDTO.isAuthorized()) {
                     /*
                      * Set api.ut.apiPublisher of the subscribed api to the message context.
@@ -363,60 +364,47 @@ public class JWTValidator {
      * Validate scopes bound to the resource of the API being invoked against the scopes specified
      * in the JWT token payload.
      *
-     * @param synCtx  The message to be authenticated
-     * @param openAPI The OpenAPI object of the invoked API
+     * @param apiContext        API Context
+     * @param apiVersion        API Version
+     * @param matchingResource  Accessed API resource
+     * @param httpMethod        API resource's HTTP method
      * @param jwtValidationInfo Validated JWT Information
+     * @param jwtToken          JWT Token
      * @throws APISecurityException in case of scope validation failure
      */
-    private void validateScopes(MessageContext synCtx, OpenAPI openAPI, JWTValidationInfo jwtValidationInfo)
+    private void validateScopes(String apiContext, String apiVersion, String matchingResource, String httpMethod,
+                                JWTValidationInfo jwtValidationInfo, SignedJWT jwtToken)
             throws APISecurityException {
 
-        if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-            HashMap<String, String> operationScopeMappingList =
-                    (HashMap<String, String>) synCtx.getProperty(APIConstants.SCOPE_OPERATION_MAPPING);
-            String[] operationList = ((String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).split(",");
-            for (String operation : operationList) {
-                String operationScope = operationScopeMappingList.get(operation);
-                checkTokenWithTheScope(operation, operationScope, jwtValidationInfo);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
+        // Generate TokenValidationContext
+        TokenValidationContext tokenValidationContext = new TokenValidationContext();
+
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+        Set<String> scopeSet = new HashSet<>();
+        scopeSet.addAll(jwtValidationInfo.getScopes());
+        apiKeyValidationInfoDTO.setScopes(scopeSet);
+        tokenValidationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+
+        tokenValidationContext.setAccessToken(jwtToken.getParsedString());
+        tokenValidationContext.setHttpVerb(httpMethod);
+        tokenValidationContext.setMatchingResource(matchingResource);
+        tokenValidationContext.setContext(apiContext);
+        tokenValidationContext.setVersion(apiVersion);
+
+        boolean valid = this.apiKeyValidator.validateScopes(tokenValidationContext, tenantDomain);
+        if (valid) {
+            if (log.isDebugEnabled()) {
+                log.debug("Scope validation successful for the resource: " + matchingResource
+                        + ", user: " + jwtValidationInfo.getUser());
             }
         } else {
-            String resource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
-            String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
-            checkTokenWithTheScope(resource, resourceScope, jwtValidationInfo);
+            String message = "User is NOT authorized to access the Resource: " + matchingResource
+                    + ". Scope validation failed.";
+            log.debug(message);
+            throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, message);
         }
-    }
-
-    private void checkTokenWithTheScope(String resource, String resourceScope, JWTValidationInfo jwtValidationInfo)
-            throws APISecurityException {
-
-        if (StringUtils.isNotBlank(resourceScope)) {
-            if (jwtValidationInfo.getScopes().isEmpty()) {
-                log.error("Scopes not found in the token.");
-                throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
-            }
-
-            boolean scopeFound = false;
-
-            for (String scope : jwtValidationInfo.getScopes()) {
-                if (scope.trim().equals(resourceScope)) {
-                    scopeFound = true;
-                    break;
-                }
-            }
-            if (!scopeFound) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Scope validation failed. User: " + jwtValidationInfo.getUser());
-                }
-                log.error("Scope validation failed.");
-                throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Scope validation successful for the resource: " + resource + ", Resource Scope: " +
-                        resourceScope
-                        + ", User: " + jwtValidationInfo.getUser());
-            }
-        }
-        log.debug("No scopes assigned to the resource: " + resource);
     }
 
     /**

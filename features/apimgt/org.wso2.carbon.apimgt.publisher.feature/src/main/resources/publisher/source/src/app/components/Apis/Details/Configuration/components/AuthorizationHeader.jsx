@@ -36,8 +36,22 @@ import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 export default function AuthorizationHeader(props) {
     const { api, configDispatcher } = props;
     const [apiFromContext] = useAPI();
-    const hasResourceWithSecurity = apiFromContext.operations.findIndex((op) => op.authType !== 'None') > -1;
-
+    let hasResourceWithSecurity;
+    if (apiFromContext.apiType === 'APIProduct') {
+        const apiList = apiFromContext.apis;
+        for (const apiInProduct in apiList) {
+            if (Object.prototype.hasOwnProperty.call(apiList, apiInProduct)) {
+                hasResourceWithSecurity = apiList[apiInProduct].operations.findIndex(
+                    (op) => op.authType !== 'None',
+                ) > -1;
+                if (hasResourceWithSecurity) {
+                    break;
+                }
+            }
+        }
+    } else {
+        hasResourceWithSecurity = apiFromContext.operations.findIndex((op) => op.authType !== 'None') > -1;
+    }
     if (!hasResourceWithSecurity && api.authorizationHeader !== '') {
         configDispatcher({ action: 'authorizationHeader', value: '' });
     }

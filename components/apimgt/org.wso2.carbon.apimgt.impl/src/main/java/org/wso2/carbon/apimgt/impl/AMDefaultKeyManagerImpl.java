@@ -194,7 +194,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         clientInfo.setClientName(applicationName);
         //todo: run tests by commenting the type
-        clientInfo.setTokenType(info.getTokenType());
+        if (StringUtils.isEmpty(info.getTokenType())) {
+            clientInfo.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        } else {
+            clientInfo.setTokenType(info.getTokenType());
+        }
         clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
@@ -780,8 +784,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public void attachResourceScopes(API api, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
-        //TODO: remove after scope validation from swagger completes
-        ApiMgtDAO.getInstance().addResourceScopes(api, uriTemplates, tenantDomain);
+        //TODO: Nothing to do here
     }
 
     /**
@@ -833,8 +836,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public void detachResourceScopes(API api, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
-        //TODO: remove after scope validation from swagger completes
-        ApiMgtDAO.getInstance().removeResourceScopes(api.getId(), api.getContext(), uriTemplates, tenantDomain);
+        //TODO: Nothing to do here
     }
 
     /**
