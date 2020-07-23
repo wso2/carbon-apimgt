@@ -22,11 +22,11 @@ const styles = (theme) => ({
 
 const SelectAppPanel = (props) => {
     let {
-        selectedApplication, selectedKeyType, selectedKeyManager,
+        selectedApplication, selectedKeyType,
     } = props;
 
     const {
-        subscriptions, handleChanges, classes, keyManagers,
+        subscriptions, handleChanges, classes,
     } = props;
 
     /**
@@ -40,9 +40,6 @@ const SelectAppPanel = (props) => {
         switch (name) {
             case 'selectedApplication':
                 selectedApplication = value;
-                break;
-            case 'selectedKeyManager':
-                selectedKeyManager = value;
                 break;
             case 'selectedKeyType':
                 selectedKeyType = value;
@@ -85,41 +82,6 @@ const SelectAppPanel = (props) => {
                             className={classes.menuItem}
                         >
                             {sub.applicationInfo.name}
-                        </MenuItem>
-                    ))}
-                </TextField>
-            </Grid>
-            <Grid x={12} md={6} className={classes.centerItems}>
-                <TextField
-                    fullWidth
-                    id='key-manager'
-                    select
-                    label={(
-                        <FormattedMessage
-                            defaultMessage='Key Managers'
-                            id='Apis.Details.ApiConsole.SelectAppPanel.keyManagers'
-                        />
-                    )}
-                    value={selectedKeyManager}
-                    name='selectedKeyManager'
-                    onChange={handleSelectPanelChange}
-                    SelectProps={keyManagers}
-                    helperText={(
-                        <FormattedMessage
-                            defaultMessage='Registered Key Managers'
-                            id='Apis.Details.ApiConsole.SelectAppPanel.select.registered.keyManagers'
-                        />
-                    )}
-                    margin='normal'
-                    variant='outlined'
-                >
-                    {keyManagers.map((keyManager) => (
-                        <MenuItem
-                            value={keyManager.name}
-                            key={keyManager.name}
-                            className={classes.menuItem}
-                        >
-                            {keyManager.name}
                         </MenuItem>
                     ))}
                 </TextField>
