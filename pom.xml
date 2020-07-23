@@ -571,11 +571,6 @@
                 <artifactId>org.wso2.carbon.apimgt.notification</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
@@ -615,12 +610,6 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.authenticator.oidc</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.hostobjects.oidc</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
@@ -768,12 +757,6 @@
                 <groupId>org.jaggeryjs</groupId>
                 <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
                 <version>${jaggery.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
-                <version>${carbon.apimgt.version}</version>
             </dependency>
 
             <dependency>
