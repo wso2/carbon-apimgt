@@ -48,15 +48,16 @@ import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.InputStream;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -327,6 +328,9 @@ public class APIAdminImpl implements APIAdmin {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(defaultKeyManagerConfiguration);
             keyManagerConfigurationsByTenant.add(defaultKeyManagerConfiguration);
         }
+        for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
+            decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
+        }
         return keyManagerConfigurationsByTenant;
     }
 
@@ -364,7 +368,7 @@ public class APIAdminImpl implements APIAdmin {
                 APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfigurationDTO);
         }
-
+        maskValues(keyManagerConfigurationDTO);
         return keyManagerConfigurationDTO;
     }
 
@@ -386,10 +390,83 @@ public class APIAdminImpl implements APIAdmin {
         }
         validateKeyManagerConfiguration(keyManagerConfigurationDTO);
         keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
-        apiMgtDAO.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+        KeyManagerConfigurationDTO keyManagerConfigurationToStore =
+                new KeyManagerConfigurationDTO(keyManagerConfigurationDTO);
+        encryptKeyManagerConfigurationValues(null, keyManagerConfigurationToStore);
+        apiMgtDAO.addKeyManagerConfiguration(keyManagerConfigurationToStore);
         new KeyMgtNotificationSender()
                 .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
         return keyManagerConfigurationDTO;
+    }
+
+    private void encryptKeyManagerConfigurationValues(KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO,
+                                                      KeyManagerConfigurationDTO updatedKeyManagerConfigurationDto)
+            throws APIManagementException {
+
+        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                .getKeyManagerConnectorConfiguration(updatedKeyManagerConfigurationDto.getType());
+        if (keyManagerConnectorConfiguration != null) {
+            Map<String, Object> additionalProperties = updatedKeyManagerConfigurationDto.getAdditionalProperties();
+            for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration
+                    .getConnectionConfigurations()) {
+                if (configurationDto.isMask()) {
+                    String value = (String) additionalProperties.get(configurationDto.getName());
+                    if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
+                        Object unModifiedValue = retrievedKeyManagerConfigurationDTO.getAdditionalProperties()
+                                .get(configurationDto.getName());
+                        additionalProperties.replace(configurationDto.getName(), unModifiedValue);
+                    } else if (StringUtils.isNotEmpty(value)) {
+                        additionalProperties.replace(configurationDto.getName(), encryptValues(value));
+                    }
+                }
+            }
+        }
+    }
+    private KeyManagerConfigurationDTO decryptKeyManagerConfigurationValues(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+
+        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
+        if (keyManagerConnectorConfiguration != null) {
+            Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
+            for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration
+                    .getConnectionConfigurations()) {
+                if (configurationDto.isMask()) {
+                    Object value = additionalProperties.get(configurationDto.getName());
+                    if (value != null){
+                        additionalProperties.replace(configurationDto.getName(),decryptValue(value));
+                    }
+                }
+            }
+        }
+        return keyManagerConfigurationDTO;
+    }
+
+    private Object decryptValue(Object value) throws APIManagementException {
+        try {
+            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+            if (value instanceof String) {
+                return new String(cryptoUtil.decrypt(((String) value).getBytes()));
+            } else if (value instanceof List) {
+                List valueList = (List) value;
+                List decryptedValues = new ArrayList<>();
+                for (Object s : valueList) {
+                    decryptedValues.add(decryptValue(s));
+                }
+                return decryptedValues;
+            } else if (value instanceof Map) {
+                Map<String, Object> map = (Map<String, Object>) value;
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    String key = entry.getKey();
+                    Object entryValue = entry.getValue();
+                    map.replace(key, decryptValue(entryValue));
+                }
+                return map;
+            }
+        } catch (CryptoException e) {
+            throw new APIManagementException("Error while encrypting values", e);
+        }
+        return null;
     }
 
     @Override
@@ -397,9 +474,15 @@ public class APIAdminImpl implements APIAdmin {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
         validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        KeyManagerConfigurationDTO oldKeyManagerConfiguration =
+                apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getTenantDomain(),
+                        keyManagerConfigurationDTO.getUuid());
+        encryptKeyManagerConfigurationValues(oldKeyManagerConfiguration, keyManagerConfigurationDTO);
         apiMgtDAO.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        KeyManagerConfigurationDTO decryptedKeyManagerConfiguration =
+                decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
         new KeyMgtNotificationSender()
-                .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE);
+                .notify(decryptedKeyManagerConfiguration, APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE);
         return keyManagerConfigurationDTO;
     }
 
@@ -425,6 +508,7 @@ public class APIAdminImpl implements APIAdmin {
                 APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
         }
+        maskValues(keyManagerConfiguration);
         return keyManagerConfiguration;
     }
 
@@ -624,6 +708,48 @@ public class APIAdminImpl implements APIAdmin {
                 throw new APIManagementException(
                         "Key Manager Type " + keyManagerConfigurationDTO.getType() + " is invalid.",
                         ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
+            }
+        }
+    }
+
+    private Object encryptValues(Object value) throws APIManagementException {
+
+        try {
+            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+            if (value instanceof String) {
+                return new String(cryptoUtil.encrypt(((String) value).getBytes()));
+            } else if (value instanceof List) {
+                List valueList = (List) value;
+                List encrpytedList = new ArrayList<>();
+                for (Object s : valueList) {
+                    encrpytedList.add(encryptValues(s));
+                }
+                return encrpytedList;
+            } else if (value instanceof Map) {
+                Map<String, Object> map = (Map<String, Object>) value;
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    String key = entry.getKey();
+                    Object entryValue = entry.getValue();
+                    map.replace(key, encryptValues(entryValue));
+                }
+                return map;
+            }
+        } catch (CryptoException e) {
+            throw new APIManagementException("Error while encrypting values", e);
+        }
+        return null;
+    }
+    private void maskValues(KeyManagerConfigurationDTO keyManagerConfigurationDTO){
+        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
+
+        Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
+        List<ConfigurationDto> connectionConfigurations =
+                keyManagerConnectorConfiguration.getConnectionConfigurations();
+        for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
+            if (connectionConfiguration.isMask()){
+                additionalProperties.replace(connectionConfiguration.getName(),
+                        APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
             }
         }
     }
