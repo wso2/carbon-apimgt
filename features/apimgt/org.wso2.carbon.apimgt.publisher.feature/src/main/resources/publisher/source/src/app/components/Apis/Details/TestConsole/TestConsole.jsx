@@ -434,12 +434,12 @@ class TestConsole extends React.Component {
         }
         let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
         authorizationHeader = 'testkey';
-        if (swagger.openapi !== null) {
-            swagger.servers = settings;
-        } else {
+        if (!swagger.openapi) {
             swagger.host = host;
             swagger.basePath = baseUrl;
             swagger.schemes = ['https'];
+        } else {
+            swagger.servers = settings;
         }
         const isProtoTyped = api.lifeCycleStatus.toLowerCase() === 'prototyped';
         const enableForTest = api.enableStore === false;
