@@ -558,4 +558,21 @@ public class APIKeyValidationService {
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         return keyValidationHandler.validateSubscription(context, version, consumerKey,keyManager);
     }
+
+    /**
+     * Validate scopes bound to the resource of the API being invoked against the scopes of the token.
+     *
+     * @param tokenValidationContext Token validation context
+     * @param tenantDomain           Tenant domain
+     * @return <code>true</code> if scope validation is successful and
+     * <code>false</code> if scope validation failed
+     * @throws APIKeyMgtException in case of scope validation failure
+     */
+    public boolean validateScopes(TokenValidationContext tokenValidationContext, String tenantDomain)
+            throws APIKeyMgtException {
+
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
+        return keyValidationHandler.validateScopes(tokenValidationContext);
+    }
 }
