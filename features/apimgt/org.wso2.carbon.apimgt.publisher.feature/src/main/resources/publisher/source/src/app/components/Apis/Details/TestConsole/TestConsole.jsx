@@ -434,7 +434,7 @@ class TestConsole extends React.Component {
         }
         let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
         authorizationHeader = 'testkey';
-        if (swagger.openapi != null) {
+        if (swagger.openapi !== null) {
             swagger.servers = settings;
         } else {
             swagger.host = host;
