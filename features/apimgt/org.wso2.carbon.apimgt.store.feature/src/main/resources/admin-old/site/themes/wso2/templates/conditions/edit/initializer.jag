@@ -1,7 +1,0 @@
-<%
-jagg.initializer("conditions/edit", {
-    preInitialize:function () {
-        jagg.addHeaderJS("conditions/edit", "jagg", "templates/conditions/edit/js/edit.js");
-    }
-});
-%>

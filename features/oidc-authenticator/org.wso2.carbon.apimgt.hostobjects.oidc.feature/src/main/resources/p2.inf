@@ -1,2 +1,0 @@
-instructions.configure = \
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.hostobjects.oidc_${feature.version}/oidc/,target:${installFolder}/../../modules/oidc,overwrite:true);\

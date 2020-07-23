@@ -1,8 +1,0 @@
-<%
-jagg.block("reports", {
-    initializer:function (data) {
-    	
-    }
-
-});
-%>
