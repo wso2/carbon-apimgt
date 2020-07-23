@@ -29,6 +29,7 @@ import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import Progress from 'AppComponents/Shared/Progress';
 import { FormattedMessage } from 'react-intl';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 import SubscriptionsTable from './SubscriptionsTable';
 import SubscriptionPoliciesManage from './SubscriptionPoliciesManage';
 import SubscriptionAvailability from './SubscriptionAvailability';
@@ -59,6 +60,7 @@ function Subscriptions(props) {
     const [tenantList, setTenantList] = useState(api.subscriptionAvailableTenants);
     const [subscriptions, setSubscriptions] = useState(null);
     const [updateInProgress, setUpdateInProgress] = useState(false);
+    const { settings } = useAppContext();
 
     /**
      * Save subscription information (policies, subscriptionAvailability, subscriptionAvailableTenants)
@@ -107,7 +109,7 @@ function Subscriptions(props) {
     return (
         <>
             <SubscriptionPoliciesManage api={api} policies={policies} setPolices={setPolices} />
-            {tenants !== 0 && (
+            {tenants !== 0 && settings.crossTenantSubscriptionEnabled && (
                 <SubscriptionAvailability
                     api={api}
                     availability={availability}

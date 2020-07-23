@@ -7800,7 +7800,7 @@ definitions:
           - ALL_TENANTS
           - SPECIFIC_TENANTS
         example: CURRENT_TENANT
-        default: ALL_TENANTS
+        default: CURRENT_TENANT
         x-otherScopes:
           - apim:api_publish
       subscriptionAvailableTenants:
@@ -10096,6 +10096,12 @@ definitions:
         description: |
           Is Document Visibility configuration enabled
         example: false
+      crossTenantSubscriptionEnabled:
+        type: boolean
+        description: |
+          Is Cross Tenant Subscriptions Enabled
+        example: false
+        default: false
       deployments:
         type: array
         items:
