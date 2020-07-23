@@ -21,16 +21,12 @@ import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import Icon from '@material-ui/core/Icon';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import WarningIcon from '@material-ui/icons/Warning';
 import Alert from 'AppComponents/Shared/Alert';
 import ImportExternalApp from 'AppComponents/Shared/AppsAndKeys/ImportExternalApp';
 import Application from 'AppData/Application';
@@ -54,6 +50,7 @@ const styles = (theme) => ({
             backgroundColor: '#f8f8f8',
             color: '#9d9d9d',
         },
+        position: 'relative',
     },
     button: {
         marginLeft: 0,
@@ -100,6 +97,22 @@ const styles = (theme) => ({
         '& .MuiBox-root': {
             padding: 0,
         }
+    },
+    disabledTabContent: {
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        background: '#fff',
+        zIndex: 1,
+        opacity: 0.6,
+        left: 0,
+        top: 0,
+        textAlign: 'center',
+    },
+    warningIcon: {
+        color: '#ff9a00',
+        fontSize: 43,
+        marginRight: 10,
     },
 });
 
@@ -311,7 +324,7 @@ class TokenManager extends React.Component {
                         this.setState({ keys, keyRequest: newRequest, keyManagers: responseKeyManagerList, selectedTab });
                     } else {
                         const selectdKMGrants = selectdKM.availableGrantTypes || [];
-                        
+
                         this.setState({
                             keys,
                             keyRequest: {
@@ -630,14 +643,27 @@ class TokenManager extends React.Component {
                         <Typography variant='h5' className={classes.keyTitle}>
                             {this.toTitleCase(keyType)}
                             <FormattedMessage
-                                id='Applications.Details.oauth2.keys.main.title'
+                                id='Shared.AppsAndKeys.TokenManager.oauth2.keys.main.title'
                                 defaultMessage=' OAuth2 Keys'
                             />
                         </Typography>
                     </Box>
-
                     {(keyManagers && keyManagers.length > 0) && keyManagers.map(keymanager => (
                         <TabPanel value={selectedTab} index={keymanager.name} className={classes.tabPanel}>
+                            {!keymanager.enabled && (<div className={classes.disabledTabContent}>
+                                <Box display='inline-flex'
+                                    justifyContent='center'
+                                    mt={2}
+                                    alignItems='center'>
+                                    <WarningIcon className={classes.warningIcon} />
+                                    <Typography variant='body1'>
+                                        {keymanager.name} <FormattedMessage
+                                            id='Shared.AppsAndKeys.TokenManager.disabled.msg'
+                                            defaultMessage={' Key Manager is disabled.'}
+                                        />
+                                    </Typography>
+                                </Box>
+                            </div>)}
                             <Box display='flex' flexDirection='row'>
                                 <Typography className={classes.heading} variant='h6' component='h6' className={classes.subTitle}>
                                     <FormattedMessage
@@ -648,11 +674,11 @@ class TokenManager extends React.Component {
                                 {
                                     mapExistingAuthApps && (
                                         <Box ml={2}>
-                                            <ImportExternalApp 
+                                            <ImportExternalApp
                                                 onChange={this.handleOnChangeProvidedOAuth}
                                                 consumerKey={providedConsumerKey}
                                                 consumerSecret={providedConsumerSecret}
-                                                isUserOwner={isUserOwner} 
+                                                isUserOwner={isUserOwner}
                                                 key={key}
                                                 provideOAuthKeySecret={this.provideOAuthKeySecret}
                                             />
