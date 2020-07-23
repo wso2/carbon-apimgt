@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -137,10 +138,12 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiPublisher("admin");
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
+        Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class), Mockito.anyString()))
+                .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
-        Mockito.verify(apiKeyValidator, Mockito.only())
+        Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
@@ -228,10 +231,12 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiPublisher("admin");
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
+        Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class), Mockito.anyString()))
+                .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
-        Mockito.verify(apiKeyValidator, Mockito.only())
+        Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
@@ -324,10 +329,12 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiPublisher("admin");
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
+        Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class), Mockito.anyString()))
+                .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
-        Mockito.verify(apiKeyValidator, Mockito.only())
+        Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
@@ -419,10 +426,12 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiPublisher("admin");
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
+        Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class), Mockito.anyString()))
+                .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
-        Mockito.verify(apiKeyValidator, Mockito.only())
+        Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
@@ -595,6 +604,8 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setAuthorized(false);
         apiKeyValidationInfoDTO.setValidationStatus(
                 APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
+        Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class), Mockito.anyString()))
+                .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()
                 , Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         try {
@@ -690,10 +701,12 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiPublisher("admin");
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
+        Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class), Mockito.anyString()))
+                .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
-        Mockito.verify(apiKeyValidator, Mockito.only())
+        Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
@@ -809,10 +822,12 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiPublisher("admin");
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
+        Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class), Mockito.anyString()))
+                .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
-        Mockito.verify(apiKeyValidator, Mockito.only())
+        Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
