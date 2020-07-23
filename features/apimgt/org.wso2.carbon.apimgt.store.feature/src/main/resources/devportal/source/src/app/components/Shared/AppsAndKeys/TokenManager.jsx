@@ -30,8 +30,8 @@ import Alert from 'AppComponents/Shared/Alert';
 import ImportExternalApp from 'AppComponents/Shared/AppsAndKeys/ImportExternalApp';
 import Application from 'AppData/Application';
 import AuthManager from 'AppData/AuthManager';
-import Settings from 'AppComponents/Shared/SettingsContext';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import WarningIcon from '@material-ui/icons/Warning';
 import API from 'AppData/api';
 import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
@@ -97,6 +97,11 @@ const styles = (theme) => ({
         '& .MuiBox-root': {
             padding: 0,
         }
+    },
+    warningIcon: {
+        color: '#ff9a00',
+        fontSize: 20,
+        marginRight: 10,
     },
 });
 
@@ -164,8 +169,7 @@ const StyledTab = withStyles((theme) => ({
         backgroundColor: '#fff',
         borderLeft: 'solid 1px #666',
         borderRight: 'solid 1px #666',
-    }
-
+    },
 }))((props) => <Tab disableRipple {...props} />);
 
 /**
@@ -199,7 +203,6 @@ class TokenManager extends React.Component {
             selectedTab: null,
             providedConsumerKey: '',
             providedConsumerSecret: '',
-            generateEnabled: true,
             validating: false,
         };
         this.keyStates = {
@@ -229,9 +232,6 @@ class TokenManager extends React.Component {
         this.loadApplication();
     }
 
-    setGenerateEnabled = (state) => {
-        this.setState({ generateEnabled: state });
-    }
     getDefaultAdditionalProperties(selectedKM) {
         const { availableGrantTypes, applicationConfiguration } = selectedKM;
         // Fill the keyRequest.additionalProperties from the selectedKM.applicationConfiguration defaultValues.
@@ -386,10 +386,18 @@ class TokenManager extends React.Component {
                 const isKeyJWT = (tokenType === 'JWT') || hashEnabled;
                 newKeys.set(selectedTab, response);
                 this.setState({ keys: newKeys, isKeyJWT });
-                Alert.info(intl.formatMessage({
-                    id: 'Shared.AppsAndKeys.TokenManager.key.generate.success',
-                    defaultMessage: 'Application keys generated successfully',
-                }));
+                if (response.keyState === this.keyStates.CREATED || response.keyState === this.keyStates.REJECTED) {
+                    Alert.info(intl.formatMessage({
+                        id: 'Shared.AppsAndKeys.TokenManager.key.generate.success.blocked',
+                        defaultMessage: 'Application keys generate request is currently pending approval by the site administrator.',
+                    }));
+                } else {
+                    Alert.info(intl.formatMessage({
+                        id: 'Shared.AppsAndKeys.TokenManager.key.generate.success',
+                        defaultMessage: 'Application keys generated successfully',
+                    }));
+                }
+                
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -554,7 +562,7 @@ class TokenManager extends React.Component {
         } = this.props;
         const {
             keys, keyRequest, isLoading, isKeyJWT, providedConsumerKey,
-            providedConsumerSecret, generateEnabled, selectedTab, keyManagers, validating,
+            providedConsumerSecret, selectedTab, keyManagers, validating,
         } = this.state;
         if (keyManagers && keyManagers.length === 0) {
             return <div className={classes.root}>
@@ -636,11 +644,6 @@ class TokenManager extends React.Component {
         if (key && (key.keyState === this.keyStates.CREATED || key.keyState === this.keyStates.REJECTED)) {
             return <WaitingForApproval keyState={key.keyState} states={this.keyStates} />;
         }
-        const settingsContext = this.context;
-        const { mapExistingAuthApps } = settingsContext.settings;
-        if (keyManagers.length === 0) {
-            return <div>kkkd</div>
-        }
         return (
             <>
                 {(keyManagers && keyManagers.length > 1) && (<StyledTabs
@@ -674,7 +677,7 @@ class TokenManager extends React.Component {
                                     />
                                 </Typography>
                                 {
-                                    mapExistingAuthApps && (
+                                    keymanager.enableMapOAuthConsumerApps && (
                                         <Box ml={2}>
                                             <ImportExternalApp
                                                 onChange={this.handleOnChangeProvidedOAuth}
@@ -759,16 +762,28 @@ class TokenManager extends React.Component {
                                                 </Typography>
                                             </>
                                         ) : (
-                                                <Button
-                                                    variant='contained'
-                                                    color='primary'
-                                                    className={classes.button}
-                                                    onClick={key ? this.updateKeys : this.generateKeys}
-                                                    disabled={!generateEnabled || isLoading || !keymanager.enableTokenGeneration}
-                                                >
-                                                    {key ? 'Update' : 'Generate Keys'}
-                                                    {isLoading && <CircularProgress size={20} />}
-                                                </Button>
+                                                <Box display='flex'>  
+                                                    <Button
+                                                        variant='contained'
+                                                        color='primary'
+                                                        className={classes.button}
+                                                        onClick={key ? this.updateKeys : this.generateKeys}
+                                                        disabled={isLoading || !keymanager.enableOAuthAppCreation}
+                                                    >
+                                                        {key ? 'Update' : 'Generate Keys'}
+                                                        {isLoading && <CircularProgress size={20} />}
+                                                    </Button>
+                                                    {!keymanager.enableOAuthAppCreation && (<Box m={2} display='flex'>
+                                                        <WarningIcon className={classes.warningIcon} />
+                                                        <Typography variant="body1">
+                                                            <FormattedMessage
+                                                                defaultMessage='Oauth app creation disabled for this key manager'
+                                                                id='Shared.AppsAndKeys.TokenManager.app.creation.disable.warn'
+                                                            />
+                                                            {keymanager.displayName || keymanager.name}
+                                                        </Typography>
+                                                    </Box>)}
+                                                </Box>
                                             )}
                                     </ScopeValidation>
                                 </div>
