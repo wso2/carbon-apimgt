@@ -29,10 +29,8 @@
         <module>service-stubs/oidc-authenticator</module>
         <module>components/apimgt</module>
         <module>components/forum</module>
-        <module>components/oidc-authenticator</module>
         <module>features/apimgt</module>
         <module>features/forum</module>
-        <module>features/oidc-authenticator</module>
         <module>features/categories</module>
     </modules>
 
@@ -612,12 +610,6 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.authenticator.oidc</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.hostobjects.oidc</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
