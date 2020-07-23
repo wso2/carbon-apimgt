@@ -1063,9 +1063,11 @@ class API extends Resource {
                 apiId: updatedAPI.id,
                 body: updatedAPI,
             };
+            console.log('payload' + JSON.stringify(payload));
             return client.apis['APIs'].put_apis__apiId_(payload);
         });
         return promisedUpdate.then(response => {
+            console.log('response from rest api' + JSON.stringify(response.body));
             return new API(response.body);
         });
     }

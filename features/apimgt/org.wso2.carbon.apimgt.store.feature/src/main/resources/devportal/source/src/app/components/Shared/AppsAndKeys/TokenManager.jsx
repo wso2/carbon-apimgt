@@ -311,12 +311,12 @@ class TokenManager extends React.Component {
                         this.setState({ keys, keyRequest: newRequest, keyManagers: responseKeyManagerList, selectedTab });
                     } else {
                         const selectdKMGrants = selectdKM.availableGrantTypes || [];
-
+                        
                         this.setState({
                             keys,
                             keyRequest: {
                                 ...keyRequest,
-                                selectedGrantTypes: selectdKMGrants,
+                                selectedGrantTypes: selectdKMGrants.filter(type => type !== 'authorization_code'),
                                 additionalProperties: this.getDefaultAdditionalProperties(selectdKM),
                             },
                             keyManagers: responseKeyManagerList,

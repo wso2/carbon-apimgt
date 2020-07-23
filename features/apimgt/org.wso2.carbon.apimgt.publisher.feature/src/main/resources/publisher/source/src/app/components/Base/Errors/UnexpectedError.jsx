@@ -96,7 +96,7 @@ UnexpectedError.defaultProps = {
     />),
     description: (<FormattedMessage
         id='UnexpectedError.message'
-        defaultMessage='Error occured due to invalid request'
+        defaultMessage='Error occurred due to invalid request'
     />),
 };
 

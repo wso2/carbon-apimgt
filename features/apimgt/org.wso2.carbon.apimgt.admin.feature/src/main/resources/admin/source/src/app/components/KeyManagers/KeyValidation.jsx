@@ -93,7 +93,7 @@ export default function KeyValidation(props) {
                     if (entry.key === jwtValue.claimKey) {
                         Alert.error(<FormattedMessage
                             id='Claim.Mapping.already.exists'
-                            defaultMessage='Claim Mapping Already Exist'
+                            defaultMessage='Claim Mapping already exists.'
                         />);
                         exist = true;
                         clearValues();

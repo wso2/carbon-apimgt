@@ -138,7 +138,7 @@ class StarRatingBar extends React.Component {
                 this.getApiRating();
             })
             .catch((error) => {
-                Alert.error('Error occured while adding ratings');
+                Alert.error('Error occurred while adding ratings');
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
@@ -160,7 +160,7 @@ class StarRatingBar extends React.Component {
                 setRatingUpdate();
             })
             .catch((error) => {
-                Alert.error('Error occured while removing ratings');
+                Alert.error('Error occurred while removing ratings');
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }

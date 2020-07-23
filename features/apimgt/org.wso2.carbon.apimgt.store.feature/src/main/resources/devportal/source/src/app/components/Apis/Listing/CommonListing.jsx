@@ -308,7 +308,7 @@ class CommonListing extends React.Component {
                             <Icon>keyboard_arrow_right</Icon>
                         </div>
                         <div className={classes.rotatedText} onClick={this.toggleLeftMenu}>
-                            <FormattedMessage defaultMessage='Tag Cloud / API Categories' id='Apis.Listing.Listing.ApiTagCloud.title' />
+                            <FormattedMessage defaultMessage='Tags / API Categories' id='Apis.Listing.Listing.ApiTagCloud.title' />
                         </div>
                     </div>
                 )}

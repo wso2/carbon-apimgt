@@ -505,7 +505,22 @@ public interface APIManager {
     Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end,
                                            boolean limitAttributes) throws APIManagementException;
 
-
+    /**
+     * Returns API Search result based on the provided query. This search method supports '&' based concatenate
+     * search in multiple fields.
+     *
+     * @param searchQuery     search query. Ex: provider=*admin*&version=*1*
+     * @param tenantDomain    tenant domain
+     * @param start           starting number
+     * @param end             ending number
+     * @param limitAttributes whether or not to limit attributes in the search result
+     * @param isPublisherListing whether publisher listing or not
+     * @return API result
+     * @throws APIManagementException if search is failed
+     */
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end,
+            boolean limitAttributes, boolean isPublisherListing) throws APIManagementException;
+    
     /**
      * fetches the lastUpdated timestamp for the API swagger resource
      *

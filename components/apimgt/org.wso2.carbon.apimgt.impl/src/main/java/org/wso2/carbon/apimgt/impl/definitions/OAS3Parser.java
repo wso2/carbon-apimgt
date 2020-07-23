@@ -767,6 +767,7 @@ public class OAS3Parser extends APIDefinition {
         if (oAuthFlow.getScopes() == null) {
             oAuthFlow.setScopes(new Scopes());
         }
+        oAuthFlow.setAuthorizationUrl("");
 
         if (api.getAuthorizationHeader() != null) {
             openAPI.addExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());
@@ -1329,6 +1330,21 @@ public class OAS3Parser extends APIDefinition {
         if (checkDefault == null) {
             return false;
         }
+
+        OAuthFlows oAuthFlows = checkDefault.getFlows();
+        if (oAuthFlows == null) {
+            return false;
+        }
+
+        OAuthFlow oAuthFlow = oAuthFlows.getImplicit();
+        if (oAuthFlow == null) {
+            return false;
+        }
+
+        Scopes scopes = oAuthFlow.getScopes();
+        if (scopes.isEmpty()) {
+            return false;
+        }
         return true;
     }
 
@@ -1343,11 +1359,74 @@ public class OAS3Parser extends APIDefinition {
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
         if (!isDefaultGiven(swaggerContent)) {
             OpenAPI openAPI = getOpenAPI(swaggerContent);
+            openAPI = processLegacyScopes(openAPI);
             openAPI = injectOtherScopesToDefaultScheme(openAPI);
             openAPI = injectOtherResourceScopesToDefaultScheme(openAPI);
             return Json.pretty(openAPI);
         }
         return swaggerContent;
+    }
+
+    /**
+     * This method will extract scopes from legacy x-wso2-security and add them to default scheme
+     * @param openAPI openAPI definition
+     * @return
+     * @throws APIManagementException
+     */
+    private OpenAPI processLegacyScopes(OpenAPI openAPI) throws APIManagementException {
+        Set<Scope> scopes = getScopesFromExtensions(openAPI);
+
+        if (!scopes.isEmpty()) {
+            if (openAPI.getComponents() == null) {
+                openAPI.setComponents(new Components());
+            }
+            Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
+            if (securitySchemes == null) {
+                securitySchemes = new HashMap<>();
+                openAPI.getComponents().setSecuritySchemes(securitySchemes);
+            }
+            SecurityScheme securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY);
+            if (securityScheme == null) {
+                securityScheme = new SecurityScheme();
+                securityScheme.setType(SecurityScheme.Type.OAUTH2);
+                securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, securityScheme);
+                List<SecurityRequirement> security = new ArrayList<SecurityRequirement>();
+                SecurityRequirement secReq = new SecurityRequirement();
+                secReq.addList(OPENAPI_SECURITY_SCHEMA_KEY, new ArrayList<String>());
+                security.add(secReq);
+                openAPI.setSecurity(security);
+            }
+            if (securityScheme.getFlows() == null) {
+                securityScheme.setFlows(new OAuthFlows());
+            }
+            OAuthFlow oAuthFlow = securityScheme.getFlows().getImplicit();
+            if (oAuthFlow == null) {
+                oAuthFlow = new OAuthFlow();
+                securityScheme.getFlows().setImplicit(oAuthFlow);
+            }
+            oAuthFlow.setAuthorizationUrl("");
+            Scopes oas3Scopes = oAuthFlow.getScopes() != null ? oAuthFlow.getScopes() : new Scopes();
+
+            if (scopes != null && !scopes.isEmpty()) {
+                Map<String, String> scopeBindings = new HashMap<>();
+                if (oAuthFlow.getExtensions() != null) {
+                    scopeBindings =
+                            (Map<String, String>) oAuthFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS)
+                                    != null ?
+                                    (Map<String, String>) oAuthFlow.getExtensions()
+                                            .get(APIConstants.SWAGGER_X_SCOPES_BINDINGS) :
+                                    new HashMap<>();
+
+                }
+                for (Scope scope : scopes) {
+                    oas3Scopes.put(scope.getKey(), scope.getDescription());
+                    scopeBindings.put(scope.getKey(), scope.getRoles());
+                }
+                oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+            }
+            oAuthFlow.setScopes(oas3Scopes);
+        }
+        return openAPI;
     }
 
     /**
@@ -1364,8 +1443,11 @@ public class OAS3Parser extends APIDefinition {
 
         if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null) {
             //If there is no default type schemes set a one
-            SecurityScheme newDefault = new SecurityScheme();
-            securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, newDefault);
+            SecurityScheme defaultScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY);
+            if (defaultScheme == null) {
+                SecurityScheme newDefault = new SecurityScheme();
+                securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, newDefault);
+            }
             for (Map.Entry<String, SecurityScheme> entry : securitySchemes.entrySet()) {
                 if (!OPENAPI_SECURITY_SCHEMA_KEY.equals(entry.getKey()) && "oauth2".equals(entry.getValue().getType().toString())) {
                     otherSetOfSchemes.add(entry.getKey());
@@ -1473,8 +1555,8 @@ public class OAS3Parser extends APIDefinition {
         for (String pathKey : paths.keySet()) {
             PathItem pathItem = paths.get(pathKey);
             Map<PathItem.HttpMethod, Operation> operationsMap = pathItem.readOperationsMap();
-            SecurityRequirement updatedDefaultSecurityRequirement = new SecurityRequirement();
             for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                SecurityRequirement updatedDefaultSecurityRequirement = new SecurityRequirement();
                 PathItem.HttpMethod httpMethod = entry.getKey();
                 Operation operation = entry.getValue();
                 List<SecurityRequirement> securityRequirements = operation.getSecurity();

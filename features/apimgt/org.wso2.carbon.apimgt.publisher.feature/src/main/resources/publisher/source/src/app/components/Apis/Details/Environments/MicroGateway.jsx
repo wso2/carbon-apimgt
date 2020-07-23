@@ -79,8 +79,8 @@ export default function MicroGateway(props) {
         <>
             <Typography variant='h4' align='left' className={classes.mainTitle}>
                 <FormattedMessage
-                    id='Apis.Details.Environments.Environments.Microgateways'
-                    defaultMessage='Microgateways'
+                    id='Apis.Details.Environments.Environments.Gateways'
+                    defaultMessage='Gateways'
                 />
             </Typography>
             {mgLabels.length > 0 ? (
@@ -133,11 +133,11 @@ export default function MicroGateway(props) {
                         <div className={classes.contentWrapper}>
                             <Typography component='p' className={classes.content}>
                                 <FormattedMessage
-                                    id='Apis.Details.Environments.microgateway.labels.emptym1'
-                                    defaultMessage='Microgateway labels are not available.'
+                                    id='Apis.Details.Environments.Gateway.labels.emptym1'
+                                    defaultMessage='Gateway labels are not available.'
                                 />
                                 <FormattedMessage
-                                    id='Apis.Details.Environments.microgateway.labels.emptym2'
+                                    id='Apis.Details.Environments.Gateway.labels.emptym2'
                                     defaultMessage=' You can request the administrator to add labels.'
                                 />
                             </Typography>

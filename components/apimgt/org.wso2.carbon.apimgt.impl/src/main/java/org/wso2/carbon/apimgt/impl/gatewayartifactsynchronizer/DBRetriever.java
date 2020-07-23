@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -48,6 +49,9 @@ public class DBRetriever implements ArtifactRetriever {
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
     protected EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfigurationService().getAPIManagerConfiguration().getEventHubConfigurationDto();
+    protected GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+            ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                    .getGatewayArtifactSynchronizerProperties();
     private String baseURL = eventHubConfigurationDto.getServiceUrl() +
             APIConstants.INTERNAL_WEB_APP_EP ;
 
@@ -60,6 +64,11 @@ public class DBRetriever implements ArtifactRetriever {
     public String retrieveArtifact(String APIId, String gatewayLabel, String gatewayInstruction)
             throws ArtifactSynchronizerException {
         CloseableHttpResponse httpResponse = null;
+        try {
+            Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
+        } catch (InterruptedException e) {
+            log.error("Error occurred while waiting to retrieve artifacts from event hub");
+        }
         try {
             String endcodedgatewayLabel= URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);
             String path = APIConstants.GatewayArtifactSynchronizer.SYNAPSE_ARTIFACTS + "?apiId=" + APIId +

@@ -156,6 +156,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIDConnectDiscoveryClient;
@@ -558,13 +559,13 @@ public final class APIUtil {
     /**
      * This method is used to execute an HTTP request
      *
-     * @param method     HttpRequest Type
-     * @param httpClient HttpClient
+     * @param method       HttpRequest Type
+     * @param httpClient   HttpClient
      * @return HTTPResponse
      * @throws IOException
      */
-    public static CloseableHttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient) throws IOException {
-
+    public static CloseableHttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient)
+            throws IOException, ArtifactSynchronizerException {
         CloseableHttpResponse httpResponse = null;
         int retryCount = 0;
         boolean retry;
@@ -589,7 +590,16 @@ public final class APIUtil {
                 }
             }
         } while (retry);
-        return httpResponse;
+
+        if (httpResponse.getStatusLine().getStatusCode() == 200) {
+            return httpResponse;
+        } else {
+            httpResponse.close();
+            String errorMessage = EntityUtils.toString(httpResponse.getEntity(),
+                    APIConstants.DigestAuthConstants.CHARSET);
+            throw new ArtifactSynchronizerException(errorMessage + "Event-Hub status code is : "
+                    + httpResponse.getStatusLine().getStatusCode());
+        }
     }
 
     /**
@@ -1712,10 +1722,8 @@ public final class APIUtil {
     }
 
     public static String getLcStateFromArtifact(GovernanceArtifact artifact) throws GovernanceException {
-
-        String state = (artifact.getLifecycleState() != null) ?
-                artifact.getLifecycleState() :
-                artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+        String lcState = artifact.getLifecycleState();
+        String state = (lcState != null) ? lcState : artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
         return (state != null) ? state.toUpperCase() : null;
     }
 
@@ -6703,7 +6711,7 @@ public final class APIUtil {
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
-            resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace("<tenant-id>", tenantDomain);
+            resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
             if (registry.resourceExists(resourcePath)) {
                 Resource resource = registry.get(resourcePath);
                 String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
@@ -10669,7 +10677,7 @@ public final class APIUtil {
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
-            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace("<tenant-id>", tenantDomain);
+            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
             if (registry.resourceExists(resourcePath)) {
                 Resource resource = registry.get(resourcePath);
                 String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
@@ -10702,7 +10710,7 @@ public final class APIUtil {
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
-            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace("<tenant-id>", tenantDomain);
+            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
             if (registry.resourceExists(resourcePath)) {
                 Resource resource = registry.get(resourcePath);
                 String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
@@ -10723,6 +10731,65 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return null;
+    }
+
+    public static Map getTenantBasedPublisherDomainMapping(String tenantDomain) throws APIManagementException {
+
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry();
+            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
+            if (registry.resourceExists(resourcePath)) {
+                Resource resource = registry.get(resourcePath);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                JSONParser parser = new JSONParser();
+                JSONObject mappings = (JSONObject) parser.parse(content);
+                if (mappings.containsKey(APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER)) {
+                    return (Map) mappings.get(APIConstants.API_DOMAIN_MAPPINGS_PUBLISHER);
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving publisher domain mappings from registry";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Malformed JSON found in the publisher tenant domain mappings";
+            throw new APIManagementException(msg, e);
+        }
+        return null;
+    }
+
+    public static String getTenantBasedPublisherContext(String tenantDomain) throws APIManagementException {
+
+        String context = null;
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry();
+            String resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
+            if (registry.resourceExists(resourcePath)) {
+                Resource resource = registry.get(resourcePath);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                JSONParser parser = new JSONParser();
+                JSONObject mappings = (JSONObject) parser.parse(content);
+                if (mappings.containsKey(APIConstants.API_PUBLISHER)) {
+                    JSONObject publisherMapping = (JSONObject) mappings.get(APIConstants.API_PUBLISHER);
+                    if (publisherMapping.containsKey(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT)) {
+                        context = (String) publisherMapping.get(APIConstants.API_DOMAIN_MAPPINGS_CONTEXT);
+                    } else {
+                        context = "";
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving publisher domain mappings from registry";
+            throw new APIManagementException(msg, e);
+        } catch (ClassCastException e) {
+            String msg = "Invalid JSON found in the publisher tenant domain mappings";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Malformed JSON found in the publisher tenant domain mappings";
+            throw new APIManagementException(msg, e);
+        }
+        return context;
     }
 
     public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException,
@@ -11507,6 +11574,105 @@ public final class APIUtil {
             return "/t/".concat(tenantDomain);
         }
         return "";
+    }
+
+    /**
+     * Copy of the getAPI(GovernanceArtifact artifact, Registry registry) method with reduced DB calls for api
+     * publisher list view listing.
+     * @param artifact
+     * @param registry
+     * @return
+     * @throws APIManagementException
+     */
+    public static API getReducedPublisherAPIForListing(GovernanceArtifact artifact, Registry registry)
+            throws APIManagementException {
+
+        API api;
+        try {
+            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            api = new API(apiIdentifier);
+            //set description
+            api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+            //set uuid
+            api.setUUID(artifact.getId());
+
+            // set url
+            api.setStatus(getLcStateFromArtifact(artifact));
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+            api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+            api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
+            api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
+            api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+            api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+            api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+            api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
+            api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
+            api.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
+            api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
+            api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
+            api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
+                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
+                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
+            }
+            api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
+            api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
+            api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
+            api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
+            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+            api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
+
+            int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
+            try {
+                cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
+            } catch (NumberFormatException e) {
+                //ignore
+            }
+
+            api.setCacheTimeout(cacheTimeout);
+
+            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
+
+            api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+            api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
+            api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+
+            api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+            api.setSubscriptionAvailableTenants(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+
+            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            // We set the context template here
+            api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
+            api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
+            api.setEnableSchemaValidation(Boolean.parseBoolean(
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
+
+            api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+
+            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+
+            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+
+        } catch (GovernanceException e) {
+            String msg = "Failed to get API for artifact ";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get LastAccess time or Rating";
+            throw new APIManagementException(msg, e);
+        }
+        return api;
     }
 }
 

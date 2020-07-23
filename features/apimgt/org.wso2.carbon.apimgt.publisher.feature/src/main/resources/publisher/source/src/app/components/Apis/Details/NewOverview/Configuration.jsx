@@ -264,7 +264,7 @@ function Configuration(props) {
                                             id='Apis.Details.NewOverview.MetaData.visibility.store.res.tooltip'
                                             defaultMessage={
                                                 'Restricted by roles: The API is visible only to '
-                                                + 'specific user roles in the tenant developer portal that you specify.'
+                                                + 'specific user roles in the tenant Developer Portal that you specify.'
                                             }
                                         />
                                     </>

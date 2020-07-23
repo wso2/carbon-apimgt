@@ -25,6 +25,7 @@ settings.AppConfig.idp = {
     origin: appUtils.getIDPOrigin(),
     checkSessionEndpoint: appUtils.getIDPCheckSessionEndpoint(),
 }
+settings.AppConfig.app.context = appUtils.getTenantBasePublisherContext();
 var content = "const AppConfig ="+stringify(settings.AppConfig)+";";
 
 print(content);

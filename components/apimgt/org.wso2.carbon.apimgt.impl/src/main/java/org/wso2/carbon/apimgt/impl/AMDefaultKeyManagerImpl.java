@@ -260,8 +260,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest appInfoDTO, String owner)
             throws APIManagementException {
 
-        log.debug("Owner not updated in the Identity Server as all apps are created under ");
-        return appInfoDTO.getOAuthApplicationInfo();
+        OAuthApplicationInfo oAuthApplicationInfo = appInfoDTO.getOAuthApplicationInfo();
+        log.debug("Updating Application Owner : " + oAuthApplicationInfo.getClientId());
+
+        ClientInfo updatedClient;
+        try {
+            updatedClient = dcrClient.updateApplicationOwner(owner, oAuthApplicationInfo.getClientId());
+            return buildDTOFromClientInfo(updatedClient, new OAuthApplicationInfo());
+        } catch (KeyManagerClientException e) {
+            handleException("Error occurred while updating OAuth Client : ", e);
+            return null;
+        }
     }
 
     @Override
@@ -344,7 +353,15 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException {
 
-        throw new APIManagementException("Regenerating consumer secret is not supported at the moment.");
+        ClientInfo updatedClient;
+        try {
+            updatedClient = dcrClient.updateApplicationSecret(tokenRequest.getClientId());
+            return updatedClient.getClientSecret();
+
+        } catch (KeyManagerClientException e) {
+            handleException("Error while generating new consumer secret", e);
+        }
+        return null;
     }
 
     @Override

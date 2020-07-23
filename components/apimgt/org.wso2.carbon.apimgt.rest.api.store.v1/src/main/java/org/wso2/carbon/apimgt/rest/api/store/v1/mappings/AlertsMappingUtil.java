@@ -102,6 +102,22 @@ public class AlertsMappingUtil {
     /**
      * Generates a MashMap from configInfoDTO
      *
+     * @param alertConfigDTO : The alertConfigDTO
+     * @return HashMap from the provided DTO.
+     * */
+    public static Map<String, String> alertInfoDTOToMap(AlertConfigDTO alertConfigDTO)
+            throws APIManagementException {
+        Map<String, String> configMap = new HashMap<>(alertConfigDTO.getConfiguration());
+        String applicationName = configMap.get("applicationName");
+        configMap.put("applicationId",
+                String.valueOf(SubscriberAlertsAPIUtils.getApplicationIdByName(applicationName)));
+        configMap.remove("applicationName");
+        return configMap;
+    }
+
+    /**
+     * Generates a MashMap from configInfoDTO
+     *
      * @param alertConfigInfoDTO : The alertConfigInfoDTO
      * @return HashMap from the provided DTO.
      * */

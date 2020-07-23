@@ -172,6 +172,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 body.setAttributes(applicationAttributes);
             }
 
+            //we do not honor tokenType sent in the body and
+            //all the applications created will of 'JWT' token type
+            body.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
+
             //subscriber field of the body is not honored. It is taken from the context
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
 
@@ -285,6 +289,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
             if (applicationAttributes != null) {
                 body.setAttributes(applicationAttributes);
+            }
+
+            //we do not honor tokenType sent in the body and all the applications are considered of 'JWT' token type
+            //unless the current application is already of 'OAUTH' type
+            if (!ApplicationDTO.TokenTypeEnum.OAUTH.toString().equals(oldApplication.getTokenType())) {
+                body.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
             }
             
             //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application

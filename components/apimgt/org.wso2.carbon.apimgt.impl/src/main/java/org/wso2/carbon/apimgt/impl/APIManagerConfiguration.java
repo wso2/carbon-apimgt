@@ -1686,6 +1686,15 @@ public class APIManagerConfiguration {
                 }
             }
         }
+
+        OMElement eventWaitingTimeElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EVENT_WAITING_TIME_CONFIG));
+        if (eventWaitingTimeElement!= null) {
+            long eventWaitingTime = Long.valueOf(eventWaitingTimeElement.getText());
+            gatewayArtifactSynchronizerProperties.setEventWaitingTime(eventWaitingTime);
+        } else {
+            log.debug("Gateway Startup mode is not set. Set to Sync Mode");
+        }
     }
 
     public GatewayArtifactSynchronizerProperties getGatewayArtifactSynchronizerProperties() {
