@@ -89,7 +89,7 @@ export default function KeyManager(props) {
     }, []);
 
     return (
-        <ExpansionPanel className={classes.expansionPanel}>
+        <ExpansionPanel className={classes.expansionPanel} defaultExpanded>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography className={classes.subHeading} variant='h6'>
                     <FormattedMessage

@@ -170,6 +170,7 @@
   "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": "",
   "Apis.Details.Configuration.RuntimeConfiguration.section.fault": "",
   "Apis.Details.Configuration.RuntimeConfiguration.topic.header": "",
+  "Apis.Details.Configuration.RuntimeConfigurationWebSocket.topic.header": "",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.add.success": "",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.alias.error": "",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.delete.error": "",
