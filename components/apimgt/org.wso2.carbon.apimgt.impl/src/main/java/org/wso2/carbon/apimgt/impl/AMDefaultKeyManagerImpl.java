@@ -132,7 +132,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
                 userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
-            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(userId), applicationName, keyType);
+            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
+                    getTenantAwareUsername(userId)), applicationName, keyType);
         } else {
             throw new APIManagementException("Missing required information for OAuth application creation.");
         }
@@ -236,7 +237,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
             // Construct the application name subsequent to replacing email domain separator
-            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(userId), applicationName, keyType);
+            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
+                    getTenantAwareUsername(userId)), applicationName, keyType);
         } else {
             throw new APIManagementException("Missing required information for OAuth application update.");
         }
