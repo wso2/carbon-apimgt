@@ -89,8 +89,8 @@ export default function ListKeyManagers() {
                 sort: false,
             },
         },
-        { name: 'id', options: { display: false } },
         { name: 'enabled', options: { display: false } },
+        { name: 'id', options: { display: false } },
     ];
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
@@ -144,7 +144,7 @@ export default function ListKeyManagers() {
             const updateSomething = () => {
                 const restApi = new API();
                 const kmName = rowData[0];
-                const kmId = rowData[3];
+                const kmId = rowData[4];
                 restApi.keyManagerGet(kmId).then((result) => {
                     let editState;
                     if (result.body.name !== null) {
@@ -170,7 +170,7 @@ export default function ListKeyManagers() {
                     });
                 });
             };
-            const kmEnabled = rowData[4];
+            const kmEnabled = rowData[3];
 
             return (
                 <Switch
