@@ -783,10 +783,10 @@ class TokenManager extends React.Component {
                                                         <WarningIcon className={classes.warningIcon} />
                                                         <Typography variant="body1">
                                                             <FormattedMessage
-                                                                defaultMessage='Oauth app creation disabled for this key manager'
+                                                                defaultMessage='Oauth app creation disabled for {kmName} key manager'
                                                                 id='Shared.AppsAndKeys.TokenManager.app.creation.disable.warn'
+                                                                values={{ kmName: keymanager.displayName || keymanager.name }}
                                                             />
-                                                            {keymanager.displayName || keymanager.name}
                                                         </Typography>
                                                     </Box>)}
                                                 </Box>
