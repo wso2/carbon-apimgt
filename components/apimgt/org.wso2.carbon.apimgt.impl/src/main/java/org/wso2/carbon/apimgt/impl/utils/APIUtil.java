@@ -25,7 +25,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import feign.Client;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -7289,6 +7288,25 @@ public final class APIUtil {
     /**
      * Return a http client instance
      *
+     * @param url      - server url
+     * @return
+     */
+
+    public static HttpClient getHttpClient(String url) throws APIManagementException {
+        URL configUrl = null;
+        try {
+            configUrl = new URL(url);
+        } catch (MalformedURLException e) {
+            handleException("URL is malformed", e);
+        }
+        int port = configUrl.getPort();
+        String protocol = configUrl.getProtocol();
+        return getHttpClient(port, protocol);
+    }
+
+    /**
+     * Return a http client instance
+     *
      * @param port      - server port
      * @param protocol- service endpoint protocol http/https
      * @return
@@ -7343,25 +7361,6 @@ public final class APIUtil {
         ThreadSafeClientConnManager tcm = new ThreadSafeClientConnManager(registry);
         return new DefaultHttpClient(tcm, params);
 
-    }
-
-    public static Client createNewFeignClient() throws APIManagementException {
-
-        String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
-        X509HostnameVerifier hostnameVerifier;
-        if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
-            hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-        } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
-            hostnameVerifier = SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
-        } else {
-            hostnameVerifier = SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
-        }
-        try {
-            return new Client.Default(null, hostnameVerifier);
-        } catch (Exception e) {
-            handleException("Exception while creating SSLSocketFactoryImpl");
-        }
-        return null;
     }
 
     private static SSLSocketFactory createSocketFactory() throws APIManagementException {
