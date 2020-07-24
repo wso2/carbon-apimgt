@@ -231,7 +231,13 @@ class TokenManager extends React.Component {
     componentDidMount() {
         this.loadApplication();
     }
-
+    componentDidUpdate(nextProps) {
+        const { keyType: nextKeyType } = nextProps;
+        const { keyType: prevKeyType } = this.props;
+        if(nextKeyType !== prevKeyType) {
+            this.loadApplication();
+        }
+    }
     getDefaultAdditionalProperties(selectedKM) {
         const { availableGrantTypes, applicationConfiguration } = selectedKM;
         // Fill the keyRequest.additionalProperties from the selectedKM.applicationConfiguration defaultValues.
