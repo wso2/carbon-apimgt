@@ -56,7 +56,8 @@ public class GatewayArtifactsMgtDAOTest {
     }
 
 
-    private static void initializeDatabase(String configFilePath) {
+    private static void initializeDatabase(String configFilePath)
+            throws XMLStreamException, IOException, NamingException {
 
         InputStream in;
         try {
@@ -93,11 +94,11 @@ public class GatewayArtifactsMgtDAOTest {
                 ic.bind("java:/comp/env/jdbc/WSO2AM_DB", basicDataSource);
             }
         } catch (XMLStreamException e) {
-            e.printStackTrace();
+            throw new XMLStreamException("Unexpected error in processing XML");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IOException("Error in processing the APIManagerDBConfiguration file ");
         } catch (NamingException e) {
-            e.printStackTrace();
+            throw new NamingException("Error in database Username and Password");
         }
     }
 
