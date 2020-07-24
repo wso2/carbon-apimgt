@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import 'AppComponents/Shared/testconsole.css';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Progress from 'AppComponents/Shared/Progress';
@@ -30,7 +31,6 @@ import { TryOutController, SwaggerUI } from 'developer_portal';
 import Button from '@material-ui/core/Button';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Banner from 'AppComponents/Shared/Banner';
-import 'AppComponents/Shared/testconsole.css';
 import ApiContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import uuid from 'uuid/v4';
 
