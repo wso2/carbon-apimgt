@@ -78,6 +78,9 @@ class ApplicationFormHandler extends React.Component {
         };
         this.handleAddChip = this.handleAddChip.bind(this);
         this.handleDeleteChip = this.handleDeleteChip.bind(this);
+        const { match: { params } } = this.props;
+
+        this.backLink = props.location.pathname.indexOf('/fromView') === -1 ? '/applications/' : `/applications/${params.application_id}/`
     }
 
     /**
@@ -471,7 +474,7 @@ class ApplicationFormHandler extends React.Component {
                                         </Button>
                                     </Box>
                                     <Box ml={1}>
-                                        <Link to='/applications/'>
+                                        <Link to={this.backLink}>
                                             <Button variant='text'>
                                                 <FormattedMessage
                                                     id='Applications.Create.ApplicationFormHandler.cancel'
