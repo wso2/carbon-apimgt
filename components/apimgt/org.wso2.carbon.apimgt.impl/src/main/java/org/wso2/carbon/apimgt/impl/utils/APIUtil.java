@@ -279,8 +279,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -9933,6 +9935,23 @@ public final class APIUtil {
             List<APIProductResource> resources = ApiMgtDAO.getInstance().
                     getAPIProductResourceMappings(apiProductIdentifier);
 
+            Map<String, Scope> uniqueAPIProductScopeKeyMappings = new LinkedHashMap<>();
+            for (APIProductResource resource : resources) {
+                List<Scope> resourceScopes = resource.getUriTemplate().retrieveAllScopes();
+                ListIterator it = resourceScopes.listIterator();
+                while (it.hasNext()) {
+                    Scope resourceScope = (Scope) it.next();
+                    String scopeKey = resourceScope.getKey();
+                    if (!uniqueAPIProductScopeKeyMappings.containsKey(scopeKey)) {
+                        resourceScope = getScopeByName(scopeKey, tenantDomainName);
+                        uniqueAPIProductScopeKeyMappings.put(scopeKey, resourceScope);
+                    } else {
+                        resourceScope = uniqueAPIProductScopeKeyMappings.get(scopeKey);
+                    }
+                    it.set(resourceScope);
+                }
+            }
+
             Set<String> tags = new HashSet<String>();
             Tag[] tag = registry.getTags(artifactPath);
             for (Tag tag1 : tag) {
@@ -11320,10 +11339,15 @@ public final class APIUtil {
 
         Map<String, Scope> scopeToKeyMap = new HashMap<>();
         for (String scopeKey : scopeKeys) {
-            Scope scope = KeyManagerHolder.getKeyManagerInstance(tenantDomain).getScopeByName(scopeKey);
+            Scope scope = getScopeByName(scopeKey, tenantDomain);
             scopeToKeyMap.put(scopeKey, scope);
         }
         return scopeToKeyMap;
+    }
+
+    public static Scope getScopeByName(String scopeKey, String tenantDomain) throws APIManagementException {
+
+        return KeyManagerHolder.getKeyManagerInstance(tenantDomain).getScopeByName(scopeKey);
     }
 
     public static KeyManagerConnectorConfiguration getKeyManagerConnectorConfigurationsByConnectorType(String type) {
