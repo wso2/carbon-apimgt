@@ -132,7 +132,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
                 userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
-            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(userId), applicationName, keyType);
+            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
+                    getTenantAwareUsername(userId)), applicationName, keyType);
         } else {
             throw new APIManagementException("Missing required information for OAuth application creation.");
         }
@@ -194,7 +195,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         clientInfo.setClientName(applicationName);
         //todo: run tests by commenting the type
-        clientInfo.setTokenType(info.getTokenType());
+        if (StringUtils.isEmpty(info.getTokenType())) {
+            clientInfo.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        } else {
+            clientInfo.setTokenType(info.getTokenType());
+        }
         clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
@@ -232,7 +237,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
             // Construct the application name subsequent to replacing email domain separator
-            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(userId), applicationName, keyType);
+            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
+                    getTenantAwareUsername(userId)), applicationName, keyType);
         } else {
             throw new APIManagementException("Missing required information for OAuth application update.");
         }
@@ -529,8 +535,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         
         String userInfoEndpoint;
-        if (configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT) != null) {
-            userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USER_INFO_ENDPOINT);
+        if (configuration.getParameter(APIConstants.KeyManager.USERINFO_ENDPOINT) != null) {
+            userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USERINFO_ENDPOINT);
         } else {
             userInfoEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
                     .concat(getTenantAwareContext().trim()).concat
@@ -780,8 +786,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public void attachResourceScopes(API api, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
-        //TODO: remove after scope validation from swagger completes
-        ApiMgtDAO.getInstance().addResourceScopes(api, uriTemplates, tenantDomain);
+        //TODO: Nothing to do here
     }
 
     /**
@@ -833,8 +838,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public void detachResourceScopes(API api, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
-        //TODO: remove after scope validation from swagger completes
-        ApiMgtDAO.getInstance().removeResourceScopes(api.getId(), api.getContext(), uriTemplates, tenantDomain);
+        //TODO: Nothing to do here
     }
 
     /**

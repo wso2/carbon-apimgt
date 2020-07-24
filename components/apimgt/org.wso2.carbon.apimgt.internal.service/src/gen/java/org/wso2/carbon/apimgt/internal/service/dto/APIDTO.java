@@ -25,6 +25,7 @@ public class APIDTO   {
     private String context = null;
     private String policy = null;
     private String apiType = null;
+    private Boolean isDefaultVersion = null;
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
 
   /**
@@ -153,6 +154,24 @@ public class APIDTO   {
   }
 
   /**
+   * Whether this is the default version of the API.
+   **/
+  public APIDTO isDefaultVersion(Boolean isDefaultVersion) {
+    this.isDefaultVersion = isDefaultVersion;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Whether this is the default version of the API.")
+  @JsonProperty("isDefaultVersion")
+  public Boolean isIsDefaultVersion() {
+    return isDefaultVersion;
+  }
+  public void setIsDefaultVersion(Boolean isDefaultVersion) {
+    this.isDefaultVersion = isDefaultVersion;
+  }
+
+  /**
    **/
   public APIDTO urlMappings(List<URLMappingDTO> urlMappings) {
     this.urlMappings = urlMappings;
@@ -186,12 +205,13 @@ public class APIDTO   {
         Objects.equals(context, API.context) &&
         Objects.equals(policy, API.policy) &&
         Objects.equals(apiType, API.apiType) &&
+        Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(urlMappings, API.urlMappings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, provider, name, version, context, policy, apiType, urlMappings);
+    return Objects.hash(apiId, provider, name, version, context, policy, apiType, isDefaultVersion, urlMappings);
   }
 
   @Override
@@ -206,6 +226,7 @@ public class APIDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
+    sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("}");
     return sb.toString();

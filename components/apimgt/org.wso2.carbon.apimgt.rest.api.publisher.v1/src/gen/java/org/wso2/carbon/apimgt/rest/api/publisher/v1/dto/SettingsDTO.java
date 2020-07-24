@@ -27,6 +27,7 @@ public class SettingsDTO   {
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
+    private Boolean crossTenantSubscriptionEnabled = false;
     private List<DeploymentsDTO> deployments = new ArrayList<>();
 
   /**
@@ -152,6 +153,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * Is Cross Tenant Subscriptions Enabled 
+   **/
+  public SettingsDTO crossTenantSubscriptionEnabled(Boolean crossTenantSubscriptionEnabled) {
+    this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Is Cross Tenant Subscriptions Enabled ")
+  @JsonProperty("crossTenantSubscriptionEnabled")
+  public Boolean isCrossTenantSubscriptionEnabled() {
+    return crossTenantSubscriptionEnabled;
+  }
+  public void setCrossTenantSubscriptionEnabled(Boolean crossTenantSubscriptionEnabled) {
+    this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
+  }
+
+  /**
    **/
   public SettingsDTO deployments(List<DeploymentsDTO> deployments) {
     this.deployments = deployments;
@@ -185,12 +204,13 @@ public class SettingsDTO   {
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
+        Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
         Objects.equals(deployments, settings.deployments);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, deployments);
+    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, deployments);
   }
 
   @Override
@@ -205,6 +225,7 @@ public class SettingsDTO   {
     sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
+    sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
     sb.append("    deployments: ").append(toIndentedString(deployments)).append("\n");
     sb.append("}");
     return sb.toString();

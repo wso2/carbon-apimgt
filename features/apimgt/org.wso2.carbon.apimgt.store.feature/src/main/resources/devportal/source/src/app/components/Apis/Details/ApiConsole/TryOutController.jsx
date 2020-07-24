@@ -37,6 +37,7 @@ import AuthManager from 'AppData/AuthManager';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
+import WarningIcon from '@material-ui/icons/Warning';
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
 import Application from '../../../../data/Application';
@@ -89,6 +90,11 @@ const styles = makeStyles((theme) => ({
     menuItem: {
         color: theme.palette.getContrastText(theme.palette.background.paper),
     },
+    warningIcon: {
+        color: '#ff9a00',
+        fontSize: 43,
+        marginRight: 10,
+    },
 }));
 
 /**
@@ -113,6 +119,7 @@ function TryOutController(props) {
     const [subscriptions, setSubscriptions] = useState([]);
     const [selectedApplication, setSelectedApplication] = useState([]);
     const [keyManagers, setKeyManagers] = useState([]);
+    const [selectedKMObject, setSelectedKMObject] = useState(null);
     const apiID = api.id;
     const restApi = new Api();
 
@@ -196,6 +203,10 @@ function TryOutController(props) {
                     const responseKeyManagerList = [];
                     response.body.list.map((item) => responseKeyManagerList.push(item));
                     setKeyManagers(responseKeyManagerList);
+                    const filteredKMs = (responseKeyManagerList.filter((km) => km.name === selectedKeyManager));
+                    if (filteredKMs && filteredKMs.length > 0) {
+                        setSelectedKMObject(filteredKMs[0]);
+                    }
                 })
                 .catch((error) => {
                     if (process.env.NODE_ENV !== 'production') {
@@ -457,6 +468,37 @@ function TryOutController(props) {
                                     defaultMessage='Security'
                                 />
                             </Typography>
+                            <Box mb={1}>
+                                <Typography variant='body1'>
+                                    <Box display='flex'>
+                                        {(selectedKMObject && selectedKMObject.enabled) && (
+                                            <FormattedMessage
+                                                id='Apis.Details.ApiConsole.TryOutController.default.km.msg.one'
+                                                defaultMessage='The Default key manager is selected for try out console.'
+                                            />
+                                        )}
+                                        {(selectedKMObject && !selectedKMObject.enabled) && (
+                                            <>
+                                                <WarningIcon className={classes.warningIcon} />
+                                                <div>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.ApiConsole.TryOutController.default.km.msg.two'
+                                                        defaultMessage={'Try it console is only accessible via the default key manager.'
+                                        + 'But the default key manager is disabled at the moment.'}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+                                        {(selectedKMObject && selectedKMObject.length === 0) && (
+                                            <FormattedMessage
+                                                id='Apis.Details.ApiConsole.TryOutController.default.km.msg.three'
+                                                defaultMessage={'Try it console is only accessible via the default key manager.'
+                                        + 'Something went wrong while selecting the default Key manager.'}
+                                            />
+                                        )}
+                                    </Box>
+                                </Typography>
+                            </Box>
                             <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
                                 <FormattedMessage
                                     id='api.console.security.type.heading'

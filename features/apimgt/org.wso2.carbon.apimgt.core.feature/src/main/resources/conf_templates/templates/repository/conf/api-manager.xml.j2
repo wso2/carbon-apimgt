@@ -19,7 +19,7 @@
     authentication logic relies on this. -->
     <AuthManager>
         <!-- Server URL of the Authentication service -->
-        <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>
+        <ServerURL>{{apim.auth_manager.service_url}}</ServerURL>
         <!-- Admin username for the Authentication manager. -->
         <Username>${admin.username}</Username>
         <!-- Admin password for the Authentication manager. -->
@@ -480,6 +480,7 @@
 
         <!--This parameter specifies whether Anonymous Mode is enabled. By default it is true.-->
         <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
+        <EnableCrossTenantSubscription>{{apim.devportal.enable_cross_tenant_subscriptions}}</EnableCrossTenantSubscription>
     </APIStore>
 
     <APIPublisher>

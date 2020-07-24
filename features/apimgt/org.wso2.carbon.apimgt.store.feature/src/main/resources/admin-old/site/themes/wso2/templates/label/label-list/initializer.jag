@@ -1,7 +1,0 @@
-<%
-jagg.initializer("label/label-list", {
-    preInitialize:function (){
-        jagg.addHeaderJS("label/label-list/", "jagg", "templates/label/label-list/js/manage.js");
-    }
-});
-%>

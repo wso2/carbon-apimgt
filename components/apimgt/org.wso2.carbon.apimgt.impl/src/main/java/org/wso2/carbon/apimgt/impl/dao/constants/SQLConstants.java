@@ -3467,7 +3467,8 @@ public class SQLConstants {
             "WHERE TENANT_ID = ?";
     public static final String GET_SHARED_SCOPE_USAGE_COUNT_BY_TENANT =
             "SELECT SS.NAME, SS.UUID, "
-                    + "(SELECT COUNT(*) FROM AM_API_RESOURCE_SCOPE_MAPPING RSM WHERE RSM.SCOPE_NAME=SS.NAME ) usages "
+                    + "(SELECT COUNT(*) FROM AM_API_RESOURCE_SCOPE_MAPPING RSM WHERE RSM.SCOPE_NAME=SS.NAME AND "
+                    + "RSM.TENANT_ID = ?) usages "
                     + "FROM AM_SHARED_SCOPE SS "
                     + "WHERE SS.TENANT_ID = ?";
     public static final String GET_SHARED_SCOPE_API_USAGE_BY_TENANT =
@@ -3478,7 +3479,7 @@ public class SQLConstants {
                     + "AARSM.URL_MAPPING_ID=AAUM.URL_MAPPING_ID AND "
                     + "AAUM.API_ID=AA.API_ID AND "
                     + "ASSC.UUID=? AND "
-                    + "ASSC.TENANT_ID=? "
+                    + "AARSM.TENANT_ID=? "
                     + "GROUP BY AA.API_ID, AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER";
 
     public static final String GET_SHARED_SCOPE_URI_USAGE_BY_TENANT =
@@ -3489,7 +3490,7 @@ public class SQLConstants {
                     + "AARSM.URL_MAPPING_ID=AAUM.URL_MAPPING_ID AND "
                     + "AAUM.API_ID=AA.API_ID AND "
                     + "ASSC.UUID=? AND "
-                    + "ASSC.TENANT_ID=? AND "
+                    + "AARSM.TENANT_ID=? AND "
                     + "AA.API_ID=?";
 
     //Resource Scope related constants

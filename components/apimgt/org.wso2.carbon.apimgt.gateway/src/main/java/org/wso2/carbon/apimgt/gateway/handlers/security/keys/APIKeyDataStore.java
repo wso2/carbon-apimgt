@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +93,18 @@ public interface APIKeyDataStore {
      */
     APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
                                                  String tenantDomain, String keyManager)
+            throws APISecurityException;
+
+    /**
+     * Validate scopes bound to the resource of the API being invoked against the scopes of the token.
+     *
+     * @param tokenValidationContext Token validation context
+     * @param tenantDomain           Tenant domain
+     * @return <code>true</code> if scope validation is successful and
+     * <code>false</code> if scope validation failed
+     * @throws APISecurityException in case of scope validation failure
+     */
+    boolean validateScopes(TokenValidationContext tokenValidationContext, String tenantDomain)
             throws APISecurityException;
 
     /**
