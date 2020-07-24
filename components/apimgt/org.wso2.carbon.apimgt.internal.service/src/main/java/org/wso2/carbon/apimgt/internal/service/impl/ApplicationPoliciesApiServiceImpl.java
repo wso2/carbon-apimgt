@@ -61,7 +61,7 @@ public class ApplicationPoliciesApiServiceImpl implements ApplicationPoliciesApi
         } else {
             if (StringUtils.isNotEmpty(policyName)) {
                 return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                        "X-WSo2-Tenant header is missing.").build();
+                        "X-WSO2-Tenant header is missing.").build();
             } else {
                 if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(validatedTenantDomain) &&
                         InternalServiceDataUtil.isUserAuthorizedToTenant(validatedTenantDomain)) {

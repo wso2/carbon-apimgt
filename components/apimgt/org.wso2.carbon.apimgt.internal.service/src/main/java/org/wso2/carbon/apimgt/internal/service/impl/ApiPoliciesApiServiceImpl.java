@@ -60,7 +60,7 @@ public class ApiPoliciesApiServiceImpl implements ApiPoliciesApiService {
             } else {
                 if (StringUtils.isNotEmpty(policyName)) {
                     return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                            "X-WSo2-Tenant header is missing.").build();
+                            "X-WSO2-Tenant header is missing.").build();
                 }
             }
             return Response.ok().entity(InternalServiceDataUtil.
