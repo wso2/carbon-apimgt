@@ -1,9 +1,0 @@
-<%
-jagg.initializer("reports", {
-
-    preInitialize:function () {
-        jagg.addFooterJS("reportGen", "jagg", "templates/reports/js/reports.js");
-    }
-});
-%>
-

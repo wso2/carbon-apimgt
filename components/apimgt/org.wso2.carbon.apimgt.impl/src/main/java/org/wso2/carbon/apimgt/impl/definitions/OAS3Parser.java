@@ -1330,21 +1330,6 @@ public class OAS3Parser extends APIDefinition {
         if (checkDefault == null) {
             return false;
         }
-
-        OAuthFlows oAuthFlows = checkDefault.getFlows();
-        if (oAuthFlows == null) {
-            return false;
-        }
-
-        OAuthFlow oAuthFlow = oAuthFlows.getImplicit();
-        if (oAuthFlow == null) {
-            return false;
-        }
-
-        Scopes scopes = oAuthFlow.getScopes();
-        if (scopes.isEmpty()) {
-            return false;
-        }
         return true;
     }
 

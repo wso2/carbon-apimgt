@@ -170,7 +170,7 @@ public enum SubscriptionAvailabilityEnum {
 }
 
     @Scope(name = "apim:api_publish", description="", value ="")
-    private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
+    private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.CURRENT_TENANT;
     private List<String> subscriptionAvailableTenants = new ArrayList<>();
     @Scope(name = "apim:api_publish", description="", value ="")
     private Map<String, String> additionalProperties = new HashMap<>();

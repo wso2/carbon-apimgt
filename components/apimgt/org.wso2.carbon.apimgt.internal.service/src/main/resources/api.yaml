@@ -642,6 +642,10 @@ definitions:
         type: string
         description: Type of the API.
         example: APIProduct
+      isDefaultVersion:
+        type: boolean
+        description: Whether this is the default version of the API.
+        example: false
       urlMappings:
         type: array
         items:

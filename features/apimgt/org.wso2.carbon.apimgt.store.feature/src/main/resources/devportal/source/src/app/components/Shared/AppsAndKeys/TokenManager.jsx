@@ -21,11 +21,6 @@ import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import Icon from '@material-ui/core/Icon';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -36,6 +31,7 @@ import ImportExternalApp from 'AppComponents/Shared/AppsAndKeys/ImportExternalAp
 import Application from 'AppData/Application';
 import AuthManager from 'AppData/AuthManager';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import API from 'AppData/api';
 import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
@@ -54,6 +50,7 @@ const styles = (theme) => ({
             backgroundColor: '#f8f8f8',
             color: '#9d9d9d',
         },
+        position: 'relative',
     },
     button: {
         marginLeft: 0,
@@ -198,7 +195,7 @@ class TokenManager extends React.Component {
                 validityTime: 3600,
                 scopes: ['default'],
             },
-            keyManagers: [],
+            keyManagers: null,
             selectedTab: null,
             providedConsumerKey: '',
             providedConsumerSecret: '',
@@ -256,7 +253,7 @@ class TokenManager extends React.Component {
             const newRequest = {
                 ...keyRequest,
                 callbackUrl,
-                selectedGrantTypes: supportedGrantTypes || availableGrantTypes,
+                selectedGrantTypes: supportedGrantTypes || availableGrantTypes.filter(type => (type !== 'authorization_code' && type !== 'implicit')),
                 additionalProperties: additionalProperties || this.getDefaultAdditionalProperties(selectedKM),
             };
             this.setState({ keyRequest: newRequest, selectedTab: newSelectedTab });
@@ -265,7 +262,7 @@ class TokenManager extends React.Component {
             this.setState({
                 keyRequest: {
                     ...keyRequest,
-                    selectedGrantTypes: availableGrantTypes,
+                    selectedGrantTypes: availableGrantTypes.filter(type => (type !== 'authorization_code' && type !== 'implicit')),
                     additionalProperties: this.getDefaultAdditionalProperties(selectedKM)
                 },
                 selectedTab: newSelectedTab,
@@ -287,8 +284,14 @@ class TokenManager extends React.Component {
                 .then((response) => {
                     // processing promisedKeyManagers response
                     const responseKeyManagerList = [];
-                    response[0].body.list.map((item) => responseKeyManagerList.push(item));
+                    response[0].body.list.map((item) => {
+                        if (item.enabled) responseKeyManagerList.push(item);
+                    });
 
+                    if (responseKeyManagerList.length === 0) {
+                        this.setState({ keyManagers: [] });
+                        return;
+                    }
                     // Selecting a key manager from the list of key managers.
                     let { selectedTab } = this.state;
                     if (!selectedTab && responseKeyManagerList.length > 0) {
@@ -311,12 +314,12 @@ class TokenManager extends React.Component {
                         this.setState({ keys, keyRequest: newRequest, keyManagers: responseKeyManagerList, selectedTab });
                     } else {
                         const selectdKMGrants = selectdKM.availableGrantTypes || [];
-                        
+
                         this.setState({
                             keys,
                             keyRequest: {
                                 ...keyRequest,
-                                selectedGrantTypes: selectdKMGrants.filter(type => type !== 'authorization_code'),
+                                selectedGrantTypes: selectdKMGrants.filter(type => (type !== 'authorization_code' && type !== 'implicit')),
                                 additionalProperties: this.getDefaultAdditionalProperties(selectdKM),
                             },
                             keyManagers: responseKeyManagerList,
@@ -553,6 +556,30 @@ class TokenManager extends React.Component {
             keys, keyRequest, isLoading, isKeyJWT, providedConsumerKey,
             providedConsumerSecret, generateEnabled, selectedTab, keyManagers, validating,
         } = this.state;
+        if (keyManagers && keyManagers.length === 0) {
+            return <div className={classes.root}>
+                <Box mb={1}>
+                    <Typography variant='h5' className={classes.keyTitle}>
+                        {this.toTitleCase(keyType)}
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.TokenManager.oauth2.keys.main.title'
+                            defaultMessage=' OAuth2 Keys'
+                        />
+                    </Typography>
+                </Box>
+                <InlineMessage type='info' className={classes.dialogContainer}>
+                    <Typography variant='h5' component='h3'>
+                        <FormattedMessage id='Shared.AppsAndKeys.TokenManager.no.km' defaultMessage='No Key Managers' />
+                    </Typography>
+                    <Typography component='p'>
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.TokenManager.no.km.content'
+                            defaultMessage='No Key Managers active to generate keys.'
+                        />
+                    </Typography>
+                </InlineMessage>
+            </div>
+        }
         if (!keys || !selectedTab || !keyRequest.selectedGrantTypes) {
             return <Loading />;
         }
@@ -611,7 +638,9 @@ class TokenManager extends React.Component {
         }
         const settingsContext = this.context;
         const { mapExistingAuthApps } = settingsContext.settings;
-
+        if (keyManagers.length === 0) {
+            return <div>kkkd</div>
+        }
         return (
             <>
                 {(keyManagers && keyManagers.length > 1) && (<StyledTabs
@@ -630,12 +659,11 @@ class TokenManager extends React.Component {
                         <Typography variant='h5' className={classes.keyTitle}>
                             {this.toTitleCase(keyType)}
                             <FormattedMessage
-                                id='Applications.Details.oauth2.keys.main.title'
+                                id='Shared.AppsAndKeys.TokenManager.oauth2.keys.main.title'
                                 defaultMessage=' OAuth2 Keys'
                             />
                         </Typography>
                     </Box>
-
                     {(keyManagers && keyManagers.length > 0) && keyManagers.map(keymanager => (
                         <TabPanel value={selectedTab} index={keymanager.name} className={classes.tabPanel}>
                             <Box display='flex' flexDirection='row'>
@@ -648,11 +676,11 @@ class TokenManager extends React.Component {
                                 {
                                     mapExistingAuthApps && (
                                         <Box ml={2}>
-                                            <ImportExternalApp 
+                                            <ImportExternalApp
                                                 onChange={this.handleOnChangeProvidedOAuth}
                                                 consumerKey={providedConsumerKey}
                                                 consumerSecret={providedConsumerSecret}
-                                                isUserOwner={isUserOwner} 
+                                                isUserOwner={isUserOwner}
                                                 key={key}
                                                 provideOAuthKeySecret={this.provideOAuthKeySecret}
                                             />

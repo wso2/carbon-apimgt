@@ -1,7 +1,0 @@
-<%
-jagg.initializer("tier/manage", {
-    preInitialize:function () {
-        jagg.addHeaderJS("tier/manage", "jagg", "templates/tier/manage/js/manage.js");
-    }
-});
-%>
