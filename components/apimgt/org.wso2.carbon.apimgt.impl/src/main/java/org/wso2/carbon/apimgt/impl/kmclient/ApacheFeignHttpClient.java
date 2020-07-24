@@ -50,6 +50,8 @@ import feign.Client;
 import feign.Request;
 import feign.Response;
 import feign.Util;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 import static feign.Util.UTF_8;
 
 /***
@@ -100,7 +102,7 @@ public final class ApacheFeignHttpClient implements Client {
 
         // request query params
         List<NameValuePair> queryParams =
-                URLEncodedUtils.parse(uri, "UTF-8");
+                URLEncodedUtils.parse(uri, APIConstants.DigestAuthConstants.CHARSET);
         for (NameValuePair queryParam : queryParams) {
             requestBuilder.addParameter(queryParam);
         }
