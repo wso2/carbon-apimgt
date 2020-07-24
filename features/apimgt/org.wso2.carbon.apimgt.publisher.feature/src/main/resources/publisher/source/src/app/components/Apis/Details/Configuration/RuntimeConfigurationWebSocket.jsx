@@ -27,9 +27,9 @@ import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
+import ArrowForwardIcon from '@material-ui/icons/SettingsEthernet';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
-import MaxBackendTps from './components/MaxBackendTps';
 import Endpoints from './components/Endpoints';
 import KeyManager from './components/KeyManager';
 import APILevelRateLimitingPolicies from './components/APILevelRateLimitingPolicies';
@@ -43,6 +43,11 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: theme.spacing(3),
+    },
+    boxFlex: {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
     },
     mainTitle: {
         paddingLeft: 0,
@@ -60,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
     heading: {
         fontSize: '1.1rem',
         fontWeight: 400,
-        marginBottom: theme.spacing(0),
+        marginBottom: theme.spacing(1),
     },
     itemPadding: {
         marginBottom: theme.spacing(3),
@@ -69,15 +74,8 @@ const useStyles = makeStyles((theme) => ({
         fontSize: 50,
         color: '#ccc',
         position: 'absolute',
-        top: 90,
-        right: -43,
-    },
-    arrowBackIcon: {
-        fontSize: 50,
-        color: '#ccc',
-        position: 'absolute',
-        top: 30,
-        right: -71,
+        top: 175,
+        right: -55,
     },
     expansionPanel: {
         marginBottom: theme.spacing(1),
@@ -216,26 +214,39 @@ export default function RuntimeConfiguration() {
             </Box>
             <div className={classes.contentWrapper}>
                 <Grid container direction='row' justify='space-around' alignItems='stretch' spacing={8}>
-                    <Grid item xs={12} md={7}>
-                        <Grid
-                            direction=' column'
-                            justify='space-between'
-                            alignItems='stretch'
-                            spacing={6}
-                        >
-                            <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
-                                <Paper className={classes.paper} elevation={0}>
+                    <Grid item xs={12} md={7} style={{ marginBottom: 30, position: 'relative' }}>
+                        <Typography className={classes.heading} variant='h6'>
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.RuntimeConfigurationWebSocket.section.client.websocket'
+                                defaultMessage='Client Websocket'
+                            />
+                        </Typography>
+                        <div className={classes.boxFlex}>
+                            <Paper
+                                className={classes.paper}
+                                elevation={0}
+                                style={{ display: 'flex', alignItems: 'center' }}
+                            >
+                                <Box pr={3}>
                                     <KeyManager api={apiConfig} configDispatcher={configDispatcher} />
+                                </Box>
+                                <Box pr={3}>
                                     <APILevelRateLimitingPolicies api={apiConfig} configDispatcher={configDispatcher} />
-                                </Paper>
-                            </Grid>
-                        </Grid>
+                                </Box>
+                            </Paper>
+                            <ArrowForwardIcon className={classes.arrowForwardIcon} />
+                        </div>
                     </Grid>
-                    <Grid item xs={12} md={5}>
+                    <Grid item xs={12} md={4}>
+                        <Typography className={classes.heading} variant='h6'>
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.RuntimeConfigurationWebSocket.section.backend.websocket'
+                                defaultMessage='Backend Websocket'
+                            />
+                        </Typography>
                         <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
                             {!api.isAPIProduct() && (
                                 <>
-                                    <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
                                     <Endpoints api={api} />
                                 </>
                             )}

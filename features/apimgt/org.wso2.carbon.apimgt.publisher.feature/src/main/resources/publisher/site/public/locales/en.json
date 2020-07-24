@@ -171,6 +171,8 @@
   "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": "Please refer respective APIs for endpoint information",
   "Apis.Details.Configuration.RuntimeConfiguration.section.fault": "Fault",
   "Apis.Details.Configuration.RuntimeConfiguration.topic.header": "Runtime Configurations",
+  "Apis.Details.Configuration.RuntimeConfigurationWebSocket.section.backend.websocket": "Backend Websocket",
+  "Apis.Details.Configuration.RuntimeConfigurationWebSocket.section.client.websocket": "Client Websocket",
   "Apis.Details.Configuration.RuntimeConfigurationWebSocket.topic.header": "Runtime Configurations",
   "Apis.Details.Configuration.components.APILevelRateLimitingPolicies.configuration": "Rate Limiting Configuration",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.add.success": "Certificate added successfully",

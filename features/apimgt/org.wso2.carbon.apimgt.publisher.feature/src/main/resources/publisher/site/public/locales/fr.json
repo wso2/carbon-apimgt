@@ -171,6 +171,8 @@
   "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": "",
   "Apis.Details.Configuration.RuntimeConfiguration.section.fault": "",
   "Apis.Details.Configuration.RuntimeConfiguration.topic.header": "",
+  "Apis.Details.Configuration.RuntimeConfigurationWebSocket.section.backend.websocket": "",
+  "Apis.Details.Configuration.RuntimeConfigurationWebSocket.section.client.websocket": "",
   "Apis.Details.Configuration.RuntimeConfigurationWebSocket.topic.header": "",
   "Apis.Details.Configuration.components.APILevelRateLimitingPolicies.configuration": "",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.add.success": "",

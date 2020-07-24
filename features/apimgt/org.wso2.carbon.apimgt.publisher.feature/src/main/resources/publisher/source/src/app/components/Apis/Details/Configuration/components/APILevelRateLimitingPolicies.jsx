@@ -139,7 +139,7 @@ export default function APILevelRateLimitingPolicies(props) {
                                 label='Rate limiting policies'
                                 margin='dense'
                                 variant='outlined'
-                                style={{ display: 'flex', minWidth: 256 }}
+                                style={{ display: 'flex', minWidth: 180 }}
                             >
                                 {apiRateLimits.map((rateLimit) => (
                                     <MenuItem key={rateLimit.name} value={rateLimit.name}>
