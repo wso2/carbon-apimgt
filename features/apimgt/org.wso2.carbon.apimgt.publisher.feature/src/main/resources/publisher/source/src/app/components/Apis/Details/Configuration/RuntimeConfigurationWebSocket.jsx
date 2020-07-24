@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -27,12 +27,12 @@ import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
-import ArrowForwardIcon from '@material-ui/icons/SettingsEthernet';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
 import MaxBackendTps from './components/MaxBackendTps';
 import Endpoints from './components/Endpoints';
 import KeyManager from './components/KeyManager';
+import APILevelRateLimitingPolicies from './components/APILevelRateLimitingPolicies';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -107,7 +107,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Object} Deep copy of an object
  */
 function copyAPIConfig(api) {
-    const keyManagers = api.type === 'APIProduct' ? ['all'] : [...api.keyManagers];
+    const keyManagers = api.apiType === 'APIProduct' ? ['all'] : [...api.keyManagers];
     return {
         id: api.id,
         name: api.name,
@@ -118,6 +118,7 @@ function copyAPIConfig(api) {
         responseCachingEnabled: api.responseCachingEnabled,
         cacheTimeout: api.cacheTimeout,
         visibility: api.visibility,
+        apiThrottlingPolicy: api.apiThrottlingPolicy,
         isDefaultVersion: api.isDefaultVersion,
         enableSchemaValidation: api.enableSchemaValidation,
         accessControlRoles: [...api.accessControlRoles],
@@ -156,11 +157,19 @@ export default function RuntimeConfiguration() {
         const { action, value } = configAction;
         const nextState = { ...copyAPIConfig(state) };
         switch (action) {
+            case 'apiThrottlingPolicy':
             case 'maxTps':
                 nextState[action] = value;
                 return nextState;
             case 'keymanagers':
                 nextState.keyManagers = value;
+                return nextState;
+            case 'throttlingPoliciesEnabled':
+                if (value) {
+                    nextState.apiThrottlingPolicy = '';
+                } else {
+                    nextState.apiThrottlingPolicy = null;
+                }
                 return nextState;
             case 'allKeyManagersEnabled':
                 if (value) {
@@ -207,23 +216,26 @@ export default function RuntimeConfiguration() {
             </Box>
             <div className={classes.contentWrapper}>
                 <Grid container direction='row' justify='space-around' alignItems='stretch' spacing={8}>
-                    <Grid item xs={12} md={7} style={{ marginBottom: 30, position: 'relative' }}>
-                        <Paper className={classes.paper} elevation={0} style={{ display: 'flex' }}>
-                            <Box pr={3}>
-                                <KeyManager api={apiConfig} configDispatcher={configDispatcher} />
-                            </Box>
-                            {!api.isAPIProduct() && (
-                                <>
-                                    <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
-                                </>
-                            )}
-                        </Paper>
-                        <ArrowForwardIcon className={classes.arrowForwardIcon} />
+                    <Grid item xs={12} md={7}>
+                        <Grid
+                            direction=' column'
+                            justify='space-between'
+                            alignItems='stretch'
+                            spacing={6}
+                        >
+                            <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
+                                <Paper className={classes.paper} elevation={0}>
+                                    <KeyManager api={apiConfig} configDispatcher={configDispatcher} />
+                                    <APILevelRateLimitingPolicies api={apiConfig} configDispatcher={configDispatcher} />
+                                </Paper>
+                            </Grid>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={5}>
                         <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
                             {!api.isAPIProduct() && (
                                 <>
+                                    <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
                                     <Endpoints api={api} />
                                 </>
                             )}
