@@ -89,20 +89,20 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_SUBSCRIPTION_SQL =
             "SELECT " +
-                    "   SUBSCRIPTION_ID AS SUB_ID," +
-                    "   TIER_ID AS TIER," +
-                    "   API_ID AS API_ID," +
-                    "   APPLICATION_ID AS APP_ID," +
+                    "   SUBS.SUBSCRIPTION_ID AS SUB_ID," +
+                    "   SUBS.TIER_ID AS TIER," +
+                    "   SUBS.API_ID AS API_ID," +
+                    "   SUBS.APPLICATION_ID AS APP_ID," +
                     "   SUB_STATUS AS STATUS" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUBS," +
                     "   AM_APPLICATION APP," +
                     "   AM_SUBSCRIBER SUB" +
                     " WHERE " +
-                    "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
+                    "   APP_ID = APP.APPLICATION_ID AND " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
                     "   API_ID = ? AND " +
-                    "   APPLICATION_ID = ? AND" +
+                    "   APP_ID = ? AND" +
                     "   SUB.TENANT_ID = ? ";
 
     public static final String GET_ALL_SUBSCRIPTION_POLICIES_SQL =
