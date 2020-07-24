@@ -2483,22 +2483,18 @@ public class SQLConstants {
                 + "WHERE AKM.CONSUMER_KEY = ? AND AKM.APPLICATION_ID = SUB.APPLICATION_ID";
 
     public static final String GET_SCOPE_ROLES_OF_APPLICATION_SQL =
-            "SELECT "
-                    + "DISTINCT A.NAME, D.SCOPE_BINDING "
-                    + "FROM (("
-                    + "IDN_OAUTH2_SCOPE A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING B ON A.NAME = B.SCOPE_NAME "
-                    + "INNER JOIN AM_API_URL_MAPPING C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
-                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING D ON A.SCOPE_ID = D.SCOPE_ID) "
-                    + "WHERE C.API_ID IN (";
-
-    public static final String GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL =
-            "SELECT "
-                    + "DISTINCT A.NAME, D.SCOPE_BINDING "
-                    + "FROM (("
-                    + "IDN_OAUTH2_SCOPE A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING B ON A.NAME = B.SCOPE_NAME "
-                    + "INNER JOIN AM_API_URL_MAPPING C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
-                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING D ON A.SCOPE_ID = D.SCOPE_ID) "
-                    + "WHERE C.API_ID IN (";
+            "SELECT DISTINCT A.NAME, D.SCOPE_BINDING "
+                    + "FROM ("
+                    + " (IDN_OAUTH2_SCOPE A "
+                    + "     INNER JOIN "
+                    + "  AM_API_RESOURCE_SCOPE_MAPPING B1 ON A.TENANT_ID = B1.TENANT_ID "
+                    + "     INNER JOIN "
+                    + "  AM_API_RESOURCE_SCOPE_MAPPING B2 ON A.NAME = B2.SCOPE_NAME "
+                    + "     INNER JOIN "
+                    + "  AM_API_URL_MAPPING C ON B1.URL_MAPPING_ID = C.URL_MAPPING_ID"
+                    + " ) LEFT JOIN "
+                    + " IDN_OAUTH2_SCOPE_BINDING D ON A.SCOPE_ID = D.SCOPE_ID"
+                    + ") WHERE C.API_ID IN (";
 
     public static final String CLOSING_BRACE = ")";
 
