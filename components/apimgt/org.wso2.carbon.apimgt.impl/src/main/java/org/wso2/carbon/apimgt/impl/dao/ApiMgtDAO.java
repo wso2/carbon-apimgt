@@ -9617,10 +9617,6 @@ public class ApiMgtDAO {
                 String apiIdList = StringUtils.join(apiIdSet, ", ");
                 String sqlQuery =
                         SQLConstants.GET_SCOPE_ROLES_OF_APPLICATION_SQL + apiIdList + SQLConstants.CLOSING_BRACE;
-                if (conn.getMetaData().getDriverName().contains("Oracle")) {
-                    sqlQuery = SQLConstants.GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL + apiIdList
-                            + SQLConstants.CLOSING_BRACE;
-                }
                 ps = conn.prepareStatement(sqlQuery);
                 resultSet = ps.executeQuery();
                 while (resultSet.next()) {
