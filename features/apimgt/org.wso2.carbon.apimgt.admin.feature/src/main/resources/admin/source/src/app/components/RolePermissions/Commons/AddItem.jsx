@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
@@ -33,27 +33,18 @@ import CircularProgress from '@material-ui/core/CircularProgress';
  */
 function AddItem(props) {
     const {
-        buttonText, title, children, onSave, disabled, isSaving, saveButtonText,
+        title, children, onSave, disabled, isSaving, saveButtonText, dialogActions, onClose, dialogProps,
     } = props;
-    const [isOpen, setIsOpen] = useState(false);
-    const handleDialogClose = () => setIsOpen(false);
+    const { disableBackdropClick } = dialogProps;
     return (
         <>
-            <Button
-                variant='contained'
-                color='primary'
-                disabled={disabled}
-                onClick={() => setIsOpen(true)}
-            >
-                {buttonText}
-            </Button>
-
             <Dialog
                 fullWidth
                 maxWidth='sm'
-                open={isOpen}
-                onClose={handleDialogClose}
+                open
+                onClose={onClose}
                 aria-labelledby='form-dialog-title'
+                disableBackdropClick={disableBackdropClick}
             >
                 <DialogTitle id='form-dialog-title'>{title}</DialogTitle>
                 <DialogContent dividers>
@@ -62,12 +53,16 @@ function AddItem(props) {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDialogClose}>
-                        Cancel
-                    </Button>
-                    <Button onClick={onSave} color='primary' variant='contained' disabled={disabled}>
-                        {isSaving ? <CircularProgress size={16} /> : <>{saveButtonText}</>}
-                    </Button>
+                    {dialogActions || (
+                        <>
+                            <Button onClick={onClose}>
+                                Cancel
+                            </Button>
+                            <Button onClick={onSave} color='primary' variant='contained' disabled={disabled}>
+                                {isSaving ? <CircularProgress size={16} /> : <>{saveButtonText}</>}
+                            </Button>
+                        </>
+                    )}
                 </DialogActions>
             </Dialog>
         </>
@@ -78,10 +73,12 @@ AddItem.defaultProps = {
     isSaving: false,
     disabled: false,
     saveButtonText: 'Save',
+    dialogProps: { disableBackdropClick: false },
 };
 
 AddItem.propTypes = {
     buttonText: PropTypes.shape({}).isRequired,
+    dialogProps: PropTypes.shape({ disableBackdropClick: PropTypes.bool }),
     title: PropTypes.shape({}).isRequired,
     onSave: PropTypes.func.isRequired,
     isSaving: PropTypes.bool,

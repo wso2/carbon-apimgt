@@ -24,29 +24,6 @@ import TablePagination from '@material-ui/core/TablePagination';
 
 import { TableContextProvider } from './AdminTableContext';
 
-/**
- *
- *
- * @param {*} name
- * @param {*} calories
- * @param {*} fat
- * @param {*} carbs
- * @param {*} protein
- * @returns
- */
-function createData(name, protein) {
-    return {
-        name, protein,
-    };
-}
-
-const rows = [
-    createData('Cupcake', 4.3),
-    createData('Donut', 4.9),
-    createData('Eclair', 6.0),
-];
-
-
 const useStyles = makeStyles((theme) => ({
     root: {
         width: '100%',
@@ -75,6 +52,9 @@ export default function AdminTable(props) {
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+    
+
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -126,7 +106,7 @@ export default function AdminTable(props) {
                     </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={rowsPerPageOptions || [10, 25, 50]} // use default prop
+                    rowsPerPageOptions={rowsPerPageOptions || [5, 10, 40]} // use default prop
                     component='div'
                     count={rows.length}
                     rowsPerPage={rowsPerPage}

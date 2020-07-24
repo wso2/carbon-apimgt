@@ -1,19 +1,34 @@
-import React, { useEffect, useState } from 'react';
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+import React, { useEffect, useState, useCallback } from 'react';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import PermissionAPI from 'AppData/PermissionScopes';
-import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Alert from 'AppComponents/Shared/Alert';
 import Progress from 'AppComponents/Shared/Progress';
+import Button from '@material-ui/core/Button';
 
 import PermissionsSelector from './TreeView/PermissionsSelector';
-import PermissionTree from './TreeView/PermissionTree';
-
-import AdminTable from './AdminTable';
-import AdminTableHead from './AdminTableHead';
-import TableBody from './AdminTableBody';
-import ListAddOns from './ListAddOns';
-import AddItem from './AddItem';
+import AdminTable from './AdminTable/AdminTable';
+import AdminTableHead from './AdminTable/AdminTableHead';
+import TableBody from './AdminTable/AdminTableBody';
+import ListAddOns from './Commons/ListAddOns';
+import AddRoleWizard from './Commons/AddRoleWizard';
 
 
 /**
@@ -62,8 +77,24 @@ function extractMappings(permissionMapping) {
 export default function ListRoles() {
     const [permissionMappings, setPermissionMappings] = useState();
     const [appMappings, setAppMappings] = useState();
-    const [newRole, setNewRole] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
 
+    const handleSave = useCallback(
+        (updatedAppMappings) => {
+            const payload = [];
+            for (const appScopes of Object.values(updatedAppMappings)) {
+                for (const scope of appScopes) {
+                    payload.push({ ...scope, roles: scope.roles.join(',') });
+                }
+            }
+            return PermissionAPI.updateSystemScopes({ count: payload.length, list: payload }).then((data) => {
+                const [roleMapping, appMapping] = extractMappings(data.body.list);
+                setPermissionMappings(roleMapping);
+                setAppMappings(appMapping);
+            });
+        },
+        [],
+    );
     useEffect(() => {
         PermissionAPI.systemScopes().then(
             (data) => {
@@ -77,14 +108,7 @@ export default function ListRoles() {
             console.error(error);
         });
     }, []);
-    const onAddRole = () => {
-        if (permissionMappings.find((role) => role === newRole) || !newRole) {
-            alert('Role already exsists or role empty !!');
-            return;
-        }
-        setPermissionMappings([...permissionMappings, newRole]);
-        setNewRole('');
-    };
+
     const permissionCheckHandler = (event) => {
         const {
             name: scopeName, checked, role: selectedRole, app,
@@ -118,21 +142,23 @@ export default function ListRoles() {
         <ContentBase title='Role Permissions'>
             <ListAddOns>
                 <Grid item>
-                    <AddItem onSave={onAddRole} title='Add new role permissions' buttonText='Add role permissions'>
-                        <TextField
-                            value={newRole}
-                            label='Role Name'
-                            variant='outlined'
-                            onChange={({ target: { value } }) => {
-                                setNewRole(value);
-                            }}
-                            onKeyDown={(event) => (event.which === 13
-                                || event.keyCode === 13
-                                || event.key === 'Enter')
-                                && onAddRole()}
-                        />
-                        {/* <PermissionTree onCheck={() => {}} role={newRole} appMappings={appMappings} /> */}
-                    </AddItem>
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        onClick={() => setIsOpen(true)}
+                    >
+                        Add role permission
+                    </Button>
+                    {
+                        isOpen && (
+                            <AddRoleWizard
+                                permissionMappings={permissionMappings}
+                                appMappings={appMappings}
+                                onClose={() => setIsOpen(false)}
+                                onRoleAdd={handleSave}
+                            />
+                        )
+                    }
                 </Grid>
             </ListAddOns>
             <AdminTable multiSelect={false}>
@@ -142,6 +168,7 @@ export default function ListRoles() {
                         onCheck={permissionCheckHandler}
                         role={role}
                         appMappings={appMappings}
+                        onSave={handleSave}
                     />];
                 })}
                 />
