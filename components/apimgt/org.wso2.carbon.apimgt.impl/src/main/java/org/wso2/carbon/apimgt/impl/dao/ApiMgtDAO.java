@@ -6117,92 +6117,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Adds URI templates define for an API
-     *
-     * @param apiId
-     * @param api
-     * @param connection
-     * @throws APIManagementException
-     */
-    public void addURLTemplates(int apiId, API api, Connection connection) throws APIManagementException {
-        if (apiId == -1) {
-            //application addition has failed
-            return;
-        }
-        PreparedStatement prepStmt = null;
-        PreparedStatement scopePrepStmt = null;
-
-        String query = SQLConstants.ADD_URL_MAPPING_SQL;
-        String scopeQuery = SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL;
-        try {
-            prepStmt = connection.prepareStatement(query);
-            scopePrepStmt = connection.prepareStatement(scopeQuery);
-
-            Iterator<URITemplate> uriTemplateIterator = api.getUriTemplates().iterator();
-            URITemplate uriTemplate;
-            for (; uriTemplateIterator.hasNext(); ) {
-                uriTemplate = uriTemplateIterator.next();
-
-                prepStmt.setInt(1, apiId);
-                prepStmt.setString(2, uriTemplate.getHTTPVerb());
-                prepStmt.setString(3, uriTemplate.getAuthType());
-                prepStmt.setString(4, uriTemplate.getUriTemplate());
-                //If API policy is available then set it for all the resources.
-                if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
-                    prepStmt.setString(5, (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) ?
-                            APIConstants.UNLIMITED_TIER :
-                            uriTemplate.getThrottlingTier());
-                } else {
-                    prepStmt.setString(5,
-                            (StringUtils.isEmpty(api.getApiLevelPolicy())) ? APIConstants.UNLIMITED_TIER : api.getApiLevelPolicy());
-                }
-                InputStream is;
-                if (uriTemplate.getMediationScript() != null) {
-                    is = new ByteArrayInputStream(uriTemplate.getMediationScript().getBytes(Charset.defaultCharset()));
-                } else {
-                    is = null;
-                }
-                if (connection.getMetaData().getDriverName().contains("PostgreSQL") || connection.getMetaData()
-                        .getDatabaseProductName().contains("DB2")) {
-                    if (uriTemplate.getMediationScript() != null) {
-                        prepStmt.setBinaryStream(6, is, uriTemplate.getMediationScript().getBytes(Charset.defaultCharset()).length);
-                    } else {
-                        prepStmt.setBinaryStream(6, is, 0);
-                    }
-                } else {
-                    prepStmt.setBinaryStream(6, is);
-                }
-                prepStmt.addBatch();
-                if (uriTemplate.getScope() != null) {
-                    scopePrepStmt.setString(1, APIUtil.getResourceKey(api, uriTemplate));
-
-                    if (Integer.parseInt(uriTemplate.getScope().getId()) == 0) {
-                        String scopeKey = uriTemplate.getScope().getKey();
-                        Scope scopeByKey = APIUtil.findScopeByKey(api.getScopes(), scopeKey);
-                        if (scopeByKey != null && Integer.parseInt(scopeByKey.getId()) > 0) {
-                            uriTemplate.getScopes().setId(scopeByKey.getId());
-                        }
-                    }
-
-                    scopePrepStmt.setInt(2, Integer.parseInt(uriTemplate.getScope().getId()));
-                    scopePrepStmt.setInt(3, APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(api.getId()
-                            .getProviderName())));
-                    scopePrepStmt.addBatch();
-                }
-            }
-            prepStmt.executeBatch();
-            prepStmt.clearBatch();
-            scopePrepStmt.executeBatch();
-            scopePrepStmt.clearBatch();
-        } catch (SQLException e) {
-            handleException("Error while adding URL template(s) to the database for API : " + api.getId(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, null, null);
-            APIMgtDBUtil.closeAllConnections(scopePrepStmt, null, null);
-        }
-    }
-
-    /**
      * Checks whether application is accessible to the specified user
      *
      * @param applicationID ID of the Application
@@ -14328,25 +14242,18 @@ public class ApiMgtDAO {
                         uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
                         uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));
                         uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
-                        uriTemplate.setId(rs.getInt("URL_MAPPING_ID"));
+                        int uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                        uriTemplate.setId(uriTemplateId);
                         uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
                         uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
 
-                        String resourceScopeKey = APIUtil.getResourceKey(rs.getString("CONTEXT"),
-                                rs.getString("API_VERSION"), uriTemplate.getUriTemplate(),
-                                uriTemplate.getHTTPVerb());
                         try (PreparedStatement scopesStatement = connection.
-                                prepareStatement(SQLConstants.GET_SCOPES_BY_RESOURCE_PATHS)) {
-                            scopesStatement.setString(1, resourceScopeKey);
+                                prepareStatement(SQLConstants.GET_SCOPE_KEYS_BY_URL_MAPPING_ID)) {
+                            scopesStatement.setInt(1, uriTemplateId);
                             try (ResultSet scopesResult = scopesStatement.executeQuery()) {
                                 while (scopesResult.next()) {
                                     Scope scope = new Scope();
-                                    scope.setKey(scopesResult.getString("NAME"));
-                                    scope.setDescription(scopesResult.getString("DESCRIPTION"));
-                                    scope.setId(String.valueOf(scopesResult.getInt("SCOPE_ID")));
-                                    scope.setName(scopesResult.getString("DISPLAY_NAME"));
-                                    scope.setRoles(scopesResult.getString("SCOPE_BINDING"));
-                                    uriTemplate.setScope(scope);
+                                    scope.setKey(scopesResult.getString("SCOPE_NAME"));
                                     uriTemplate.setScopes(scope);
                                 }
                             }

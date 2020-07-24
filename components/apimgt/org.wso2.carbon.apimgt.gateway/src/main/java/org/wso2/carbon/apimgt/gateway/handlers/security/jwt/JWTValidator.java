@@ -154,8 +154,6 @@ public class JWTValidator {
 
         if (jwtValidationInfo != null) {
             if (jwtValidationInfo.isValid()) {
-                // Validate scopes
-                validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, jwtToken);
 
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO;
@@ -167,6 +165,9 @@ public class JWTValidator {
                     log.debug("Subscription validation via Key Manager. Status: "
                             + apiKeyValidationInfoDTO.isAuthorized());
                 }
+
+                // Validate scopes
+                validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, jwtToken);
 
                 if (apiKeyValidationInfoDTO.isAuthorized()) {
                     /*
