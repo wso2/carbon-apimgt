@@ -751,6 +751,8 @@ public final class APIConstants {
     public static final String API_STORE_API_KEY_ALIAS = API_STORE + "ApiKeyAlias";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
     public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
+    public static final String API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION = API_STORE +
+            "EnableCrossTenantSubscription";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
@@ -2275,7 +2277,6 @@ public final class APIConstants {
         public static final String CERTIFICATE_TYPE_PEM_FILE = "PEM";
         public static final String EVENT_PUBLISHER_CONFIGURATIONS = "EventPublisherConfiguration";
         public static final String KEY_MANAGER_TYPE_HEADER = "X-WSO2-KEY-MANAGER";
-        public static final String USER_INFO_ENDPOINT = "user_info_endpoint";
         public static final String ACCESS_TOKEN = "accessToken";
         public static final String AUTH_CODE = "authCode";
         public static final String CLAIM_DIALECT = "dialect";
