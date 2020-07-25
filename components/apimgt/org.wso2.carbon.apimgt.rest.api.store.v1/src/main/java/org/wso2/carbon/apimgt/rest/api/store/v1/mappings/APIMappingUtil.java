@@ -327,7 +327,7 @@ public class APIMappingUtil {
         dto.setTiers(tiersToReturn);
 
         List<APIOperationsDTO> operationList = new ArrayList<>();
-        Map<String, ScopeInfoDTO> uniqueScope = new HashMap<>();
+        Map<String, ScopeInfoDTO> uniqueScopes = new HashMap<>();
         for (APIProductResource productResource : model.getProductResources()) {
             URITemplate uriTemplate = productResource.getUriTemplate();
             APIOperationsDTO operation = new APIOperationsDTO();
@@ -335,20 +335,22 @@ public class APIMappingUtil {
             operation.setVerb(uriTemplate.getHTTPVerb());
             operationList.add(operation);
 
-            Scope scope = uriTemplate.getScope();
-            if (scope != null && !uniqueScope.containsKey(scope.getKey())) {
-                ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO().
-                        key(scope.getKey()).
-                        name(scope.getName()).
-                        description(scope.getDescription()).
-                        roles(Arrays.asList(scope.getRoles().split(",")));
-                uniqueScope.put(scope.getKey(), scopeInfoDTO);
+            List<Scope> scopes = uriTemplate.retrieveAllScopes();
+            for (Scope scope : scopes) {
+                if (!uniqueScopes.containsKey(scope.getKey())) {
+                    ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO().
+                            key(scope.getKey()).
+                            name(scope.getName()).
+                            description(scope.getDescription()).
+                            roles(Arrays.asList(scope.getRoles().split(",")));
+                    uniqueScopes.put(scope.getKey(), scopeInfoDTO);
+                }
             }
         }
 
         dto.setOperations(operationList);
 
-        dto.setScopes(new ArrayList<>(uniqueScope.values()));
+        dto.setScopes(new ArrayList<>(uniqueScopes.values()));
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
 

@@ -3092,14 +3092,8 @@ public class SQLConstants {
                 "ON PROD_MAP.URL_MAPPING_ID = API_UM.URL_MAPPING_ID " +
             "WHERE PROD_MAP.API_ID = ?";
 
-    public static final String GET_SCOPES_BY_RESOURCE_PATHS =
-            "SELECT SCOPE.NAME, SCOPE.DISPLAY_NAME, SCOPE.DESCRIPTION, SCOPE.SCOPE_ID , BINDING.SCOPE_BINDING " +
-            "FROM IDN_OAUTH2_SCOPE SCOPE " +
-            "INNER JOIN IDN_OAUTH2_SCOPE_BINDING BINDING " +
-                "ON BINDING.SCOPE_ID = SCOPE.SCOPE_ID " +
-            "INNER JOIN IDN_OAUTH2_RESOURCE_SCOPE RES_SCOPE " +
-                "ON RES_SCOPE.SCOPE_ID = SCOPE.SCOPE_ID " +
-            "WHERE RES_SCOPE.RESOURCE_PATH = ?";
+    public static final String GET_SCOPE_KEYS_BY_URL_MAPPING_ID =
+            "SELECT SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE URL_MAPPING_ID = ?" ;
 
     /** API Categories related constants **/
 
@@ -3560,18 +3554,6 @@ public class SQLConstants {
 
     }
 
-    //TODO: Need remove after KM seperation
-    public static final String
-            REMOVE_OAUTH2_RESOURCE_SCOPE_SQL =
-            " DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_ID IN "
-                    + "(SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?) "
-                    + "AND RESOURCE_PATH = ?";
-
-    public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
-            "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH, SCOPE_ID, TENANT_ID) VALUES (?,?,?)";
-
-    public static final String GET_OAUTH2_SCOPE_ID_BY_NAME_SQL =
-            "SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =
                 " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED," +

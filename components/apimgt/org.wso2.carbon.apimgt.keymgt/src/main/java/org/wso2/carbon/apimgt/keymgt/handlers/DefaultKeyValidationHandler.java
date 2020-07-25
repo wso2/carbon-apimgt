@@ -231,7 +231,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                         }
                     }
                     if (!validate && urlMapping.getScopes().size() > 0) {
-                        return false;
+                        break;
                     }
                 }
             }
