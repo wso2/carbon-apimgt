@@ -177,7 +177,9 @@ export default function AddRoleWizard(props) {
                                                 fullWidth
                                                 label='Role Name'
                                                 helperText={
-                                                    validation.role || 'Type role name of an existing user role'
+                                                    validation.role
+                                                    || 'Type existing user role, '
+                                                    + ' If not create a new role from carbon console first'
                                                 }
                                                 variant='outlined'
                                                 onChange={({ target: { value } }) => {

@@ -34,7 +34,7 @@ import AddRoleWizard from './Commons/AddRoleWizard';
 
 const headCells = [
     {
-        id: 'roles', numeric: false, disablePadding: false, label: 'Roles',
+        numeric: false, disablePadding: false, label: 'Roles',
     },
     {
         id: 'permissions', numeric: false, disablePadding: false, label: 'Permissions',
@@ -185,14 +185,16 @@ export default function ListRoles() {
                                 appMappings={appMappings}
                                 onSave={handleScopeMappingUpdate}
                             />
-                            <DeletePermission
-                                size='small'
-                                variant='outlined'
-                                onDelete={handleDeleteRole}
-                                role={role}
-                            >
-                                Delete
-                            </DeletePermission>
+                            <Box pl={1} display='inline'>
+                                <DeletePermission
+                                    size='small'
+                                    variant='outlined'
+                                    onDelete={handleDeleteRole}
+                                    role={role}
+                                >
+                                    Delete
+                                </DeletePermission>
+                            </Box>
                         </Box>,
                     ];
                 })}

@@ -117,7 +117,7 @@ export default function PermissionsSelector(props) {
                         variant='contained'
                         color='primary'
                         onClick={handleSave}
-                        disable={isSaving}
+                        disabled={isSaving}
                     >
                         {isSaving && <CircularProgress size={16} />}
                         Save

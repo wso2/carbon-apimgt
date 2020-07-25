@@ -111,7 +111,7 @@ export default function DeletePermission(props) {
                         color='primary'
                         onClick={handleConfirmation}
                         id={role}
-                        disable={isDeleting}
+                        disabled={isDeleting}
                     >
                         {isDeleting && <CircularProgress size={16} />}
                         Delete
