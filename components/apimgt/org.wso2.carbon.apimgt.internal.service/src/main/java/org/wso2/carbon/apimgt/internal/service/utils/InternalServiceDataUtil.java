@@ -355,21 +355,15 @@ public class InternalServiceDataUtil {
         if (isCrossTenantAccess || MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(targetTenantDomain)) {
             String superAdminRole = null;
             try {
-                superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
+                superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(
+                        MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
             } catch (UserStoreException e) {
                 RestApiUtil.handleInternalServerError("Error in getting super admin role name", e, log);
             }
 
             //check whether logged in user is a super tenant user
-            String superTenantDomain = null;
-            try {
-                superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                        getSuperTenantDomain();
-            } catch (UserStoreException e) {
-                RestApiUtil.handleInternalServerError("Error in getting the super tenant domain", e, log);
-            }
-            boolean isSuperTenantUser = RestApiUtil.getLoggedInUserTenantDomain().equals(superTenantDomain);
+            boolean isSuperTenantUser = RestApiUtil.getLoggedInUserTenantDomain().equals(
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             if (!isSuperTenantUser) {
                 String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
                         " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a super " +

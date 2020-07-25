@@ -99,10 +99,10 @@ public class SubscriptionValidationSQLConstants {
                     "   AM_APPLICATION APP," +
                     "   AM_SUBSCRIBER SUB" +
                     " WHERE " +
-                    "   APP_ID = APP.APPLICATION_ID AND " +
+                    "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
-                    "   API_ID = ? AND " +
-                    "   APP_ID = ? AND" +
+                    "   SUBS.API_ID = ? AND " +
+                    "   SUBS.APPLICATION_ID = ? AND" +
                     "   SUB.TENANT_ID = ? ";
 
     public static final String GET_ALL_SUBSCRIPTION_POLICIES_SQL =
