@@ -137,53 +137,33 @@ public class ApplicationImportExportManager {
                 Set<Object> apiSet = (Set<Object>) matchedAPIs.get("apis");
                 if (apiSet != null && !apiSet.isEmpty()) {
                     Object type = apiSet.iterator().next();
-                    //Check whether the object is an ApiProduct
+                    ApiTypeWrapper apiTypeWrapper = null;
+                    //Check whether the object is ApiProduct
                     if (isApiProduct(type)) {
-                        //Handle Api Product subscriptions
                         APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
-                        //tier of the imported subscription
-                        Tier tier = subscribedAPI.getTier();
-                        //checking whether the target tier is available
-                        if (isTierAvailableForProduct(tier, apiProduct) && apiProduct.getState() != null &&
-                                APIConstants.PUBLISHED.equals(apiProduct.getState())) {
-                            ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiProduct);
-                            apiTypeWrapper.setTier(tier.getName());
-                            // add subscription if update flag is not specified
-                            // it will throw an error if subscriber already exists
-                            if (update == null || !update) {
-                                apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
-                            } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId, appId)) {
-                                // on update skip subscriptions that already exists
-                                apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
-                            }
-                        } else {
-                            log.error("Failed to import Subscription as API " + name + "-" + version +
-                                    " as one or more tiers may be unavailable or the API may not have been published ");
-                            skippedAPIList.add(subscribedAPI.getApiId());
+                        apiTypeWrapper = new ApiTypeWrapper(apiProduct);
+                    } else {
+                        API api = (API) apiSet.iterator().next();
+                        apiTypeWrapper = new ApiTypeWrapper(api);
+                    }
+                    //tier of the imported subscription
+                    Tier tier = subscribedAPI.getTier();
+                    //checking whether the target tier is available
+                    if (isTierAvailable(tier, apiTypeWrapper) && apiTypeWrapper.getStatus() != null &&
+                            APIConstants.PUBLISHED.equals(apiTypeWrapper.getStatus())) {
+                        apiTypeWrapper.setTier(tier.getName());
+                        // add subscription if update flag is not specified
+                        // it will throw an error if subscriber already exists
+                        if (update == null || !update) {
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
+                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId, appId)) {
+                            // on update skip subscriptions that already exists
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
                         }
                     } else {
-                        //Handle API subscriptions
-                        API api = (API) apiSet.iterator().next();
-                        //tier of the imported subscription
-                        Tier tier = subscribedAPI.getTier();
-                        //checking whether the target tier is available
-                        if (isTierAvailable(tier, api) && api.getStatus() != null &&
-                                APIConstants.PUBLISHED.equals(api.getStatus())) {
-                            ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-                            apiTypeWrapper.setTier(tier.getName());
-                            // add subscription if update flag is not specified
-                            // it will throw an error if subscriber already exists
-                            if (update == null || !update) {
-                                apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
-                            } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId, appId)) {
-                                // on update skip subscriptions that already exists
-                                apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
-                            }
-                        } else {
-                            log.error("Failed to import Subscription as API " + name + "-" + version +
-                                    " as one or more tiers may be unavailable or the API may not have been published ");
-                            skippedAPIList.add(subscribedAPI.getApiId());
-                        }
+                        log.error("Failed to import Subscription as API/API Product " + name + "-" + version +
+                                " as one or more tiers may be unavailable or the API/API Product may not have been published ");
+                        skippedAPIList.add(subscribedAPI.getApiId());
                     }
                 } else {
                     log.error("Failed to import Subscription as API " + name + "-" + version + " is not available");
@@ -200,18 +180,31 @@ public class ApplicationImportExportManager {
     /**
      * Check whether a target Tier is available to subscribe
      *
-     * @param targetTier Target Tier
-     * @param api        - {@link API}
+     * @param targetTier     Target Tier
+     * @param apiTypeWrapper - {@link ApiTypeWrapper}
      * @return true, if the target tier is available
      */
-    private boolean isTierAvailable(Tier targetTier, API api) {
-        APIIdentifier apiId = api.getId();
-        Set<Tier> availableTiers = api.getAvailableTiers();
+    private boolean isTierAvailable(Tier targetTier, ApiTypeWrapper apiTypeWrapper) {
+        Set<Tier> availableTiers = null;
+        API api = null;
+        APIProduct apiProduct = null;
+        if (!apiTypeWrapper.isAPIProduct()) {
+            api = apiTypeWrapper.getApi();
+            availableTiers = api.getAvailableTiers();
+        } else {
+            apiProduct = apiTypeWrapper.getApiProduct();
+            availableTiers = apiProduct.getAvailableTiers();
+        }
         if (availableTiers.contains(targetTier)) {
             return true;
         } else {
-            log.error("Tier:" + targetTier.getName() + " is not available for API " + apiId.getApiName() + "-" +
-                    apiId.getVersion());
+            if (!apiTypeWrapper.isAPIProduct()) {
+                log.error("Tier:" + targetTier.getName() + " is not available for API " + api.getId().getApiName() + "-" +
+                        api.getId().getVersion());
+            } else {
+                log.error("Tier:" + targetTier.getName() + " is not available for API Product " + apiProduct.getId().getName() + "-" +
+                        apiProduct.getId().getVersion());
+            }
             return false;
         }
     }
@@ -228,25 +221,6 @@ public class ApplicationImportExportManager {
             APIProduct apiProduct = (APIProduct) object;
             return (apiProduct != null) ? true : false;
         } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /**
-     * Check whether a target Tier is available to subscribe
-     *
-     * @param targetTier Target Tier
-     * @param apiProduct - {@link APIProduct}
-     * @return true, if the target tier is available
-     */
-    private boolean isTierAvailableForProduct(Tier targetTier, APIProduct apiProduct) {
-        APIProductIdentifier apiProductId = apiProduct.getId();
-        Set<Tier> availableTiers = apiProduct.getAvailableTiers();
-        if (availableTiers.contains(targetTier)) {
-            return true;
-        } else {
-            log.error("Tier:" + targetTier.getName() + " is not available for API Product " + apiProductId.getName() + "-" +
-                    apiProductId.getVersion());
             return false;
         }
     }
