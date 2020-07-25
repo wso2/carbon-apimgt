@@ -99,7 +99,7 @@ public class ApplicationImportExportManager {
     }
 
     /**
-     * Import and add subscriptions of a particular application for the available APIs
+     * Import and add subscriptions of a particular application for the available APIs and API products
      *
      * @param appDetails details of the imported application
      * @param userId     username of the subscriber
@@ -137,8 +137,9 @@ public class ApplicationImportExportManager {
                 Set<Object> apiSet = (Set<Object>) matchedAPIs.get("apis");
                 if (apiSet != null && !apiSet.isEmpty()) {
                     Object type = apiSet.iterator().next();
-
+                    //Check whether the object is an ApiProduct
                     if (isApiProduct(type)) {
+                        //Handle Api Product subscriptions
                         APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
                         //tier of the imported subscription
                         Tier tier = subscribedAPI.getTier();
@@ -161,6 +162,7 @@ public class ApplicationImportExportManager {
                             skippedAPIList.add(subscribedAPI.getApiId());
                         }
                     } else {
+                        //Handle API subscriptions
                         API api = (API) apiSet.iterator().next();
                         //tier of the imported subscription
                         Tier tier = subscribedAPI.getTier();
@@ -214,19 +216,18 @@ public class ApplicationImportExportManager {
         }
     }
 
-//    /**
-//     * Check whether a target Tier is available to subscribe
-//     *
-//     * @param targetTier Target Tier
-//     * @param api        - {@link API}
-//     * @return true, if the target tier is available
-//     */
+    /**
+     * Check whether the object is a type of ApiProduct
+     *
+     * @param object        - {@link Object}
+     * @return true, if the object is an ApiProduct, otherwise false
+     */
     private boolean isApiProduct(Object object) {
-
-        try{
+        try {
+            //Cast object to ApiProduct
             APIProduct apiProduct = (APIProduct) object;
-            return  (apiProduct != null) ?  true:  false;
-        } catch (Exception e){
+            return (apiProduct != null) ? true : false;
+        } catch (Exception e) {
             return false;
         }
     }
@@ -239,13 +240,13 @@ public class ApplicationImportExportManager {
      * @return true, if the target tier is available
      */
     private boolean isTierAvailableForProduct(Tier targetTier, APIProduct apiProduct) {
-        APIProductIdentifier apiId = apiProduct.getId();
+        APIProductIdentifier apiProductId = apiProduct.getId();
         Set<Tier> availableTiers = apiProduct.getAvailableTiers();
         if (availableTiers.contains(targetTier)) {
             return true;
         } else {
-            log.error("Tier:" + targetTier.getName() + " is not available for API " + apiId.getName() + "-" +
-                    apiId.getVersion());
+            log.error("Tier:" + targetTier.getName() + " is not available for API Product " + apiProductId.getName() + "-" +
+                    apiProductId.getVersion());
             return false;
         }
     }
