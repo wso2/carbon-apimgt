@@ -105,7 +105,7 @@ export default function AddRoleWizard(props) {
             return;
         }
         setIsSaving(true);
-        onRoleAdd(localAppMappings)
+        Promise.resolve(onRoleAdd(localAppMappings))
             .then(() => {
                 Alert.info(
                     <span>

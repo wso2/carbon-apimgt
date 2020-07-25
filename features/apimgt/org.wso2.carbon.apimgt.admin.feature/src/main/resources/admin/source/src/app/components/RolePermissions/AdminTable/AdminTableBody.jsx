@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
@@ -82,9 +82,14 @@ function stableSort(array, comparator) {
  */
 function AdminTableBody(props) {
     const {
-        selected, setSelected, rowsPerPage, page, order, orderBy, multiSelect,
+        selected, setSelected, rowsPerPage, page, order, orderBy, multiSelect, setDataIDs,
     } = useTableContext();
     const { rows } = props;
+
+    useEffect(() => {
+        setDataIDs(rows.map((element) => element[0]));
+    }, [rows]);
+
     const handleClick = (event, name) => {
         const selectedIndex = selected.indexOf(name);
         let newSelected = [];
@@ -124,6 +129,7 @@ function AdminTableBody(props) {
                             tabIndex={-1}
                             key={key}
                             selected={isItemSelected}
+
                         >
                             {multiSelect && (
                                 <TableCell padding='checkbox'>
@@ -133,12 +139,13 @@ function AdminTableBody(props) {
                                     />
                                 </TableCell>
                             )}
-                            {row.map((column) => (
+                            {row.map((column, index) => (
                                 <TableCell
                                     component='th'
                                     id={labelId}
                                     scope='row'
                                     padding={multiSelect ? 'none' : 'default'}
+                                    align={index === 0 ? 'left' : 'right'}
                                 >
                                     {column}
                                 </TableCell>
@@ -147,7 +154,7 @@ function AdminTableBody(props) {
                     );
                 })}
             {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
+                <TableRow style={{ height: 60 * emptyRows }}>
                     <TableCell colSpan={6} />
                 </TableRow>
             )}

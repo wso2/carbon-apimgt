@@ -50,10 +50,9 @@ export default function AdminTable(props) {
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
+    const [dataIDs, setDataIDs] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
-    
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -63,7 +62,7 @@ export default function AdminTable(props) {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelecteds = rows.map((n) => n.name);
+            const newSelecteds = dataIDs.map((n) => n.name);
             setSelected(newSelecteds);
             return;
         }
@@ -85,13 +84,14 @@ export default function AdminTable(props) {
             order,
             orderBy,
             numSelected: selected.length,
-            rowCount: rows.length,
+            rowCount: dataIDs.length,
             onRequestSort: handleRequestSort,
             multiSelect,
             selected,
             setSelected,
             rowsPerPage,
             page,
+            setDataIDs,
         }}
         >
             <div className={classes.root}>
@@ -104,16 +104,17 @@ export default function AdminTable(props) {
                     >
                         {children}
                     </Table>
+                    <TablePagination
+                        rowsPerPageOptions={rowsPerPageOptions || [5, 10, 40]} // use default prop
+                        component='div'
+                        count={dataIDs.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onChangePage={handleChangePage}
+                        onChangeRowsPerPage={handleChangeRowsPerPage}
+                    />
                 </TableContainer>
-                <TablePagination
-                    rowsPerPageOptions={rowsPerPageOptions || [5, 10, 40]} // use default prop
-                    component='div'
-                    count={rows.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onChangePage={handleChangePage}
-                    onChangeRowsPerPage={handleChangeRowsPerPage}
-                />
+
             </div>
         </TableContextProvider>
     );

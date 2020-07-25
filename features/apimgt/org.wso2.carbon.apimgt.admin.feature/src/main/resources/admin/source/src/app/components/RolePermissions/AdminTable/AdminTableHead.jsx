@@ -39,6 +39,9 @@ const useStyles = makeStyles(() => ({
         top: 20,
         width: 1,
     },
+    tableHead: {
+        fontWeight: 800,
+    },
 }));
 
 /**
@@ -72,12 +75,14 @@ function AdminTableHead(props) {
                         />
                     </TableCell>
                 )}
-                {headCells.map((headCell) => (
+                {headCells.map((headCell, index) => (
                     <TableCell
                         key={headCell.id}
-                        align={headCell.numeric ? 'right' : 'left'}
+                        align={index === 0 ? 'left' : 'right'}
                         padding={headCell.disablePadding ? 'none' : 'default'}
                         sortDirection={orderBy === headCell.id ? order : false}
+                        variant='head'
+                        classes={{ head: classes.tableHead }}
                     >
                         <TableSortLabel
                             active={orderBy === headCell.id}

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import cloneDeep from 'lodash.clonedeep';
 import APIClientFactory from 'AppData/APIClientFactory';
 import Resource from './Resource';
 
@@ -35,42 +34,6 @@ class Permissions extends Resource {
         super();
         this.role = role;
         this.scopes = scopes;
-    }
-
-    /**
-     *
-     * @param data
-     * @returns {object} Metadata for API request
-     * @private
-     */
-    _requestMetaData() {
-        Resource._requestMetaData();
-    }
-
-    /**
-     *
-     * Instance method of the API class to provide raw JSON object
-     * which is API body friendly to use with REST api requests
-     * Use this method instead of accessing the private _data object for
-     * converting to a JSON representation of an API object.
-     * Note: This is deep coping, Use sparingly, Else will have a bad impact on performance
-     * Basically this is the revers operation in constructor.
-     * This method simply iterate through all the object properties (excluding the properties in `excludes` list)
-     * and copy their values to new object.
-     * So use this method with care!!
-     * @memberof API
-     * @param {Array} [userExcludes=[]] List of properties that are need to be excluded from the generated JSON object
-     * @returns {JSON} JSON representation of the API
-     */
-    toJSON(userExcludes = []) {
-        const copy = {};
-        const excludes = ['_data', ...userExcludes];
-        for (const prop in this) {
-            if (!excludes.includes(prop)) {
-                copy[prop] = cloneDeep(this[prop]);
-            }
-        }
-        return copy;
     }
 
 
@@ -95,7 +58,15 @@ class Permissions extends Resource {
      * @returns
      * @memberof Permissions
      */
-    static updateSystemScopes(scopeMapping) {
+    static updateSystemScopes(updatedAPIPermissions) {
+        const payload = [];
+        for (const appScopes of Object.values(updatedAPIPermissions)) {
+            for (const scope of appScopes) {
+                payload.push({ ...scope, roles: scope.roles.join(',') });
+            }
+        }
+        const scopeMapping = { count: payload.length, list: payload };
+
         const apiClient = new APIClientFactory().getAPIClient().client;
         return apiClient.then((client) => {
             return client.apis['System Scopes'].updateRolesForScope({ body: scopeMapping });

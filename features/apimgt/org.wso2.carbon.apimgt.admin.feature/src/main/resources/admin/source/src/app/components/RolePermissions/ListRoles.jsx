@@ -22,23 +22,33 @@ import Grid from '@material-ui/core/Grid';
 import Alert from 'AppComponents/Shared/Alert';
 import Progress from 'AppComponents/Shared/Progress';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 
 import PermissionsSelector from './TreeView/PermissionsSelector';
 import AdminTable from './AdminTable/AdminTable';
 import AdminTableHead from './AdminTable/AdminTableHead';
 import TableBody from './AdminTable/AdminTableBody';
 import ListAddOns from './Commons/ListAddOns';
+import DeletePermission from './Commons/DeletePermission';
 import AddRoleWizard from './Commons/AddRoleWizard';
 
+const headCells = [
+    {
+        id: 'roles', numeric: false, disablePadding: false, label: 'Roles',
+    },
+    {
+        id: 'permissions', numeric: false, disablePadding: false, label: 'Permissions',
+    },
+];
 
 /**
  *
- *
- * @param {Array} permissionMapping
- * @returns
+ * Extract the scope mapping against REST API applications and User roles.
+ * This is to make it easy to iterate over the data
+ * @param {Array} permissionMapping Raw scope mapping response received from REST API
+ * @returns {Array} Two values, REST API wise scope mappings and User role wise scope mappings
  */
 function extractMappings(permissionMapping) {
-    // const roles = new Set();
     const roleMapping = {};
     const appMapping = {};
     for (const mapping of permissionMapping) {
@@ -54,7 +64,8 @@ function extractMappings(permissionMapping) {
             appMapping[tag] = [mapping];
         }
         for (const role of rolesList) {
-            const trimmedRole = role.trim();
+            let trimmedRole = role.trim();
+            trimmedRole = trimmedRole || '<No_Name>';
             trimmedRoles.push(trimmedRole);
             if (roleMapping[trimmedRole]) {
                 roleMapping[trimmedRole].push(mapping);
@@ -71,30 +82,34 @@ function extractMappings(permissionMapping) {
 /**
  *
  *
- * @export
- * @returns
+ * @export @inheritdoc
+ * @returns {React.Component} Role -> Permission list component
  */
 export default function ListRoles() {
+    /*
+    Same set of scope mappings, Mapped to corresponding **roles
+    i:e
+        {
+            admin -> [{ name: '', description: '', roles: ''}],
+            .
+            .
+            .
+            Internal/Publisher -> [{ name: '', description: '', roles: ''}],
+        }
+    */
     const [permissionMappings, setPermissionMappings] = useState();
+    /*
+    Same set of scope mappings, Mapped to corresponding **REST APIs
+    i:e
+        {
+            admin -> [{ name: '', description: '', roles: []}],
+            publisher -> [{ name: '', description: '', roles: []}],
+            store -> [{ name: '', description: '', roles: []}],
+        }
+    */
     const [appMappings, setAppMappings] = useState();
     const [isOpen, setIsOpen] = useState(false);
 
-    const handleSave = useCallback(
-        (updatedAppMappings) => {
-            const payload = [];
-            for (const appScopes of Object.values(updatedAppMappings)) {
-                for (const scope of appScopes) {
-                    payload.push({ ...scope, roles: scope.roles.join(',') });
-                }
-            }
-            return PermissionAPI.updateSystemScopes({ count: payload.length, list: payload }).then((data) => {
-                const [roleMapping, appMapping] = extractMappings(data.body.list);
-                setPermissionMappings(roleMapping);
-                setAppMappings(appMapping);
-            });
-        },
-        [],
-    );
     useEffect(() => {
         PermissionAPI.systemScopes().then(
             (data) => {
@@ -109,35 +124,34 @@ export default function ListRoles() {
         });
     }, []);
 
-    const permissionCheckHandler = (event) => {
-        const {
-            name: scopeName, checked, role: selectedRole, app,
-        } = event.target;
-        const newAppMappings = { ...appMappings };
-        newAppMappings[app] = newAppMappings[app].map(({ name, roles, ...rest }) => {
-            if (name === scopeName) {
-                if (checked) {
-                    return { ...rest, name, roles: [...roles, selectedRole] };
-                } else {
-                    return { ...rest, name, roles: roles.filter((role) => selectedRole !== role) };
-                }
-            } else {
-                return { name, roles, ...rest };
-            }
-        });
-        setAppMappings(newAppMappings);
+    /*
+        No need to create handleScopeMappingUpdate all the time ,
+        because we pass the updatedAppMappings, don't take anything from state or props
+        This method is in the `ListRoles` component because we need this method when deleting a permission map
+    */
+    const handleScopeMappingUpdate = useCallback(
+        (updatedAppMappings) => {
+            return PermissionAPI.updateSystemScopes(updatedAppMappings).then((data) => {
+                const [newRoleMapping, newAppMapping] = extractMappings(data.body.list);
+                setPermissionMappings(newRoleMapping);
+                setAppMappings(newAppMapping);
+            });
+        },
+        [],
+    );
+    const handleDeleteRole = (deletedRole) => {
+        const updatedAppMappings = {};
+        for (const [app, permissions] of Object.entries(appMappings)) {
+            updatedAppMappings[app] = permissions.map((permission) => (
+                { ...permission, roles: permission.roles.filter((role) => role !== deletedRole) }
+            ));
+        }
+        return handleScopeMappingUpdate(updatedAppMappings);
     };
+
     if (!permissionMappings || !appMappings) {
         return <Progress message='Resolving user ...' />;
     }
-    const headCells = [
-        {
-            id: 'roles', numeric: false, disablePadding: false, label: 'Roles',
-        },
-        {
-            id: 'permissions', numeric: false, disablePadding: false, label: 'Permissions',
-        },
-    ];
     return (
         <ContentBase title='Role Permissions'>
             <ListAddOns>
@@ -155,7 +169,7 @@ export default function ListRoles() {
                                 permissionMappings={permissionMappings}
                                 appMappings={appMappings}
                                 onClose={() => setIsOpen(false)}
-                                onRoleAdd={handleSave}
+                                onRoleAdd={handleScopeMappingUpdate}
                             />
                         )
                     }
@@ -164,12 +178,23 @@ export default function ListRoles() {
             <AdminTable multiSelect={false}>
                 <AdminTableHead headCells={headCells} />
                 <TableBody rows={Object.entries(permissionMappings).map(([role]) => {
-                    return [role, <PermissionsSelector
-                        onCheck={permissionCheckHandler}
-                        role={role}
-                        appMappings={appMappings}
-                        onSave={handleSave}
-                    />];
+                    return [role,
+                        <Box component='span' display='block'>
+                            <PermissionsSelector
+                                role={role}
+                                appMappings={appMappings}
+                                onSave={handleScopeMappingUpdate}
+                            />
+                            <DeletePermission
+                                size='small'
+                                variant='outlined'
+                                onDelete={handleDeleteRole}
+                                role={role}
+                            >
+                                Delete
+                            </DeletePermission>
+                        </Box>,
+                    ];
                 })}
                 />
             </AdminTable>
