@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.jwt;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
-import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -110,12 +109,11 @@ public class JWTValidator {
      *
      * @param jwtToken The JWT token sent with the API request
      * @param synCtx   The message to be authenticated
-     * @param openAPI  The OpenAPI object of the invoked API
      * @return an AuthenticationContext object which contains the authentication information
      * @throws APISecurityException in case of authentication failure
      */
     @MethodStats
-    public AuthenticationContext authenticate(SignedJWT jwtToken, MessageContext synCtx, OpenAPI openAPI)
+    public AuthenticationContext authenticate(SignedJWT jwtToken, MessageContext synCtx)
             throws APISecurityException {
 
         String tokenSignature = jwtToken.getSignature().toString();

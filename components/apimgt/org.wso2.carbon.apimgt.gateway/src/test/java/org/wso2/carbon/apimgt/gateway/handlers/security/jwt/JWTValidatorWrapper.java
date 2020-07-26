@@ -60,12 +60,6 @@ public class JWTValidatorWrapper extends JWTValidator {
         return gatewayJWTTokenCache;
     }
 
-    @Override
-    protected APIManagerConfiguration getApiManagerConfiguration() {
-
-        return apiManagerConfiguration;
-    }
-
     public void setApiManagerConfiguration(APIManagerConfiguration apiManagerConfiguration) {
 
         this.apiManagerConfiguration = apiManagerConfiguration;

@@ -211,9 +211,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 List<URLMapping> resources = api.getResources();
                 URLMapping urlMapping = null;
                 for (URLMapping mapping : resources) {
-                    if (resource.equals(mapping.getUrlPattern()) && httpVerb.equals(mapping.getHttpMethod())) {
-                        urlMapping = mapping;
-                        break;
+                    if (httpVerb.equals(mapping.getHttpMethod())) {
+                        if (isResourcePathMatching(resource, mapping)) {
+                            urlMapping = mapping;
+                            break;
+                        }
                     }
                 }
                 if (urlMapping != null) {
@@ -242,4 +244,24 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         }
         return scopesValidated;
     }
+
+    private boolean isResourcePathMatching(String resourceString, URLMapping urlMapping) {
+
+        String resource = resourceString.trim();
+        String urlPattern = urlMapping.getUrlPattern().trim();
+
+        if (resource.equalsIgnoreCase(urlPattern)) {
+            return true;
+        }
+
+        // If the urlPattern is only one character longer than the resource and the urlPattern ends with a '/'
+        if (resource.length() + 1 == urlPattern.length() && urlPattern.endsWith("/")) {
+            // Check if resource is equal to urlPattern if the trailing '/' of the urlPattern is ignored
+            String urlPatternWithoutSlash = urlPattern.substring(0, urlPattern.length() - 1);
+            return resource.equalsIgnoreCase(urlPatternWithoutSlash);
+        }
+
+        return false;
+    }
+
 }

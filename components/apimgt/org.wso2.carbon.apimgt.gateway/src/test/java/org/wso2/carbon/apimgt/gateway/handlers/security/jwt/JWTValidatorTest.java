@@ -142,7 +142,7 @@ public class JWTValidatorTest {
                 .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
-        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext);
         Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
@@ -155,7 +155,7 @@ public class JWTValidatorTest {
                 .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
                         "GET");
         Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
-        authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+        authenticate = jwtValidator.authenticate(signedJWT, messageContext);
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
@@ -235,7 +235,7 @@ public class JWTValidatorTest {
                 .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
-        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext);
         Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
@@ -251,7 +251,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis());
         Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
         try {
-            authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+            authenticate = jwtValidator.authenticate(signedJWT, messageContext);
 
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
@@ -333,7 +333,7 @@ public class JWTValidatorTest {
                 .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
-        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext);
         Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
@@ -349,7 +349,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis());
         Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
         try {
-            authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+            authenticate = jwtValidator.authenticate(signedJWT, messageContext);
 
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
@@ -430,7 +430,7 @@ public class JWTValidatorTest {
                 .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
-        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext);
         Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
@@ -443,7 +443,7 @@ public class JWTValidatorTest {
                 .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
                         "GET");
         Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
-        authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+        authenticate = jwtValidator.authenticate(signedJWT, messageContext);
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
@@ -519,7 +519,7 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
         try {
-            AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+            AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext);
             Assert.fail("JWT get Authenticated");
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
@@ -529,7 +529,7 @@ public class JWTValidatorTest {
                 .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
                         "GET");
         try {
-            jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+            jwtValidator.authenticate(signedJWT, messageContext);
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         }
@@ -609,7 +609,7 @@ public class JWTValidatorTest {
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()
                 , Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         try {
-            jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+            jwtValidator.authenticate(signedJWT, messageContext);
             Assert.fail("JWT get Authenticated");
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_FORBIDDEN);
@@ -705,7 +705,7 @@ public class JWTValidatorTest {
                 .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
-        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext);
         Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
@@ -719,7 +719,7 @@ public class JWTValidatorTest {
                         "GET");
         Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
         try {
-            authenticate = jwtValidator.authenticate(tempered, messageContext, openAPI);
+            authenticate = jwtValidator.authenticate(tempered, messageContext);
             Assert.fail("tempered JWT get authenticated");
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
@@ -729,7 +729,7 @@ public class JWTValidatorTest {
         Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
         Mockito.when(invalidTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
         try {
-            authenticate = jwtValidator.authenticate(tempered, messageContext, openAPI);
+            authenticate = jwtValidator.authenticate(tempered, messageContext);
             Assert.fail("tempered JWT get authenticated");
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
@@ -826,7 +826,7 @@ public class JWTValidatorTest {
                 .thenReturn(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
-        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
+        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext);
         Mockito.verify(apiKeyValidator)
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
@@ -840,7 +840,7 @@ public class JWTValidatorTest {
                         "GET");
         Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
         try {
-            jwtValidator.authenticate(tempered, messageContext, openAPI);
+            jwtValidator.authenticate(tempered, messageContext);
             Assert.fail("tempered JWT get authenticated");
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
@@ -849,7 +849,7 @@ public class JWTValidatorTest {
         Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
         Mockito.when(invalidTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("abc.com");
         try {
-            jwtValidator.authenticate(tempered, messageContext, openAPI);
+            jwtValidator.authenticate(tempered, messageContext);
             Assert.fail("tempered JWT get authenticated");
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
