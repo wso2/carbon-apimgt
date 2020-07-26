@@ -17,7 +17,6 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
 import com.nimbusds.jwt.SignedJWT;
-import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -39,12 +38,10 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -55,7 +52,6 @@ import org.wso2.carbon.metrics.manager.Timer;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -114,7 +110,6 @@ public class OAuthAuthenticator implements Authenticator {
     @MethodStats
     public AuthenticationResponse authenticate(MessageContext synCtx) {
         boolean isJwtToken = false;
-        OpenAPI openAPI = null;
         String apiKey = null;
         boolean defaultVersionInvoked = false;
         TracingSpan getClientDomainSpan = null;
@@ -224,9 +219,6 @@ public class OAuthAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
             }
-            //TODO temporarily added. remove this once scope validation is moved to use inmemory maps
-            openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
-            // Find the resource authentication scheme based on the token type
 
             authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
         } catch (APISecurityException ex) {
@@ -305,7 +297,7 @@ public class OAuthAuthenticator implements Authenticator {
             //Start JWT token validation
             if (isJwtToken) {
                 try {
-                    AuthenticationContext authenticationContext = jwtValidator.authenticate(signedJWT, synCtx, openAPI);
+                    AuthenticationContext authenticationContext = jwtValidator.authenticate(signedJWT, synCtx);
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
                     log.debug("User is authorized using JWT token to access the resource.");
                     return new AuthenticationResponse(true, isMandatory, false, 0, null);
