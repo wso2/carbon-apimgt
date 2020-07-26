@@ -1330,21 +1330,6 @@ public class OAS3Parser extends APIDefinition {
         if (checkDefault == null) {
             return false;
         }
-
-        OAuthFlows oAuthFlows = checkDefault.getFlows();
-        if (oAuthFlows == null) {
-            return false;
-        }
-
-        OAuthFlow oAuthFlow = oAuthFlows.getImplicit();
-        if (oAuthFlow == null) {
-            return false;
-        }
-
-        Scopes scopes = oAuthFlow.getScopes();
-        if (scopes.isEmpty()) {
-            return false;
-        }
         return true;
     }
 
@@ -1357,8 +1342,33 @@ public class OAS3Parser extends APIDefinition {
      */
     @Override
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent);
+        Set<Scope> legacyScopes = getScopesFromExtensions(openAPI);
+
+        //In case default scheme already exists we check whether the legacy x-wso2-scopes are there in the default scheme
+        //If not we proceed to process legacy scopes to make sure old local scopes work in migrated pack too.
+        //This is to fix https://github.com/wso2/product-apim/issues/8724
+        if (isDefaultGiven(swaggerContent) && !legacyScopes.isEmpty()) {
+            SecurityScheme defaultScheme = openAPI.getComponents().getSecuritySchemes()
+                    .get(OPENAPI_SECURITY_SCHEMA_KEY);
+            OAuthFlows oAuthFlows = defaultScheme.getFlows();
+            if (oAuthFlows != null) {
+                OAuthFlow oAuthFlow = oAuthFlows.getImplicit();
+                if (oAuthFlow != null) {
+                    Scopes defaultScopes = oAuthFlow.getScopes();
+                    if (defaultScopes != null) {
+                        for (Scope legacyScope : legacyScopes) {
+                            if (!defaultScopes.containsKey(legacyScope.getKey())) {
+                                openAPI = processLegacyScopes(openAPI);
+                                return Json.pretty(openAPI);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (!isDefaultGiven(swaggerContent)) {
-            OpenAPI openAPI = getOpenAPI(swaggerContent);
             openAPI = processLegacyScopes(openAPI);
             openAPI = injectOtherScopesToDefaultScheme(openAPI);
             openAPI = injectOtherResourceScopesToDefaultScheme(openAPI);

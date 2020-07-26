@@ -2483,22 +2483,18 @@ public class SQLConstants {
                 + "WHERE AKM.CONSUMER_KEY = ? AND AKM.APPLICATION_ID = SUB.APPLICATION_ID";
 
     public static final String GET_SCOPE_ROLES_OF_APPLICATION_SQL =
-            "SELECT "
-                    + "DISTINCT A.NAME, D.SCOPE_BINDING "
-                    + "FROM (("
-                    + "IDN_OAUTH2_SCOPE A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING B ON A.NAME = B.SCOPE_NAME "
-                    + "INNER JOIN AM_API_URL_MAPPING C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
-                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING D ON A.SCOPE_ID = D.SCOPE_ID) "
-                    + "WHERE C.API_ID IN (";
-
-    public static final String GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL =
-            "SELECT "
-                    + "DISTINCT A.NAME, D.SCOPE_BINDING "
-                    + "FROM (("
-                    + "IDN_OAUTH2_SCOPE A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING B ON A.NAME = B.SCOPE_NAME "
-                    + "INNER JOIN AM_API_URL_MAPPING C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
-                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING D ON A.SCOPE_ID = D.SCOPE_ID) "
-                    + "WHERE C.API_ID IN (";
+            "SELECT DISTINCT A.NAME, D.SCOPE_BINDING "
+                    + "FROM ("
+                    + " (IDN_OAUTH2_SCOPE A "
+                    + "     INNER JOIN "
+                    + "  AM_API_RESOURCE_SCOPE_MAPPING B1 ON A.TENANT_ID = B1.TENANT_ID "
+                    + "     INNER JOIN "
+                    + "  AM_API_RESOURCE_SCOPE_MAPPING B2 ON A.NAME = B2.SCOPE_NAME "
+                    + "     INNER JOIN "
+                    + "  AM_API_URL_MAPPING C ON B1.URL_MAPPING_ID = C.URL_MAPPING_ID"
+                    + " ) LEFT JOIN "
+                    + " IDN_OAUTH2_SCOPE_BINDING D ON A.SCOPE_ID = D.SCOPE_ID"
+                    + ") WHERE C.API_ID IN (";
 
     public static final String CLOSING_BRACE = ")";
 
@@ -3096,14 +3092,8 @@ public class SQLConstants {
                 "ON PROD_MAP.URL_MAPPING_ID = API_UM.URL_MAPPING_ID " +
             "WHERE PROD_MAP.API_ID = ?";
 
-    public static final String GET_SCOPES_BY_RESOURCE_PATHS =
-            "SELECT SCOPE.NAME, SCOPE.DISPLAY_NAME, SCOPE.DESCRIPTION, SCOPE.SCOPE_ID , BINDING.SCOPE_BINDING " +
-            "FROM IDN_OAUTH2_SCOPE SCOPE " +
-            "INNER JOIN IDN_OAUTH2_SCOPE_BINDING BINDING " +
-                "ON BINDING.SCOPE_ID = SCOPE.SCOPE_ID " +
-            "INNER JOIN IDN_OAUTH2_RESOURCE_SCOPE RES_SCOPE " +
-                "ON RES_SCOPE.SCOPE_ID = SCOPE.SCOPE_ID " +
-            "WHERE RES_SCOPE.RESOURCE_PATH = ?";
+    public static final String GET_SCOPE_KEYS_BY_URL_MAPPING_ID =
+            "SELECT SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE URL_MAPPING_ID = ?" ;
 
     /** API Categories related constants **/
 
@@ -3564,18 +3554,6 @@ public class SQLConstants {
 
     }
 
-    //TODO: Need remove after KM seperation
-    public static final String
-            REMOVE_OAUTH2_RESOURCE_SCOPE_SQL =
-            " DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_ID IN "
-                    + "(SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?) "
-                    + "AND RESOURCE_PATH = ?";
-
-    public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
-            "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH, SCOPE_ID, TENANT_ID) VALUES (?,?,?)";
-
-    public static final String GET_OAUTH2_SCOPE_ID_BY_NAME_SQL =
-            "SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =
                 " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED," +
