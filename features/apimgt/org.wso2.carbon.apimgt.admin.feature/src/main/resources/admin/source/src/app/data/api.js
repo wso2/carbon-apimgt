@@ -135,10 +135,10 @@ class API extends Resource {
     getUserScope(username, scope) {
         return this.client.then((client) => {
             const data = {
-                username,
-                scope,
+                username: username,
+                scopeName: btoa(scope),
             };
-            return client.apis['Settings'].get_settings_scopes__scope_(
+            return client.apis['System Scopes'].systemScopesScopeNameGet(
                 data,
                 this._requestMetaData(),
             );

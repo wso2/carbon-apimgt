@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import 'AppComponents/Shared/testconsole.css';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Progress from 'AppComponents/Shared/Progress';

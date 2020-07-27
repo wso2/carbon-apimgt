@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -27,17 +27,15 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { makeStyles } from '@material-ui/core/styles';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import Chip from '@material-ui/core/Chip';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import API from 'AppData/api';
-import ListItemText from '@material-ui/core/ListItemText';
-import Checkbox from '@material-ui/core/Checkbox';
+
 
 const useStyles = makeStyles((theme) => ({
     expansionPanel: {
@@ -45,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
     },
     expansionPanelDetails: {
         flexDirection: 'column',
+        display: 'inline-flex',
     },
     iconSpace: {
         marginLeft: theme.spacing(0.5),
@@ -66,26 +65,27 @@ const useStyles = makeStyles((theme) => ({
 
 /**
  *
- * KeyManager configuration
+ * API Level Rate Limiting configuration
  * @param {*} props
  * @returns
  */
-export default function KeyManager(props) {
+export default function APILevelRateLimitingPolicies(props) {
     const [apiFromContext] = useAPI();
-    const [keyManagersConfigured, setKeyManagersConfigured] = useState([]);
+    const classes = useStyles();
     const {
         configDispatcher,
-        api: { keyManagers },
+        api: { apiThrottlingPolicy },
     } = props;
-    const classes = useStyles();
+    const [apiRateLimits, setApiRateLimits] = useState([]);
     const handleChange = (event) => {
         configDispatcher({
-            action: 'keymanagers',
+            action: 'apiThrottlingPolicy',
             value: event.target.value,
         });
     };
+
     useEffect(() => {
-        API.keyManagers().then((response) => setKeyManagersConfigured(response.body.list));
+        API.policies('api').then((response) => setApiRateLimits(response.body.list));
     }, []);
 
     return (
@@ -93,17 +93,18 @@ export default function KeyManager(props) {
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography className={classes.subHeading} variant='h6'>
                     <FormattedMessage
-                        id='Apis.Details.Configuration.components.KeyManager.configuration'
-                        defaultMessage='Keymanager Configuration'
+                        id='Apis.Details.Configuration.components.APILevelRateLimitingPolicies.configuration'
+                        defaultMessage='Rate Limiting Configuration'
                     />
                     <Tooltip
                         title={(
                             <FormattedMessage
-                                id='Apis.Details.Keymanager.components.Configuration.tooltip'
-                                defaultMessage='If enabled, the Key Managers for the API will be enabled.'
+                                id='Apis.Details.APILevelRateLimitingPolicies.components.Configuration.tooltip'
+                                defaultMessage={'Selected Rate Limiting Policy will be applied to all the'
+                                + ' requests of this API.'}
                             />
                         )}
-                        aria-label='Key managers'
+                        aria-label='Rate Limiting Policies'
                         placement='right-end'
                         interactive
                     >
@@ -115,9 +116,9 @@ export default function KeyManager(props) {
                     control={(
                         <Switch
                             disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                            checked={!keyManagers.includes('all')}
+                            checked={!(apiThrottlingPolicy === null)}
                             onChange={({ target: { checked } }) => configDispatcher({
-                                action: 'allKeyManagersEnabled',
+                                action: 'throttlingPoliciesEnabled',
                                 value: checked,
                             })}
                             color='primary'
@@ -126,33 +127,26 @@ export default function KeyManager(props) {
                 />
             </ExpansionPanelSummary>
             <ExpansionPanelDetails className={classes.expansionPanelDetails}>
-                <Grid container>
-                    <Grid item md={12}>
-                        {!keyManagers.includes('all') && (
-                            <Grid container>
-                                <Grid item md={12}>
-                                    <Select
-                                        multiple
-                                        value={keyManagers}
-                                        className={classes.keyManagerSelect}
-                                        onChange={handleChange}
-                                        renderValue={(selected) => (
-                                            <div className={classes.chips}>
-                                                {selected.map((value) => (
-                                                    <Chip key={value} label={value} className={classes.chip} />
-                                                ))}
-                                            </div>
-                                        )}
-                                    >
-                                        {keyManagersConfigured.map((key) => (
-                                            <MenuItem key={key.name} value={key.name} disabled={!key.enabled}>
-                                                <Checkbox color='primary' checked={keyManagers.includes(key.name)} />
-                                                <ListItemText primary={key.name} secondary={key.description} />
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </Grid>
-                            </Grid>
+                <Grid container spacing={1} alignItems='center'>
+                    <Grid item md={6} xs={12}>
+                        {!(apiThrottlingPolicy === null) && (
+                            <TextField
+                                disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                id='operation_throttling_policy'
+                                select
+                                value={apiThrottlingPolicy}
+                                onChange={handleChange}
+                                label='Rate limiting policies'
+                                margin='dense'
+                                variant='outlined'
+                                style={{ display: 'flex', minWidth: 180 }}
+                            >
+                                {apiRateLimits.map((rateLimit) => (
+                                    <MenuItem key={rateLimit.name} value={rateLimit.name}>
+                                        {rateLimit.displayName}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
                         )}
                     </Grid>
                 </Grid>
@@ -161,7 +155,7 @@ export default function KeyManager(props) {
     );
 }
 
-KeyManager.propTypes = {
+APILevelRateLimitingPolicies.propTypes = {
     api: PropTypes.shape({}).isRequired,
     configDispatcher: PropTypes.func.isRequired,
 };
