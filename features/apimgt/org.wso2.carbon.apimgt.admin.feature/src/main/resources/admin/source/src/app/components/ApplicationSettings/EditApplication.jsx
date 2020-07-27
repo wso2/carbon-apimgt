@@ -23,7 +23,6 @@ import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
-import Alert from 'AppComponents/Shared/Alert';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -77,26 +76,35 @@ function Edit(props) {
     };
 
     const validateOwner = () => {
-        const valid = { invalid: false, error: '' };
+        let validationError = '';
 
         const applicationsWithSameName = applicationList.filter(
             (app) => app.name === name && app.owner === owner,
         );
 
-        const promiseValidation = new Promise((resolve) => {
+        const promiseValidation = new Promise((resolve, reject) => {
             if (applicationsWithSameName.length > 0) {
-                valid.error = `${owner} already has an application with name: ${name}`;
-                valid.invalid = true;
-                resolve(valid);
+                validationError = `${owner} already has an application with name: ${name}`;
+                reject(validationError);
             }
             const basicScope = 'apim:subscribe';
             restApi.getUserScope(owner, basicScope)
-                .then((result) => {
-                    if (result.body.name !== basicScope) {
-                        valid.error = `${owner} is not a valid Subscriber`;
-                        valid.invalid = true;
+                .then(() => {
+                    // This api returns 200 when only the $owner has the $basicScope.
+                    resolve();
+                }).catch((error) => {
+                    const { response } = error;
+                    // This api returns 404 when the $owner is not found.
+                    // identify the case specially with error code 901502 and display error.
+                    if (response.body) {
+                        if (response.body.code === 901502) {
+                            validationError = `${owner} is not a valid Subscriber`;
+                            reject(validationError);
+                        }
+                    } else {
+                        validationError = 'Something went wrong when validating user';
+                        reject(validationError);
                     }
-                    resolve(valid);
                 });
         });
 
@@ -104,30 +112,25 @@ function Edit(props) {
     };
 
     const formSaveCallback = () => {
-        return validateOwner().then((valid) => {
-            if (valid.invalid) {
-                Alert.error(valid.error);
-                return false;
-            } else {
-                return restApi.updateApplicationOwner(id, owner)
-                    .then(() => {
-                        return (
-                            <FormattedMessage
-                                id='AdminPages.ApplicationSettings.Edit.form.edit.successful'
-                                defaultMessage='Application owner changed successfully'
-                            />
-                        );
-                    })
-                    .catch((error) => {
-                        const { response } = error;
-                        if (response.body) {
-                            throw response.body.description;
-                        }
-                    })
-                    .finally(() => {
-                        updateList();
-                    });
-            }
+        return validateOwner().then(() => {
+            return restApi.updateApplicationOwner(id, owner)
+                .then(() => {
+                    return (
+                        <FormattedMessage
+                            id='AdminPages.ApplicationSettings.Edit.form.edit.successful'
+                            defaultMessage='Application owner changed successfully'
+                        />
+                    );
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response.body) {
+                        throw response.body.description;
+                    }
+                })
+                .finally(() => {
+                    updateList();
+                });
         });
     };
 

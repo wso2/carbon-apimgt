@@ -11154,7 +11154,7 @@ public final class APIUtil {
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS)) {
                 keyManagerConfigurationDTO
-                        .addProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, isMapExistingAuthAppsEnabled());
+                        .addProperty(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS, isMapExistingAuthAppsEnabled());
             }
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)) {

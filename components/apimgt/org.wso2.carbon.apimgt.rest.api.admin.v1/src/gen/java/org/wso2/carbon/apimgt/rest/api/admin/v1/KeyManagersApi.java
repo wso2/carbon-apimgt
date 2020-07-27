@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.KeyManagersApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -36,6 +37,22 @@ public class KeyManagersApi  {
 
 KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
 
+
+    @POST
+    @Path("/discover")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve Well-known information from KeyManager Well-known Endpoint.", notes = "Get all Key managers ", response = KeyManagerWellKnownResponseDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "Key Manager (Collection)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. KeyManagers returned ", response = KeyManagerWellKnownResponseDTO.class) })
+    public Response keyManagersDiscoverPost(@Multipart(value = "url", required = false)  String url, @Multipart(value = "type", required = false)  String type) throws APIManagementException{
+        return delegate.keyManagersDiscoverPost(url, type, securityContext);
+    }
 
     @GET
     

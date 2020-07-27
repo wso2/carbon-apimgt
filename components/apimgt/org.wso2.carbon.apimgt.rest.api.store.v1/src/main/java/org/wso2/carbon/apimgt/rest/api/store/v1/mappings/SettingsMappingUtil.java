@@ -127,7 +127,7 @@ public class SettingsMappingUtil {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
             Map<String, Environment> environments = APIUtil.getEnvironments();
             if (environments.isEmpty()) {
-                settingsDTO.apiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
+                settingsDTO.apiGatewayEndpoint("http://localhost:8280, https://localhost:8243");
             } else {
                 for (Map.Entry<String, Environment> entry : environments.entrySet()) {
                     Environment environment = environments.get(entry.getKey());
