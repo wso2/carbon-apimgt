@@ -1,5 +1,5 @@
-- title: Get all subscription policies
-  id: getAllSubscriptionPolicies
+- title: Retrieve All pending workflow processes
+  id: retrieveAllPendingWorkflowProcesses
   request:
     method: GET
     url: https://localhost:9443/api/am/admin/v1/workflows
@@ -12,17 +12,40 @@
     headers: |
       Content-Type: application/json
     body:
+      {
+        "count": 1,
+        "next": "",
+        "previous": "",
+        "list": [
+        {
+          "workflowType": "APPLICATION_CREATION",
+          "workflowStatus": "CREATED",
+          "createdTime": "2020-07-27 15:31:56.57",
+          "updatedTime": "2020-07-27 15:31:56.57",
+          "referenceId": "2ef7ec5f-2297-49c7-9a95-131fa4802c8b",
+          "properties": {
+            "applicationTier": "10PerMin",
+            "userName": "admin",
+            "applicationName": "TestWorkflowAdminRestAPIs"
+          },
+          "description": "Approve application TestWorkflowAdminRestAPIs creation request from application creator -admin with throttling tier - 10PerMin"
+        }
+        ]
+      }
 
-
-- title: Add a subscription throttling policy
-  id: addSubscriptionThrottlingPolicy
+- title: Update workflow status
+  id: updateWorkflowStatus
   request:
     method: POST
-    url: https://localhost:9443/api/am/admin/v1/workflows/update-workflow-status
+    url: https://localhost:9443/api/am/admin/v1/workflows/update-workflow-status?workflowReferenceId=2ef7ec5f-2297-49c7-9a95-131fa4802c8b
     headers: |
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     body:
-
+      {
+        "status": "APPROVED",
+        "attributes": {},
+        "description": "Approve workflow request"
+      }
   response:
     status:
       code: 200
@@ -30,13 +53,17 @@
     headers: |
       Content-Type: application/json
     body:
+      {
+        "status": "APPROVED",
+        "attributes": {},
+        "description": "Approve workflow request"
+      }
 
-
-- title: Get a subscription policy by Id
-  id: getSubscriptionPolicyById
+- title: Get pending workflow request details by External Workflow Referenc Id
+  id: getPendingRrequestByExternalWorkflowReferencId
   request:
     method: GET
-    url: https://localhost:9443/api/am/admin/v1/workflows/
+    url: https://localhost:9443/api/am/admin/v1/workflows/2ef7ec5f-2297-49c7-9a95-131fa4802c8b
     headers: |
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
   response:
@@ -46,3 +73,16 @@
     headers: |
       Content-Type: application/json
     body:
+      {
+        "workflowType": "APPLICATION_CREATION",
+        "workflowStatus": "CREATED",
+        "createdTime": "2020-07-27 15:31:56.57",
+        "updatedTime": "2020-07-27 15:31:56.57",
+        "referenceId": "2ef7ec5f-2297-49c7-9a95-131fa4802c8b",
+        "properties": {
+          "applicationTier": "10PerMin",
+          "userName": "admin",
+          "applicationName": "TestWorkflowAdminRestAPIs"
+        },
+        "description": "Approve application TestWorkflowAdminRestAPIs creation request from application creator -admin with throttling tier - 10PerMin"
+      }
