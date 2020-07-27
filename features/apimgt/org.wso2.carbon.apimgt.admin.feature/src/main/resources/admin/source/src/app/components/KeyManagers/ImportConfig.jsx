@@ -20,11 +20,15 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { useIntl, FormattedMessage } from 'react-intl';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import TextField from '@material-ui/core/TextField';
-import CreateIcon from '@material-ui/icons/Create';
-import CON_CONSTS from 'AppComponents/Throttling/Advanced/CON_CONSTS';
+import Select from '@material-ui/core/Select';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
+
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -40,13 +44,30 @@ const useStyles = makeStyles((theme) => ({
 function ImportConfig(props) {
     const intl = useIntl();
     const classes = useStyles();
+
+    const { settings } = useAppContext();
+
+    const defaultKMType = (settings.keyManagerConfiguration
+        && settings.keyManagerConfiguration.length > 0)
+        ? settings.keyManagerConfiguration[0].type : '';
+
     const { callBack } = props;
 
     const [url, setUrl] = useState('');
+    const [type, setType] = useState(defaultKMType);
     const [validating, setValidating] = useState(false);
     const onChange = (e) => {
         const { target: { name: field, value: fieldValue } } = e;
-        if (field === 'url') setUrl(fieldValue);
+        switch (field) {
+            case 'url':
+                setUrl(fieldValue);
+                break;
+            case 'type':
+                setType(fieldValue);
+                break;
+            default:
+                break;
+        }
     };
 
     const hasErrors = (fieldName, fieldValue, validatingActive) => {
@@ -75,7 +96,7 @@ function ImportConfig(props) {
         setValidating(true);
         if (!formHasErrors(true)) {
             return ((setOpen) => {
-                callBack();
+                callBack({ url, type });
                 setOpen(false);
             });
         }
@@ -103,6 +124,41 @@ function ImportConfig(props) {
             }}
             formSaveCallback={formSaveCallback}
         >
+            <FormControl
+                variant='outlined'
+                className={classes.FormControlRoot}
+                error={hasErrors('type', type, validating)}
+                margin='dense'
+                fullWidth
+            >
+                <InputLabel classes={{ root: classes.labelRoot }}>
+                    <FormattedMessage
+                        defaultMessage='Key Manager Type'
+                        id='Admin.KeyManager.form.type'
+                    />
+                    <span className={classes.error}>*</span>
+                </InputLabel>
+                <Select
+                    name='type'
+                    value={type}
+                    onChange={onChange}
+                    classes={{ select: classes.select }}
+                >
+                    {settings.keyManagerConfiguration.map((keymanager) => (
+                        <MenuItem key={keymanager.type} value={keymanager.type}>
+                            {keymanager.type}
+                        </MenuItem>
+                    ))}
+                </Select>
+                <FormHelperText>
+                    {hasErrors('type', type, validating) || (
+                        <FormattedMessage
+                            defaultMessage='Select Key Manager Type'
+                            id='KeyManagers.AddEditKeyManager.form.type.help'
+                        />
+                    )}
+                </FormHelperText>
+            </FormControl>
             <TextField
                 margin='dense'
                 name='url'
