@@ -216,13 +216,8 @@ public class ApplicationImportExportManager {
      * @return true, if the object is an ApiProduct, otherwise false
      */
     private boolean isApiProduct(Object object) {
-        try {
-            //Cast object to ApiProduct
-            APIProduct apiProduct = (APIProduct) object;
-            return (apiProduct != null) ? true : false;
-        } catch (Exception e) {
-            return false;
-        }
+        //Check whether the object is an instance of ApiProduct
+        return (object) instanceof APIProduct;
     }
 
     /**
