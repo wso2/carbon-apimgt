@@ -48,6 +48,7 @@ import ClaimMappings from 'AppComponents/KeyManagers/ClaimMapping';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Cetificates from 'AppComponents/KeyManagers/Cetificates';
+import ImportConfig from 'AppComponents/KeyManagers/ImportConfig';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -91,6 +92,19 @@ const useStyles = makeStyles((theme) => ({
     },
     chipContainer: {
         marginBottom: 8,
+    },
+    importButton: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        display: 'flex',
+        flexDirection: 'row',
+        textAlign: 'right',
+        alignItems: 'center',
+        paddingTop: 10,
+        '& p': {
+            marginRight: 10,
+        },
     },
 }));
 
@@ -367,8 +381,15 @@ function AddEditKeyManager(props) {
             }
             help={<div />}
         >
-
-
+            <Box className={classes.importButton}>
+                <Typography color='inherit' variant='caption' component='p'>
+                    <FormattedMessage
+                        id='KeyManagers.AddEditKeyManager.import.description'
+                        defaultMessage='Import Key Manager Configuration'
+                    />
+                </Typography>
+                <ImportConfig callBack={null} />
+            </Box>
             <Box component='div' m={2} className={classes.root}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12} lg={3}>
