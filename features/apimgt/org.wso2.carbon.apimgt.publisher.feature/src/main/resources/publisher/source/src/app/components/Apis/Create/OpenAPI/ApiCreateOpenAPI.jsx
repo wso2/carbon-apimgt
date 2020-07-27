@@ -173,7 +173,7 @@ export default function ApiCreateOpenAPI(props) {
                     <Typography variant='caption'>
                         <FormattedMessage
                             id='Apis.Create.OpenAPI.ApiCreateOpenAPI.sub.heading'
-                            defaultMessage='Create an API using an existing OpenAPI definition (swagger) file or URL.'
+                            defaultMessage='Create an API using an existing OpenAPI definition file or URL.'
                         />
                     </Typography>
                 </>
