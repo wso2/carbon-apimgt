@@ -17,6 +17,8 @@
  */
 
 import APIClient from './APIClient';
+import Utils from './Utils';
+
 
 /**
  * Class representing a Factory of APIClients
@@ -43,14 +45,7 @@ class APIClientFactory {
      * @param {Object} environment
      * @returns {APIClient} APIClient object for the environment
      */
-    getAPIClient(environment) {
-        const {
-            label,
-        } = environment;
-        if (label === undefined) {
-            throw new Error('Environment label is undefined, Please provide'
-                + 'a valid environment object with keys (host,label & loginTokenPath)');
-        }
+    getAPIClient(environment = Utils.getDefaultEnvironment()) {
         let apiClient = this._APIClientMap.get(environment.label);
 
         if (apiClient) {

@@ -157,7 +157,7 @@
   "Base.RouteMenuMapping.keymanagers.items.Editing": "Edit KeyManager",
   "Base.RouteMenuMapping.manage.alerts": "Manage Alerts",
   "Base.RouteMenuMapping.microgateways": "Microgateways",
-  "Base.RouteMenuMapping.scope.mapping": "Scope Mapping",
+  "Base.RouteMenuMapping.role.permissions": "Role Permissions",
   "Base.RouteMenuMapping.settings": "Settings",
   "Base.RouteMenuMapping.subscription.creation": "Subscription Creation",
   "Base.RouteMenuMapping.subscription.throttling.policies": "Subscription Policies",

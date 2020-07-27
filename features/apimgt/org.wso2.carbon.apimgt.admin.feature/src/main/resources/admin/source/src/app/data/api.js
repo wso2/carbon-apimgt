@@ -763,8 +763,6 @@ class API extends Resource {
         });
     }
 
-
-
     /**
      * Get lis of keymanagers Registrered
      */
