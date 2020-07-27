@@ -601,7 +601,7 @@ class Details extends Component {
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.left.menu.scope',
-                                    defaultMessage: 'scopes',
+                                    defaultMessage: 'Local Scopes',
                                 })}
                                 to={pathPrefix + 'scopes'}
                                 Icon={<ScopesIcon />}

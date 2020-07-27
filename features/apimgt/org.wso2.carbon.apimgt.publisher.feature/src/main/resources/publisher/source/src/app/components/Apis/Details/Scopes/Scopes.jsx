@@ -34,6 +34,10 @@ import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Grid from '@material-ui/core/Grid';
 import { isRestricted } from 'AppData/AuthManager';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+
 import Delete from './Delete';
 
 const styles = (theme) => ({
@@ -252,16 +256,30 @@ class Scopes extends React.Component {
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
                             <FormattedMessage
                                 id='Apis.Details.Scopes.Scopes.heading.scope.heading'
-                                defaultMessage='Scopes'
+                                defaultMessage='Local Scopes'
                             />
                         </Typography>
+                        <Tooltip
+                            title={(
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.Scopes.heading.scope.title.tooltip'
+                                    defaultMessage='Manage scopes that are local to this API'
+                                />
+                            )}
+                            placement='top-end'
+                            aria-label='Local Scopes'
+                        >
+                            <IconButton size='small' aria-label='delete'>
+                                <HelpOutlineIcon fontSize='small' />
+                            </IconButton>
+                        </Tooltip>
                     </div>
                     <InlineMessage type='info' height={140}>
                         <div className={classes.contentWrapper}>
                             <Typography variant='h5' component='h3' className={classes.head}>
                                 <FormattedMessage
                                     id='Apis.Details.Scopes.Scopes.create.scopes.title'
-                                    defaultMessage='Create Scopes'
+                                    defaultMessage='Create API Local Scopes'
                                 />
                             </Typography>
                             <Typography component='p' className={classes.content}>
@@ -300,9 +318,23 @@ class Scopes extends React.Component {
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage
                             id='Apis.Details.Scopes.Scopes.heading.scope.heading'
-                            defaultMessage='Scopes'
+                            defaultMessage='Local Scopes'
                         />
                     </Typography>
+                    <Tooltip
+                        title={(
+                            <FormattedMessage
+                                id='Apis.Details.Scopes.Scopes.heading.scope.title.tooltip2'
+                                defaultMessage='Manage scopes that are local to this API'
+                            />
+                        )}
+                        placement='top-end'
+                        aria-label='Local Scopes'
+                    >
+                        <IconButton size='small' aria-label='delete'>
+                            <HelpOutlineIcon fontSize='small' />
+                        </IconButton>
+                    </Tooltip>
                     <Link to={!isRestricted(['apim:api_create'], api) && url}>
                         <Button
                             size='small'
@@ -312,7 +344,7 @@ class Scopes extends React.Component {
                             <AddCircle className={classes.buttonIcon} />
                             <FormattedMessage
                                 id='Apis.Details.Scopes.Scopes.heading.scope.add_new'
-                                defaultMessage='Add New Scope'
+                                defaultMessage='Add New Local Scope'
                             />
                         </Button>
                     </Link>
