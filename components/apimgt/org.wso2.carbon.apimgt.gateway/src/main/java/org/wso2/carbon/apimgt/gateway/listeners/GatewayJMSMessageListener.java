@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -46,7 +47,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
@@ -58,9 +58,10 @@ public class GatewayJMSMessageListener implements MessageListener {
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
     private boolean debugEnabled = log.isDebugEnabled();
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-    GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
+    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+    private final ScheduledExecutorService artifactRetrievalScheduler = Executors.newScheduledThreadPool( 10,
+            new ArtifactsRetrieverThreadFactory());
 
     public void onMessage(Message message) {
 
@@ -142,7 +143,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                         }
                     };
                 }
-                scheduler.schedule(task, 1, TimeUnit.MILLISECONDS);
+                artifactRetrievalScheduler.schedule(task, 1, TimeUnit.MILLISECONDS);
                 if (debugEnabled) {
                     log.debug("Event with ID " + gatewayEvent.getEventId() + " is received and " +
                             gatewayEvent.getApiId() + " is successfully deployed/undeployed");
