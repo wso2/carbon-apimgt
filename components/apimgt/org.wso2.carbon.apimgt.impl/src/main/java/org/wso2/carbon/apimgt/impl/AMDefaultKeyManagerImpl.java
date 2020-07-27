@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.dto.UserInfoDTO;
+import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.kmclient.FormEncoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
@@ -544,7 +545,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         dcrClient = Feign.builder()
-                .client(APIUtil.createNewFeignClient())
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(dcrEndpoint)))
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
@@ -553,7 +554,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .errorDecoder(new KMClientErrorDecoder())
                 .target(DCRClient.class, dcrEndpoint);
         authClient = Feign.builder()
-                .client(APIUtil.createNewFeignClient())
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(tokenEndpoint)))
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
@@ -562,7 +563,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .target(AuthClient.class, tokenEndpoint);
 
         introspectionClient = Feign.builder()
-                .client(APIUtil.createNewFeignClient())
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(introspectionEndpoint)))
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
@@ -572,7 +573,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .encoder(new FormEncoder())
                 .target(IntrospectionClient.class, introspectionEndpoint);
         scopeClient = Feign.builder()
-                .client(APIUtil.createNewFeignClient())
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(scopeEndpoint)))
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
@@ -581,7 +582,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .errorDecoder(new KMClientErrorDecoder())
                 .target(ScopeClient.class, scopeEndpoint);
         userClient = Feign.builder()
-                .client(APIUtil.createNewFeignClient())
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(userInfoEndpoint)))
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())

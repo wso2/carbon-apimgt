@@ -408,7 +408,7 @@ class InfoBar extends React.Component {
                     <VerticalDivider height={70} />
                     <Grid item xs={1} m={1} className={classes.editButton}>
                         {isUserOwner ? (
-                            <Link to={`/applications/${applicationId}/edit/`} className={classes.editButton}>
+                            <Link to={`/applications/${applicationId}/edit/fromView`} className={classes.editButton}>
                                 <Button
                                     style={{ padding: '4px' }}
                                     color='default'

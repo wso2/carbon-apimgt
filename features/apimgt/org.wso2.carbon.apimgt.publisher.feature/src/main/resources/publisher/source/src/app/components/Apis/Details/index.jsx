@@ -55,6 +55,7 @@ import LastUpdatedTime from 'AppComponents/Apis/Details/components/LastUpdatedTi
 import Overview from './NewOverview/Overview';
 import DesignConfigurations from './Configuration/DesignConfigurations';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
+import RuntimeConfigurationWebSocket from './Configuration/RuntimeConfigurationWebSocket';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Operations from './Operations/Operations';
@@ -544,6 +545,17 @@ class Details extends Component {
                                 Icon={<RuntimeConfigurationIcon />}
                             />
                         )}
+                        {api.isWebSocket() && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.runtime.configs',
+                                    defaultMessage: 'Runtime Configurations',
+                                })}
+                                route='runtime-configuration'
+                                to={pathPrefix + 'runtime-configuration-websocket'}
+                                Icon={<RuntimeConfigurationIcon />}
+                            />
+                        )}
                         {this.getLeftMenuItemForResourcesByType(api.type)}
                         {!isAPIProduct && (
                             <LeftMenuItem
@@ -689,6 +701,10 @@ class Details extends Component {
                                     component={() => <RuntimeConfiguration api={api} />}
                                 />
                                 <Route
+                                    path={Details.subPaths.RUNTIME_CONFIGURATION_WEBSOCKET}
+                                    component={() => <RuntimeConfigurationWebSocket api={api} />}
+                                />
+                                <Route
                                     path={Details.subPaths.CONFIGURATION_PRODUCT}
                                     component={() => <DesignConfigurations api={api} />}
                                 />
@@ -792,6 +808,7 @@ Details.subPaths = {
     RUNTIME_CONFIGURATION: '/apis/:api_uuid/runtime-configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
     RUNTIME_CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/runtime-configuration',
+    RUNTIME_CONFIGURATION_WEBSOCKET: '/apis/:api_uuid/runtime-configuration-websocket',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
     ENVIRONMENTS: '/apis/:api_uuid/environments',
     OPERATIONS: '/apis/:api_uuid/operations',
