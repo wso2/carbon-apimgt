@@ -755,7 +755,7 @@ class TokenManager extends React.Component {
                                                     onClick={
                                                         key ? this.updateKeys : this.generateKeys
                                                     }
-                                                    disabled={!isUserOwner || isLoading || !keymanager.enableTokenGeneration}
+                                                    disabled={!isUserOwner || isLoading || !keymanager.enableOAuthAppCreation}
                                                 >
                                                     {key ? 'Update keys' : 'Generate Keys'}
                                                     {isLoading && <CircularProgress size={20} />}
