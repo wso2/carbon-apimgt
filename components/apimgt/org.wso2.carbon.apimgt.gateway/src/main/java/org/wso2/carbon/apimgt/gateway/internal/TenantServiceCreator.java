@@ -155,6 +155,9 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
         CacheProvider.createGatewayJWKSCache();
         CacheProvider.createTenantConfigCache();
         CacheProvider.createRecommendationsCache();
+        CacheProvider.getJWKSCache();
+        CacheProvider.createParsedSignJWTCache();
+
     }
 
     /**
