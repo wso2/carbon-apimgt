@@ -1,0 +1,20 @@
+- title: Get bot detection data
+  id: getBotDetectionData
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/bot-detection-data
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "state": "COMPLETED",
+        "status": "SUCCESSFULL",
+        "startedTime": "1595408216000",
+        "lastPublsihedTime": "1595408216000"
+      }

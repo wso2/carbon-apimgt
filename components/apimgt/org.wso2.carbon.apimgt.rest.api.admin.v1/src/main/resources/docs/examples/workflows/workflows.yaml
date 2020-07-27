@@ -1,0 +1,48 @@
+- title: Get all subscription policies
+  id: getAllSubscriptionPolicies
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/workflows
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+
+
+- title: Add a subscription throttling policy
+  id: addSubscriptionThrottlingPolicy
+  request:
+    method: POST
+    url: https://localhost:9443/api/am/admin/v1/workflows/update-workflow-status
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+
+
+- title: Get a subscription policy by Id
+  id: getSubscriptionPolicyById
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/workflows/
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:

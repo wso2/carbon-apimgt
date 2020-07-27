@@ -113,6 +113,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_view
+      x-examples:
+        $ref: docs/examples/applications-policy/applications_policy.yaml#/getAllApplicationThrottlingPolicies
       summary: Get all Application Throttling Policies
       description: |
         Retrieves all existing application throttling policies.
@@ -162,6 +164,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+      x-examples:
+        $ref: docs/examples/applications-policy/applications_policy.yaml#/addApplicationThrottlingPolicy
       summary: Add an Application Throttling Policy
       description: |
         This operation can be used to add a new application level throttling policy.
@@ -222,6 +226,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_view
+      x-examples:
+        $ref: docs/examples/applications-policy/applications_policy.yaml#/getApplicationPolicyById
       summary: Get an Application Policy
       description: |
         Retrieves an Application Policy.
@@ -278,6 +284,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+      x-examples:
+        $ref: docs/examples/applications-policy/applications_policy.yaml#/deleteApplicationThrottlingPolicyById
       summary: Delete an Application Throttling policy
       description: |
         Deletes an Application level throttling policy.
@@ -313,6 +321,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+      x-examples:
+        $ref: docs/examples/applications-policy/applications_policy.yaml#/updateApplicationThrottlingPolicyById
       summary: Update an Application Throttling policy
       description: |
         Updates an existing Application level throttling policy. Upon succesfull, you will receive the updated application policy as the response.
@@ -694,6 +704,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_view
+      x-examples:
+        $ref: docs/examples/subscription-policy/subscription_policy.yaml#/getAllSubscriptionPolicy
       summary: Get all Subscription Throttling Policies
       description: |
         This operation can be used to retrieve all Subscription level throttling policies.
@@ -744,6 +756,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+      x-examples:
+        $ref: docs/examples/subscription-policy/subscription_policy.yaml#/addSubscriptionThrottlingPolicy
       summary: Add a Subscription Throttling Policy
       description: |
         This operation can be used to add a Subscription level throttling policy specifying the details of the policy in the payload.
@@ -804,6 +818,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_view
+      x-examples:
+        $ref: docs/examples/subscription-policy/subscription_policy.yaml#/getSubscriptionPolicyById
       summary: Get a Subscription Policy
       description: |
         Retrieve a single subscription-level throttling policy. We should provide the Id of the policy as a path parameter.
@@ -860,6 +876,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+      x-examples:
+        $ref: docs/examples/subscription-policy/subscription_policy.yaml#/deleteSubscriptionPolicyById
       summary: Delete a Subscription Policy
       description: |
         This operation can be used to delete a subscription-level throttling policy specifying the Id of the policy as a path paramter.
@@ -895,6 +913,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+      x-examples:
+        $ref: docs/examples/subscription-policy/subscription_policy.yaml#/updateSubscriptionPolicyById
       summary: Update a Subscription Policy
       description: |
         Updates an existing subscription-level throttling policy.
@@ -1272,6 +1292,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_view
+      x-examples:
+        $ref: docs/examples/advanced-policy/advanced_policy.yaml#/getAllAdvancedThrottlingPolicies
       summary: Get all Advanced throttling policies.
       description: |
         Retrieves all existing Advanced level throttling policies.
@@ -1322,6 +1344,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+      x-examples:
+        $ref: docs/examples/advanced-policy/advanced_policy.yaml#/addAdvancedThrottlingPolicy
       summary: Add an Advanced Throttling Policy
       description: |
         Add a new Advanced level throttling policy.
@@ -1382,6 +1406,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_view
+      x-examples:
+        $ref: docs/examples/advanced-policy/advanced_policy.yaml#/getAdvancedPolicyById
       summary: Get an Advanced Policy
       description: |
         Retrieves an Advanced Policy.
@@ -1438,6 +1464,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+      x-examples:
+        $ref: docs/examples/advanced-policy/advanced_policy.yaml#/deleteAdvancedThrottlingPolicyById
       summary: Delete an Advanced Throttling Policy
       description: |
         Deletes an Advanced level throttling policy.
@@ -1473,6 +1501,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tier_manage
+      x-examples:
+        $ref: docs/examples/advanced-policy/advanced_policy.yaml#/updateAdvancedThrottlingPolicyById
       summary: Update an Advanced Throttling Policy
       description: |
         Updates an existing Advanced level throttling policy.
@@ -2721,6 +2751,7 @@ paths:
     get:
       security:
         - OAuth2Security:
+            - apim:admin
             - apim:api_workflow_view
       x-wso2-request: |
         GET https://localhost:9443/api/am/admin/v1/workflows
@@ -2732,7 +2763,6 @@ paths:
       description: |
         This operation can be used to retrieve list of workflow pending processes.
       parameters:
-
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
@@ -2773,8 +2803,6 @@ paths:
             Requested user does not exist.
           schema:
             $ref: '#/definitions/Error'
-
-
         304:
           description: |
             Not Modified.
@@ -2797,11 +2825,12 @@ paths:
   '/workflows/{externalWorkflowRef}':
 
     #-----------------------------------------------------
-    # Retrieve the Details of a workflow pendding process
+    # Retrieve the Details of a workflow pending process
     #-----------------------------------------------------
     get:
       security:
         - OAuth2Security:
+            - apim:admin
             - apim:api_workflow_view
       x-wso2-curl: "curl https://localhost:9443/api/am/admin/v1/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
       x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/admin/v0.17/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
@@ -2809,10 +2838,9 @@ paths:
         GET https://localhost:9443/api/am/admin/v1/workflows/c43a325c-260b-4302-81cb-768eafaa3aed
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n                 \"WF_TYPE\": \"AM_APPLICATION_CREATION\",\n         \"WF_STATUS\": \"APPROVED\",\n         \"WF_CREATED_TIME\": \"  2020-02-10 09:33:34.476\"\n    \"WF_UPDATED_TIME\": \"  2020-02-10 09:33:34.476\"\n    \"WF_STATUS_DESC\": \"  Approve workflow request\"\n   \"TENANT_ID\": \"-1234\",\n  \"TENANT_DOMAIN\": \"carbon.super\",\n  \"WF_EXTERNAL_REFERENCE\": \"5871244b-d6f3-466e-8995-8accd1e64303\",\n  \"PAYLOAD\": \"7b2263616c6c4261636b55524c22\",\n } "
       summary: |
-        Get details of a the pending workflow request according to the External Workflow Reference.
+        Get details of the pending workflow request according to the External Workflow Reference.
       description: |
         Using this operation, you can retrieve complete details of a pending workflow request that either belongs to application creation, application subscription, application registration, api state change, user self sign up.. You need to provide the External_Workflow_Reference of the workflow Request to retrive it.
-
       parameters:
         - name: externalWorkflowRef
           in: path
@@ -2830,7 +2858,6 @@ paths:
             Requested Workflow Pending is returned
           schema:
             $ref: '#/definitions/WorkflowInfo'
-
         304:
           description: |
             Not Modified.

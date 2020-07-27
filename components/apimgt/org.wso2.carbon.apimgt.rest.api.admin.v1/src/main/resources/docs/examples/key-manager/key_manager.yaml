@@ -1,0 +1,127 @@
+- title: Get all Key managers
+  id: getAllKeyManagers
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/key-managers
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 2,
+        "list": [
+        {
+          "id": "70cfd8ed-4a77-4a1c-b2b9-261a34524d63",
+          "name": "Business",
+          "description": "Contains all business type APIs",
+          "numberOfAPIs": 1
+        },
+        {
+          "id": "f6fe4c67-c4fa-4557-8f51-edb46b6e75b3",
+          "name": "Sales",
+          "description": "Contains all sales related APIs",
+          "numberOfAPIs": 0
+        }
+        ]
+      }
+
+- title: Add a new API Category
+  id: addNewAPICategory
+  request:
+    method: POST
+    url: https://localhost:9443/api/am/admin/v1/key-managers
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "name": "WSO2 IS",
+        "displayName": "WSO2 IS",
+        "type": "IS",
+        "description": "This is a key manager for Developers",
+        "enabled": true
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "id": "bc91cb24-58f8-4c11-b958-0914461427d4",
+        "name": "Finance",
+        "description": "Finance related APIs",
+        "numberOfAPIs": null
+      }
+
+- title: Get all API categories
+  id: getAllAPICategories
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/key-managers/id
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 2,
+        "list": [
+        {
+          "id": "70cfd8ed-4a77-4a1c-b2b9-261a34524d63",
+          "name": "Business",
+          "description": "Contains all business type APIs",
+          "numberOfAPIs": 1
+        },
+        {
+          "id": "f6fe4c67-c4fa-4557-8f51-edb46b6e75b3",
+          "name": "Sales",
+          "description": "Contains all sales related APIs",
+          "numberOfAPIs": 0
+        }
+        ]
+      }
+
+- title: Update an API Category by category Id
+  id: updateAPICategoryByCategoryId
+  request:
+    method: PUT
+    url: https://localhost:9443/api/am/admin/v1/key-managers/
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "id": "bc91cb24-58f8-4c11-b958-0914461427d4",
+        "name": "Finance",
+        "description": "Contains finance related APIs",
+        "numberOfAPIs": null
+      }
+
+- title: Delete an API Category
+  id: deleteAPICategory
+  request:
+    method: DELETE
+    url: https://localhost:9443/api/am/admin/v1/key-managers/
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json

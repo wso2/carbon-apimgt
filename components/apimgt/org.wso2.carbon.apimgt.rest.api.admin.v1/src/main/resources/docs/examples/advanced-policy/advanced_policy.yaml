@@ -1,0 +1,226 @@
+- title: Get all Advanced throttling policies
+  id: getAllAdvancedThrottlingPolicies
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/throttling/policies/advanced
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 4,
+        "list": [
+        {
+          "policyId": "68706113-7b4f-4759-94e7-4edf59bf2bde",
+          "policyName": "10KPerMin",
+          "displayName": "10KPerMin",
+          "description": "Allows 10000 requests per minute",
+          "isDeployed": true,
+          "defaultLimit": {
+            "type": "REQUESTCOUNTLIMIT",
+            "requestCount": {
+              "timeUnit": "min",
+              "unitTime": 1,
+              "requestCount": 10000
+            },
+            "bandwidth": null
+          }
+        },
+        {
+          "policyId": "63ac57c3-8dca-4f2a-acb3-9077de0ccbc6",
+          "policyName": "20KPerMin",
+          "displayName": "20KPerMin",
+          "description": "Allows 20000 requests per minute",
+          "isDeployed": true,
+          "defaultLimit": {
+            "type": "REQUESTCOUNTLIMIT",
+            "requestCount": {
+              "timeUnit": "min",
+              "unitTime": 1,
+              "requestCount": 20000
+            },
+            "bandwidth": null
+          }
+        },
+        {
+          "policyId": "184fe7f7-8958-4800-9963-6fd07200a7cb",
+          "policyName": "50KPerMin",
+          "displayName": "50KPerMin",
+          "description": "Allows 50000 requests per minute",
+          "isDeployed": true,
+          "defaultLimit": {
+            "type": "REQUESTCOUNTLIMIT",
+            "requestCount": {
+              "timeUnit": "min",
+              "unitTime": 1,
+              "requestCount": 50000
+            },
+            "bandwidth": null
+          }
+        },
+        {
+          "policyId": "b466d1e8-33f1-4625-b308-f86a94173426",
+          "policyName": "Unlimited",
+          "displayName": "Unlimited",
+          "description": "Allows unlimited requests",
+          "isDeployed": true,
+          "defaultLimit": {
+            "type": "REQUESTCOUNTLIMIT",
+            "requestCount": {
+              "timeUnit": "min",
+              "unitTime": 1,
+              "requestCount": 2147483647
+            },
+            "bandwidth": null
+          }
+        }
+        ]
+      }
+
+- title: Add an Advanced Throttling Policy
+  id: addAdvancedThrottlingPolicy
+  request:
+    method: POST
+    url: https://localhost:9443/api/am/admin/v1/throttling/policies/advanced
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "policyName": "500KPerMin",
+        "displayName": "500KPerMin",
+        "description": "Allows 500000 requests per minute",
+        "isDeployed": true,
+        "defaultLimit": {
+          "type": "REQUESTCOUNTLIMIT",
+          "requestCount": {
+            "timeUnit": "min",
+            "unitTime": 1,
+            "requestCount": 50000
+          },
+          "bandwidth": null
+        }
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "policyId": "8ca2bf5f-cb7d-452b-b5b2-d7f8affb89d6",
+        "policyName": "500KPerMin",
+        "displayName": "500KPerMin",
+        "description": "Allows 500000 requests per minute",
+        "isDeployed": true,
+        "defaultLimit": {
+          "type": "REQUESTCOUNTLIMIT",
+          "requestCount": {
+            "timeUnit": "min",
+            "unitTime": 1,
+            "requestCount": 50000
+          },
+          "bandwidth": null
+        },
+        "conditionalGroups": []
+      }
+
+- title: Get an Advanced Policy by Id
+  id: getAdvancedPolicyById
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/8ca2bf5f-cb7d-452b-b5b2-d7f8affb89d6
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "policyId": "8ca2bf5f-cb7d-452b-b5b2-d7f8affb89d6",
+        "policyName": "500KPerMin",
+        "displayName": "500KPerMin",
+        "description": "Allows 500000 requests per minute",
+        "isDeployed": true,
+        "defaultLimit": {
+          "type": "REQUESTCOUNTLIMIT",
+          "requestCount": {
+            "timeUnit": "min",
+            "unitTime": 1,
+            "requestCount": 50000
+          },
+          "bandwidth": null
+        },
+        "conditionalGroups": []
+      }
+
+- title: Update an Advanced Throttling Policy by Id
+  id: updateAdvancedThrottlingPolicyById
+  request:
+    method: PUT
+    url: https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/8ca2bf5f-cb7d-452b-b5b2-d7f8affb89d6
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    body:
+      {
+        "policyName": "500KPerMin",
+        "displayName": "500KPerMin",
+        "description": "Allows 500000 requests per minute",
+        "isDeployed": false,
+        "defaultLimit": {
+          "type": "REQUESTCOUNTLIMIT",
+          "requestCount": {
+            "timeUnit": "min",
+            "unitTime": 1,
+            "requestCount": 500000
+          },
+          "bandwidth": null
+        },
+        "conditionalGroups": []
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "policyId": "8ca2bf5f-cb7d-452b-b5b2-d7f8affb89d6",
+        "policyName": "500KPerMin",
+        "displayName": "500KPerMin",
+        "description": "Allows 500000 requests per minute",
+        "isDeployed": true,
+        "defaultLimit": {
+          "type": "REQUESTCOUNTLIMIT",
+          "requestCount": {
+            "timeUnit": "min",
+            "unitTime": 1,
+            "requestCount": 500000
+          },
+          "bandwidth": null
+        },
+        "conditionalGroups": []
+      }
+
+- title: Delete an Advanced Throttling Policy by Id
+  id: deleteAdvancedThrottlingPolicyById
+  request:
+    method: DELETE
+    url: https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/8ca2bf5f-cb7d-452b-b5b2-d7f8affb89d6
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
