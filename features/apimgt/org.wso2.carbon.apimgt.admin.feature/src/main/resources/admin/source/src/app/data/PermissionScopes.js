@@ -61,8 +61,8 @@ class Permissions extends Resource {
     static updateSystemScopes(updatedAPIPermissions) {
         const payload = [];
         for (const appScopes of Object.values(updatedAPIPermissions)) {
-            for (const scope of appScopes) {
-                payload.push({ ...scope, roles: scope.roles.join(',') });
+            for (const scopeMap of appScopes) {
+                payload.push(scopeMap);
             }
         }
         const scopeMapping = { count: payload.length, list: payload };

@@ -55,25 +55,18 @@ function extractMappings(permissionMapping) {
         const {
             roles, tag,
         } = mapping;
-        const trimmedRoles = [];
-        const rolesList = roles.split(',');
-
         if (appMapping[tag]) {
             appMapping[tag].push(mapping);
         } else {
             appMapping[tag] = [mapping];
         }
-        for (const role of rolesList) {
-            let trimmedRole = role.trim();
-            trimmedRole = trimmedRole || '<No_Name>';
-            trimmedRoles.push(trimmedRole);
-            if (roleMapping[trimmedRole]) {
-                roleMapping[trimmedRole].push(mapping);
+        for (const role of roles) {
+            if (roleMapping[role]) {
+                roleMapping[role].push(mapping);
             } else {
-                roleMapping[trimmedRole] = [mapping];
+                roleMapping[role] = [mapping];
             }
         }
-        mapping.roles = trimmedRoles;
     }
     return [roleMapping, appMapping];
 }
