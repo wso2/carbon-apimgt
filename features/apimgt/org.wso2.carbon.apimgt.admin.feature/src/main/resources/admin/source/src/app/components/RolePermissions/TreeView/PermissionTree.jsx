@@ -1,6 +1,5 @@
-/* eslint-disable */
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +17,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import SvgIcon from '@material-ui/core/SvgIcon';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
 import TreeView from '@material-ui/lab/TreeView';
@@ -83,13 +81,6 @@ function TransitionComponent(props) {
     );
 }
 
-TransitionComponent.propTypes = {
-    /**
-   * Show the component; triggers the enter or exit states
-   */
-    in: PropTypes.bool,
-};
-
 const StyledTreeItem = withStyles((theme) => ({
     iconContainer: {
         '& .close': {
@@ -145,23 +136,42 @@ export default function PermissionTreeView(props) {
 
             <StyledTreeItem nodeId={0} label={`Permissions (${totalPermissions})`}>
                 {
-                    Object.entries(appMappings).map(([app, scopes], index) => {
-                        const nodeId = index + 1; // this is to give unique id for each nodes in the tree
+                    Object.entries(appMappings).map(([app, scopes], APIIndex) => {
+                        const nodeId = APIIndex + 1; // this is to give unique id for each nodes in the tree
                         return (
-                            <StyledTreeItem nodeId={nodeId} label={<Typography display="block" variant="subtitle1">
-                                {app} <Typography variant="caption">({scopes.length})</Typography>
-                            </Typography>}>
+                            <StyledTreeItem
+                                nodeId={nodeId}
+                                label={(
+                                    <Typography display='block' variant='subtitle1'>
+                                        {app}
+                                        {' '}
+                                        <Typography variant='caption'>
+                                            (
+                                            {scopes.length}
+                                            )
+                                        </Typography>
+                                    </Typography>
+                                )}
+                            >
                                 {scopes.map(({ name, description, roles }, index) => (
                                     <StyledTreeItem
                                         endIcon={(
                                             <Checkbox
                                                 checked={roles.includes(role)}
                                                 name={name}
-                                                onChange={(e) => onCheck({ target: { name, checked: e.target.checked, role, app } })}
+                                                onChange={(e) => onCheck({
+                                                    target: {
+                                                        name, checked: e.target.checked, role, app,
+                                                    },
+                                                })}
                                                 inputProps={{ 'aria-label': 'primary checkbox' }}
                                             />
                                         )}
-                                        onLabelClick={() => onCheck({ target: { name, checked: !roles.includes(role), role, app } })}
+                                        onLabelClick={() => onCheck({
+                                            target: {
+                                                name, checked: !roles.includes(role), role, app,
+                                            },
+                                        })}
                                         nodeId={index + 10 * nodeId}
                                         label={(
                                             <ListItemText
