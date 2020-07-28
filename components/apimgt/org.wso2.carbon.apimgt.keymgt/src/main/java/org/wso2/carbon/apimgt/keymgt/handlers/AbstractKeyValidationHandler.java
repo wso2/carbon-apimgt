@@ -216,7 +216,11 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                 .getTenantSubscriptionStore(apiTenantDomain);
         //TODO add a check to see whether datastore is initialized an load data using rest api if it is not loaded
         if (datastore != null) {
-            api = datastore.getApiByContextAndVersion(context, version);
+            if (version != null && context.startsWith("/" + version)) {
+                api = datastore.getDefaultApiByContext(context);
+            } else {
+                api = datastore.getApiByContextAndVersion(context, version);
+            }
             if (api != null) {
                 key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager);
                 if (key != null) {

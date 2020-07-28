@@ -38,6 +38,7 @@ public class API implements CacheableEntity<String> {
     private String context = null;
     private String policy = null;
     private String apiType = null;
+    private boolean isDefaultVersion = false;
 
     private List<URLMapping> urlMappings = new ArrayList<>();
 
@@ -137,4 +138,13 @@ public class API implements CacheableEntity<String> {
                 + ", context=" + context + ", policy=" + policy + ", apiType=" + apiType + ", urlMappings="
                 + urlMappings + "]";
     }
+
+    public boolean isDefaultVersion() {
+        return isDefaultVersion;
+    }
+
+    public void setDefaultVersion(boolean isDefaultVersion) {
+        this.isDefaultVersion = isDefaultVersion;
+    }
+    
 }
