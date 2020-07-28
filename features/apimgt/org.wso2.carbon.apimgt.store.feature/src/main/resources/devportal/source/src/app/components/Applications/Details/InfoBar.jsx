@@ -405,9 +405,10 @@ class InfoBar extends React.Component {
                             </Typography>
                         </div>
                     </Grid>
+                    {isUserOwner && (
+                    <>
                     <VerticalDivider height={70} />
                     <Grid item xs={1} m={1} className={classes.editButton}>
-                        {isUserOwner ? (
                             <Link to={`/applications/${applicationId}/edit/fromView`} className={classes.editButton}>
                                 <Button
                                     style={{ padding: '4px' }}
@@ -428,29 +429,7 @@ class InfoBar extends React.Component {
                                         />
                                     </Typography>
                                 </Button>
-                            </Link>) :
-                            (
-                                <Button
-                                    disabled
-                                    style={{ padding: '4px' }}
-                                    color='default'
-                                    classes={{ label: classes.iconButton }}
-                                    aria-label={(
-                                        <FormattedMessage
-                                            id='Applications.Details.InfoBar.edit'
-                                            defaultMessage='Edit'
-                                        />
-                                    )}
-                                >
-                                    <Icon>edit</Icon>
-                                    <Typography variant='caption' style={{ marginTop: '2px' }} >
-                                        <FormattedMessage
-                                            id='Applications.Details.InfoBar.edit.text'
-                                            defaultMessage='Edit'
-                                        />
-                                    </Typography>
-                                </Button>
-                            )}
+                            </Link>
                     </Grid>
                     <VerticalDivider height={70} />
                     <Grid item xs={1} m={1} className={classes.button}>
@@ -480,6 +459,8 @@ class InfoBar extends React.Component {
                             toggleDeleteConfirmation={this.toggleDeleteConfirmation}
                         />
                     </Grid>
+                    </>
+                     )}
                 </div>
             </div>
         );

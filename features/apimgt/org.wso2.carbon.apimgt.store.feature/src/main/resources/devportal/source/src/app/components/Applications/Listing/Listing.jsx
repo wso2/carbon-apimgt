@@ -175,7 +175,9 @@ const styles = theme => ({
             color: theme.palette.getContrastText(theme.custom.listView.tableHeadBackground),
             paddingLeft: theme.spacing(1),
         },
-
+        '& table tr td button.Mui-disabled span.material-icons': {
+            color: theme.palette.action.disabled,
+        },
     },
     clearSearchLink: {
         color: theme.palette.primary.light,
