@@ -3884,7 +3884,7 @@ paths:
         2. Retrieving subscriptions for a specific API.
         `GET https://127.0.0.1:9443/api/am/publisher/v1/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
       parameters:
-        - $ref: '#/parameters/apiId-Query'
+        - $ref: '#/parameters/apiId-Q-Opt'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
@@ -7238,7 +7238,7 @@ parameters:
 
   # API Identifier
   # Specified as part of the query string
-  apiId-Query:
+  apiId-Q-Opt:
     name: apiId
     in: query
     description: |
