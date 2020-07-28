@@ -31,6 +31,7 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  * @inheritdoc
@@ -45,6 +46,9 @@ const styles = theme => ({
         '& td': {
             padding: theme.spacing(0.5),
         }
+    },
+    appOwner: {
+        pointerEvents: 'none',
     },
 });
 const StyledTableCell = withStyles(theme => ({
@@ -113,6 +117,7 @@ class AppsTableContent extends Component {
             <TableBody className={classes.fullHeight}>
                 {appsTableData
                     .map((app) => {
+                        const isAppOwner = app.owner === AuthManager.getUser().name;
                         return (
                             <StyledTableRow className={classes.tableRow} key={app.applicationId}>
                                 <StyledTableCell align='left'>
@@ -166,14 +171,28 @@ class AppsTableContent extends Component {
                                         resourceMethod={resourceMethods.PUT}
                                     >
                                         {app.status === this.APPLICATION_STATES.APPROVED && (
-                                            <Tooltip title='Edit'>
-                                                <Link to={`/applications/${app.applicationId}/edit/`}>
-                                                    <IconButton aria-label='Edit'>
+                                             <Tooltip title={isAppOwner ? 
+                                                (
+                                                    <FormattedMessage
+                                                        id='Applications.Listing.AppsTableContent.edit.tooltip'
+                                                        defaultMessage='Edit'
+                                                    />
+                                                ) : (
+                                                    <FormattedMessage
+                                                        id='Applications.Listing.AppsTableContent.edit.tooltip.disabled.button'
+                                                        defaultMessage='Not allowed to modify shared applications'
+                                                    />
+                                                )
+                                                }>
+                                                <span>
+                                                <Link to={`/applications/${app.applicationId}/edit/`} className={!isAppOwner && classes.appOwner}>
+                                                    <IconButton disabled={!isAppOwner} aria-label='Edit'>
                                                         <Icon>
                                                             edit
                                                         </Icon>
                                                     </IconButton>
                                                 </Link>
+                                                </span>
                                             </Tooltip>
                                         )}
                                     </ScopeValidation>
@@ -181,15 +200,21 @@ class AppsTableContent extends Component {
                                         resourcePath={resourcePaths.SINGLE_APPLICATION}
                                         resourceMethod={resourceMethods.DELETE}
                                     >
-                                        <Tooltip title={(
+                                        <Tooltip title={ isAppOwner ? (
                                             <FormattedMessage
                                                 id='Applications.Listing.AppsTableContent.delete.tooltip'
                                                 defaultMessage='Delete'
                                             />
+                                            ) : (
+                                            <FormattedMessage
+                                                id='Applications.Listing.AppsTableContent.delete.tooltip.disabled.button'
+                                                defaultMessage='Not allowed to delete shared applications'
+                                            />
                                         )}
                                         >
+                                            <span>
                                             <IconButton
-                                                disabled={app.deleting}
+                                                disabled={app.deleting || !isAppOwner}
                                                 data-appid={app.applicationId}
                                                 onClick={toggleDeleteConfirmation}
                                                 color='default'
@@ -197,6 +222,7 @@ class AppsTableContent extends Component {
                                             >
                                                 <Icon>delete</Icon>
                                             </IconButton>
+                                            </span>
                                         </Tooltip>
                                     </ScopeValidation>
                                     {app.deleting && <CircularProgress size={24} />}
