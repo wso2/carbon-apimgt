@@ -47,7 +47,6 @@ import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -71,6 +70,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
             apidto.setName(model.getName());
+            apidto.setIsDefaultVersion(model.isDefaultVersion());
             Map<String,URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -99,6 +99,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
             apidto.setName(model.getName());
+            apidto.setIsDefaultVersion(model.isDefaultVersion());
             Map<String,URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
