@@ -514,6 +514,9 @@ function AddEditKeyManager(props) {
 
 
                                 <TextField
+                                    multiline
+                                    rows={4}
+                                    rowsMax={10}
                                     margin='dense'
                                     name='description'
                                     label={(
