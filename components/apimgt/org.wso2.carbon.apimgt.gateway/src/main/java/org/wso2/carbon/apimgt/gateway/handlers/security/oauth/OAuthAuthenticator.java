@@ -162,6 +162,7 @@ public class OAuthAuthenticator implements Authenticator {
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         SignedJWT signedJWT = null;
+        String keyManager;
 
         if (Util.tracingEnabled()) {
             TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
@@ -202,8 +203,9 @@ public class OAuthAuthenticator implements Authenticator {
                     }
 
                     signedJWT = getSignedJwt(accessToken);
-                    String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                    keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                             .getKeyManagerNameIfJwtValidatorExist(signedJWT);
+                    synCtx.setProperty(APIMgtGatewayConstants.ELECTED_KEY_MANAGER, keyManager);
                     if (StringUtils.isNotEmpty(keyManager)){
                         if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                                 keyManagerList.contains(keyManager)) {
