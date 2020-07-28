@@ -774,6 +774,29 @@ class API extends Resource {
         });
     }
 
+    /**
+     * Discover keymanager from well known url
+     */
+    keyManagersDiscover(url) {
+        return this.client.then((client) => {
+            return client.apis['Key Manager (Collection)'].post_key_managers_discover(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    keyManagersDiscover(requestData) {
+        return this.client.then((client) => {
+            const payload = {
+                ...requestData,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Key Manager (Collection)'].post_key_managers_discover(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
         /**
      * Get details of an Application Throttling Policy
      */
