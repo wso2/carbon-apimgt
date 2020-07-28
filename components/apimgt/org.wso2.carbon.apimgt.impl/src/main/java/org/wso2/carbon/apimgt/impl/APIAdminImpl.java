@@ -492,9 +492,14 @@ public class APIAdminImpl implements APIAdmin {
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                 apiMgtDAO.getKeyManagerConfigurationByID(tenantDomain, id);
         if (keyManagerConfigurationDTO != null) {
-            apiMgtDAO.deleteKeyManagerConfigurationById(id, tenantDomain);
-            new KeyMgtNotificationSender()
-                    .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
+            if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
+                apiMgtDAO.deleteKeyManagerConfigurationById(id, tenantDomain);
+                new KeyMgtNotificationSender()
+                        .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
+            } else {
+                throw new APIManagementException(APIConstants.KeyManager.DEFAULT_KEY_MANAGER + " couldn't delete",
+                        ExceptionCodes.INTERNAL_ERROR);
+            }
         }
     }
 
