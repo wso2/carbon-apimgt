@@ -61,8 +61,6 @@ public final class KeyMgtRegistrationService {
                 keyManagerConfigurationDTO.setDescription(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION);
                 if (apiManagerConfigurationService != null &&
                         apiManagerConfigurationService.getAPIManagerConfiguration() != null) {
-                    String serviceURl = apiManagerConfigurationService.getAPIManagerConfiguration()
-                            .getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
                     String defaultKeyManagerType =
                             apiManagerConfigurationService.getAPIManagerConfiguration()
                                     .getFirstProperty(APIConstants.DEFAULT_KEY_MANAGER_TYPE);
@@ -71,7 +69,6 @@ public final class KeyMgtRegistrationService {
                     } else {
                         keyManagerConfigurationDTO.setType(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE);
                     }
-                    keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.AUTHSERVER_URL, serviceURl);
                 }
                 TokenHandlingDto tokenHandlingDto = new TokenHandlingDto();
                 tokenHandlingDto.setEnable(true);

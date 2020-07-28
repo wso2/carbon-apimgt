@@ -212,8 +212,8 @@ public class OAuthAuthenticator implements Authenticator {
                             isJwtToken = true;
                         }else{
                             return new AuthenticationResponse(false, isMandatory, true,
-                                    APISecurityConstants.API_INVALID_KEY_MANAGER,
-                                    APISecurityConstants.API_KEY_MANAGER_NOT_AVAILABLE_MESSAGE);
+                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                         }
                     }
                 } catch ( ParseException | IllegalArgumentException e) {

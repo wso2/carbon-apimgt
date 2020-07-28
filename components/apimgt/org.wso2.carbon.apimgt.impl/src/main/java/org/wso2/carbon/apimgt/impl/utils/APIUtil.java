@@ -11096,17 +11096,19 @@ public final class APIUtil {
         if (config != null) {
             OpenIdConnectConfiguration openIdConnectConfigurations = null;
             APIManagerConfiguration apiManagerConfiguration = config.getAPIManagerConfiguration();
+            String keyManagerUrl;
             String enableTokenEncryption =
                     apiManagerConfiguration.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE);
+            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.AUTHSERVER_URL)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
+                        apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
+            }
+            keyManagerUrl =
+                    (String) keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.AUTHSERVER_URL);
+
             if (keyManagerConfigurationDTO.getProperty(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION) == null) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE,
                         Boolean.parseBoolean(enableTokenEncryption));
-                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.AUTHSERVER_URL)) {
-                    keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
-                            apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
-                }
-                String keyManagerUrl =
-                        (String) keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.AUTHSERVER_URL);
                 openIdConnectConfigurations = APIUtil.getOpenIdConnectConfigurations(
                         keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
                                 .concat(getTenantAwareContext(keyManagerConfigurationDTO.getTenantDomain()))
@@ -11188,25 +11190,14 @@ public final class APIUtil {
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.CERTIFICATE_TYPE)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CERTIFICATE_TYPE,
-                        APIConstants.KeyManager.CERTIFICATE_TYPE_PEM_FILE);
+                        APIConstants.KeyManager.CERTIFICATE_TYPE_JWKS_ENDPOINT);
             }
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.CERTIFICATE_VALUE)) {
-                try {
-                    Certificate certificate = CertificateMgtUtils.getInstance()
-                            .getPublicCertificate(keyManagerConfigurationDTO.getTenantDomain());
-                    String x509certificateContent = null;
-                    if (certificate != null) {
-                        x509certificateContent = getX509certificateContent(certificate);
-
-                    }
-                    keyManagerConfigurationDTO
-                            .addProperty(APIConstants.KeyManager.CERTIFICATE_VALUE, x509certificateContent);
-                } catch (APIManagementException e) {
-                    log.error("Error while adding public key into keyManagerConfiguration");
-                } catch (java.security.cert.CertificateEncodingException e) {
-                    log.error("Error while reading encoded data");
-                }
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CERTIFICATE_VALUE,
+                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                                .concat(getTenantAwareContext(keyManagerConfigurationDTO.getTenantDomain()))
+                                .concat(APIConstants.KeyManager.DEFAULT_JWKS_ENDPOINT));
             }
         }
         return keyManagerConfigurationDTO;

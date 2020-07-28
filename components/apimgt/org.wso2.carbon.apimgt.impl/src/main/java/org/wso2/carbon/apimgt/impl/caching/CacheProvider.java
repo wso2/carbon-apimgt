@@ -476,18 +476,7 @@ public class CacheProvider {
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
                 getRecommendationsCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                .removeCache(CacheProvider.getJWKSCache().getName());
-        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                 .removeCache(CacheProvider.getGatewaySignedJWTParseCache().getName());
     }
 
-    public static Cache getJWKSCache() {
-        return getCache(APIConstants.GATEWAY_JWKS_CACHE);
-    }
-
-    public static Cache createGatewayJWKSCache() {
-        long defaultCacheTimeout = getDefaultCacheTimeout();
-        return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_JWKS_CACHE,
-                defaultCacheTimeout, defaultCacheTimeout);
-    }
 }
