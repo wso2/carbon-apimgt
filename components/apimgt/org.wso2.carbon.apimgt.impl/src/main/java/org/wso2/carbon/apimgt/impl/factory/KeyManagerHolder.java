@@ -252,6 +252,15 @@ public class KeyManagerHolder {
         return null;
     }
 
+    public static KeyManagerDto getKeyManagerByName(String tenantDomain, String keyManager) {
+
+        TenantKeyManagerDto tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);
+        if (tenantKeyManagerDto != null) {
+            return tenantKeyManagerDto.getKeyManagerByName(keyManager);
+        }
+        return null;
+    }
+
     public static JWTValidator getJWTValidator(String tenantDomain, String issuer) {
 
         TenantKeyManagerDto tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);

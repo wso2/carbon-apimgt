@@ -36,28 +36,21 @@ public class JWTValidationServiceImpl implements JWTValidationService {
     private static final Log log = LogFactory.getLog(JWTValidationServiceImpl.class);
 
     @Override
-    public JWTValidationInfo validateJWTToken(SignedJWT signedJWT) throws APIManagementException {
+    public JWTValidationInfo validateJWTToken(SignedJWT signedJWT, String keyManager) throws APIManagementException {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
-        try {
-            String issuer = signedJWT.getJWTClaimsSet().getIssuer();
-            if (StringUtils.isNotEmpty(issuer)) {
-                KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
-                if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
-                    JWTValidationInfo validationInfo = keyManagerDto.getJwtValidator().validateToken(signedJWT);
-                    validationInfo.setKeyManager(keyManagerDto.getName());
-                    return validationInfo;
-                }
+
+        if (StringUtils.isNotEmpty(keyManager)) {
+            KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByName(tenantDomain, keyManager);
+            if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
+                JWTValidationInfo validationInfo = keyManagerDto.getJwtValidator().validateToken(signedJWT);
+                validationInfo.setKeyManager(keyManagerDto.getName());
+                return validationInfo;
             }
-            jwtValidationInfo.setValid(false);
-            jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_GENERAL_ERROR);
-            return jwtValidationInfo;
-        } catch (ParseException e) {
-            log.error("Error while parsing JWT Token", e);
-            jwtValidationInfo.setValid(false);
-            jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_GENERAL_ERROR);
-            return jwtValidationInfo;
         }
+        jwtValidationInfo.setValid(false);
+        jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_GENERAL_ERROR);
+        return jwtValidationInfo;
     }
 
     @Override
