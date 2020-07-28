@@ -132,7 +132,10 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
                 }
             }
             adminAlertConfigurator.subscribe(fullyQualifiedUsername, emailsList, alertTypesToSubscribe);
-            return Response.status(Response.Status.OK).build();
+            AlertsSubscriptionDTO subscribedAlerts = new AlertsSubscriptionDTO();
+            subscribedAlerts.setAlerts(AlertsMappingUtil.fromAlertTypesListToAlertTypeDTOList(alertTypesToSubscribe));
+            subscribedAlerts.setEmailList(emailsList);
+            return Response.status(Response.Status.OK).entity(subscribedAlerts).build();
         } catch (AlertManagementException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("API Manager analytics is not Enabled").build();
         } catch (APIManagementException e) {

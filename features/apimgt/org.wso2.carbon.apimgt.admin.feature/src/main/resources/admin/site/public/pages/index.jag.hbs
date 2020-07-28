@@ -16,20 +16,14 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-
+<% var app = require("/site/public/conf/settings.js").AppConfig.app; %>
 <html lang="en">
-<%
-    var app = require("/site/public/conf/settings.js").AppConfig.app;
-    var manifest = require("/site/public/dist/manifest.json");
-    var indexKey = 'index.js';
-    var indexBundle = manifest[indexKey].split("dist/")[1];
-%>
 
 <head>
     <base href="<%= app.context %>/" />
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=1024, initial-scale=1"/>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=1024, initial-scale=1" />
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>[Admin Portal]WSO2 APIM</title>
 
@@ -47,7 +41,7 @@
     <script src="<%= app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
     <script src="<%= app.context %>/site/public/conf/defaultTheme.js"></script>
     <script src="<%= app.context %>/site/public/conf/settings.js"></script>
-    <script src="<%= app.context %>/site/public/dist/<%= indexBundle %>"></script>
+    <script src="<%= app.context %>/{{ htmlWebpackPlugin.files.js[0] }}"></script>
     <link rel="stylesheet" href="<%= app.context %>/site/public/fonts/iconfont/material-icons.css">
 </body>
 
