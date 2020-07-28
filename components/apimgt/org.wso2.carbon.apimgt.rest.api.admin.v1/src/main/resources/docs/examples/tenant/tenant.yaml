@@ -1,0 +1,40 @@
+- title: Get tenant id of the user
+  id: getTenantIdOfUser
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/tenant-info​/am9obkBmb28uY29t
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "username": "john@foo.com",
+        "tenantDomain": "foo.com",
+        "tenantId": 1
+      }
+
+- title: Get custom-url info of a tenant domain
+  id: getCustomURLInfoOfTenantDomain
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/custom-urls/foo.com
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "tenantDomain": "foo.com",
+        "tenantAdminUsername": "john@foo.com",
+        "enabled": false,
+        "devPortal": null
+      }

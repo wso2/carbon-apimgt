@@ -2935,24 +2935,22 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tenantInfo
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X GET \"https://localhost:9443/api/am/admin/v1/tenant-info/john/info\""
-      x-wso2-request: "GET https://localhost:9443/api/am/admin/v1/tenant-info/john\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"tenantDomain\" : \"carbon.super\",\n   \"tenantId\" : -1234 \n}"
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-examples:
+        $ref: docs/examples/tenant/tenant.yaml#/getTenantIdOfUser
       summary: |
         Get tenant id of the user
       description: |
-        This operation is to get tenant id of the provided user
+        This operation is to get tenant id of the provided Base64 encoded user
       operationId: getTenantInfoByUsername
       parameters:
         - name: username
           description: |
             The state represents the current state of the tenant
-
             Supported states are [ active, inactive]
           in: path
           type: string
           required: true
-          default: 'john'
+          default: 'john@foo.com'
       tags:
         - Tenants
       responses:
@@ -2992,9 +2990,8 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:tenantInfo
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X GET \"https://localhost:9443/api/am/admin/v1/custom-url/foo.com\""
-      x-wso2-request: "GET https://localhost:9443/api/am/admin/v1/custom-url/foo.com\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"tenantDomain\" : \"foo.com\",\n}"
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-examples:
+        $ref: docs/examples/tenant/tenant.yaml#/getCustomURLInfoOfTenantDomain
       summary: |
         Get custom-url info of a tenant domain
       description: |
