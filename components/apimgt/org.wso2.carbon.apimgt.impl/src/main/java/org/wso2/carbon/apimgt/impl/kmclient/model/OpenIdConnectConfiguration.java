@@ -97,6 +97,10 @@ public class OpenIdConnectConfiguration {
     private String opPolicyURI;
     @SerializedName("op_tos_uri")
     private String opTOCUri;
+    @SerializedName("introspection_endpoint")
+    private String introspectionEndpoint;
+    @SerializedName("revocation_endpoint")
+    private String revokeEndpoint;
 
     public String getIssuer() {
 
@@ -449,5 +453,25 @@ public class OpenIdConnectConfiguration {
     public void setOpTOCUri(String opTOCUri) {
 
         this.opTOCUri = opTOCUri;
+    }
+
+    public String getIntrospectionEndpoint() {
+
+        return introspectionEndpoint;
+    }
+
+    public void setIntrospectionEndpoint(String introspectionEndpoint) {
+
+        this.introspectionEndpoint = introspectionEndpoint;
+    }
+
+    public String getRevokeEndpoint() {
+
+        return revokeEndpoint;
+    }
+
+    public void setRevokeEndpoint(String revokeEndpoint) {
+
+        this.revokeEndpoint = revokeEndpoint;
     }
 }

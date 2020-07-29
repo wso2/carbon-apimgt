@@ -55,8 +55,8 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.cache.Cache;
 
@@ -119,6 +119,8 @@ public class JWTValidator {
         String tokenSignature = jwtToken.getSignature().toString();
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String keyManager = (String) synCtx.getProperty(APIMgtGatewayConstants.ELECTED_KEY_MANAGER);
+
         String httpMethod = (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
@@ -148,7 +150,7 @@ public class JWTValidator {
         String cacheKey =
                 GatewayUtils.getAccessTokenCacheKey(jti, apiContext, apiVersion, matchingResource, httpMethod);
 
-        JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(jwtToken, cacheKey, jti);
+        JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(jwtToken, cacheKey, jti, keyManager);
 
         if (jwtValidationInfo != null) {
             if (jwtValidationInfo.isValid()) {
@@ -292,7 +294,8 @@ public class JWTValidator {
      * @throws APISecurityException in case of authentication failure
      */
     @MethodStats
-    public AuthenticationContext authenticateForWebSocket(SignedJWT jwtToken, String apiContext, String apiVersion)
+    public AuthenticationContext authenticateForWebSocket(SignedJWT jwtToken, String apiContext, String apiVersion,
+                                                          String keyManager)
             throws APISecurityException {
 
         String tokenSignature = jwtToken.getSignature().toString();
@@ -310,7 +313,7 @@ public class JWTValidator {
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
 
-        jwtValidationInfo = getJwtValidationInfo(jwtToken, cacheKey, jti);
+        jwtValidationInfo = getJwtValidationInfo(jwtToken, cacheKey, jti, keyManager);
         if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
             if (log.isDebugEnabled()) {
                 log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
@@ -441,7 +444,7 @@ public class JWTValidator {
         return OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
     }
 
-    private JWTValidationInfo getJwtValidationInfo(SignedJWT jwtToken, String cacheKey, String jti)
+    private JWTValidationInfo getJwtValidationInfo(SignedJWT jwtToken, String cacheKey, String jti,String keyManager)
             throws APISecurityException {
 
         String jwtHeader = jwtToken.getHeader().toString();
@@ -473,7 +476,7 @@ public class JWTValidator {
         if (jwtValidationInfo == null) {
 
             try {
-                jwtValidationInfo = jwtValidationService.validateJWTToken(jwtToken);
+                jwtValidationInfo = jwtValidationService.validateJWTToken(jwtToken, keyManager);
                 if (isGatewayTokenCacheEnabled) {
                     // Add token to tenant token cache
                     if (jwtValidationInfo.isValid()) {

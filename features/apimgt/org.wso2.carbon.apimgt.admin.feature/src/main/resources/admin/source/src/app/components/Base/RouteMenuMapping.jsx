@@ -322,8 +322,8 @@ const RouteMenuMapping = (intl) => [
             },
             {
                 id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.scope.mapping',
-                    defaultMessage: 'Scope Mapping',
+                    id: 'Base.RouteMenuMapping.role.permissions',
+                    defaultMessage: 'Role Permissions',
                 }),
                 path: '/settings/scope-mapping',
                 component: ListRoles,

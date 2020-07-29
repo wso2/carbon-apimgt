@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -44,14 +43,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.cache.Cache;
-
 public class JWTValidatorImpl implements JWTValidator {
 
     TokenIssuerDto tokenIssuer;
     private Log log = LogFactory.getLog(JWTValidatorImpl.class);
     JWTTransformer jwtTransformer;
-
+    private JWKSet jwkSet;
     @Override
     public JWTValidationInfo validateToken(SignedJWT jwtToken) throws APIManagementException {
 
@@ -105,15 +102,11 @@ public class JWTValidatorImpl implements JWTValidator {
                 if (tokenIssuer.getJwksConfigurationDTO().isEnabled() &&
                         StringUtils.isNotEmpty(tokenIssuer.getJwksConfigurationDTO().getUrl())) {
                     // Check JWKSet Available in Cache
-                    Object jwks = getJWKSCache().get(tokenIssuer.getIssuer());
-                    JWKSet jwkSet;
-                    if (jwks != null) {
-                        jwkSet = (JWKSet) jwks;
-                    } else {
-                        String jwksInfo = JWTUtil
-                                .retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
-                        jwkSet = JWKSet.parse(jwksInfo);
-                        getJWKSCache().put(tokenIssuer.getIssuer(), jwkSet);
+                    if (jwkSet == null) {
+                        jwkSet = retrieveJWKSet();
+                    }
+                    if (jwkSet.getKeyByKeyId(keyID) == null) {
+                        jwkSet = retrieveJWKSet();
                     }
                     if (jwkSet.getKeyByKeyId(keyID) instanceof RSAKey) {
                         RSAKey keyByKeyId = (RSAKey) jwkSet.getKeyByKeyId(keyID);
@@ -178,10 +171,10 @@ public class JWTValidatorImpl implements JWTValidator {
                     .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
         }
     }
-
-    protected Cache getJWKSCache() {
-
-        return CacheProvider.getJWKSCache();
+    private JWKSet retrieveJWKSet() throws IOException, ParseException {
+        String jwksInfo = JWTUtil
+                .retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
+        jwkSet = JWKSet.parse(jwksInfo);
+        return jwkSet;
     }
-
 }

@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface KeyManagersApiService {
+      public Response keyManagersDiscoverPost(String url, String type, MessageContext messageContext) throws APIManagementException;
       public Response keyManagersGet(MessageContext messageContext) throws APIManagementException;
       public Response keyManagersKeyManagerIdDelete(String keyManagerId, MessageContext messageContext) throws APIManagementException;
       public Response keyManagersKeyManagerIdGet(String keyManagerId, MessageContext messageContext) throws APIManagementException;

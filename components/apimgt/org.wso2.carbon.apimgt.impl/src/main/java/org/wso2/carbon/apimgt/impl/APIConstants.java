@@ -571,6 +571,7 @@ public final class APIConstants {
     public static final String REVOKED_TOKEN_TYPE = "type";
     public static final String IDENTITY_REVOKE_ENDPOINT = "/oauth2/revoke";
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
+    public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
 
     public static String DELEM_COLON = ":";
 
@@ -2281,6 +2282,7 @@ public final class APIConstants {
         public static final String AUTH_CODE = "authCode";
         public static final String CLAIM_DIALECT = "dialect";
         public static final String DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT = "/oauth2/token/.well-known/openid-configuration";
+        public static final String DEFAULT_JWKS_ENDPOINT = "/oauth2/jwks";
         public static final String PRODUCTION_TOKEN_ENDPOINT = "production_token_endpoint";
         public static final String SANDBOX_TOKEN_ENDPOINT = "sandbox_token_endpoint";
         public static final String PRODUCTION_REVOKE_ENDPOINT = "production_revoke_endpoint";

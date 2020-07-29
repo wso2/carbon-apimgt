@@ -260,6 +260,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 //Initial guess of a JWT token using the presence of a DOT.
 
                 SignedJWT signedJWT = null;
+                String keyManager = null;
                 if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
                     try {
                         // Check if the header part is decoded
@@ -270,7 +271,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                     "Invalid JWT token");
                         }
                         signedJWT = SignedJWT.parse(apiKey);
-                        String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                        keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                                 .getKeyManagerNameIfJwtValidatorExist(signedJWT);
                         if (StringUtils.isNotEmpty(keyManager)){
                             isJwtToken = true;
@@ -288,7 +289,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     log.debug("The token was identified as a JWT token");
                     AuthenticationContext authenticationContext =
                             new JWTValidator(null, new APIKeyValidator(null)).
-                                    authenticateForWebSocket(signedJWT, apiContextUri, version);
+                                    authenticateForWebSocket(signedJWT, apiContextUri, version, keyManager);
                     if(authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;
                     }

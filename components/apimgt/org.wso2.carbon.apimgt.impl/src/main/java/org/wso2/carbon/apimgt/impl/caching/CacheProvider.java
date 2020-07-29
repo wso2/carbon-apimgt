@@ -19,8 +19,8 @@
 package org.wso2.carbon.apimgt.impl.caching;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 
@@ -101,6 +101,14 @@ public class CacheProvider {
         return getCache(APIConstants.GATEWAY_JWT_TOKEN_CACHE);
     }
 
+    /**
+     *
+     * @return SignedJWT ParsedCache
+     */
+    public static Cache getGatewaySignedJWTParseCache() {
+
+        return getCache(APIConstants.GATEWAY_SIGNED_JWT_CACHE);
+    }
     /**
      * @return Gateway API Key cache
      */
@@ -292,6 +300,22 @@ public class CacheProvider {
     }
 
     /**
+     * Create and return GATEWAY_SIGNED_JWT_CACHE
+     */
+    public static Cache createParsedSignJWTCache() {
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants
+                    .GATEWAY_SIGNED_JWT_CACHE, Long.parseLong(apimGWCacheExpiry), Long.parseLong
+                    (apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants
+                    .GATEWAY_SIGNED_JWT_CACHE, defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
      * Create and return basic authenticated resource request cache
      */
     public static Cache createGatewayBasicAuthResourceCache() {
@@ -452,16 +476,7 @@ public class CacheProvider {
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
                 getRecommendationsCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                .removeCache(CacheProvider.getJWKSCache().getName());
+                .removeCache(CacheProvider.getGatewaySignedJWTParseCache().getName());
     }
 
-    public static Cache getJWKSCache() {
-        return getCache(APIConstants.GATEWAY_JWKS_CACHE);
-    }
-
-    public static Cache createGatewayJWKSCache() {
-        long defaultCacheTimeout = getDefaultCacheTimeout();
-        return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_JWKS_CACHE,
-                defaultCacheTimeout, defaultCacheTimeout);
-    }
 }

@@ -3983,6 +3983,47 @@ paths:
             Key Manager to be deleted does not exist.
           schema:
             $ref: '#/definitions/Error'
+  ######################################################
+  # The "Key Manager Collection" resource API
+  ######################################################
+  /key-managers/discover:
+
+    #-----------------------------------------------------
+    # Retrieve Information from Well-known Endpoint.
+    #-----------------------------------------------------
+    post:
+      consumes:
+        - multipart/form-data
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+
+      summary: Retrieve Well-known information from KeyManager Well-known Endpoint.
+      description: |
+        Get all Key managers
+      parameters:
+        - in: formData
+          name: url
+          description: Well-Known Endpoint
+          type: string
+          required: false
+        - in: formData
+          name: type
+          description: |
+            Key Manager Type
+          type: string
+          default: false
+          required: false
+      tags:
+        - Key Manager (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            KeyManagers returned
+          schema:
+            $ref: '#/definitions/KeyManagerWellKnownResponse'
 
 
 
@@ -5234,6 +5275,20 @@ definitions:
         description: |
           Roles for the particular scope.
         example: ["admin","Internal/publisher"]
+
+
+  #-----------------------------------------------------
+  # The KeyManager Well Known Response.
+  #-----------------------------------------------------
+  KeyManagerWellKnownResponse:
+    title: Key Manager Well-Known Response.
+    properties:
+      valid:
+       type: boolean
+       example: true
+       default: false
+      value:
+       $ref: '#/definitions/KeyManager'
 
   #-----------------------------------------------------
   # The KeyManager resource

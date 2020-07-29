@@ -18,8 +18,7 @@
  */
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const config = {
     entry: { index: './source/index.jsx' },
@@ -85,6 +84,18 @@ const config = {
                 test: /\.(woff|woff2|eot|ttf|svg)$/,
                 loader: 'url-loader?limit=100000',
             },
+            // Until https://github.com/jantimon/html-webpack-plugin/issues/1483 ~tmkb
+            // This was added to generate the index.jag from a hbs template file including the hashed bundle file
+            {
+                test: /\.jag\.hbs$/,
+                loader: 'underscore-template-loader',
+                query: {
+                    engine: 'lodash',
+                    interpolate: '\\{\\[(.+?)\\]\\}',
+                    evaluate: '\\{%([\\s\\S]+?)%\\}',
+                    escape: '\\{\\{(.+?)\\}\\}',
+                },
+            },
         ],
     },
     externals: {
@@ -92,12 +103,17 @@ const config = {
         MaterialIcons: 'MaterialIcons',
         Config: 'AppConfig',
     },
-    plugins: [new MonacoWebpackPlugin({
-        languages: ['xml', 'json', 'yaml', 'sql', 'mysql'],
-        features: ['!gotoSymbol'],
-    }),
-    new CleanWebpackPlugin(),
-    new ManifestPlugin(),
+    plugins: [
+        new MonacoWebpackPlugin({
+            languages: ['xml', 'json', 'yaml', 'sql', 'mysql'],
+            features: ['!gotoSymbol'],
+        }),
+        new HtmlWebpackPlugin({
+            inject: false,
+            template: path.resolve(__dirname, 'site/public/pages/index.jag.hbs'),
+            filename: path.resolve(__dirname, 'site/public/pages/index.jag'),
+            minify: false, // Make this true to get exploded, formatted index.jag file
+        }),
     ],
 };
 

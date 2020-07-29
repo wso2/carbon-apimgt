@@ -70,8 +70,8 @@ const APICreateMenu = (props) => {
                         )}
                         secondary={(
                             <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.secondary.swagger'
-                                defaultMessage='Use an existing OpenAPI definition (swagger) file or URL'
+                                id='Apis.Listing.components.APICreateMenu.secondary.openapi'
+                                defaultMessage='Use an existing OpenAPI definition file or URL'
                             />
                         )}
                     />

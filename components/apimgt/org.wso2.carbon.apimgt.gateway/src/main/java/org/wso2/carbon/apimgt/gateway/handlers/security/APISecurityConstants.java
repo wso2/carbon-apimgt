@@ -16,15 +16,11 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-import org.wso2.carbon.apimgt.impl.APIConstants;
-
 public class APISecurityConstants {
     public static final String API_AUTH_FAILURE_HANDLER = "_auth_failure_handler_";
     public static final int API_AUTH_GENERAL_ERROR       = 900900;
     public static final String API_AUTH_GENERAL_ERROR_MESSAGE = "Unclassified Authentication Failure";
 
-    public static final int API_INVALID_KEY_MANAGER = APIConstants.KeyValidationStatus.KEY_MANAGER_NOT_AVAILABLE;
-    public static final String API_KEY_MANAGER_NOT_AVAILABLE_MESSAGE = "Key Manager not available for API";
     public static final int API_AUTH_INVALID_CREDENTIALS = 900901;
     public static final String API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid Credentials";
     public static final String API_AUTH_INVALID_CREDENTIALS_DESCRIPTION =
@@ -128,9 +124,6 @@ public class APISecurityConstants {
                 break;
             case INVALID_SCOPE:
                 errorMessage = INVALID_SCOPE_MESSAGE;
-                break;
-            case API_INVALID_KEY_MANAGER:
-                errorMessage = API_KEY_MANAGER_NOT_AVAILABLE_MESSAGE;
                 break;
             default:
                 errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;

@@ -312,6 +312,30 @@ const suggestions = {
             route: 'api definition',
         },
         {
+            label: 'OAS',
+            route: 'api definition',
+        },
+        {
+            label: 'Import OAS',
+            route: 'api definition',
+        },
+        {
+            label: 'Download OAS',
+            route: 'api definition',
+        },
+        {
+            label: 'OpenAPI',
+            route: 'api definition',
+        },
+        {
+            label: 'Import OpenAPI',
+            route: 'api definition',
+        },
+        {
+            label: 'Download OpenAPI',
+            route: 'api definition',
+        },
+        {
             label: 'Resources',
             route: 'resources',
         },
@@ -379,6 +403,30 @@ const suggestions = {
         },
         {
             label: 'Download Swagger',
+            route: 'api definition',
+        },
+        {
+            label: 'OAS',
+            route: 'api definition',
+        },
+        {
+            label: 'Import OAS',
+            route: 'api definition',
+        },
+        {
+            label: 'Download OAS',
+            route: 'api definition',
+        },
+        {
+            label: 'OpenAPI',
+            route: 'api definition',
+        },
+        {
+            label: 'Import OpenAPI',
+            route: 'api definition',
+        },
+        {
+            label: 'Download OpenAPI',
             route: 'api definition',
         },
         {

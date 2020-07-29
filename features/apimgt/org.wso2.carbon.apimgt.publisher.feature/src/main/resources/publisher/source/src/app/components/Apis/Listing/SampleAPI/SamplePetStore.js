@@ -194,10 +194,10 @@ const getSwagger = (policyLevel) => ({
     swagger: '2.0',
     definitions: {
         ErrorListItem: {
-            title: 'Description of individual errors that may have occored during a request.',
+            title: 'Description of individual errors that may have occurred during a request.',
             properties: {
                 message: {
-                    description: 'Description about individual errors occored',
+                    description: 'Description about individual errors occurred',
                     type: 'string',
                 },
                 code: { format: 'int64', type: 'integer' },

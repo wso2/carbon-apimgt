@@ -6,14 +6,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import org.apache.axis2.databinding.types.xsd._double;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenValidationDTO;
 
 import java.util.ArrayList;
@@ -269,4 +273,27 @@ public class KeyManagerMappingUtil {
         return jsonObject;
     }
 
+    public static KeyManagerWellKnownResponseDTO fromOpenIdConnectConfigurationToKeyManagerConfiguration(
+            OpenIdConnectConfiguration openIdConnectConfiguration) {
+        KeyManagerWellKnownResponseDTO keyManagerWellKnownResponseDTO = new KeyManagerWellKnownResponseDTO();
+        if (openIdConnectConfiguration != null){
+            keyManagerWellKnownResponseDTO.setValid(true);
+            KeyManagerDTO keyManagerDto = new KeyManagerDTO();
+            keyManagerDto.setIssuer(openIdConnectConfiguration.getIssuer());
+            keyManagerDto.setIntrospectionEndpoint(openIdConnectConfiguration.getIntrospectionEndpoint());
+            keyManagerDto.setClientRegistrationEndpoint(openIdConnectConfiguration.getRegistrationEndpoint());
+            keyManagerDto.setAuthorizeEndpoint(openIdConnectConfiguration.getAuthorizeEndpoint());
+            keyManagerDto.setTokenEndpoint(openIdConnectConfiguration.getTokenEndpoint());
+            keyManagerDto.setRevokeEndpoint(openIdConnectConfiguration.getRevokeEndpoint());
+            keyManagerDto.setAvailableGrantTypes(openIdConnectConfiguration.getGrantTypesSupported());
+            if (StringUtils.isNotEmpty(openIdConnectConfiguration.getJwksEndpoint())){
+                KeyManagerCertificatesDTO keyManagerCertificatesDTO = new KeyManagerCertificatesDTO();
+                keyManagerCertificatesDTO.setType(KeyManagerCertificatesDTO.TypeEnum.JWKS);
+                keyManagerCertificatesDTO.setValue(openIdConnectConfiguration.getJwksEndpoint());
+                keyManagerDto.setCertificates(keyManagerCertificatesDTO);
+            }
+            keyManagerWellKnownResponseDTO.setValue(keyManagerDto);
+        }
+        return keyManagerWellKnownResponseDTO;
+    }
 }
