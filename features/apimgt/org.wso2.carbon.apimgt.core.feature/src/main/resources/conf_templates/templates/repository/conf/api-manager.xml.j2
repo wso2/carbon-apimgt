@@ -377,7 +377,7 @@
         <!-- All  scopes under the AllowedScopes element are not validating against roles that has assigned to it.
              By default ^device_.* and openid scopes have been white listed internally. -->
         <AllowedScopes>
-        {%for scope in apim.oauth_config.white_listed_scopes%}
+        {%for scope in apim.oauth_config.allowed_scopes%}
             <Scope>{{scope}}</Scope>
         {% endfor %}
         </AllowedScopes>
