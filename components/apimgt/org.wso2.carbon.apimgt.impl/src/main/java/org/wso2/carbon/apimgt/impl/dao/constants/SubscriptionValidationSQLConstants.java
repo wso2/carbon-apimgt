@@ -137,7 +137,7 @@ public class SubscriptionValidationSQLConstants {
                     "      APIS.URL_PATTERN," +
                     "      APIS.RES_TIER," +
                     "      APIS.SCOPE_NAME," +
-                    "      DEF.DEFAULT_API_VERSION" +
+                    "      DEF.PUBLISHED_DEFAULT_API_VERSION" +
                     " FROM " +
                     "  (" +
                     "    SELECT " +
@@ -188,7 +188,8 @@ public class SubscriptionValidationSQLConstants {
                     "      AND URL.API_ID = PROD.API_ID" +
                     "  ) AS APIS " +
                     "  LEFT JOIN AM_API_DEFAULT_VERSION AS DEF ON APIS.API_NAME = DEF.API_NAME" +
-                    "  AND APIS.API_PROVIDER = DEF.API_PROVIDER AND APIS.API_VERSION = DEF.DEFAULT_API_VERSION";
+                    "  AND APIS.API_PROVIDER = DEF.API_PROVIDER AND " +
+                    "  APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
 
     public static final String GET_ALL_AM_KEY_MAPPINGS_SQL =
             "SELECT " +
@@ -379,7 +380,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APIS.URL_PATTERN," +
                     "   APIS.RES_TIER," +
                     "   APIS.SCOPE_NAME," +
-                    "   DEF.DEFAULT_API_VERSION " +
+                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
                     "FROM" +
                     "   (" +
                     "      SELECT" +
@@ -437,7 +438,7 @@ public class SubscriptionValidationSQLConstants {
                     "      AM_API_DEFAULT_VERSION AS DEF " +
                     "      ON APIS.API_NAME = DEF.API_NAME " +
                     "      AND APIS.API_PROVIDER = DEF.API_PROVIDER " +
-                    "      AND APIS.API_VERSION = DEF.DEFAULT_API_VERSION";
+                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
 
     public static final String GET_ST_APIS_SQL =
             "SELECT" +
@@ -454,7 +455,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APIS.URL_PATTERN," +
                     "   APIS.RES_TIER," +
                     "   APIS.SCOPE_NAME," +
-                    "   DEF.DEFAULT_API_VERSION " +
+                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
                     "FROM" +
                     "   (" +
                     "      SELECT" +
@@ -512,7 +513,7 @@ public class SubscriptionValidationSQLConstants {
                     "      AM_API_DEFAULT_VERSION AS DEF " +
                     "      ON APIS.API_NAME = DEF.API_NAME " +
                     "      AND APIS.API_PROVIDER = DEF.API_PROVIDER " +
-                    "      AND APIS.API_VERSION = DEF.DEFAULT_API_VERSION";
+                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
 
     public static final String GET_API_SQL =
             "SELECT " +
@@ -529,7 +530,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APIS.URL_PATTERN," +
                     "   APIS.RES_TIER," +
                     "   APIS.SCOPE_NAME," +
-                    "   DEF.DEFAULT_API_VERSION " +
+                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
                     "FROM " +
                     "   (" +
                     "      SELECT " +
@@ -562,7 +563,7 @@ public class SubscriptionValidationSQLConstants {
                     "      AM_API_DEFAULT_VERSION AS DEF" +
                     "      ON APIS.API_NAME = DEF.API_NAME" +
                     "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
-                    "      AND APIS.API_VERSION = DEF.DEFAULT_API_VERSION";
+                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
 
     //todo merge with above DET_API
     public static final String GET_API_PRODUCT_SQL =
@@ -580,7 +581,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APIS.URL_PATTERN," +
                     "   APIS.RES_TIER," +
                     "   APIS.SCOPE_NAME," +
-                    "   DEF.DEFAULT_API_VERSION " +
+                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
                     "FROM " +
                     "   (" +
                     "      SELECT " +
@@ -615,7 +616,7 @@ public class SubscriptionValidationSQLConstants {
                     "      AM_API_DEFAULT_VERSION AS DEF " +
                     "      ON APIS.API_NAME = DEF.API_NAME" +
                     "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
-                    "      AND APIS.API_VERSION = DEF.DEFAULT_API_VERSION";
+                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
 
     public static final String GET_TENANT_AM_KEY_MAPPING_SQL =
             "SELECT " +

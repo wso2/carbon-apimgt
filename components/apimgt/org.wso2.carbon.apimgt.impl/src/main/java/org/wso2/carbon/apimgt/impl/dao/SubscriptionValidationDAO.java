@@ -329,7 +329,7 @@ public class SubscriptionValidationDAO {
                     api.setPolicy(resultSet.getString("API_TIER"));
                     api.setVersion(resultSet.getString("API_VERSION"));
                     api.setContext(resultSet.getString("CONTEXT"));
-                    api.setIsDefaultVersion(resultSet.getBoolean("DEFAULT_API_VERSION"));
+                    api.setIsDefaultVersion(resultSet.getBoolean("PUBLISHED_DEFAULT_API_VERSION"));
                     temp.put(apiId, api);
                 }
                 String urlPattern = resultSet.getString("URL_PATTERN");
@@ -372,7 +372,7 @@ public class SubscriptionValidationDAO {
                 api.setPolicy(resultSet.getString("API_TIER"));
                 api.setVersion(resultSet.getString("API_VERSION"));
                 api.setContext(resultSet.getString("CONTEXT"));
-                api.setIsDefaultVersion(resultSet.getBoolean("DEFAULT_API_VERSION"));
+                api.setIsDefaultVersion(resultSet.getBoolean("PUBLISHED_DEFAULT_API_VERSION"));
                 api.setApiType(apiType);
                 temp.put(apiId, api);
                 tempUrls = new ConcurrentHashMap<>();
