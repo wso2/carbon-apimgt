@@ -472,7 +472,7 @@ class TestConsole extends React.Component {
                                     <Typography component='p'>
                                         <FormattedMessage
                                             id='Apis.Details.tryout.initialize.test'
-                                            defaultMessage='Initialize the API to Prototype(testing) state'
+                                            defaultMessage='Initialize the API for the testing phase'
                                         />
                                     </Typography>
                                     <div className={classes.actions}>
@@ -539,15 +539,6 @@ class TestConsole extends React.Component {
                         type='info'
                         message='API should be in prototype(testing) state. Please demote to created state and click
                         on the initialize Test button in the Test Console left menu item.'
-                    />
-                )}
-                {(!isProtoTyped) && (
-                    <Banner
-                        disableActions
-                        dense
-                        paperProps={{ elevation: 1 }}
-                        type='info'
-                        message='This API is not in the prototype-test state.'
                     />
                 )}
             </>
