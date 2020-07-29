@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -46,7 +47,9 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
@@ -65,10 +68,11 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.text.ParseException;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.cache.Cache;
 
 /**
  * This is a handler which is actually embedded to the netty pipeline which does operations such as
@@ -259,20 +263,19 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
                 //Initial guess of a JWT token using the presence of a DOT.
 
-                SignedJWT signedJWT = null;
+                SignedJWTInfo signedJWTInfo = null;
                 String keyManager = null;
                 if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
                     try {
                         // Check if the header part is decoded
-                        Base64.getUrlDecoder().decode(apiKey.split("\\.")[0]);
                         if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
                             log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
                             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     "Invalid JWT token");
                         }
-                        signedJWT = SignedJWT.parse(apiKey);
+                        signedJWTInfo = getSignedJwtInfo(apiKey);
                         keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
-                                .getKeyManagerNameIfJwtValidatorExist(signedJWT);
+                                .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
                         if (StringUtils.isNotEmpty(keyManager)){
                             isJwtToken = true;
                         }
@@ -289,7 +292,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     log.debug("The token was identified as a JWT token");
                     AuthenticationContext authenticationContext =
                             new JWTValidator(null, new APIKeyValidator(null)).
-                                    authenticateForWebSocket(signedJWT, apiContextUri, version, keyManager);
+                                    authenticateForWebSocket(signedJWTInfo, apiContextUri, version, keyManager);
                     if(authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;
                     }
@@ -584,5 +587,28 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
         // remove trailing '?' or '&' from the built string
         uri = queryBuilder.substring(0, queryBuilder.length() - 1);
+    }
+
+    private SignedJWTInfo getSignedJwtInfo(String accessToken) throws ParseException {
+
+        String signature = accessToken.split("\\.")[2];
+        SignedJWTInfo signedJWTInfo;
+        Cache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
+        if (gatewaySignedJWTParseCache != null) {
+            Object cachedEntry = gatewaySignedJWTParseCache.get(signature);
+            if (cachedEntry != null) {
+                signedJWTInfo = (SignedJWTInfo) cachedEntry;
+            } else {
+                SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+                signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
+                gatewaySignedJWTParseCache.put(signature, signedJWTInfo);
+            }
+        } else {
+            SignedJWT signedJWT = SignedJWT.parse(accessToken);
+            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+            signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
+        }
+        return signedJWTInfo;
     }
 }

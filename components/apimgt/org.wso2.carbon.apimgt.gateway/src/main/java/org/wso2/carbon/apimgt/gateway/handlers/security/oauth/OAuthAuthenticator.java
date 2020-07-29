@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -52,7 +54,6 @@ import org.wso2.carbon.metrics.manager.Timer;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -161,7 +162,7 @@ public class OAuthAuthenticator implements Authenticator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
-        SignedJWT signedJWT = null;
+        SignedJWTInfo signedJWTInfo = null;
         String keyManager;
 
         if (Util.tracingEnabled()) {
@@ -194,17 +195,15 @@ public class OAuthAuthenticator implements Authenticator {
             //Initial guess of a JWT token using the presence of a DOT.
             if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
                 try {
-                    // Check if the header part is decoded
-                    Base64.getUrlDecoder().decode(accessToken.split("\\.")[0]);
                     if (StringUtils.countMatches(accessToken, APIConstants.DOT) != 2) {
                         log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 "Invalid JWT token");
                     }
 
-                    signedJWT = getSignedJwt(accessToken);
+                    signedJWTInfo = getSignedJwt(accessToken);
                     keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
-                            .getKeyManagerNameIfJwtValidatorExist(signedJWT);
+                            .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
                     synCtx.setProperty(APIMgtGatewayConstants.ELECTED_KEY_MANAGER, keyManager);
                     if (StringUtils.isNotEmpty(keyManager)){
                         if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
@@ -301,7 +300,7 @@ public class OAuthAuthenticator implements Authenticator {
             //Start JWT token validation
             if (isJwtToken) {
                 try {
-                    AuthenticationContext authenticationContext = jwtValidator.authenticate(signedJWT, synCtx);
+                    AuthenticationContext authenticationContext = jwtValidator.authenticate(signedJWTInfo, synCtx);
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
                     log.debug("User is authorized using JWT token to access the resource.");
                     return new AuthenticationResponse(true, isMandatory, false, 0, null);
@@ -582,22 +581,26 @@ public class OAuthAuthenticator implements Authenticator {
         return 10;
     }
 
-    private SignedJWT getSignedJwt(String accessToken) throws ParseException {
+    private SignedJWTInfo getSignedJwt(String accessToken) throws ParseException {
 
         String signature = accessToken.split("\\.")[2];
-        SignedJWT signedJWT = null;
+        SignedJWTInfo signedJWTInfo;
         Cache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
         if (gatewaySignedJWTParseCache != null) {
             Object cachedEntry = gatewaySignedJWTParseCache.get(signature);
             if (cachedEntry != null) {
-                signedJWT = (SignedJWT) cachedEntry;
+                signedJWTInfo = (SignedJWTInfo) cachedEntry;
             } else {
-                signedJWT = SignedJWT.parse(accessToken);
-                gatewaySignedJWTParseCache.put(signature, signedJWT);
+                SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+                signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
+                gatewaySignedJWTParseCache.put(signature, signedJWTInfo);
             }
         } else {
-            signedJWT = SignedJWT.parse(accessToken);
+            SignedJWT signedJWT = SignedJWT.parse(accessToken);
+            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+            signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
         }
-        return signedJWT;
+        return signedJWTInfo;
     }
 }
