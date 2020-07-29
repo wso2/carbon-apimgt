@@ -123,54 +123,72 @@ public class SubscriptionValidationSQLConstants {
                     "   AM_POLICY_APPLICATION";
 
     public static final String GET_ALL_APIS_SQL =
-            "SELECT" +
-                    "        API.API_ID," +
-                    "        API.API_PROVIDER," +
-                    "        API.API_NAME," +
-                    "        API.API_TIER," +
-                    "        API.API_VERSION," +
-                    "        API.CONTEXT," +
-                    "        API.API_TYPE," +
-                    "        URL.URL_MAPPING_ID," +
-                    "        URL.HTTP_METHOD," +
-                    "        URL.AUTH_SCHEME," +
-                    "        URL.URL_PATTERN," +
-                    "        URL.THROTTLING_TIER AS RES_TIER," +
-                    "        SCOPE.SCOPE_NAME " +
-                    "    FROM" +
-                    "        AM_API API," +
-                    "        AM_API_URL_MAPPING URL " +
-                    "    LEFT JOIN" +
-                    "        AM_API_RESOURCE_SCOPE_MAPPING AS SCOPE \n" +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
-                    "    WHERE" +
-                    "        API.API_ID = URL.API_ID " +
-                    "    UNION" +
-                    "    SELECT" +
-                    "        API.API_ID," +
-                    "        API.API_PROVIDER," +
-                    "        API.API_NAME," +
-                    "        API.API_TIER," +
-                    "        API.API_VERSION," +
-                    "        API.CONTEXT," +
-                    "        API.API_TYPE," +
-                    "        URL.URL_MAPPING_ID," +
-                    "        URL.HTTP_METHOD," +
-                    "        URL.AUTH_SCHEME," +
-                    "        URL.URL_PATTERN," +
-                    "        URL.THROTTLING_TIER AS RES_TIER," +
-                    "        SCOPE.SCOPE_NAME " +
-                    "    FROM" +
-                    "        AM_API API," +
-                    "        AM_API_PRODUCT_MAPPING PROD," +
-                    "        AM_API_URL_MAPPING URL " +
-                    "    LEFT JOIN" +
-                    "        AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    "    WHERE" +
-                    "        URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID " +
-                    "        AND API.API_ID = URL.API_ID" +
-                    "        AND URL.API_ID = PROD.API_ID";
+            "SELECT " +
+                    "      APIS.API_ID," +
+                    "      APIS.API_PROVIDER," +
+                    "      APIS.API_NAME," +
+                    "      APIS.API_TIER," +
+                    "      APIS.API_VERSION," +
+                    "      APIS.CONTEXT," +
+                    "      APIS.API_TYPE," +
+                    "      APIS.URL_MAPPING_ID," +
+                    "      APIS.HTTP_METHOD," +
+                    "      APIS.AUTH_SCHEME," +
+                    "      APIS.URL_PATTERN," +
+                    "      APIS.RES_TIER," +
+                    "      APIS.SCOPE_NAME," +
+                    "      DEF.DEFAULT_API_VERSION" +
+                    " FROM " +
+                    "  (" +
+                    "    SELECT " +
+                    "      API.API_ID," +
+                    "      API.API_PROVIDER," +
+                    "      API.API_NAME," +
+                    "      API.API_TIER," +
+                    "      API.API_VERSION," +
+                    "      API.CONTEXT," +
+                    "      API.API_TYPE," +
+                    "      URL.URL_MAPPING_ID," +
+                    "      URL.HTTP_METHOD," +
+                    "      URL.AUTH_SCHEME," +
+                    "      URL.URL_PATTERN," +
+                    "      URL.THROTTLING_TIER AS RES_TIER," +
+                    "      SCOPE.SCOPE_NAME" +
+                    "    FROM " +
+                    "      AM_API API," +
+                    "      AM_API_URL_MAPPING URL" +
+                    "      LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING AS SCOPE ON" +
+                    "      URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
+                    "    WHERE " +
+                    "      API.API_ID = URL.API_ID" +
+                    "    UNION " +
+                    "    SELECT " +
+                    "      API.API_ID," +
+                    "      API.API_PROVIDER," +
+                    "      API.API_NAME," +
+                    "      API.API_TIER," +
+                    "      API.API_VERSION," +
+                    "      API.CONTEXT," +
+                    "      API.API_TYPE," +
+                    "      URL.URL_MAPPING_ID," +
+                    "      URL.HTTP_METHOD," +
+                    "      URL.AUTH_SCHEME," +
+                    "      URL.URL_PATTERN," +
+                    "      URL.THROTTLING_TIER AS RES_TIER," +
+                    "      SCOPE.SCOPE_NAME" +
+                    "    FROM " +
+                    "      AM_API API," +
+                    "      AM_API_PRODUCT_MAPPING PROD," +
+                    "      AM_API_URL_MAPPING URL" +
+                    "      LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING SCOPE ON" +
+                    "      URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
+                    "    WHERE " +
+                    "      URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID" +
+                    "      AND API.API_ID = URL.API_ID" +
+                    "      AND URL.API_ID = PROD.API_ID" +
+                    "  ) AS APIS " +
+                    "  LEFT JOIN AM_API_DEFAULT_VERSION AS DEF ON APIS.API_NAME = DEF.API_NAME" +
+                    "  AND APIS.API_PROVIDER = DEF.API_PROVIDER AND APIS.API_VERSION = DEF.DEFAULT_API_VERSION";
 
     public static final String GET_ALL_AM_KEY_MAPPINGS_SQL =
             "SELECT " +
@@ -348,161 +366,256 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_TENANT_APIS_SQL =
             "SELECT" +
-                    "        API.API_ID," +
-                    "        API.API_PROVIDER," +
-                    "        API.API_NAME," +
-                    "        API.API_TIER," +
-                    "        API.API_VERSION," +
-                    "        API.CONTEXT," +
-                    "        API.API_TYPE," +
-                    "        URL.URL_MAPPING_ID," +
-                    "        URL.HTTP_METHOD," +
-                    "        URL.AUTH_SCHEME," +
-                    "        URL.URL_PATTERN," +
-                    "        URL.THROTTLING_TIER AS RES_TIER," +
-                    "        SCOPE.SCOPE_NAME " +
-                    "    FROM" +
-                    "        AM_API API," +
-                    "        AM_API_URL_MAPPING URL " +
-                    "    LEFT JOIN" +
-                    "        AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
+                    "   APIS.API_ID," +
+                    "   APIS.API_PROVIDER," +
+                    "   APIS.API_NAME," +
+                    "   APIS.API_TIER," +
+                    "   APIS.API_VERSION," +
+                    "   APIS.CONTEXT," +
+                    "   APIS.API_TYPE," +
+                    "   APIS.URL_MAPPING_ID," +
+                    "   APIS.HTTP_METHOD," +
+                    "   APIS.AUTH_SCHEME," +
+                    "   APIS.URL_PATTERN," +
+                    "   APIS.RES_TIER," +
+                    "   APIS.SCOPE_NAME," +
+                    "   DEF.DEFAULT_API_VERSION " +
+                    "FROM" +
+                    "   (" +
+                    "      SELECT" +
+                    "         API.API_ID," +
+                    "         API.API_PROVIDER," +
+                    "         API.API_NAME," +
+                    "         API.API_TIER," +
+                    "         API.API_VERSION," +
+                    "         API.CONTEXT," +
+                    "         API.API_TYPE," +
+                    "         URL.URL_MAPPING_ID," +
+                    "         URL.HTTP_METHOD," +
+                    "         URL.AUTH_SCHEME," +
+                    "         URL.URL_PATTERN," +
+                    "         URL.THROTTLING_TIER AS RES_TIER," +
+                    "         SCOPE.SCOPE_NAME " +
+                    "      FROM" +
+                    "         AM_API API," +
+                    "         AM_API_URL_MAPPING URL " +
+                    "         LEFT JOIN" +
+                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
                     "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    "    WHERE" +
-                    "        API.API_ID = URL.API_ID" +
-                    "        AND CONTEXT LIKE ?  " +
-                    "    UNION ALL" +
-                    "    SELECT" +
-                    "        API.API_ID," +
-                    "        API.API_PROVIDER," +
-                    "        API.API_NAME," +
-                    "        API.API_TIER," +
-                    "        API.API_VERSION," +
-                    "        API.CONTEXT," +
-                    "        API.API_TYPE," +
-                    "        URL.URL_MAPPING_ID," +
-                    "        URL.HTTP_METHOD," +
-                    "        URL.AUTH_SCHEME," +
-                    "        URL.URL_PATTERN," +
-                    "        URL.THROTTLING_TIER AS RES_TIER," +
-                    "        SCOPE.SCOPE_NAME " +
-                    "    FROM" +
-                    "        AM_API API," +
-                    "        AM_API_PRODUCT_MAPPING PROD," +
-                    "        AM_API_URL_MAPPING URL " +
-                    "    LEFT JOIN" +
-                    "        AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
+                    "      WHERE" +
+                    "         API.API_ID = URL.API_ID " +
+                    "         AND CONTEXT LIKE ? " +
+                    "      UNION ALL" +
+                    "      SELECT" +
+                    "         API.API_ID," +
+                    "         API.API_PROVIDER," +
+                    "         API.API_NAME," +
+                    "         API.API_TIER," +
+                    "         API.API_VERSION," +
+                    "         API.CONTEXT," +
+                    "         API.API_TYPE," +
+                    "         URL.URL_MAPPING_ID," +
+                    "         URL.HTTP_METHOD," +
+                    "         URL.AUTH_SCHEME," +
+                    "         URL.URL_PATTERN," +
+                    "         URL.THROTTLING_TIER AS RES_TIER," +
+                    "         SCOPE.SCOPE_NAME " +
+                    "      FROM" +
+                    "         AM_API API," +
+                    "         AM_API_PRODUCT_MAPPING PROD," +
+                    "         AM_API_URL_MAPPING URL " +
+                    "         LEFT JOIN" +
+                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
                     "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    "    WHERE" +
-                    "        URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID " +
-                    "        AND API.API_ID = PROD.API_ID" +
-                    "        AND CONTEXT LIKE ?";
+                    "      WHERE" +
+                    "         URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID " +
+                    "         AND API.API_ID = PROD.API_ID " +
+                    "         AND CONTEXT LIKE ? " +
+                    "   )" +
+                    "   AS APIS " +
+                    "   LEFT JOIN" +
+                    "      AM_API_DEFAULT_VERSION AS DEF " +
+                    "      ON APIS.API_NAME = DEF.API_NAME " +
+                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER " +
+                    "      AND APIS.API_VERSION = DEF.DEFAULT_API_VERSION";
 
     public static final String GET_ST_APIS_SQL =
             "SELECT" +
-                    "        API.API_ID," +
-                    "        API.API_PROVIDER," +
-                    "        API.API_NAME," +
-                    "        API.API_TIER," +
-                    "        API.API_VERSION," +
-                    "        API.CONTEXT," +
-                    "        API.API_TYPE," +
-                    "        URL.URL_MAPPING_ID," +
-                    "        URL.HTTP_METHOD," +
-                    "        URL.AUTH_SCHEME," +
-                    "        URL.URL_PATTERN," +
-                    "        URL.THROTTLING_TIER AS RES_TIER," +
-                    "        SCOPE.SCOPE_NAME " +
-                    "    FROM" +
-                    "        AM_API API," +
-                    "        AM_API_URL_MAPPING URL " +
-                    "    LEFT JOIN" +
-                    "        AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
+                    "   APIS.API_ID," +
+                    "   APIS.API_PROVIDER," +
+                    "   APIS.API_NAME," +
+                    "   APIS.API_TIER," +
+                    "   APIS.API_VERSION," +
+                    "   APIS.CONTEXT," +
+                    "   APIS.API_TYPE," +
+                    "   APIS.URL_MAPPING_ID," +
+                    "   APIS.HTTP_METHOD," +
+                    "   APIS.AUTH_SCHEME," +
+                    "   APIS.URL_PATTERN," +
+                    "   APIS.RES_TIER," +
+                    "   APIS.SCOPE_NAME," +
+                    "   DEF.DEFAULT_API_VERSION " +
+                    "FROM" +
+                    "   (" +
+                    "      SELECT" +
+                    "         API.API_ID," +
+                    "         API.API_PROVIDER," +
+                    "         API.API_NAME," +
+                    "         API.API_TIER," +
+                    "         API.API_VERSION," +
+                    "         API.CONTEXT," +
+                    "         API.API_TYPE," +
+                    "         URL.URL_MAPPING_ID," +
+                    "         URL.HTTP_METHOD," +
+                    "         URL.AUTH_SCHEME," +
+                    "         URL.URL_PATTERN," +
+                    "         URL.THROTTLING_TIER AS RES_TIER," +
+                    "         SCOPE.SCOPE_NAME " +
+                    "      FROM" +
+                    "         AM_API API," +
+                    "         AM_API_URL_MAPPING URL " +
+                    "         LEFT JOIN" +
+                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
                     "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    "    WHERE" +
-                    "        API.API_ID = URL.API_ID" +
-                    "        AND CONTEXT NOT LIKE ?  " +
-                    "    UNION" +
-                    "    SELECT" +
-                    "        API.API_ID," +
-                    "        API.API_PROVIDER," +
-                    "        API.API_NAME," +
-                    "        API.API_TIER," +
-                    "        API.API_VERSION," +
-                    "        API.CONTEXT," +
-                    "        API.API_TYPE," +
-                    "        URL.URL_MAPPING_ID," +
-                    "        URL.HTTP_METHOD," +
-                    "        URL.AUTH_SCHEME," +
-                    "        URL.URL_PATTERN," +
-                    "        URL.THROTTLING_TIER AS RES_TIER," +
-                    "        SCOPE.SCOPE_NAME " +
-                    "    FROM" +
-                    "        AM_API API," +
-                    "        AM_API_PRODUCT_MAPPING PROD," +
-                    "        AM_API_URL_MAPPING URL " +
-                    "    LEFT JOIN" +
-                    "        AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
+                    "      WHERE" +
+                    "         API.API_ID = URL.API_ID " +
+                    "         AND CONTEXT NOT LIKE ? " +
+                    "      UNION" +
+                    "      SELECT" +
+                    "         API.API_ID," +
+                    "         API.API_PROVIDER," +
+                    "         API.API_NAME," +
+                    "         API.API_TIER," +
+                    "         API.API_VERSION," +
+                    "         API.CONTEXT," +
+                    "         API.API_TYPE," +
+                    "         URL.URL_MAPPING_ID," +
+                    "         URL.HTTP_METHOD," +
+                    "         URL.AUTH_SCHEME," +
+                    "         URL.URL_PATTERN," +
+                    "         URL.THROTTLING_TIER AS RES_TIER," +
+                    "         SCOPE.SCOPE_NAME " +
+                    "      FROM" +
+                    "         AM_API API," +
+                    "         AM_API_PRODUCT_MAPPING PROD," +
+                    "         AM_API_URL_MAPPING URL " +
+                    "         LEFT JOIN" +
+                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
                     "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    "    WHERE" +
-                    "        URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID " +
-                    "        AND API.API_ID = PROD.API_ID" +
-                    "        AND CONTEXT NOT LIKE ?";
+                    "      WHERE" +
+                    "         URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID " +
+                    "         AND API.API_ID = PROD.API_ID " +
+                    "         AND CONTEXT NOT LIKE ? " +
+                    "   )" +
+                    "   AS APIS " +
+                    "   LEFT JOIN" +
+                    "      AM_API_DEFAULT_VERSION AS DEF " +
+                    "      ON APIS.API_NAME = DEF.API_NAME " +
+                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER " +
+                    "      AND APIS.API_VERSION = DEF.DEFAULT_API_VERSION";
 
     public static final String GET_API_SQL =
             "SELECT " +
-                    "  API.API_ID," +
-                    "  API.API_PROVIDER," +
-                    "  API.API_NAME," +
-                    "  API.API_TIER," +
-                    "  API.API_VERSION," +
-                    "  API.CONTEXT, " +
-                    "  API.API_TYPE, " +
-                    "  URL.URL_MAPPING_ID," +
-                    "  URL.HTTP_METHOD," +
-                    "  URL.AUTH_SCHEME," +
-                    "  URL.URL_PATTERN," +
-                    "  URL.THROTTLING_TIER AS RES_TIER," +
-                    "  SCOPE.SCOPE_NAME " +
-                    " FROM " +
-                    "   AM_API API," +
-                    "   AM_API_URL_MAPPING URL" +
-                    " LEFT JOIN " +
-                    "  AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
-                    " ON " +
-                    "  URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    " WHERE " +
-                    "   API.API_ID = URL.API_ID AND " +
-                    "   API.API_VERSION = ? AND " +
-                    "   API.CONTEXT = ?";
+                    "   APIS.API_ID," +
+                    "   APIS.API_PROVIDER," +
+                    "   APIS.API_NAME," +
+                    "   APIS.API_TIER," +
+                    "   APIS.API_VERSION," +
+                    "   APIS.CONTEXT," +
+                    "   APIS.API_TYPE," +
+                    "   APIS.URL_MAPPING_ID," +
+                    "   APIS.HTTP_METHOD," +
+                    "   APIS.AUTH_SCHEME," +
+                    "   APIS.URL_PATTERN," +
+                    "   APIS.RES_TIER," +
+                    "   APIS.SCOPE_NAME," +
+                    "   DEF.DEFAULT_API_VERSION " +
+                    "FROM " +
+                    "   (" +
+                    "      SELECT " +
+                    "         API.API_ID," +
+                    "         API.API_PROVIDER," +
+                    "         API.API_NAME," +
+                    "         API.API_TIER," +
+                    "         API.API_VERSION," +
+                    "         API.CONTEXT," +
+                    "         API.API_TYPE," +
+                    "         URL.URL_MAPPING_ID," +
+                    "         URL.HTTP_METHOD," +
+                    "         URL.AUTH_SCHEME," +
+                    "         URL.URL_PATTERN," +
+                    "         URL.THROTTLING_TIER AS RES_TIER," +
+                    "         SCOPE.SCOPE_NAME" +
+                    "      FROM " +
+                    "         AM_API API," +
+                    "         AM_API_URL_MAPPING URL" +
+                    "         LEFT JOIN" +
+                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE" +
+                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
+                    "      WHERE" +
+                    "         API.API_ID = URL.API_ID" +
+                    "         AND API.API_VERSION = ?" +
+                    "         AND API.CONTEXT = ?" +
+                    "   )" +
+                    "   AS APIS " +
+                    "   LEFT JOIN " +
+                    "      AM_API_DEFAULT_VERSION AS DEF" +
+                    "      ON APIS.API_NAME = DEF.API_NAME" +
+                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
+                    "      AND APIS.API_VERSION = DEF.DEFAULT_API_VERSION";
 
     //todo merge with above DET_API
     public static final String GET_API_PRODUCT_SQL =
-            " SELECT" +
-                    "        API.API_ID," +
-                    "        API.API_PROVIDER," +
-                    "        API.API_NAME," +
-                    "        API.API_TIER," +
-                    "        API.API_VERSION," +
-                    "        API.CONTEXT," +
-                    "        API.API_TYPE," +
-                    "        URL.URL_MAPPING_ID," +
-                    "        URL.HTTP_METHOD," +
-                    "        URL.AUTH_SCHEME," +
-                    "        URL.URL_PATTERN," +
-                    "        URL.THROTTLING_TIER AS RES_TIER," +
-                    "        SCOPE.SCOPE_NAME " +
-                    "    FROM" +
-                    "        AM_API API," +
-                    "        AM_API_PRODUCT_MAPPING PROD," +
-                    "        AM_API_URL_MAPPING URL " +
-                    "    LEFT JOIN" +
-                    "        AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    "    WHERE" +
-                    "        URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID " +
-                    "        AND API.API_ID = PROD.API_ID " +
-                    "        AND API.API_VERSION = ? " +
-                    "        AND API.CONTEXT = ?";
+            "SELECT " +
+                    "   APIS.API_ID," +
+                    "   APIS.API_PROVIDER," +
+                    "   APIS.API_NAME," +
+                    "   APIS.API_TIER," +
+                    "   APIS.API_VERSION," +
+                    "   APIS.CONTEXT," +
+                    "   APIS.API_TYPE," +
+                    "   APIS.URL_MAPPING_ID," +
+                    "   APIS.HTTP_METHOD," +
+                    "   APIS.AUTH_SCHEME," +
+                    "   APIS.URL_PATTERN," +
+                    "   APIS.RES_TIER," +
+                    "   APIS.SCOPE_NAME," +
+                    "   DEF.DEFAULT_API_VERSION " +
+                    "FROM " +
+                    "   (" +
+                    "      SELECT " +
+                    "         API.API_ID," +
+                    "         API.API_PROVIDER," +
+                    "         API.API_NAME," +
+                    "         API.API_TIER," +
+                    "         API.API_VERSION," +
+                    "         API.CONTEXT," +
+                    "         API.API_TYPE," +
+                    "         URL.URL_MAPPING_ID," +
+                    "         URL.HTTP_METHOD," +
+                    "         URL.AUTH_SCHEME," +
+                    "         URL.URL_PATTERN," +
+                    "         URL.THROTTLING_TIER AS RES_TIER," +
+                    "         SCOPE.SCOPE_NAME" +
+                    "      FROM " +
+                    "         AM_API API," +
+                    "         AM_API_PRODUCT_MAPPING PROD," +
+                    "         AM_API_URL_MAPPING URL" +
+                    "         LEFT JOIN " +
+                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE" +
+                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
+                    "      WHERE " +
+                    "         URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID" +
+                    "         AND API.API_ID = PROD.API_ID" +
+                    "         AND API.API_VERSION = ?" +
+                    "         AND API.CONTEXT = ?" +
+                    "   )" +
+                    "   AS APIS " +
+                    "   LEFT JOIN " +
+                    "      AM_API_DEFAULT_VERSION AS DEF " +
+                    "      ON APIS.API_NAME = DEF.API_NAME" +
+                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
+                    "      AND APIS.API_VERSION = DEF.DEFAULT_API_VERSION";
 
     public static final String GET_TENANT_AM_KEY_MAPPING_SQL =
             "SELECT " +
