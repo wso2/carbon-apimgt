@@ -3726,6 +3726,8 @@ paths:
       operationId: exportTenantTheme
       produces:
         - application/zip
+      x-examples:
+        $ref: docs/examples/tenant-theme/tenant_theme.yaml#/exportDevPortalTenantTheme
       summary: Export a DevPortal Tenant Theme
       description: |
         This operation can be used to export a DevPortal tenant theme as a zip file.
@@ -3773,6 +3775,8 @@ paths:
       operationId: importTenantTheme
       consumes:
         - multipart/form-data
+      x-examples:
+        $ref: docs/examples/tenant-theme/tenant_theme_put.yaml
       summary: Import a DevPortal Tenant Theme
       description: |
         This operation can be used to import a DevPortal tenant theme.

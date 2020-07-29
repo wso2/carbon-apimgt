@@ -1,0 +1,13 @@
+- title: Export a DevPortal Tenant Theme
+  id: exportDevPortalTenantTheme
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/admin/v1/tenant-theme
+    headers: |
+      Authorization: Bearer 88d1d5f8-d5f5-3b1a-82d4-907ec6d66f60
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
