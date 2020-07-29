@@ -927,7 +927,8 @@ public class OAS3Parser extends APIDefinition {
         if (scopes != null && !scopes.isEmpty()) {
             Map<String, String> scopeBindings = new HashMap<>();
             for (Scope scope : scopes) {
-                oas3Scopes.put(scope.getKey(), scope.getDescription());
+                String description = scope.getDescription() != null ? scope.getDescription() : "";
+                oas3Scopes.put(scope.getKey(), description);
                 scopeBindings.put(scope.getKey(), scope.getRoles());
             }
             oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
