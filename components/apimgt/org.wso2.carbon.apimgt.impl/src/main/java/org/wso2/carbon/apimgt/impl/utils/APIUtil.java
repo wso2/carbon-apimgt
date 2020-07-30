@@ -7606,6 +7606,20 @@ public final class APIUtil {
     }
 
     /**
+     * This method gets the RESTAPIScopes configuration from tenant-conf.json in registry. Role Mappings (Role aliases
+     * will not be substituted to the scope/role mappings)
+     *
+     * @param tenantDomain Tenant domain
+     * @return RESTAPIScopes configuration without substituting role mappings
+     * @throws APIManagementException error while getting RESTAPIScopes configuration
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getRESTAPIScopesForTenantWithoutRoleMappings(String tenantDomain)
+            throws APIManagementException{
+        return APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain), null);
+    }
+
+    /**
      * @param tenantDomain Tenant domain to be used to get default role configurations
      * @return JSON object which contains configuration for default roles
      * @throws APIManagementException

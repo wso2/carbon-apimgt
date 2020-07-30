@@ -64,7 +64,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
 
     public Response systemScopesGet(MessageContext messageContext) {
         try {
-            Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+            Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(MultitenantUtils
                     .getTenantDomain(RestApiUtil.getLoggedInUsername()));
             ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
             return Response.ok().entity(scopeListDTO).build();
@@ -79,7 +79,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
             throws APIManagementException {
         JSONObject newScopeRoleJson = SystemScopesMappingUtil.createJsonObjectOfScopeMapping(body);
         APIUtil.updateTenantConfOfRoleScopeMapping(newScopeRoleJson, RestApiUtil.getLoggedInUsername());
-        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(MultitenantUtils
                 .getTenantDomain(RestApiUtil.getLoggedInUsername()));
         ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
         return Response.ok().entity(scopeListDTO).build();
