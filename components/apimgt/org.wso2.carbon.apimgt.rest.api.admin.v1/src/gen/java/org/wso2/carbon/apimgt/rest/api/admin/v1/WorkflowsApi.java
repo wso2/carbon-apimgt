@@ -44,7 +44,8 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of a the pending workflow request according to the External Workflow Reference. ", notes = "Using this operation, you can retrieve complete details of a pending workflow request that either belongs to application creation, application subscription, application registration, api state change, user self sign up.. You need to provide the External_Workflow_Reference of the workflow Request to retrive it. ", response = WorkflowInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_workflow_view", description = "Retrive workflow requests")
+            @AuthorizationScope(scope = "apim:api_workflow_view", description = "Retrive workflow requests"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Workflows (Individual)",  })
     @ApiResponses(value = { 
@@ -62,7 +63,8 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve All pending workflow processes ", notes = "This operation can be used to retrieve list of workflow pending processes. ", response = WorkflowListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_workflow_view", description = "Retrive workflow requests")
+            @AuthorizationScope(scope = "apim:api_workflow_view", description = "Retrive workflow requests"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Workflow (Collection)",  })
     @ApiResponses(value = { 
