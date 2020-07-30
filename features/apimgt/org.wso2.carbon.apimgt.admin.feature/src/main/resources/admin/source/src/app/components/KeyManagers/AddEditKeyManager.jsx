@@ -156,6 +156,7 @@ function reducer(state, newValue) {
         case 'consumerKeyClaim':
         case 'scopesClaim':
         case 'certificates':
+        case 'wellKnownEndpoint':
             return { ...state, [field]: value };
         case 'all':
             return value;
@@ -172,7 +173,6 @@ function AddEditKeyManager(props) {
     const classes = useStyles();
     const intl = useIntl();
     const [saving, setSaving] = useState(false);
-    const [wellKnownUrl, setWellKnownUrl] = useState('');
     const [importingConfig, setImportingConfig] = useState(false);
     const { match: { params: { id } }, history } = props;
     const { settings } = useAppContext();
@@ -213,10 +213,11 @@ function AddEditKeyManager(props) {
             type: 'PEM',
             value: '',
         },
+        wellKnownEndpoint: '',
     });
     const [state, dispatch] = useReducer(reducer, initialState);
     const {
-        name, description, type, displayName,
+        name, description, type, displayName, wellKnownEndpoint,
         introspectionEndpoint, clientRegistrationEndpoint,
         tokenEndpoint, revokeEndpoint,
         userInfoEndpoint, authorizeEndpoint,
@@ -395,7 +396,7 @@ function AddEditKeyManager(props) {
         dispatch({ field: 'tokenValidation', value });
     };
     const importKMConfig = () => {
-        const payload = { url: wellKnownUrl, type };
+        const payload = { url: wellKnownEndpoint, type };
         setImportingConfig(true);
         restApi.keyManagersDiscover(payload).then((result) => {
             const { obj: { value } } = result;
@@ -593,11 +594,11 @@ function AddEditKeyManager(props) {
                             <Box display='flex' mt={2} alignItems='flex-start'>
                                 <TextField
                                     margin='dense'
-                                    name='wellKnownUrl'
+                                    name='wellKnownEndpoint'
                                     fullWidth
                                     variant='outlined'
-                                    value={wellKnownUrl}
-                                    onChange={(e) => setWellKnownUrl(e.target.value)}
+                                    value={wellKnownEndpoint}
+                                    onChange={onChange}
                                     label={(
                                         <FormattedMessage
                                             id='KeyManagers.AddEditKeyManager.form.wellKnownUrl'
