@@ -2756,6 +2756,7 @@ paths:
     get:
       security:
         - OAuth2Security:
+            - apim:admin
             - apim:api_workflow_view
       x-wso2-request: |
         GET https://localhost:9443/api/am/admin/v1/workflows
@@ -2837,6 +2838,7 @@ paths:
     get:
       security:
         - OAuth2Security:
+            - apim:admin
             - apim:api_workflow_view
       x-wso2-curl: "curl https://localhost:9443/api/am/admin/v1/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
       x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/admin/v0.17/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
