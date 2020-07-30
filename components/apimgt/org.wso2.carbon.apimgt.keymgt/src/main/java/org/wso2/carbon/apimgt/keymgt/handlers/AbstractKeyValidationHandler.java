@@ -216,10 +216,11 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                 .getTenantSubscriptionStore(apiTenantDomain);
         //TODO add a check to see whether datastore is initialized an load data using rest api if it is not loaded
         if (datastore != null) {
-            if (version != null && context.startsWith("/" + version)) {
+            api = datastore.getApiByContextAndVersion(context, version);
+            if (api == null && (context.startsWith("/" + version)
+                    || context.startsWith("/t/" + apiTenantDomain + "/" + version))) {
+                // for websocket default version. context comes as the version. get the default api for that context
                 api = datastore.getDefaultApiByContext(context);
-            } else {
-                api = datastore.getApiByContextAndVersion(context, version);
             }
             if (api != null) {
                 key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager);
