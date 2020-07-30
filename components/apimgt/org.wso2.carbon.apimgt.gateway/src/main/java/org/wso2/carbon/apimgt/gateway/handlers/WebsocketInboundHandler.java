@@ -290,9 +290,16 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
+                    String apiVersion = version;
+                    boolean isDefaultVersion = false;
+                    if ((apiContextUri.startsWith("/" + version)
+                            || apiContextUri.startsWith("/t/" + tenantDomain + "/" + version))) {
+                        apiVersion = APIConstants.DEFAULT_WEBSOCKET_VERSION;
+                        isDefaultVersion = true;
+                    }
                     AuthenticationContext authenticationContext =
                             new JWTValidator(null, new APIKeyValidator(null)).
-                                    authenticateForWebSocket(signedJWTInfo, apiContextUri, version, keyManager);
+                                    authenticateForWebSocket(signedJWTInfo, apiContextUri, apiVersion, keyManager);
                     if(authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;
                     }
@@ -316,11 +323,22 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
                     //This prefix is added for synapse to dispatch this request to the specific sequence
                     if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(info.getType())) {
-                        uri = "/_PRODUCTION_" + uri;
+                        if (isDefaultVersion) {
+                            uri = "/_PRODUCTION_" + uri + "/" + authenticationContext.getApiVersion();
+                        } else {
+                            uri = "/_PRODUCTION_" + uri;
+                        }                       
                     } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(info.getType())) {
-                        uri = "/_SANDBOX_" + uri;
+                        if (isDefaultVersion) {
+                            uri = "/_SANDBOX_" + uri + "/" + authenticationContext.getApiVersion();
+                        } else {
+                            uri = "/_SANDBOX_" + uri;
+                        }       
                     }
-
+                    if (isDefaultVersion) {
+                        version = authenticationContext.getApiVersion();
+                    }
+                    
                     infoDTO = info;
                     return authenticationContext.isAuthenticated();
                 } else {

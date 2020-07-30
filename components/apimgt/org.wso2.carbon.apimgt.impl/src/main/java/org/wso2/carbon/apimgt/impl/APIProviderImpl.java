@@ -2393,6 +2393,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + " published to gateway";
             log.debug(logMessage);
         }
+        //if the API is websocket and if default version is selected, update the other versions
+        if (APIConstants.APITransportType.WS.toString().equals(api.getType()) && api.isDefaultVersion()) {
+            Set<String> versions = getAPIVersions(api.getId().getProviderName(), api.getId().getName());
+            for (String version : versions) {
+                if (version.equals(api.getId().getVersion())) {
+                    continue;
+                }
+                API otherApi = getAPI(new APIIdentifier(api.getId().getProviderName(), api.getId().getName(), version));
+                APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                        APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, otherApi.getId().getApiName(),
+                        0, version, api.getType(), otherApi.getContext(), otherApi.getId().getProviderName(),
+                        otherApi.getStatus());
+                APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+            }
+        }
         return failedEnvironment;
     }
 

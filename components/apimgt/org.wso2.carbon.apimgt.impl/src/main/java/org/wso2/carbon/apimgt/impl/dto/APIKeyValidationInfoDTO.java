@@ -64,6 +64,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String keyManager;
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
+    private String apiVersion;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -358,6 +359,13 @@ public class APIKeyValidationInfoDTO implements Serializable {
 
     public void setGraphQLMaxComplexity(int graphQLMaxComplexity) { this.graphQLMaxComplexity = graphQLMaxComplexity; }
 
+    public String getApiVersion() {
+        return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
+    }
 
 }
 

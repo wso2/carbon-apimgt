@@ -572,6 +572,8 @@ public final class APIConstants {
     public static final String IDENTITY_REVOKE_ENDPOINT = "/oauth2/revoke";
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
+    
+    public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
 
     public static String DELEM_COLON = ":";
 

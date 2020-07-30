@@ -124,5 +124,7 @@ public interface SubscriptionDataStore {
     boolean isApisInitialized();
 
     boolean isApiPoliciesInitialized();
+
+    API getDefaultApiByContext(String context);
 }
 
