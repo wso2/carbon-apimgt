@@ -290,9 +290,14 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
+                    String apiVersion = version;
+                    if ((apiContextUri.startsWith("/" + version)
+                            || apiContextUri.startsWith("/t/" + tenantDomain + "/" + version))) {
+                        apiVersion = APIConstants.DEFAULT_WEBSOCKET_VERSION;
+                    }
                     AuthenticationContext authenticationContext =
                             new JWTValidator(null, new APIKeyValidator(null)).
-                                    authenticateForWebSocket(signedJWTInfo, apiContextUri, version, keyManager);
+                                    authenticateForWebSocket(signedJWTInfo, apiContextUri, apiVersion, keyManager);
                     if(authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;
                     }

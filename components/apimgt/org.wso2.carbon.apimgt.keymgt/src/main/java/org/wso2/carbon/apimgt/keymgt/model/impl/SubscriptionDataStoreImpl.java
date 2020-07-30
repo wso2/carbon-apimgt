@@ -38,11 +38,13 @@ import org.wso2.carbon.base.MultitenantConstants;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
@@ -455,5 +457,20 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public void removeApiPolicy(ApiPolicy apiPolicy) {
         apiPolicyMap.remove(apiPolicy.getCacheKey());
+    }
+
+    @Override
+    public API getDefaultApiByContext(String context) {
+        Set<String> set = apiMap.keySet()
+                .stream()
+                .filter(s -> s.startsWith(context))
+                .collect(Collectors.toSet());
+        for (String key : set) {
+            API api = apiMap.get(key);
+            if (api.isDefaultVersion() && (api.getContext().replace("/" + api.getApiVersion(), "")).equals(context)) {
+                return api;
+            }
+        }
+        return null;
     }
 }
