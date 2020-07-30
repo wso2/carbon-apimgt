@@ -327,8 +327,13 @@ public class SubscriptionValidationDAO {
                     api.setProvider(resultSet.getString("API_PROVIDER"));
                     api.setName(resultSet.getString("API_NAME"));
                     api.setPolicy(resultSet.getString("API_TIER"));
-                    api.setVersion(resultSet.getString("API_VERSION"));
+                    String apiVersionFromDB = resultSet.getString("API_VERSION");
+                    api.setVersion(apiVersionFromDB);
                     api.setContext(resultSet.getString("CONTEXT"));
+                    String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
+                    if (apiVersionFromDB != null) {
+                        api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
+                    }
                     temp.put(apiId, api);
                 }
                 String urlPattern = resultSet.getString("URL_PATTERN");
@@ -369,8 +374,13 @@ public class SubscriptionValidationDAO {
                 api.setProvider(resultSet.getString("API_PROVIDER"));
                 api.setName(resultSet.getString("API_NAME"));
                 api.setPolicy(resultSet.getString("API_TIER"));
-                api.setVersion(resultSet.getString("API_VERSION"));
+                String apiVersionFromDB = resultSet.getString("API_VERSION");
+                api.setVersion(apiVersionFromDB);
                 api.setContext(resultSet.getString("CONTEXT"));
+                String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
+                if (apiVersionFromDB != null) {
+                    api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
+                }
                 api.setApiType(apiType);
                 temp.put(apiId, api);
                 tempUrls = new ConcurrentHashMap<>();

@@ -33,6 +33,7 @@ public class API implements CacheableEntity<String> {
     private String context = null;
     private String policy = null;
     private String apiType = null;
+    private Boolean isDefaultVersion = false;
 
     private Map<String, URLMapping> resources = new HashMap<>();
 
@@ -133,5 +134,13 @@ public class API implements CacheableEntity<String> {
     public Map<String, URLMapping> getAllResources() {
 
         return resources;
+    }
+
+    public Boolean isDefaultVersion() {
+        return isDefaultVersion;
+    }
+
+    public void setIsDefaultVersion(Boolean defaultVersion) {
+        isDefaultVersion = defaultVersion;
     }
 }
