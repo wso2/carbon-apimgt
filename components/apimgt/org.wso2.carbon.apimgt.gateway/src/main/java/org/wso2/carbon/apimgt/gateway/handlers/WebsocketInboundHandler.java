@@ -233,6 +233,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             version = getVersionFromUrl(uri);
+            if ((apiContextUri.startsWith("/" + version)
+                    || apiContextUri.startsWith("/t/" + tenantDomain + "/" + version))) {
+                version = APIConstants.DEFAULT_WEBSOCKET_VERSION;
+            }
             APIKeyValidationInfoDTO info;
             if (!req.headers().contains(HttpHeaders.AUTHORIZATION)) {
                 QueryStringDecoder decoder = new QueryStringDecoder(req.getUri());
