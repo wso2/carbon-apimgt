@@ -32,6 +32,7 @@ import ListAddOns from './Commons/ListAddOns';
 import DeletePermission from './Commons/DeletePermission';
 import AddRoleWizard from './Commons/AddRoleWizard';
 
+
 const headCells = [
     {
         numeric: false, disablePadding: false, label: 'Roles',
@@ -75,6 +76,28 @@ function extractMappings(permissionMapping) {
 /**
  *
  *
+ * @param {*} roleAliases
+ * @param {*} scopeMappings
+ */
+function mergeRoleAliasesAndScopeMappings(roleAliases, scopeMappings) {
+    const roleAliasesMap = {};
+    for (const roleAlias of roleAliases) {
+        const { role, aliases } = roleAlias;
+        for (const alias of aliases) {
+            if (roleAliasesMap[alias]) {
+                roleAliasesMap[alias].aliases.push(role);
+            } else {
+                roleAliasesMap[alias] = { aliases: [role] };
+            }
+        }
+    }
+    // Later role names(roleAliasesMap) will overwrite earlier role names(scopeMappings) with the same name.
+    return Object.assign(scopeMappings, roleAliasesMap);
+}
+
+/**
+ *
+ *
  * @export @inheritdoc
  * @returns {React.Component} Role -> Permission list component
  */
@@ -101,15 +124,16 @@ export default function ListRoles() {
         }
     */
     const [appMappings, setAppMappings] = useState();
+    const [roleAliases, setRoleAliases] = useState();
+    const [systemScopes, setSystemScopes] = useState();
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         PermissionAPI.getRoleAliases();
         Promise.all([PermissionAPI.getRoleAliases(), PermissionAPI.systemScopes()]).then(
-            ([roleAliases, systemScopes]) => {
-                const [roleMapping, appMapping] = extractMappings(systemScopes.body.list);
-                setPermissionMappings(roleMapping);
-                setAppMappings(appMapping);
+            ([roleAliasesRes, systemScopesRes]) => {
+                setSystemScopes(systemScopesRes.body);
+                setRoleAliases(roleAliasesRes.body);
             },
         ).catch((error) => {
             // TODO: Proper error handling here ~tmkb
@@ -117,6 +141,14 @@ export default function ListRoles() {
             console.error(error);
         });
     }, []);
+
+    useEffect(() => {
+        if (systemScopes && roleAliases) {
+            const [roleMapping, appMapping] = extractMappings(systemScopes.list);
+            setPermissionMappings(mergeRoleAliasesAndScopeMappings(roleAliases.list, roleMapping));
+            setAppMappings(appMapping);
+        }
+    }, [roleAliases, systemScopes]);
 
     /*
         No need to create handleScopeMappingUpdate all the time ,
@@ -142,7 +174,6 @@ export default function ListRoles() {
         }
         return handleScopeMappingUpdate(updatedAppMappings);
     };
-
     if (!permissionMappings || !appMappings) {
         return <Progress message='Resolving user ...' />;
     }
@@ -171,8 +202,28 @@ export default function ListRoles() {
             </ListAddOns>
             <AdminTable multiSelect={false}>
                 <AdminTableHead headCells={headCells} />
-                <TableBody rows={Object.entries(permissionMappings).map(([role]) => {
-                    return [role,
+                <TableBody rows={Object.entries(permissionMappings).map(([role, mapping]) => {
+                    return [mapping.aliases ? (
+                        <Box display='inline'>
+                            {role}
+                            <Box
+                                borderRadius={16}
+                                borderColor='info.main'
+                                ml={2}
+                                mr={2}
+                                pl={1}
+                                pr={1}
+                                border={1}
+                                display='inline'
+                                fontSize={10}
+                                fontWeight='fontWeightLight'
+                            >
+                                {/* TODO: Do support multiple aliases from UI ~tmkb  */}
+                                {mapping.aliases[0]}
+                            </Box>
+                        </Box>
+                    ) : role,
+                    (
                         <Box component='span' display='block'>
                             <PermissionsSelector
                                 role={role}
@@ -189,7 +240,7 @@ export default function ListRoles() {
                                     Delete
                                 </DeletePermission>
                             </Box>
-                        </Box>,
+                        </Box>),
                     ];
                 })}
                 />
