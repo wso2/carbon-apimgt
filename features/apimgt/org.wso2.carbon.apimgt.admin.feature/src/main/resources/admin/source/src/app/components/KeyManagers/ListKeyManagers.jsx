@@ -60,9 +60,26 @@ export default function ListKeyManagers() {
             }),
             options: {
                 customBodyRender: (value, tableMeta) => {
-                    if (typeof tableMeta.rowData === 'object') {
+                    if (typeof tableMeta.rowData === 'object' && value !== 'Default') {
                         const artifactId = tableMeta.rowData[tableMeta.rowData.length - 2];
                         return <RouterLink to={`/settings/key-managers/${artifactId}`}>{value}</RouterLink>;
+                    } else if (typeof tableMeta.rowData === 'object' && value === 'Default') {
+                        return (
+                            <>
+                                <div>
+                                    {intl.formatMessage({
+                                        id: 'KeyManagers.ListKeyManagers.table.default.km.name',
+                                        defaultMessage: 'Resident Key Manager',
+                                    })}
+                                </div>
+                                <Typography variant='caption' display='block' gutterBottom>
+                                    <FormattedMessage
+                                        id='KeyManagers.ListKeyManagers.editing.not.allowed'
+                                        defaultMessage='Residence key manager editing is not allowed'
+                                    />
+                                </Typography>
+                            </>
+                        );
                     } else {
                         return <div />;
                     }

@@ -4,10 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import TableHead from '@material-ui/core/TableHead';
@@ -36,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
     formControlSelect: {
         width: 200,
         marginRight: 20,
+        paddingLeft: 14,
     },
     labelRoot: {
         position: 'relative',
@@ -123,10 +121,15 @@ export default function KeyValidation(props) {
             newPreValues[tokenValidation.type] = tokenValidation.value;
             setPreValues(newPreValues);
             tokenValidation.type = value;
+            if (tokenValidation.type === 'JWT') {
+                tokenValidation.value = preValues[value];
+            } else {
+                tokenValidation.value = '';
+            }
         } else if (name === 'value') {
             tokenValidation.value = value;
         }
-        tokenValidation.value = preValues[value];
+
         setTokenValidation(tokenValidation);
     };
     const onCreateJWTmapping = (e) => {
@@ -142,24 +145,13 @@ export default function KeyValidation(props) {
         setTokenValidation(newMapping);
     };
     return (
-        <ExpansionPanel>
-            <ExpansionPanelSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls='panel1bh-content'
-                id='panel1bh-header'
-            >
-                <Typography className={classes.heading}>
-                    Token Validation
-                    {' '}
-                    {tokenValidation.id}
-                </Typography>
-            </ExpansionPanelSummary>
-            <Box display='flex' flexDirection='row' m={2}>
+        <>
+            <Box display='flex' flexDirection='row' mt={2}>
                 <FormControl variant='outlined' className={classes.formControlSelect}>
                     <InputLabel classes={{ root: classes.labelRoot }}>
                         <FormattedMessage
                             id='KeyManager.KeyValidation.token.validation.type'
-                            defaultMessage='Token Validation Type'
+                            defaultMessage='Type'
                         />
                     </InputLabel>
                     <Select
@@ -307,7 +299,7 @@ export default function KeyValidation(props) {
                     </Table>
                 )}
             </Box>
-        </ExpansionPanel>
+        </>
     );
 }
 KeyValidation.defaultProps = {

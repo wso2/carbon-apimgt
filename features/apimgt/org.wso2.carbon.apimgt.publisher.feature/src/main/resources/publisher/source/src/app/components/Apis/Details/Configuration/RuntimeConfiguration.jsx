@@ -42,7 +42,6 @@ import Flow from './components/Flow';
 import Endpoints from './components/Endpoints';
 import APISecurity from './components/APISecurity/APISecurity';
 import QueryAnalysis from './components/QueryAnalysis';
-import KeyManager from './components/KeyManager';
 import {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
@@ -273,9 +272,9 @@ export default function RuntimeConfiguration() {
                 return nextState;
             case 'allKeyManagersEnabled':
                 if (value) {
-                    nextState.keyManagers = [];
-                } else {
                     nextState.keyManagers = ['all'];
+                } else {
+                    nextState.keyManagers = [];
                 }
                 return nextState;
             default:
@@ -389,7 +388,6 @@ export default function RuntimeConfiguration() {
                                 <Paper className={classes.paper} elevation={0}>
                                     <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
                                     <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
-                                    <KeyManager api={apiConfig} configDispatcher={configDispatcher} />
 
                                     {api.type !== 'GRAPHQL'
                                         && <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />}

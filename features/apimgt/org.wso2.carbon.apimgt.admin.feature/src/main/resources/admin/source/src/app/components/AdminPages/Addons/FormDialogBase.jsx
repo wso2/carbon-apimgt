@@ -32,7 +32,15 @@ import Alert from 'AppComponents/Shared/Alert';
  * @returns {JSX} Header AppBar components.
  */
 function FormDialogBase({
-    title, children, icon, triggerButtonText, saveButtonText, triggerButtonProps, formSaveCallback, dialogOpenCallback,
+    title,
+    children,
+    icon,
+    triggerButtonText,
+    saveButtonText,
+    triggerButtonProps,
+    formSaveCallback,
+    dialogOpenCallback,
+    triggerIconProps,
 }) {
     const [open, setOpen] = React.useState(false);
     const [saving, setSaving] = useState(false);
@@ -66,7 +74,7 @@ function FormDialogBase({
     return (
         <>
             {icon && (
-                <IconButton color='primary' component='span' onClick={handleClickOpen}>
+                <IconButton {...triggerIconProps} onClick={handleClickOpen}>
                     {icon}
                 </IconButton>
             )}
@@ -100,6 +108,10 @@ FormDialogBase.defaultProps = {
         variant: 'contained',
         color: 'primary',
     },
+    triggerIconProps: {
+        color: 'primary',
+        component: 'span',
+    },
 };
 
 FormDialogBase.propTypes = {
@@ -109,6 +121,7 @@ FormDialogBase.propTypes = {
     triggerButtonText: PropTypes.string.isRequired,
     saveButtonText: PropTypes.string.isRequired,
     triggerButtonProps: PropTypes.shape({}),
+    triggerIconProps: PropTypes.shape({}),
     formSaveCallback: PropTypes.func.isRequired,
     dialogOpenCallback: PropTypes.func,
 };
