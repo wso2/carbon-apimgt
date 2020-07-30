@@ -419,6 +419,7 @@ function TryOutController(props) {
             prefix = '';
         }
     }
+    const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
 
     let tokenValue = '';
     if (securitySchemeType === 'API-KEY') {
@@ -556,242 +557,245 @@ function TryOutController(props) {
                     )}
                 </Box>
             </Grid>
-            <Grid xs={12} md={12} item>
-                <Box display='block'>
-                    {user && subscriptions
-                        && subscriptions.length > 0 && securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST'
-                        && (
-                            <SelectAppPanel
-                                subscriptions={subscriptions}
-                                handleChanges={handleChanges}
-                                selectedApplication={selectedApplication}
-                                selectedKeyManager={selectedKeyManager}
-                                selectedKeyType={selectedKeyType}
-                                keyManagers={keyManagers}
-                            />
-                        )}
-                    {subscriptions && subscriptions.length === 0 && securitySchemeType !== 'TEST' && (
-                        <Box display='flex' justifyContent='center'>
-                            <Typography variant='body1' gutterBottom>
-                                <FormattedMessage
-                                    id='Apis.Details.ApiConsole.ApiConsole.subscribe.to.application'
-                                    defaultMessage='Please subscribe to an application'
-                                />
-                            </Typography>
-                        </Box>
-                    )}
-                    <Box display='block' justifyContent='center'>
-                        <Grid x={8} md={6} className={classes.tokenType} item>
-                            {securitySchemeType === 'BASIC' && (
-                                <>
-                                    <Grid x={12} md={12} item>
-                                        <TextField
-                                            margin='normal'
-                                            variant='outlined'
-                                            label={(
-                                                <FormattedMessage
-                                                    id='username'
-                                                    defaultMessage='Username'
-                                                />
-                                            )}
-                                            name='username'
-                                            onChange={handleChanges}
-                                            value={username || ''}
-                                            fullWidth
-                                        />
-                                        <TextField
-                                            margin='normal'
-                                            variant='outlined'
-                                            label={(
-                                                <FormattedMessage
-                                                    id='password'
-                                                    defaultMessage='Password'
-                                                />
-                                            )}
-                                            name='password'
-                                            onChange={handleChanges}
-                                            value={password || ''}
-                                            fullWidth
-                                        />
-                                    </Grid>
-                                </>
-                            )}
-                            {securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST' && (
-                                <TextField
-                                    fullWidth
-                                    margin='normal'
-                                    variant='outlined'
-                                    label={(
+            {!isPrototypedAPI
+                && (
+                    <Grid xs={12} md={12} item>
+                        <Box display='block'>
+                            {user && subscriptions
+                                && subscriptions.length > 0 && securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST'
+                                && (
+                                    <SelectAppPanel
+                                        subscriptions={subscriptions}
+                                        handleChanges={handleChanges}
+                                        selectedApplication={selectedApplication}
+                                        selectedKeyManager={selectedKeyManager}
+                                        selectedKeyType={selectedKeyType}
+                                        keyManagers={keyManagers}
+                                    />
+                                )}
+                            {subscriptions && subscriptions.length === 0 && securitySchemeType !== 'TEST' && (
+                                <Box display='flex' justifyContent='center'>
+                                    <Typography variant='body1' gutterBottom>
                                         <FormattedMessage
-                                            id='access.token'
-                                            sdefaultMessage='Access Token'
+                                            id='Apis.Details.ApiConsole.ApiConsole.subscribe.to.application'
+                                            defaultMessage='Please subscribe to an application'
                                         />
-                                    )}
-                                    name='accessToken'
-                                    onChange={handleChanges}
-                                    type={showToken ? 'text' : 'password'}
-                                    value={tokenValue || ''}
-                                    helperText={(
-                                        <FormattedMessage
-                                            id='enter.access.token'
-                                            defaultMessage='Enter access Token'
-                                        />
-                                    )}
-                                    id='accessTokenInput'
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position='end'>
-                                                <IconButton
-                                                    edge='end'
-                                                    aria-label='Toggle token visibility'
-                                                    onClick={handleClickShowToken}
-                                                >
-                                                    {showToken ? <Icon>visibility_off</Icon>
-                                                        : <Icon>visibility</Icon>}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                        startAdornment: (
-                                            <InputAdornment
-                                                className={classes.inputAdornmentStart}
-                                                position='start'
-                                            >
-                                                {`${authorizationHeader}: ${prefix}`}
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
+                                    </Typography>
+                                </Box>
                             )}
-                            {securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST' && (
-                                <>
-                                    <Button
-                                        onClick={securitySchemeType === 'API-KEY' ? generateApiKey
-                                            : generateAccessToken}
-                                        color='secondary'
-                                        variant='outlined'
-                                        className={classes.genKeyButton}
-                                        disabled={!user || (subscriptions && subscriptions.length === 0)}
-                                    >
-                                        {isUpdating && (
-                                            <CircularProgress size={15} />
-                                        )}
-                                        <FormattedMessage
-                                            id='Apis.Details.ApiCOnsole.generate.test.key'
-                                            defaultMessage='GET TEST KEY '
-                                        />
-                                    </Button>
-                                    <Tooltip
-                                        placement='right'
-                                        interactive
-                                        title={(
-                                            <FormattedMessage
-                                                id='Apis.Details.TryOutConsole.access.token.tooltip'
-                                                defaultMessage={
-                                                    'You can use your existing Access Token or '
-                                                + 'you can generate a new Test Key.'
-                                                }
-                                            />
-                                        )}
-                                    >
-                                        <Box m={1}>
-                                            <IconButton
-                                                aria-label='Use existing Access Token or generate a new Test Key'
-                                            >
-                                                <HelpOutline />
-                                            </IconButton>
-                                        </Box>
-                                    </Tooltip>
-                                </>
-                            )}
-                        </Grid>
-                    </Box>
-                    <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
-                        <Grid xs={12} md={6} item>
-                            {((environments && environments.length > 0) || (containerMngEnvMenuItems.length > 0)
-                                || (labels && labels.length > 0))
-                                    && (
+                            <Box display='block' justifyContent='center'>
+                                <Grid x={8} md={6} className={classes.tokenType} item>
+                                    {securitySchemeType === 'BASIC' && (
                                         <>
-                                            <Typography
-                                                variant='h5'
-                                                color='textPrimary'
-                                                className={classes.categoryHeading}
-                                            >
-                                                <FormattedMessage
-                                                    id='api.console.gateway.heading'
-                                                    defaultMessage='Gateway'
+                                            <Grid x={12} md={12} item>
+                                                <TextField
+                                                    margin='normal'
+                                                    variant='outlined'
+                                                    label={(
+                                                        <FormattedMessage
+                                                            id='username'
+                                                            defaultMessage='Username'
+                                                        />
+                                                    )}
+                                                    name='username'
+                                                    onChange={handleChanges}
+                                                    value={username || ''}
+                                                    fullWidth
                                                 />
-                                            </Typography>
-                                            <TextField
-                                                fullWidth
-                                                select
-                                                label={(
-                                                    <FormattedMessage
-                                                        defaultMessage='Environment'
-                                                        id='Apis.Details.ApiConsole.environment'
-                                                    />
-                                                )}
-                                                value={selectedEnvironment || (environments && environments[0])}
-                                                name='selectedEnvironment'
-                                                onChange={handleChanges}
-                                                helperText={(
-                                                    <FormattedMessage
-                                                        defaultMessage='Please select an environment'
-                                                        id='Apis.Details.ApiConsole.SelectAppPanel.environment'
-                                                    />
-                                                )}
-                                                margin='normal'
-                                                variant='outlined'
-                                            >
-                                                {environments && environments.length > 0 && (
-                                                    <MenuItem value='' disabled className={classes.menuItem}>
-                                                        <em>
-                                                            <FormattedMessage
-                                                                id='api.gateways'
-                                                                defaultMessage='API Gateways'
-                                                            />
-                                                        </em>
-                                                    </MenuItem>
-                                                )}
-                                                {environments && (
-                                                    environments.map((env) => (
-                                                        <MenuItem
-                                                            value={env}
-                                                            key={env}
-                                                            className={classes.menuItem}
-                                                        >
-                                                            {env}
-                                                        </MenuItem>
-                                                    )))}
-                                                {containerMngEnvMenuItems}
-                                                {labels && labels.length > 0 && (
-                                                    <MenuItem value='' disabled>
-                                                        <em>
-                                                            <FormattedMessage
-                                                                id='gateways'
-                                                                defaultMessage='Gateways'
-                                                                className={classes.menuItem}
-                                                            />
-                                                        </em>
-                                                    </MenuItem>
-                                                )}
-                                                {labels && (
-                                                    labels.map((label) => (
-                                                        <MenuItem
-                                                            value={label}
-                                                            key={label}
-                                                            className={classes.menuItem}
-                                                        >
-                                                            {label}
-                                                        </MenuItem>
-                                                    ))
-                                                )}
-                                            </TextField>
+                                                <TextField
+                                                    margin='normal'
+                                                    variant='outlined'
+                                                    label={(
+                                                        <FormattedMessage
+                                                            id='password'
+                                                            defaultMessage='Password'
+                                                        />
+                                                    )}
+                                                    name='password'
+                                                    onChange={handleChanges}
+                                                    value={password || ''}
+                                                    fullWidth
+                                                />
+                                            </Grid>
                                         </>
                                     )}
-                        </Grid>
-                    </Box>
-                </Box>
-            </Grid>
+                                    {securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST' && (
+                                        <TextField
+                                            fullWidth
+                                            margin='normal'
+                                            variant='outlined'
+                                            label={(
+                                                <FormattedMessage
+                                                    id='access.token'
+                                                    sdefaultMessage='Access Token'
+                                                />
+                                            )}
+                                            name='accessToken'
+                                            onChange={handleChanges}
+                                            type={showToken ? 'text' : 'password'}
+                                            value={tokenValue || ''}
+                                            helperText={(
+                                                <FormattedMessage
+                                                    id='enter.access.token'
+                                                    defaultMessage='Enter access Token'
+                                                />
+                                            )}
+                                            id='accessTokenInput'
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position='end'>
+                                                        <IconButton
+                                                            edge='end'
+                                                            aria-label='Toggle token visibility'
+                                                            onClick={handleClickShowToken}
+                                                        >
+                                                            {showToken ? <Icon>visibility_off</Icon>
+                                                                : <Icon>visibility</Icon>}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                                startAdornment: (
+                                                    <InputAdornment
+                                                        className={classes.inputAdornmentStart}
+                                                        position='start'
+                                                    >
+                                                        {`${authorizationHeader}: ${prefix}`}
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    )}
+                                    {securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST' && (
+                                        <>
+                                            <Button
+                                                onClick={securitySchemeType === 'API-KEY' ? generateApiKey
+                                                    : generateAccessToken}
+                                                color='secondary'
+                                                variant='outlined'
+                                                className={classes.genKeyButton}
+                                                disabled={!user || (subscriptions && subscriptions.length === 0)}
+                                            >
+                                                {isUpdating && (
+                                                    <CircularProgress size={15} />
+                                                )}
+                                                <FormattedMessage
+                                                    id='Apis.Details.ApiCOnsole.generate.test.key'
+                                                    defaultMessage='GET TEST KEY '
+                                                />
+                                            </Button>
+                                            <Tooltip
+                                                placement='right'
+                                                interactive
+                                                title={(
+                                                    <FormattedMessage
+                                                        id='Apis.Details.TryOutConsole.access.token.tooltip'
+                                                        defaultMessage={
+                                                            'You can use your existing Access Token or '
+                                                            + 'you can generate a new Test Key.'
+                                                        }
+                                                    />
+                                                )}
+                                            >
+                                                <Box m={1}>
+                                                    <IconButton
+                                                        aria-label='Use existing Access Token or generate a new Test Key'
+                                                    >
+                                                        <HelpOutline />
+                                                    </IconButton>
+                                                </Box>
+                                            </Tooltip>
+                                        </>
+                                    )}
+                                </Grid>
+                            </Box>
+                            <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
+                                <Grid xs={12} md={6} item>
+                                    {((environments && environments.length > 0) || (containerMngEnvMenuItems.length > 0)
+                                        || (labels && labels.length > 0))
+                                        && (
+                                            <>
+                                                <Typography
+                                                    variant='h5'
+                                                    color='textPrimary'
+                                                    className={classes.categoryHeading}
+                                                >
+                                                    <FormattedMessage
+                                                        id='api.console.gateway.heading'
+                                                        defaultMessage='Gateway'
+                                                    />
+                                                </Typography>
+                                                <TextField
+                                                    fullWidth
+                                                    select
+                                                    label={(
+                                                        <FormattedMessage
+                                                            defaultMessage='Environment'
+                                                            id='Apis.Details.ApiConsole.environment'
+                                                        />
+                                                    )}
+                                                    value={selectedEnvironment || (environments && environments[0])}
+                                                    name='selectedEnvironment'
+                                                    onChange={handleChanges}
+                                                    helperText={(
+                                                        <FormattedMessage
+                                                            defaultMessage='Please select an environment'
+                                                            id='Apis.Details.ApiConsole.SelectAppPanel.environment'
+                                                        />
+                                                    )}
+                                                    margin='normal'
+                                                    variant='outlined'
+                                                >
+                                                    {environments && environments.length > 0 && (
+                                                        <MenuItem value='' disabled className={classes.menuItem}>
+                                                            <em>
+                                                                <FormattedMessage
+                                                                    id='api.gateways'
+                                                                    defaultMessage='API Gateways'
+                                                                />
+                                                            </em>
+                                                        </MenuItem>
+                                                    )}
+                                                    {environments && (
+                                                        environments.map((env) => (
+                                                            <MenuItem
+                                                                value={env}
+                                                                key={env}
+                                                                className={classes.menuItem}
+                                                            >
+                                                                {env}
+                                                            </MenuItem>
+                                                        )))}
+                                                    {containerMngEnvMenuItems}
+                                                    {labels && labels.length > 0 && (
+                                                        <MenuItem value='' disabled>
+                                                            <em>
+                                                                <FormattedMessage
+                                                                    id='gateways'
+                                                                    defaultMessage='Gateways'
+                                                                    className={classes.menuItem}
+                                                                />
+                                                            </em>
+                                                        </MenuItem>
+                                                    )}
+                                                    {labels && (
+                                                        labels.map((label) => (
+                                                            <MenuItem
+                                                                value={label}
+                                                                key={label}
+                                                                className={classes.menuItem}
+                                                            >
+                                                                {label}
+                                                            </MenuItem>
+                                                        ))
+                                                    )}
+                                                </TextField>
+                                            </>
+                                        )}
+                                </Grid>
+                            </Box>
+                        </Box>
+                    </Grid>
+                )}
         </IntlProvider>
     );
 }
