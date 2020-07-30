@@ -18,26 +18,15 @@
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
-import HelpOutline from '@material-ui/icons/HelpOutline';
+import Box from '@material-ui/core/Box';
+import Checkbox from '@material-ui/core/Checkbox';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { makeStyles } from '@material-ui/core/styles';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import { isRestricted } from 'AppData/AuthManager';
-import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import Chip from '@material-ui/core/Chip';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import API from 'AppData/api';
-import ListItemText from '@material-ui/core/ListItemText';
-import Checkbox from '@material-ui/core/Checkbox';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 
 const useStyles = makeStyles((theme) => ({
     expansionPanel: {
@@ -71,93 +60,104 @@ const useStyles = makeStyles((theme) => ({
  * @returns
  */
 export default function KeyManager(props) {
-    const [apiFromContext] = useAPI();
     const [keyManagersConfigured, setKeyManagersConfigured] = useState([]);
     const {
         configDispatcher,
-        api: { keyManagers },
+        api: { keyManagers, securityScheme },
     } = props;
     const classes = useStyles();
     const handleChange = (event) => {
+        const newKeyManagers = [...keyManagers];
+        const { target: { checked, name } } = event;
+        if (newKeyManagers.indexOf(name) === -1 && checked) {
+            newKeyManagers.push(name);
+        } else if (newKeyManagers.indexOf(name) !== -1 && !checked) {
+            newKeyManagers.splice(newKeyManagers.indexOf(name), 1);
+        }
         configDispatcher({
             action: 'keymanagers',
-            value: event.target.value,
+            value: newKeyManagers,
         });
     };
     useEffect(() => {
         API.keyManagers().then((response) => setKeyManagersConfigured(response.body.list));
     }, []);
-
-    return (
-        <ExpansionPanel className={classes.expansionPanel} defaultExpanded>
-            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography className={classes.subHeading} variant='h6'>
+    if (!securityScheme.includes('oauth2')) {
+        return (
+            <>
+                <Typography className={classes.subHeading} variant='subtitle2'>
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.KeyManager.configuration'
                         defaultMessage='Keymanager Configuration'
                     />
-                    <Tooltip
-                        title={(
+                </Typography>
+                <Box ml={1} mb={2}>
+                    <Typography className={classes.subHeading} variant='caption'>
+                        <FormattedMessage
+                            id='Apis.Details.Configuration.components.oauth.disabled'
+                            defaultMessage='Key Manager configuration only valid when OAuth2 security is enabled.'
+                        />
+                    </Typography>
+                </Box>
+            </>
+        );
+    }
+    return (
+        <>
+            <Typography className={classes.subHeading} variant='subtitle2'>
+                <FormattedMessage
+                    id='Apis.Details.Configuration.components.KeyManager.configuration'
+                    defaultMessage='Keymanager Configuration'
+                />
+            </Typography>
+            <Box ml={1}>
+                <RadioGroup
+                    value={keyManagers.includes('all') ? 'all' : 'selected'}
+                    onChange={({ target: { value } }) => configDispatcher({
+                        action: 'allKeyManagersEnabled',
+                        value: value === 'all',
+                    })}
+                    style={{ flexDirection: 'row' }}
+                >
+                    <FormControlLabel
+                        value='all'
+                        control={<Radio />}
+                        label={(
                             <FormattedMessage
-                                id='Apis.Details.Keymanager.components.Configuration.tooltip'
-                                defaultMessage='If enabled, the Key Managers for the API will be enabled.'
+                                id='Apis.Details.Configuration.components.KeyManager.allow.all'
+                                defaultMessage='Allow all'
                             />
                         )}
-                        aria-label='Key managers'
-                        placement='right-end'
-                        interactive
-                    >
-                        <HelpOutline className={classes.iconSpace} />
-                    </Tooltip>
-                </Typography>
-                <FormControlLabel
-                    className={classes.actionSpace}
-                    control={(
-                        <Switch
-                            disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                            checked={!keyManagers.includes('all')}
-                            onChange={({ target: { checked } }) => configDispatcher({
-                                action: 'allKeyManagersEnabled',
-                                value: checked,
-                            })}
-                            color='primary'
-                        />
-                    )}
-                />
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails className={classes.expansionPanelDetails}>
-                <Grid container>
-                    <Grid item md={12}>
-                        {!keyManagers.includes('all') && (
-                            <Grid container>
-                                <Grid item md={12}>
-                                    <Select
-                                        multiple
-                                        value={keyManagers}
-                                        className={classes.keyManagerSelect}
-                                        onChange={handleChange}
-                                        renderValue={(selected) => (
-                                            <div className={classes.chips}>
-                                                {selected.map((value) => (
-                                                    <Chip key={value} label={value} className={classes.chip} />
-                                                ))}
-                                            </div>
-                                        )}
-                                    >
-                                        {keyManagersConfigured.map((key) => (
-                                            <MenuItem key={key.name} value={key.name} disabled={!key.enabled}>
-                                                <Checkbox color='primary' checked={keyManagers.includes(key.name)} />
-                                                <ListItemText primary={key.name} secondary={key.description} />
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </Grid>
-                            </Grid>
+                    />
+                    <FormControlLabel
+                        value='selected'
+                        control={<Radio />}
+                        label={(
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.components.KeyManager.allow.selected'
+                                defaultMessage='Allow selected'
+                            />
                         )}
-                    </Grid>
-                </Grid>
-            </ExpansionPanelDetails>
-        </ExpansionPanel>
+                    />
+                </RadioGroup>
+                <Box display='flex' flexDirection='row' mb={2}>
+                    {!keyManagers.includes('all') && keyManagersConfigured.map((key) => (
+                        <FormControlLabel
+                            control={(
+                                <Checkbox
+                                    color='primary'
+                                    checked={keyManagers.includes(key.name)}
+                                    disabled={!key.enabled}
+                                    onChange={handleChange}
+                                    name={key.name}
+                                />
+                            )}
+                            label={key.name}
+                        />
+                    ))}
+                </Box>
+            </Box>
+        </>
     );
 }
 

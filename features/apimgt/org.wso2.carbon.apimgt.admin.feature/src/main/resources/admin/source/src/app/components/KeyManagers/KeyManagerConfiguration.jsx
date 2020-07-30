@@ -18,17 +18,24 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
     inputLabel: {
         transform: 'translate(14px, 11px) scale(1)',
+    },
+    error: {
+        color: theme.palette.error.dark,
     },
 }));
 
 /**
- * Keymanager Connector configuration
  * @export
- * @param {*} props
+ * @param {*} props sksk
  * @returns {React.Component}
+ */
+/**
+ * Keymanager Connector configuration
+ * @param {JSON} props props passed from parents.
+ * @returns {JSX} key manager connector form.
  */
 export default function KeyManagerConfiguration(props) {
     const {
@@ -68,6 +75,7 @@ export default function KeyManagerConfiguration(props) {
                     <FormControl variant='outlined' fullWidth>
                         <InputLabel className={classes.inputLabel}>
                             {keymanagerConnectorConfiguration.label}
+                            {keymanagerConnectorConfiguration.required && (<span className={classes.error}>*</span>)}
                         </InputLabel>
                         <OutlinedInput
                             type={showPassword ? 'text' : 'password'}
@@ -102,9 +110,13 @@ export default function KeyManagerConfiguration(props) {
                     autoFocus
                     margin='dense'
                     name={keymanagerConnectorConfiguration.name}
-                    label={keymanagerConnectorConfiguration.label}
+                    label={(
+                        <span>
+                            {keymanagerConnectorConfiguration.label}
+                            {keymanagerConnectorConfiguration.required && (<span className={classes.error}>*</span>)}
+                        </span>
+                    )}
                     fullWidth
-                    required
                     error={keymanagerConnectorConfiguration.required && hasErrors('keyconfig', value, validating)}
                     helperText={hasErrors('keyconfig', value, validating) || keymanagerConnectorConfiguration.tooltip}
                     variant='outlined'
