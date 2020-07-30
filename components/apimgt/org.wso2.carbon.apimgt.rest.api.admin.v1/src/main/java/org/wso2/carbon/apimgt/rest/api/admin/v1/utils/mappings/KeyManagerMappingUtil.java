@@ -6,11 +6,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import org.apache.axis2.databinding.types.xsd._double;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
@@ -96,6 +94,11 @@ public class KeyManagerMappingUtil {
         if (issuerElement != null) {
             keyManagerDTO.setIssuer(issuerElement.getAsString());
             jsonObject.remove(APIConstants.KeyManager.ISSUER);
+        }
+        JsonElement wellKnownEndpointElement = jsonObject.get(APIConstants.KeyManager.WELL_KNOWN_ENDPOINT);
+        if (wellKnownEndpointElement != null) {
+            keyManagerDTO.setWellKnownEndpoint(wellKnownEndpointElement.getAsString());
+            jsonObject.remove(APIConstants.KeyManager.WELL_KNOWN_ENDPOINT);
         }
         JsonElement certificateValueElement = jsonObject.get(APIConstants.KeyManager.CERTIFICATE_VALUE);
         JsonElement certificateTypeElement = jsonObject.get(APIConstants.KeyManager.CERTIFICATE_TYPE);
@@ -231,6 +234,9 @@ public class KeyManagerMappingUtil {
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getAuthorizeEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.AUTHORIZE_ENDPOINT, keyManagerDTO.getAuthorizeEndpoint());
+        }
+        if (StringUtils.isNotEmpty(keyManagerDTO.getWellKnownEndpoint())) {
+            additionalProperties.put(APIConstants.KeyManager.WELL_KNOWN_ENDPOINT, keyManagerDTO.getWellKnownEndpoint());
         }
         additionalProperties
                 .put(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, keyManagerDTO.isEnableOAuthAppCreation());
