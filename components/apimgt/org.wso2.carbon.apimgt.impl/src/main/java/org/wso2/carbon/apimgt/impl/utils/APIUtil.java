@@ -157,6 +157,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIDConnectDiscoveryClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
@@ -11083,7 +11084,7 @@ public final class APIUtil {
     }
 
     public static KeyManagerConfigurationDTO getAndSetDefaultKeyManagerConfiguration(
-            KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
 
         boolean clientSecretHashEnabled =
                 ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isClientSecretHashEnabled();
@@ -11561,11 +11562,11 @@ public final class APIUtil {
         }
     }
 
-    public static OpenIdConnectConfiguration getOpenIdConnectConfigurations(String url) {
+    public static OpenIdConnectConfiguration getOpenIdConnectConfigurations(String url) throws APIManagementException {
 
-        OpenIDConnectDiscoveryClient openIDConnectDiscoveryClient =
-                Feign.builder().client(new OkHttpClient()).encoder(new GsonEncoder()).decoder(new GsonDecoder())
-                        .target(OpenIDConnectDiscoveryClient.class, url);
+        OpenIDConnectDiscoveryClient openIDConnectDiscoveryClient = Feign.builder()
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(url))).encoder(new GsonEncoder())
+                .decoder(new GsonDecoder()).target(OpenIDConnectDiscoveryClient.class, url);
         return openIDConnectDiscoveryClient.getOpenIdConnectConfiguration();
     }
 
