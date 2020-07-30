@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
@@ -770,7 +771,13 @@ public class APIAdminImpl implements APIAdmin {
      */
     public Workflow[] getworkflows(String workflowType, String status, String tenantDomain)
             throws APIManagementException {
-        return apiMgtDAO.getworkflows(workflowType, status, tenantDomain);
+        WorkflowProperties workflowConfig = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+        if (workflowConfig.isListTasks()) {
+            return apiMgtDAO.getworkflows(workflowType, status, tenantDomain);
+        } else {
+            return new Workflow[0];
+        }
     }
 
     /**
@@ -784,9 +791,14 @@ public class APIAdminImpl implements APIAdmin {
      */
     public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status,
                                                                       String tenantDomain) throws APIManagementException {
-        Workflow workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef,
-                status, tenantDomain);
-
+        Workflow workflow = null;
+        WorkflowProperties workflowConfig = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+        if (workflowConfig.isListTasks()) {
+            workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef,
+                    status, tenantDomain);
+        } 
+        
         if (workflow == null) {
             String msg = "External workflow Reference: " + externelWorkflowRef + " was not found.";
             throw new APIMgtResourceNotFoundException(msg);

@@ -798,6 +798,12 @@ public class APIManagerConfiguration {
             String dcrEPPassword = MiscellaneousUtil.resolve(dcrEPPasswordOmElement, secretResolver);
             dcrEPPassword = APIUtil.replaceSystemProperty(dcrEPPassword);
             workflowProperties.setdCREndpointPassword(dcrEPPassword);
+            
+            OMElement listTasksElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.LIST_PENDING_TASKS));
+            if (listTasksElement != null) {
+                workflowProperties.setListTasks(JavaUtils.isTrueExplicitly(listTasksElement.getText()));
+            }
 
         }
     }
