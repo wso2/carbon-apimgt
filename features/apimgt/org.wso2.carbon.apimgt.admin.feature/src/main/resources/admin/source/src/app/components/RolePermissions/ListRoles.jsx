@@ -104,9 +104,10 @@ export default function ListRoles() {
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        PermissionAPI.systemScopes().then(
-            (data) => {
-                const [roleMapping, appMapping] = extractMappings(data.body.list);
+        PermissionAPI.getRoleAliases();
+        Promise.all([PermissionAPI.getRoleAliases(), PermissionAPI.systemScopes()]).then(
+            ([roleAliases, systemScopes]) => {
+                const [roleMapping, appMapping] = extractMappings(systemScopes.body.list);
                 setPermissionMappings(roleMapping);
                 setAppMappings(appMapping);
             },

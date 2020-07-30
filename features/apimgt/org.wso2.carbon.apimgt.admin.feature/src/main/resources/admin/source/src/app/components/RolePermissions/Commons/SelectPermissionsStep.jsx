@@ -34,10 +34,11 @@ import PermissionTree from '../TreeView/PermissionTree';
  */
 export default function SelectPermissionsStep(props) {
     const {
-        onCheck, role, appMappings, permissionMappings,
+        onCheck, role, appMappings,
+        permissionMappings, onMappedRoleSelect, mappedRole, onPermissionTypeSelect, permissionType,
     } = props;
-    const [permissionType, setPermissionType] = React.useState('role-alias');
-    const [mappedRole, setMappedRole] = React.useState();
+
+    const { ROLE_ALIAS, SELECT_PERMISSIONS } = SelectPermissionsStep.CONST;
 
     return (
         <FormControl style={{ width: '100%' }} component='fieldset'>
@@ -45,17 +46,21 @@ export default function SelectPermissionsStep(props) {
                 aria-label='mapping-type'
                 name='mapping-type'
                 value={permissionType}
-                onChange={(e) => setPermissionType(e.target.value)}
+                onChange={(e) => onPermissionTypeSelect(e.target.value)}
             >
-                <FormControlLabel value='role-alias' control={<Radio color='primary' />} label='Role alias' />
+                <FormControlLabel
+                    value={ROLE_ALIAS}
+                    control={<Radio color='primary' />}
+                    label='Role alias'
+                />
                 <Box width={400} display='inline' pl={7} pt={2} pb={2}>
                     <Autocomplete
                         value={mappedRole}
                         onChange={(e, newValue) => {
-                            setMappedRole(newValue);
+                            onMappedRoleSelect(newValue);
                         }}
                         clearOnEscape
-                        disabled={permissionType !== 'role-alias'}
+                        disabled={permissionType !== ROLE_ALIAS}
                         id='role-select-dropdown'
                         autoFocus
                         options={Object.keys(permissionMappings)}
@@ -94,13 +99,13 @@ export default function SelectPermissionsStep(props) {
                     />
                 </Box>
                 <FormControlLabel
-                    value='select-permissions'
+                    value={SELECT_PERMISSIONS}
                     control={<Radio color='primary' />}
                     label='Custom permissions'
                 />
                 <Box pl={7} pt={2}>
                     <PermissionTree
-                        disabled={permissionType !== 'select-permissions'}
+                        disabled={permissionType !== SELECT_PERMISSIONS}
                         onCheck={onCheck}
                         role={role}
                         appMappings={appMappings}
@@ -110,3 +115,7 @@ export default function SelectPermissionsStep(props) {
         </FormControl>
     );
 }
+SelectPermissionsStep.CONST = {
+    SELECT_PERMISSIONS: 'select-permissions',
+    ROLE_ALIAS: 'role-alias',
+};
