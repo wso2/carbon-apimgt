@@ -25,6 +25,7 @@ public class KeyManagerDTO   {
     private String displayName = null;
     private String type = null;
     private String description = null;
+    private String wellKnownEndpoint = null;
     private String introspectionEndpoint = null;
     private String clientRegistrationEndpoint = null;
     private String tokenEndpoint = null;
@@ -134,6 +135,24 @@ public class KeyManagerDTO   {
   }
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  /**
+   * Well-Known Endpoint of Identity Provider. 
+   **/
+  public KeyManagerDTO wellKnownEndpoint(String wellKnownEndpoint) {
+    this.wellKnownEndpoint = wellKnownEndpoint;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "", value = "Well-Known Endpoint of Identity Provider. ")
+  @JsonProperty("wellKnownEndpoint")
+  public String getWellKnownEndpoint() {
+    return wellKnownEndpoint;
+  }
+  public void setWellKnownEndpoint(String wellKnownEndpoint) {
+    this.wellKnownEndpoint = wellKnownEndpoint;
   }
 
   /**
@@ -525,6 +544,7 @@ public class KeyManagerDTO   {
         Objects.equals(displayName, keyManager.displayName) &&
         Objects.equals(type, keyManager.type) &&
         Objects.equals(description, keyManager.description) &&
+        Objects.equals(wellKnownEndpoint, keyManager.wellKnownEndpoint) &&
         Objects.equals(introspectionEndpoint, keyManager.introspectionEndpoint) &&
         Objects.equals(clientRegistrationEndpoint, keyManager.clientRegistrationEndpoint) &&
         Objects.equals(tokenEndpoint, keyManager.tokenEndpoint) &&
@@ -551,7 +571,7 @@ public class KeyManagerDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, description, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, certificates, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties);
+    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, certificates, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties);
   }
 
   @Override
@@ -564,6 +584,7 @@ public class KeyManagerDTO   {
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    wellKnownEndpoint: ").append(toIndentedString(wellKnownEndpoint)).append("\n");
     sb.append("    introspectionEndpoint: ").append(toIndentedString(introspectionEndpoint)).append("\n");
     sb.append("    clientRegistrationEndpoint: ").append(toIndentedString(clientRegistrationEndpoint)).append("\n");
     sb.append("    tokenEndpoint: ").append(toIndentedString(tokenEndpoint)).append("\n");

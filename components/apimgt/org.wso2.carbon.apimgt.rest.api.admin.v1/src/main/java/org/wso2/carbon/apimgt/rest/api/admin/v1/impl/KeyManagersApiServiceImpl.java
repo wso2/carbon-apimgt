@@ -51,6 +51,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             if (openIdConnectConfiguration != null){
                 KeyManagerWellKnownResponseDTO keyManagerWellKnownResponseDTO = KeyManagerMappingUtil
                         .fromOpenIdConnectConfigurationToKeyManagerConfiguration(openIdConnectConfiguration);
+                keyManagerWellKnownResponseDTO.getValue().setWellKnownEndpoint(url);
                 keyManagerWellKnownResponseDTO.getValue().setType(type);
                 return Response.ok().entity(keyManagerWellKnownResponseDTO).build();
             }
