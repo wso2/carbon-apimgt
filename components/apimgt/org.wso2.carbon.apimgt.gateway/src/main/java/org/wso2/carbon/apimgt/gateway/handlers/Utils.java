@@ -43,12 +43,11 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
+import org.apache.synapse.rest.API;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -68,6 +67,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.cache.Caching;
 import javax.security.cert.CertificateException;
 import javax.security.cert.X509Certificate;
@@ -475,5 +475,16 @@ public class Utils {
             }
         }
         return propertyMap;
+    }
+
+    public static API getSelectedAPI(MessageContext messageContext) {
+
+        String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+        Object apiObject = messageContext.getProperty(RESTConstants.PROCESSED_API);
+        if (apiObject != null) {
+            return (API) apiObject;
+        } else {
+            return messageContext.getConfiguration().getAPI(apiName);
+        }
     }
 }
