@@ -142,7 +142,7 @@ class AuthManager {
     }
 
     static hasBasicLoginPermission(scopes) {
-        return scopes.includes('apim:tier_view') || scopes.includes('apim:admin');
+        return scopes.includes('apim:admin');
     }
 
     /**
