@@ -27,8 +27,8 @@ import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import PermissionTree from '../TreeView/PermissionTree';
 import AddItem from './AddItem';
+import SelectPermissionsStep from './SelectPermissionsStep';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -130,7 +130,7 @@ export default function AddRoleWizard(props) {
             onClose={onClose}
             title='Add new role permissions'
             buttonText='Add role permissions'
-            dialogProps={{ disableBackdropClick: isSaving }}
+            dialogProps={{ disableBackdropClick: isSaving, maxWidth: 'md' }}
             dialogActions={(
                 <div className={classes.actionsContainer}>
                     <div>
@@ -168,13 +168,14 @@ export default function AddRoleWizard(props) {
 
                                 {
                                     (index === 0) && (
-                                        <Box pt={3}>
-
+                                        <Box pt={3} width='40%'>
                                             <TextField
                                                 id='role-input-field-helper-text'
                                                 error={Boolean(validation.role)}
                                                 value={newRole}
                                                 fullWidth
+                                                autoFocus
+                                                size='small'
                                                 label='Role Name'
                                                 helperText={
                                                     validation.role
@@ -202,11 +203,14 @@ export default function AddRoleWizard(props) {
                                 }
                                 {
                                     (index === 1) && (
-                                        <PermissionTree
-                                            onCheck={permissionCheckHandler}
-                                            role={newRole}
-                                            appMappings={localAppMappings}
-                                        />
+                                        <>
+                                            <SelectPermissionsStep
+                                                onCheck={permissionCheckHandler}
+                                                role={newRole}
+                                                appMappings={localAppMappings}
+                                                permissionMappings={permissionMappings}
+                                            />
+                                        </>
                                     )
                                 }
                             </StepContent>
