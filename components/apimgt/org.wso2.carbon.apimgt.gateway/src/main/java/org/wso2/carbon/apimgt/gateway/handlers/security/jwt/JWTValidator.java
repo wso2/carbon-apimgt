@@ -316,7 +316,9 @@ public class JWTValidator {
             log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(apiContext,
                     apiVersion, jwtValidationInfo);
-
+            if (APIConstants.DEFAULT_WEBSOCKET_VERSION.equals(apiVersion)) {
+                apiVersion = apiKeyValidationInfoDTO.getApiVersion();
+            }
             if (log.isDebugEnabled()) {
                 log.debug("Subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager() + ". Status: " +
                         apiKeyValidationInfoDTO.isAuthorized());
@@ -331,8 +333,10 @@ public class JWTValidator {
                                 apiKeyValidationInfoDTO, apiContext, apiVersion);
                         endUserToken = generateAndRetrieveJWTToken(tokenSignature, jwtInfoDto);
                     }
-                    return GatewayUtils.generateAuthenticationContext(tokenSignature, jwtValidationInfo, null,
+                    AuthenticationContext context = GatewayUtils.generateAuthenticationContext(tokenSignature, jwtValidationInfo, null,
                             apiKeyValidationInfoDTO, getApiLevelPolicy(), endUserToken, true);
+                    context.setApiVersion(apiVersion);
+                    return context;
                 } catch (ParseException e) {
                     throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                             APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);

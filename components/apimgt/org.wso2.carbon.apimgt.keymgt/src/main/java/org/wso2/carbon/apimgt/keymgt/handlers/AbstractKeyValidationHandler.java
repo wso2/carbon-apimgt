@@ -367,6 +367,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         infoDTO.setSubscriber(app.getSubName());
         infoDTO.setApplicationId(app.getId().toString());
         infoDTO.setApiName(api.getApiName());
+        infoDTO.setApiVersion(api.getApiVersion());
         infoDTO.setApiPublisher(api.getApiProvider());
         infoDTO.setApplicationName(app.getName());
         infoDTO.setApplicationTier(app.getPolicy());
