@@ -27,8 +27,11 @@ import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import PermissionTree from '../TreeView/PermissionTree';
+import PermissionAPI from 'AppData/PermissionScopes';
 import AddItem from './AddItem';
+import SelectPermissionsStep from './SelectPermissionsStep';
+
+const { ROLE_ALIAS, SELECT_PERMISSIONS } = SelectPermissionsStep.CONST;
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -62,6 +65,9 @@ export default function AddRoleWizard(props) {
     const [isSaving, setIsSaving] = useState(false);
     const [validation, setValidation] = useState({});
     const [permissionsValidation, setPermissionsValidation] = useState({});
+    const [mappedRole, setMappedRole] = useState();
+    const [permissionTypeSelection, setPermissionTypeSelection] = useState(ROLE_ALIAS);
+
     // No need an effect here due to the component structure
     const [localAppMappings, setLocalAppMappings] = useState({ ...appMappings });
 
@@ -97,30 +103,43 @@ export default function AddRoleWizard(props) {
     const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
+
+    /**
+     * Handle the final step in the wizard, The `Save` action
+     */
     const onAddRole = () => {
-        const permissionsValidationConditions = Object.values(permissionsValidation);
-        if (!permissionsValidationConditions.length
-            || !permissionsValidationConditions.reduce((acc, cu) => acc || cu)) {
-            Alert.warning('You need to select at least one permission!');
-            return;
-        }
         setIsSaving(true);
-        Promise.resolve(onRoleAdd(localAppMappings))
-            .then(() => {
-                Alert.info(
-                    <span>
-                        Add permissions for
-                        <b>{` ${newRole} `}</b>
-                        successfully
-                    </span>,
-                );
-                onClose();
-            })
-            .catch((error) => {
-                Alert.error('Something went wrong while adding new role permissions');
-                console.error(error);
-            })
-            .finally(() => setIsSaving(false));
+        // Check if user has select at least one permission from the tree if the type is SELECT_PERMISSION
+        if (permissionTypeSelection === SELECT_PERMISSIONS) {
+            const permissionsValidationConditions = Object.values(permissionsValidation);
+            if (!permissionsValidationConditions.length
+                || !permissionsValidationConditions.reduce((acc, cu) => acc || cu)) {
+                Alert.warning('You need to select at least one permission!');
+                return;
+            }
+            Promise.resolve(onRoleAdd(localAppMappings))
+                .then(() => {
+                    Alert.info(
+                        <span>
+                            Add permissions for
+                            <b>{` ${newRole} `}</b>
+                            successfully
+                        </span>,
+                    );
+                    onClose();
+                })
+                .catch((error) => {
+                    Alert.error('Something went wrong while adding new role permissions');
+                    console.error(error);
+                })
+                .finally(() => setIsSaving(false));
+        } else {
+            if (!mappedRole) {
+                Alert.warning("Mapped role selection can't be empty!");
+                return;
+            }
+            PermissionAPI.updateRoleAliases();
+        }
     };
 
     return (
@@ -130,7 +149,7 @@ export default function AddRoleWizard(props) {
             onClose={onClose}
             title='Add new role permissions'
             buttonText='Add role permissions'
-            dialogProps={{ disableBackdropClick: isSaving }}
+            dialogProps={{ disableBackdropClick: isSaving, maxWidth: 'md' }}
             dialogActions={(
                 <div className={classes.actionsContainer}>
                     <div>
@@ -168,13 +187,14 @@ export default function AddRoleWizard(props) {
 
                                 {
                                     (index === 0) && (
-                                        <Box pt={3}>
-
+                                        <Box pt={3} width='40%'>
                                             <TextField
                                                 id='role-input-field-helper-text'
                                                 error={Boolean(validation.role)}
                                                 value={newRole}
                                                 fullWidth
+                                                autoFocus
+                                                size='small'
                                                 label='Role Name'
                                                 helperText={
                                                     validation.role
@@ -202,11 +222,18 @@ export default function AddRoleWizard(props) {
                                 }
                                 {
                                     (index === 1) && (
-                                        <PermissionTree
-                                            onCheck={permissionCheckHandler}
-                                            role={newRole}
-                                            appMappings={localAppMappings}
-                                        />
+                                        <>
+                                            <SelectPermissionsStep
+                                                onCheck={permissionCheckHandler}
+                                                role={newRole}
+                                                appMappings={localAppMappings}
+                                                permissionMappings={permissionMappings}
+                                                onMappedRoleSelect={setMappedRole}
+                                                mappedRole={mappedRole}
+                                                onPermissionTypeSelect={setPermissionTypeSelection}
+                                                permissionType={permissionTypeSelection}
+                                            />
+                                        </>
                                     )
                                 }
                             </StepContent>
