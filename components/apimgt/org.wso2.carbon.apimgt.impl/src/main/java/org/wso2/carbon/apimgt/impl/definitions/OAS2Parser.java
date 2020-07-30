@@ -1332,7 +1332,9 @@ public class OAS2Parser extends APIDefinition {
         Map<String, String> defaultScopeBindings = null;
         if (securityDefinitions != null) {
             //If there is no default type schemes set a one
-            OAuth2Definition newDefault = new OAuth2Definition();
+            OAuth2Definition newDefault = new OAuth2Definition().implicit("https://test.com");
+            newDefault.setType("oauth2");
+            newDefault.setDescription("");
             securityDefinitions.put(SWAGGER_SECURITY_SCHEMA_KEY, newDefault);
             //Check all the security definitions
             for (Map.Entry<String, SecuritySchemeDefinition> definition : securityDefinitions.entrySet()) {

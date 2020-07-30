@@ -34,7 +34,7 @@ public interface JWTValidator {
      * @return JWTValidationInfo for validated Token
      * @throws APIManagementException
      */
-    JWTValidationInfo validateToken(SignedJWT jwtToken) throws APIManagementException;
+    JWTValidationInfo validateToken(SignedJWTInfo jwtToken) throws APIManagementException;
 
     /**
      * This method used to load JWTValidator related configurations

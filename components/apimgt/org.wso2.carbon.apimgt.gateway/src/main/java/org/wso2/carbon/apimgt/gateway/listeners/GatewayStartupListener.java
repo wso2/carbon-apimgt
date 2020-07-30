@@ -21,6 +21,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
+import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
+import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -39,6 +42,7 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
     private boolean debugEnabled = log.isDebugEnabled();
     private JMSTransportHandler jmsTransportHandlerForTrafficManager;
     private JMSTransportHandler jmsTransportHandlerForEventHub;
+    private ThrottleProperties throttleProperties;
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
     private boolean isAPIsDeployedInSyncMode = false;
     private int syncModeDeploymentCount = 0;
@@ -48,9 +52,9 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
         gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
+        throttleProperties = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getThrottleProperties();
         ThrottleProperties.JMSConnectionProperties jmsConnectionProperties =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getThrottleProperties()
-                        .getJmsConnectionProperties();
+                throttleProperties.getJmsConnectionProperties();
         this.jmsTransportHandlerForTrafficManager =
                 new JMSTransportHandler(jmsConnectionProperties.getJmsConnectionProperties());
         EventHubConfigurationDto.EventHubReceiverConfiguration eventHubReceiverConfiguration =
@@ -93,6 +97,7 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
                 deployAPIsInAsyncMode();
             }
         }
+        retrieveBlockConditionsAndKeyTemplates();
         jmsTransportHandlerForTrafficManager
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
         jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
@@ -178,5 +183,20 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
                 }
             }
         }
+    }
+    private void retrieveBlockConditionsAndKeyTemplates(){
+        if (throttleProperties.getBlockCondition().isEnabled()) {
+            BlockingConditionRetriever webServiceThrottleDataRetriever = new BlockingConditionRetriever();
+            webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
+            KeyTemplateRetriever webServiceBlockConditionsRetriever = new KeyTemplateRetriever();
+            webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
+
+            // Start web service based revoked JWT tokens retriever.
+            // Advanced throttle properties & blocking conditions have to be enabled for JWT token
+            // retrieval due to the throttle config dependency for this feature.
+            RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
+            webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
+        }
+
     }
 }
