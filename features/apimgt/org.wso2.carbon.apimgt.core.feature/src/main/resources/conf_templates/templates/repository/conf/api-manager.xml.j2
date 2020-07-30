@@ -906,6 +906,9 @@
 
     <WorkflowConfigurations>
         <Enabled>{{apim.workflow.enable}}</Enabled>
+        {% if apim.workflow.list_pending_tasks is defined %}
+        <ListPendingTasks>{{apim.workflow.list_pending_tasks}}</ListPendingTasks>
+        {% endif %}
     	<ServerUrl>{{apim.workflow.service_url}}</ServerUrl>
     	<ServerUser>{{apim.workflow.wf_engine_user}}</ServerUser>
     	<ServerPassword>{{apim.workflow.wf_engine_pass}}</ServerPassword>

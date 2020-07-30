@@ -50,20 +50,21 @@ public class JWTValidatorImpl implements JWTValidator {
     JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
     @Override
-    public JWTValidationInfo validateToken(SignedJWT jwtToken) throws APIManagementException {
+    public JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo) throws APIManagementException {
 
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         boolean state;
         try {
-            state = validateSignature(jwtToken);
+            state = validateSignature(signedJWTInfo.getSignedJWT());
             if (state) {
-                state = validateTokenExpiry(jwtToken.getJWTClaimsSet());
+                JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
+                state = validateTokenExpiry(jwtClaimsSet);
                 if (state) {
-                    jwtValidationInfo.setConsumerKey(getConsumerKey(jwtToken.getJWTClaimsSet()));
-                    jwtValidationInfo.setScopes(getScopes(jwtToken.getJWTClaimsSet()));
-                    JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtToken.getJWTClaimsSet());
+                    jwtValidationInfo.setConsumerKey(getConsumerKey(jwtClaimsSet));
+                    jwtValidationInfo.setScopes(getScopes(jwtClaimsSet));
+                    JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
                     createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
-                    jwtValidationInfo.setRawPayload(jwtToken.getParsedString());
+                    jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
                     return jwtValidationInfo;
                 } else {
                     jwtValidationInfo.setValid(false);
