@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -386,7 +387,7 @@ public class APIKeyValidator {
                 return verbInfoList;
             }
         } else {
-            API selectedApi = synCtx.getConfiguration().getAPI(apiName);
+            API selectedApi = Utils.getSelectedAPI(synCtx);
             Resource selectedResource = null;
             String resourceString;
 
