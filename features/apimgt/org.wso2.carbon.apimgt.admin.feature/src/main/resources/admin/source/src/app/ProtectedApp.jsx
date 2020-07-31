@@ -82,6 +82,14 @@ let theme = createMuiTheme(themeJSON);
 theme = {
     ...theme,
     overrides: {
+        MuiRadio: {
+            colorSecondary: {
+                '&$checked': { color: theme.palette.primary.main },
+                '&$disabled': {
+                    color: theme.palette.action.disabled,
+                },
+            },
+        },
         MuiDrawer: {
             paper: {
                 backgroundColor: '#18202c',
