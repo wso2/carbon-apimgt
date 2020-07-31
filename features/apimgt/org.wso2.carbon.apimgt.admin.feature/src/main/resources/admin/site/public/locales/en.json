@@ -6,7 +6,6 @@
   "Admin.KeyManager.label.Enable.OutOfBandProvisioning": "Out Of Band Provisioning",
   "Admin.KeyManager.label.Enable.TokenGen": "Token Generation",
   "Admin.KeyManager.label.Scopes.Claim": "Scopes Claim URI",
-  "Admin.KeyManager.label.Self.Validate.JWT": "Self Validate JWT",
   "Admin.Throttling.Advanced.Throttling.policy.table.header.name": "Name",
   "Admin.Throttling.Advanced.Throttling.policy.table.header.quota": "Quota",
   "Admin.Throttling.Advanced.Throttling.policy.table.header.quota.policy": "Quota Policy",

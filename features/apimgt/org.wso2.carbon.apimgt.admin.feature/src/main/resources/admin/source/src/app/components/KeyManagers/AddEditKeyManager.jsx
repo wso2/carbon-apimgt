@@ -510,6 +510,7 @@ function AddEditKeyManager(props) {
                                 <Grid item xs={6}>
                                     <Box ml={1}>
                                         <TextField
+                                            autoFocus={!!id}
                                             margin='dense'
                                             name='displayName'
                                             fullWidth
@@ -1065,26 +1066,6 @@ function AddEditKeyManager(props) {
                                             />
                                         )}
 
-                                        labelPlacement='end'
-                                    />
-                                </Grid>
-                                <Grid item xs={6} md={4} lg={4}>
-                                    <FormControlLabel
-                                        value='enableSelfValidationJWT'
-                                        control={(
-                                            <Checkbox
-                                                checked={enableSelfValidationJWT}
-                                                onChange={onChange}
-                                                name='enableSelfValidationJWT'
-                                                color='primary'
-                                            />
-                                        )}
-                                        label={(
-                                            <FormattedMessage
-                                                id='Admin.KeyManager.label.Self.Validate.JWT'
-                                                defaultMessage='Self Validate JWT'
-                                            />
-                                        )}
                                         labelPlacement='end'
                                     />
                                 </Grid>

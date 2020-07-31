@@ -107,7 +107,6 @@ export default function KeyManagerConfiguration(props) {
             }
             return (
                 <TextField
-                    autoFocus
                     margin='dense'
                     name={keymanagerConnectorConfiguration.name}
                     label={(
@@ -166,7 +165,6 @@ export default function KeyManagerConfiguration(props) {
         } else {
             return (
                 <TextField
-                    autoFocus
                     margin='dense'
                     name={keymanagerConnectorConfiguration.name}
                     label={keymanagerConnectorConfiguration.label}

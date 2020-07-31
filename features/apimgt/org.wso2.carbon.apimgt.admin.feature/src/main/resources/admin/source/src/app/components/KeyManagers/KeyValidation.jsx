@@ -174,7 +174,6 @@ export default function KeyValidation(props) {
                 </FormControl>
                 { (tokenValidation.type === 'REFERENCE' || tokenValidation.type === 'CUSTOM') && (
                     <TextField
-                        autoFocus
                         margin='dense'
                         name='value'
                         label=''
