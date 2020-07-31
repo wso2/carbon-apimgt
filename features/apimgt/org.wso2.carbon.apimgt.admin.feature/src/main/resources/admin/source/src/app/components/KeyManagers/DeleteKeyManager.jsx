@@ -30,7 +30,7 @@ import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
  * @returns {JSX} Loading animation.
  */
 function Delete({ updateList, dataRow }) {
-    const { id, name } = dataRow;
+    const { id, type } = dataRow;
 
     const formSaveCallback = () => {
         // todo: don't create a new promise
@@ -65,7 +65,7 @@ function Delete({ updateList, dataRow }) {
             triggerIconProps={{
                 color: 'primary',
                 component: 'span',
-                disabled: name === 'Default',
+                disabled: type === 'default',
             }}
         >
             <DialogContentText>

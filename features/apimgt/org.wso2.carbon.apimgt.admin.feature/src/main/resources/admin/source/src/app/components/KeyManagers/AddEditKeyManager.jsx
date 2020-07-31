@@ -578,7 +578,7 @@ function AddEditKeyManager(props) {
                                 >
                                     {settings.keyManagerConfiguration.map((keymanager) => (
                                         <MenuItem key={keymanager.type} value={keymanager.type}>
-                                            {keymanager.type}
+                                            {keymanager.displayName || keymanager.type}
                                         </MenuItem>
                                     ))}
                                 </Select>
