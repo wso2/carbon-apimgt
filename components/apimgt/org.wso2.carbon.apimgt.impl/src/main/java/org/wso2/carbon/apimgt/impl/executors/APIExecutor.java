@@ -146,24 +146,18 @@ public class APIExecutor implements Execution {
         } catch (UserStoreException e) {
             log.error("Failed to get tenant Id while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
-                    "APIManagementException:" + e.getMessage());
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
+                    "UserStoreException:" + e.getMessage());
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            log.error("Failed to get lifecycle status. ", e);
+            context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
+                    "RegistryException:" + e.getMessage());
         }
         return executed;
     }
 
     private boolean changeLifeCycle(RequestContext context, API api, Resource apiResource, Registry registry,
                                     APIProvider apiProvider, GenericArtifact apiArtifact, String targetState)
-            throws APIManagementException, FaultGatewaysException, org.wso2.carbon.registry.api.RegistryException, IllegalAccessException, ParseException, InstantiationException, ClassNotFoundException, UserStoreException {
+            throws APIManagementException, FaultGatewaysException, org.wso2.carbon.registry.api.RegistryException{
         boolean executed;
 
         String oldStatus = APIUtil.getLcStateFromArtifact(apiArtifact);
