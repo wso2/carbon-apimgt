@@ -2243,9 +2243,9 @@ public final class APIConstants {
         public static final String ENABLE_TOKEN_HASH = "enable_token_hash";
         public static final String ENABLE_TOKEN_ENCRYPTION = "enable_token_encryption";
         public static final String ENABLE_OAUTH_APP_CREATION = "enable_oauth_app_creation";
-        public static final String DEFAULT_KEY_MANAGER = "Default";
+        public static final String DEFAULT_KEY_MANAGER = "Resident Key Manager";
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
-        public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Key Manager";
+        public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
 
         public static final String ISSUER = "issuer";
         public static final String JWKS_ENDPOINT = "jwks_endpoint";
