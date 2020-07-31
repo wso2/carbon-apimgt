@@ -28,6 +28,7 @@ public class WorkflowProperties {
     private String dCREndPoint;
     private String dCREndpointUser;
     private String dCREndpointPassword;
+    private boolean listTasks = true; //default true
     
     public String getdCREndpointUser() {
         return dCREndpointUser;
@@ -83,6 +84,10 @@ public class WorkflowProperties {
     public void setWorkflowCallbackAPI(String workflowCallbackAPI) {
         this.workflowCallbackAPI = workflowCallbackAPI;
     }
-
-    
+    public boolean isListTasks() {
+        return listTasks;
+    }
+    public void setListTasks(boolean listTasks) {
+        this.listTasks = listTasks;
+    }    
 }

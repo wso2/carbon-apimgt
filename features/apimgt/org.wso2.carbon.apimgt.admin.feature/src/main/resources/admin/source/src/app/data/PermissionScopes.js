@@ -72,6 +72,33 @@ class Permissions extends Resource {
             return client.apis['System Scopes'].updateRolesForScope({ body: scopeMapping });
         });
     }
+
+
+    /**
+     *
+     *
+     * @static
+     * @returns
+     * @memberof Permissions
+     */
+    static getRoleAliases() {
+        const apiClient = new APIClientFactory().getAPIClient().client;
+        return apiClient.then((client) => {
+            return client.apis['System Scopes'].get_system_scopes_role_aliases();
+        });
+    }
+
+
+    /**
+     *
+     *
+     * @static
+     * @memberof Permissions
+     */
+    static updateRoleAliases() {
+        // ["System Scopes"].put_system_scopes_role_aliases
+
+    }
 }
 
 export default Permissions;

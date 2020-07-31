@@ -572,6 +572,8 @@ public final class APIConstants {
     public static final String IDENTITY_REVOKE_ENDPOINT = "/oauth2/revoke";
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
+    
+    public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
 
     public static String DELEM_COLON = ":";
 
@@ -1833,6 +1835,7 @@ public final class APIConstants {
         public static final String WORKFLOW_DCR_EP = "DCREndPoint";
         public static final String WORKFLOW_DCR_EP_USER = "DCREndPointUser";
         public static final String WORKFLOW_DCR_EP_PASSWORD = "DCREndPointPassword";
+        public static final String LIST_PENDING_TASKS = "ListPendingTasks";
 
     }
 
@@ -2233,6 +2236,7 @@ public final class APIConstants {
         public static final String KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT = "/keymanager-operations/user-info";
         public static final String TOKEN_ENDPOINT = "token_endpoint";
         public static final String REVOKE_ENDPOINT = "revoke_endpoint";
+        public static final String WELL_KNOWN_ENDPOINT = "well_known_endpoint";
         public static final String SCOPE_MANAGEMENT_ENDPOINT = "scope_endpoint";
         public static final String AVAILABLE_GRANT_TYPE = "grant_types";
         public static final String ENABLE_TOKEN_GENERATION = "enable_token_generation";

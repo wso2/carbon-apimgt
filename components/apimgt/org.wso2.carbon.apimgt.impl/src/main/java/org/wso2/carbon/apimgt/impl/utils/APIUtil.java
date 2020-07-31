@@ -28,7 +28,6 @@ import com.google.gson.reflect.TypeToken;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
-import feign.okhttp.OkHttpClient;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -157,6 +156,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIDConnectDiscoveryClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
@@ -7607,6 +7607,20 @@ public final class APIUtil {
     }
 
     /**
+     * This method gets the RESTAPIScopes configuration from tenant-conf.json in registry. Role Mappings (Role aliases
+     * will not be substituted to the scope/role mappings)
+     *
+     * @param tenantDomain Tenant domain
+     * @return RESTAPIScopes configuration without substituting role mappings
+     * @throws APIManagementException error while getting RESTAPIScopes configuration
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getRESTAPIScopesForTenantWithoutRoleMappings(String tenantDomain)
+            throws APIManagementException{
+        return APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain), null);
+    }
+
+    /**
      * @param tenantDomain Tenant domain to be used to get default role configurations
      * @return JSON object which contains configuration for default roles
      * @throws APIManagementException
@@ -11096,7 +11110,7 @@ public final class APIUtil {
     }
 
     public static KeyManagerConfigurationDTO getAndSetDefaultKeyManagerConfiguration(
-            KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
 
         boolean clientSecretHashEnabled =
                 ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isClientSecretHashEnabled();
@@ -11574,11 +11588,11 @@ public final class APIUtil {
         }
     }
 
-    public static OpenIdConnectConfiguration getOpenIdConnectConfigurations(String url) {
+    public static OpenIdConnectConfiguration getOpenIdConnectConfigurations(String url) throws APIManagementException {
 
-        OpenIDConnectDiscoveryClient openIDConnectDiscoveryClient =
-                Feign.builder().client(new OkHttpClient()).encoder(new GsonEncoder()).decoder(new GsonDecoder())
-                        .target(OpenIDConnectDiscoveryClient.class, url);
+        OpenIDConnectDiscoveryClient openIDConnectDiscoveryClient = Feign.builder()
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(url))).encoder(new GsonEncoder())
+                .decoder(new GsonDecoder()).target(OpenIDConnectDiscoveryClient.class, url);
         return openIDConnectDiscoveryClient.getOpenIdConnectConfiguration();
     }
 

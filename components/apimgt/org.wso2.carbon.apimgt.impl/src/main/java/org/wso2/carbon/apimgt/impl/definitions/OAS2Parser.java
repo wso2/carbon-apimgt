@@ -807,7 +807,8 @@ public class OAS2Parser extends APIDefinition {
         if (scopes != null && !scopes.isEmpty()) {
             Map<String, String> scopeBindings = new HashMap<>();
             for (Scope scope : scopes) {
-                oAuth2Definition.addScope(scope.getKey(), scope.getDescription());
+                String description = scope.getDescription() != null ? scope.getDescription() : "";
+                oAuth2Definition.addScope(scope.getKey(), description);
                 scopeBindings.put(scope.getKey(), scope.getRoles());
             }
             oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);

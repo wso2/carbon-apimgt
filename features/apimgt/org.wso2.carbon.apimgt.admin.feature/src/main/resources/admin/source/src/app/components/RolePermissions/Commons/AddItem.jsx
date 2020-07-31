@@ -35,12 +35,12 @@ function AddItem(props) {
     const {
         title, children, onSave, disabled, isSaving, saveButtonText, dialogActions, onClose, dialogProps,
     } = props;
-    const { disableBackdropClick } = dialogProps;
+    const { disableBackdropClick, maxWidth } = dialogProps;
     return (
         <>
             <Dialog
                 fullWidth
-                maxWidth='sm'
+                maxWidth={maxWidth || 'sm'}
                 open
                 onClose={onClose}
                 aria-labelledby='form-dialog-title'

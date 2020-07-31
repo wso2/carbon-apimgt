@@ -100,6 +100,7 @@ public class CORSRequestHandlerTestCase {
         Mockito.when(versionStrategy.getVersionType()).thenReturn("url");
         Mockito.when(versionStrategy.getVersion()).thenReturn("1.0");
         Mockito.when(api.getVersionStrategy()).thenReturn(versionStrategy);
+        Mockito.when(Utils.getSelectedAPI(messageContext)).thenReturn(api);
         Mockito.when(synapseConfiguration.getAPI("admin-AT-wso2.com--PizzaShackAPI")).thenReturn(api);
         Mockito.when(messageContext.getConfiguration()).thenReturn(synapseConfiguration);
 

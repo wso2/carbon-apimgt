@@ -105,7 +105,7 @@ export default function ClaimMappings(props) {
         setClaimMapping(newMapping);
     };
     return (
-        <Box m={2}>
+        <Box mt={2}>
             <Table className={classes.table} aria-label='simple table'>
                 <TableHead>
                     <TableRow>

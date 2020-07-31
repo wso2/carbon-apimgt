@@ -377,7 +377,7 @@
         <!-- All  scopes under the AllowedScopes element are not validating against roles that has assigned to it.
              By default ^device_.* and openid scopes have been white listed internally. -->
         <AllowedScopes>
-        {%for scope in apim.oauth_config.white_listed_scopes%}
+        {%for scope in apim.oauth_config.allowed_scopes%}
             <Scope>{{scope}}</Scope>
         {% endfor %}
         </AllowedScopes>
@@ -906,6 +906,9 @@
 
     <WorkflowConfigurations>
         <Enabled>{{apim.workflow.enable}}</Enabled>
+        {% if apim.workflow.list_pending_tasks is defined %}
+        <ListPendingTasks>{{apim.workflow.list_pending_tasks}}</ListPendingTasks>
+        {% endif %}
     	<ServerUrl>{{apim.workflow.service_url}}</ServerUrl>
     	<ServerUser>{{apim.workflow.wf_engine_user}}</ServerUser>
     	<ServerPassword>{{apim.workflow.wf_engine_pass}}</ServerPassword>
