@@ -105,7 +105,7 @@ const generateAccessTokenStep = (props) => {
     const messages = defineMessages({
         dataInfo: {
             id: 'Apis.Details.Credentials.Wizard.GenerateAccessTokenStep',
-            defaultMessage: 'Generate Access Toke for {keyType} environment',
+            defaultMessage: 'Generate Access Token for {keyType} environment',
         },
     });
 

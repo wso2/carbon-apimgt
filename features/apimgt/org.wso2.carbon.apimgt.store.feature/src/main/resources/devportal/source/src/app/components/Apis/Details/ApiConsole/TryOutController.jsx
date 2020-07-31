@@ -291,7 +291,7 @@ function TryOutController(props) {
      * @memberof TryOutController
      */
     function handleClickShowToken() {
-        setShowToken(true);
+        setShowToken(!showToken);
     }
 
     /**
