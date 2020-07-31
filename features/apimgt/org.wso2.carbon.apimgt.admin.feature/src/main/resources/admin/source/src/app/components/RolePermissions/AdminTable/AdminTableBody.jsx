@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
@@ -82,13 +82,9 @@ function stableSort(array, comparator) {
  */
 function AdminTableBody(props) {
     const {
-        selected, setSelected, rowsPerPage, page, order, orderBy, multiSelect, setDataIDs,
+        selected, setSelected, rowsPerPage, page, order, orderBy, multiSelect,
     } = useTableContext();
     const { rows } = props;
-
-    useEffect(() => {
-        setDataIDs(rows.map((element) => element[0]));
-    }, [rows]);
 
     const handleClick = (event, name) => {
         const selectedIndex = selected.indexOf(name);
