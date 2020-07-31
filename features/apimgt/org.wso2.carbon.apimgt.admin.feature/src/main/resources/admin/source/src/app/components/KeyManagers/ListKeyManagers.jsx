@@ -75,7 +75,7 @@ export default function ListKeyManagers() {
                                 <Typography variant='caption' display='block' gutterBottom>
                                     <FormattedMessage
                                         id='KeyManagers.ListKeyManagers.editing.not.allowed'
-                                        defaultMessage='Residence key manager editing is not allowed'
+                                        defaultMessage='Modifying residence key manager is not allowed'
                                     />
                                 </Typography>
                             </>
