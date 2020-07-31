@@ -22,17 +22,17 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
+
 import java.util.Collections;
 import java.util.List;
 
 @Component(
         name = "default.km.configuration.component",
         immediate = true,
-        service = KeyManagerConnectorConfiguration.class,
-        property = {"type=" + APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE}
+        service = KeyManagerConnectorConfiguration.class
 )
 /**
- *  This is to register default keymanager as connector
+ *  This is to register default key manager as connector
  */
 public class DefaultKeyManagerConnectorConfiguration implements KeyManagerConnectorConfiguration {
 
@@ -59,4 +59,11 @@ public class DefaultKeyManagerConnectorConfiguration implements KeyManagerConnec
 
         return Collections.emptyList();
     }
+
+    @Override
+    public String getType() {
+
+        return APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE;
+    }
+
 }

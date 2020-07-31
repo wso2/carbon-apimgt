@@ -48,4 +48,17 @@ public interface KeyManagerConnectorConfiguration {
      * @return
      */
     public List<ConfigurationDto> getApplicationConfigurations();
+
+    /**
+     * This method used to get Type
+     */
+    public String getType();
+
+    /**
+     * This method used to get Disaply Name
+     */
+    public default String getDisplayName() {
+
+        return getType();
+    }
 }
