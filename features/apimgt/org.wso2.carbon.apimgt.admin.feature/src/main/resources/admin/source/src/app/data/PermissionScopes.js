@@ -95,9 +95,12 @@ class Permissions extends Resource {
      * @static
      * @memberof Permissions
      */
-    static updateRoleAliases() {
-        // ["System Scopes"].put_system_scopes_role_aliases
-
+    static updateRoleAliases(updatedRoleAliases) {
+        const roleAliasesMapping = { count: updatedRoleAliases.length, list: updatedRoleAliases };
+        const apiClient = new APIClientFactory().getAPIClient().client;
+        return apiClient.then((client) => {
+            return client.apis['System Scopes'].put_system_scopes_role_aliases({ body: roleAliasesMapping });
+        });
     }
 }
 

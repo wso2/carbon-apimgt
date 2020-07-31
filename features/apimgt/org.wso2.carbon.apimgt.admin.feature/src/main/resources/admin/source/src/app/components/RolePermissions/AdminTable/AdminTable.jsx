@@ -45,12 +45,13 @@ const useStyles = makeStyles((theme) => ({
  * @returns
  */
 export default function AdminTable(props) {
-    const { children, multiSelect, rowsPerPageOptions } = props;
+    const {
+        children, multiSelect, rowsPerPageOptions, dataIDs,
+    } = props;
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
-    const [dataIDs, setDataIDs] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
@@ -91,7 +92,6 @@ export default function AdminTable(props) {
             setSelected,
             rowsPerPage,
             page,
-            setDataIDs,
         }}
         >
             <div className={classes.root}>

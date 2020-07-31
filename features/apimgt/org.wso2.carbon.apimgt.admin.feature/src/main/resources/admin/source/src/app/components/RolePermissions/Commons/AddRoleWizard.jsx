@@ -26,6 +26,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import cloneDeep from 'lodash.clonedeep';
 
 import PermissionAPI from 'AppData/PermissionScopes';
 import AddItem from './AddItem';
@@ -57,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function AddRoleWizard(props) {
     const {
-        appMappings, onClose, onRoleAdd, permissionMappings,
+        appMappings, onClose, onRoleAdd, permissionMappings, roleAliases, setRoleAliases,
     } = props;
 
     const classes = useStyles();
@@ -69,7 +70,7 @@ export default function AddRoleWizard(props) {
     const [permissionTypeSelection, setPermissionTypeSelection] = useState(ROLE_ALIAS);
 
     // No need an effect here due to the component structure
-    const [localAppMappings, setLocalAppMappings] = useState({ ...appMappings });
+    const [localAppMappings, setLocalAppMappings] = useState(cloneDeep(appMappings));
 
     const [activeStep, setActiveStep] = React.useState(0);
 
@@ -102,6 +103,7 @@ export default function AddRoleWizard(props) {
 
     const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
+        setLocalAppMappings(cloneDeep(appMappings));
     };
 
     /**
@@ -115,6 +117,7 @@ export default function AddRoleWizard(props) {
             if (!permissionsValidationConditions.length
                 || !permissionsValidationConditions.reduce((acc, cu) => acc || cu)) {
                 Alert.warning('You need to select at least one permission!');
+                setIsSaving(false);
                 return;
             }
             Promise.resolve(onRoleAdd(localAppMappings))
@@ -136,9 +139,30 @@ export default function AddRoleWizard(props) {
         } else {
             if (!mappedRole) {
                 Alert.warning("Mapped role selection can't be empty!");
+                setIsSaving(false);
                 return;
             }
-            PermissionAPI.updateRoleAliases();
+            const updatedRoleAliases = [...roleAliases.list];
+            const targetRole = updatedRoleAliases.find(({ role }) => role === mappedRole);
+            if (targetRole) {
+                targetRole.aliases.push(newRole);
+            } else {
+                updatedRoleAliases.push({ role: mappedRole, aliases: [newRole] });
+            }
+            PermissionAPI.updateRoleAliases(updatedRoleAliases).then((response) => {
+                setRoleAliases(response.body);
+                Alert.info(
+                    <span>
+                        Add new alias for
+                        <b>{` ${newRole} `}</b>
+                        successfully
+                    </span>,
+                );
+                onClose();
+            }).catch((error) => {
+                Alert.error('Something went wrong while adding new role alias');
+                console.error(error);
+            }).finally(() => setIsSaving(false));
         }
     };
 
@@ -203,14 +227,15 @@ export default function AddRoleWizard(props) {
                                                 }
                                                 variant='outlined'
                                                 onChange={({ target: { value } }) => {
-                                                    if (!value) {
+                                                    const trimmedValue = value.trim();
+                                                    if (!trimmedValue) {
                                                         setValidation({ role: "Role name can't be empty!" });
-                                                    } else if (permissionMappings[value]) {
+                                                    } else if (permissionMappings[trimmedValue]) {
                                                         setValidation({ role: 'Permission mapping exist' });
                                                     } else {
                                                         setValidation({ role: false });
                                                     }
-                                                    setNewRole(value);
+                                                    setNewRole(trimmedValue);
                                                 }}
                                                 onKeyDown={(event) => (event.which === 13
                                                     || event.keyCode === 13

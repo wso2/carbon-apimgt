@@ -36,7 +36,7 @@ import Alert from 'AppComponents/Shared/Alert';
  */
 export default function DeletePermission(props) {
     const {
-        onDelete, role,
+        onDelete, role, isAlias,
     } = props;
     const [open, setOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -51,7 +51,7 @@ export default function DeletePermission(props) {
     const handleConfirmation = (event) => {
         const { id } = event.currentTarget;
         setIsDeleting(true);
-        Promise.resolve(onDelete(id))
+        Promise.resolve(onDelete(id, isAlias))
             .then(() => {
                 Alert.info(
                     <span>
