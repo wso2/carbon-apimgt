@@ -79,8 +79,8 @@ export default function MicroGateway(props) {
         <>
             <Typography variant='h4' align='left' className={classes.mainTitle}>
                 <FormattedMessage
-                    id='Apis.Details.Environments.Environments.Gateways'
-                    defaultMessage='Gateways'
+                    id='Apis.Details.Environments.Environments.GatewayLabels'
+                    defaultMessage='Gateway Labels'
                 />
             </Typography>
             {mgLabels.length > 0 ? (

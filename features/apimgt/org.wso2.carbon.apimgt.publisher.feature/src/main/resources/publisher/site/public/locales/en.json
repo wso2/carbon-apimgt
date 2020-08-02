@@ -499,7 +499,7 @@
   "Apis.Details.EndpointsNew.Endpoints.endpoints.header": "Endpoints",
   "Apis.Details.EndpointsNew.Endpoints.save": "Save",
   "Apis.Details.Environments.Environments.APIGateways": "API Gateways",
-  "Apis.Details.Environments.Environments.Gateways": "Gateways",
+  "Apis.Details.Environments.Environments.GatewayLabels": "Gateway Labels",
   "Apis.Details.Environments.Environments.Kubernetes": "Kubernetes",
   "Apis.Details.Environments.Environments.cancel": "Cancel",
   "Apis.Details.Environments.Environments.save": "Save",
