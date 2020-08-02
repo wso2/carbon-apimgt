@@ -40,7 +40,11 @@ import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.security.PrivilegedAction;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -119,15 +123,26 @@ public class GatewayJMSMessageListener implements MessageListener {
             gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             if (!gatewayEvent.getGatewayLabels().isEmpty()) {
                 String gatewayLabel = gatewayEvent.getGatewayLabels().iterator().next();
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                if (tenantDomain == null) {
+                    tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                }
+                String finalTenantDomain = tenantDomain;
                 Runnable task = null;
                 if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
                     task = new Runnable() {
 
                         @Override public void run() {
+                            boolean tenantFlowStarted = false;
                             try {
+                                startTenantFlow(finalTenantDomain);
                                 inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
                             } catch (ArtifactSynchronizerException e) {
                                 log.error("Error in deploying artifacts");
+                            } finally {
+                                if (tenantFlowStarted){
+                                    endTenantFlow();
+                                }
                             }
                         }
                     };
@@ -135,10 +150,17 @@ public class GatewayJMSMessageListener implements MessageListener {
                     task = new Runnable() {
 
                         @Override public void run() {
+                            boolean tenantFlowStarted = false;
                             try {
+                                startTenantFlow(finalTenantDomain);
+                                tenantFlowStarted = true;
                                 inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
                             } catch (ArtifactSynchronizerException e) {
                                 log.error("Error in undeploying artifacts");
+                            } finally {
+                                if (tenantFlowStarted){
+                                    endTenantFlow();
+                                }
                             }
                         }
                     };
@@ -220,5 +242,17 @@ public class GatewayJMSMessageListener implements MessageListener {
                 }
             } 
         }
+    }
+
+    private void endTenantFlow() {
+
+        PrivilegedCarbonContext.endTenantFlow();
+    }
+
+    private void startTenantFlow(String tenantDomain) {
+
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                setTenantDomain(tenantDomain, true);
     }
 }
