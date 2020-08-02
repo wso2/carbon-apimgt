@@ -155,7 +155,7 @@
   "Base.RouteMenuMapping.keymanagers.items.Adding": "Add KeyManager",
   "Base.RouteMenuMapping.keymanagers.items.Editing": "Edit KeyManager",
   "Base.RouteMenuMapping.manage.alerts": "Manage Alerts",
-  "Base.RouteMenuMapping.microgateways": "Microgateways",
+  "Base.RouteMenuMapping.gateways": "Gateways",
   "Base.RouteMenuMapping.role.permissions": "Role Permissions",
   "Base.RouteMenuMapping.settings": "Settings",
   "Base.RouteMenuMapping.subscription.creation": "Subscription Creation",
