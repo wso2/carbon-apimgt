@@ -39,7 +39,6 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -634,7 +633,7 @@ public class APIMgtDAOTest {
 
         APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION, "APP-10",
-                "sub_user1", "clientId1","Default");
+                "sub_user1", "clientId1","Default", UUID.randomUUID().toString());
         Map<String, String> consumerkeyByApplicationIdAndKeyType =
                 apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
         assertEquals(consumerkeyByApplicationIdAndKeyType.get("Default"), "clientId1");
@@ -995,9 +994,9 @@ public class APIMgtDAOTest {
         String clientIdProduction = UUID.randomUUID().toString();
         String clientIdSandbox = UUID.randomUUID().toString();
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION, application
-                .getName(), subscriber.getName(), clientIdProduction,"Default");
+                .getName(), subscriber.getName(), clientIdProduction, "Default", UUID.randomUUID().toString());
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application
-                .getName(), subscriber.getName(), clientIdSandbox,"Default");
+                .getName(), subscriber.getName(), clientIdSandbox, "Default", UUID.randomUUID().toString());
         int appIdProduction = insertConsumerApp(clientIdProduction, application.getName(), subscriber.getName());
         int appIdSandBox = insertConsumerApp(clientIdSandbox, application.getName(), subscriber.getName());
         String tokenProduction = UUID.randomUUID().toString();

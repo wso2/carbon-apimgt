@@ -213,7 +213,7 @@ function ListLabels() {
         pageStyle: 'half',
         title: intl.formatMessage({
             id: 'Workflow.RegistrationCreation.title.registrationcreation',
-            defaultMessage: 'Registration Creation - Approval Tasks',
+            defaultMessage: 'Application Registration - Approval Tasks',
         }),
     };
 

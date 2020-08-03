@@ -124,7 +124,6 @@ function TryOutController(props) {
     const restApi = new Api();
 
     useEffect(() => {
-        let selectedEnvironments;
         let subscriptionsList;
         let newSelectedApplication;
         let keys;
@@ -156,7 +155,7 @@ function TryOutController(props) {
                                 setSelectedApplication(newSelectedApplication);
                                 setSubscriptions(subscriptionsList);
                                 setKeys(appKeys);
-                                setSelectedEnvironment(selectedEnvironments, false);
+                                setSelectedEnvironment(selectedEnvironment, false);
                                 setSelectedKeyType(selectedKeyTypes, false);
                                 if (selectedKeyType === 'PRODUCTION') {
                                     setProductionAccessToken(accessToken);
@@ -291,7 +290,7 @@ function TryOutController(props) {
      * @memberof TryOutController
      */
     function handleClickShowToken() {
-        setShowToken(true);
+        setShowToken(!showToken);
     }
 
     /**

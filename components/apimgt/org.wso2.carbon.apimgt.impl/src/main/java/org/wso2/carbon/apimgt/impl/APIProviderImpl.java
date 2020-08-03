@@ -8792,9 +8792,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             }
-        } catch (RegistryException e) {
-            handleException("Couldn't read tenant configuration from tenant registry", e);
-        } catch (UserStoreException e) {
+        } catch (RegistryException | UserStoreException e) {
             handleException("Couldn't read tenant configuration from tenant registry", e);
         } catch (ParseException e) {
             handleException("Couldn't parse tenant configuration for reading extension handler position", e);

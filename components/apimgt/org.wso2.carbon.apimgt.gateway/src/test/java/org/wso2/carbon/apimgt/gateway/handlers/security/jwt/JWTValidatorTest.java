@@ -115,7 +115,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setKeyManager("Default");
         SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
                 signedJWT.getJWTClaimsSet());
-        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo, "Default")).thenReturn(jwtValidationInfo);
+        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
                 jwtValidationService, invalidTokenCache, gatewayTokenCache, gatewayKeyCache, gatewayJWTTokenCache);
@@ -130,14 +130,12 @@ public class JWTValidatorTest {
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ELECTED_KEY_MANAGER)).thenReturn("Default");
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION))
                 .thenReturn("true");
         jwtValidator.setApiManagerConfiguration(apiManagerConfiguration);
         OpenAPIParser parser = new OpenAPIParser();
         String swagger = IOUtils.toString(this.getClass().getResourceAsStream("/swaggerEntry/openapi.json"));
-        OpenAPI openAPI = parser.readContents(swagger, null, null).getOpenAPI();
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
         apiKeyValidationInfoDTO.setApiName("api1");
         apiKeyValidationInfoDTO.setApiPublisher("admin");
@@ -156,16 +154,13 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
         Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
-        String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
-                        "GET");
-        Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
+        Mockito.when(gatewayKeyCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn(jwtValidationInfo);
         authenticate = jwtValidator.authenticate(signedJWTInfo, messageContext);
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
-        Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo, "Default");
+        Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
         Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
     }
 
@@ -211,7 +206,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setKeyManager("Default");
         SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
                 signedJWT.getJWTClaimsSet());
-        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo, "Default")).thenReturn(jwtValidationInfo);
+        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
                 jwtValidationService, invalidTokenCache, gatewayTokenCache, gatewayKeyCache, gatewayJWTTokenCache);
@@ -226,7 +221,6 @@ public class JWTValidatorTest {
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ELECTED_KEY_MANAGER)).thenReturn("Default");
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION))
                 .thenReturn("true");
@@ -252,19 +246,16 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
         Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
-        String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
-                        "GET");
         jwtValidationInfo.setIssuedTime(System.currentTimeMillis() - 100);
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis());
-        Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
+        Mockito.when(gatewayKeyCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn(jwtValidationInfo);
         try {
             authenticate = jwtValidator.authenticate(signedJWTInfo, messageContext);
 
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         }
-        Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo, "Default");
+        Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
         Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
         Mockito.verify(invalidTokenCache, Mockito.times(1)).put(signedJWT.getJWTClaimsSet().getJWTID(), "carbon.super");
     }
@@ -312,7 +303,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setKeyManager("Default");
         SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
                 signedJWT.getJWTClaimsSet());
-        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo, "Default")).thenReturn(jwtValidationInfo);
+        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
                 jwtValidationService, invalidTokenCache, gatewayTokenCache, gatewayKeyCache, gatewayJWTTokenCache);
@@ -327,14 +318,10 @@ public class JWTValidatorTest {
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ELECTED_KEY_MANAGER)).thenReturn("Default");
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION))
                 .thenReturn("true");
         jwtValidator.setApiManagerConfiguration(apiManagerConfiguration);
-        OpenAPIParser parser = new OpenAPIParser();
-        String swagger = IOUtils.toString(this.getClass().getResourceAsStream("/swaggerEntry/openapi.json"));
-        OpenAPI openAPI = parser.readContents(swagger, null, null).getOpenAPI();
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
         apiKeyValidationInfoDTO.setApiName("api1");
         apiKeyValidationInfoDTO.setApiPublisher("admin");
@@ -353,19 +340,16 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
         Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("abc.com");
-        String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
-                        "GET");
         jwtValidationInfo.setIssuedTime(System.currentTimeMillis() - 100);
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis());
-        Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
+        Mockito.when(gatewayKeyCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn(jwtValidationInfo);
         try {
             authenticate = jwtValidator.authenticate(signedJWTInfo, messageContext);
 
         } catch (APISecurityException e) {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         }
-        Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo, "Default");
+        Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
         Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
         Mockito.verify(invalidTokenCache, Mockito.times(1)).put(signedJWT.getJWTClaimsSet().getJWTID(), "abc.com");
     }
@@ -412,7 +396,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
         jwtValidationInfo.setUser("user1");
         jwtValidationInfo.setKeyManager("Default");
-        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo, "Default")).thenReturn(jwtValidationInfo);
+        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
                 jwtValidationService, invalidTokenCache, gatewayTokenCache, gatewayKeyCache, gatewayJWTTokenCache);
@@ -427,14 +411,10 @@ public class JWTValidatorTest {
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ELECTED_KEY_MANAGER)).thenReturn("Default");
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION))
                 .thenReturn("true");
         jwtValidator.setApiManagerConfiguration(apiManagerConfiguration);
-        OpenAPIParser parser = new OpenAPIParser();
-        String swagger = IOUtils.toString(this.getClass().getResourceAsStream("/swaggerEntry/openapi.json"));
-        OpenAPI openAPI = parser.readContents(swagger, null, null).getOpenAPI();
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
         apiKeyValidationInfoDTO.setApiName("api1");
         apiKeyValidationInfoDTO.setApiPublisher("admin");
@@ -453,16 +433,13 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
         Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
-        String cacheKey = GatewayUtils
-                .getAccessTokenCacheKey(signedJWT.getJWTClaimsSet().getJWTID(), "/api1", "1.0", "/pet/findByStatus",
-                        "GET");
-        Mockito.when(gatewayKeyCache.get(cacheKey)).thenReturn(jwtValidationInfo);
+        Mockito.when(gatewayKeyCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn(jwtValidationInfo);
         authenticate = jwtValidator.authenticate(signedJWTInfo, messageContext);
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
-        Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo, "Default");
+        Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
         Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
     }
 
@@ -507,7 +484,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         jwtValidationInfo.setUser("user1");
         jwtValidationInfo.setKeyManager("Default");
-        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo, "Default")).thenReturn(jwtValidationInfo);
+        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
                 jwtValidationService, invalidTokenCache, gatewayTokenCache, gatewayKeyCache, gatewayJWTTokenCache);
@@ -522,7 +499,6 @@ public class JWTValidatorTest {
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ELECTED_KEY_MANAGER)).thenReturn("Default");
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION))
                 .thenReturn("true");
@@ -597,7 +573,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
         jwtValidationInfo.setUser("user1");
         jwtValidationInfo.setKeyManager("Default");
-        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo, "Default")).thenReturn(jwtValidationInfo);
+        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
                 jwtValidationService, invalidTokenCache, gatewayTokenCache, gatewayKeyCache, gatewayJWTTokenCache);
@@ -612,7 +588,6 @@ public class JWTValidatorTest {
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ELECTED_KEY_MANAGER)).thenReturn("Default");
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION))
                 .thenReturn("true");

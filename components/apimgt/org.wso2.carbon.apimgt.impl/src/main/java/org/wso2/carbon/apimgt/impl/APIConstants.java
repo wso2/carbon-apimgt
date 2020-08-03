@@ -572,8 +572,10 @@ public final class APIConstants {
     public static final String IDENTITY_REVOKE_ENDPOINT = "/oauth2/revoke";
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
-    
+
     public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
+    public static final String ENCRYPTED_VALUE = "encrypted";
+    public static final String VALUE = "value";
 
     public static String DELEM_COLON = ":";
 
@@ -692,6 +694,8 @@ public final class APIConstants {
     public static final String KEY_MANAGER_USERNAME = "Username";
     public static final String KEY_MANAGER_PASSWORD = "Password";
     public static final String AUTHSERVER_URL = "ServerURL";
+    public static final String API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION =
+            API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
@@ -2208,10 +2212,13 @@ public final class APIConstants {
 
     public static class TokenIssuer {
 
+        public static final String SCOPES_CLAIM = "ScopesClaim";
         public static String TOKEN_ISSUER = "TokenIssuer";
         public static final String JWKS_CONFIGURATION = "JWKSConfiguration";
         public static final String CLAIM_MAPPINGS = "ClaimMappings";
         public static final String CLAIM_MAPPING = "ClaimMapping";
+        public static final String CONSUMER_KEY_CLAIM = "ConsumerKeyClaim";
+        
 
         public static class JWKSConfiguration {
 
@@ -2243,9 +2250,9 @@ public final class APIConstants {
         public static final String ENABLE_TOKEN_HASH = "enable_token_hash";
         public static final String ENABLE_TOKEN_ENCRYPTION = "enable_token_encryption";
         public static final String ENABLE_OAUTH_APP_CREATION = "enable_oauth_app_creation";
-        public static final String DEFAULT_KEY_MANAGER = "Default";
+        public static final String DEFAULT_KEY_MANAGER = "Resident Key Manager";
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
-        public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Key Manager";
+        public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
 
         public static final String ISSUER = "issuer";
         public static final String JWKS_ENDPOINT = "jwks_endpoint";

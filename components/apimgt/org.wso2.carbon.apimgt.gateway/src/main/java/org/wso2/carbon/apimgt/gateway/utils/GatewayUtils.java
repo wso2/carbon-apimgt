@@ -94,7 +94,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public class GatewayUtils {
 
     private static final Log log = LogFactory.getLog(GatewayUtils.class);
@@ -137,7 +136,8 @@ public class GatewayUtils {
         return ipRangeMap;
     }
 
-    private static void convertIpRangeBigIntValue(IPRange ipRange){
+    private static void convertIpRangeBigIntValue(IPRange ipRange) {
+
         ipRange.setStartingIpBigIntValue(APIUtil.ipToBigInteger(ipRange.getStartingIP()));
         ipRange.setEndingIpBigIntValue(APIUtil.ipToBigInteger(ipRange.getEndingIp()));
     }
@@ -402,13 +402,14 @@ public class GatewayUtils {
      * @return cloned InputStreams.
      * @throws IOException this exception might occurred while cloning the inputStream.
      */
-    public static Map<String,InputStream> cloneRequestMessage(org.apache.synapse.MessageContext messageContext)
+    public static Map<String, InputStream> cloneRequestMessage(org.apache.synapse.MessageContext messageContext)
             throws IOException {
+
         BufferedInputStream bufferedInputStream = null;
         Map<String, InputStream> inputStreamMap;
         InputStream inputStreamSchema = null;
         InputStream inputStreamXml = null;
-        InputStream inputStreamJSON = null ;
+        InputStream inputStreamJSON = null;
         InputStream inputStreamOriginal = null;
         int requestBufferSize = 1024;
         org.apache.axis2.context.MessageContext axis2MC;
@@ -429,7 +430,7 @@ public class GatewayUtils {
 
         if (bufferedInputStream != null) {
             bufferedInputStream.mark(0);
-            if (bufferedInputStream.read() != -1){
+            if (bufferedInputStream.read() != -1) {
                 bufferedInputStream.reset();
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 byte[] buffer = new byte[requestBufferSize];
@@ -444,11 +445,11 @@ public class GatewayUtils {
                 inputStreamJSON = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             } else {
                 String payload;
-                if (ThreatProtectorConstants.APPLICATION_JSON.equals(contentType)){
+                if (ThreatProtectorConstants.APPLICATION_JSON.equals(contentType)) {
                     inputStreamJSON = JsonUtil.getJsonPayload(axis2MC);
                 } else {
                     payload = axis2MC.getEnvelope().getBody().getFirstElement().toString();
-                    inputStreamXml= new ByteArrayInputStream(payload.getBytes(StandardCharsets.UTF_8));
+                    inputStreamXml = new ByteArrayInputStream(payload.getBytes(StandardCharsets.UTF_8));
                 }
             }
         }
@@ -552,17 +553,15 @@ public class GatewayUtils {
         return endpointAddress;
     }
 
-    public static AuthenticationContext generateAuthenticationContext(String tokenSignature,
+    public static AuthenticationContext generateAuthenticationContext(String jti,
                                                                       JWTValidationInfo jwtValidationInfo,
-                                                                      JSONObject api,
                                                                       APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
-                                                                      String apiLevelPolicy, String endUserToken,
-                                                                      boolean isOauth) throws java.text.ParseException {
-
+                                                                      String endUserToken,
+                                                                      boolean isOauth) {
 
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
-        authContext.setApiKey(tokenSignature);
+        authContext.setApiKey(jti);
         authContext.setUsername(jwtValidationInfo.getUser());
 
         if (apiKeyValidationInfoDTO != null) {
@@ -581,65 +580,9 @@ public class GatewayUtils {
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
             authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
-        } else {
-            if (jwtValidationInfo.getClaims().get(APIConstants.JwtTokenConstants.KEY_TYPE)!= null) {
-                authContext.setKeyType(
-                        (String) jwtValidationInfo.getClaims().get(APIConstants.JwtTokenConstants.KEY_TYPE));
-            } else {
-                authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-            }
-
-            authContext.setApiTier(apiLevelPolicy);
-
-            if (jwtValidationInfo.getClaims().get(APIConstants.JwtTokenConstants.APPLICATION) != null) {
-                JSONObject applicationObj =
-                        (JSONObject) jwtValidationInfo.getClaims().get(APIConstants.JwtTokenConstants.APPLICATION);
-
-                authContext
-                        .setApplicationId(String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
-                authContext.setApplicationName(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
-                authContext.setApplicationTier(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
-                authContext.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
-                if (applicationObj.containsKey(APIConstants.JwtTokenConstants.QUOTA_TYPE)
-                        && APIConstants.JwtTokenConstants.QUOTA_TYPE_BANDWIDTH
-                        .equals(applicationObj.getAsString(APIConstants.JwtTokenConstants.QUOTA_TYPE))) {
-                    authContext.setIsContentAware(true);;
-                }
-            }
         }
         if (isOauth) {
             authContext.setConsumerKey(jwtValidationInfo.getConsumerKey());
-        }
-        if (apiKeyValidationInfoDTO == null && api != null) {
-
-            // If the user is subscribed to the API
-            String subscriptionTier = api.getAsString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
-            authContext.setTier(subscriptionTier);
-            authContext.setSubscriberTenantDomain(
-                    api.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN));
-            JSONObject tierInfo =
-                    (JSONObject) jwtValidationInfo.getClaims().get(APIConstants.JwtTokenConstants.TIER_INFO);
-            authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
-            authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
-            if (tierInfo.get(subscriptionTier) != null) {
-                JSONObject subscriptionTierObj = (JSONObject) tierInfo.get(subscriptionTier);
-                authContext.setStopOnQuotaReach(
-                        Boolean.parseBoolean(
-                                subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH)));
-                authContext.setSpikeArrestLimit
-                        (subscriptionTierObj.getAsNumber(APIConstants.JwtTokenConstants.SPIKE_ARREST_LIMIT).intValue());
-                if (!"null".equals(
-                        subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT))) {
-                    authContext.setSpikeArrestUnit(
-                            subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT));
-                }
-                //check whether the quota type is there and it is equal to bandwithVolume type.
-                if (subscriptionTierObj.containsKey(APIConstants.JwtTokenConstants.QUOTA_TYPE)
-                        && APIConstants.JwtTokenConstants.QUOTA_TYPE_BANDWIDTH
-                        .equals(subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.QUOTA_TYPE))) {
-                    authContext.setIsContentAware(true);;
-                }
-            }
         }
         // Set JWT token sent to the backend
         if (StringUtils.isNotEmpty(endUserToken)) {
@@ -654,8 +597,8 @@ public class GatewayUtils {
                                                                       APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
                                                                       String apiLevelPolicy, String endUserToken,
                                                                       boolean isOauth,
-                                                                      org.apache.synapse.MessageContext synCtx) throws java.text.ParseException {
-
+                                                                      org.apache.synapse.MessageContext synCtx)
+            throws java.text.ParseException {
 
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
@@ -677,75 +620,15 @@ public class GatewayUtils {
             authContext.setSpikeArrestLimit(apiKeyValidationInfoDTO.getSpikeArrestLimit());
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
-        } else {
-            if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE)!= null) {
-                authContext.setKeyType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
-            } else {
-                authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-            }
-
-            authContext.setApiTier(apiLevelPolicy);
-
-            if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
-                JSONObject
-                        applicationObj = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
-
-                authContext
-                .setApplicationId(String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
-                authContext.setApplicationName(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
-                authContext.setApplicationTier(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
-                authContext.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
-                if (applicationObj.containsKey(APIConstants.JwtTokenConstants.QUOTA_TYPE)
-                        && APIConstants.JwtTokenConstants.QUOTA_TYPE_BANDWIDTH
-                                .equals(applicationObj.getAsString(APIConstants.JwtTokenConstants.QUOTA_TYPE))) {
-                    authContext.setIsContentAware(true);;
-                }
-            }
         }
         if (isOauth) {
             if (payload.getClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY) != null) {
                 authContext.setConsumerKey(payload.getStringClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY));
-            } else if (payload.getClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY) !=  null) {
+            } else if (payload.getClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY) != null) {
                 authContext.setConsumerKey(payload.getStringClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY));
             }
         }
 
-        if (apiKeyValidationInfoDTO == null && api != null) {
-
-            // If the user is subscribed to the API
-            String subscriptionTier = api.getAsString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
-            authContext.setTier(subscriptionTier);
-            authContext.setSubscriberTenantDomain(
-                    api.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN));
-            JSONObject tierInfo =  payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.TIER_INFO);
-            authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
-            authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
-            if (tierInfo.get(subscriptionTier) != null) {
-                JSONObject subscriptionTierObj = (JSONObject) tierInfo.get(subscriptionTier);
-                authContext.setStopOnQuotaReach(
-                        Boolean.parseBoolean(
-                                subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH)));
-                authContext.setSpikeArrestLimit
-                        (subscriptionTierObj.getAsNumber(APIConstants.JwtTokenConstants.SPIKE_ARREST_LIMIT).intValue());
-                if (!"null".equals(
-                        subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT))) {
-                    authContext.setSpikeArrestUnit(
-                            subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT));
-                }
-                //check whether the quota type is there and it is equal to bandwithVolume type.
-                if (subscriptionTierObj.containsKey(APIConstants.JwtTokenConstants.QUOTA_TYPE)
-                        && APIConstants.JwtTokenConstants.QUOTA_TYPE_BANDWIDTH
-                                .equals(subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.QUOTA_TYPE))) {
-                    authContext.setIsContentAware(true);;
-                }
-                if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_DEPTH);
-                    Integer graphQLMaxComplexity = (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_COMPLEXITY);
-                    synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH, graphQLMaxDepth);
-                    synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY, graphQLMaxComplexity);
-                }
-            }
-        }
         // Set JWT token sent to the backend
         if (StringUtils.isNotEmpty(endUserToken)) {
             authContext.setCallerToken(endUserToken);
@@ -765,7 +648,8 @@ public class GatewayUtils {
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
      */
-    public static JSONObject validateAPISubscription(String apiContext, String apiVersion, JWTValidationInfo jwtValidationInfo,
+    public static JSONObject validateAPISubscription(String apiContext, String apiVersion,
+                                                     JWTValidationInfo jwtValidationInfo,
                                                      String jwtHeader, boolean isOauth)
             throws APISecurityException {
 
@@ -778,9 +662,11 @@ public class GatewayUtils {
             for (int i = 0; i < subscribedAPIs.size(); i++) {
                 JSONObject subscribedAPIsJSONObject =
                         (JSONObject) subscribedAPIs.get(i);
-                if (apiContext.equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
-                        apiVersion.equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
-                                         )) {
+                if (apiContext
+                        .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
+                        apiVersion
+                                .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
+                                       )) {
                     api = subscribedAPIsJSONObject;
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + apiContext + ", " +
@@ -836,9 +722,11 @@ public class GatewayUtils {
             for (int i = 0; i < subscribedAPIs.size(); i++) {
                 JSONObject subscribedAPIsJSONObject =
                         (JSONObject) subscribedAPIs.get(i);
-                if (apiContext.equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
-                        apiVersion.equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
-                                         )) {
+                if (apiContext
+                        .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
+                        apiVersion
+                                .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
+                                       )) {
                     api = subscribedAPIsJSONObject;
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + apiContext + ", " +
@@ -905,6 +793,7 @@ public class GatewayUtils {
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
     }
+
     /**
      * Verify the JWT token signature.
      *
@@ -932,7 +821,6 @@ public class GatewayUtils {
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
     }
-
 
     public static String getMaskedToken(String token) {
 
@@ -971,21 +859,23 @@ public class GatewayUtils {
 
         return accessToken + ":" + apiContext + ":" + apiVersion + ":" + resourceUri + ":" + httpVerb;
     }
-    public static JWTInfoDto generateJWTInfoDto(JWTValidationInfo jwtValidationInfo, JSONObject subscribedAPI,
+
+    public static JWTInfoDto generateJWTInfoDto(JWTValidationInfo jwtValidationInfo,
                                                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String apiContext,
                                                 String apiVersion) {
+
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
         jwtInfoDto.setMessageContext(null);
         jwtInfoDto.setApicontext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
-        constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
+        constructJWTContent(apiKeyValidationInfoDTO, jwtInfoDto);
         return jwtInfoDto;
     }
 
-    private static void constructJWTContent(JSONObject subscribedAPI,
-                                            APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
-        if (jwtInfoDto.getJwtValidationInfo() != null){
+    private static void constructJWTContent(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
+
+        if (jwtInfoDto.getJwtValidationInfo() != null) {
             jwtInfoDto.setEnduser(jwtInfoDto.getJwtValidationInfo().getUser());
         }
         if (apiKeyValidationInfoDTO != null) {
@@ -998,39 +888,13 @@ public class GatewayUtils {
             jwtInfoDto.setApiName(apiKeyValidationInfoDTO.getApiName());
             jwtInfoDto.setEndusertenantid(
                     APIUtil.getTenantIdFromTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain()));
-        } else if (subscribedAPI != null) {
-            // If the user is subscribed to the API
-            String apiName = subscribedAPI.getAsString(APIConstants.JwtTokenConstants.API_NAME);
-            jwtInfoDto.setApiName(apiName);
-            String subscriptionTier = subscribedAPI.getAsString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
-            String subscriptionTenantDomain =
-                    subscribedAPI.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);
-            jwtInfoDto.setSubscriptionTier(subscriptionTier);
-            jwtInfoDto.setEndusertenantid(APIUtil.getTenantIdFromTenantDomain(subscriptionTenantDomain));
-            if (jwtInfoDto.getJwtValidationInfo() != null) {
-                if (jwtInfoDto.getJwtValidationInfo().getClaims().get(APIConstants.JwtTokenConstants.APPLICATION) !=
-                        null) {
-                    JSONObject applicationObj = (JSONObject) jwtInfoDto.getJwtValidationInfo().getClaims()
-                            .get(APIConstants.JwtTokenConstants.APPLICATION);
-                    jwtInfoDto.setApplicationid(
-                            String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
-                    jwtInfoDto
-                            .setApplicationname(
-                                    applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
-                    jwtInfoDto
-                            .setApplicationtier(
-                                    applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
-                    jwtInfoDto.setSubscriber(
-                            applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
-                }
-            }
         }
     }
 
-    public static JWTInfoDto generateJWTInfoDto(JWTValidationInfo jwtValidationInfo, JSONObject subscribedAPI,
+    public static JWTInfoDto generateJWTInfoDto(JWTValidationInfo jwtValidationInfo,
                                                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
-                                                org.apache.synapse.MessageContext synCtx)
-            throws java.text.ParseException {
+                                                org.apache.synapse.MessageContext synCtx) {
+
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
         jwtInfoDto.setMessageContext(synCtx);
@@ -1038,27 +902,8 @@ public class GatewayUtils {
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         jwtInfoDto.setApicontext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
-        constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
+        constructJWTContent(apiKeyValidationInfoDTO, jwtInfoDto);
         return jwtInfoDto;
-    }
-
-    public static String retrieveJWKSConfiguration(String jwksEndpoint) throws IOException {
-
-        URL url = new URL(jwksEndpoint);
-        try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
-                .getHttpClient(url.getPort(), url.getProtocol())) {
-            HttpGet httpGet = new HttpGet(jwksEndpoint);
-            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    HttpEntity entity = response.getEntity();
-                    try (InputStream content = entity.getContent()) {
-                        return IOUtils.toString(content);
-                    }
-                } else {
-                    return null;
-                }
-            }
-        }
     }
 
     public static void setAPIRelatedTags(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
@@ -1092,7 +937,10 @@ public class GatewayUtils {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ACTIVITY_ID, axis2MessageContext.getMessageID());
         }
     }
-    public static void setRequestRelatedTags(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext){
+
+    public static void setRequestRelatedTags(TracingSpan tracingSpan,
+                                             org.apache.synapse.MessageContext messageContext) {
+
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         Object restUrlPostfix = axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX);
@@ -1108,8 +956,9 @@ public class GatewayUtils {
 
     public static void setEndpointRelatedInformation(TracingSpan tracingSpan,
                                                      org.apache.synapse.MessageContext messageContext) {
+
         Object endpoint = messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
-        if (endpoint != null){
+        if (endpoint != null) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
         }
     }

@@ -58,7 +58,6 @@ import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
-import org.wso2.carbon.apimgt.impl.keymgt.AbstractKeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
@@ -87,7 +86,6 @@ import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
-import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -834,16 +832,11 @@ public class APIManagerComponent {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "removeKeyManagerConnectorConfiguration")
     protected void addKeyManagerConnectorConfiguration(
-            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration, Map<String, Object> properties) {
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration) {
 
-        if (properties.containsKey(APIConstants.KeyManager.KEY_MANAGER_TYPE)) {
-            String type = (String) properties.get(APIConstants.KeyManager.KEY_MANAGER_TYPE);
-            if (keyManagerConnectorConfiguration instanceof AbstractKeyManagerConnectorConfiguration) {
-                ((AbstractKeyManagerConnectorConfiguration) keyManagerConnectorConfiguration).setKeyManagerType(type);
-            }
-            ServiceReferenceHolder.getInstance().addKeyManagerConnectorConfiguration(type,
-                    keyManagerConnectorConfiguration);
-        }
+        ServiceReferenceHolder.getInstance()
+                .addKeyManagerConnectorConfiguration(keyManagerConnectorConfiguration.getType(),
+                        keyManagerConnectorConfiguration);
     }
 
     /**

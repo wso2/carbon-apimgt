@@ -2186,6 +2186,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 APIUtil.loadTenantRegistry(tenantIDLocal);
                 userRegistry = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
                 userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
+                APIUtil.loadTenantConfigBlockingMode(requestedTenantDomain);
             } else {
                 userRegistry = this.registry;
                 tenantIDLocal = tenantId;

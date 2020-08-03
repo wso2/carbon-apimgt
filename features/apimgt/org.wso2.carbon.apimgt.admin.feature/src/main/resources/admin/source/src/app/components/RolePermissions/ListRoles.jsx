@@ -23,6 +23,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import Progress from 'AppComponents/Shared/Progress';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
+import cloneDeep from 'lodash.clonedeep';
 
 import PermissionsSelector from './TreeView/PermissionsSelector';
 import AdminTable from './AdminTable/AdminTable';
@@ -84,10 +85,14 @@ function mergeRoleAliasesAndScopeMappings(roleAliases, scopeMappings) {
     for (const roleAlias of roleAliases) {
         const { role, aliases } = roleAlias;
         for (const alias of aliases) {
-            if (roleAliasesMap[alias]) {
-                roleAliasesMap[alias].aliases.push(role);
+            if (alias) {
+                if (roleAliasesMap[alias]) {
+                    roleAliasesMap[alias].aliases.push(role);
+                } else {
+                    roleAliasesMap[alias] = { aliases: [role] };
+                }
             } else {
-                roleAliasesMap[alias] = { aliases: [role] };
+                console.warn('Found role aliases with no mappings(role name)!');
             }
         }
     }
@@ -158,21 +163,28 @@ export default function ListRoles() {
     const handleScopeMappingUpdate = useCallback(
         (updatedAppMappings) => {
             return PermissionAPI.updateSystemScopes(updatedAppMappings).then((data) => {
-                const [newRoleMapping, newAppMapping] = extractMappings(data.body.list);
-                setPermissionMappings(newRoleMapping);
-                setAppMappings(newAppMapping);
+                setSystemScopes(data.body);
             });
         },
         [],
     );
-    const handleDeleteRole = (deletedRole) => {
-        const updatedAppMappings = {};
-        for (const [app, permissions] of Object.entries(appMappings)) {
-            updatedAppMappings[app] = permissions.map((permission) => (
-                { ...permission, roles: permission.roles.filter((role) => role !== deletedRole) }
-            ));
+    const handleDeleteRole = (deletedRole, isAlias) => {
+        if (!isAlias) {
+            const updatedAppMappings = {};
+            for (const [app, permissions] of Object.entries(appMappings)) {
+                updatedAppMappings[app] = permissions.map((permission) => (
+                    { ...permission, roles: permission.roles.filter((role) => role !== deletedRole) }
+                ));
+            }
+            return handleScopeMappingUpdate(updatedAppMappings);
+        } else {
+            const updatedRoleAliases = cloneDeep(roleAliases.list).map(({ role, aliases }) => {
+                return { role, aliases: aliases.filter((roleAlias) => roleAlias !== deletedRole) };
+            });
+            return PermissionAPI.updateRoleAliases(updatedRoleAliases).then((response) => {
+                setRoleAliases(response.body);
+            });
         }
-        return handleScopeMappingUpdate(updatedAppMappings);
     };
     if (!permissionMappings || !appMappings) {
         return <Progress message='Resolving user ...' />;
@@ -191,6 +203,8 @@ export default function ListRoles() {
                     {
                         isOpen && (
                             <AddRoleWizard
+                                setRoleAliases={setRoleAliases}
+                                roleAliases={roleAliases}
                                 permissionMappings={permissionMappings}
                                 appMappings={appMappings}
                                 onClose={() => setIsOpen(false)}
@@ -200,7 +214,7 @@ export default function ListRoles() {
                     }
                 </Grid>
             </ListAddOns>
-            <AdminTable multiSelect={false}>
+            <AdminTable dataIDs={Object.keys(permissionMappings)} multiSelect={false}>
                 <AdminTableHead headCells={headCells} />
                 <TableBody rows={Object.entries(permissionMappings).map(([role, mapping]) => {
                     return [mapping.aliases ? (
@@ -225,17 +239,20 @@ export default function ListRoles() {
                     ) : role,
                     (
                         <Box component='span' display='block'>
-                            <PermissionsSelector
-                                role={role}
-                                appMappings={appMappings}
-                                onSave={handleScopeMappingUpdate}
-                            />
+                            {!mapping.aliases && (
+                                <PermissionsSelector
+                                    role={role}
+                                    appMappings={appMappings}
+                                    onSave={handleScopeMappingUpdate}
+                                />
+                            )}
                             <Box pl={1} display='inline'>
                                 <DeletePermission
                                     size='small'
                                     variant='outlined'
                                     onDelete={handleDeleteRole}
                                     role={role}
+                                    isAlias={mapping.aliases}
                                 >
                                     Delete
                                 </DeletePermission>

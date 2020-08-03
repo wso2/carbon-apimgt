@@ -5223,7 +5223,10 @@ definitions:
           properties:
             type:
               type: string
-              example: 'wso2is'
+              example: 'default'
+            displayName:
+              type: string
+              example: 'default'
             configurations:
               type: array
               items:

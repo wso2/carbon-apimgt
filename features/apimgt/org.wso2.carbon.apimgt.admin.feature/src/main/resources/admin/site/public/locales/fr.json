@@ -6,7 +6,6 @@
   "Admin.KeyManager.label.Enable.OutOfBandProvisioning": "",
   "Admin.KeyManager.label.Enable.TokenGen": "",
   "Admin.KeyManager.label.Scopes.Claim": "",
-  "Admin.KeyManager.label.Self.Validate.JWT": "",
   "Admin.Throttling.Advanced.Throttling.policy.table.header.name": "",
   "Admin.Throttling.Advanced.Throttling.policy.table.header.quota": "",
   "Admin.Throttling.Advanced.Throttling.policy.table.header.quota.policy": "",

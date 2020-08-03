@@ -20,8 +20,7 @@ import java.util.Map;
 
 public abstract class AbstractKeyManagerConnectorConfiguration implements KeyManagerConnectorConfiguration {
 
-    private String keyManagerType;
-    private Map<String, List<ConfigurationDto>> confiListMap = new HashMap<>();
+    private Map<String, List<ConfigurationDto>> configListMap = new HashMap<>();
     private Log log = LogFactory.getLog(AbstractKeyManagerConnectorConfiguration.class);
     public static final String CONNECTOR_CONFIGURATION = "configurations";
     public static final String APPLICATION_CONFIGURATIONS = "application_configurations";
@@ -29,28 +28,28 @@ public abstract class AbstractKeyManagerConnectorConfiguration implements KeyMan
     @Override
     public List<ConfigurationDto> getConnectionConfigurations() {
 
-        if (confiListMap.get(CONNECTOR_CONFIGURATION) == null) {
+        if (configListMap.get(CONNECTOR_CONFIGURATION) == null) {
             convertJsonToConnectorConfiguration();
         }
-        return confiListMap.get(CONNECTOR_CONFIGURATION);
+        return configListMap.get(CONNECTOR_CONFIGURATION);
     }
 
     @Override
     public List<ConfigurationDto> getApplicationConfigurations() {
 
-        if (confiListMap.get(APPLICATION_CONFIGURATIONS) == null) {
+        if (configListMap.get(APPLICATION_CONFIGURATIONS) == null) {
             convertJsonToConnectorConfiguration();
         }
-        return confiListMap.get(APPLICATION_CONFIGURATIONS);
+        return configListMap.get(APPLICATION_CONFIGURATIONS);
     }
 
     private void convertJsonToConnectorConfiguration() {
 
-        confiListMap.put(CONNECTOR_CONFIGURATION, Collections.emptyList());
-        confiListMap.put(APPLICATION_CONFIGURATIONS, Collections.EMPTY_LIST);
+        configListMap.put(CONNECTOR_CONFIGURATION, Collections.emptyList());
+        configListMap.put(APPLICATION_CONFIGURATIONS, Collections.EMPTY_LIST);
         String connectorConfigPath = CarbonBaseUtils.getCarbonHome() + File.separator + "repository" + File.separator +
                 "resources" +
-                File.separator + "keyManager-extensions" +File.separator+ keyManagerType + ".json";
+                File.separator + "keyManager-extensions" +File.separator+ getType() + ".json";
         File file = new File(connectorConfigPath);
         if (file.exists()) {
             try (FileInputStream fileInputStream = new FileInputStream(file)) {
@@ -58,15 +57,10 @@ public abstract class AbstractKeyManagerConnectorConfiguration implements KeyMan
                 Gson gson = new Gson();
                 Type configurationDtoType = new TypeToken<Map<String, List<ConfigurationDto>>>() {
                 }.getType();
-                confiListMap = gson.fromJson(content, configurationDtoType);
+                configListMap = gson.fromJson(content, configurationDtoType);
             } catch (IOException e) {
                 log.error("Error while reading connector configuration", e);
             }
         }
-    }
-
-    public void setKeyManagerType(String keyManagerType) {
-
-        this.keyManagerType = keyManagerType;
     }
 }

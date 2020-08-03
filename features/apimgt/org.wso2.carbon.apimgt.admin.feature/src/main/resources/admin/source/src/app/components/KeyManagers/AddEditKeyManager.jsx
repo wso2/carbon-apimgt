@@ -281,11 +281,6 @@ function AddEditKeyManager(props) {
                     });
                 }
                 break;
-            case 'type':
-                error = fieldValue === 'select'
-                    ? 'Select a Key Manager type. If the list is empty please refer the documentation.'
-                    : false;
-                break;
             case 'keyconfig':
             case 'displayName':
             case 'issuer':
@@ -322,8 +317,23 @@ function AddEditKeyManager(props) {
     };
 
     const formHasErrors = (validatingActive = false) => {
+        let connectorConfigHasErrors = false;
+        keymanagerConnectorConfigurations.forEach((connector) => {
+            if (connector.required && (!additionalProperties[connector.name]
+                || additionalProperties[connector.name] === '')) {
+                connectorConfigHasErrors = true;
+            }
+        });
+
         if (hasErrors('name', name, validatingActive)
-            || hasErrors('type', type, validatingActive)) {
+            || hasErrors('displayName', displayName, validatingActive)
+            || connectorConfigHasErrors
+            || hasErrors('issuer', issuer, validatingActive)
+            || hasErrors('clientRegistrationEndpoint', clientRegistrationEndpoint, validatingActive)
+            || hasErrors('introspectionEndpoint', introspectionEndpoint, validatingActive)
+            || hasErrors('tokenEndpoint', tokenEndpoint, validatingActive)
+            || hasErrors('revokeEndpoint', revokeEndpoint, validatingActive)
+        ) {
             return true;
         } else {
             return false;
@@ -510,6 +520,7 @@ function AddEditKeyManager(props) {
                                 <Grid item xs={6}>
                                     <Box ml={1}>
                                         <TextField
+                                            autoFocus={!!id}
                                             margin='dense'
                                             name='displayName'
                                             fullWidth
@@ -578,7 +589,7 @@ function AddEditKeyManager(props) {
                                 >
                                     {settings.keyManagerConfiguration.map((keymanager) => (
                                         <MenuItem key={keymanager.type} value={keymanager.type}>
-                                            {keymanager.type}
+                                            {keymanager.displayName || keymanager.type}
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -1009,7 +1020,7 @@ function AddEditKeyManager(props) {
                             <Grid container>
                                 <Grid item xs={6} md={4} lg={4}>
                                     <FormControlLabel
-                                        value='EnableTokenGeneration'
+                                        value='enableTokenGeneration'
                                         control={(
                                             <Checkbox
                                                 checked={enableTokenGeneration}
@@ -1065,26 +1076,6 @@ function AddEditKeyManager(props) {
                                             />
                                         )}
 
-                                        labelPlacement='end'
-                                    />
-                                </Grid>
-                                <Grid item xs={6} md={4} lg={4}>
-                                    <FormControlLabel
-                                        value='enableSelfValidationJWT'
-                                        control={(
-                                            <Checkbox
-                                                checked={enableSelfValidationJWT}
-                                                onChange={onChange}
-                                                name='enableSelfValidationJWT'
-                                                color='primary'
-                                            />
-                                        )}
-                                        label={(
-                                            <FormattedMessage
-                                                id='Admin.KeyManager.label.Self.Validate.JWT'
-                                                defaultMessage='Self Validate JWT'
-                                            />
-                                        )}
                                         labelPlacement='end'
                                     />
                                 </Grid>

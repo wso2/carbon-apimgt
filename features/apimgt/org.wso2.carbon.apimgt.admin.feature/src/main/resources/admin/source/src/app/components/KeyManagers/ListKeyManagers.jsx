@@ -60,10 +60,11 @@ export default function ListKeyManagers() {
             }),
             options: {
                 customBodyRender: (value, tableMeta) => {
-                    if (typeof tableMeta.rowData === 'object' && value !== 'Default') {
+                    const type = tableMeta.rowData[2];
+                    if (typeof tableMeta.rowData === 'object' && type !== 'default') {
                         const artifactId = tableMeta.rowData[tableMeta.rowData.length - 2];
                         return <RouterLink to={`/settings/key-managers/${artifactId}`}>{value}</RouterLink>;
-                    } else if (typeof tableMeta.rowData === 'object' && value === 'Default') {
+                    } else if (typeof tableMeta.rowData === 'object' && type === 'default') {
                         return (
                             <>
                                 <div>
@@ -75,7 +76,7 @@ export default function ListKeyManagers() {
                                 <Typography variant='caption' display='block' gutterBottom>
                                     <FormattedMessage
                                         id='KeyManagers.ListKeyManagers.editing.not.allowed'
-                                        defaultMessage='Residence key manager editing is not allowed'
+                                        defaultMessage='Modifying residence key manager is not allowed'
                                     />
                                 </Typography>
                             </>

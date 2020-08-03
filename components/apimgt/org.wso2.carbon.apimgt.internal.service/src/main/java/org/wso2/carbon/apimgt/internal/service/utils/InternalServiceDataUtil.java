@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.internal.service.utils;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +40,6 @@ import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationAttributeDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingListDTO;
@@ -153,6 +153,7 @@ public class InternalServiceDataUtil {
         if (model != null) {
             for (Application appModel : model) {
                 ApplicationDTO applicationDTO = new ApplicationDTO();
+                applicationDTO.setUuid(appModel.getUuid());
                 applicationDTO.setId(appModel.getId());
                 applicationDTO.setName(appModel.getName());
                 applicationDTO.setPolicy(appModel.getPolicy());
@@ -168,12 +169,7 @@ public class InternalServiceDataUtil {
                 }
 
                 Map<String, String> attributes = appModel.getAttributes();
-                for (String attrib : attributes.keySet()) {
-                    ApplicationAttributeDTO applicationAttributeDTO = new ApplicationAttributeDTO();
-                    applicationAttributeDTO.setName(attrib);
-                    applicationAttributeDTO.setValue(attributes.get(attrib));
-                    applicationDTO.getAttributes().add(applicationAttributeDTO);
-                }
+                applicationDTO.setAttributes(attributes);
                 applicationListDTO.getList().add(applicationDTO);
             }
             applicationListDTO.setCount(model.size());

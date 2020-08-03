@@ -885,9 +885,9 @@
           }
         },
         "attributes" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/ApplicationAttribute"
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
           }
         }
       }
@@ -922,29 +922,6 @@
           "properties" : { }
         }
       }
-    },
-    "ApplicationAttribute" : {
-      "properties" : {
-        "applicationId" : {
-          "type" : "integer",
-          "example" : 1,
-          "description" : "application ID of the attribute associated with"
-        },
-        "name" : {
-          "type" : "string",
-          "description" : "name of the attribute"
-        },
-        "value" : {
-          "type" : "string",
-          "description" : "the value of the attribute"
-        },
-        "tenant" : {
-          "type" : "string",
-          "example" : "wso2.com",
-          "description" : "tenant domain"
-        }
-      },
-      "title" : "Application attributes"
     },
     "SubscriptionList" : {
       "properties" : {

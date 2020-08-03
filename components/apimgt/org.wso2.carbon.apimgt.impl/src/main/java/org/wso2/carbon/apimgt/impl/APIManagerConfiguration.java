@@ -1482,7 +1482,17 @@ public class APIManagerConfiguration {
         while (tokenIssuersElement.hasNext()) {
             OMElement issuerElement = (OMElement) tokenIssuersElement.next();
             String issuer = issuerElement.getAttributeValue(new QName("issuer"));
+            OMElement consumerKeyClaimElement =
+                    issuerElement.getFirstChildWithName(new QName(APIConstants.TokenIssuer.CONSUMER_KEY_CLAIM));
+            OMElement scopesElement =
+                    issuerElement.getFirstChildWithName(new QName(APIConstants.TokenIssuer.SCOPES_CLAIM));
             TokenIssuerDto tokenIssuerDto = new TokenIssuerDto(issuer);
+            if (consumerKeyClaimElement != null){
+                tokenIssuerDto.setConsumerKeyClaim(consumerKeyClaimElement.getText());
+            }
+            if (scopesElement != null){
+                tokenIssuerDto.setScopesClaim(scopesElement.getText());
+            }
             OMElement jwksConfiguration =
                     issuerElement.getFirstChildWithName(new QName(APIConstants.TokenIssuer.JWKS_CONFIGURATION));
             if (jwksConfiguration != null) {

@@ -504,51 +504,6 @@ class ViewKeys extends React.Component {
             <div className={classes.inputWrapper}>
                 <Grid container spacing={3}>
                     {this.viewKeyAndSecret(consumerKey, consumerSecret, keyMappingId, selectedTab, isUserOwner)}
-                    {(accessToken && tokenType !== 'JWT' && !hashEnabled) && (
-                        <Grid item xs={6}>
-                            <InputLabel htmlFor='adornment-amount'>
-                                <FormattedMessage
-                                    id='Shared.AppsAndKeys.ViewKeys.access.token'
-                                    defaultMessage='Access Token'
-                                />
-                            </InputLabel>
-                            <div className={classes.copyWrapper}>
-                                <TextField
-                                    id='access-token'
-                                    value={accessToken}
-                                    margin='dense'
-                                    variant='outlined'
-                                    fullWidth
-                                    InputProps={{
-                                        readOnly: true,
-                                        endAdornment: (
-                                            <InputAdornment position='end'>
-                                                <Tooltip
-                                                    title={tokenCopied ? 'Copied' : 'Copy to clipboard'}
-                                                    placement='right'
-                                                >
-                                                    <CopyToClipboard
-                                                        text={accessToken}
-                                                        onCopy={() => this.onCopy('tokenCopied')}
-                                                    >
-                                                        <IconButton aria-label='Copy to clipboard' classes={{ root: classes.iconButton }}>
-                                                            <Icon color='secondary'>file_copy</Icon>
-                                                        </IconButton>
-                                                    </CopyToClipboard>
-                                                </Tooltip>
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-                            </div>
-                            <FormControl>
-                                <FormHelperText id='access-token-helper-text'>
-                                    {`Above token has a validity period of ${validityPeriod} seconds.
-                                            And the token has (${accessTokenScopes.join(', ')}) scopes.`}
-                                </FormHelperText>
-                            </FormControl>
-                        </Grid>
-                    )}
                     <Grid item xs={12}>
                         <Dialog
                             fullScreen={fullScreen}
