@@ -156,6 +156,12 @@
         <URL>{{issuer_1.jwks.url}}</URL>
       </JWKSConfiguration>
     {% endif %}
+    {% if issuer_1.consumer_key_claim is defined %}
+    <ConsumerKeyClaim>{{issuer_1.consumer_key_claim}}</ConsumerKeyClaim>
+    {% endif %}
+    {% if issuer_1.scopes_claim is defined %}
+    <ScopesClaim>{{issuer_1.scopes_claim}}</ScopesClaim>
+    {% endif %}
     {% if issuer_1.disable_default_claim_mapping is defined %}
       <ClaimMappings disable-default-claim-mapping ="{{issuer_1.disable_default_claim_mapping}}">
     {% else%}

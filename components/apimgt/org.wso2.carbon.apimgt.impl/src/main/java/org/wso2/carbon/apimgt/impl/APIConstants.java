@@ -2212,10 +2212,13 @@ public final class APIConstants {
 
     public static class TokenIssuer {
 
+        public static final String SCOPES_CLAIM = "ScopesClaim";
         public static String TOKEN_ISSUER = "TokenIssuer";
         public static final String JWKS_CONFIGURATION = "JWKSConfiguration";
         public static final String CLAIM_MAPPINGS = "ClaimMappings";
         public static final String CLAIM_MAPPING = "ClaimMapping";
+        public static final String CONSUMER_KEY_CLAIM = "ConsumerKeyClaim";
+        
 
         public static class JWKSConfiguration {
 
