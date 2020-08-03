@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.internal.service.utils;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
@@ -33,7 +34,6 @@ import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationAttributeDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingListDTO;
@@ -46,7 +46,6 @@ import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
-import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -142,6 +141,7 @@ public class SubscriptionValidationDataUtil {
         if (model != null) {
             for (Application appModel : model) {
                 ApplicationDTO applicationDTO = new ApplicationDTO();
+                applicationDTO.setUuid(appModel.getUuid());
                 applicationDTO.setId(appModel.getId());
                 applicationDTO.setName(appModel.getName());
                 applicationDTO.setPolicy(appModel.getPolicy());
@@ -157,12 +157,7 @@ public class SubscriptionValidationDataUtil {
                 }
 
                 Map<String, String> attributes = appModel.getAttributes();
-                for (String attrib : attributes.keySet()) {
-                    ApplicationAttributeDTO applicationAttributeDTO = new ApplicationAttributeDTO();
-                    applicationAttributeDTO.setName(attrib);
-                    applicationAttributeDTO.setValue(attributes.get(attrib));
-                    applicationDTO.getAttributes().add(applicationAttributeDTO);
-                }
+                applicationDTO.setAttributes(attributes);
                 applicationListDTO.getList().add(applicationDTO);
             }
             applicationListDTO.setCount(model.size());
