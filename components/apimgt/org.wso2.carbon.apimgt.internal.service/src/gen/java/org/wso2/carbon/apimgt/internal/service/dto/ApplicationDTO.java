@@ -3,8 +3,9 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationAttributeDTO;
+import java.util.Map;
 import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
 import javax.validation.constraints.*;
 
@@ -26,7 +27,7 @@ public class ApplicationDTO   {
     private String policy = null;
     private String tokenType = null;
     private List<GroupIdDTO> groupIds = new ArrayList<>();
-    private List<ApplicationAttributeDTO> attributes = new ArrayList<>();
+    private Map<String, String> attributes = new HashMap<>();
 
   /**
    **/
@@ -152,7 +153,7 @@ public class ApplicationDTO   {
 
   /**
    **/
-  public ApplicationDTO attributes(List<ApplicationAttributeDTO> attributes) {
+  public ApplicationDTO attributes(Map<String, String> attributes) {
     this.attributes = attributes;
     return this;
   }
@@ -160,10 +161,10 @@ public class ApplicationDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("attributes")
-  public List<ApplicationAttributeDTO> getAttributes() {
+  public Map<String, String> getAttributes() {
     return attributes;
   }
-  public void setAttributes(List<ApplicationAttributeDTO> attributes) {
+  public void setAttributes(Map<String, String> attributes) {
     this.attributes = attributes;
   }
 

@@ -194,32 +194,6 @@
         }
       }
     },
-    "/apikey/revoke" : {
-      "post" : {
-        "summary" : "Revoke given API Key",
-        "description" : "Revoke and notify the provided API Key",
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "body",
-          "description" : "API Key revoke request object\n",
-          "required" : false,
-          "schema" : {
-            "$ref" : "#/definitions/RevokeAPIKey"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK.\nApi key revoked successfully.\n"
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/apis" : {
       "get" : {
         "tags" : [ "Subscription Validation" ],
@@ -584,6 +558,36 @@
           }
         }
       }
+    },
+    "/notify" : {
+      "post" : {
+        "tags" : [ "Notification" ],
+        "summary" : "Push notification events into nodes.",
+        "description" : "This pushes events to the other nodes.\n",
+        "parameters" : [ {
+          "name" : "X-WSO2-KEY-MANAGER",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Notification event payload",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Event Received success",
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
     }
   },
   "definitions" : {
@@ -786,6 +790,11 @@
           "example" : "APIProduct",
           "description" : "Type of the API."
         },
+        "isDefaultVersion" : {
+          "type" : "boolean",
+          "example" : false,
+          "description" : "Whether this is the default version of the API."
+        },
         "urlMappings" : {
           "type" : "array",
           "items" : {
@@ -876,9 +885,9 @@
           }
         },
         "attributes" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/ApplicationAttribute"
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
           }
         }
       }
@@ -913,29 +922,6 @@
           "properties" : { }
         }
       }
-    },
-    "ApplicationAttribute" : {
-      "properties" : {
-        "applicationId" : {
-          "type" : "integer",
-          "example" : 1,
-          "description" : "application ID of the attribute associated with"
-        },
-        "name" : {
-          "type" : "string",
-          "description" : "name of the attribute"
-        },
-        "value" : {
-          "type" : "string",
-          "description" : "the value of the attribute"
-        },
-        "tenant" : {
-          "type" : "string",
-          "example" : "wso2.com",
-          "description" : "tenant domain"
-        }
-      },
-      "title" : "Application attributes"
     },
     "SubscriptionList" : {
       "properties" : {
@@ -1244,6 +1230,13 @@
   "parameters" : {
     "requestedTenant" : {
       "name" : "xWSO2Tenant",
+      "in" : "header",
+      "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+      "required" : true,
+      "type" : "string"
+    },
+    "type" : {
+      "name" : "X-WSO2-KEY-MANAGER",
       "in" : "header",
       "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
       "required" : true,
