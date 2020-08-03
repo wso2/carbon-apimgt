@@ -259,6 +259,8 @@ function AddEditKeyManager(props) {
                 dispatch({ field: 'all', value: editState });
                 updateKeyManagerConnectorConfiguration(editState.type);
             });
+        } else {
+            updateKeyManagerConnectorConfiguration(defaultKMType);
         }
     }, []);
 
