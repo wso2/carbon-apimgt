@@ -151,10 +151,11 @@ public class APIMappingUtil {
                     if (MapUtils.isNotEmpty(currentTier.getMonetizationAttributes())) {
                         Map<String, String> monetizationAttributes = currentTier.getMonetizationAttributes();
                         //check for the billing plan (fixed or price per request)
-                        if (monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE) != null) {
+                        if (!StringUtils.isBlank(monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE))) {
                             monetizationAttributesDTO.setFixedPrice(monetizationAttributes.get
                                     (APIConstants.Monetization.FIXED_PRICE));
-                        } else if (monetizationAttributes.get(APIConstants.Monetization.PRICE_PER_REQUEST) != null) {
+                        } else if (!StringUtils.isBlank(monetizationAttributes.get(
+                                APIConstants.Monetization.PRICE_PER_REQUEST))) {
                             monetizationAttributesDTO.setPricePerRequest(monetizationAttributes.get
                                     (APIConstants.Monetization.PRICE_PER_REQUEST));
                         }
@@ -305,10 +306,11 @@ public class APIMappingUtil {
                     if (MapUtils.isNotEmpty(currentTier.getMonetizationAttributes())) {
                         Map<String, String> monetizationAttributes = currentTier.getMonetizationAttributes();
                         //check the billing plan (fixed or price per request)
-                        if (monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE) != null) {
+                        if (!StringUtils.isBlank(monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE))) {
                             monetizationAttributesDTO.setFixedPrice(monetizationAttributes.get
                                     (APIConstants.Monetization.FIXED_PRICE));
-                        } else if (monetizationAttributes.get(APIConstants.Monetization.PRICE_PER_REQUEST) != null) {
+                        } else if (!StringUtils.isBlank(monetizationAttributes.get(
+                                APIConstants.Monetization.PRICE_PER_REQUEST))) {
                             monetizationAttributesDTO.setPricePerRequest(monetizationAttributes.get
                                     (APIConstants.Monetization.PRICE_PER_REQUEST));
                         }
