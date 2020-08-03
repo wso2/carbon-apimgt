@@ -49,9 +49,10 @@ public class GatewayArtifactsMgtDAO {
      * @param tenantDomain - Tenant domain of the API
      * @throws APIManagementException if an error occurs
      */
-    public void addGatewayPublishedAPIDetails(String APIId, String APIName, String version, String tenantDomain)
+    public boolean addGatewayPublishedAPIDetails(String APIId, String APIName, String version, String tenantDomain)
             throws APIManagementException {
 
+        boolean result = false;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             connection.setAutoCommit(false);
                 try (PreparedStatement statement = connection
@@ -60,12 +61,13 @@ public class GatewayArtifactsMgtDAO {
                     statement.setString(2, APIName);
                     statement.setString(3, version);
                     statement.setString(4, tenantDomain);
-                    statement.executeUpdate();
+                    result = statement.executeUpdate() == 1;
                 }
             connection.commit();
         } catch (SQLException e) {
             handleException("Failed to add API details for " + APIName, e);
         }
+        return result;
     }
 
     /**
@@ -77,10 +79,11 @@ public class GatewayArtifactsMgtDAO {
      * @param streamLength - Length of the stream
      * @throws APIManagementException if an error occurs
      */
-    public void addGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel, ByteArrayInputStream bais,
+    public boolean addGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel, ByteArrayInputStream bais,
             int streamLength, String gatewayInstruction, String query)
             throws APIManagementException {
 
+        boolean result = false;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             connection.setAutoCommit(false);
                 try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -88,12 +91,13 @@ public class GatewayArtifactsMgtDAO {
                     statement.setString(2, gatewayInstruction);
                     statement.setString(3, APIId);
                     statement.setString(4, gatewayLabel);
-                    statement.executeUpdate();
+                    result = statement.executeUpdate() == 1;
                 }
             connection.commit();
         } catch (SQLException e) {
             handleException("Failed to add artifacts for " + APIId, e);
         }
+        return result;
     }
 
     /**
