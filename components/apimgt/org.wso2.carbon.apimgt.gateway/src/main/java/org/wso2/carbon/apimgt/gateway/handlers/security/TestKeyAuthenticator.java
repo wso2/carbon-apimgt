@@ -77,13 +77,15 @@ public class TestKeyAuthenticator extends AbstractHandler {
         axis2MC.getProperty((APIMgtGatewayConstants.TRANSPORT_HEADERS));
         Map headers = (Map) axis2MC.getProperty((APIMgtGatewayConstants.TRANSPORT_HEADERS));
         String originalToken = testKey;
+        String requestHeader = null;
         Object header = headers.get(APIMgtGatewayConstants.TEST_KEY);
         int errorStatus;
         if (header == null) {
             errorStatus = APISecurityConstants.API_AUTH_MISSING_CREDENTIALS;
             handleAuthenticationError(messageContext, errorStatus);
+        } else {
+            requestHeader = header.toString();
         }
-        String requestHeader = header.toString();
         if (originalToken.equals(requestHeader)) {
             logger.debug("Successfully authenticating the user for the API");
             return true;
@@ -102,7 +104,7 @@ public class TestKeyAuthenticator extends AbstractHandler {
     private void handleAuthenticationError(MessageContext mc, int status) {
         mc.setProperty(SynapseConstants.ERROR_CODE, HttpStatus.SC_UNAUTHORIZED);
         mc.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, HttpStatus.SC_UNAUTHORIZED);
-        mc.setProperty(SynapseConstants.ERROR_DETAIL, "Either test token is missing or found an invalid test token");
+        mc.setProperty(SynapseConstants.ERROR_DETAIL, "Authentication Error");
 
         Mediator sequence = mc.getSequence(APISecurityConstants.API_AUTH_FAILURE_HANDLER);
         // By default we send a 401 response back
@@ -164,7 +166,7 @@ public class TestKeyAuthenticator extends AbstractHandler {
         if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
             String errorDescription =
                     APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) +
-                            " test-key is missing";
+                            "testkey is missing";
             errorDetail.setText(errorDescription);
         }
 
