@@ -33,12 +33,13 @@ public class JWTValidationServiceImpl implements JWTValidationService {
     private static final Log log = LogFactory.getLog(JWTValidationServiceImpl.class);
 
     @Override
-    public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo, String keyManager) throws APIManagementException {
+    public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws APIManagementException {
+
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
-
-        if (StringUtils.isNotEmpty(keyManager)) {
-            KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByName(tenantDomain, keyManager);
+        String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
+        if (StringUtils.isNotEmpty(issuer)) {
+            KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
             if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
                 JWTValidationInfo validationInfo = keyManagerDto.getJwtValidator().validateToken(signedJWTInfo);
                 validationInfo.setKeyManager(keyManagerDto.getName());

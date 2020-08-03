@@ -264,7 +264,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 //Initial guess of a JWT token using the presence of a DOT.
 
                 SignedJWTInfo signedJWTInfo = null;
-                String keyManager = null;
                 if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
                     try {
                         // Check if the header part is decoded
@@ -274,7 +273,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                     "Invalid JWT token");
                         }
                         signedJWTInfo = getSignedJwtInfo(apiKey);
-                        keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                        String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                                 .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
                         if (StringUtils.isNotEmpty(keyManager)){
                             isJwtToken = true;
@@ -298,8 +297,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                         isDefaultVersion = true;
                     }
                     AuthenticationContext authenticationContext =
-                            new JWTValidator(null, new APIKeyValidator(null)).
-                                    authenticateForWebSocket(signedJWTInfo, apiContextUri, apiVersion, keyManager);
+                            new JWTValidator(new APIKeyValidator()).
+                                    authenticateForWebSocket(signedJWTInfo, apiContextUri, apiVersion);
                     if(authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;
                     }
@@ -327,18 +326,18 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                             uri = "/_PRODUCTION_" + uri + "/" + authenticationContext.getApiVersion();
                         } else {
                             uri = "/_PRODUCTION_" + uri;
-                        }                       
+                        }
                     } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(info.getType())) {
                         if (isDefaultVersion) {
                             uri = "/_SANDBOX_" + uri + "/" + authenticationContext.getApiVersion();
                         } else {
                             uri = "/_SANDBOX_" + uri;
-                        }       
+                        }
                     }
                     if (isDefaultVersion) {
                         version = authenticationContext.getApiVersion();
                     }
-                    
+
                     infoDTO = info;
                     return authenticationContext.isAuthenticated();
                 } else {

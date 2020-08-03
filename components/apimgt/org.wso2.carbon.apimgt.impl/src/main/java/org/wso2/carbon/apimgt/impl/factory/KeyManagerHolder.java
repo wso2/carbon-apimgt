@@ -55,7 +55,7 @@ public class KeyManagerHolder {
 
     private static Log log = LogFactory.getLog(KeyManagerHolder.class);
     private static Map<String, TenantKeyManagerDto> tenantWiseMap = new HashMap<>();
-
+    private static Map<String, KeyManagerDto> globalJWTValidatorMap = new HashMap<>();
     public static void addKeyManagerConfiguration(String tenantDomain, String name, String type,
                                                   KeyManagerConfiguration keyManagerConfiguration)
             throws APIManagementException {
@@ -243,8 +243,12 @@ public class KeyManagerHolder {
         }
         return keyManagerDto.getKeyManager();
     }
+
     public static KeyManagerDto getKeyManagerByIssuer(String tenantDomain, String issuer) {
 
+        if (globalJWTValidatorMap.containsKey(issuer)) {
+            return globalJWTValidatorMap.get(issuer);
+        }
         TenantKeyManagerDto tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);
         if (tenantKeyManagerDto != null) {
             return tenantKeyManagerDto.getKeyManagerDtoByIssuer(issuer);
@@ -252,21 +256,14 @@ public class KeyManagerHolder {
         return null;
     }
 
-    public static KeyManagerDto getKeyManagerByName(String tenantDomain, String keyManager) {
+    public static void addGlobalJWTValidators(TokenIssuerDto tokenIssuerDto) {
 
-        TenantKeyManagerDto tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);
-        if (tenantKeyManagerDto != null) {
-            return tenantKeyManagerDto.getKeyManagerByName(keyManager);
-        }
-        return null;
-    }
-
-    public static JWTValidator getJWTValidator(String tenantDomain, String issuer) {
-
-        TenantKeyManagerDto tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);
-        if (tenantKeyManagerDto == null) {
-            return null;
-        }
-        return tenantKeyManagerDto.getJWTValidatorByIssuer(issuer);
+        KeyManagerDto keyManagerDto = new KeyManagerDto();
+        keyManagerDto.setIssuer(tokenIssuerDto.getIssuer());
+        keyManagerDto.setName(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+        JWTValidator jwtValidator = new JWTValidatorImpl();
+        jwtValidator.loadTokenIssuerConfiguration(tokenIssuerDto);
+        keyManagerDto.setJwtValidator(jwtValidator);
+        globalJWTValidatorMap.put(tokenIssuerDto.getIssuer(), keyManagerDto);
     }
 }

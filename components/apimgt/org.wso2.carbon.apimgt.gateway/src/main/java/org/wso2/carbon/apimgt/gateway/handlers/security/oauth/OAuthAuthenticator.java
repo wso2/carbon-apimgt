@@ -86,22 +86,21 @@ public class OAuthAuthenticator implements Authenticator {
     private String requestOrigin;
     private String remainingAuthHeader;
     private boolean isMandatory;
-    private String apiLevelPolicy;
+
     public OAuthAuthenticator() {
     }
 
     public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader,
-                              String apiLevelPolicy,List<String> keyManagerList) {
+                              List<String> keyManagerList) {
         this.securityHeader = authorizationHeader;
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
         this.isMandatory = isMandatory;
-        this.apiLevelPolicy = apiLevelPolicy;
         this.keyManagerList = keyManagerList;
     }
 
     public void init(SynapseEnvironment env) {
-        this.keyValidator = new APIKeyValidator(env.getSynapseConfiguration().getAxisConfiguration());
-        this.jwtValidator = new JWTValidator(apiLevelPolicy, this.keyValidator);
+        this.keyValidator = new APIKeyValidator();
+        this.jwtValidator = new JWTValidator(this.keyValidator);
         initOAuthParams();
     }
 
@@ -163,7 +162,6 @@ public class OAuthAuthenticator implements Authenticator {
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         SignedJWTInfo signedJWTInfo = null;
-        String keyManager;
 
         if (Util.tracingEnabled()) {
             TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
@@ -202,9 +200,8 @@ public class OAuthAuthenticator implements Authenticator {
                     }
 
                     signedJWTInfo = getSignedJwt(accessToken);
-                    keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                    String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                             .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
-                    synCtx.setProperty(APIMgtGatewayConstants.ELECTED_KEY_MANAGER, keyManager);
                     if (StringUtils.isNotEmpty(keyManager)){
                         if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                                 keyManagerList.contains(keyManager)) {

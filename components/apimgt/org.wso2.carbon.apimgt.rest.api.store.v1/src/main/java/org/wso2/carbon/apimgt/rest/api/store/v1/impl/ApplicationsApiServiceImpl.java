@@ -471,7 +471,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     apiConsumer.removeApplication(application, username);

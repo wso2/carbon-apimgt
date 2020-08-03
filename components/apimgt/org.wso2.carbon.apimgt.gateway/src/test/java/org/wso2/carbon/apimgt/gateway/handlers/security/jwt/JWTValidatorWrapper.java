@@ -15,10 +15,9 @@ public class JWTValidatorWrapper extends JWTValidator {
     private Cache gatewayKeyCache;
     private Cache gatewayJWTTokenCache;
     private APIManagerConfiguration apiManagerConfiguration;
-    public JWTValidatorWrapper(String apiLevelPolicy,
-                               APIKeyValidator apiKeyValidator) {
+    public JWTValidatorWrapper(APIKeyValidator apiKeyValidator) {
 
-        super(apiLevelPolicy, apiKeyValidator);
+        super(apiKeyValidator);
     }
 
     public JWTValidatorWrapper(String apiLevelPolicy, boolean isGatewayTokenCacheEnabled,

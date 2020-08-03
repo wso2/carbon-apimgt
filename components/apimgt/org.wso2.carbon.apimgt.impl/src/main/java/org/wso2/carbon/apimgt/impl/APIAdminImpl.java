@@ -17,6 +17,11 @@
 */
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -423,51 +428,71 @@ public class APIAdminImpl implements APIAdmin {
             }
         }
     }
-    private KeyManagerConfigurationDTO decryptKeyManagerConfigurationValues(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+
+    private KeyManagerConfigurationDTO decryptKeyManagerConfigurationValues(
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
 
-        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
-                .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
-        if (keyManagerConnectorConfiguration != null) {
-            Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
-            for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration
-                    .getConnectionConfigurations()) {
-                if (configurationDto.isMask()) {
-                    Object value = additionalProperties.get(configurationDto.getName());
-                    if (value != null){
-                        additionalProperties.replace(configurationDto.getName(),decryptValue(value));
-                    }
-                }
+        Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
+        for (Map.Entry<String, Object> entry : additionalProperties.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value != null) {
+                additionalProperties.replace(key, decryptValue(value));
             }
         }
         return keyManagerConfigurationDTO;
     }
 
     private Object decryptValue(Object value) throws APIManagementException {
+
+        if (value instanceof String) {
+            return getDecryptedValue((String) value);
+        } else if (value instanceof List) {
+            List valueList = (List) value;
+            List decryptedValues = new ArrayList<>();
+            for (Object s : valueList) {
+                decryptedValues.add(decryptValue(s));
+            }
+            return decryptedValues;
+        } else if (value instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) value;
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String key = entry.getKey();
+                Object entryValue = entry.getValue();
+                map.replace(key, decryptValue(entryValue));
+            }
+            return map;
+        }
+        return value;
+    }
+
+    private String getDecryptedValue(String value) throws APIManagementException {
+
         try {
-            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-            if (value instanceof String) {
-                return new String(cryptoUtil.decrypt(((String) value).getBytes()));
-            } else if (value instanceof List) {
-                List valueList = (List) value;
-                List decryptedValues = new ArrayList<>();
-                for (Object s : valueList) {
-                    decryptedValues.add(decryptValue(s));
+            JsonElement encryptedJsonValue = new JsonParser().parse(value);
+            if (encryptedJsonValue instanceof JsonObject) {
+                JsonObject jsonObject = (JsonObject) encryptedJsonValue;
+                JsonPrimitive encryptedValue = jsonObject.getAsJsonPrimitive(APIConstants.ENCRYPTED_VALUE);
+                if (encryptedValue.isBoolean()) {
+                    JsonPrimitive valueElement = jsonObject.getAsJsonPrimitive(APIConstants.VALUE);
+                    if (encryptedValue.getAsBoolean()) {
+                        if (valueElement.isString()) {
+                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                            return new String(cryptoUtil.decrypt(valueElement.getAsString().getBytes()));
+                        }
+                    }
                 }
-                return decryptedValues;
-            } else if (value instanceof Map) {
-                Map<String, Object> map = (Map<String, Object>) value;
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    String key = entry.getKey();
-                    Object entryValue = entry.getValue();
-                    map.replace(key, decryptValue(entryValue));
-                }
-                return map;
             }
         } catch (CryptoException e) {
-            throw new APIManagementException("Error while encrypting values", e);
+            throw new APIManagementException("Error while Decrypting value", e);
+        } catch (JsonParseException e) {
+            // check Element is a json element
+            if (log.isDebugEnabled()) {
+                log.debug("Error while parsing element " + value, e);
+            }
         }
-        return null;
+        return value;
     }
 
     @Override
@@ -723,7 +748,8 @@ public class APIAdminImpl implements APIAdmin {
         try {
             CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
             if (value instanceof String) {
-                return new String(cryptoUtil.encrypt(((String) value).getBytes()));
+                String encryptedValue = new String(cryptoUtil.encrypt(((String) value).getBytes()));
+                return getEncryptedValue(encryptedValue);
             } else if (value instanceof List) {
                 List valueList = (List) value;
                 List encrpytedList = new ArrayList<>();
@@ -745,6 +771,15 @@ public class APIAdminImpl implements APIAdmin {
         }
         return null;
     }
+
+    private String getEncryptedValue(String value) {
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(APIConstants.ENCRYPTED_VALUE, true);
+        jsonObject.put(APIConstants.VALUE, value);
+        return jsonObject.toJSONString();
+    }
+
     private void maskValues(KeyManagerConfigurationDTO keyManagerConfigurationDTO){
         KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
                 .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
