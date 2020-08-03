@@ -1256,7 +1256,8 @@ public class APIConsumerImplTest {
         Mockito.when(apiMgtDAO.isMappingExistsforConsumerKey(Mockito.anyString(),Mockito.anyString())).thenReturn(true, false);
         Mockito.when(keyManager.mapOAuthApplication((OAuthAppRequest) Mockito.any())).thenReturn(oAuthApplicationInfo);
         Mockito.doNothing().when(apiMgtDAO).createApplicationKeyTypeMappingForManualClients(Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),Mockito.anyString());
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString());
         KeyManagerConfigurationDTO keyManagerConfigurationsDto = new KeyManagerConfigurationDTO();
         Mockito.when(apiMgtDAO.isKeyManagerConfigurationExistByName( "default","carbon.super"))
                 .thenReturn(true);
@@ -1273,7 +1274,7 @@ public class APIConsumerImplTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("is used for another Application"));
         }
-        Assert.assertEquals(6, apiConsumer.mapExistingOAuthClient("", "admin", "1",
+        Assert.assertEquals(7, apiConsumer.mapExistingOAuthClient("", "admin", "1",
                 "app1", "refresh", "DEFAULT", "default").size());
     }
 

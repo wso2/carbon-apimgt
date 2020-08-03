@@ -204,6 +204,5 @@ public class APIMgtGatewayConstants {
     public static final String SPAN_ENDPOINT = "span.endpoint";
 
     public static final String TEST_KEY = "testkey";
-    public static final String ELECTED_KEY_MANAGER = "elected_key_manager";
 }
 

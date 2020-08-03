@@ -575,7 +575,7 @@ public final class APIConstants {
 
     public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
     public static final String ENCRYPTED_VALUE = "encrypted";
-    public static final Object VALUE = "value";
+    public static final String VALUE = "value";
 
     public static String DELEM_COLON = ":";
 

@@ -17,13 +17,16 @@
 */
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.wso2.carbon.apimgt.api.APIAdmin;
@@ -461,27 +464,33 @@ public class APIAdminImpl implements APIAdmin {
             }
             return map;
         }
-        return null;
+        return value;
     }
 
     private String getDecryptedValue(String value) throws APIManagementException {
 
         try {
-            JSONObject jsonObject = (JSONObject) new JSONParser().parse(value);
-            Object encryptedValue = jsonObject.get(APIConstants.ENCRYPTED_VALUE);
-            if (encryptedValue instanceof Boolean) {
-                Object valueElement = jsonObject.get(APIConstants.VALUE);
-                if ((Boolean) encryptedValue) {
-                    if (valueElement instanceof String) {
-                        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                        return new String(cryptoUtil.decrypt(((String) valueElement).getBytes()));
+            JsonElement encryptedJsonValue = new JsonParser().parse(value);
+            if (encryptedJsonValue instanceof JsonObject) {
+                JsonObject jsonObject = (JsonObject) encryptedJsonValue;
+                JsonPrimitive encryptedValue = jsonObject.getAsJsonPrimitive(APIConstants.ENCRYPTED_VALUE);
+                if (encryptedValue.isBoolean()) {
+                    JsonPrimitive valueElement = jsonObject.getAsJsonPrimitive(APIConstants.VALUE);
+                    if (encryptedValue.getAsBoolean()) {
+                        if (valueElement.isString()) {
+                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                            return new String(cryptoUtil.decrypt(valueElement.getAsString().getBytes()));
+                        }
                     }
                 }
             }
-        } catch (ParseException e) {
-            log.error("Error while parsing value", e);
         } catch (CryptoException e) {
             throw new APIManagementException("Error while Decrypting value", e);
+        } catch (JsonParseException e) {
+            // check Element is a json element
+            if (log.isDebugEnabled()) {
+                log.debug("Error while parsing element " + value, e);
+            }
         }
         return value;
     }

@@ -2598,8 +2598,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         OAuthApplicationInfo oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
 
         //Do application mapping with consumerKey.
+        String keyMappingId = UUID.randomUUID().toString();
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId,
-                keyManagerName);
+                keyManagerName, keyMappingId);
         Object enableTokenGeneration =
                 keyManager.getKeyManagerConfiguration().getParameter(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
 
@@ -2629,6 +2630,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         keyDetails.put("consumerKey", oAuthApplication.getClientId());
         keyDetails.put("consumerSecret", oAuthApplication.getParameter("client_secret"));
         keyDetails.put("appDetails", oAuthApplication.getJsonString());
+        keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
 
         return keyDetails;
     }

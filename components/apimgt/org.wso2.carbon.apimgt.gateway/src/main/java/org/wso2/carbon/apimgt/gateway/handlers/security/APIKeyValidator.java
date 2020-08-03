@@ -17,7 +17,6 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import org.apache.axis2.Constants;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,20 +74,17 @@ public class APIKeyValidator {
 
     protected APIKeyDataStore dataStore;
 
-    private boolean gatewayKeyCacheEnabled = true;
+    private boolean gatewayKeyCacheEnabled;
 
-    private boolean isGatewayAPIResourceValidationEnabled = true;
+    private boolean isGatewayAPIResourceValidationEnabled;
 
     protected Log log = LogFactory.getLog(getClass());
 
     private ArrayList<URITemplate> uriTemplates = null;
 
-    public APIKeyValidator(AxisConfiguration axisConfig) {
-        //check the client type from config
-        String keyValidatorClientType = getKeyValidatorClientType();
-        if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
-            this.dataStore = new WSAPIKeyDataStore();
-        }
+    public APIKeyValidator() {
+
+        this.dataStore = new WSAPIKeyDataStore();
 
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
 

@@ -612,7 +612,7 @@ public class APIKeyValidatorTestCase {
         AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
         List<VerbInfoDTO> verbInfoDTOList = new ArrayList<>();
         verbInfoDTOList.add(verbInfoDTO);
-        return new APIKeyValidator(axisConfig) {
+        return new APIKeyValidator() {
             @Override
             protected String getKeyValidatorClientType() {
 
@@ -708,7 +708,7 @@ public class APIKeyValidatorTestCase {
 
         // Test for token cache is found in token cache
         AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
-        APIKeyValidator newApiKeyValidator = new APIKeyValidator(axisConfig) {
+        APIKeyValidator newApiKeyValidator = new APIKeyValidator() {
             @Override
             protected String getTenantDomain() {
 
@@ -769,7 +769,7 @@ public class APIKeyValidatorTestCase {
 
         AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
         Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn("carbon.super");
-        APIKeyValidator apiKeyValidator = new APIKeyValidator(axisConfig) {
+        APIKeyValidator apiKeyValidator = new APIKeyValidator() {
         };
 
         assertNotNull(apiKeyValidator.getApiManagerConfiguration());
@@ -780,7 +780,7 @@ public class APIKeyValidatorTestCase {
     public void testGetKeyValidatorClientType() {
 
         AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
-        APIKeyValidator apiKeyValidator = new APIKeyValidator(axisConfig) {
+        APIKeyValidator apiKeyValidator = new APIKeyValidator() {
         };
         apiKeyValidator.getKeyValidatorClientType();
 
@@ -793,7 +793,7 @@ public class APIKeyValidatorTestCase {
         WSAPIKeyDataStore wsDataStore = Mockito.mock(WSAPIKeyDataStore.class);
         PowerMockito.whenNew(WSAPIKeyDataStore.class).withNoArguments().thenReturn(wsDataStore);
 
-        APIKeyValidator wsKeyValidator = new APIKeyValidator(axisConfig) {
+        APIKeyValidator wsKeyValidator = new APIKeyValidator() {
             @Override
             protected String getKeyValidatorClientType() {
 
@@ -1163,7 +1163,7 @@ public class APIKeyValidatorTestCase {
             tokenCache, final Cache keyCache, final Cache resourceCache, final APIKeyDataStore apiKeyDataStore,
                                                final String tenantDomain) {
 
-        APIKeyValidator apiKeyValidator = new APIKeyValidator(axisConfig) {
+        APIKeyValidator apiKeyValidator = new APIKeyValidator() {
             @Override
             protected String getKeyValidatorClientType() {
 

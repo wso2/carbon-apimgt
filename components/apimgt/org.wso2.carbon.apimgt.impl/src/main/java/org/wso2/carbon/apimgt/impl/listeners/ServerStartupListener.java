@@ -19,21 +19,21 @@ package org.wso2.carbon.apimgt.impl.listeners;
 
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
-import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Class for performing operations on initial server startup
@@ -54,6 +54,9 @@ public class ServerStartupListener implements ServerStartupObserver {
             if (JavaUtils.isTrueExplicitly(enableKeyManagerRetrieval)) {
                 startConfigureKeyManagerConfigurations();
             }
+            Map<String, TokenIssuerDto> tokenIssuerDtoMap =
+                    apiManagerConfiguration.getJwtConfigurationDto().getTokenIssuerDtoMap();
+            tokenIssuerDtoMap.forEach((issuer, tokenIssuer) -> KeyManagerHolder.addGlobalJWTValidators(tokenIssuer));
         }
     }
 

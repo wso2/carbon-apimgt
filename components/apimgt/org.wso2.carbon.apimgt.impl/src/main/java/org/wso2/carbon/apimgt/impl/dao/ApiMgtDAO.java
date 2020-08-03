@@ -47,7 +47,6 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -137,7 +136,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -3052,10 +3050,12 @@ public class ApiMgtDAO {
      * @param applicationName apim application name.
      * @param userName        apim user name
      * @param clientId        this is the consumner key.
+     * @param keyMappingId
      * @throws APIManagementException
      */
     public void createApplicationKeyTypeMappingForManualClients(String keyType, String applicationName, String userName,
-                                                                String clientId,String keyManagerName) throws APIManagementException {
+                                                                String clientId, String keyManagerName,
+                                                                String keyMappingId) throws APIManagementException {
         String consumerKey = null;
         if (clientId != null) {
             consumerKey = clientId;
@@ -3077,8 +3077,9 @@ public class ApiMgtDAO {
                 ps.setString(3, keyType);
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
-                ps.setString(5, "MAPPED");
-                ps.setString(6,keyManagerName);
+                ps.setString(5, APIConstants.OAuthAppMode.MAPPED.name());
+                ps.setString(6, keyManagerName);
+                ps.setString(7, keyMappingId);
                 ps.execute();
                 connection.commit();
 
