@@ -355,6 +355,9 @@
         <JWTExpiryTime>{{apim.jwt.expiry_time}}</JWTExpiryTime>
        {% endif %}
      <EnableKeyManagerConfigurationRetriever>{{apim.key_manager.enable_retriever}}</EnableKeyManagerConfigurationRetriever>
+      {% if apim.key_manager.enable_provisioned_app_validation is defined %}
+      <EnableProvisionedAppValidation>{{apim.key_manager.enable_provisioned_app_validation}}</EnableProvisionedAppValidation>
+      {% endif %}
     </APIKeyValidator>
 
 

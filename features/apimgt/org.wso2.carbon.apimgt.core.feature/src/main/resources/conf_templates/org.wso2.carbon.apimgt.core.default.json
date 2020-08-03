@@ -47,6 +47,7 @@
   "apim.key_manager.pool.max_idle": "100",
   "apim.key_manager.pool.init_idle_capacity": "50",
   "apim.key_manager.key_validation_handler_impl": "org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler",
+  "apim.key_manager.enable_provisioned_app_validation": true,
   "apim.monetization.publish_duration": "1d",
   "apim.monetization.granularity": "days",
   "apim.monetization.monetization_impl": "org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl",

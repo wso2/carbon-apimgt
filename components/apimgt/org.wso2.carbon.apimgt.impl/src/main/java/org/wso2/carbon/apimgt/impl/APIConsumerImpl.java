@@ -2570,11 +2570,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (StringUtils.isNotEmpty(keyManagerName) &&
                 !apiMgtDAO.isKeyManagerConfigurationExistByName(keyManagerName, tenantDomain)) {
             throw new APIManagementException(
-                    "Key Manager " + keyManagerName + "Couldn't find in tenant " + tenantDomain + ".",ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                    "Key Manager " + keyManagerName + "Couldn't find in tenant " + tenantDomain + ".",
+                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
-                this.tenantDomain,keyManagerName);
+                        this.tenantDomain, keyManagerName);
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
         if (keyManager == null) {
@@ -2591,11 +2592,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         log.debug("Client ID not mapped previously with another application.");
 
         //createApplication on oAuthorization server.
-
-
-
-
-        OAuthApplicationInfo oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
+        OAuthApplicationInfo oAuthApplication;
+        String oauthAppValidation = getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
+        if (StringUtils.isNotEmpty(oauthAppValidation)) {
+            if (Boolean.parseBoolean(oauthAppValidation)) {
+                oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
+            } else {
+                oAuthApplication = oauthAppRequest.getOAuthApplicationInfo();
+            }
+        } else {
+            oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
+        }
 
         //Do application mapping with consumerKey.
         String keyMappingId = UUID.randomUUID().toString();
@@ -2614,7 +2622,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             tokenInfo = new AccessTokenInfo();
             tokenInfo.setAccessToken("");
             tokenInfo.setValidityPeriod(0L);
-            String[] noScopes = new String[] {"N/A"};
+            String[] noScopes = new String[]{"N/A"};
             tokenInfo.setScope(noScopes);
             oAuthApplication.addParameter("tokenScope", Arrays.toString(noScopes));
         }
