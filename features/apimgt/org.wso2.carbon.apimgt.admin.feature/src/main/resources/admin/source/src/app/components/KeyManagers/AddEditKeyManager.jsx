@@ -848,68 +848,69 @@ function AddEditKeyManager(props) {
                                     />
                                 </Box>
                             </Grid>
+
+                            <Grid item xs={12}>
+                                <Box marginTop={2} marginBottom={2}>
+                                    <hr className={classes.hr} />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} md={12} lg={3}>
+                                <Typography color='inherit' variant='subtitle2' component='div'>
+                                    <FormattedMessage
+                                        id='KeyManagers.AddEditKeyManager.claim.uris'
+                                        defaultMessage='Claim URIs'
+                                    />
+                                </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='KeyManagers.AddEditKeyManager.claim.uris.description'
+                                        defaultMessage='Provide claim URIs for consumer key and scopes.'
+                                    />
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} md={12} lg={9}>
+                                <Box component='div' m={1}>
+                                    <TextField
+                                        margin='dense'
+                                        name='consumerKeyClaim'
+                                        label={(
+                                            <FormattedMessage
+                                                id='Admin.KeyManager.label.ConsumerKey.Claim'
+                                                defaultMessage='Consumer Key Claim URI'
+                                            />
+                                        )}
+                                        fullWidth
+                                        variant='outlined'
+                                        value={consumerKeyClaim}
+                                        onChange={onChange}
+                                        helperText={intl.formatMessage({
+                                            id: 'KeyManagers.AddEditKeyManager.form.consumerKeyClaim.help',
+                                            defaultMessage: 'Provide consumer key claim URIs.',
+                                        })}
+                                    />
+                                    <TextField
+                                        margin='dense'
+                                        name='scopesClaim'
+                                        label={(
+                                            <FormattedMessage
+                                                id='Admin.KeyManager.label.Scopes.Claim'
+                                                defaultMessage='Scopes Claim URI'
+                                            />
+                                        )}
+
+                                        fullWidth
+                                        variant='outlined'
+                                        value={scopesClaim}
+                                        onChange={onChange}
+                                        helperText={intl.formatMessage({
+                                            id: 'KeyManagers.AddEditKeyManager.form.scopesClaim.help',
+                                            defaultMessage: 'Provide scope claim URI.',
+                                        })}
+                                    />
+                                </Box>
+                            </Grid>
                         </>
                     )}
-                    <Grid item xs={12}>
-                        <Box marginTop={2} marginBottom={2}>
-                            <hr className={classes.hr} />
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={3}>
-                        <Typography color='inherit' variant='subtitle2' component='div'>
-                            <FormattedMessage
-                                id='KeyManagers.AddEditKeyManager.claim.uris'
-                                defaultMessage='Claim URIs'
-                            />
-                        </Typography>
-                        <Typography color='inherit' variant='caption' component='p'>
-                            <FormattedMessage
-                                id='KeyManagers.AddEditKeyManager.claim.uris.description'
-                                defaultMessage='Provide claim URIs for consumer key and scopes.'
-                            />
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={9}>
-                        <Box component='div' m={1}>
-                            <TextField
-                                margin='dense'
-                                name='consumerKeyClaim'
-                                label={(
-                                    <FormattedMessage
-                                        id='Admin.KeyManager.label.ConsumerKey.Claim'
-                                        defaultMessage='Consumer Key Claim URI'
-                                    />
-                                )}
-                                fullWidth
-                                variant='outlined'
-                                value={consumerKeyClaim}
-                                onChange={onChange}
-                                helperText={intl.formatMessage({
-                                    id: 'KeyManagers.AddEditKeyManager.form.consumerKeyClaim.help',
-                                    defaultMessage: 'Provide consumer key claim URIs.',
-                                })}
-                            />
-                            <TextField
-                                margin='dense'
-                                name='scopesClaim'
-                                label={(
-                                    <FormattedMessage
-                                        id='Admin.KeyManager.label.Scopes.Claim'
-                                        defaultMessage='Scopes Claim URI'
-                                    />
-                                )}
-
-                                fullWidth
-                                variant='outlined'
-                                value={scopesClaim}
-                                onChange={onChange}
-                                helperText={intl.formatMessage({
-                                    id: 'KeyManagers.AddEditKeyManager.form.scopesClaim.help',
-                                    defaultMessage: 'Provide scope claim URI.',
-                                })}
-                            />
-                        </Box>
-                    </Grid>
                     <Grid item xs={12}>
                         <Box marginTop={2} marginBottom={2}>
                             <hr className={classes.hr} />
