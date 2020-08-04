@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
+import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.Collections;
@@ -130,7 +131,7 @@ public class KeyManagerHolder {
 
     public static Map<String, KeyManagerDto> getTenantKeyManagers(String tenantDomain) {
 
-        TenantKeyManagerDto tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);
+        TenantKeyManagerDto tenantKeyManagerDto = getTenantKeyManagerDto(tenantDomain);
         if (tenantKeyManagerDto != null) {
             return tenantKeyManagerDto.getKeyManagerMap();
         } else {
@@ -233,15 +234,15 @@ public class KeyManagerHolder {
 
     public static KeyManager getKeyManagerInstance(String tenantDomain, String keyManagerName) {
 
-        TenantKeyManagerDto tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);
-        if (tenantKeyManagerDto == null) {
-            return null;
+        TenantKeyManagerDto tenantKeyManagerDto = getTenantKeyManagerDto(tenantDomain);
+        if (tenantKeyManagerDto != null) {
+            KeyManagerDto keyManagerDto = tenantKeyManagerDto.getKeyManagerByName(keyManagerName);
+            if (keyManagerDto == null) {
+                return null;
+            }
+            return keyManagerDto.getKeyManager();
         }
-        KeyManagerDto keyManagerDto = tenantKeyManagerDto.getKeyManagerByName(keyManagerName);
-        if (keyManagerDto == null) {
-            return null;
-        }
-        return keyManagerDto.getKeyManager();
+        return null;
     }
 
     public static KeyManagerDto getKeyManagerByIssuer(String tenantDomain, String issuer) {
@@ -249,13 +250,26 @@ public class KeyManagerHolder {
         if (globalJWTValidatorMap.containsKey(issuer)) {
             return globalJWTValidatorMap.get(issuer);
         }
-        TenantKeyManagerDto tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);
+        TenantKeyManagerDto tenantKeyManagerDto = getTenantKeyManagerDto(tenantDomain);
         if (tenantKeyManagerDto != null) {
             return tenantKeyManagerDto.getKeyManagerDtoByIssuer(issuer);
         }
         return null;
     }
 
+    private static TenantKeyManagerDto getTenantKeyManagerDto(String tenantDomain) {
+
+        TenantKeyManagerDto tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);
+        if (tenantKeyManagerDto == null) {
+            synchronized ("KeyManagerHolder".concat(tenantDomain)) {
+                if (tenantKeyManagerDto == null) {
+                    new KeyManagerConfigurationDataRetriever(tenantDomain).run();
+                    tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);
+                }
+            }
+        }
+        return tenantKeyManagerDto;
+    }
     public static void addGlobalJWTValidators(TokenIssuerDto tokenIssuerDto) {
 
         KeyManagerDto keyManagerDto = new KeyManagerDto();
