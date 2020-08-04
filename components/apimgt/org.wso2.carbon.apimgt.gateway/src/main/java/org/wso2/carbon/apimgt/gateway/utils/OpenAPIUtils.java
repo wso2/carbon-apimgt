@@ -72,7 +72,7 @@ public class OpenAPIUtils {
      * @param synCtx  The message containing resource request
      * @return the scopes
      */
-    public static String getScopesOfResource(OpenAPI openAPI, MessageContext synCtx) {
+    public static List<String> getScopesOfResource(OpenAPI openAPI, MessageContext synCtx) {
         Map<String, Object> vendorExtensions = getPathItemExtensions(synCtx, openAPI);
         if (vendorExtensions != null) {
             String resourceScope = (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
@@ -82,12 +82,12 @@ public class OpenAPIUtils {
                 if (securityScopes == null || securityScopes.isEmpty()) {
                     return null;
                 } else {
-                    // We support only one scope for gateway authentication. Hence using the first scope from the list
-                    // TODO:// add support multiple scopes per resource
-                    return securityScopes.get(0);
+                    return securityScopes;
                 }
             } else {
-                return resourceScope;
+                List<String> scopeList = new ArrayList<>();
+                scopeList.add(resourceScope);
+                return scopeList;
             }
         }
         return null;
