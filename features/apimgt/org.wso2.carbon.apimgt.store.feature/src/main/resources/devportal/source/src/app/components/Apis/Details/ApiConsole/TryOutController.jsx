@@ -419,6 +419,7 @@ function TryOutController(props) {
         }
     }
     const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
+    const enableStore = api.enableStore && api.enableStore === 'true';
 
     let tokenValue = '';
     if (securitySchemeType === 'API-KEY') {
@@ -515,7 +516,7 @@ function TryOutController(props) {
                                 onChange={handleChanges}
                                 row
                             >
-                                {isOAuthEnabled && (
+                                {isOAuthEnabled && enableStore && (
                                     <FormControlLabel
                                         value='OAUTH'
                                         control={<Radio />}
@@ -527,7 +528,7 @@ function TryOutController(props) {
                                         )}
                                     />
                                 )}
-                                {isApiKeyEnabled && (
+                                {isApiKeyEnabled && enableStore && (
                                     <FormControlLabel
                                         value='API-KEY'
                                         control={<Radio />}
@@ -539,7 +540,7 @@ function TryOutController(props) {
                                         )}
                                     />
                                 )}
-                                {isBasicAuthEnabled && (
+                                {isBasicAuthEnabled && enableStore && (
                                     <FormControlLabel
                                         value='BASIC'
                                         control={<Radio />}
