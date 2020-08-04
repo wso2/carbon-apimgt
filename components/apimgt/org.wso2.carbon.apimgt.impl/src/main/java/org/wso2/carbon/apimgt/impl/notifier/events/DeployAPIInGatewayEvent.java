@@ -7,12 +7,12 @@ public class DeployAPIInGatewayEvent extends Event {
     private String apiId;
     private Set<String> gatewayLabels;
 
-    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, int tenantId, String apiId,
+    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenanrDomain, String apiId,
                                    Set<String> gatewayLabels) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
-        this.tenantId = tenantId;
+        this.tenantDomain = tenanrDomain;
 
         this.apiId = apiId;
         this.gatewayLabels = gatewayLabels;
