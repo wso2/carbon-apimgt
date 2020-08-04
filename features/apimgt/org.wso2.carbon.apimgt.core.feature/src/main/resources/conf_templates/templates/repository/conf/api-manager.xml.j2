@@ -1197,7 +1197,7 @@
                     <ReceiverUrlGroup>tcp://${carbon.local.ip}:${receiver.url.port}</ReceiverUrlGroup>
                     <AuthUrlGroup>ssl://${carbon.local.ip}:${auth.url.port}</AuthUrlGroup>
                 {% endif %}
-            {% endif %}}
+            {% endif %}
         </EventPublisherConfiguration>
          <EventReceiverConfiguration>
              <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
