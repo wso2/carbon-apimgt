@@ -123,8 +123,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Object} Deep copy of an object
  */
 function copyAPIConfig(api) {
-    const keyManagers = api.apiType === 'APIProduct' ? ['all'] : [...api.keyManagers];
-    return {
+    const apiConfigJson = {
         id: api.id,
         name: api.name,
         description: api.description,
@@ -150,8 +149,11 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
-        keyManagers,
     };
+    if (api.apiType !== 'APIProduct') {
+        apiConfigJson.keyManagers = [...api.keyManagers];
+    }
+    return apiConfigJson;
 }
 /**
  * This component handles the basic configurations UI in the API details page
