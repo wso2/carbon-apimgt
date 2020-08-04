@@ -92,7 +92,7 @@ class ApiConsole extends React.Component {
             keys: [],
             productionApiKey: '',
             sandboxApiKey: '',
-            selectedKeyManager: 'Default',
+            selectedKeyManager: 'Resident Key Manager',
         };
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.updateSwagger = this.updateSwagger.bind(this);
