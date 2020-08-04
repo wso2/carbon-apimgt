@@ -30,7 +30,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import MUIDataTable from 'mui-datatables';
@@ -366,25 +365,23 @@ function ListLabels() {
                 pageStyle='small'
             >
                 <Card className={classes.root}>
-                    <CardActionArea>
-                        <CardContent>
-                            <Typography gutterBottom variant='h5' component='h2'>
-                                <FormattedMessage
-                                    id='Workflow.SubscriptionUpdate.List.empty.title.subscriptionUpdate'
-                                    defaultMessage='Subscription Update'
-                                />
-                            </Typography>
-                            <Typography variant='body2' color='textSecondary' component='p'>
-                                <FormattedMessage
-                                    id='Workflow.SubscriptionUpdate.List.empty.content.subscriptionUpdates'
-                                    defaultMessage={'There are no workflow pending requests for subscription updates.'
-                                    + 'It is possible to approve or reject workflow pending requests of subscription '
-                                    + ' update. Workflow Approval Executor needs to be enabled to approve '
-                                    + 'or reject the requests. '}
-                                />
-                            </Typography>
-                        </CardContent>
-                    </CardActionArea>
+                    <CardContent>
+                        <Typography gutterBottom variant='h5' component='h2'>
+                            <FormattedMessage
+                                id='Workflow.SubscriptionUpdate.List.empty.title.subscriptionUpdate'
+                                defaultMessage='Subscription Update'
+                            />
+                        </Typography>
+                        <Typography variant='body2' color='textSecondary' component='p'>
+                            <FormattedMessage
+                                id='Workflow.SubscriptionUpdate.List.empty.content.subscriptionUpdates'
+                                defaultMessage={'There are no workflow pending requests for subscription updates.'
+                                + 'It is possible to approve or reject workflow pending requests of subscription '
+                                + ' update. Workflow Approval Executor needs to be enabled to approve '
+                                + 'or reject the requests. '}
+                            />
+                        </Typography>
+                    </CardContent>
                     <CardActions>
                         {addButtonOverride || (
                             <span updateList={fetchData} {...addButtonProps} />

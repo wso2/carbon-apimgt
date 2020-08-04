@@ -17,19 +17,28 @@
  */
 
 import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import cloneDeep from 'lodash.clonedeep';
-import { injectIntl } from 'react-intl';
+import { injectIntl, FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import InlineMessage from 'AppComponents/Shared/InlineMessage'
+import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import ButtonPanel from './ButtonPanel';
 
 const useStyles = makeStyles((theme) => ({
     appCreateFormWrapper: {
         paddingLeft: theme.spacing(2),
+    },
+    warningIcon: {
+        color: '#ff9a00',
+        fontSize: 43,
+        marginRight: 10,
     },
 }));
 
@@ -51,9 +60,11 @@ const createAppStep = (props) => {
     const [isNameValid, setIsNameValid] = useState(true);
     const [allAppAttributes, setAllAppAttributes] = useState(null);
     const [notFound, setNotFound] = useState(false);
+    const [hasValidKM, setHasValidKM] = useState(null);
     const {
         currentStep, setCreatedApp, incrementStep, intl, setStepStatus, stepStatuses,
     } = props;
+    const { api: apiObject } = useContext(ApiContext);
 
     const validateName = (value) => {
         if (!value || value.trim() === '') {
@@ -173,9 +184,11 @@ const createAppStep = (props) => {
         const api = new API();
         const promiseTiers = api.getAllTiers('application');
         const promisedAttributes = api.getAllApplicationAttributes();
-        Promise.all([promiseTiers, promisedAttributes])
+        const promisedKeyManagers = api.getKeyManagers();
+
+        Promise.all([promiseTiers, promisedAttributes, promisedKeyManagers])
             .then((response) => {
-                const [tierResponse, allAttributes] = response;
+                const [tierResponse, allAttributes, keyManagers] = response;
                 const throttlingPolicyListLocal = tierResponse.body.list.map((item) => item.name);
                 const newRequest = { ...applicationRequest };
                 if (throttlingPolicyListLocal.length > 0) {
@@ -186,6 +199,16 @@ const createAppStep = (props) => {
                 if (allAttributes.length > 0) {
                     newRequest.attributes = allAppAttr.filter((item) => !item.hidden);
                 }
+                // Selecting the resident key manager
+                const responseKeyManagerList = [];
+                keyManagers.body.list.map((item) => responseKeyManagerList.push(item));
+
+                let hasValidKM;
+                if (responseKeyManagerList.length > 0) {
+                    const responseKeyManagerList_default = responseKeyManagerList.filter(x => x.name === 'Resident Key Manager' && x.enabled);
+                    hasValidKM = responseKeyManagerList_default.length !== 0;
+                }
+                setHasValidKM(hasValidKM);
                 setApplicationRequest(newRequest);
                 setThrottlingPolicyList(throttlingPolicyListLocal);
                 setAllAppAttributes(allAppAttr);
@@ -202,6 +225,26 @@ const createAppStep = (props) => {
     }, []);
 
     const classes = useStyles();
+    if (!hasValidKM) {
+        return (
+            <Box mb={1} ml={4}>
+                <InlineMessage type='warn'>
+                        <FormattedMessage
+                            id='Apis.Details.Credentials.Wizard.CreateAppStep.default.km.msg'
+                            defaultMessage={'Wizard is only accessible via the Resident Key Manager.'
+                                + 'But the Resident Key Manager is disabled at the moment.'}
+                        />
+                </InlineMessage>
+                <Box mt={2}>
+                    <Link to={`/apis/${apiObject.id}/credentials`}>
+                        <Button variant="contained"><FormattedMessage
+                            id='Apis.Details.Credentials.Wizard.CreateAppStep.cancel'
+                            defaultMessage='Cancel'
+                        /></Button>
+                    </Link>
+                </Box>
+            </Box>);
+    }
 
     return (
         <div className={classes.appCreateFormWrapper}>

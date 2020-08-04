@@ -62,6 +62,8 @@
   "Apis.Details.Credentials.SubscriptionTableRow.sandbox.keys": "SANDBOX KEYS",
   "Apis.Details.Credentials.SubscriptionTableRow.unsubscribe": "UNSUBSCRIBE",
   "Apis.Details.Credentials.Wizard.CreateAppStep.application.name.is.required": "Application name is required",
+  "Apis.Details.Credentials.Wizard.CreateAppStep.cancel": "Cancel",
+  "Apis.Details.Credentials.Wizard.CreateAppStep.default.km.msg": "Wizard is only accessible via the Resident Key Manager.But the Resident Key Manager is disabled at the moment.",
   "Apis.Details.Credentials.Wizard.CreateAppStep.error.while.creating.the.application": "Error while creating the application",
   "Apis.Details.Credentials.Wizard.GenerateAccessTokenStep": "Generate Access Token for {keyType} environment",
   "Apis.Details.Credentials.Wizard.GenerateKeysStep.config.km.name": "Key Manager",
