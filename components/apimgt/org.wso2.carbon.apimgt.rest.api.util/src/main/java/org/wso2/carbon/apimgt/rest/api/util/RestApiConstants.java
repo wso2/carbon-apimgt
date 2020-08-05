@@ -214,6 +214,7 @@ public final class RestApiConstants {
 
     //Constants for application sortBy
     public static final String SORT_BY_NAME = "name";
+    public static final String SORT_BY_OWNER = "owner";
     public static final String SORT_BY_THROTTLING_TIER = "throttlingTier";
     public static final String SORT_BY_STATUS = "status";
 

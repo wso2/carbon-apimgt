@@ -422,6 +422,7 @@ public final class APIConstants {
     //table columns for AM_APPLICATION
     public static final String APPLICATION_ID = "APPLICATION_ID";
     public static final String APPLICATION_NAME = "NAME";
+    public static final String APPLICATION_CREATED_BY = "CREATED_BY";
     public static final String APPLICATION_SUBSCRIBER_ID = "SUBSCRIBER_ID";
     public static final String APPLICATION_TIER = "APPLICATION_TIER";
     public static final String APPLICATION_STATUS = "APPLICATION_STATUS";
