@@ -40,7 +40,7 @@ public class GatewayArtifactsMgtDAOTest {
     String version = "1.0.0";
     String label = "Production and Sandbox";
     ByteArrayInputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
-    private static final long WAIT_TIME = 3000;
+    private static final long WAIT_TIME = 10000;
 
     @Before
     public void setUp() throws Exception {
