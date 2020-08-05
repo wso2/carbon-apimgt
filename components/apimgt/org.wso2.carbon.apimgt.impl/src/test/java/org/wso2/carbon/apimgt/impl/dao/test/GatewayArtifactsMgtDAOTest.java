@@ -40,7 +40,6 @@ public class GatewayArtifactsMgtDAOTest {
     String version = "1.0.0";
     String label = "Production and Sandbox";
     ByteArrayInputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
-    private static final long WAIT_TIME = 10000;
 
     @Before
     public void setUp() throws Exception {
@@ -119,37 +118,32 @@ public class GatewayArtifactsMgtDAOTest {
     }
 
     @Test
-    public void testGetGatewayPublishedAPIArtifacts() throws APIManagementException, InterruptedException {
-        Thread.sleep(WAIT_TIME);
+    public void testGetGatewayPublishedAPIArtifacts() throws APIManagementException {
         String gatewayPublishedAPIArtifacts = gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiUUID, label,
                         APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
         Assert.assertNotNull(gatewayPublishedAPIArtifacts);
     }
 
     @Test
-    public void testGetAllGatewayPublishedAPIArtifacts() throws APIManagementException, InterruptedException {
-        Thread.sleep(WAIT_TIME);
+    public void testGetAllGatewayPublishedAPIArtifacts() throws APIManagementException {
         List<String> gatewayRuntimeArtifactsArray = gatewayArtifactsMgtDAO.getAllGatewayPublishedAPIArtifacts(label);
         Assert.assertTrue(gatewayRuntimeArtifactsArray.size() > 0);
     }
 
     @Test
-    public void testIsAPIPublishedInAnyGateway() throws APIManagementException, InterruptedException {
-        Thread.sleep(WAIT_TIME);
+    public void testIsAPIPublishedInAnyGateway() throws APIManagementException {
         boolean isApiPublished = gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiUUID);
         Assert.assertTrue(isApiPublished);
     }
 
     @Test
-    public void testIsAPIArtifactExists() throws APIManagementException, InterruptedException {
-        Thread.sleep(WAIT_TIME);
+    public void testIsAPIArtifactExists() throws APIManagementException {
         boolean isApiArtifactsExists = gatewayArtifactsMgtDAO.isAPIArtifactExists(apiUUID, label);
         Assert.assertTrue(isApiArtifactsExists);
     }
 
     @Test
-    public void testIsAPIDetailExists() throws APIManagementException, InterruptedException {
-        Thread.sleep(WAIT_TIME);
+    public void testIsAPIDetailExists() throws APIManagementException {
         boolean isApiDetailsExists = gatewayArtifactsMgtDAO.isAPIDetailsExists(apiUUID);
         Assert.assertTrue(isApiDetailsExists);
     }
