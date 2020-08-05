@@ -36,6 +36,7 @@ import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -54,10 +55,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -91,6 +89,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.security.KeyStore;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -141,60 +140,6 @@ public class APIUtilTest {
         providerName = APIUtil.getAPIProviderFromRESTAPI(restAPI, "test.com");
         Assert.assertEquals(providerName, "user@test.com");
 
-    }
-
-    @Test
-    public void testGetHttpClient() throws Exception {
-        Log log = Mockito.mock(Log.class);
-        PowerMockito.mockStatic(LogFactory.class);
-        Mockito.when(LogFactory.getLog(Mockito.any(Class.class))).thenReturn(log);
-
-        SSLSocketFactory socketFactory = Mockito.mock(SSLSocketFactory.class);
-        PowerMockito.mockStatic(SSLSocketFactory.class);
-        Mockito.when(SSLSocketFactory.getSocketFactory()).thenReturn(socketFactory);
-
-        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
-        ServiceReferenceHolderMockCreator.initContextService();
-
-        HttpClient client = APIUtil.getHttpClient(3244, "http");
-
-        Assert.assertNotNull(client);
-        Scheme scheme = client.getConnectionManager().getSchemeRegistry().get("http");
-        Assert.assertEquals(3244, scheme.getDefaultPort());
-
-        client = APIUtil.getHttpClient(3244, "https");
-        Assert.assertNotNull(client);
-        scheme = client.getConnectionManager().getSchemeRegistry().get("https");
-        Assert.assertEquals(3244, scheme.getDefaultPort());
-
-        client = APIUtil.getHttpClient(-1, "http");
-        Assert.assertNotNull(client);
-        scheme = client.getConnectionManager().getSchemeRegistry().get("http");
-        Assert.assertEquals(80, scheme.getDefaultPort());
-
-        client = APIUtil.getHttpClient(-1, "https");
-        Assert.assertNotNull(client);
-        scheme = client.getConnectionManager().getSchemeRegistry().get("https");
-        Assert.assertEquals(443, scheme.getDefaultPort());
-    }
-
-    @Test
-    public void testGetHttpClientIgnoreHostNameVerify() throws Exception {
-        Log log = Mockito.mock(Log.class);
-        PowerMockito.mockStatic(LogFactory.class);
-        Mockito.when(LogFactory.getLog(Mockito.any(Class.class))).thenReturn(log);
-
-        SSLSocketFactory socketFactory = Mockito.mock(SSLSocketFactory.class);
-        PowerMockito.mockStatic(SSLSocketFactory.class);
-        Mockito.when(SSLSocketFactory.getSocketFactory()).thenReturn(socketFactory);
-
-        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
-        ServiceReferenceHolderMockCreator.initContextService();
-
-        System.setProperty("httpclient.hostnameVerifier", "DefaultAndLocalhost");
-        HttpClient client = APIUtil.getHttpClient(3244, "https");
-
-        Assert.assertNotNull(client);
     }
 
     @Test

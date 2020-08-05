@@ -53,20 +53,20 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -299,6 +299,7 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.net.ssl.SSLContext;
 import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.X509Certificate;
 import javax.xml.XMLConstants;
@@ -1016,7 +1017,6 @@ public final class APIUtil {
             api.addAvailableTiers(availablePolicy);
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
-
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
@@ -7308,6 +7308,66 @@ public final class APIUtil {
     }
 
     /**
+     * Return a PoolingHttpClientConnectionManager instance
+     *
+     * @param protocol- service endpoint protocol. It can be http/https
+     * @return PoolManager
+     */
+    private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(String protocol)
+            throws APIManagementException {
+
+        PoolingHttpClientConnectionManager poolManager;
+        if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
+            SSLConnectionSocketFactory socketFactory = createSocketFactory();
+            org.apache.http.config.Registry<ConnectionSocketFactory> socketFactoryRegistry =
+                    RegistryBuilder.<ConnectionSocketFactory>create()
+                            .register(APIConstants.HTTPS_PROTOCOL, socketFactory).build();
+            poolManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        } else {
+            poolManager = new PoolingHttpClientConnectionManager();
+        } return poolManager;
+    }
+
+    private static SSLConnectionSocketFactory createSocketFactory() throws APIManagementException {
+        SSLContext sslContext;
+
+        String keyStorePath = CarbonUtils.getServerConfiguration()
+                .getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
+        String keyStorePassword = CarbonUtils.getServerConfiguration()
+                .getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
+        try {
+            KeyStore trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
+            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
+
+            X509HostnameVerifier hostnameVerifier;
+            String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
+
+            if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
+                hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+            } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
+                hostnameVerifier = SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
+            } else {
+                hostnameVerifier = SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
+            }
+
+            return new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
+        } catch (KeyStoreException e) {
+            handleException("Failed to read from Key Store", e);
+        } catch (IOException e) {
+            handleException("Key Store not found in " + keyStorePath, e);
+        } catch (CertificateException e) {
+            handleException("Failed to read Certificate", e);
+        } catch (NoSuchAlgorithmException e) {
+            handleException("Failed to load Key Store from " + keyStorePath, e);
+        } catch (KeyManagementException e) {
+            handleException("Failed to load key from" + keyStorePath, e);
+        }
+
+        return null;
+    }
+
+    /**
      * Return a http client instance
      *
      * @param port      - server port
@@ -7316,84 +7376,27 @@ public final class APIUtil {
      */
     public static HttpClient getHttpClient(int port, String protocol) {
 
-        SchemeRegistry registry = new SchemeRegistry();
-        SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-        String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
-        String sslValue = null;
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        AxisConfiguration axis2Config = ServiceReferenceHolder.getContextService().getServerConfigContext()
-                .getAxisConfiguration();
-        org.apache.axis2.description.Parameter sslVerifyClient = axis2Config.getTransportIn(APIConstants.HTTPS_PROTOCOL)
-                .getParameter(APIConstants.SSL_VERIFY_CLIENT);
-        if (sslVerifyClient != null) {
-            sslValue = (String) sslVerifyClient.getValue();
-        }
+        String maxTotal = configuration
+                .getFirstProperty(APIConstants.HTTP_CLIENT_MAX_TOTAL);
+        String defaultMaxPerRoute = configuration
+                .getFirstProperty(APIConstants.HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE);
 
-        X509HostnameVerifier hostnameVerifier;
-        if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
-            hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-        } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
-            hostnameVerifier = SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
-        } else {
-            hostnameVerifier = SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
-        }
-        socketFactory.setHostnameVerifier(hostnameVerifier);
-
-        if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
-            try {
-                if (APIConstants.SSL_VERIFY_CLIENT_STATUS_REQUIRE.equals(sslValue)) {
-                    socketFactory = createSocketFactory();
-                    socketFactory.setHostnameVerifier(hostnameVerifier);
-                }
-                if (port >= 0) {
-                    registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));
-                } else {
-                    registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, 443, socketFactory));
-                }
-            } catch (APIManagementException e) {
-                log.error(e);
-            }
-        } else if (APIConstants.HTTP_PROTOCOL.equals(protocol)) {
-            if (port >= 0) {
-                registry.register(new Scheme(APIConstants.HTTP_PROTOCOL, port, PlainSocketFactory.getSocketFactory()));
-            } else {
-                registry.register(new Scheme(APIConstants.HTTP_PROTOCOL, 80, PlainSocketFactory.getSocketFactory()));
-            }
-        }
-        HttpParams params = new BasicHttpParams();
-        ThreadSafeClientConnManager tcm = new ThreadSafeClientConnManager(registry);
-        return new DefaultHttpClient(tcm, params);
-
-    }
-
-    private static SSLSocketFactory createSocketFactory() throws APIManagementException {
-
-        KeyStore keyStore;
-        String keyStorePath = null;
-        String keyStorePassword;
+        PoolingHttpClientConnectionManager pool = null;
         try {
-            keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.Location");
-            keyStorePassword = CarbonUtils.getServerConfiguration()
-                    .getFirstProperty("Security.KeyStore.Password");
-            keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
-            return new SSLSocketFactory(keyStore, keyStorePassword);
-
-        } catch (KeyStoreException e) {
-            handleException("Failed to read from Key Store", e);
-        } catch (CertificateException e) {
-            handleException("Failed to read Certificate", e);
-        } catch (NoSuchAlgorithmException e) {
-            handleException("Failed to load Key Store from " + keyStorePath, e);
-        } catch (IOException e) {
-            handleException("Key Store not found in " + keyStorePath, e);
-        } catch (UnrecoverableKeyException e) {
-            handleException("Failed to load key from" + keyStorePath, e);
-        } catch (KeyManagementException e) {
-            handleException("Failed to load key from" + keyStorePath, e);
+            pool = getPoolingHttpClientConnectionManager(protocol);
+        } catch (APIManagementException e) {
+            log.error("Error while getting http client connection manager", e);
         }
-        return null;
+        pool.setMaxTotal(Integer.parseInt(maxTotal));
+        pool.setDefaultMaxPerRoute(Integer.parseInt(defaultMaxPerRoute));
+
+        RequestConfig params = RequestConfig.custom().build();
+        return HttpClients.custom().setConnectionManager(pool).setDefaultRequestConfig(params).build();
     }
+
 
     /**
      * This method will return a relative URL for given registry resource which we can used to retrieve the resource
