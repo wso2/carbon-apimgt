@@ -47,6 +47,7 @@ public class APIDTO   {
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
     private Boolean enableSchemaValidation = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private Boolean enableStore = null;
 
 @XmlType(name="TypeEnum")
