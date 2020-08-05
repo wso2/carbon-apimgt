@@ -84,12 +84,14 @@ public interface ContainerManager {
     /**
      * Represents the LC change Blocked --> Republish
      * Redeploy the API CR with "override : false"
+     * @param api API
      * @param apiId API Identifier
+     * @param registry API registry
      * @param containerMgtInfoDetails Clusters which the API has published
-     * @param configMapName Name of the Config Map
+     * @throws APIManagementException API management exception during publishing to cluster
      */
-    void changeLCStateBlockedToRepublished(APIIdentifier apiId, JSONObject containerMgtInfoDetails,
-                                           String[] configMapName);
+    void changeLCStateBlockedToRepublished(API api, APIIdentifier apiId, Registry registry,
+                                           JSONObject containerMgtInfoDetails) throws APIManagementException;
 
     DeploymentStatus getPodStatus (APIIdentifier apiIdentifier, String clusterName);
 
