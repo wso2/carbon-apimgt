@@ -7664,6 +7664,8 @@ definitions:
       lifeCycleStatus:  # NEED TO RENAME AS lifeCycleState
         type: string
         example: CREATED
+        x-otherScopes:
+        - apim:api_publish
       wsdlInfo:
         $ref: '#/definitions/WSDLInfo'
       wsdlUrl:

@@ -36,6 +36,7 @@ public class APIDTO   {
     private String context = null;
     private String version = null;
     private String provider = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private String lifeCycleStatus = null;
     private WSDLInfoDTO wsdlInfo = null;
     private String wsdlUrl = null;
