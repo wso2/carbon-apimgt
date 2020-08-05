@@ -11161,7 +11161,8 @@ public final class APIUtil {
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS)) {
                 keyManagerConfigurationDTO
-                        .addProperty(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS, isMapExistingAuthAppsEnabled());
+                        .addProperty(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS,
+                                isMapExistingAuthAppsEnabled());
             }
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)) {
@@ -11216,6 +11217,11 @@ public final class APIUtil {
                         keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
                                 .concat(getTenantAwareContext(keyManagerConfigurationDTO.getTenantDomain()))
                                 .concat(APIConstants.KeyManager.DEFAULT_JWKS_ENDPOINT));
+            }
+            String defaultKeyManagerType =
+                    apiManagerConfiguration.getFirstProperty(APIConstants.DEFAULT_KEY_MANAGER_TYPE);
+            if (StringUtils.isNotEmpty(defaultKeyManagerType)) {
+                keyManagerConfigurationDTO.setType(defaultKeyManagerType);
             }
         }
         return keyManagerConfigurationDTO;
