@@ -15,6 +15,12 @@
     APIs will be protected with OAuth2 security-->
     <EnableMTLSForAPIs>true</EnableMTLSForAPIs>
 
+    <!-- These parameters will be used to set the pool size of HTTP client-->
+    <HttpClient>
+         <MaxTotal>{{apim.http_client.max_total}}</MaxTotal>
+         <DefaultMaxPerRoute>{{apim.http_client.default_max_per_route}}</DefaultMaxPerRoute>
+     </HttpClient>
+
     <!-- Authentication manager configuration for Admin Portal. This is a required configuration as its user
     authentication logic relies on this. -->
     <AuthManager>
