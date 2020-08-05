@@ -4026,7 +4026,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus);
+                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus, format);
             } catch (APIManagementException e) {
                 if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
