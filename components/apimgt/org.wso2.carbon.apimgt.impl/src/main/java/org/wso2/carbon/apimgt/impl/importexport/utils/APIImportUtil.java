@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -299,6 +300,14 @@ public final class APIImportUtil {
                     //Set extensions from API definition to API object
                     importedApi = OASParserUtil.setExtensionsToAPI(swaggerContent, importedApi);
                 }
+
+                // Generate API definition using the given API's URI templates and the swagger
+                // (Adding missing attributes to swagger)
+                String oldDefinition = apiProvider.getOpenAPIDefinition(importedApi.getId());
+                APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
+                SwaggerData swaggerData = new SwaggerData(importedApi);
+                String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
+                apiProvider.saveSwaggerDefinition(importedApi, newDefinition);
             }
             // This is required to make url templates and scopes get effected
             apiProvider.updateAPI(importedApi);
