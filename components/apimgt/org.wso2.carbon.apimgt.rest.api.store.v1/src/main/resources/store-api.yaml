@@ -1227,8 +1227,8 @@ paths:
           type: string
           enum:
             - name
-            - throttlingPolicy
-            - status
+            - owner
+            - throttlingTier
         - name: sortOrder
           in: query
           type: string
