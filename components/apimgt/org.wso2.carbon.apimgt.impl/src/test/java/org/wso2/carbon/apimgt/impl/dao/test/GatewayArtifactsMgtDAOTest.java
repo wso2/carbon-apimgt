@@ -6,10 +6,10 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.junit.runners.MethodSorters;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -17,7 +17,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -33,6 +32,7 @@ import java.io.InputStream;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class GatewayArtifactsMgtDAOTest {
     public static GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     String apiUUID = "1236233";
