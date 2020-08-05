@@ -117,34 +117,4 @@ public class GatewayArtifactsMgtDAOTest {
         Assert.assertTrue(result);
     }
 
-    @Test
-    public void testGetGatewayPublishedAPIArtifacts() throws APIManagementException {
-        String gatewayPublishedAPIArtifacts = gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiUUID, label,
-                        APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-        Assert.assertNotNull(gatewayPublishedAPIArtifacts);
-    }
-
-    @Test
-    public void testGetAllGatewayPublishedAPIArtifacts() throws APIManagementException {
-        List<String> gatewayRuntimeArtifactsArray = gatewayArtifactsMgtDAO.getAllGatewayPublishedAPIArtifacts(label);
-        Assert.assertTrue(gatewayRuntimeArtifactsArray.size() > 0);
-    }
-
-    @Test
-    public void testIsAPIPublishedInAnyGateway() throws APIManagementException {
-        boolean isApiPublished = gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiUUID);
-        Assert.assertTrue(isApiPublished);
-    }
-
-    @Test
-    public void testIsAPIArtifactExists() throws APIManagementException {
-        boolean isApiArtifactsExists = gatewayArtifactsMgtDAO.isAPIArtifactExists(apiUUID, label);
-        Assert.assertTrue(isApiArtifactsExists);
-    }
-
-    @Test
-    public void testIsAPIDetailExists() throws APIManagementException {
-        boolean isApiDetailsExists = gatewayArtifactsMgtDAO.isAPIDetailsExists(apiUUID);
-        Assert.assertTrue(isApiDetailsExists);
-    }
 }
