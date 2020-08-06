@@ -151,7 +151,13 @@ public class JWTValidator {
                     log.debug("Subscription validation via Key Manager. Status: "
                             + apiKeyValidationInfoDTO.isAuthorized());
                 }
+                if (!apiKeyValidationInfoDTO.isAuthorized()){
+                    log.debug(
+                            "User is NOT authorized to access the Resource. API Subscription validation failed.");
+                    throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
+                            "User is NOT authorized to access the Resource. API Subscription validation failed.");
 
+                }
                 // Validate scopes
                 validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo);
 
@@ -169,13 +175,7 @@ public class JWTValidator {
                                 apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
                     }
                     log.debug("JWT authentication successful.");
-                } else {
-                    log.debug(
-                            "User is NOT authorized to access the Resource. API Subscription validation " + "failed.");
-                    throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
-                            "User is NOT authorized to access the Resource. API Subscription validation " + "failed.");
                 }
-
                 log.debug("JWT authentication successful.");
                 String endUserToken = null;
                 if (jwtGenerationEnabled) {

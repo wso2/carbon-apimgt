@@ -46,7 +46,7 @@ public class WebsocketWSClient {
 	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey, String tenantDomain)
 			throws APISecurityException {
 		try {
-			return apiKeyValidationService.validateKeyforHandshake(context, apiVersion, apiKey, tenantDomain,
+			return apiKeyValidationService.validateKeyForHandshake(context, apiVersion, apiKey, tenantDomain,
 					Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
 		} catch (Exception e) {
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,

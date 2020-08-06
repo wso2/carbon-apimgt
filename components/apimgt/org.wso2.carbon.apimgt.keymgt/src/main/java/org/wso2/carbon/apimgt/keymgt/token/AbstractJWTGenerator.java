@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -45,7 +45,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.security.Key;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -193,7 +192,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         Map<String, String> customClaims = populateCustomClaims(validationContext);
 
         //get tenantId
-        int tenantId = APIUtil.getTenantId(validationContext.getValidationInfoDTO().getEndUserName());
+        int tenantId = APIUtil.getTenantId(validationContext.getTenantDomain());
 
         String claimSeparator = getMultiAttributeSeparator(tenantId);
         if (StringUtils.isNotBlank(claimSeparator)) {
@@ -255,17 +254,12 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     public byte[] signJWT(String assertion, String endUserName) throws APIManagementException {
 
-        String tenantDomain = null;
-
         try {
-            //get tenant domain
-            tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
-            Key privateKey = CertificateMgtUtils.getInstance().getPrivateKey(tenantDomain);
-            return APIUtil.signJwt(assertion, (PrivateKey) privateKey, signatureAlgorithm);
-        } catch (RegistryException e) {
-            String error = "Error in loading tenant registry for " + tenantDomain;
-            //do not log
-            throw new APIManagementException(error, e);
+            KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
+            PrivateKey privateKey = keyStoreManager.getDefaultPrivateKey();
+            return APIUtil.signJwt(assertion, privateKey, signatureAlgorithm);
+        } catch (Exception e) {
+            throw new APIManagementException(e);
         }
     }
 

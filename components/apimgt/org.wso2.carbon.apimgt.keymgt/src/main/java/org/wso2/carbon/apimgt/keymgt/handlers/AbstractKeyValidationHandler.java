@@ -371,6 +371,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         infoDTO.setApiPublisher(api.getApiProvider());
         infoDTO.setApplicationName(app.getName());
         infoDTO.setApplicationTier(app.getPolicy());
+        infoDTO.setApplicationUUID(app.getUUID());
+        infoDTO.setAppAttributes(app.getAttributes());
         infoDTO.setType(type);
 
         // Advanced Level Throttling Related Properties
