@@ -370,14 +370,12 @@ export default function Resources(props) {
             for (const [, verbs] of Object.entries(apiOperations)) {
                 for (const [, verbInfo] of Object.entries(verbs)) {
                     // Checking if the scope resides in the operation
-                    if (verbInfo.security) {
-                        for (const secDef of verbInfo.security) {
-                            if (secDef
-                                && secDef.default
-                                && secDef.default.includes(key)) {
-                                isScopeExistsInOperation = true;
-                                break;
-                            }
+                    for (const secDef of verbInfo.security || []) {
+                        if (secDef
+                            && secDef.default
+                            && secDef.default.includes(key)) {
+                            isScopeExistsInOperation = true;
+                            break;
                         }
                     }
 

@@ -122,10 +122,7 @@ class LifeCycleUpdate extends Component {
                 }
 
                 // update api in context
-                this.context.updateAPI();
-                // set true the enableStore Property
-                this.context.updateAPI({ enableStore: true });
-                /* TODO: add i18n ~tmkb */
+                this.context.updateAPI().then(() => this.context.updateAPI({ enableStore: true }));
             })
             .catch((error) => {
                 if (error.response) {

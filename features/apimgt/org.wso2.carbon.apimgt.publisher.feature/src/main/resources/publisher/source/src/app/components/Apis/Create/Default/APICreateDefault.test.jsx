@@ -30,7 +30,7 @@ import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import getMockedModel, { getAllScopes } from 'AppTests/Utils/MockAPIModel.js';
 import MenuItem from '@material-ui/core/MenuItem';
 import Policies from 'AppComponents/Apis/Details/LifeCycle/Policies';
-import Themes from 'Themes';
+import Themes from 'AppData/defaultTheme';
 import APICreateDefault from './APICreateDefault';
 
 const mockedGetUser = jest.fn();
@@ -84,7 +84,7 @@ describe('<APICreateForm/> tests', () => {
                 isAPIProduct={false}
                 valid={{ name: '', version: '', context: '' }}
             />
-                                            </MuiThemeProvider>);
+        </MuiThemeProvider>);
         await new Promise((resolve) => setImmediate(resolve));
         await wrapper.update();
         const policiesDropDown = await wrapper.find(Policies);
@@ -140,7 +140,7 @@ describe('<APICreateForm/> tests', () => {
                 valid={{ name: '', version: '', context: '' }}
                 history={history}
             />
-                                      </MuiThemeProvider>);
+        </MuiThemeProvider>);
 
         // Simulate typing values into input fields, Entering API name, version , context , endpoint
         // and selecting a policy

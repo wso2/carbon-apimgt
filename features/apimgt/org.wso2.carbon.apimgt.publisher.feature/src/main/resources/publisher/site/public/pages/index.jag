@@ -49,7 +49,7 @@
     </div>
 
     <script src="<%= app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
-    <script src="<%= app.context %>/site/public/conf/defaultTheme.js"></script>
+    <script src="<%= app.context %>/site/public/conf/userThemes.js"></script>
     <script src="<%= app.context %>/site/public/conf/portalSettings.js"></script>
     <script src="<%= app.context %>/services/settings/settings.js"></script>
     <script src="<%= app.context %>/site/public/dist/<%= indexBundle %>"></script>

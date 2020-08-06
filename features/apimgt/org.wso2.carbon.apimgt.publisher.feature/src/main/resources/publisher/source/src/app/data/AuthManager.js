@@ -18,7 +18,6 @@
 
 import qs from 'qs';
 import CONSTS from 'AppData/Constants';
-import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';
@@ -146,12 +145,16 @@ class AuthManager {
         return !AuthManager.getUser().scopes.includes('apim:api_create');
     }
 
+
+    /**
+     *
+     * Check whether the current user has Internal/publisher role or not
+     * @static
+     * @returns {Boolean} isNotPublisher
+     * @memberof AuthManager
+     */
     static isNotPublisher() {
-        if (AuthManager.getUser() === null) {
-            return doRedirectToLogin();
-        } else {
-            return !AuthManager.getUser().scopes.includes('apim:api_publish');
-        }
+        return !AuthManager.getUser().scopes.includes('apim:api_publish'); // TODO: make this scope name configurable
     }
 
     /**
