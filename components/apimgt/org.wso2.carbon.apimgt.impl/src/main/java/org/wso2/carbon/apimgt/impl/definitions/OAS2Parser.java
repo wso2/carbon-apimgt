@@ -1276,12 +1276,43 @@ public class OAS2Parser extends APIDefinition {
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
         if (!isDefaultGiven(swaggerContent)) {
             Swagger swagger = getSwagger(swaggerContent);
+            swagger = injectMgwThrottlingExtensionsToDefault(swagger);
             swagger = processLegacyScopes(swagger);
             swagger = injectOtherScopesToDefaultScheme(swagger);
             swagger = injectOtherResourceScopesToDefaultScheme(swagger);
             return getSwaggerJsonString(swagger);
         }
         return swaggerContent;
+    }
+
+    /**
+     * This method returns swagger definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in swagger file(Swagger version 2)
+     *
+     * @param swagger Swagger
+     * @return Swagger
+     * @throws APIManagementException
+     */
+    private Swagger injectMgwThrottlingExtensionsToDefault(Swagger swagger) throws APIManagementException {
+        Map<String, Path> paths = swagger.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<HttpMethod, Operation> operationsMap = paths.get(pathKey).getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> extensions = operation.getVendorExtensions();
+                if (extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
+                    Object tier = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, tier);
+                }
+                operation.setVendorExtensions(extensions);
+                entry.setValue(operation);
+                operationsMap.put(entry.getKey(), operation);
+            }
+            paths.put(pathKey, paths.get(pathKey));
+        }
+        swagger.setPaths(paths);
+        return swagger;
     }
 
     /**
@@ -1467,7 +1498,7 @@ public class OAS2Parser extends APIDefinition {
             }
             if (APIConstants.OPTIONAL.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            } else if (APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY.equals(mutualSSL)) {
+            } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL + "," +
                         APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }

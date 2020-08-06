@@ -20,6 +20,9 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.swagger.models.HttpMethod;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
 import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
@@ -1344,6 +1347,7 @@ public class OAS3Parser extends APIDefinition {
     @Override
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
+        openAPI = injectMgwThrottlingExtensionsToDefault(openAPI);
         Set<Scope> legacyScopes = getScopesFromExtensions(openAPI);
 
         //In case default scheme already exists we check whether the legacy x-wso2-scopes are there in the default scheme
@@ -1376,6 +1380,36 @@ public class OAS3Parser extends APIDefinition {
             return Json.pretty(openAPI);
         }
         return swaggerContent;
+    }
+
+    /**
+     * This method returns openAPI definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in openAPI file(openAPI version 3)
+     *
+     * @param openAPI OpenAPI
+     * @return OpenAPI
+     * @throws APIManagementException
+     */
+    private OpenAPI injectMgwThrottlingExtensionsToDefault(OpenAPI openAPI) throws APIManagementException {
+        Paths paths = openAPI.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<PathItem.HttpMethod, Operation> operationsMap = paths.get(pathKey).readOperationsMap();
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> extensions = operation.getExtensions();
+                if (extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
+                    Object tier = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, tier);
+                }
+                operation.setExtensions(extensions);
+                entry.setValue(operation);
+                operationsMap.put(entry.getKey(), operation);
+            }
+            paths.put(pathKey, paths.get(pathKey));
+        }
+        openAPI.setPaths(paths);
+        return openAPI;
     }
 
     /**
@@ -1638,7 +1672,7 @@ public class OAS3Parser extends APIDefinition {
             }
             if (APIConstants.OPTIONAL.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            } else if (APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY.equals(mutualSSL)) {
+            } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL + "," +
                         APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }
