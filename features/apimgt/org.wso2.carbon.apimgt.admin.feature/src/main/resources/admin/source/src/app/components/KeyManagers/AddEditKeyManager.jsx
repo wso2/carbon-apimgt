@@ -665,7 +665,7 @@ function AddEditKeyManager(props) {
                                         error={hasErrors('issuer', issuer, validating)}
                                         helperText={hasErrors('issuer', issuer, validating) || intl.formatMessage({
                                             id: 'KeyManagers.AddEditKeyManager.form.issuer.help',
-                                            defaultMessage: 'Ex: https://localhost:9443/oauth2/token',
+                                            defaultMessage: 'E: https://localhost:9443/oauth2/token',
                                         })}
                                     />
                                 </>
@@ -718,7 +718,7 @@ function AddEditKeyManager(props) {
                                             clientRegistrationEndpoint, validating)
                                 || intl.formatMessage({
                                     id: 'KeyManagers.AddEditKeyManager.form.clientRegistrationEndpoint.help',
-                                    defaultMessage: 'Ex: https://localhost:9444/client-registration/v0.17/register',
+                                    defaultMessage: 'E https://localhost:9444/client-registration/v0.17/register',
                                 })}
                                     />
                                     <TextField
@@ -743,7 +743,7 @@ function AddEditKeyManager(props) {
                                             validating)
                                 || intl.formatMessage({
                                     id: 'KeyManagers.AddEditKeyManager.form.introspectionEndpoint.help',
-                                    defaultMessage: 'Ex: https://localhost:9443/oauth2/introspect',
+                                    defaultMessage: 'Ex https://localhost:9443/oauth2/introspect',
                                 })}
                                     />
                                     <TextField
@@ -766,7 +766,7 @@ function AddEditKeyManager(props) {
                                         helperText={hasErrors('tokenEndpoint', tokenEndpoint, validating)
                                 || intl.formatMessage({
                                     id: 'KeyManagers.AddEditKeyManager.form.tokenEndpoint.help',
-                                    defaultMessage: 'Ex: https://localhost:9443/oauth2/token',
+                                    defaultMessage: 'E.g., https://localhost:9443/oauth2/token',
                                 })}
                                     />
                                     <TextField
@@ -789,7 +789,7 @@ function AddEditKeyManager(props) {
                                         helperText={hasErrors('revokeEndpoint', revokeEndpoint, validating)
                                 || intl.formatMessage({
                                     id: 'KeyManagers.AddEditKeyManager.form.revokeEndpoint.help',
-                                    defaultMessage: 'Ex: https://localhost:9443/oauth2/revoke',
+                                    defaultMessage: 'E.g., https://localhost:9443/oauth2/revoke',
                                 })}
                                     />
                                     <TextField
@@ -807,7 +807,7 @@ function AddEditKeyManager(props) {
                                         onChange={onChange}
                                         helperText={intl.formatMessage({
                                             id: 'KeyManagers.AddEditKeyManager.form.userInfoEndpoint.help',
-                                            defaultMessage: 'Ex: https://localhost:9443/oauth2/userInfo',
+                                            defaultMessage: 'E.g., https://localhost:9443/oauth2/userInfo',
                                         })}
                                     />
                                     <TextField
@@ -825,7 +825,7 @@ function AddEditKeyManager(props) {
                                         onChange={onChange}
                                         helperText={intl.formatMessage({
                                             id: 'KeyManagers.AddEditKeyManager.form.authorizeEndpoint.help',
-                                            defaultMessage: 'Ex: https://localhost:9443/oauth2/userinfo',
+                                            defaultMessage: 'E.g., https://localhost:9443/oauth2/userinfo',
                                         })}
                                     />
                                     <TextField
@@ -843,7 +843,7 @@ function AddEditKeyManager(props) {
                                         onChange={onChange}
                                         helperText={intl.formatMessage({
                                             id: 'KeyManagers.AddEditKeyManager.form.scopeManagementEndpoint.help',
-                                            defaultMessage: 'Ex: https://localhost:9443/oauth2/scope',
+                                            defaultMessage: 'E.g, https://localhost:9443/oauth2/scope',
                                         })}
                                     />
                                 </Box>
