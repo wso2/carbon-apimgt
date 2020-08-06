@@ -22,7 +22,7 @@ import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import getMockedModel, { getAllScopes } from 'AppTests/Utils/MockAPIModel.js';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import Themes from 'Themes';
+import Themes from 'AppData/defaultTheme';
 import { MemoryRouter } from 'react-router-dom';
 import ScopeValidation from 'AppData/ScopeValidation';
 import AuthManager from 'AppData/AuthManager';

@@ -19,7 +19,7 @@
 import React from 'react';
 import { getExampleBodyById, getExampleResponseById } from 'AppTests/Utils/MockAPIModel.js';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
-import Themes from 'Themes';
+import Themes from 'AppData/defaultTheme';
 import { MemoryRouter, Redirect } from 'react-router-dom';
 import { resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';

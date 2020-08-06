@@ -151,7 +151,7 @@ function copyAPIConfig(api) {
         },
     };
     if (api.apiType !== 'APIProduct') {
-        apiConfigJson.keyManagers = [...api.keyManagers];
+        apiConfigJson.keyManagers = [...api.keyManagers || []]; // || operator has precedence over spread
     }
     return apiConfigJson;
 }
