@@ -1638,8 +1638,9 @@ public class OAS3Parser extends APIDefinition {
             }
             if (APIConstants.OPTIONAL.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
-                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
+            } else if (APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY.equals(mutualSSL)) {
+                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL + "," +
+                        APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }
             api.setApiSecurity(securityList);
         }
