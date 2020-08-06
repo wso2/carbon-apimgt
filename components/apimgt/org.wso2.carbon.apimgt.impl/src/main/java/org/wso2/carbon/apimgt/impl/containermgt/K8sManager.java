@@ -253,42 +253,18 @@ public class K8sManager implements ContainerManager {
 
     /**
      * Represents the LC change Blocked --> Republish
-     * Redeploy the API CR with "override : false"
+     * Redeploy the API CR with "override : true"
      *
      * @param api                     API
      * @param apiId                   API Identifier
+     * @param registry                API registry
      * @param containerMgtInfoDetails Clusters which the API has published
+     * @throws APIManagementException API management exception during publishing to cluster
      */
     @Override
     public void changeLCStateBlockedToRepublished(API api, APIIdentifier apiId, Registry registry,
                                                   JSONObject containerMgtInfoDetails) throws APIManagementException {
-        JSONObject properties = (JSONObject) containerMgtInfoDetails.get(ContainerBasedConstants.PROPERTIES);
-
-        String jwtSecurity = "";
-        String basicSecurity = "";
-        String oauthSecurity = "";
-        if (properties.get(JWT_SECURITY_CR_NAME) != null) {
-            jwtSecurity = properties.get(JWT_SECURITY_CR_NAME).toString();
-        }
-        if (properties.get(OAUTH2_SECURITY_CR_NAME) != null) {
-            oauthSecurity = properties.get(OAUTH2_SECURITY_CR_NAME).toString();
-        }
-        if (properties.get(BASICAUTH_SECURITY_CR_NAME) != null) {
-            basicSecurity = properties.get(BASICAUTH_SECURITY_CR_NAME).toString();
-        }
-
-        //get openShiftClient Object
-        OpenShiftClient client = getClient(properties);
-        if (client != null) {
-            // apply swagger config map
-            String[] configMapNames = deployConfigMap(api, apiId, registry, client,
-                    jwtSecurity, oauthSecurity, basicSecurity, "");
-            //apply API CR with not overriding the existing API Docker image
-            applyAPICustomResourceDefinition(client, configMapNames, Integer.parseInt(properties.get(REPLICAS).toString())
-                    , apiId, false);
-        } else {
-            log.error("Error occurred while establishing the connection to the Kubernetes cluster");
-        }
+        apiRepublish(api, apiId, registry, containerMgtInfoDetails);
     }
 
     /**
