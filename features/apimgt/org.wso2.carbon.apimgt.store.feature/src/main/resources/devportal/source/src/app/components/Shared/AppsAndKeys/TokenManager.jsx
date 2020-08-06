@@ -301,7 +301,7 @@ class TokenManager extends React.Component {
                     // Selecting a key manager from the list of key managers.
                     let { selectedTab } = this.state;
                     if (!selectedTab && responseKeyManagerList.length > 0) {
-                        selectedTab = !!responseKeyManagerList.find(x => x.name === 'Default') ? 'Default'
+                        selectedTab = !!responseKeyManagerList.find(x => x.name === 'Resident Key Manager') ? 'Resident Key Manager'
                             : responseKeyManagerList[0].name;
                     }
                     const selectdKM = responseKeyManagerList.find(x => x.name === selectedTab);
