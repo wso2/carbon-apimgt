@@ -395,7 +395,7 @@ function TryOutController(props) {
     }
 
     const user = AuthManager.getUser();
-    if (!api) {
+    if (api == null) {
         return <Progress />;
     }
     if (notFound) {
