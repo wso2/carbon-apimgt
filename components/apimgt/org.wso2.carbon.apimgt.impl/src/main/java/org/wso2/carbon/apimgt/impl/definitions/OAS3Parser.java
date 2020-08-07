@@ -1398,18 +1398,13 @@ public class OAS3Parser extends APIDefinition {
             for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
                 Operation operation = entry.getValue();
                 Map<String, Object> extensions = operation.getExtensions();
-                if (extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
+                if (extensions != null && extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
                     Object tier = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER);
                     extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
                     extensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, tier);
                 }
-                operation.setExtensions(extensions);
-                entry.setValue(operation);
-                operationsMap.put(entry.getKey(), operation);
             }
-            paths.put(pathKey, paths.get(pathKey));
         }
-        openAPI.setPaths(paths);
         return Json.pretty(openAPI);
     }
 
