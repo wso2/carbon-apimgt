@@ -142,6 +142,7 @@ function copyAPIConfig(api) {
         wsdlUrl: api.wsdlUrl,
         transport: [...api.transport],
         securityScheme: [...api.securityScheme],
+        keyManagers: [...api.keyManagers || []],
         corsConfiguration: {
             corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
             accessControlAllowCredentials: api.corsConfiguration.accessControlAllowCredentials,
@@ -150,9 +151,6 @@ function copyAPIConfig(api) {
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
     };
-    if (api.apiType !== 'APIProduct') {
-        apiConfigJson.keyManagers = [...api.keyManagers || []]; // || operator has precedence over spread
-    }
     return apiConfigJson;
 }
 /**
@@ -345,7 +343,9 @@ export default function RuntimeConfiguration() {
     function handleSave() {
         setIsUpdating(true);
         const newMediationPolicies = getMediationPoliciesToSave();
-        if (!api.isAPIProduct()) {
+        if (api.isAPIProduct()) {
+            delete apiConfig.keyManagers; // remove keyManagers property if API type is API Product
+        } else {
             apiConfig.mediationPolicies = newMediationPolicies;
         }
         if (updateComplexityList !== null) {
