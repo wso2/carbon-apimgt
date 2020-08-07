@@ -2177,7 +2177,6 @@ paths:
 # Import Resource API
 ######################################################
   /import/api:
-
     post:
       security:
         - OAuth2Security:
@@ -2248,7 +2247,6 @@ paths:
 # Export Resource API
 ######################################################
   /export/api:
-
     get:
       security:
         - OAuth2Security:

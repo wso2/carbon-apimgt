@@ -40,7 +40,7 @@ TenantInfoApiService delegate = new TenantInfoApiServiceImpl();
     @Path("/{username}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get tenant id of the user ", notes = "This operation is to get tenant id of the provided user ", response = TenantInfoDTO.class, authorizations = {
+    @ApiOperation(value = "Get tenant id of the user ", notes = "This operation is to get tenant id of the provided Base64 encoded user ", response = TenantInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:tenantInfo", description = "Retrieve tenant related information"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
@@ -50,7 +50,7 @@ TenantInfoApiService delegate = new TenantInfoApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Tenant id of the user retrieved. ", response = TenantInfoDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested user does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response getTenantInfoByUsername(@ApiParam(value = "The state represents the current state of the tenant  Supported states are [ active, inactive] ",required=true) @PathParam("username") String username) throws APIManagementException{
+    public Response getTenantInfoByUsername(@ApiParam(value = "The state represents the current state of the tenant Supported states are [ active, inactive] ",required=true) @PathParam("username") String username) throws APIManagementException{
         return delegate.getTenantInfoByUsername(username, securityContext);
     }
 }

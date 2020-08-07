@@ -1,0 +1,49 @@
+- title: Import an API
+  rawRequest: |
+    PUT /api/am/admin/v1/tenant-theme HTTP/1.1
+    Host: localhost:9443
+    User-Agent: curl/7.64.1
+    Accept: */*
+    Authorization:Bearer 88d1d5f8-d5f5-3b1a-82d4-907ec6d66f60
+    Content-Length: 5483
+    Content-Type: multipart/form-data; boundary=------------------------cb912af46986aaf4
+    Expect: 100-continue
+
+  curl: |
+    curl -k -H "Authorization:Bearer 9d29561e-3511-3a99-bfa2-d84153b48648" -F file=@"sample-theme.zip" -X PUT "https://localhost:9443/api/am/admin/v1/tenant-theme"
+  rawResponse: |
+    HTTP/1.1 200
+    Date: Wed, 29 Jul 2020 05:14:06 GMT
+    Content-Type: application/json
+    Content-Length: 27
+    Server: WSO2 Carbon Server
+
+    Theme imported successfully
+
+- title: Import a DevPortal tenant theme for super-tenant
+  rawRequest: |
+    PUT /api/am/admin/v1/tenant-theme HTTP/1.1
+    Host: localhost:9443
+    User-Agent: curl/7.64.1
+    Accept: */*
+    Authorization:Bearer eddcaf5c-3ac0-3487-8a35-6e2ebded0a8f
+    Content-Length: 5483
+    Content-Type: multipart/form-data; boundary=------------------------1e15671635f0ff28
+    Expect: 100-continue
+
+  curl: |
+    curl -k -H "Authorization:Bearer eddcaf5c-3ac0-3487-8a35-6e2ebded0a8f" -F file=@"sample-theme.zip" -X PUT "https://localhost:9443/api/am/admin/v1/tenant-theme"
+  rawResponse: |
+    HTTP/1.1 400
+    Date: Wed, 29 Jul 2020 05:20:07 GMT
+    Content-Type: application/json
+    Transfer-Encoding: chunked
+    Connection: close
+    Server: WSO2 Carbon Server
+
+    {
+      "code":901702,
+      "message":"Super Tenant not allowed to import tenant theme",
+      "description":"Super Tenant carbon.super is not allowed to import a tenant theme",
+      "moreInfo":"","error":[]
+    }
