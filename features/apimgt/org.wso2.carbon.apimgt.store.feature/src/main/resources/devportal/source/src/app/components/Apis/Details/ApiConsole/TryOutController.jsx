@@ -392,7 +392,7 @@ function TryOutController(props) {
     }
 
     const user = AuthManager.getUser();
-    if (api == null) {
+    if (!api) {
         return <Progress />;
     }
     if (notFound) {
@@ -419,7 +419,8 @@ function TryOutController(props) {
         }
     }
     const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
-    const enableStore = api.enableStore && api.enableStore === 'true';
+    const isPublished = api.lifeCycleStatus.toLowerCase() === 'published';
+    const showSecurityType = isPublished || (isPrototypedAPI && api.enableStore === false);
 
     let tokenValue = '';
     if (securitySchemeType === 'API-KEY') {
@@ -508,7 +509,7 @@ function TryOutController(props) {
                             </Typography>
                         </>
                     )}
-                    {(isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && (
+                    {((isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && showSecurityType) && (
                         <FormControl component='fieldset'>
                             <RadioGroup
                                 name='securityScheme'
@@ -516,7 +517,7 @@ function TryOutController(props) {
                                 onChange={handleChanges}
                                 row
                             >
-                                {isOAuthEnabled && enableStore && (
+                                {isOAuthEnabled && (
                                     <FormControlLabel
                                         value='OAUTH'
                                         control={<Radio />}
@@ -528,7 +529,7 @@ function TryOutController(props) {
                                         )}
                                     />
                                 )}
-                                {isApiKeyEnabled && enableStore && (
+                                {isApiKeyEnabled && (
                                     <FormControlLabel
                                         value='API-KEY'
                                         control={<Radio />}
@@ -540,7 +541,7 @@ function TryOutController(props) {
                                         )}
                                     />
                                 )}
-                                {isBasicAuthEnabled && enableStore && (
+                                {isBasicAuthEnabled && (
                                     <FormControlLabel
                                         value='BASIC'
                                         control={<Radio />}
