@@ -182,7 +182,7 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     public abstract String getOASVersion(String oasDefinition) throws APIManagementException;
-    
+
     public abstract String getOASDefinitionWithTierContentAwareProperty(String oasDefinition,
             List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException;
 
@@ -193,6 +193,17 @@ public abstract class APIDefinition {
      * @return String
      */
     public abstract String processOtherSchemeScopes(String resourceConfigsJSON)
+            throws APIManagementException;
+
+    /**
+     * This method returns OAS definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in OAS file
+     *
+     * @param swaggerContent String
+     * @return OpenAPI
+     * @throws APIManagementException
+     */
+    public abstract String injectMgwThrottlingExtensionsToDefault(String swaggerContent)
             throws APIManagementException;
 
     /**

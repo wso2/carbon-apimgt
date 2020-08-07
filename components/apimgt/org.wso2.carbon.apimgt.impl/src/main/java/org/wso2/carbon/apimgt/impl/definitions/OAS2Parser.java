@@ -1276,7 +1276,6 @@ public class OAS2Parser extends APIDefinition {
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
         if (!isDefaultGiven(swaggerContent)) {
             Swagger swagger = getSwagger(swaggerContent);
-            swagger = injectMgwThrottlingExtensionsToDefault(swagger);
             swagger = processLegacyScopes(swagger);
             swagger = injectOtherScopesToDefaultScheme(swagger);
             swagger = injectOtherResourceScopesToDefaultScheme(swagger);
@@ -1289,11 +1288,13 @@ public class OAS2Parser extends APIDefinition {
      * This method returns swagger definition which replaced X-WSO2-throttling-tier extension comes from
      * mgw with X-throttling-tier extensions in swagger file(Swagger version 2)
      *
-     * @param swagger Swagger
-     * @return Swagger
+     * @param swaggerContent String
+     * @return String
      * @throws APIManagementException
      */
-    private Swagger injectMgwThrottlingExtensionsToDefault(Swagger swagger) throws APIManagementException {
+    @Override
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
         Map<String, Path> paths = swagger.getPaths();
         for (String pathKey : paths.keySet()) {
             Map<HttpMethod, Operation> operationsMap = paths.get(pathKey).getOperationMap();
@@ -1312,7 +1313,7 @@ public class OAS2Parser extends APIDefinition {
             paths.put(pathKey, paths.get(pathKey));
         }
         swagger.setPaths(paths);
-        return swagger;
+        return getSwaggerJsonString(swagger);
     }
 
     /**

@@ -1347,7 +1347,6 @@ public class OAS3Parser extends APIDefinition {
     @Override
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
-        openAPI = injectMgwThrottlingExtensionsToDefault(openAPI);
         Set<Scope> legacyScopes = getScopesFromExtensions(openAPI);
 
         //In case default scheme already exists we check whether the legacy x-wso2-scopes are there in the default scheme
@@ -1386,11 +1385,13 @@ public class OAS3Parser extends APIDefinition {
      * This method returns openAPI definition which replaced X-WSO2-throttling-tier extension comes from
      * mgw with X-throttling-tier extensions in openAPI file(openAPI version 3)
      *
-     * @param openAPI OpenAPI
-     * @return OpenAPI
+     * @param swaggerContent String
+     * @return String
      * @throws APIManagementException
      */
-    private OpenAPI injectMgwThrottlingExtensionsToDefault(OpenAPI openAPI) throws APIManagementException {
+    @Override
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent);
         Paths paths = openAPI.getPaths();
         for (String pathKey : paths.keySet()) {
             Map<PathItem.HttpMethod, Operation> operationsMap = paths.get(pathKey).readOperationsMap();
@@ -1409,7 +1410,7 @@ public class OAS3Parser extends APIDefinition {
             paths.put(pathKey, paths.get(pathKey));
         }
         openAPI.setPaths(paths);
-        return openAPI;
+        return Json.pretty(openAPI);
     }
 
     /**
