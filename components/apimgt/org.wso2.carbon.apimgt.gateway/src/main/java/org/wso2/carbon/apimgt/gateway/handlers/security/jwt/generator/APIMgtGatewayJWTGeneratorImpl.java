@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator;
 
-import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -72,6 +71,11 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         claims.put(dialect + "/usertype", APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN);
         claims.put(dialect + "/enduser", jwtInfoDto.getEnduser());
         claims.put(dialect + "/enduserTenantId", String.valueOf(jwtInfoDto.getEndusertenantid()));
+        claims.put(dialect + "/applicationUUId", jwtInfoDto.getApplicationuuid());
+        Map<String, String> appAttributes = jwtInfoDto.getAppAttributes();
+        if (appAttributes != null && !appAttributes.isEmpty()) {
+            claims.put(dialect + "/applicationAttributes", appAttributes);
+        }
         return claims;
     }
 

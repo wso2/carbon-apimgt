@@ -28,12 +28,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
@@ -466,7 +464,7 @@ public class APIKeyValidationService {
      * @throws APIKeyMgtException
      * @throws APIManagementException
      */
-    public APIKeyValidationInfoDTO validateKeyforHandshake(String context, String version,
+    public APIKeyValidationInfoDTO validateKeyForHandshake(String context, String version,
                                                            String accessToken, String tenantDomain,
                                                            List<String> keyManagers)
             throws APIKeyMgtException, APIManagementException {
@@ -484,61 +482,30 @@ public class APIKeyValidationService {
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
-        ApiMgtDAO dao = ApiMgtDAO.getInstance();
         if (state) {
-            info.setAuthorized(true);
-            info.setValidityPeriod(validationContext.getTokenInfo().getValidityPeriod());
-            info.setIssuedTime(validationContext.getTokenInfo().getIssuedTime());
-            info.setKeyManager(validationContext.getValidationInfoDTO().getKeyManager());
-            String def_version = isDefaultVersionInvoked(validationContext.getContext());
-            if (def_version != null) {
-                defaultVersionInvoked = true;
-                version = def_version;
-                context += "/" + def_version;
-                validationContext.setVersion(version);
-                validationContext.setContext(context);
+            state = keyValidationHandler.validateSubscription(validationContext);
+            if (state) {
+                if (APIConstants.DEFAULT_WEBSOCKET_VERSION.equals(version)) {
+                    version = info.getApiVersion();
+                    defaultVersionInvoked = true;
+                }
+                if (defaultVersionInvoked) {
+                    validationContext.getValidationInfoDTO().setApiName(info.getApiName() + "*" + version);
+                }
+                if (APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
+                        validationContext.getValidationInfoDTO().getEndUserName() != null
+                        && !validationContext.isCacheHit()) {
+                    Application application = APIUtil.getApplicationByClientId(validationContext.getValidationInfoDTO()
+                            .getConsumerKey());
+                    validationContext.getValidationInfoDTO().setApplicationId(String.valueOf(application.getId()));
+                    validationContext.getValidationInfoDTO().setApplicationTier(application.getTier());
+                    keyValidationHandler.generateConsumerToken(validationContext);
+                    info.setEndUserToken(validationContext.getValidationInfoDTO().getEndUserToken());
+                }
             }
-            info = dao.validateSubscriptionDetails(info, validationContext.getContext(), validationContext.getVersion(),
-                    validationContext.getTokenInfo().getConsumerKey(), info.getKeyManager(),
-                    defaultVersionInvoked);
-
-            if (defaultVersionInvoked) {
-                info.setApiName(info.getApiName() + "*" + version);
-            }
-
-            if (APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
-                    validationContext.getValidationInfoDTO().getEndUserName() != null
-                    && !validationContext.isCacheHit()) {
-                Application application = APIUtil.getApplicationByClientId(validationContext.getValidationInfoDTO()
-                        .getConsumerKey());
-                validationContext.getValidationInfoDTO().setApplicationId(String.valueOf(application.getId()));
-                validationContext.getValidationInfoDTO().setApplicationTier(application.getTier());
-                keyValidationHandler.generateConsumerToken(validationContext);
-                info.setEndUserToken(validationContext.getValidationInfoDTO().getEndUserToken());
-            }
+            return validationContext.getValidationInfoDTO();
         }
-
-        info.setConsumerKey(validationContext.getTokenInfo().getConsumerKey());
-        info.setEndUserName(validationContext.getTokenInfo().getEndUserName());
         return info;
-    }
-
-    /**
-     * find out whether the Default API version is invoked
-     *
-     * @param context context of API accessing
-     * @return Default API version. return null if not default version
-     * @throws APIManagementException
-     */
-    private String isDefaultVersionInvoked(String context) throws APIManagementException {
-        ApiMgtDAO dao = ApiMgtDAO.getInstance();
-        String[] APIDetails = dao.getAPIDetailsByContext(context);
-        String apiName = APIDetails[0];
-        String apiProvider = APIDetails[1];
-        if (!(apiName.equalsIgnoreCase("") || apiProvider.equalsIgnoreCase(""))) {
-            return dao.getDefaultVersion(new APIIdentifier(apiProvider, apiName, ""));
-        }
-        return null;
     }
 
     /**

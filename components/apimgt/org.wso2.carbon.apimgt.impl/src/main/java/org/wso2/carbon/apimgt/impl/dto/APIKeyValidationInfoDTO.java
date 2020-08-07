@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -65,6 +66,8 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
     private String apiVersion;
+    private String applicationUUID;
+    private Map<String, String> appAttributes;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -367,5 +370,24 @@ public class APIKeyValidationInfoDTO implements Serializable {
         this.apiVersion = apiVersion;
     }
 
+    public String getApplicationUUID() {
+
+        return applicationUUID;
+    }
+
+    public void setApplicationUUID(String applicationUUID) {
+
+        this.applicationUUID = applicationUUID;
+    }
+
+    public Map<String, String> getAppAttributes() {
+
+        return appAttributes;
+    }
+
+    public void setAppAttributes(Map<String, String> appAttributes) {
+
+        this.appAttributes = appAttributes;
+    }
 }
 

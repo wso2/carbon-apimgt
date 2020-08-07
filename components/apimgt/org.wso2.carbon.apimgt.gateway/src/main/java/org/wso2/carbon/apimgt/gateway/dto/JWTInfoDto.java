@@ -17,10 +17,11 @@
  */
 package org.wso2.carbon.apimgt.gateway.dto;
 
-import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.synapse.MessageContext;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class JWTInfoDto {
 
@@ -38,7 +39,7 @@ public class JWTInfoDto {
     private String apiName;
     private JWTValidationInfo jwtValidationInfo;
     private MessageContext messageContext;
-
+    private Map<String, String> appAttributes = new HashMap<>();
     public String getApplicationtier() {
 
         return applicationtier;
@@ -177,5 +178,15 @@ public class JWTInfoDto {
     public void setApiName(String apiName) {
 
         this.apiName = apiName;
+    }
+
+    public Map<String, String> getAppAttributes() {
+
+        return appAttributes;
+    }
+
+    public void setAppAttributes(Map<String, String> appAttributes) {
+
+        this.appAttributes = appAttributes;
     }
 }

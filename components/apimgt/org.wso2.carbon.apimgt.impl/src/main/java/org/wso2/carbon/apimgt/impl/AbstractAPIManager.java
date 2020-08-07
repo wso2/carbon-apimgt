@@ -130,6 +130,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -1713,6 +1714,7 @@ public abstract class AbstractAPIManager implements APIManager {
         //application will not be shared within the group
         defaultApp.setGroupId("");
         defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        defaultApp.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addApplication(defaultApp, subscriber.getName());
     }
 
