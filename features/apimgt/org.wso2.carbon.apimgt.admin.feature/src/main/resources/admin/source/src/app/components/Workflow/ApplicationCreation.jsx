@@ -53,6 +53,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import ClearIcon from '@material-ui/icons/Clear';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -88,6 +89,7 @@ function ListLabels() {
     const [searchText, setSearchText] = useState('');
     const [isUpdating, setIsUpdating] = useState(null);
     const [buttonValue, setButtonValue] = useState();
+    const [hasListPermission, setHasListPermission] = useState(true);
 
     /**
      * API call to get Detected Data
@@ -111,11 +113,16 @@ function ListLabels() {
                 return workflowlist;
             })
             .catch((error) => {
-                Alert.error(intl.formatMessage({
-                    id: 'Workflow.ApplicationCreation.apicall.has.errors',
-                    defaultMessage: 'Unable to get workflow pending requests for Application Creation',
-                }));
-                throw (error);
+                const { status } = error;
+                if (status === 401) {
+                    setHasListPermission(false);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Workflow.ApplicationCreation.apicall.has.errors',
+                        defaultMessage: 'Unable to get workflow pending requests for Application Creation',
+                    }));
+                    throw (error);
+                }
             });
     }
 
@@ -160,8 +167,11 @@ function ListLabels() {
                 }));
             })
             .catch((error) => {
-                const { response } = error;
-                if (response.body) {
+                const { response, status } = error;
+                const { body: { description } } = response;
+                if (status === 401) {
+                    Alert.error(description);
+                } else if (response.body) {
                     Alert.error(intl.formatMessage({
                         id: 'Workflow.ApplicationCreation.updateStatus.has.errors',
                         defaultMessage: 'Unable to complete application creation approve/reject process. ',
@@ -390,6 +400,26 @@ function ListLabels() {
                     </CardActions>
                 </Card>
             </ContentBase>
+        );
+    }
+    if (!hasListPermission) {
+        return (
+            <WarningBase
+                pageProps={pageProps}
+                title={(
+                    <FormattedMessage
+                        id='Workflow.ApplicationCreation.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='Workflow.ApplicationCreation.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view Application Creation - '
+                        + 'Approval Tasks. Please contact the site administrator.'}
+                    />
+                )}
+            />
         );
     }
     if (!data) {

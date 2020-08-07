@@ -35,6 +35,7 @@ import CardContent from '@material-ui/core/CardContent';
 import MUIDataTable from 'mui-datatables';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 import Alert from 'AppComponents/Shared/Alert';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -87,7 +88,7 @@ function ListLabels() {
     const [searchText, setSearchText] = useState('');
     const [isUpdating, setIsUpdating] = useState(null);
     const [buttonValue, setButtonValue] = useState();
-
+    const [hasListPermission, setHasListPermission] = useState(true);
     /**
      * API call to get Detected Data
      * @returns {Promise}.
@@ -109,11 +110,16 @@ function ListLabels() {
                 return workflowlist;
             })
             .catch((error) => {
-                Alert.error(intl.formatMessage({
-                    id: 'Workflow.UserCreation.apicall.has.errors',
-                    defaultMessage: 'Unable to get workflow pending requests for User Creation',
-                }));
-                throw (error);
+                const { status } = error;
+                if (status === 401) {
+                    setHasListPermission(false);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Workflow.UserCreation.apicall.has.errors',
+                        defaultMessage: 'Unable to get workflow pending requests for User Creation',
+                    }));
+                    throw (error);
+                }
             });
     }
 
@@ -157,8 +163,11 @@ function ListLabels() {
                 }));
             })
             .catch((error) => {
-                const { response } = error;
-                if (response.body) {
+                const { response, status } = error;
+                const { body: { description } } = response;
+                if (status === 401) {
+                    Alert.error(description);
+                } else if (response.body) {
                     Alert.error(intl.formatMessage({
                         id: 'Workflow.UserCreation.updateStatus.has.errors',
                         defaultMessage: 'Unable to complete User creation approve/reject process.',
@@ -383,6 +392,26 @@ function ListLabels() {
                     </CardActions>
                 </Card>
             </ContentBase>
+        );
+    }
+    if (!hasListPermission) {
+        return (
+            <WarningBase
+                pageProps={pageProps}
+                title={(
+                    <FormattedMessage
+                        id='Workflow.UserCreation.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='Workflow.UserCreation.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view User Creation - '
+                        + 'Approval Tasks. Please contact the site administrator.'}
+                    />
+                )}
+            />
         );
     }
     if (!data) {
