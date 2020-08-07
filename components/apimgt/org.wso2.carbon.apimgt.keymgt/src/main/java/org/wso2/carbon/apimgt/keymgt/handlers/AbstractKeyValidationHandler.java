@@ -318,12 +318,12 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                 //go further and load missing objects
                 if(app == null) {
                     app = new SubscriptionDataLoaderImpl().getApplicationById(key.getApplicationId());
-                    if(app != null && app.getId() != 0) {
+                    if(app != null && app.getId() != null && app.getId() != 0) {
                         // load to the memory
-                        log.debug("Loading Application to the in-memory datastore.");
+                        log.debug("Loading Application to the in-memory datastore. applicationId = " + app.getId());
                         datastore.addOrUpdateApplication(app);
                     } else {
-                        log.debug("Application not found.");
+                        log.debug("Application not found. applicationId = " + key.getApplicationId());
                     }
                 }
                 if (app != null) {
@@ -371,6 +371,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         infoDTO.setApiPublisher(api.getApiProvider());
         infoDTO.setApplicationName(app.getName());
         infoDTO.setApplicationTier(app.getPolicy());
+        infoDTO.setApplicationUUID(app.getUUID());
+        infoDTO.setAppAttributes(app.getAttributes());
         infoDTO.setType(type);
 
         // Advanced Level Throttling Related Properties

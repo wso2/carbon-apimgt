@@ -54,7 +54,7 @@ const applicationTableHead = (props) => {
                 id='Applications.Listing.ApplicationTableHead.workflow.status'
                 defaultMessage='Workflow Status'
             />),
-            sorting: true,
+            sorting: false,
         },
         {
             id: 'subscriptions',
@@ -64,7 +64,7 @@ const applicationTableHead = (props) => {
                 id='Applications.Listing.ApplicationTableHead.subscriptions'
                 defaultMessage='Subscriptions'
             />),
-            sorting: true,
+            sorting: false,
         },
         {
             id: 'actions',

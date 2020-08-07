@@ -31,14 +31,9 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -79,7 +74,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
@@ -594,9 +588,7 @@ public class GatewayUtils {
 
     public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JWTClaimsSet payload,
                                                                       JSONObject api,
-                                                                      APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
                                                                       String apiLevelPolicy, String endUserToken,
-                                                                      boolean isOauth,
                                                                       org.apache.synapse.MessageContext synCtx)
             throws java.text.ParseException {
 
@@ -604,31 +596,69 @@ public class GatewayUtils {
         authContext.setAuthenticated(true);
         authContext.setApiKey(tokenSignature);
         authContext.setUsername(payload.getSubject());
-
-        if (apiKeyValidationInfoDTO != null) {
-            authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
-            authContext.setKeyType(apiKeyValidationInfoDTO.getType());
-            authContext.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
-            authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
-            authContext.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
-            authContext.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
-            authContext.setTier(apiKeyValidationInfoDTO.getTier());
-            authContext.setSubscriberTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain());
-            authContext.setApiName(apiKeyValidationInfoDTO.getApiName());
-            authContext.setApiPublisher(apiKeyValidationInfoDTO.getApiPublisher());
-            authContext.setStopOnQuotaReach(apiKeyValidationInfoDTO.isStopOnQuotaReach());
-            authContext.setSpikeArrestLimit(apiKeyValidationInfoDTO.getSpikeArrestLimit());
-            authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
-            authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
+        if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
+            authContext.setKeyType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
+        } else {
+            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         }
-        if (isOauth) {
-            if (payload.getClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY) != null) {
-                authContext.setConsumerKey(payload.getStringClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY));
-            } else if (payload.getClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY) != null) {
-                authContext.setConsumerKey(payload.getStringClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY));
+
+        authContext.setApiTier(apiLevelPolicy);
+
+        if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+            JSONObject
+                    applicationObj = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
+
+            authContext
+                    .setApplicationId(
+                            String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
+            authContext.setApplicationName(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
+            authContext.setApplicationTier(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
+            authContext.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
+            if (applicationObj.containsKey(APIConstants.JwtTokenConstants.QUOTA_TYPE)
+                    && APIConstants.JwtTokenConstants.QUOTA_TYPE_BANDWIDTH
+                    .equals(applicationObj.getAsString(APIConstants.JwtTokenConstants.QUOTA_TYPE))) {
+                authContext.setIsContentAware(true);
+                ;
             }
         }
+        if (api != null) {
 
+            // If the user is subscribed to the API
+            String subscriptionTier = api.getAsString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
+            authContext.setTier(subscriptionTier);
+            authContext.setSubscriberTenantDomain(
+                    api.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN));
+            JSONObject tierInfo = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.TIER_INFO);
+            authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
+            authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
+            if (tierInfo.get(subscriptionTier) != null) {
+                JSONObject subscriptionTierObj = (JSONObject) tierInfo.get(subscriptionTier);
+                authContext.setStopOnQuotaReach(
+                        Boolean.parseBoolean(
+                                subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH)));
+                authContext.setSpikeArrestLimit
+                        (subscriptionTierObj.getAsNumber(APIConstants.JwtTokenConstants.SPIKE_ARREST_LIMIT).intValue());
+                if (!"null".equals(
+                        subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT))) {
+                    authContext.setSpikeArrestUnit(
+                            subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT));
+                }
+                //check whether the quota type is there and it is equal to bandwithVolume type.
+                if (subscriptionTierObj.containsKey(APIConstants.JwtTokenConstants.QUOTA_TYPE)
+                        && APIConstants.JwtTokenConstants.QUOTA_TYPE_BANDWIDTH
+                        .equals(subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.QUOTA_TYPE))) {
+                    authContext.setIsContentAware(true);
+                    ;
+                }
+                if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_DEPTH);
+                    Integer graphQLMaxComplexity =
+                            (int) (long) subscriptionTierObj.get(APIConstants.GRAPHQL_MAX_COMPLEXITY);
+                    synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH, graphQLMaxDepth);
+                    synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY, graphQLMaxComplexity);
+                }
+            }
+        }
         // Set JWT token sent to the backend
         if (StringUtils.isNotEmpty(endUserToken)) {
             authContext.setCallerToken(endUserToken);
@@ -888,6 +918,8 @@ public class GatewayUtils {
             jwtInfoDto.setApiName(apiKeyValidationInfoDTO.getApiName());
             jwtInfoDto.setEndusertenantid(
                     APIUtil.getTenantIdFromTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain()));
+            jwtInfoDto.setApplicationuuid(apiKeyValidationInfoDTO.getApplicationUUID());
+            jwtInfoDto.setAppAttributes(apiKeyValidationInfoDTO.getAppAttributes());
         }
     }
 

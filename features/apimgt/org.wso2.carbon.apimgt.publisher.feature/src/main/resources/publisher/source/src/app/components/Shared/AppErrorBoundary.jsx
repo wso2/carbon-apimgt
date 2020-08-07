@@ -24,57 +24,59 @@ import Footer from 'AppComponents/Base/Footer/Footer';
 import { FormattedMessage } from 'react-intl';
 import Configurations from 'Config';
 
-const styles = (theme) => ({
-    appBar: {
-        zIndex: theme.zIndex.modal + 1,
-        position: 'relative',
-        background: theme.palette.background.appBar,
-    },
-    typoRoot: {
-        marginLeft: theme.spacing(3),
-        marginRight: theme.spacing(3),
-        textTransform: 'capitalize',
-    },
-    brandLink: {
-        color: theme.palette.primary.contrastText,
-    },
-    toolbar: {
-        minHeight: 56,
-        [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
-            minHeight: 48,
+const styles = (theme) => {
+    return ({
+        appBar: {
+            zIndex: theme.zIndex.modal + 1,
+            position: 'relative',
+            background: theme.palette.background.appBar,
         },
-        [theme.breakpoints.up('sm')]: {
-            minHeight: 64,
+        typoRoot: {
+            marginLeft: theme.spacing(3),
+            marginRight: theme.spacing(3),
+            textTransform: 'capitalize',
         },
-    },
-    menuIcon: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
-        fontSize: 35,
-    },
-    errorDisplay: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-    },
-    errorDisplayContent: {
-        width: 960,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'auto',
-    },
-    errorTitle: {
-        display: 'flex',
-        alignItems: 'center',
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-        '& h2': {
-            paddingLeft: theme.spacing(2),
+        brandLink: {
+            color: theme.palette.primary.contrastText,
         },
-    },
-    link: {
-        color: theme.palette.getContrastText(theme.palette.background.default),
-    },
-});
+        toolbar: {
+            minHeight: 56,
+            [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
+                minHeight: 48,
+            },
+            [theme.breakpoints.up('sm')]: {
+                minHeight: 64,
+            },
+        },
+        menuIcon: {
+            color: theme.palette.getContrastText(theme.palette.background.appBar),
+            fontSize: 35,
+        },
+        errorDisplay: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+        },
+        errorDisplayContent: {
+            width: 960,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'auto',
+        },
+        errorTitle: {
+            display: 'flex',
+            alignItems: 'center',
+            paddingTop: theme.spacing(2),
+            paddingBottom: theme.spacing(2),
+            '& h2': {
+                paddingLeft: theme.spacing(2),
+            },
+        },
+        link: {
+            color: theme.palette.getContrastText(theme.palette.background.default),
+        },
+    });
+};
 /**
  * Error boundary for the application.catch JavaScript errors anywhere in their child component tree,
  * log those errors, and display a fallback UI instead of the component tree that crashed.

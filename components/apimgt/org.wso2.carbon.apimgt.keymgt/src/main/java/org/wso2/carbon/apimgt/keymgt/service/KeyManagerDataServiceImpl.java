@@ -200,13 +200,16 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
     }
 
     private Application getApplicationFromApplicationEvent(ApplicationEvent event) {
+
         Application application = new Application();
         application.setId(event.getApplicationId());
         application.setName(event.getApplicationName());
         application.setPolicy(event.getApplicationPolicy());
         application.setTokenType(event.getTokenType());
+        application.setUUID(event.getUuid());
+        event.getAttributes().forEach(application::addAttribute);
         application.setSubName(event.getSubscriber());
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + application.toString());
         }

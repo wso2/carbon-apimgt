@@ -422,6 +422,7 @@ public final class APIConstants {
     //table columns for AM_APPLICATION
     public static final String APPLICATION_ID = "APPLICATION_ID";
     public static final String APPLICATION_NAME = "NAME";
+    public static final String APPLICATION_CREATED_BY = "CREATED_BY";
     public static final String APPLICATION_SUBSCRIBER_ID = "SUBSCRIBER_ID";
     public static final String APPLICATION_TIER = "APPLICATION_TIER";
     public static final String APPLICATION_STATUS = "APPLICATION_STATUS";
@@ -1314,6 +1315,9 @@ public final class APIConstants {
 
     public static final String HTTP_PROXY_HOST = "http.proxyHost";
     public static final String HTTP_PROXY_PORT = "http.proxyPort";
+
+    public static final String HTTP_CLIENT_MAX_TOTAL = "HttpClient.MaxTotal";
+    public static final String HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE = "HttpClient.DefaultMaxPerRoute";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";

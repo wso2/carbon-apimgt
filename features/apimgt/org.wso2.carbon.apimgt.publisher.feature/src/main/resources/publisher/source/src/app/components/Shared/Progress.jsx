@@ -18,7 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import Themes from 'Themes';
+import defaultTheme from 'AppData/defaultTheme';
 
 const Progress = (props) => {
     const { message, per } = props;
@@ -32,7 +32,7 @@ const Progress = (props) => {
         return (
             <div id='apim-loader' className='progress-bar-striped'>
                 <span style={{
-                    backgroundColor: Themes.light.custom.wrapperBackground,
+                    backgroundColor: defaultTheme.custom.wrapperBackground, // to override this u need to build the app
                     width: '300px',
                     display: 'flex',
                     justifyContent: 'center',

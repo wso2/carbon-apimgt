@@ -18,6 +18,7 @@
  */
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
+const fs = require('fs');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 
@@ -46,8 +47,10 @@ const config = {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
             AppTests: path.resolve(__dirname, 'source/Tests/'),
-            react: path.resolve('../../../../../node_modules/react'),
-            reactDom: path.resolve('../../../../../node_modules/react-dom'),
+            react: fs.existsSync('../../../../../node_modules/react')
+                ? path.resolve('../../../../../node_modules/react') : path.resolve('../node_modules/react'),
+            reactDom: fs.existsSync('../../../../../node_modules/react-dom')
+                ? path.resolve('../../../../../node_modules/react-dom') : path.resolve('../node_modules/react-dom'),
         },
         extensions: ['.js', '.jsx'],
     },
@@ -94,7 +97,7 @@ const config = {
         ],
     },
     externals: {
-        Themes: 'AppThemes', // Should use long names for preventing global scope JS variable conflicts
+        userCustomThemes: 'userThemes', // Should use long names for preventing global scope JS variable conflicts
         MaterialIcons: 'MaterialIcons',
         Config: 'AppConfig',
         Settings: 'Settings',

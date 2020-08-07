@@ -20,7 +20,7 @@ import { unwrap } from '@material-ui/core/test-utils';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
-import Themes from 'Themes';
+import Themes from 'AppData/defaultTheme';
 import AppErrorBoundary from './AppErrorBoundary';
 
 const UnwrappedAppErrorBoundary = unwrap(AppErrorBoundary);

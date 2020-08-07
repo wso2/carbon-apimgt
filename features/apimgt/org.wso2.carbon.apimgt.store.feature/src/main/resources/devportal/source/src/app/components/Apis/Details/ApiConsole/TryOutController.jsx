@@ -107,11 +107,14 @@ function TryOutController(props) {
     const {
         securitySchemeType, selectedEnvironment, environments, containerMngEnvironments, labels,
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
-        selectedKeyManager, setSelectedKeyManager,
+        setSelectedKeyManager,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
         setSecurityScheme, setUsername, setPassword, username, password, updateSwagger,
         setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey, environmentObject, setURLs, api,
     } = props;
+    let { selectedKeyManager } = props;
+    selectedKeyManager = selectedKeyManager || 'Resident Key Manager';
+
     const classes = styles();
     const [showToken, setShowToken] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);

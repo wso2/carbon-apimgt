@@ -156,9 +156,26 @@ class Publisher extends React.Component {
         if (!userResolved) {
             return <Progress per={5} message='Resolving user ...' />;
         }
+        let checkSessionURL;
+        if (user) {
+            checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
+            + user.getAppInfo().clientId + '&redirect_uri=https://' + window.location.host
+            + Configurations.app.context + '/services/auth/callback/login';
+        }
+
         return (
             <IntlProvider locale={locale} messages={messages}>
                 <PublisherRootErrorBoundary appName='Publisher Application'>
+                    {user && (
+                        <iframe
+                            style={{ display: 'none' }}
+                            title='iframeOP'
+                            id='iframeOP'
+                            src={checkSessionURL}
+                            width='0px'
+                            height='0px'
+                        />
+                    )}
                     <Router basename={Configurations.app.context}>
                         <Switch>
                             <Redirect exact from='/login' to='/apis' />

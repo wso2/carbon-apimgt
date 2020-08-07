@@ -291,6 +291,11 @@ public class KeyManagerMappingUtil {
             keyManagerDto.setAuthorizeEndpoint(openIdConnectConfiguration.getAuthorizeEndpoint());
             keyManagerDto.setTokenEndpoint(openIdConnectConfiguration.getTokenEndpoint());
             keyManagerDto.setRevokeEndpoint(openIdConnectConfiguration.getRevokeEndpoint());
+            keyManagerDto.setEnabled(true);
+            keyManagerDto.setEnableTokenGeneration(true);
+            keyManagerDto.setEnableMapOAuthConsumerApps(true);
+            keyManagerDto.setEnableOAuthAppCreation(true);
+            keyManagerDto.setEnableSelfValidationJWT(true);
             keyManagerDto.setAvailableGrantTypes(openIdConnectConfiguration.getGrantTypesSupported());
             if (StringUtils.isNotEmpty(openIdConnectConfiguration.getJwksEndpoint())){
                 KeyManagerCertificatesDTO keyManagerCertificatesDTO = new KeyManagerCertificatesDTO();

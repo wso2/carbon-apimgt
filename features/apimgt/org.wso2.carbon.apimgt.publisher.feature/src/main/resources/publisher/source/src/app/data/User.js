@@ -165,6 +165,22 @@ export default class User {
             expiryTime: this.getExpiryTime(),
         };
     }
+
+
+    /**
+     * Return the Publisher application information
+     *  Client ID: Service provider client id
+     *  session state: OIDC check session state value for Publisher
+     *
+     * @returns {Object} Publisher Application information
+     * @memberof User
+     */
+    getAppInfo() {
+        return {
+            clientId: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_CLIENT_ID),
+            sessionState: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_SESSION_STATE),
+        };
+    }
 }
 
 User.CONST = {
