@@ -23,7 +23,6 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import ChipInput from 'material-ui-chip-input';
-import Application from 'AppData/Application';
 
 
 /**
@@ -104,7 +103,6 @@ const ApplicationCreate = (props) => {
         throttlingPolicyList,
         applicationRequest,
         isNameValid,
-        isDescriptionValid,
         allAppAttributes,
         handleAttributesChange,
         isRequiredAttribute,
@@ -120,19 +118,11 @@ const ApplicationCreate = (props) => {
     const showDescError = () => {
         const descLength = applicationRequest.description.length;
         const remaining = 512 - descLength;
-        if(remaining <= 0){
-            return( `( ${remaining.toString()} ) ${intl.formatMessage({
-                defaultMessage:
-                    'characters remaining',
-                id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.length.error.suffix',
-            })}`)
-        } else {
-            return (intl.formatMessage({
-                defaultMessage:
-                    'Describe the application',
-                id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application.help',
-            }));
-        }
+        return( `( ${remaining.toString()} ) ${intl.formatMessage({
+            defaultMessage:
+                'characters remaining',
+            id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.length.error.suffix',
+        })}`)
     }
     return (
         <form noValidate autoComplete='off' className={classes.applicationForm}>
@@ -220,8 +210,9 @@ const ApplicationCreate = (props) => {
                     defaultMessage: 'My Mobile Application',
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application.placeholder',
                 })}
-                error={!isDescriptionValid}
+                error={applicationRequest.description !== '' && applicationRequest.description.length >= 512}
                 onBlur={(e) => validateDescription(e.target.value)}
+
             />
             {allAppAttributes && (
                 Object.entries(allAppAttributes).map((item) => (
@@ -279,7 +270,6 @@ ApplicationCreate.propTypes = {
     applicationRequest: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
     isNameValid: PropTypes.bool.isRequired,
-    isDescriptionValid: PropTypes.bool.isRequired,
     allAppAttributes: PropTypes.arrayOf(PropTypes.array),
     handleAttributesChange: PropTypes.func.isRequired,
     getAttributeValue: PropTypes.func.isRequired,

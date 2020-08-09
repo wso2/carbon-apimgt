@@ -408,7 +408,6 @@
   "Shared.AppsAndKeys.ApplicationCreateForm.application.name": "Application Name",
   "Shared.AppsAndKeys.ApplicationCreateForm.assign.api.request": "Assign API request quota per access token.\n                            Allocated quota will be shared among all\n                            the subscribed APIs of the application.",
   "Shared.AppsAndKeys.ApplicationCreateForm.describe.length.error.suffix": "characters remaining",
-  "Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application.help": "Describe the application",
   "Shared.AppsAndKeys.ApplicationCreateForm.enter.a.name": "Enter a name to identify the Application.\n                                    You will be able to pick this application when subscribing to APIs",
   "Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application": "My Application",
   "Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application.placeholder": "My Mobile Application",
