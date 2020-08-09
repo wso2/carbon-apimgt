@@ -71,6 +71,7 @@ class ApplicationFormHandler extends React.Component {
                 attributes: {},
             },
             isNameValid: true,
+            isDescriptionValid: true,
             throttlingPolicyList: [],
             allAppAttributes: null,
             isApplicationSharingEnabled: true,
@@ -266,6 +267,7 @@ class ApplicationFormHandler extends React.Component {
         const { intl, history } = this.props;
         const api = new API();
         this.validateName(applicationRequest.name)
+            .then(() => this.validateDescription(applicationRequest.description))
             .then(() => this.validateAttributes(applicationRequest.attributes))
             .then(() => api.createApplication(applicationRequest))
             .then((response) => {
@@ -311,6 +313,7 @@ class ApplicationFormHandler extends React.Component {
         } = this.props;
         const api = new API();
         this.validateName(applicationRequest.name)
+            .then(() => this.validateDescription(applicationRequest.description))
             .then(() => this.validateAttributes(applicationRequest.attributes))
             .then(() => api.updateApplication(applicationRequest, null))
             .then((response) => {
@@ -344,6 +347,19 @@ class ApplicationFormHandler extends React.Component {
             })));
         }
         this.setState({ isNameValid: true });
+        return Promise.resolve(true);
+    };
+
+    validateDescription = (value) => {
+        const { intl } = this.props;
+        if (value && value.length !== '' && value.length >= 512) {
+            this.setState({ isDescriptionValid: false });
+            return Promise.reject(new Error(intl.formatMessage({
+                id: 'Applications.Create.ApplicationFormHandler.app.desc.long',
+                defaultMessage: 'Exceeds maximum length limit of 512 characters',
+            })));
+        }
+        this.setState({ isDescriptionValid: true });
         return Promise.resolve(true);
     };
 
@@ -393,7 +409,7 @@ class ApplicationFormHandler extends React.Component {
      */
     render() {
         const {
-            throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
+            throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled, isDescriptionValid,
             isEdit, applicationOwner,
         } = this.state;
         const { match: { params }, classes } = this.props;
@@ -449,6 +465,8 @@ class ApplicationFormHandler extends React.Component {
                                     updateApplicationRequest={this.updateApplicationRequest}
                                     validateName={this.validateName}
                                     isNameValid={isNameValid}
+                                    isDescriptionValid={isDescriptionValid}
+                                    validateDescription={this.validateDescription}
                                     allAppAttributes={allAppAttributes}
                                     handleAttributesChange={this.handleAttributesChange}
                                     isRequiredAttribute={this.isRequiredAttribute}

@@ -104,16 +104,36 @@ const ApplicationCreate = (props) => {
         throttlingPolicyList,
         applicationRequest,
         isNameValid,
+        isDescriptionValid,
         allAppAttributes,
         handleAttributesChange,
         isRequiredAttribute,
         getAttributeValue,
         intl,
         validateName,
+        validateDescription,
         isApplicationSharingEnabled,
         handleAddChip,
         handleDeleteChip,
     } = props;
+
+    const showDescError = () => {
+        const descLength = applicationRequest.description.length;
+        const remaining = 512 - descLength;
+        if(remaining <= 0){
+            return( `( ${remaining.toString()} ) ${intl.formatMessage({
+                defaultMessage:
+                    'characters remaining',
+                id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.length.error.suffix',
+            })}`)
+        } else {
+            return (intl.formatMessage({
+                defaultMessage:
+                    'Describe the application',
+                id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application.help',
+            }));
+        }
+    }
     return (
         <form noValidate autoComplete='off' className={classes.applicationForm}>
             <TextField
@@ -186,22 +206,22 @@ const ApplicationCreate = (props) => {
                 margin='normal'
                 variant='outlined'
                 fullWidth
+                multiline
+                rows={4}
                 value={applicationRequest.description}
                 label={intl.formatMessage({
                     defaultMessage: 'Application Description',
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.application.description.label',
                 })}
-                helperText={intl.formatMessage({
-                    defaultMessage:
-                        'Describe the application',
-                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application.help',
-                })}
+                helperText={showDescError()}
                 name='description'
                 onChange={handleChange}
                 placeholder={intl.formatMessage({
                     defaultMessage: 'My Mobile Application',
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application.placeholder',
                 })}
+                error={!isDescriptionValid}
+                onBlur={(e) => validateDescription(e.target.value)}
             />
             {allAppAttributes && (
                 Object.entries(allAppAttributes).map((item) => (
@@ -259,10 +279,12 @@ ApplicationCreate.propTypes = {
     applicationRequest: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
     isNameValid: PropTypes.bool.isRequired,
+    isDescriptionValid: PropTypes.bool.isRequired,
     allAppAttributes: PropTypes.arrayOf(PropTypes.array),
     handleAttributesChange: PropTypes.func.isRequired,
     getAttributeValue: PropTypes.func.isRequired,
     validateName: PropTypes.func.isRequired,
+    validateDescription: PropTypes.func.isRequired,
     updateApplicationRequest: PropTypes.func.isRequired,
     isRequiredAttribute: PropTypes.func.isRequired,
     isApplicationSharingEnabled: PropTypes.bool.isRequired,
