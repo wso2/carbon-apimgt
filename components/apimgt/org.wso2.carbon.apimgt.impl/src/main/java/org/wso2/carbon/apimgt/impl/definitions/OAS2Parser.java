@@ -1291,21 +1291,16 @@ public class OAS2Parser extends APIDefinition {
      * @throws APIManagementException
      */
     private Swagger processLegacyScopes(Swagger swagger) throws APIManagementException {
+
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
         OAuth2Definition oAuth2Definition = new OAuth2Definition();
-        if (securityDefinitions != null) {
-            oAuth2Definition = (OAuth2Definition) swagger.getSecurityDefinitions()
-                    .get(APIConstants.OAUTH2_DEFAULT_SCOPE);
+        if (securityDefinitions != null && securityDefinitions.get(APIConstants.OAUTH2_DEFAULT_SCOPE) != null) {
+            oAuth2Definition = (OAuth2Definition) securityDefinitions.get(APIConstants.OAUTH2_DEFAULT_SCOPE);
         }
         Map<String, String> scopeBindings = new HashMap<>();
-        if (oAuth2Definition != null) {
-            Map<String, Object> vendorExtensions = oAuth2Definition.getVendorExtensions();
-            if (vendorExtensions != null && vendorExtensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS) != null) {
-                scopeBindings = (Map<String, String>) oAuth2Definition.getVendorExtensions()
-                        .get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
-            } else {
-                scopeBindings = new HashMap<>();
-            }
+        Map<String, Object> vendorExtensions = oAuth2Definition.getVendorExtensions();
+        if (vendorExtensions != null && vendorExtensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS) != null) {
+            scopeBindings = (Map<String, String>) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
         }
         Set<Scope> scopes = getScopesFromExtensions(swagger);
         if (scopes != null && !scopes.isEmpty()) {
