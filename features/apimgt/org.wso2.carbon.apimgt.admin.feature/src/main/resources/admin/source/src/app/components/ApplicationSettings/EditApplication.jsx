@@ -124,8 +124,9 @@ function Edit(props) {
                 })
                 .catch((error) => {
                     const { response } = error;
-                    if (response.body) {
-                        throw response.body.description;
+                    if (response.body.code === 500) {
+                        const notValidSubscriber = 'Error while updating ownership to ' + owner;
+                        throw notValidSubscriber;
                     }
                 })
                 .finally(() => {
