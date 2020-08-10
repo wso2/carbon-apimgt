@@ -47,8 +47,10 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.gateway.stub.APIGatewayAdminStub;
 import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 @RunWith(PowerMockRunner.class)
@@ -78,6 +80,12 @@ public class APIGatewayAdminClientTest {
         serviceContext.setProperty(HTTPConstants.COOKIE_STRING, "");
         ServiceClient serviceClient = Mockito.mock(ServiceClient.class);
         AuthenticationAdminStub authAdminStub = Mockito.mock(AuthenticationAdminStub.class);
+
+        ConfigurationContextService configurationContextService = Mockito.mock(ConfigurationContextService.class);
+        ConfigurationContext context = Mockito.mock(ConfigurationContext.class);
+        ServiceReferenceHolder.setContextService(configurationContextService);
+        PowerMockito.when(configurationContextService.getClientConfigContext()).thenReturn(context);
+
         Mockito.doReturn(true).when(authAdminStub).login(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
         Mockito.when(authAdminStub._getServiceClient()).thenReturn(serviceClient);
         Mockito.when(serviceClient.getLastOperationContext()).thenReturn(operationContext);
