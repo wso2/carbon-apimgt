@@ -28,8 +28,11 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.gateway.stub.APIGatewayAdminStub;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.keymgt.client.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
@@ -41,12 +44,50 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     private APIGatewayAdminStub apiGatewayAdminStub;
     private static Log log = LogFactory.getLog(APIGatewayAdminClient.class);
 
+    /**
+     * This constructor is used for gateways specified as labels. Super admin credentials of the gateway is used to
+     * create the environment.
+     *
+     * @throws AxisFault
+     */
+    public APIGatewayAdminClient() throws AxisFault {
+        Environment environment = new Environment();
+        try {
+            UserRealm bootstrapRealm = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm();
+            if (bootstrapRealm != null){
+                environment.setServerURL("https://localhost:"
+                        + APIUtil.getCarbonTransportPort(APIConstants.HTTPS_PROTOCOL) + "/services/");
+                environment.setUserName(bootstrapRealm.getRealmConfiguration().getAdminUserName());
+                environment.setPassword(bootstrapRealm.getRealmConfiguration().getAdminPassword());
+            }
+        } catch (UserStoreException e) {
+            String msg = "Failed to get the super admin credentials for the gateway " + e.getMessage();
+            log.error(msg);
+            throw new AxisFault(msg, e);
+        }
+        createAPIGatewayAdminStub(environment);
+    }
+
+    /**
+     * Used to get the Admin client if the Gateway environment is already defined.
+     *
+     * @param environment   - Gateway Environment
+     * @throws AxisFault
+     */
     public APIGatewayAdminClient(Environment environment) throws AxisFault {
-        //String qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() + ":v" + apiId.getVersion();
-        //String qualifiedDefaultApiName = apiId.getProviderName() + "--" + apiId.getApiName();
-        //String providerDomain = apiId.getProviderName();
-        //providerDomain = APIUtil.replaceEmailDomainBack(providerDomain);
-        ConfigurationContext ctx = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
+
+        createAPIGatewayAdminStub(environment);
+    }
+
+    /**
+     * Create the APIGatewayAdminStub with the configuration context and environment admin credentials.
+     *
+     * @param environment   - Gateway Environment
+     * @throws AxisFault
+     */
+    public void createAPIGatewayAdminStub(Environment environment) throws AxisFault {
+
+        ConfigurationContext ctx = ServiceReferenceHolder.getContextService().getClientConfigContext();
         apiGatewayAdminStub = new APIGatewayAdminStub(ctx, environment.getServerURL() + "APIGatewayAdmin");
         setup(apiGatewayAdminStub, environment);
 
