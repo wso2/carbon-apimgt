@@ -19,7 +19,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.7.184-SNAPSHOT</version>
+        <version>6.7.184</version>
     </parent>
     <artifactId>org.wso2.carbon.apimgt.notification</artifactId>
     <modelVersion>4.0.0</modelVersion>
