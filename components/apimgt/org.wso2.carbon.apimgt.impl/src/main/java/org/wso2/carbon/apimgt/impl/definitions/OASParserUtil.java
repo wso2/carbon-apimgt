@@ -710,9 +710,6 @@ public class OASParserUtil {
         File[] listOfFiles = new File(extractedLocation).listFiles();
         File archiveDirectory = null;
         if (listOfFiles != null) {
-            if (listOfFiles.length > 1) {
-                throw new APIManagementException("Swagger Definitions should be placed under one root folder.");
-            }
             for (File file: listOfFiles) {
                 if (file.isDirectory()) {
                     archiveDirectory = file.getAbsoluteFile();
@@ -720,8 +717,7 @@ public class OASParserUtil {
                 }
             }
         }
-        //Verify whether the zipped input is archive or file.
-        //If it is a single  swagger file without remote references it can be imported directly, without zipping.
+        //verify whether the zipped input is archive or file.
         if (archiveDirectory == null) {
             throw new APIManagementException("Could not find an archive in the given ZIP file.");
         }
@@ -1329,8 +1325,6 @@ public class OASParserUtil {
     public static String preProcess(String swaggerContent) throws APIManagementException {
         //Load required properties from swagger to the API
         APIDefinition apiDefinition = getOASParser(swaggerContent);
-        //Inject and map mgw throttling extensions to default type
-        swaggerContent = apiDefinition.injectMgwThrottlingExtensionsToDefault(swaggerContent);
         return apiDefinition.processOtherSchemeScopes(swaggerContent);
     }
 
@@ -1473,6 +1467,20 @@ public class OASParserUtil {
         return authorizationHeader == null ? null : authorizationHeader.toString();
     }
 
+    /**
+     * This method returns extension of custom authorization Header related to micro-gw
+     *
+     * @param extensions Map<String, Object>
+     * @return String
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static boolean getDisableSecurity(Map<String, Object> extensions) throws APIManagementException {
+        boolean disableSecurity = false;
+        if (extensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+            disableSecurity = Boolean.parseBoolean(String.valueOf(extensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
+        }
+        return disableSecurity;
+    }
     /**
      * This method returns extension of application security types related to micro-gw
      *
