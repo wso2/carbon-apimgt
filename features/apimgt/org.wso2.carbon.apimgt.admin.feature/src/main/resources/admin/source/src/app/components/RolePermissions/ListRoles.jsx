@@ -24,7 +24,8 @@ import Progress from 'AppComponents/Shared/Progress';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import cloneDeep from 'lodash.clonedeep';
-
+import { FormattedMessage, useIntl } from 'react-intl';
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 import PermissionsSelector from './TreeView/PermissionsSelector';
 import AdminTable from './AdminTable/AdminTable';
 import AdminTableHead from './AdminTable/AdminTableHead';
@@ -132,6 +133,8 @@ export default function ListRoles() {
     const [roleAliases, setRoleAliases] = useState();
     const [systemScopes, setSystemScopes] = useState();
     const [isOpen, setIsOpen] = useState(false);
+    const [hasListPermission, setHasListPermission] = useState(true);
+    const intl = useIntl();
 
     useEffect(() => {
         PermissionAPI.getRoleAliases();
@@ -142,8 +145,13 @@ export default function ListRoles() {
             },
         ).catch((error) => {
             // TODO: Proper error handling here ~tmkb
-            Alert.error('Error while retrieving permission info');
-            console.error(error);
+            const { status } = error;
+            if (status === 401) {
+                setHasListPermission(false);
+            } else {
+                Alert.error('Error while retrieving permission info');
+                console.error(error);
+            }
         });
     }, []);
 
@@ -186,6 +194,34 @@ export default function ListRoles() {
             });
         }
     };
+    if (!hasListPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'RolePermissions.ListRoles.title.role.permissions',
+                        defaultMessage: 'Role Permissions',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='RolePermissions.ListRoles.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='RolePermissions.ListRoles.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view Role Permissions.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    }
     if (!permissionMappings || !appMappings) {
         return <Progress message='Resolving user ...' />;
     }
