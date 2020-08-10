@@ -51,10 +51,11 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * @throws AxisFault
      */
     public APIGatewayAdminClient() throws AxisFault {
+
         Environment environment = new Environment();
         try {
             UserRealm bootstrapRealm = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm();
-            if (bootstrapRealm != null){
+            if (bootstrapRealm != null) {
                 environment.setServerURL("https://localhost:"
                         + APIUtil.getCarbonTransportPort(APIConstants.HTTPS_PROTOCOL) + "/services/");
                 environment.setUserName(bootstrapRealm.getRealmConfiguration().getAdminUserName());
@@ -71,7 +72,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * Used to get the Admin client if the Gateway environment is already defined.
      *
-     * @param environment   - Gateway Environment
+     * @param environment - Gateway Environment
      * @throws AxisFault
      */
     public APIGatewayAdminClient(Environment environment) throws AxisFault {
@@ -82,7 +83,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * Create the APIGatewayAdminStub with the configuration context and environment admin credentials.
      *
-     * @param environment   - Gateway Environment
+     * @param environment - Gateway Environment
      * @throws AxisFault
      */
     public void createAPIGatewayAdminStub(Environment environment) throws AxisFault {
