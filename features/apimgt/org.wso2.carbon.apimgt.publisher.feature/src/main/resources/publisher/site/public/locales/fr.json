@@ -462,6 +462,7 @@
   "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.invalid.file": "",
   "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.uploadCertificate": "",
   "Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading": "",
+  "Apis.Details.Endpoints.GeneralConfiguration.not.allowed": "",
   "Apis.Details.Endpoints.GenericEndpoint.no.ep.error": "",
   "Apis.Details.Endpoints.GenericEndpoint.service.url.input": "",
   "Apis.Details.Endpoints.LoadBalanceConfig.algorithm": "",

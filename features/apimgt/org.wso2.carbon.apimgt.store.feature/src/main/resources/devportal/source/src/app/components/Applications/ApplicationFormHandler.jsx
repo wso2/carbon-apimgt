@@ -465,7 +465,6 @@ class ApplicationFormHandler extends React.Component {
                                     updateApplicationRequest={this.updateApplicationRequest}
                                     validateName={this.validateName}
                                     isNameValid={isNameValid}
-                                    isDescriptionValid={isDescriptionValid}
                                     validateDescription={this.validateDescription}
                                     allAppAttributes={allAppAttributes}
                                     handleAttributesChange={this.handleAttributesChange}

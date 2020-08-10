@@ -462,6 +462,7 @@
   "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.invalid.file": "Invalid file type",
   "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.uploadCertificate": "Upload Certificate",
   "Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading": "Certificates",
+  "Apis.Details.Endpoints.GeneralConfiguration.not.allowed": "*You are not authorized to view certificates due to insufficient permissions",
   "Apis.Details.Endpoints.GenericEndpoint.no.ep.error": "Endpoint URL should not be empty",
   "Apis.Details.Endpoints.GenericEndpoint.service.url.input": "Service URL",
   "Apis.Details.Endpoints.LoadBalanceConfig.algorithm": "Algorithm",
