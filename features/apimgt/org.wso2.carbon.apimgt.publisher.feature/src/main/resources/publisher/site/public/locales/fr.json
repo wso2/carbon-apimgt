@@ -238,6 +238,7 @@
   "Apis.Details.Configuration.components.transport.empty": "",
   "Apis.Details.Configuration.components.transport.sslHttps": "",
   "Apis.Details.Configurations.api.categories": "",
+  "Apis.Details.Configurations.api.categories.empty": "",
   "Apis.Details.Documents.Create.heading": "",
   "Apis.Details.Documents.Create.markdown.editor.add.document.button": "",
   "Apis.Details.Documents.Create.markdown.editor.add.document.cancel.button": "",

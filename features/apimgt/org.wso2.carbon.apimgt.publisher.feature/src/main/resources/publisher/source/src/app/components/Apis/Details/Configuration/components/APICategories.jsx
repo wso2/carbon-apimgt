@@ -27,7 +27,6 @@ import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { makeStyles } from '@material-ui/core/styles';
-
 import API from 'AppData/api';
 import { withAPI, useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
@@ -39,7 +38,11 @@ const useStyles = makeStyles((theme) => ({
         top: theme.spacing(1),
     },
 }));
-
+/**
+ * Render the categories drop down.
+ * @param {JSON} props props passed from it's parents.
+ * @returns {JSX} Render the categories drop down.
+ */
 function APICategories(props) {
     const [categories, setCategories] = useState({});
     const { api, configDispatcher } = props;
@@ -52,6 +55,41 @@ function APICategories(props) {
 
     if (!categories.list) {
         return null;
+    } else if (categories.list.length === 0) {
+        return (
+            <Box style={{ position: 'relative', marginTop: 10 }}>
+                <TextField
+                    fullWidth
+                    select
+                    label={(
+                        <>
+                            <FormattedMessage
+                                id='Apis.Details.Configurations.api.categories'
+                                defaultMessage='API Categories'
+                            />
+                        </>
+                    )}
+                    margin='normal'
+                    variant='outlined'
+                    disabled
+                    value='emptyMessage'
+                >
+                    <MenuItem
+                        dense
+                        disableGutters
+                        value='emptyMessage'
+                    >
+                        <ListItemText primary={(
+                            <FormattedMessage
+                                id='Apis.Details.Configurations.api.categories.empty'
+                                defaultMessage='No API Categories defined yet. Please create an API Category first.'
+                            />
+                        )}
+                        />
+                    </MenuItem>
+                </TextField>
+            </Box>
+        );
     } else {
         return (
             <Box style={{ position: 'relative', marginTop: 10 }}>
@@ -81,28 +119,18 @@ function APICategories(props) {
                     }}
                     helperText='Select API Categories for the API'
                 >
-                    { (categories.list.length === 0)
-                        ? (
-                            <MenuItem id='no-category-notification'>
-                                <ListItemText
-                                    primary='No API Categories defined yet. Please create an API Category first.'
-                                />
-                            </MenuItem>
-                        )
-                        : (
-                            categories.list.map((category) => (
-                                <MenuItem
-                                    dense
-                                    disableGutters
-                                    id={category.id}
-                                    key={category.name}
-                                    value={category.name}
-                                >
-                                    <Checkbox color='primary' checked={api.categories.includes(category.name)} />
-                                    <ListItemText primary={category.name} secondary={category.description} />
-                                </MenuItem>
-                            ))
-                        )}
+                    { categories.list.map((category) => (
+                        <MenuItem
+                            dense
+                            disableGutters
+                            id={category.id}
+                            key={category.name}
+                            value={category.name}
+                        >
+                            <Checkbox color='primary' checked={api.categories.includes(category.name)} />
+                            <ListItemText primary={category.name} secondary={category.description} />
+                        </MenuItem>
+                    ))}
                 </TextField>
                 <Tooltip
                     title={(

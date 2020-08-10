@@ -238,6 +238,7 @@
   "Apis.Details.Configuration.components.transport.empty": "Please select at least one transport!",
   "Apis.Details.Configuration.components.transport.sslHttps": "Please select Https as transport with mutual SSL!",
   "Apis.Details.Configurations.api.categories": "API Categories",
+  "Apis.Details.Configurations.api.categories.empty": "No API Categories defined yet. Please create an API Category first.",
   "Apis.Details.Documents.Create.heading": "Documents",
   "Apis.Details.Documents.Create.markdown.editor.add.document.button": "Add Document",
   "Apis.Details.Documents.Create.markdown.editor.add.document.cancel.button": "Cancel",
