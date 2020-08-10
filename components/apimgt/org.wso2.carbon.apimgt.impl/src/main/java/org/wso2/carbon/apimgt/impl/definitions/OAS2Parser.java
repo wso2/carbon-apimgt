@@ -1274,11 +1274,15 @@ public class OAS2Parser extends APIDefinition {
      */
     @Override
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
-        if (!isDefaultGiven(swaggerContent)) {
-            Swagger swagger = getSwagger(swaggerContent);
-            swagger = processLegacyScopes(swagger);
+        Swagger swagger = getSwagger(swaggerContent);
+        Set<Scope> legacyScopes = getScopesFromExtensions(swagger);
+
+        if (!isDefaultGiven(swaggerContent) && legacyScopes.isEmpty()) {
             swagger = injectOtherScopesToDefaultScheme(swagger);
             swagger = injectOtherResourceScopesToDefaultScheme(swagger);
+            return getSwaggerJsonString(swagger);
+        } else if (!legacyScopes.isEmpty()) {
+            swagger = processLegacyScopes(swagger);
             return getSwaggerJsonString(swagger);
         }
         return swaggerContent;
