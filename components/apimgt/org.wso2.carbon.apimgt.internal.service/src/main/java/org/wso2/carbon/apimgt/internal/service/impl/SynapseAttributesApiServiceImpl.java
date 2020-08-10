@@ -10,23 +10,24 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.internal.service.dto.SynapseAttributesDTO;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
 import javax.ws.rs.core.Response;
 
 public class SynapseAttributesApiServiceImpl implements SynapseAttributesApiService {
 
     private GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
-    private SynapseAttributesDTO synapseArtifactListDTOS = new SynapseAttributesDTO();
+    private SynapseAttributesDTO synapseAttributesListDTOS = new SynapseAttributesDTO();
     private static final Log log = LogFactory.getLog(SynapseAttributesApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
     @Override public Response synapseAttributesGet(String apiName, String tenantDomain, String version,
             MessageContext messageContext) {
-        List<String> apiAttributes = new ArrayList<>();
         String apiId = null;
-        String label;
+        List<String> labels;
         try {
             apiId = gatewayArtifactsMgtDAO.getGatewayAPIId(apiName, version, tenantDomain);
-            label = gatewayArtifactsMgtDAO.getGatewayAPILabel(apiId);
+            labels = gatewayArtifactsMgtDAO.getGatewayAPILabels(apiId);
         } catch (APIManagementException e) {
             JSONObject responseObj = new JSONObject();
             responseObj.put("Message", "Error retrieving apiID and label of  " + apiName+ " from DB");
@@ -37,10 +38,8 @@ public class SynapseAttributesApiServiceImpl implements SynapseAttributesApiServ
         if (debugEnabled) {
             log.debug("Successfully retrieved artifacts for " + apiName + " from DB");
         }
-        apiAttributes.add(apiId);
-        apiAttributes.add(label);
-        synapseArtifactListDTOS.setApiId(apiId);
-        synapseArtifactListDTOS.setLabel(label);
-        return Response.ok().entity(synapseArtifactListDTOS).build();
+        synapseAttributesListDTOS.setApiId(apiId);
+        synapseAttributesListDTOS.setLabels(labels);
+        return Response.ok().entity(synapseAttributesListDTOS).build();
     }
 }

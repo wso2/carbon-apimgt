@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +30,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
@@ -40,8 +43,10 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class DBRetriever implements ArtifactRetriever {
 
@@ -143,9 +148,20 @@ public class DBRetriever implements ArtifactRetriever {
                 throw new ArtifactSynchronizerException("HTTP response is empty");
             }
             Map <String, String> apiAttribute = new HashMap<>();
+
             JSONObject artifactObject = new JSONObject(responseString);
             String apiId = (String)artifactObject.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
-            String label = (String)artifactObject.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
+            String labelsStr = artifactObject.get(APIConstants.GatewayArtifactSynchronizer.LABELS).toString();
+
+            Set<String> labelsSet = new Gson().fromJson(labelsStr, new TypeToken<HashSet<String>>(){}.getType());
+            Set<String> gatewaySubscribedLabel = gatewayArtifactSynchronizerProperties.getGatewayLabels();
+            String label = null;
+            if (!labelsSet.isEmpty() || !gatewaySubscribedLabel.isEmpty()){
+                labelsSet.retainAll(gatewaySubscribedLabel);
+                if (!labelsSet.isEmpty()){
+                    label = labelsSet.iterator().next();
+                }
+            }
             apiAttribute.put(APIConstants.GatewayArtifactSynchronizer.API_ID, apiId);
             apiAttribute.put(APIConstants.GatewayArtifactSynchronizer.LABEL, label);
             return apiAttribute;
