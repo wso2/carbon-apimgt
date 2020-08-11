@@ -34,6 +34,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+
 import java.util.Map;
 
 public class SequenceApiServiceImpl implements SequenceApiService {
@@ -41,7 +42,8 @@ public class SequenceApiServiceImpl implements SequenceApiService {
     private static final Log log = LogFactory.getLog(SequenceApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
-    public Response sequenceGet(String apiName, String version , String tenantDomain, MessageContext messageContext) {
+    public Response sequenceGet(String apiName, String version, String tenantDomain, MessageContext messageContext) {
+
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
@@ -54,10 +56,10 @@ public class SequenceApiServiceImpl implements SequenceApiService {
             String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
             String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
 
-            if (label == null){
-                return Response.status(Response.Status.BAD_REQUEST).entity(apiName + " is not deployed in the Gateway").build();
+            if (label == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(apiName + " is not deployed in the Gateway")
+                        .build();
             }
-
             gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
             if (debugEnabled) {
                 log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
@@ -72,11 +74,11 @@ public class SequenceApiServiceImpl implements SequenceApiService {
             try {
                 JSONArray sequencesArray = new JSONArray();
                 JSONArray undeployedsequencesArray = new JSONArray();
-                if (gatewayAPIDTO.getSequenceToBeAdd() != null ) {
+                if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
                     SequenceAdminServiceProxy sequenceAdminServiceProxy =
                             new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
                     for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
-                        if(sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
+                        if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
                             sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
                         } else {
                             log.error(sequence.getName() + " was not deployed in the gateway");
