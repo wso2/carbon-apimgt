@@ -150,18 +150,24 @@ public class DBRetriever implements ArtifactRetriever {
             Map <String, String> apiAttribute = new HashMap<>();
 
             JSONObject artifactObject = new JSONObject(responseString);
-            String apiId = (String)artifactObject.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
-            String labelsStr = artifactObject.get(APIConstants.GatewayArtifactSynchronizer.LABELS).toString();
-
-            Set<String> labelsSet = new Gson().fromJson(labelsStr, new TypeToken<HashSet<String>>(){}.getType());
-            Set<String> gatewaySubscribedLabel = gatewayArtifactSynchronizerProperties.getGatewayLabels();
             String label = null;
-            if (!labelsSet.isEmpty() || !gatewaySubscribedLabel.isEmpty()){
-                labelsSet.retainAll(gatewaySubscribedLabel);
-                if (!labelsSet.isEmpty()){
-                    label = labelsSet.iterator().next();
+            String apiId = null;
+            try {
+                apiId = (String)artifactObject.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
+                String labelsStr = artifactObject.get(APIConstants.GatewayArtifactSynchronizer.LABELS).toString();
+
+                Set<String> labelsSet = new Gson().fromJson(labelsStr, new TypeToken<HashSet<String>>(){}.getType());
+                Set<String> gatewaySubscribedLabel = gatewayArtifactSynchronizerProperties.getGatewayLabels();
+                if (!labelsSet.isEmpty() || !gatewaySubscribedLabel.isEmpty()){
+                    labelsSet.retainAll(gatewaySubscribedLabel);
+                    if (!labelsSet.isEmpty()){
+                        label = labelsSet.iterator().next();
+                    }
                 }
+            } catch (Exception e ){
+                log.error("Unexpected response received from the storage ", e);
             }
+
             apiAttribute.put(APIConstants.GatewayArtifactSynchronizer.API_ID, apiId);
             apiAttribute.put(APIConstants.GatewayArtifactSynchronizer.LABEL, label);
             return apiAttribute;
