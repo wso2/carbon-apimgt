@@ -28,6 +28,7 @@
         "async-react-component": "^0.7.0",
         "autosuggest-highlight": "^3.1.1",
         "dayjs": "^1.8.28",
+        "fastestsmallesttextencoderdecoder": "^1.0.22",
         "lodash.clonedeep": "^4.5.0",
         "lodash.isempty": "^4.4.0",
         "material-ui-chip-input": "^1.1.0",

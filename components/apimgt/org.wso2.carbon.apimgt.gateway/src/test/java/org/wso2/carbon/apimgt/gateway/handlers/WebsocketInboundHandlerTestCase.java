@@ -400,7 +400,9 @@ public class WebsocketInboundHandlerTestCase {
             APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
 
             @Override
-            protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey, String tenantDomain)
+            protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain,
+                                                                       String apiKey,
+                                                                       String tenantDomain)
                     throws APISecurityException {
                 return info;
             }
@@ -421,7 +423,9 @@ public class WebsocketInboundHandlerTestCase {
             APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
 
             @Override
-            protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey, String tenantDomain)
+            protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain,
+                                                                       String apiKey,
+                                                                       String tenantDomain)
                     throws APISecurityException {
                 info.setAuthorized(true);
                 info.setApiName("Phoneverify*1.0");

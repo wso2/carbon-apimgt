@@ -29,23 +29,20 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.security.Key;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -137,7 +134,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     public String generateToken(TokenValidationContext validationContext) throws APIManagementException{
 
-        String jwtHeader = buildHeader(validationContext.getValidationInfoDTO().getEndUserName());
+        String jwtHeader = buildHeader();
 
         String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
@@ -167,7 +164,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         }
     }
 
-    public String buildHeader(String endUserName) throws APIManagementException {
+    public String buildHeader() throws APIManagementException {
         String jwtHeader = null;
 
         //if signature algo==NONE, header without cert
@@ -182,7 +179,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             jwtHeader = jwtHeaderBuilder.toString();
 
         } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
-            jwtHeader = addCertToHeader(endUserName);
+            jwtHeader = addCertToHeader();
         }
         return jwtHeader;
     }
@@ -193,7 +190,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         Map<String, String> customClaims = populateCustomClaims(validationContext);
 
         //get tenantId
-        int tenantId = APIUtil.getTenantId(validationContext.getValidationInfoDTO().getEndUserName());
+        int tenantId = APIUtil.getTenantId(validationContext.getTenantDomain());
 
         String claimSeparator = getMultiAttributeSeparator(tenantId);
         if (StringUtils.isNotBlank(claimSeparator)) {
@@ -255,17 +252,12 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     public byte[] signJWT(String assertion, String endUserName) throws APIManagementException {
 
-        String tenantDomain = null;
-
         try {
-            //get tenant domain
-            tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
-            Key privateKey = CertificateMgtUtils.getInstance().getPrivateKey(tenantDomain);
-            return APIUtil.signJwt(assertion, (PrivateKey) privateKey, signatureAlgorithm);
-        } catch (RegistryException e) {
-            String error = "Error in loading tenant registry for " + tenantDomain;
-            //do not log
-            throw new APIManagementException(error, e);
+            KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
+            PrivateKey privateKey = keyStoreManager.getDefaultPrivateKey();
+            return APIUtil.signJwt(assertion, privateKey, signatureAlgorithm);
+        } catch (Exception e) {
+            throw new APIManagementException(e);
         }
     }
 
@@ -311,24 +303,16 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     /**
      * Helper method to add public certificate to JWT_HEADER to signature verification.
      *
-     * @param endUserName - The end user name
      * @throws APIManagementException
      */
-    protected String addCertToHeader(String endUserName) throws APIManagementException {
+    protected String addCertToHeader() throws APIManagementException {
 
         try {
-            //get tenant domain
-            String tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
-            Certificate publicCert = CertificateMgtUtils.getInstance().getPublicCertificate(tenantDomain);
-
-            //TODO: maintain a hashmap with tenants' pubkey thumbprints after first initialization
-            if (publicCert == null) {
-                throw new APIManagementException("Error in obtaining keystore for tenantDomain = " + tenantDomain);
-            } else {
-                return APIUtil.generateHeader(publicCert, signatureAlgorithm);
-            }
-        } catch (APIManagementException e) {
-            String error = "Error in obtaining tenant's keystore";
+            KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
+            Certificate publicCert = keyStoreManager.getDefaultPrimaryCertificate();
+            return APIUtil.generateHeader(publicCert, signatureAlgorithm);
+        } catch (Exception e) {
+            String error = "Error in obtaining keystore";
             throw new APIManagementException(error, e);
         }
     }
