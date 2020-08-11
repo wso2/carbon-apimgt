@@ -593,7 +593,7 @@
   "Workflow.ApplicationCreation.title.applicationcreation": "Application Creation - Approval Tasks",
   "Workflow.ApplicationCreation.update.success": "Workflow status is updated successfully",
   "Workflow.ApplicationCreation.updateStatus.has.errors": "Unable to complete subscription creation approve/reject process.",
-  "Workflow.ApplicationRegistration.List.empty.content.applicationregistrations": "There are no pending workflow requests for application.",
+  "Workflow.ApplicationRegistration.List.empty.content.applicationregistrations": "There are no pending workflow requests for application registration (key generation).",
   "Workflow.ApplicationRegistration.List.empty.title.applicationregistrations": "Application Registration",
   "Workflow.ListUserCreation.search.default": "Search by Tenant name or domain",
   "Workflow.ListUserCreation.title.usercreation": "User Creation - Approval Tasks",
