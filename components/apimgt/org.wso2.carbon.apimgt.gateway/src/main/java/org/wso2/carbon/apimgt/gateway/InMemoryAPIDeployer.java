@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -72,7 +73,8 @@ public class InMemoryAPIDeployer {
                             APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
                     if (gatewayRuntimeArtifact != null) {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
-                        apiGatewayAdmin.deployAPI(gatewayAPIDTO);
+                        APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
+                        apiGatewayAdminClient.deployAPI(gatewayAPIDTO);
                         if (debugEnabled) {
                             log.debug("API with " + apiId + " is deployed in gateway with the label of " + gatewayLabel);
                         }
@@ -110,6 +112,7 @@ public class InMemoryAPIDeployer {
             if (artifactRetriever != null) {
                 try {
                     Iterator<String> it = assignedGatewayLabels.iterator();
+                    APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
                     while (it.hasNext()) {
                         String label = it.next();
                         List<String> gatewayRuntimeArtifacts = ServiceReferenceHolder
@@ -120,7 +123,7 @@ public class InMemoryAPIDeployer {
                                 if (APIruntimeArtifact != null) {
                                     gatewayAPIDTO = new Gson().fromJson(APIruntimeArtifact, GatewayAPIDTO.class);
                                     log.info("Deploying synapse artifacts of " + gatewayAPIDTO.getName());
-                                    apiGatewayAdmin.deployAPI(gatewayAPIDTO);
+                                    apiGatewayAdminClient.deployAPI(gatewayAPIDTO);
                                 }
                             if (debugEnabled) {
                                 log.debug("APIs deployed in gateway with the label of " + label);
@@ -164,7 +167,8 @@ public class InMemoryAPIDeployer {
                                     APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
                     if (gatewayRuntimeArtifact != null) {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
-                        apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
+                        APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
+                        apiGatewayAdminClient.unDeployAPI(gatewayAPIDTO);
                         if (debugEnabled) {
                             log.debug("API with " + apiId + " is undeployed in gateway with the label of " + gatewayLabel);
                         }

@@ -888,7 +888,11 @@
                 {% if apim.throttling.jms.topic_connection_factory is defined %}
                 <connectionfactory.TopicConnectionFactory>{{apim.throttling.jms.topic_connection_factory}}</connectionfactory.TopicConnectionFactory>
                 {% elif apim.throttling.throttle_decision_endpoints is defined %}
-                <connectionfactory.TopicConnectionFactory>amqp://{{apim.throttling.jms.username}}:{{apim.throttling.jms.password}}@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+                <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+                {% elif apim.throttling.jms.username is defined %}
+                {% if apim.throttling.jms.password is defined %}
+                <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
+                {% endif %}
                 {% else %}
                 <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
                 {% endif %}
@@ -1214,9 +1218,13 @@
              <transport.jms.DestinationType>topic</transport.jms.DestinationType>
              <java.naming.factory.initial>{{apim.event_hub.java_naming_factory_initial}}</java.naming.factory.initial>
              {% if apim.event_hub.event_listening_endpoints is defined %}
-             <connectionfactory.TopicConnectionFactory>amqp://{{apim.event_hub.username}}:{{apim.event_hub.password}}@clientid/carbon?brokerlist='{% for url in apim.event_hub.event_listening_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.event_hub.username}}]]>:<![CDATA[{{apim.event_hub.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.event_hub.event_listening_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
              {% elif apim.throttling.throttle_decision_endpoints is defined %}
-             <connectionfactory.TopicConnectionFactory>amqp://{{apim.throttling.jms.username}}:{{apim.throttling.jms.password}}@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             {% elif apim.throttling.jms.username is defined %}
+             {% if apim.throttling.jms.password is defined %}
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
+             {% endif %}
              {% else %}
              <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
              {% endif %}

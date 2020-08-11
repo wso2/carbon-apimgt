@@ -150,10 +150,14 @@ function getOperationScopes(operation, spec) {
     if (VERSIONS.V3.includes(openAPIVersion)) {
         if (Array.isArray(operation.security) && operation.security.find((item) => item.default)) {
             scopes = operation.security.find((item) => item.default).default;
+        } else if (operation['x-scope']) {
+            scopes = [operation['x-scope']];
         }
     } else if (VERSIONS.V2.includes(openAPIVersion)) {
         if (Array.isArray(operation.security) && operation.security.find((item) => item.default)) {
             scopes = operation.security.find((item) => item.default).default;
+        } else if (operation['x-scope']) {
+            scopes = [operation['x-scope']];
         }
     }
     return scopes;

@@ -91,7 +91,7 @@ function AdvanceEndpointConfig(props) {
             config.format = 'soap11';
             config.optimize = 'SWA';
         }
-        config.actionDuration = '300';
+        config.actionDuration = '30000';
         config.actionSelect = 'fault';
         config.factor = '';
         config.retryDelay = '';

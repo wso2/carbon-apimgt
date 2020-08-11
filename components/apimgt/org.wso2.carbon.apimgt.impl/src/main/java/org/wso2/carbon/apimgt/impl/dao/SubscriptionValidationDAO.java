@@ -135,7 +135,7 @@ public class SubscriptionValidationDAO {
                     application.setUuid(resultSet.getString("APP_UUID"));
                     application.setPolicy(resultSet.getString("TIER"));
                     application.setSubName(resultSet.getString("SUB_NAME"));
-                    application.setName(resultSet.getString("NAME"));
+                    application.setName(resultSet.getString("APS_NAME"));
                     application.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     temp.put(appId, application);
                 }
@@ -207,7 +207,7 @@ public class SubscriptionValidationDAO {
                 SubscriptionPolicy subscriptionPolicyDTO = new SubscriptionPolicy();
 
                 subscriptionPolicyDTO.setId(resultSet.getInt("POLICY_ID"));
-                subscriptionPolicyDTO.setName(resultSet.getString("NAME"));
+                subscriptionPolicyDTO.setName(resultSet.getString("POLICY_NAME"));
                 subscriptionPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                 subscriptionPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
 
@@ -837,7 +837,7 @@ public class SubscriptionValidationDAO {
                     SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
 
                     subscriptionPolicy.setId(resultSet.getInt("POLICY_ID"));
-                    subscriptionPolicy.setName(resultSet.getString("NAME"));
+                    subscriptionPolicy.setName(resultSet.getString("POLICY_NAME"));
                     subscriptionPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                     subscriptionPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
 

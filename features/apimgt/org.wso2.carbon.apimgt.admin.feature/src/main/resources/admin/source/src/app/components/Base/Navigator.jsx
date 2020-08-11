@@ -74,7 +74,7 @@ function Navigator(props) {
         classes, history, ...other
     } = props;
     const intl = useIntl();
-    const { settings } = useAppContext();
+    const { settings, user: { _scopes } } = useAppContext();
     const isAnalyticsEnabled = settings.analyticsEnabled;
     const matchMenuPath = (currentRoute, pathToMatch) => {
         return (currentRoute.indexOf(pathToMatch) !== -1);
@@ -83,6 +83,25 @@ function Navigator(props) {
     if (!isAnalyticsEnabled) {
         routeMenuMapping = RouteMenuMapping(intl).filter((menu) => menu.id !== 'Manage Alerts');
     }
+
+    const isWorkflowManager = _scopes.includes('apim:api_workflow_view')
+    && _scopes.includes('apim:api_workflow_approve')
+    && _scopes.includes('apim:tenantInfo')
+    && _scopes.includes('openid')
+    && _scopes.includes('apim:admin_settings')
+    && _scopes.length === 5;
+
+    if (isWorkflowManager) {
+        const { location: { pathname } } = history;
+        if (pathname.indexOf('dashboard') !== -1) {
+            history.push('/tasks/user-creation');
+        }
+        routeMenuMapping = routeMenuMapping.filter(((route) => route.id === intl.formatMessage({
+            id: 'Base.RouteMenuMapping.tasks',
+            defaultMessage: 'Tasks',
+        })));
+    }
+
     const updateAllRoutePaths = (path) => {
         for (let i = 0; i < routeMenuMapping.length; i++) {
             const childRoutes = routeMenuMapping[i].children;
