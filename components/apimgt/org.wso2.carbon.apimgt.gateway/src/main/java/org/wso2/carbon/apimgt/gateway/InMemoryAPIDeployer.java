@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway;
 
 import com.google.gson.Gson;
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
@@ -71,7 +72,7 @@ public class InMemoryAPIDeployer {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(apiId, gatewayLabel,
                             APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                    if (gatewayRuntimeArtifact != null) {
+                    if (!StringUtils.isEmpty(gatewayRuntimeArtifact)) {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
                         APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
                         apiGatewayAdminClient.deployAPI(gatewayAPIDTO);
@@ -120,18 +121,19 @@ public class InMemoryAPIDeployer {
                         for (String APIruntimeArtifact :gatewayRuntimeArtifacts){
                             GatewayAPIDTO gatewayAPIDTO = null;
                             try {
-                                if (APIruntimeArtifact != null) {
+                                if (!StringUtils.isEmpty(APIruntimeArtifact)) {
                                     gatewayAPIDTO = new Gson().fromJson(APIruntimeArtifact, GatewayAPIDTO.class);
                                     log.info("Deploying synapse artifacts of " + gatewayAPIDTO.getName());
                                     apiGatewayAdminClient.deployAPI(gatewayAPIDTO);
                                 }
-                            if (debugEnabled) {
-                                log.debug("APIs deployed in gateway with the label of " + label);
-                            }
                             } catch (AxisFault axisFault) {
                                 log.error("Error in deploying" + gatewayAPIDTO.getName()+ " to the Gateway ");
                                 continue;
                             }
+                        }
+
+                        if (debugEnabled) {
+                            log.debug("APIs deployed in gateway with the label of " + label);
                         }
                     }
                     return true;
@@ -165,7 +167,7 @@ public class InMemoryAPIDeployer {
                     String gatewayRuntimeArtifact = artifactRetriever
                             .retrieveArtifact(apiId, gatewayLabel,
                                     APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_ANY);
-                    if (gatewayRuntimeArtifact != null) {
+                    if (!StringUtils.isEmpty(gatewayRuntimeArtifact)) {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
                         APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
                         apiGatewayAdminClient.unDeployAPI(gatewayAPIDTO);
@@ -207,7 +209,7 @@ public class InMemoryAPIDeployer {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(apiId, gatewayLabel,
                             APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                    if (gatewayRuntimeArtifact != null) {
+                    if (!StringUtils.isEmpty(gatewayRuntimeArtifact)) {
                         gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
                         if (debugEnabled) {
                             log.debug("Retrieved artifacts for API  " + apiId + " retrieved from eventhub");
