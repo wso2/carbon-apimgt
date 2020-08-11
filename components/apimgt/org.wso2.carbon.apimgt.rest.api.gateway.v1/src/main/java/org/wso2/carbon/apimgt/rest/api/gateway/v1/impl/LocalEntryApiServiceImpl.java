@@ -48,11 +48,17 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
         GatewayAPIDTO gatewayAPIDTO = null;
+        JSONObject responseObj = new JSONObject();
         try {
             Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version,
                     tenantDomain);
             String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
             String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
+
+            if (label == null){
+                return Response.status(Response.Status.BAD_REQUEST).entity(apiName + " is not deployed in the Gateway").build();
+            }
+
             gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
             if (debugEnabled) {
                 log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
@@ -62,8 +68,6 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
             log.error(errorMessage, e);
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-
-        JSONObject responseObj = new JSONObject();
 
         if (gatewayAPIDTO != null) {
             try {
@@ -91,9 +95,7 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
             String responseStringObj = String.valueOf(responseObj);
             return Response.ok().entity(responseStringObj).build();
         } else {
-            responseObj.put("Message", "Error");
-            String responseStringObj = String.valueOf(responseObj);
-            return Response.serverError().entity(responseStringObj).build();
+            return Response.serverError().entity("Unexpected error occurred").build();
         }
     }
 }
