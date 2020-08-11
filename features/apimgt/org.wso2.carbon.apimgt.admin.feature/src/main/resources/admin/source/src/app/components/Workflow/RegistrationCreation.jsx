@@ -404,10 +404,7 @@ function ListLabels() {
                         <Typography variant='body2' color='textSecondary' component='p'>
                             <FormattedMessage
                                 id='Workflow.ApplicationRegistration.List.empty.content.applicationregistrations'
-                                defaultMessage={'There are no pending workflow requests for application '
-                                    + 'registration. You can approve or reject pending workflow requests for '
-                                    + 'application registration. The Workflow Approval Executor needs to be enabled '
-                                    + 'to approve or reject the requests. '}
+                                defaultMessage={'There are no pending workflow requests for application.'}
                             />
                         </Typography>
                     </CardContent>
