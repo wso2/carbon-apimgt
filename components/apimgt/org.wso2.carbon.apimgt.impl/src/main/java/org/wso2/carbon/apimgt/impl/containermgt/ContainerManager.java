@@ -83,7 +83,7 @@ public interface ContainerManager {
 
     /**
      * Represents the LC change Blocked --> Republish
-     * Redeploy the API CR with "override : false"
+     * Redeploy the API CR with "override : true"
      * @param api API
      * @param apiId API Identifier
      * @param registry API registry

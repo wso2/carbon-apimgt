@@ -5670,6 +5670,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                         ContainerManager containerManager =
                                                                 getContainerManagerInstance(containerMgtDetails
                                                                         .get(ContainerBasedConstants.CLASS_NAME).toString());
+                                                        containerManager.initManager(containerMgtInfoDetails);
                                                         if (action.equals(ContainerBasedConstants.BLOCK)) {
                                                             containerManager.changeLCStateToBlocked(apiIdentifier,
                                                                     containerMgtInfoDetails);
