@@ -18,6 +18,7 @@
  *
  */
 var path = require('path');
+const fs = require('fs');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 
@@ -43,8 +44,10 @@ const config = {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
             AppTests: path.resolve(__dirname, 'source/Tests/'),
-            react: path.resolve('../../../../../node_modules/react'),
-            reactDom: path.resolve('../../../../../node_modules/react-dom'),
+            react: fs.existsSync('../../../../../node_modules/react')
+                ? path.resolve('../../../../../node_modules/react') : path.resolve('../node_modules/react'),
+            reactDom: fs.existsSync('../../../../../node_modules/react-dom')
+                ? path.resolve('../../../../../node_modules/react-dom') : path.resolve('../node_modules/react-dom'),
         },
         extensions: ['.mjs','.js', '.jsx'],
     },
