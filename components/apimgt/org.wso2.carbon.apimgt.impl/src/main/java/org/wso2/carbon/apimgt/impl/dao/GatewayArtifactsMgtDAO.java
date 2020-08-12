@@ -112,13 +112,21 @@ public class GatewayArtifactsMgtDAO {
             throws APIManagementException {
         ResultSet rs = null;
         String gatewayRuntimeArtifacts = null;
+        String sqlQuery;
+        if (APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_ANY.equals(gatewayInstruction)) {
+            sqlQuery = SQLConstants.GET_API_ARTIFACT_ANY_INSTRUCTION;
+        } else {
+            sqlQuery = SQLConstants.GET_API_ARTIFACT;
+        }
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
-                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ARTIFACT)) {
+                PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
             connection.setAutoCommit(false);
             connection.commit();
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
-            statement.setString(3, gatewayInstruction);
+            if (!APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_ANY.equals(gatewayInstruction)) {
+                statement.setString(3, gatewayInstruction);
+            }
             rs = statement.executeQuery();
             if (rs.next()) {
                 try (InputStream inputStream = rs.getBinaryStream(1)) {
