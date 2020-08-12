@@ -9935,7 +9935,8 @@ public final class APIUtil {
             apiProduct.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             apiProduct.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
-            apiProduct.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.ENABLE_STORE)));
+            apiProduct.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_ENABLE_STORE)));
             apiProduct.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
             apiProduct.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
 
