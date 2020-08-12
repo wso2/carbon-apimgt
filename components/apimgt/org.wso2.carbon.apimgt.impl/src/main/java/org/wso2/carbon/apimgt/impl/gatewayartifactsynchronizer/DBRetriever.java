@@ -164,8 +164,8 @@ public class DBRetriever implements ArtifactRetriever {
                         label = labelsSet.iterator().next();
                     }
                 }
-            } catch (Exception e ){
-                log.error("Unexpected response received from the storage ", e);
+            } catch (ClassCastException e){
+                log.error("Unexpected response received from the storage." + e.getMessage());
             }
 
             apiAttribute.put(APIConstants.GatewayArtifactSynchronizer.API_ID, apiId);

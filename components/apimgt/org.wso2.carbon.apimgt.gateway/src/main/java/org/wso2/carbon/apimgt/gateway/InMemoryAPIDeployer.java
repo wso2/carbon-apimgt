@@ -72,7 +72,7 @@ public class InMemoryAPIDeployer {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(apiId, gatewayLabel,
                             APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                    if (!StringUtils.isEmpty(gatewayRuntimeArtifact)) {
+                    if (StringUtils.isNotEmpty(gatewayRuntimeArtifact)) {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
                         APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
                         apiGatewayAdminClient.deployAPI(gatewayAPIDTO);
@@ -118,11 +118,11 @@ public class InMemoryAPIDeployer {
                         String label = it.next();
                         List<String> gatewayRuntimeArtifacts = ServiceReferenceHolder
                                 .getInstance().getArtifactRetriever().retrieveAllArtifacts(label);
-                        for (String APIruntimeArtifact :gatewayRuntimeArtifacts){
+                        for (String runtimeArtifact :gatewayRuntimeArtifacts){
                             GatewayAPIDTO gatewayAPIDTO = null;
                             try {
-                                if (!StringUtils.isEmpty(APIruntimeArtifact)) {
-                                    gatewayAPIDTO = new Gson().fromJson(APIruntimeArtifact, GatewayAPIDTO.class);
+                                if (StringUtils.isNotEmpty(runtimeArtifact)) {
+                                    gatewayAPIDTO = new Gson().fromJson(runtimeArtifact, GatewayAPIDTO.class);
                                     log.info("Deploying synapse artifacts of " + gatewayAPIDTO.getName());
                                     apiGatewayAdminClient.deployAPI(gatewayAPIDTO);
                                 }
@@ -167,7 +167,7 @@ public class InMemoryAPIDeployer {
                     String gatewayRuntimeArtifact = artifactRetriever
                             .retrieveArtifact(apiId, gatewayLabel,
                                     APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_ANY);
-                    if (!StringUtils.isEmpty(gatewayRuntimeArtifact)) {
+                    if (StringUtils.isNotEmpty(gatewayRuntimeArtifact)) {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
                         APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
                         apiGatewayAdminClient.unDeployAPI(gatewayAPIDTO);
@@ -209,7 +209,7 @@ public class InMemoryAPIDeployer {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(apiId, gatewayLabel,
                             APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                    if (!StringUtils.isEmpty(gatewayRuntimeArtifact)) {
+                    if (StringUtils.isNotEmpty(gatewayRuntimeArtifact)) {
                         gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
                         if (debugEnabled) {
                             log.debug("Retrieved artifacts for API  " + apiId + " retrieved from eventhub");
