@@ -385,10 +385,7 @@ function ListLabels() {
                         <Typography variant='body2' color='textSecondary' component='p'>
                             <FormattedMessage
                                 id='Workflow.SubscriptionCreation.List.empty.content.subscriptioncreations'
-                                defaultMessage={'There are no workflow pending requests for subscription creation.'
-                                + 'It is possible to approve or reject workflow pending requests of subscription '
-                                + ' creation. Workflow Approval Executor needs to be enabled to approve '
-                                + 'or reject the requests. '}
+                                defaultMessage={'There are no pending workflow requests for subscription creation.'}
                             />
                         </Typography>
                     </CardContent>
