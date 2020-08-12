@@ -352,7 +352,7 @@ class ApplicationFormHandler extends React.Component {
 
     validateDescription = (value) => {
         const { intl } = this.props;
-        if (value && value.length !== '' && value.length >= 512) {
+        if (value && value.length !== '' && value.length > 512) {
             this.setState({ isDescriptionValid: false });
             return Promise.reject(new Error(intl.formatMessage({
                 id: 'Applications.Create.ApplicationFormHandler.app.desc.long',
