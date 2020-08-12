@@ -1715,6 +1715,7 @@ public abstract class AbstractAPIManager implements APIManager {
         defaultApp.setGroupId("");
         defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);
         defaultApp.setUUID(UUID.randomUUID().toString());
+        defaultApp.setDescription(APIConstants.DEFAULT_APPLICATION_DESCRIPTION);
         apiMgtDAO.addApplication(defaultApp, subscriber.getName());
     }
 
