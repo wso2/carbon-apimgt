@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class GatewayArtifactsMgtDAO {
     private static final Log log = LogFactory.getLog(GatewayArtifactsMgtDAO.class);
@@ -298,16 +299,16 @@ public class GatewayArtifactsMgtDAO {
     }
 
     /**
-     * Retrieve the gateway label which the API subscribed to
+     * Retrieve the gateway labels which the API subscribed to
      *
      * @param apiID - API ID  of the API
      * @throws APIManagementException if an error occurs
      */
-    public String getGatewayAPILabel(String apiID)
+    public List<String> getGatewayAPILabels(String apiID)
             throws APIManagementException {
 
         ResultSet rs = null;
-        String label =  null;
+        List<String> labels =  new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_LABEL)) {
             connection.setAutoCommit(false);
@@ -315,13 +316,13 @@ public class GatewayArtifactsMgtDAO {
             statement.setString(1, apiID);
             rs = statement.executeQuery();
             while (rs.next()) {
-                label = rs.getString("GATEWAY_LABEL");
+                labels.add(rs.getString("GATEWAY_LABEL"));
             }
         } catch (SQLException e) {
             handleException("Failed to get artifacts " , e);
         } finally {
             GatewayArtifactsMgtDBUtil.closeResultSet(rs);
         }
-        return label;
+        return labels;
     }
 }

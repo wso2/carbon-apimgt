@@ -499,8 +499,10 @@ definitions:
     properties:
       count:
         type: integer
-      label:
-        type: string
+      labels:
+        type: array
+        items:
+          type: string
       apiId:
         type: string
 
