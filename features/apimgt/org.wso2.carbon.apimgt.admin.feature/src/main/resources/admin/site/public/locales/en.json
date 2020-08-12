@@ -576,7 +576,7 @@
   "Workflow.APIStatechange.help.link.one": "Create a API State change approval workflow request",
   "Workflow.ApiStateChange.permission.denied.content": "You dont have enough permission to view API State Change - Approval Tasks. Please contact the site administrator.",
   "Workflow.ApiStateChange.permission.denied.title": "Permission Denied",
-  "Workflow.ApplicationCreation.List.empty.content.applicationcreations": "There are no pending workflow requests for application creation (key generation).",
+  "Workflow.ApplicationCreation.List.empty.content.applicationcreations": "There are no pending workflow requests for application creation.",
   "Workflow.ApplicationCreation.List.empty.title.applicationcreations": "Application Creation",
   "Workflow.ApplicationCreation.apicall.has.errors": "Unable to get workflow pending requests for Application Creation",
   "Workflow.ApplicationCreation.fetch.has.errors": "Unable to fetch data.",
