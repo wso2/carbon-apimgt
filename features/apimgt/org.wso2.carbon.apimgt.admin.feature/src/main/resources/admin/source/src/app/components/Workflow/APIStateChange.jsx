@@ -398,7 +398,7 @@ function ListLabels() {
                         <Typography variant='body2' color='textSecondary' component='p'>
                             <FormattedMessage
                                 id='Workflow.APIStateChange.List.empty.content.apistatechange'
-                                defaultMessage={'There are no pending workflow requests for API state change.'}
+                                defaultMessage='There are no pending workflow requests for API state change.'
                             />
                         </Typography>
                     </CardContent>

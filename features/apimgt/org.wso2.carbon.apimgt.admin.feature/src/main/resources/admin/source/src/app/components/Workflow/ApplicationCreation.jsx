@@ -386,8 +386,7 @@ function ListLabels() {
                         <Typography variant='body2' color='textSecondary' component='p'>
                             <FormattedMessage
                                 id='Workflow.ApplicationCreation.List.empty.content.applicationcreations'
-                                defaultMessage={'There are no pending workflow requests for application creation.'
-                                }
+                                defaultMessage='There are no pending workflow requests for application creation.'
                             />
                         </Typography>
                     </CardContent>
