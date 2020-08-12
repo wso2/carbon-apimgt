@@ -114,11 +114,11 @@ const ApplicationCreate = (props) => {
         handleAddChip,
         handleDeleteChip,
     } = props;
-
+    const description = applicationRequest.description || '';
     const showDescError = () => {
-        const descLength = applicationRequest.description.length;
+        const descLength = description.length;
         const remaining = 512 - descLength;
-        return( `( ${remaining.toString()} ) ${intl.formatMessage({
+        return (`( ${remaining.toString()} ) ${intl.formatMessage({
             defaultMessage:
                 'characters remaining',
             id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.length.error.suffix',
@@ -198,7 +198,7 @@ const ApplicationCreate = (props) => {
                 fullWidth
                 multiline
                 rows={4}
-                value={applicationRequest.description}
+                value={description}
                 label={intl.formatMessage({
                     defaultMessage: 'Application Description',
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.application.description.label',
@@ -210,7 +210,7 @@ const ApplicationCreate = (props) => {
                     defaultMessage: 'My Mobile Application',
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application.placeholder',
                 })}
-                error={applicationRequest.description !== '' && applicationRequest.description.length >= 512}
+                error={description !== '' && description.length > 512}
                 onBlur={(e) => validateDescription(e.target.value)}
 
             />
