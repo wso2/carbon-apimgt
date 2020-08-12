@@ -164,7 +164,7 @@ public class InMemoryAPIDeployer {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever
                             .retrieveArtifact(apiId, gatewayLabel,
-                                    APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
+                                    APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_ANY);
                     if (gatewayRuntimeArtifact != null) {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
                         APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
