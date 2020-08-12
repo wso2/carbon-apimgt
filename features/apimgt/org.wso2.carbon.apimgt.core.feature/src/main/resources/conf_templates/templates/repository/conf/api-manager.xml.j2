@@ -1162,6 +1162,8 @@
         {% endif %}
         {% if apim.event_hub.service_url is defined %}
         <ServiceURL>{{apim.event_hub.service_url}}</ServiceURL>
+        {% else %}
+         <ServiceURL>{{apim.throttling.service_url}}</ServiceURL>
         {% endif %}
          {% if apim.event_hub.init_delay is defined %}
         <InitDelay>{{apim.event_hub.init_delay}}</InitDelay>
