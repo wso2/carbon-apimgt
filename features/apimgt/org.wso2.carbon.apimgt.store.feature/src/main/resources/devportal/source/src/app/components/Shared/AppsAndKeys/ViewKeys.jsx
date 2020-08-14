@@ -36,6 +36,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
+import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
@@ -291,6 +292,10 @@ class ViewKeys extends React.Component {
                     this.setState({ notFound: true });
                 }
                 this.setState({ isUpdating: false });
+                const { response } = error;
+                if (response && response.body) {
+                    Alert.error(response.body.message);
+                }
             });
     };
 
