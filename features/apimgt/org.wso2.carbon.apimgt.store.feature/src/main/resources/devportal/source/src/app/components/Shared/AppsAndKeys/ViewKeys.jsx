@@ -293,7 +293,7 @@ class ViewKeys extends React.Component {
                 }
                 this.setState({ isUpdating: false });
                 const { response } = error;
-                if (response.body) {
+                if (response && response.body) {
                     Alert.error(response.body.message);
                 }
             });
