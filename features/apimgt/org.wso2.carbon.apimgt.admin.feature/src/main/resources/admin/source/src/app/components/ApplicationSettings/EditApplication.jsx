@@ -76,7 +76,7 @@ function Edit(props) {
     };
 
     const validateOwner = () => {
-        let validationError = '';
+        let validationError = 'Something went wrong when validating user';
 
         const applicationsWithSameName = applicationList.filter(
             (app) => app.name === name && app.owner === owner,
@@ -95,14 +95,12 @@ function Edit(props) {
                 }).catch((error) => {
                     const { response } = error;
                     // This api returns 404 when the $owner is not found.
-                    // identify the case specially with error code 901502 and display error.
-                    if (response.body) {
-                        if (response.body.code === 901502) {
-                            validationError = `${owner} is not a valid Subscriber`;
-                            reject(validationError);
-                        }
-                    } else {
-                        validationError = 'Something went wrong when validating user';
+                    // error codes: 901502, 901500 for user not found and scope not found
+                    if (response?.body?.code === 901502 || response?.body?.code === 901500) {
+                        validationError = `${owner} is not a valid Subscriber`;
+                    }
+                }).finally(() => {
+                    if (validationError) {
                         reject(validationError);
                     }
                 });
