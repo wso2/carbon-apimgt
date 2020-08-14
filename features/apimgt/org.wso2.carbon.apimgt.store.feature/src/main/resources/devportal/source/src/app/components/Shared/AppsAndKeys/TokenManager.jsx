@@ -461,7 +461,7 @@ class TokenManager extends React.Component {
                     this.setState({ notFound: true });
                 }
                 const { response } = error;
-                if (response.body) {
+                if (response && response.body) {
                     Alert.error(response.body.message);
                 }
             }).finally(() => this.setState({ isLoading: false }));
