@@ -80,7 +80,7 @@ public class SystemScopesMappingUtil {
                 roleScopeDTO.setName(mapping.getKey());
                 String roles = scopeRoleMapping.get(mapping.getKey());
                 List<String> roleList = new ArrayList<String>(Arrays.asList((roles
-                        .replaceAll("\\s+","")).split(",")));
+                        .replaceAll("\\s+", "")).split(",")));
                 roleScopeDTO.setRoles(roleList);
                 roleScopeDTO.setDescription(mapping.getValue().get(0));
                 roleScopeDTO.setTag(mapping.getValue().get(1));
