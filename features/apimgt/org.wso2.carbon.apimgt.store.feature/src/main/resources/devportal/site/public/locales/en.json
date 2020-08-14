@@ -1,6 +1,7 @@
 {
   "Apis.Details.APIConsole.APIConsole.download.swagger": "Swagger ( /swagger.json )",
   "Apis.Details.ApiCOnsole.generate.test.key": "GET TEST KEY ",
+  "Apis.Details.ApiConsole.ApiConsole.keys.not.generated": "Consumer key and secret not generated for the selected application on the {what} environment. ",
   "Apis.Details.ApiConsole.ApiConsole.subscribe.to.application": "Please subscribe to an application",
   "Apis.Details.ApiConsole.ApiConsole.title": "Try Out",
   "Apis.Details.ApiConsole.SelectAppPanel.applications": "Applications",
@@ -9,7 +10,7 @@
   "Apis.Details.ApiConsole.SelectAppPanel.sandbox.radio": "Sandbox",
   "Apis.Details.ApiConsole.SelectAppPanel.select.key.type.heading": "Key Type",
   "Apis.Details.ApiConsole.SelectAppPanel.select.subscribed.application": "Subscribed applications",
-  "Apis.Details.ApiConsole.TryOutController.default.km.msg.one": "The Default key manager is selected for try out console.",
+  "Apis.Details.ApiConsole.TryOutController.default.km.msg.one": "The Resident Key Manager is selected for try out console.",
   "Apis.Details.ApiConsole.TryOutController.default.km.msg.three": "Try it console is only accessible via the default key manager.Something went wrong while selecting the default Key manager.",
   "Apis.Details.ApiConsole.TryOutController.default.km.msg.two": "Try it console is only accessible via the default key manager.But the default key manager is disabled at the moment.",
   "Apis.Details.ApiConsole.environment": "Environment",

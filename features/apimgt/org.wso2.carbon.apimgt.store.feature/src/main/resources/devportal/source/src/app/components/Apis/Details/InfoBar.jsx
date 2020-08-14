@@ -295,7 +295,7 @@ class InfoBar extends React.Component {
                 if (name === 'all'){
                     response = 'All Applicable';
                 } else {
-                    response = keyManagers;
+                    response = keyManagers.join();
                 }
             });
         }
