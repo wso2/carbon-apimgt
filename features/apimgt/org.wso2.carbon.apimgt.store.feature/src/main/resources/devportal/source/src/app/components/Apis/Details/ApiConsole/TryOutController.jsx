@@ -54,6 +54,9 @@ const styles = makeStyles((theme) => ({
     tokenType: {
         margin: 'auto',
         display: 'flex',
+        '& .MuiButton-contained.Mui-disabled span.MuiButton-label': {
+            color: '#999999',
+        },
     },
     inputAdornmentStart: {
         minWidth: theme.spacing(18),
@@ -92,7 +95,7 @@ const styles = makeStyles((theme) => ({
     },
     warningIcon: {
         color: '#ff9a00',
-        fontSize: 43,
+        fontSize: 25,
         marginRight: 10,
     },
 }));
@@ -123,6 +126,7 @@ function TryOutController(props) {
     const [selectedApplication, setSelectedApplication] = useState([]);
     const [keyManagers, setKeyManagers] = useState([]);
     const [selectedKMObject, setSelectedKMObject] = useState(null);
+    const [ksGenerated, setKSGenerated] = useState(false);
     const apiID = api.id;
     const restApi = new Api();
 
@@ -315,17 +319,22 @@ function TryOutController(props) {
             }
             Application.get(selectedApplication)
                 .then((application) => {
-                    return application.getKeys(keyType);
+                    return application.getKeys(keyType || 'PRODUCTION');
                 })
                 .then((appKeys) => {
-                    if (appKeys.get(selectedKeyManager)
-                    && appKeys.get(selectedKeyManager).keyType === selectedKeyType) {
-                        ({ accessToken } = appKeys.get(selectedKeyManager).token);
+                    const selectedKeys = appKeys.get(selectedKeyManager);
+                    if (selectedKeys && selectedKeys.keyType === selectedKeyType) {
+                        ({ accessToken } = selectedKeys.token);
                     }
-                    if (appKeys.get(selectedKeyManager).keyType === 'PRODUCTION') {
+                    if (selectedKeys && selectedKeys.keyType === 'PRODUCTION') {
                         setProductionAccessToken(accessToken);
-                    } else {
+                    } else if (selectedKeys && selectedKeys.keyType === 'SANDBOX') {
                         setSandboxAccessToken(accessToken);
+                    }
+                    if (selectedKeys && selectedKeys.consumerKey && selectedKeys.consumerKey !== '') {
+                        setKSGenerated(true);
+                    } else {
+                        setKSGenerated(false);
                     }
                     setKeys(appKeys);
                 });
@@ -334,7 +343,7 @@ function TryOutController(props) {
 
     useEffect(() => {
         updateApplication();
-    }, [selectedApplication]);
+    }, [selectedApplication, selectedKeyType, selectedEnvironment, securitySchemeType]);
 
     /**
      * Handle onChange of inputs
@@ -475,11 +484,11 @@ function TryOutController(props) {
                             </Typography>
                             <Box mb={1}>
                                 <Typography variant='body1'>
-                                    <Box display='flex'>
+                                    <Box display='flex' alignItems='center'>
                                         {(selectedKMObject && selectedKMObject.enabled) && (
                                             <FormattedMessage
                                                 id='Apis.Details.ApiConsole.TryOutController.default.km.msg.one'
-                                                defaultMessage='The Default key manager is selected for try out console.'
+                                                defaultMessage='The Resident Key Manager is selected for try out console.'
                                             />
                                         )}
                                         {(selectedKMObject && !selectedKMObject.enabled) && (
@@ -520,42 +529,39 @@ function TryOutController(props) {
                                 onChange={handleChanges}
                                 row
                             >
-                                {isOAuthEnabled && (
-                                    <FormControlLabel
-                                        value='OAUTH'
-                                        control={<Radio />}
-                                        label={(
-                                            <FormattedMessage
-                                                id='Apis.Details.ApiConsole.security.scheme.oauth'
-                                                defaultMessage='OAuth'
-                                            />
-                                        )}
-                                    />
-                                )}
-                                {isApiKeyEnabled && (
-                                    <FormControlLabel
-                                        value='API-KEY'
-                                        control={<Radio />}
-                                        label={(
-                                            <FormattedMessage
-                                                id='Apis.Details.ApiConsole.security.scheme.apikey'
-                                                defaultMessage='API Key'
-                                            />
-                                        )}
-                                    />
-                                )}
-                                {isBasicAuthEnabled && (
-                                    <FormControlLabel
-                                        value='BASIC'
-                                        control={<Radio />}
-                                        label={(
-                                            <FormattedMessage
-                                                id='Apis.Details.ApiConsole.security.scheme.basic'
-                                                defaultMessage='Basic'
-                                            />
-                                        )}
-                                    />
-                                )}
+                                <FormControlLabel
+                                    value='OAUTH'
+                                    disabled={!isOAuthEnabled}
+                                    control={<Radio />}
+                                    label={(
+                                        <FormattedMessage
+                                            id='Apis.Details.ApiConsole.security.scheme.oauth'
+                                            defaultMessage='OAuth'
+                                        />
+                                    )}
+                                />
+                                <FormControlLabel
+                                    value='API-KEY'
+                                    disabled={!isApiKeyEnabled}
+                                    control={<Radio />}
+                                    label={(
+                                        <FormattedMessage
+                                            id='Apis.Details.ApiConsole.security.scheme.apikey'
+                                            defaultMessage='API Key'
+                                        />
+                                    )}
+                                />
+                                <FormControlLabel
+                                    value='BASIC'
+                                    disabled={!isBasicAuthEnabled}
+                                    control={<Radio />}
+                                    label={(
+                                        <FormattedMessage
+                                            id='Apis.Details.ApiConsole.security.scheme.basic'
+                                            defaultMessage='Basic'
+                                        />
+                                    )}
+                                />
                             </RadioGroup>
                         </FormControl>
                     )}
@@ -577,15 +583,42 @@ function TryOutController(props) {
                                         keyManagers={keyManagers}
                                     />
                                 )}
-                            {subscriptions && subscriptions.length === 0 && securitySchemeType !== 'TEST' && (
-                                <Box display='flex' justifyContent='center'>
-                                    <Typography variant='body1' gutterBottom>
-                                        <FormattedMessage
-                                            id='Apis.Details.ApiConsole.ApiConsole.subscribe.to.application'
-                                            defaultMessage='Please subscribe to an application'
-                                        />
-                                    </Typography>
-                                </Box>
+                            {subscriptions && subscriptions.length === 0 && securitySchemeType !== 'TEST' ? (
+                                <Grid x={8} md={6} className={classes.tokenType} item>
+                                    <Box mb={1} alignItems='center'>
+                                        <Typography variant='body1'>
+                                            <Box display='flex'>
+                                                <WarningIcon className={classes.warningIcon} />
+                                                <div>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.ApiConsole.ApiConsole.subscribe.to.application'
+                                                        defaultMessage='Please subscribe to an application'
+                                                    />
+                                                </div>
+                                            </Box>
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            ) : (
+                                !ksGenerated && (
+                                    <Grid x={8} md={6} className={classes.tokenType} item>
+                                        <Box mb={1} alignItems='center'>
+                                            <Typography variant='body1'>
+                                                <Box display='flex'>
+                                                    <WarningIcon className={classes.warningIcon} />
+                                                    <div>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.ApiConsole.ApiConsole.keys.not.generated'
+                                                            defaultMessage={'Consumer key and secret not generated for the selected'
+                                                            + ' application on the {what} environment. '}
+                                                            values={{ what: selectedKeyType }}
+                                                        />
+                                                    </div>
+                                                </Box>
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+                                )
                             )}
                             <Box display='block' justifyContent='center'>
                                 <Grid x={8} md={6} className={classes.tokenType} item>
@@ -674,10 +707,9 @@ function TryOutController(props) {
                                             <Button
                                                 onClick={securitySchemeType === 'API-KEY' ? generateApiKey
                                                     : generateAccessToken}
-                                                color='secondary'
-                                                variant='outlined'
+                                                variant='contained'
                                                 className={classes.genKeyButton}
-                                                disabled={!user || (subscriptions && subscriptions.length === 0)}
+                                                disabled={!user || (subscriptions && subscriptions.length === 0) || !ksGenerated}
                                             >
                                                 {isUpdating && (
                                                     <CircularProgress size={15} />
@@ -700,7 +732,7 @@ function TryOutController(props) {
                                                     />
                                                 )}
                                             >
-                                                <Box m={1}>
+                                                <Box m={1} mt={2}>
                                                     <IconButton
                                                         aria-label='Use existing Access Token or generate a new Test Key'
                                                     >
