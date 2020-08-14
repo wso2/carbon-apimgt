@@ -117,8 +117,7 @@ public class LocalEntryServiceProxy {
 
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             try {
-                OMElement entry = localEntryAdmin.getEntry(key);
-                if (entry != null) {
+                if (localEntryAdmin.isEntryExist(key)) {
                     return true;
                 }
             } catch (LocalEntryAdminException e) {
@@ -126,8 +125,7 @@ public class LocalEntryServiceProxy {
             }
         } else {
             try {
-                OMElement entryForTenant = localEntryAdmin.getEntryForTenant(key, tenantDomain);
-                if (entryForTenant != null) {
+                if (localEntryAdmin.isEntryExistForTenant(key, tenantDomain)) {
                     return true;
                 }
             } catch (LocalEntryAdminException e) {
