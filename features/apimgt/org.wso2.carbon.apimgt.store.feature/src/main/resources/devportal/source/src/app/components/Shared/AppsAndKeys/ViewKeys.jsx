@@ -26,6 +26,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
+import Alert from 'AppComponents/Shared/Alert';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -291,6 +292,10 @@ class ViewKeys extends React.Component {
                     this.setState({ notFound: true });
                 }
                 this.setState({ isUpdating: false });
+                const { response } = error;
+                if (response.body) {
+                    Alert.error(response.body.message);
+                }
             });
     };
 
