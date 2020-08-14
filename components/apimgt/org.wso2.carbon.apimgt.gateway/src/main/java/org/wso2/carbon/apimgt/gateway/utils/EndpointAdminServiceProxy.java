@@ -154,14 +154,9 @@ public class EndpointAdminServiceProxy {
             throws EndpointAdminException {
 
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            if (endpointAdmin.isEndpointExist(endpointName)) {
-                return true;
-            }
+            return endpointAdmin.isEndpointExist(endpointName);
         } else {
-            if (endpointAdmin.isEndpointExistForTenant(endpointName, tenantDomain)) {
-                return true;
-            }
+            return endpointAdmin.isEndpointExistForTenant(endpointName, tenantDomain);
         }
-        return false;
     }
 }
