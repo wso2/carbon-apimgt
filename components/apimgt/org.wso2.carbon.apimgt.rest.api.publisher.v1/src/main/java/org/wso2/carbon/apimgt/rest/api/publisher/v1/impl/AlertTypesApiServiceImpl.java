@@ -57,7 +57,6 @@ public class AlertTypesApiServiceImpl implements AlertTypesApiService {
             RestApiUtil
                     .handleInternalServerError("Internal Server Error Occurred while retrieving alert types", e, log);
         } catch (AlertManagementException e) {
-            log.warn("Analytics is not enabled", e);
             return Response.status(Response.Status.NO_CONTENT).build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();
