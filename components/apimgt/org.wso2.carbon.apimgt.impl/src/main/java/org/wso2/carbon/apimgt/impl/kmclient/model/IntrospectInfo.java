@@ -29,7 +29,7 @@ public class IntrospectInfo {
     @SerializedName("exp")
     private long expiry;
     @SerializedName("iat")
-    private String issuer;
+    private long iat;
     @SerializedName("nbf")
     private long nbf;
     @SerializedName("scope")
@@ -79,14 +79,14 @@ public class IntrospectInfo {
         this.expiry = expiry;
     }
 
-    public String getIssuer() {
+    public long getIat() {
 
-        return issuer;
+        return iat;
     }
 
-    public void setIssuer(String issuer) {
+    public void setIat(long iat) {
 
-        this.issuer = issuer;
+        this.iat = iat;
     }
 
     public long getNbf() {
