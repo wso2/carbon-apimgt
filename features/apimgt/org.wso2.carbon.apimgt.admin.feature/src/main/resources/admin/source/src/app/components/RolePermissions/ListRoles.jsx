@@ -63,7 +63,8 @@ function extractMappings(permissionMapping) {
         } else {
             appMapping[tag] = [mapping];
         }
-        for (const role of roles) {
+        for (const $role of roles) {
+            const role = $role.trim && $role.trim();
             if (roleMapping[role]) {
                 roleMapping[role].push(mapping);
             } else {
@@ -186,9 +187,14 @@ export default function ListRoles() {
             }
             return handleScopeMappingUpdate(updatedAppMappings);
         } else {
-            const updatedRoleAliases = cloneDeep(roleAliases.list).map(({ role, aliases }) => {
-                return { role, aliases: aliases.filter((roleAlias) => roleAlias !== deletedRole) };
-            });
+            const clonedRoleAliases = cloneDeep(roleAliases.list);
+            const updatedRoleAliases = [];
+            for (const { role, aliases } of clonedRoleAliases) {
+                const filteredAliases = aliases.filter((roleAlias) => roleAlias !== deletedRole);
+                if (filteredAliases.length) {
+                    updatedRoleAliases.push({ role, aliases: filteredAliases });
+                }
+            }
             return PermissionAPI.updateRoleAliases(updatedRoleAliases).then((response) => {
                 setRoleAliases(response.body);
             });
