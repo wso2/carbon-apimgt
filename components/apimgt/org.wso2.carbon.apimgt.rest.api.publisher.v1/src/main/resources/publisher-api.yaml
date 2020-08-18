@@ -8000,6 +8000,8 @@ definitions:
         items:
           type: string
           example: ["Finance"]
+        x-otherScopes:
+          - apim:api_publish
       keyManagers:
         description: |
           API Key Managers

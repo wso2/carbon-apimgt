@@ -20,6 +20,10 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
@@ -88,11 +92,11 @@ export default function KeyManager(props) {
                 <Typography className={classes.subHeading} variant='subtitle2'>
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.KeyManager.configuration'
-                        defaultMessage='Keymanager Configuration'
+                        defaultMessage='Key Manager Configuration'
                     />
                 </Typography>
                 <Box ml={1} mb={2}>
-                    <Typography className={classes.subHeading} variant='caption'>
+                    <Typography variant='caption'>
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.oauth.disabled'
                             defaultMessage='Key Manager configuration only valid when OAuth2 security is enabled.'
@@ -107,7 +111,7 @@ export default function KeyManager(props) {
             <Typography className={classes.subHeading} variant='subtitle2'>
                 <FormattedMessage
                     id='Apis.Details.Configuration.components.KeyManager.configuration'
-                    defaultMessage='Keymanager Configuration'
+                    defaultMessage='Key Manager Configuration'
                 />
             </Typography>
             <Box ml={1}>
@@ -140,22 +144,49 @@ export default function KeyManager(props) {
                         )}
                     />
                 </RadioGroup>
-                <Box display='flex' flexDirection='row' mb={2}>
-                    {!keyManagers.includes('all') && keyManagersConfigured.map((key) => (
-                        <FormControlLabel
-                            control={(
-                                <Checkbox
-                                    color='primary'
-                                    checked={keyManagers.includes(key.name)}
-                                    disabled={!key.enabled}
-                                    onChange={handleChange}
-                                    name={key.name}
+                {!keyManagers.includes('all') && (
+                    <Box display='flex' flexDirection='column' m={2}>
+                        <FormControl
+                            required
+                            error={!keyManagers || (keyManagers && keyManagers.length === 0)}
+                            component='fieldset'
+                            className={classes.formControl}
+                        >
+                            <FormLabel component='legend'>
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.components.KeyManager.more.than.one.info'
+                                    defaultMessage='Select one or more Key Managers'
                                 />
-                            )}
-                            label={key.name}
-                        />
-                    ))}
-                </Box>
+                            </FormLabel>
+                            <FormGroup
+                                style={{ flexDirection: 'row' }}
+
+                            >
+                                {keyManagersConfigured.map((key) => (
+                                    <FormControlLabel
+                                        control={(
+                                            <Checkbox
+                                                color='primary'
+                                                checked={keyManagers.includes(key.name)}
+                                                disabled={!key.enabled}
+                                                onChange={handleChange}
+                                                name={key.name}
+                                            />
+                                        )}
+                                        label={key.displayName || key.name}
+                                    />
+                                ))}
+                            </FormGroup>
+                            <FormHelperText>
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.components.KeyManager.more.than.one.error'
+                                    defaultMessage='Select at least one Key Manager'
+                                />
+                            </FormHelperText>
+
+                        </FormControl>
+                    </Box>
+                )}
             </Box>
         </>
     );

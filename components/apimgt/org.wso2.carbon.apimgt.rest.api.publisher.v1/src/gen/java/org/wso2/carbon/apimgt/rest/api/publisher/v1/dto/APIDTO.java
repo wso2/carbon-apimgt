@@ -257,6 +257,7 @@ public enum EndpointImplementationTypeEnum {
     private List<APIScopeDTO> scopes = new ArrayList<>();
     private List<APIOperationsDTO> operations = new ArrayList<>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> categories = new ArrayList<>();
     private Object keyManagers = null;
 
