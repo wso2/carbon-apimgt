@@ -55,6 +55,7 @@ export default function SelectPermissionsStep(props) {
                 />
                 <Box width={400} display='inline' pl={7} pt={2} pb={2}>
                     <Autocomplete
+                        // multiple
                         value={mappedRole}
                         onChange={(e, newValue) => {
                             onMappedRoleSelect(newValue);
