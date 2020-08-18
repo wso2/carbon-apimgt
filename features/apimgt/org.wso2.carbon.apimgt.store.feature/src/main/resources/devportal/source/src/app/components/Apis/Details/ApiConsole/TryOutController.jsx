@@ -58,9 +58,6 @@ const styles = makeStyles((theme) => ({
             color: '#999999',
         },
     },
-    inputAdornmentStart: {
-        minWidth: theme.spacing(18),
-    },
     paper: {
         margin: theme.spacing(1),
         padding: theme.spacing(1),
@@ -470,6 +467,9 @@ function TryOutController(props) {
         });
     }
 
+    const authHeader = `${authorizationHeader}: ${prefix}`;
+    console.log(authHeader.length);
+
     return (
         <IntlProvider locale='en'>
             <Grid x={12} md={6} className={classes.centerItems}>
@@ -656,6 +656,7 @@ function TryOutController(props) {
                                             </Grid>
                                         </>
                                     )}
+
                                     {securitySchemeType !== 'BASIC' && securitySchemeType !== 'TEST' && (
                                         <TextField
                                             fullWidth
@@ -693,7 +694,9 @@ function TryOutController(props) {
                                                 ),
                                                 startAdornment: (
                                                     <InputAdornment
-                                                        className={classes.inputAdornmentStart}
+                                                        style={{
+                                                            minWidth: (authHeader.length * 7),
+                                                        }}
                                                         position='start'
                                                     >
                                                         {`${authorizationHeader}: ${prefix}`}

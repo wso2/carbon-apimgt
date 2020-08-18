@@ -454,7 +454,6 @@
   "Shared.AppsAndKeys.TokenManager.key.generate.success.blocked": "Application keys generate request is currently pending approval by the site administrator.",
   "Shared.AppsAndKeys.TokenManager.key.provide.error": "Error occurred when providing application keys",
   "Shared.AppsAndKeys.TokenManager.key.provide.success": "Application keys provided successfully",
-  "Shared.AppsAndKeys.TokenManager.key.update.error": "Error occurred when updating application keys",
   "Shared.AppsAndKeys.TokenManager.key.update.success": "Application keys updated successfully",
   "Shared.AppsAndKeys.TokenManager.no.km": "No Key Managers",
   "Shared.AppsAndKeys.TokenManager.no.km.content": "No Key Managers active to generate keys.",
