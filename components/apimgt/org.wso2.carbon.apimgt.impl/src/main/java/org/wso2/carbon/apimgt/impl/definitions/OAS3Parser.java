@@ -427,10 +427,12 @@ public class OAS3Parser extends APIDefinition {
         Map<String, SecurityScheme> securitySchemes;
         SecurityScheme securityScheme;
         OAuthFlow oAuthFlow;
+        OAuthFlows oAuthFlows;
         Scopes scopes;
         if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null
                 && (securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null
-                && (oAuthFlow = securityScheme.getFlows().getImplicit()) != null
+                && (oAuthFlows = securityScheme.getFlows()) != null
+                && (oAuthFlow = oAuthFlows.getImplicit()) != null
                 && (scopes = oAuthFlow.getScopes()) != null) {
             Set<Scope> scopeSet = new HashSet<>();
             for (Map.Entry<String, String> entry : scopes.entrySet()) {
