@@ -259,13 +259,16 @@ class ProtectedApp extends Component {
         if (isWidget) {
             return (
                 <>
-                    <iframe
-                        title='iframeOP'
-                        id='iframeOP'
-                        src={checkSessionURL}
-                        width='0px'
-                        height='0px'
-                    />
+                    {clientId
+                    && (
+                        <iframe
+                            title='iframeOP'
+                            id='iframeOP'
+                            src={checkSessionURL}
+                            width='0px'
+                            height='0px'
+                        />
+                    )}
                     <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
                 </>
             );
@@ -278,13 +281,16 @@ class ProtectedApp extends Component {
          */
         return (
             <Base>
-                <iframe
-                    title='iframeOP'
-                    id='iframeOP'
-                    src={checkSessionURL}
-                    width='0px'
-                    height='0px'
-                />
+                {clientId
+                    && (
+                        <iframe
+                            title='iframeOP'
+                            id='iframeOP'
+                            src={checkSessionURL}
+                            width='0px'
+                            height='0px'
+                        />
+                    )}
                 <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
             </Base>
         );
