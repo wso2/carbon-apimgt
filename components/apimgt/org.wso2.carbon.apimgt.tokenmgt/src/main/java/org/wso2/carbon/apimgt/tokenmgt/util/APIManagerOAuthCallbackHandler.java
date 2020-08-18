@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.tokenmgt.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.tokenmgt.ScopesIssuer;
 import org.wso2.carbon.identity.oauth.callback.AbstractOAuthCallbackHandler;
 import org.wso2.carbon.identity.oauth.callback.OAuthCallback;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
@@ -49,8 +48,6 @@ public class APIManagerOAuthCallbackHandler extends AbstractOAuthCallbackHandler
             }
             if (OAuthCallback.OAuthCallbackType.SCOPE_VALIDATION_AUTHZ.equals(
                     oauthCallback.getCallbackType())){
-                //Validate scopes in callback using scope issuers
-                ScopesIssuer.getInstance().setScopes(oauthCallback);
                 oauthCallback.setValidScope(true);
             }
             if (OAuthCallback.OAuthCallbackType.SCOPE_VALIDATION_TOKEN.equals(
