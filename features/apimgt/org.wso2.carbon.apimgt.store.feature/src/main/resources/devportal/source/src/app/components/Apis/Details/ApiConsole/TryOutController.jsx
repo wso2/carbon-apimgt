@@ -468,7 +468,6 @@ function TryOutController(props) {
     }
 
     const authHeader = `${authorizationHeader}: ${prefix}`;
-    console.log(authHeader.length);
 
     return (
         <IntlProvider locale='en'>
