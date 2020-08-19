@@ -535,6 +535,7 @@
   "Throttling.Subscription.Policy.policy.name.empty.error.msg": "Name is Empty",
   "Throttling.Subscription.Policy.policy.name.invalid.character.error.msg": "Name contains one or more illegal characters",
   "Throttling.Subscription.Policy.policy.name.space.error.msg": "Name contains spaces",
+  "Throttling.Subscription.Policy.policy.name.too.long.error.msg": "Subscription policy name is too long",
   "Throttling.Subscription.Policy.policy.request.count.empty.error.msg": "Request Count is Empty",
   "Throttling.Subscription.Policy.policy.unit.time.empty.error.msg": "Unit Time is Empty",
   "Throttling.Subscription.Policy.search.default": "Subscription Rate Limiting Policies",

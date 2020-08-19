@@ -535,6 +535,7 @@
   "Throttling.Subscription.Policy.policy.name.empty.error.msg": "",
   "Throttling.Subscription.Policy.policy.name.invalid.character.error.msg": "",
   "Throttling.Subscription.Policy.policy.name.space.error.msg": "",
+  "Throttling.Subscription.Policy.policy.name.too.long.error.msg": "",
   "Throttling.Subscription.Policy.policy.request.count.empty.error.msg": "",
   "Throttling.Subscription.Policy.policy.unit.time.empty.error.msg": "",
   "Throttling.Subscription.Policy.search.default": "",
