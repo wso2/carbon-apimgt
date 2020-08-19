@@ -10527,17 +10527,45 @@ public class ApiMgtDAO {
     public APIPolicy updateAPIPolicy(APIPolicy policy) throws APIManagementException {
         Connection connection = null;
         PreparedStatement updateStatement = null;
+        PreparedStatement deleteStatement = null ;
+        PreparedStatement selectStatement = null;
         String updateQuery;
-
-        if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
-            String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
-                    ", Tenant Id: " + policy.getTenantId();
-            log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
-        }
+        int policyId = 0;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
+            if (policy != null) {
+                if (policy.getPolicyName() != null && policy.getTenantId() != -1) {
+                    selectStatement  = connection
+                            .prepareStatement(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL);
+                    selectStatement .setString(1, policy.getPolicyName());
+                    selectStatement .setInt(2, policy.getTenantId());
+                } else if (policy.getUUID() != null) {
+                    selectStatement = connection
+                            .prepareStatement(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_BY_UUID_SQL);
+                    selectStatement .setString(1, policy.getUUID());
+                } else {
+                    String errorMsg =
+                            "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
+                                    + " should be provided. Name: " + policy.getPolicyName()
+                                    + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
+                    log.error(errorMsg);
+                    throw new APIManagementException(errorMsg);
+                }
+            } else {
+                String errorMsg = "Provided Policy to add is null";
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg);
+            }
+
+            ResultSet resultSet = selectStatement.executeQuery();
+            if (resultSet.next()) {
+                policyId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID);
+            }
+            deleteStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.DELETE_CONDITION_GROUP_SQL);
+            deleteStatement.setInt(1, policyId);
+            deleteStatement.executeUpdate();
+
             if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
                 updateQuery = SQLConstants.ThrottleSQLConstants.UPDATE_API_POLICY_SQL;
             } else if (!StringUtils.isBlank(policy.getUUID())) {
@@ -10577,15 +10605,16 @@ public class ApiMgtDAO {
             } else if (!StringUtils.isBlank(policy.getUUID())) {
                 updateStatement.setString(8, policy.getUUID());
             }
-            List<Pipeline> pipelines = policy.getPipelines();
-            if (pipelines != null) {
-                for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
-                    updatePipeline(pipeline, policy.getPolicyId(), connection);
+            int updatedRawCount = updateStatement.executeUpdate();
+            if (updatedRawCount > 0) {
+                List<Pipeline> pipelines = policy.getPipelines();
+                if (pipelines != null) {
+                    for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
+                        addPipeline(pipeline,policyId, connection);
+                    }
                 }
             }
-            updateStatement.executeUpdate();
             connection.commit();
-
         } catch (SQLException e) {
             if (connection != null) {
                 try {
