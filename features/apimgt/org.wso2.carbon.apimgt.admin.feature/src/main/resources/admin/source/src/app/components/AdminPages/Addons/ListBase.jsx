@@ -56,6 +56,12 @@ const useStyles = makeStyles((theme) => ({
     button: {
         borderColor: 'rgba(255, 255, 255, 0.7)',
     },
+    tableCellWrapper: {
+        '& td': {
+            'word-break': 'break-all',
+            'white-space': 'normal',
+        },
+    },
 }));
 
 /**
@@ -266,15 +272,16 @@ function ListBase(props) {
                         </Toolbar>
                     </AppBar>
                 )}
-
-                {data && data.length > 0 && (
-                    <MUIDataTable
-                        title={null}
-                        data={data}
-                        columns={columns}
-                        options={options}
-                    />
-                )}
+                <div className={classes.tableCellWrapper}>
+                    {data && data.length > 0 && (
+                        <MUIDataTable
+                            title={null}
+                            data={data}
+                            columns={columns}
+                            options={options}
+                        />
+                    )}
+                </div>
                 {data && data.length === 0 && (
                     <div className={classes.contentWrapper}>
                         <Typography color='textSecondary' align='center'>
