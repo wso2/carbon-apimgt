@@ -10517,11 +10517,12 @@ public class ApiMgtDAO {
     /**
      * Update a API level throttling policy to database.
      * <p>
-     * policy will be inserted with that policy Id.
+     * If condition group already exists for the policy, that condition Group will be deleted and condition Group will
+     * be inserted to the database with old POLICY_ID.
      * </p>
      *
      * @param policy policy object defining the throttle policy
-     * @throws SQLException
+     * @throws APIManagementException
      */
     public APIPolicy updateAPIPolicy(APIPolicy policy) throws APIManagementException {
         Connection connection = null;
@@ -10534,12 +10535,12 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             if (policy != null) {
-                if (policy.getPolicyName() != null && policy.getTenantId() != -1) {
+                if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
                     selectStatement  = connection
                             .prepareStatement(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL);
                     selectStatement .setString(1, policy.getPolicyName());
                     selectStatement .setInt(2, policy.getTenantId());
-                } else if (policy.getUUID() != null) {
+                } else if (!StringUtils.isBlank(policy.getUUID())) {
                     selectStatement = connection
                             .prepareStatement(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_BY_UUID_SQL);
                     selectStatement .setString(1, policy.getUUID());
@@ -10552,7 +10553,7 @@ public class ApiMgtDAO {
                     throw new APIManagementException(errorMsg);
                 }
             } else {
-                String errorMsg = "Provided Policy to add is null";
+                String errorMsg = "Provided Policy to update is null";
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg);
             }
@@ -10570,8 +10571,7 @@ public class ApiMgtDAO {
             } else if (!StringUtils.isBlank(policy.getUUID())) {
                 updateQuery = ThrottleSQLConstants.UPDATE_API_POLICY_BY_UUID_SQL;
             } else {
-                String errorMsg =
-                        "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
+                String errorMsg = "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
                                 + " should be provided. Name: " + policy.getPolicyName()
                                 + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
                 log.error(errorMsg);
