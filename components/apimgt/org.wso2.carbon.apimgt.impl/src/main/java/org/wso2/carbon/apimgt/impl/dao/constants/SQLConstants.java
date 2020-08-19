@@ -3241,10 +3241,6 @@ public class SQLConstants {
                 + "DESCRIPTION = ? "
                 + "WHERE POLICY_ID = ?";
 
-
-        public static final String GET_PIPELINES_SQL = "SELECT " + "CONDITION_GROUP_ID, " + "QUOTA_TYPE, " + "QUOTA, "
-				+ " QUOTA_UNIT, " + "UNIT_TIME, " + "TIME_UNIT, "+ "DESCRIPTION " + "FROM " + "AM_CONDITION_GROUP " + "WHERE " + "POLICY_ID =?";
-
 		public static final String GET_IP_CONDITIONS_SQL = "SELECT " + "STARTING_IP, " + "ENDING_IP, " + "SPECIFIC_IP, "
 				+ " WITHIN_IP_RANGE " + "FROM " + "AM_IP_CONDITION " + "WHERE " + "CONDITION_GROUP_ID = ? ";
 
@@ -3269,15 +3265,6 @@ public class SQLConstants {
 		public static final String INSERT_IP_CONDITION_SQL =
 	            " INSERT INTO AM_IP_CONDITION(STARTING_IP,ENDING_IP,SPECIFIC_IP,WITHIN_IP_RANGE,CONDITION_GROUP_ID ) \n" +
 	            " VALUES (?,?,?,?,?)";
-
-        public static final String UPDATE_IP_CONDITION_SQL =
-                "UPDATE AM_CONDITION_GROUP " + "SET "
-                        + "STARTING_IP = ?,"
-                        + "ENDING_IP = ?,"
-                        + "SPECIFIC_IP = ?,"
-                        + "WITHIN_IP_RANGE = ?,"
-                        + "CONDITION_GROUP_ID  = ?,"
-                        + "WHERE AM_IP_CONDITION_ID = ?";
 
 		public static final String IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL = "SELECT APPPOLICY.TENANT_ID, APPPOLICY.QUOTA_TYPE "
 				+ " FROM AM_POLICY_APPLICATION APPPOLICY," + "AM_POLICY_SUBSCRIPTION SUBPOLICY "
