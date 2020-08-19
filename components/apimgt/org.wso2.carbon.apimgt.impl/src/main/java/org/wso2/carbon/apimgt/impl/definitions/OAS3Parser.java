@@ -426,11 +426,13 @@ public class OAS3Parser extends APIDefinition {
         OpenAPI openAPI = getOpenAPI(resourceConfigsJSON);
         Map<String, SecurityScheme> securitySchemes;
         SecurityScheme securityScheme;
+        OAuthFlows oAuthFlows;
         OAuthFlow oAuthFlow;
         Scopes scopes;
         if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null
                 && (securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null
-                && (oAuthFlow = securityScheme.getFlows().getImplicit()) != null
+                && (oAuthFlows = securityScheme.getFlows()) != null
+                && (oAuthFlow = oAuthFlows.getImplicit()) != null
                 && (scopes = oAuthFlow.getScopes()) != null) {
             Set<Scope> scopeSet = new HashSet<>();
             for (Map.Entry<String, String> entry : scopes.entrySet()) {
@@ -1458,6 +1460,14 @@ public class OAS3Parser extends APIDefinition {
             if (defaultScheme == null) {
                 SecurityScheme newDefault = new SecurityScheme();
                 newDefault.setType(SecurityScheme.Type.OAUTH2);
+                OAuthFlows newDefaultFlows = new OAuthFlows();
+                OAuthFlow newDefaultFlow = new OAuthFlow();
+                newDefaultFlow.setAuthorizationUrl("https://test.com");
+                Scopes newDefaultScopes = new Scopes();
+                newDefaultFlow.setScopes(newDefaultScopes);
+                newDefaultFlows.setImplicit(newDefaultFlow);
+                newDefault.setFlows(newDefaultFlows);
+
                 securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, newDefault);
             }
             for (Map.Entry<String, SecurityScheme> entry : securitySchemes.entrySet()) {
