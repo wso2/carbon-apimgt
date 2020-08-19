@@ -153,7 +153,7 @@ function AddEdit(props) {
 
     const validate = (fieldName, value) => {
         let error = '';
-        const schema = Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/);
+        const schema = Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/);
         switch (fieldName) {
             case 'policyName':
                 if (value === '') {
@@ -165,6 +165,11 @@ function AddEdit(props) {
                     error = intl.formatMessage({
                         id: 'Throttling.Application.Policy.policy.name.space',
                         defaultMessage: 'Name contains spaces',
+                    });
+                } else if (value.length > 60) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Application.Policy.policy.name.too.long',
+                        defaultMessage: 'Application policy name is too long',
                     });
                 } else if (schema.validate(value).error) {
                     error = intl.formatMessage({

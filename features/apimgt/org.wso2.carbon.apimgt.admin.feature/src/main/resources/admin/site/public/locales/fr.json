@@ -454,6 +454,7 @@
   "Throttling.Application.Policy.policy.name.empty": "",
   "Throttling.Application.Policy.policy.name.invalid.character": "",
   "Throttling.Application.Policy.policy.name.space": "",
+  "Throttling.Application.Policy.policy.name.too.long": "",
   "Throttling.Application.Policy.policy.request.count.empty": "",
   "Throttling.Application.Policy.policy.unit.time.empty": "",
   "Throttling.Application.Policy.search.default": "",
