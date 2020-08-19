@@ -454,6 +454,7 @@
   "Throttling.Application.Policy.policy.name.empty": "Name is Empty",
   "Throttling.Application.Policy.policy.name.invalid.character": "Name contains one or more illegal characters",
   "Throttling.Application.Policy.policy.name.space": "Name contains spaces",
+  "Throttling.Application.Policy.policy.name.too.long": "Application policy name is too long",
   "Throttling.Application.Policy.policy.request.count.empty": "Request Count is Empty",
   "Throttling.Application.Policy.policy.unit.time.empty": "Unit Time is Empty",
   "Throttling.Application.Policy.search.default": "Application Rate Limiting Policies",
