@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -119,8 +118,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
         KeyManagerHolder.class, WorkflowExecutorFactory.class, AbstractApplicationRegistrationWorkflowExecutor.class,
-        ServiceReferenceHolder.class, MultitenantUtils.class, CacheInvalidator.class,
-        RegistryUtils.class, Caching.class})
+        ServiceReferenceHolder.class, MultitenantUtils.class, RegistryUtils.class, Caching.class})
 @SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
@@ -132,7 +130,6 @@ public class APIConsumerImplTest {
     private TenantManager tenantManager;
     private UserStoreManager userStoreManager;
     private KeyManager keyManager;
-    private CacheInvalidator cacheInvalidator;
     private GenericArtifactManager genericArtifactManager;
     private Registry registry;
     private UserRegistry userRegistry;
@@ -153,7 +150,6 @@ public class APIConsumerImplTest {
         tenantManager = Mockito.mock(TenantManager.class);
         userStoreManager = Mockito.mock(UserStoreManager.class);
         keyManager = Mockito.mock(KeyManager.class);
-        cacheInvalidator = Mockito.mock(CacheInvalidator.class);
         registryService = Mockito.mock(RegistryService.class);
         genericArtifactManager = Mockito.mock(GenericArtifactManager.class);
         registry = Mockito.mock(Registry.class);
@@ -166,10 +162,8 @@ public class APIConsumerImplTest {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(MultitenantUtils.class);
         PowerMockito.mockStatic(KeyManagerHolder.class);
-        PowerMockito.mockStatic(CacheInvalidator.class);
         PowerMockito.mockStatic(RegistryUtils.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        PowerMockito.when(CacheInvalidator.getInstance()).thenReturn(cacheInvalidator);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(userRealm);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
