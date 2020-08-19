@@ -155,6 +155,11 @@ function AddEdit(props) {
                         id: 'Throttling.Advanced.AddEdit.is.empty.error',
                         defaultMessage: ' is empty',
                     })}`;
+                } else if (fieldValue.length > 60) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Advanced.AddEdit.policy.name.too.long.error.msg',
+                        defaultMessage: 'Throttling policy name is too long',
+                    });
                 } else if (fieldValue !== '' && /\s/g.test(fieldValue)) {
                     error = `Policy name ${intl.formatMessage({
                         id: 'Throttling.Advanced.AddEdit.empty.error',
