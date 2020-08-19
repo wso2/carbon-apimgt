@@ -1467,4 +1467,16 @@ public class OASParserUtil {
         return authorizationHeader == null ? null : authorizationHeader.toString();
     }
 
+    /**
+     * This method returns extension of mutualSSL related to micro-gw
+     *
+     * @param extensions Map<String, Object>
+     * @return String
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static String getApplicationSecurity(Map<String, Object> extensions) throws APIManagementException {
+        Object applicationSecurity = extensions.get(APIConstants.X_WSO2_APP_SECURITY);
+        return applicationSecurity == null ? null : applicationSecurity.toString();
+    }
+
 }

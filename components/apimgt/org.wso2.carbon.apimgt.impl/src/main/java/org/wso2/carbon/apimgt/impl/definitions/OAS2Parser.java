@@ -51,6 +51,9 @@ import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1501,4 +1504,46 @@ public class OAS2Parser extends APIDefinition {
         return api;
     }
 
+    /**
+     * This method will extract X-WSO2-application-security extension provided in API level
+     * by mgw and inject that extension to all resources in OAS file
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String processApplicationSecurityExtension(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
+        Map<String, Object> apiExtensions = swagger.getVendorExtensions();
+        if (apiExtensions == null) {
+            return swaggerContent;
+        }
+        //Check Disable Security is enabled in API level
+        String applicationSecurity = OASParserUtil.getApplicationSecurity(apiExtensions);
+        Map<String, Path> paths = swagger.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<HttpMethod, Operation> operationsMap = paths.get(pathKey).getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> resourceExtensions = operation.getVendorExtensions();
+                if (StringUtils.isNotBlank(applicationSecurity)) {
+                    if (resourceExtensions == null) {
+                        resourceExtensions = new HashMap<>();
+                    }
+                    resourceExtensions.put(APIConstants.X_WSO2_APP_SECURITY, applicationSecurity);
+                    operation.setVendorExtensions(resourceExtensions);
+
+                } else if (resourceExtensions != null && resourceExtensions.containsKey(APIConstants.X_WSO2_APP_SECURITY)) {
+                    //Check Disable Security is enabled in resource level
+                    Object applicationSecurityInResources = resourceExtensions.get(APIConstants.X_WSO2_APP_SECURITY);
+
+                    if (StringUtils.isNotBlank(applicationSecurityInResources.toString())) {
+                        resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, applicationSecurityInResources.toString());
+                    }
+                }
+            }
+        }
+        return getSwaggerJsonString(swagger);
+    }
 }
