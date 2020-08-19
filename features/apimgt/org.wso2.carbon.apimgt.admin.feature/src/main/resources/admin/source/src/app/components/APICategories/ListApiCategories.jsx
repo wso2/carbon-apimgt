@@ -122,7 +122,7 @@ export default function ListApiCategories() {
                             href={
                                 Configurations.app.docUrl
                                 + 'develop/customizations/customizing-the-developer-portal/customize-api-listing/'
-                                + 'categorizing-and-grouping-apis/api-category-based-grouping/'
+                                + 'api-category-based-grouping/'
                             }
                         >
                             <ListItemText
