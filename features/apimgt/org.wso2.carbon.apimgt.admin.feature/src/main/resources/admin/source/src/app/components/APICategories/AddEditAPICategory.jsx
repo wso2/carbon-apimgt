@@ -86,7 +86,7 @@ function AddEdit(props) {
                 }
                 if (value === '') {
                     error = 'Name is Empty';
-                } else if (value.length > 30) {
+                } else if (value.length > 255) {
                     error = 'API Category name is too long';
                 } else if (/\s/.test(value)) {
                     error = 'Name contains spaces';
