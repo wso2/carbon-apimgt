@@ -1325,6 +1325,7 @@ public class OASParserUtil {
     public static String preProcess(String swaggerContent) throws APIManagementException {
         //Load required properties from swagger to the API
         APIDefinition apiDefinition = getOASParser(swaggerContent);
+
         return apiDefinition.processOtherSchemeScopes(swaggerContent);
     }
 
@@ -1468,7 +1469,7 @@ public class OASParserUtil {
     }
 
     /**
-     * This method returns extension of mutualSSL related to micro-gw
+     * This method returns extension of application security related to micro-gw
      *
      * @param extensions Map<String, Object>
      * @return String

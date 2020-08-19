@@ -1643,6 +1643,23 @@ public class OAS3Parser extends APIDefinition {
             }
             api.setApiSecurity(securityList);
         }
+        //Setup application Security
+        String applicationSecurity = OASParserUtil.getApplicationSecurity(extensions);
+        if (StringUtils.isNotBlank(applicationSecurity)) {
+            String securityList = api.getApiSecurity();
+            if (StringUtils.contains("api_key", applicationSecurity)) {
+                securityList = securityList + "," + "api_key";
+            }
+            if (StringUtils.contains("basic_auth", applicationSecurity)) {
+                securityList = securityList + "," + "basic_auth";
+            }
+            if (StringUtils.contains("mandatory", applicationSecurity)) {
+                securityList = securityList + "," + "mandatory";
+            } else {
+                securityList = securityList + "," + "optional";
+            }
+            api.setApiSecurity(securityList);
+        }
         //Setup CORSConfigurations
         CORSConfiguration corsConfiguration = OASParserUtil.getCorsConfigFromSwagger(extensions);
         if (corsConfiguration != null) {
@@ -1699,49 +1716,6 @@ public class OAS3Parser extends APIDefinition {
             throw new APIManagementException("Error while removing examples from OpenAPI definition", e,
                     ExceptionCodes.ERROR_REMOVING_EXAMPLES);
         }
-    }
-
-    /**
-     * This method will extract X-WSO2-application-security extension provided in API level
-     * by mgw and inject that extension to all resources in OAS file
-     *
-     * @param swaggerContent String
-     * @return String
-     * @throws APIManagementException
-     */
-    @Override
-    public String processApplicationSecurityExtension(String swaggerContent) throws APIManagementException {
-        OpenAPI openAPI = getOpenAPI(swaggerContent);
-        Map<String, Object> apiExtensions = openAPI.getExtensions();
-        if (apiExtensions == null) {
-            return swaggerContent;
-        }
-        //Check Disable Security is enabled in API level
-        String applicationSecurity = OASParserUtil.getApplicationSecurity(apiExtensions);
-        Paths paths = openAPI.getPaths();
-        for (String pathKey : paths.keySet()) {
-            Map<PathItem.HttpMethod, Operation> operationsMap = paths.get(pathKey).readOperationsMap();
-            for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
-                Operation operation = entry.getValue();
-                Map<String, Object> resourceExtensions = operation.getExtensions();
-                if (StringUtils.isNotBlank(applicationSecurity)) {
-                    if (resourceExtensions == null) {
-                        resourceExtensions = new HashMap<>();
-                    }
-                    resourceExtensions.put(APIConstants.X_WSO2_APP_SECURITY, applicationSecurity);
-                    operation.setExtensions(resourceExtensions);
-
-                } else if (resourceExtensions != null && resourceExtensions.containsKey(APIConstants.X_WSO2_APP_SECURITY)) {
-                    //Check Disable Security is enabled in resource level
-                    Object applicationSecurityInResources = resourceExtensions.get(APIConstants.X_WSO2_APP_SECURITY);
-
-                    if (StringUtils.isNotBlank(applicationSecurityInResources.toString())) {
-                        resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, applicationSecurityInResources.toString());
-                    }
-                }
-            }
-        }
-        return Json.pretty(openAPI);
     }
 
 }
