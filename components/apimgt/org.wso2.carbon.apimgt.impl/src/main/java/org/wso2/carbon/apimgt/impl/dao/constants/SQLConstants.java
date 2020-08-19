@@ -3183,9 +3183,26 @@ public class SQLConstants {
 				+ " DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n"
 				+ " IS_DEPLOYED, UUID, APPLICABLE_LEVEL, POLICY_ID) \n" + "VALUES (?,?,?,?,?, ?,?,?,?,? ,?,?,?)";
 
-		public static final String UPDATE_POLICY_SQL = "UPDATE AM_API_THROTTLE_POLICY " + "SET " + "NAME = ?," + "DISPLAY_NAME = ?,"
-				+ " TYPE = ?," + "TENANT_ID = ?," + "APPLICABLE_LEVEL = ? ," + "DESCRIPTION = ? ,"
-				+ " DEFAULT_QUOTA_TYPE = ? ," + "DEFAULT_QUOTA = ?," + "DEFAULT_UNIT_TIME = ? " + " WHERE POLICY_ID = ?";
+
+        public static final String UPDATE_API_POLICY_BY_UUID_SQL = "UPDATE AM_API_THROTTLE_POLICY " + "SET "
+                + "DISPLAY_NAME = ?,"
+                + "DESCRIPTION = ?,"
+                + "DEFAULT_QUOTA_TYPE = ?,"
+                + "DEFAULT_QUOTA = ?,"
+                + "DEFAULT_QUOTA_UNIT = ?,"
+                + "DEFAULT_UNIT_TIME = ?,"
+                + "DEFAULT_TIME_UNIT = ? "
+                + "WHERE UUID = ?";
+
+		public static final String UPDATE_API_POLICY_SQL = "UPDATE AM_API_THROTTLE_POLICY " + "SET "
+                + "DISPLAY_NAME = ?,"
+                + "DESCRIPTION = ?,"
+                + "DEFAULT_QUOTA_TYPE = ?,"
+                + "DEFAULT_QUOTA = ?,"
+                + "DEFAULT_QUOTA_UNIT = ?,"
+                + "DEFAULT_UNIT_TIME = ?,"
+                + "DEFAULT_TIME_UNIT = ? "
+                + "WHERE NAME = ? AND TENANT_ID = ?";
 
 		public static final String GET_API_POLICY_NAMES = " SELECT " + "   NAME " + "FROM "
 				+ "   AM_API_THROTTLE_POLICY " + " WHERE" + "   TENANT_ID =?";
@@ -3214,7 +3231,17 @@ public class SQLConstants {
 		public static final String INSERT_CONDITION_GROUP_SQL = "INSERT INTO AM_CONDITION_GROUP(POLICY_ID, QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT,DESCRIPTION) \n"
 															+ " VALUES (?,?,?,?,?,?,?)";
 
-		public static final String GET_PIPELINES_SQL = "SELECT " + "CONDITION_GROUP_ID, " + "QUOTA_TYPE, " + "QUOTA, "
+        public static final String UPDATE_CONDITION_GROUP_SQL =  "UPDATE AM_CONDITION_GROUP " + "SET "
+                + "QUOTA_TYPE = ?,"
+                + "QUOTA = ?,"
+                + "QUOTA_UNIT = ?,"
+                + "UNIT_TIME = ?,"
+                + "TIME_UNIT = ?,"
+                + "DESCRIPTION = ? "
+                + "WHERE POLICY_ID = ?";
+
+
+        public static final String GET_PIPELINES_SQL = "SELECT " + "CONDITION_GROUP_ID, " + "QUOTA_TYPE, " + "QUOTA, "
 				+ " QUOTA_UNIT, " + "UNIT_TIME, " + "TIME_UNIT, "+ "DESCRIPTION " + "FROM " + "AM_CONDITION_GROUP " + "WHERE " + "POLICY_ID =?";
 
 		public static final String GET_IP_CONDITIONS_SQL = "SELECT " + "STARTING_IP, " + "ENDING_IP, " + "SPECIFIC_IP, "
@@ -3241,6 +3268,15 @@ public class SQLConstants {
 		public static final String INSERT_IP_CONDITION_SQL =
 	            " INSERT INTO AM_IP_CONDITION(STARTING_IP,ENDING_IP,SPECIFIC_IP,WITHIN_IP_RANGE,CONDITION_GROUP_ID ) \n" +
 	            " VALUES (?,?,?,?,?)";
+
+        public static final String UPDATE_IP_CONDITION_SQL =
+                "UPDATE AM_CONDITION_GROUP " + "SET "
+                        + "STARTING_IP = ?,"
+                        + "ENDING_IP = ?,"
+                        + "SPECIFIC_IP = ?,"
+                        + "WITHIN_IP_RANGE = ?,"
+                        + "CONDITION_GROUP_ID  = ?,"
+                        + "WHERE AM_IP_CONDITION_ID = ?";
 
 		public static final String IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL = "SELECT APPPOLICY.TENANT_ID, APPPOLICY.QUOTA_TYPE "
 				+ " FROM AM_POLICY_APPLICATION APPPOLICY," + "AM_POLICY_SUBSCRIPTION SUBPOLICY "

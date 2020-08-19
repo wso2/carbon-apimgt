@@ -10514,6 +10514,7 @@ public class ApiMgtDAO {
         }
     }
 
+
     /**
      * Update a API level throttling policy to database.
      * <p>
@@ -10523,42 +10524,158 @@ public class ApiMgtDAO {
      * @param policy policy object defining the throttle policy
      * @throws SQLException
      */
-    private void updateAPIPolicy(APIPolicy policy, Connection conn) throws SQLException {
-        ResultSet resultSet = null;
-        PreparedStatement policyStatement = null;
-        String addQuery = SQLConstants.ThrottleSQLConstants.INSERT_API_POLICY_WITH_ID_SQL;
-        int policyId = policy.getPolicyId();
+    public APIPolicy updateAPIPolicy(APIPolicy policy) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement updateStatement = null;
+        String updateQuery;
+
+        if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
+            String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
+                    ", Tenant Id: " + policy.getTenantId();
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
+        }
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+                updateQuery = SQLConstants.ThrottleSQLConstants.UPDATE_API_POLICY_SQL;
+            } else if (!StringUtils.isBlank(policy.getUUID())) {
+                updateQuery = ThrottleSQLConstants.UPDATE_API_POLICY_BY_UUID_SQL;
+            } else {
+                String errorMsg =
+                        "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
+                                + " should be provided. Name: " + policy.getPolicyName()
+                                + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg);
+            }
+            updateStatement = connection.prepareStatement(updateQuery);
+            if (!StringUtils.isEmpty(policy.getDisplayName())) {
+                updateStatement.setString(1, policy.getDisplayName());
+            } else {
+                updateStatement.setString(1, policy.getPolicyName());
+            }
+            updateStatement.setString(2, policy.getDescription());
+            updateStatement.setString(3, policy.getDefaultQuotaPolicy().getType());
+
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+                updateStatement.setLong(4, limit.getRequestCount());
+                updateStatement.setString(5, null);
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
+                updateStatement.setLong(4, limit.getDataAmount());
+                updateStatement.setString(5, limit.getDataUnit());
+            }
+            updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+
+            if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+                updateStatement.setString(8, policy.getPolicyName());
+                updateStatement.setInt(9, policy.getTenantId());
+            } else if (!StringUtils.isBlank(policy.getUUID())) {
+                updateStatement.setString(8, policy.getUUID());
+            }
+            List<Pipeline> pipelines = policy.getPipelines();
+            if (pipelines != null) {
+                for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
+                    updatePipeline(pipeline, policy.getPolicyId(), connection);
+                }
+            }
+            updateStatement.executeUpdate();
+            connection.commit();
+
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the API Application Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException(
+                    "Failed to update API policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
+        }
+        return policy;
+    }
+
+    /**
+     * update throttling policy pipeline to database
+     *
+     * @param pipeline condition pipeline
+     * @param policyID id of the policy to add pipeline
+     * @param conn     database connection. This should be provided inorder to rollback transaction
+     * @throws SQLException
+     */
+    private void updatePipeline(Pipeline pipeline, int policyID, Connection conn) throws SQLException {
+        PreparedStatement conditionStatement = null;
+        ResultSet rs = null;
 
         try {
-            Statement st = conn.createStatement();
-            String driverName = conn.getMetaData().getDriverName();
-            if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                st.executeUpdate("SET IDENTITY_INSERT AM_API_THROTTLE_POLICY ON");
-            }
+            String sqlUpdateQuery = SQLConstants.ThrottleSQLConstants.UPDATE_CONDITION_GROUP_SQL;
+            List<Condition> conditionList = pipeline.getConditions();
+
+            // Update data to the AM_CONDITION table
             String dbProductName = conn.getMetaData().getDatabaseProductName();
-            policyStatement = conn.prepareStatement(addQuery,
-                    new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "POLICY_ID")});
-            setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setString(12, policy.getUserLevel());
-            policyStatement.setBoolean(10, true);
-            policyStatement.setInt(13, policyId);
-            int updatedRawCount = policyStatement.executeUpdate();
+            conditionStatement = conn.prepareStatement(sqlUpdateQuery, new String[]{DBUtils
+                    .getConvertedAutoGeneratedColumnName(dbProductName, "CONDITION_GROUP_ID")});
+            conditionStatement.setString(1, pipeline.getQuotaPolicy().getType());
 
-            if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                st.executeUpdate("SET IDENTITY_INSERT AM_API_THROTTLE_POLICY OFF");
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
+                conditionStatement.setLong(2,
+                        ((RequestCountLimit) pipeline.getQuotaPolicy().getLimit()).getRequestCount());
+                conditionStatement.setString(3, null);
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
+                BandwidthLimit limit = (BandwidthLimit) pipeline.getQuotaPolicy().getLimit();
+                conditionStatement.setLong(2, limit.getDataAmount());
+                conditionStatement.setString(3, limit.getDataUnit());
             }
 
-            // Returns only single row
-            if (updatedRawCount > 0) {
-                List<Pipeline> pipelines = policy.getPipelines();
-                if (pipelines != null) {
-                    for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
-                        addPipeline(pipeline, policyId, conn);
+            conditionStatement.setLong(4, pipeline.getQuotaPolicy().getLimit().getUnitTime());
+            conditionStatement.setString(5, pipeline.getQuotaPolicy().getLimit().getTimeUnit());
+            conditionStatement.setString(6, pipeline.getDescription());
+            conditionStatement.setInt(7, policyID);
+            conditionStatement.executeUpdate();
+            rs = conditionStatement.getGeneratedKeys();
+
+            // Add Throttling parameters which have multiple entries
+            if (rs != null && rs.next()) {
+                // Get the inserted CONDITION_GROUP_ID (auto incremented value)
+                int pipelineId = rs.getInt(1);
+                pipeline.setId(pipelineId);
+                for (Condition condition : conditionList) {
+                    if (condition == null) {
+                        continue;
+                    }
+                    String type = condition.getType();
+                    if (PolicyConstants.IP_RANGE_TYPE.equals(type) || PolicyConstants.IP_SPECIFIC_TYPE.equals(type)) {
+                        IPCondition ipCondition = (IPCondition) condition;
+                        PreparedStatement getIPStatement = conn.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_IP_CONDITIONS_SQL);
+                        getIPStatement.setInt(1, pipelineId);
+                        ResultSet resultSet = getIPStatement.executeQuery();
+                        if (resultSet.next()) {
+                            int ipConditionId = rs.getInt(1);
+                            updateIPCondition(ipCondition, pipelineId, conn, ipConditionId);
+                        } else {
+                            addIPCondition(ipCondition, pipelineId, conn);
+                        }
+                    }
+                    if (PolicyConstants.HEADER_TYPE.equals(type)) {
+                        addHeaderCondition((HeaderCondition) condition, pipelineId, conn);
+                    } else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(type)) {
+                        addQueryParameterCondition((QueryParameterCondition) condition, pipelineId, conn);
+                    } else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(type)) {
+                        addJWTClaimsCondition((JWTClaimsCondition) condition, pipelineId, conn);
                     }
                 }
             }
         } finally {
-            APIMgtDBUtil.closeAllConnections(policyStatement, null, resultSet);
+            APIMgtDBUtil.closeAllConnections(conditionStatement, null, rs);
         }
     }
 
@@ -10679,6 +10796,29 @@ public class ApiMgtDAO {
             psQueryParameterCondition.executeUpdate();
         } finally {
             APIMgtDBUtil.closeAllConnections(psQueryParameterCondition, null, null);
+        }
+    }
+
+    private void updateIPCondition(IPCondition ipCondition, int pipelineId, Connection conn, int ipConditionID) throws SQLException {
+        PreparedStatement statementIPCondition = null;
+
+        try {
+            String sqlQuery = SQLConstants.ThrottleSQLConstants.UPDATE_IP_CONDITION_SQL;
+
+            statementIPCondition = conn.prepareStatement(sqlQuery);
+            String startingIP = ipCondition.getStartingIP();
+            String endingIP = ipCondition.getEndingIP();
+            String specificIP = ipCondition.getSpecificIP();
+
+            statementIPCondition.setString(1, startingIP);
+            statementIPCondition.setString(2, endingIP);
+            statementIPCondition.setString(3, specificIP);
+            statementIPCondition.setBoolean(4, ipCondition.isInvertCondition());
+            statementIPCondition.setInt(5, pipelineId);
+            statementIPCondition.setInt(6, ipConditionID);
+            statementIPCondition.executeUpdate();
+        } finally {
+            APIMgtDBUtil.closeAllConnections(statementIPCondition, null, null);
         }
     }
 
@@ -11704,88 +11844,6 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(conditionsStatement, connection, resultSet);
         }
-    }
-
-    /**
-     * Updates API level policy.
-     * <p>policy name and tenant id should be specified in <code>policy</code></p>
-     * <p>
-     * Exsisting policy will be deleted and new policy will be inserted to the database
-     * with old POLICY_ID. Uses {@link #updateAPIPolicy(APIPolicy)}
-     * to create new policy.
-     * </p>
-     *
-     * @param policy updated policy object
-     * @throws APIManagementException
-     */
-    public APIPolicy updateAPIPolicy(APIPolicy policy) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement selectStatement = null;
-        PreparedStatement deleteStatement = null;
-        ResultSet resultSet = null;
-        int oldPolicyId = 0;
-        String oldPolicyUUID = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            if (policy != null) {
-                if (policy.getPolicyName() != null && policy.getTenantId() != -1) {
-                    selectStatement = connection
-                            .prepareStatement(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL);
-                    selectStatement.setString(1, policy.getPolicyName());
-                    selectStatement.setInt(2, policy.getTenantId());
-                } else if (policy.getUUID() != null) {
-                    selectStatement = connection
-                            .prepareStatement(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_BY_UUID_SQL);
-                    selectStatement.setString(1, policy.getUUID());
-                } else {
-                    String errorMsg =
-                            "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
-                                    + " should be provided. Name: " + policy.getPolicyName()
-                                    + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
-                    log.error(errorMsg);
-                    throw new APIManagementException(errorMsg);
-                }
-            } else {
-                String errorMsg = "Provided Policy to add is null";
-                log.error(errorMsg);
-                throw new APIManagementException(errorMsg);
-            }
-
-            // Should return only single row
-            resultSet = selectStatement.executeQuery();
-            if (resultSet.next()) {
-                oldPolicyId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID);
-                oldPolicyUUID = resultSet.getString(ThrottlePolicyConstants.COLUMN_UUID);
-            }
-
-            deleteStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.DELETE_API_POLICY_SQL);
-            deleteStatement.setInt(1, policy.getTenantId());
-            deleteStatement.setString(2, policy.getPolicyName());
-            deleteStatement.executeUpdate();
-            policy.setPolicyId(oldPolicyId);
-            if (!StringUtils.isBlank(oldPolicyUUID)) {
-                policy.setUUID(oldPolicyUUID);
-            }
-            updateAPIPolicy(policy, connection);
-            connection.commit();
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-
-                    // Rollback failed. Exception will be thrown later for upper exception
-                    log.error("Failed to rollback the add Api Policy: " + policy.toString(), ex);
-                }
-            }
-            handleException("Failed to update api policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
-            APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
-        }
-        return policy;
     }
 
     /**
