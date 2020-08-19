@@ -51,9 +51,6 @@ import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1461,6 +1458,27 @@ public class OAS2Parser extends APIDefinition {
         if (StringUtils.isNotBlank(authHeader)) {
             api.setAuthorizationHeader(authHeader);
         }
+        //Setup application Security
+        List<String> applicationSecurity = OASParserUtil.getApplicationSecurityTypes(extensions);
+        Boolean isOptional = OASParserUtil.getAppSecurityStateFromSwagger(extensions);
+        if (!applicationSecurity.isEmpty()) {
+            String securityList = api.getApiSecurity();
+            for (String securityType : applicationSecurity) {
+                if (APIConstants.DEFAULT_API_SECURITY_OAUTH2.equals(securityType)) {
+                    securityList = securityList + "," + APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+                }
+                if (APIConstants.API_SECURITY_BASIC_AUTH.equals(securityType)) {
+                    securityList = securityList + "," + APIConstants.API_SECURITY_BASIC_AUTH;
+                }
+                if (APIConstants.API_SECURITY_API_KEY.equals(securityType)) {
+                    securityList = securityList + "," + APIConstants.API_SECURITY_API_KEY;
+                }
+            }
+            if (!isOptional) {
+                securityList = securityList + "," + APIConstants.MANDATORY;
+            }
+            api.setApiSecurity(securityList);
+        }
         //Setup mutualSSL configuration
         String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
         if (StringUtils.isNotBlank(mutualSSL)) {
@@ -1472,23 +1490,6 @@ public class OAS2Parser extends APIDefinition {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
             } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
-            }
-            api.setApiSecurity(securityList);
-        }
-        //Setup application Security
-        String applicationSecurity = OASParserUtil.getApplicationSecurity(extensions);
-        if (StringUtils.isNotBlank(applicationSecurity)) {
-            String securityList = api.getApiSecurity();
-            if (StringUtils.contains("api_key", applicationSecurity)) {
-                securityList = securityList + "," + "api_key";
-            }
-            if (StringUtils.contains("basic_auth", applicationSecurity)) {
-                securityList = securityList + "," + "basic_auth";
-            }
-            if (StringUtils.contains("mandatory", applicationSecurity)) {
-                securityList = securityList + "," + "mandatory";
-            } else {
-                securityList = securityList + "," + "optional";
             }
             api.setApiSecurity(securityList);
         }
