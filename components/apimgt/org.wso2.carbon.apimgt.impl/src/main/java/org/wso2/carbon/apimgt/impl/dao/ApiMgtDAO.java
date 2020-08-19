@@ -10514,7 +10514,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     /**
      * Update a API level throttling policy to database.
      * <p>
@@ -10610,7 +10609,7 @@ public class ApiMgtDAO {
                 List<Pipeline> pipelines = policy.getPipelines();
                 if (pipelines != null) {
                     for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
-                        addPipeline(pipeline,policyId, connection);
+                        addPipeline(pipeline, policyId, connection);
                     }
                 }
             }
@@ -10620,7 +10619,6 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-
                     // Rollback failed. Exception will be thrown later for upper exception
                     log.error("Failed to rollback the API Application Policy: " + policy.toString(), ex);
                 }
@@ -11568,7 +11566,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            pipelinesStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_PIPELINES_SQL);
+            pipelinesStatement = connection.prepareStatement(ThrottleSQLConstants.GET_PIPELINES_SQL);
             int unitTime = 0;
             int quota = 0;
             int pipelineId = -1;
