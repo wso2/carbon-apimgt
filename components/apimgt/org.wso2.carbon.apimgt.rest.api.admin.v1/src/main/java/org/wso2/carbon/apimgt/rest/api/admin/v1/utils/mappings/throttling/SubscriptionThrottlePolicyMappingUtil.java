@@ -24,12 +24,16 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -163,6 +167,25 @@ public class SubscriptionThrottlePolicyMappingUtil {
                     .setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getDefaultLimit()));
         }
         return subscriptionPolicy;
+    }
+
+    /**
+     * Converts a Subscription Throttle Policy Permission model object into a DTO object
+     *
+     * @param model Subscription Throttle Policy Permission model object
+     * @return mapped REST API DTO object
+     */
+    public static SubscriptionThrottlePolicyPermissionDTO fromSubscriptionThrottlePolicyPermissionToDTO(TierPermissionDTO model) {
+        SubscriptionThrottlePolicyPermissionDTO permissionDTO = new SubscriptionThrottlePolicyPermissionDTO();
+        if (APIConstants.TIER_PERMISSION_ALLOW.equals(model.getPermissionType())) {
+            permissionDTO.setPermissionType(SubscriptionThrottlePolicyPermissionDTO.PermissionTypeEnum.ALLOW);
+        } else {
+            permissionDTO.setPermissionType(SubscriptionThrottlePolicyPermissionDTO.PermissionTypeEnum.DENY);
+        }
+        if (model.getRoles() != null) {
+            permissionDTO.setRoles(Arrays.asList(model.getRoles()));
+        }
+        return permissionDTO;
     }
 }
  

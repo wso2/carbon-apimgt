@@ -16,7 +16,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
@@ -35,18 +36,9 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionStatusDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.ApplicationThrottlePolicyMappingUtil;
@@ -512,17 +504,27 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 }
             } catch (PolicyNotFoundException ignore) {
             }
+
+            // validate if permission info exists and halt the execution in case of an error
+            validatePolicyPermissions(body);
+
             //Add the policy
             apiProvider.addPolicy(subscriptionPolicy);
+
+            //update policy permissions
+            updatePolicyPermissions(body);
 
             //retrieve the new policy and send back as the response
             SubscriptionPolicy newSubscriptionPolicy = apiProvider.getSubscriptionPolicy(username,
                     body.getPolicyName());
             SubscriptionThrottlePolicyDTO policyDTO =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(newSubscriptionPolicy);
+
+            //setting policy permissions
+            setPolicyPermissionsToDTO(policyDTO);
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_SUBSCRIPTION + "/"
                     + policyDTO.getPolicyId())).entity(policyDTO).build();
-        } catch (APIManagementException | ParseException e) {
+        } catch (ParseException e) {
             String errorMessage = "Error while adding a Subscription level policy: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
@@ -531,6 +533,62 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * Validates the permission element of the subscription throttle policy
+     *
+     * @param body subscription throttle policy
+     * @throws APIManagementException when there are validation errors
+     */
+    private void validatePolicyPermissions(SubscriptionThrottlePolicyDTO body) throws APIManagementException {
+        SubscriptionThrottlePolicyPermissionDTO policyPermissions = body.getPermissions();
+        if (policyPermissions != null && policyPermissions.getRoles().size() == 0) {
+            throw new APIManagementException(ExceptionCodes.ROLES_CANNOT_BE_EMPTY);
+        }
+    }
+
+    /**
+     * Update APIM with the subscription throttle policy permission
+     *
+     * @param body subscription throttle policy
+     * @throws APIManagementException when there are validation errors or error while updating the permissions
+     */
+    private void updatePolicyPermissions(SubscriptionThrottlePolicyDTO body) throws APIManagementException {
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        SubscriptionThrottlePolicyPermissionDTO policyPermissions = body.getPermissions();
+        if (policyPermissions != null) {
+            if (policyPermissions.getRoles().size() > 0) {
+                String roles = StringUtils.join(policyPermissions.getRoles(), ",");
+                String permissionType;
+                if (policyPermissions.getPermissionType() ==
+                        SubscriptionThrottlePolicyPermissionDTO.PermissionTypeEnum.ALLOW) {
+                    permissionType = APIConstants.TIER_PERMISSION_ALLOW;
+                } else {
+                    permissionType = APIConstants.TIER_PERMISSION_DENY;
+                }
+                apiProvider.updateThrottleTierPermissions(body.getPolicyName(), permissionType, roles);
+            } else {
+                throw new APIManagementException(ExceptionCodes.ROLES_CANNOT_BE_EMPTY);
+            }
+        }
+    }
+
+    /**
+     * Set subscription throttle policy permission info into the DTO
+     *
+     * @param policyDTO subscription throttle policy DTO
+     * @throws APIManagementException error while setting/retrieve the permissions to the DTO
+     */
+    private void setPolicyPermissionsToDTO(SubscriptionThrottlePolicyDTO policyDTO) throws APIManagementException {
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        TierPermissionDTO addedPolicyPermission =
+                (TierPermissionDTO) apiProvider.getThrottleTierPermission(policyDTO.getPolicyName());
+        if (addedPolicyPermission != null) {
+            SubscriptionThrottlePolicyPermissionDTO addedPolicyPermissionDTO =
+                    SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyPermissionToDTO(addedPolicyPermission);
+            policyDTO.setPermissions(addedPolicyPermissionDTO);
+        }
     }
 
     /**
@@ -555,6 +613,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             }
             SubscriptionThrottlePolicyDTO policyDTO =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(subscriptionPolicy);
+
+            //setting policy permissions
+            setPolicyPermissionsToDTO(policyDTO);
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException | ParseException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -580,8 +641,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, SubscriptionThrottlePolicyDTO body,
-                                                              String contentType, String ifMatch,
-                                                              String ifUnmodifiedSince, MessageContext messageContext) {
+            String contentType, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext)
+            throws APIManagementException{
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
@@ -596,16 +657,24 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
 
+            // validate if permission info exists and halt the execution in case of an error
+            validatePolicyPermissions(body);
+
             //update the policy
             SubscriptionPolicy subscriptionPolicy =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(body);
             apiProvider.updatePolicy(subscriptionPolicy);
+
+            //update policy permissions
+            updatePolicyPermissions(body);
 
             //retrieve the new policy and send back as the response
             SubscriptionPolicy newSubscriptionPolicy = apiProvider.getSubscriptionPolicy(username,
                     body.getPolicyName());
             SubscriptionThrottlePolicyDTO policyDTO =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(newSubscriptionPolicy);
+            //setting policy permissions
+            setPolicyPermissionsToDTO(policyDTO);
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException | ParseException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -613,7 +682,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                         log);
             } else {
                 String errorMessage = "Error while updating Subscription level policy: " + body.getPolicyName();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw new APIManagementException(errorMessage, e);
             }
         }
         return null;

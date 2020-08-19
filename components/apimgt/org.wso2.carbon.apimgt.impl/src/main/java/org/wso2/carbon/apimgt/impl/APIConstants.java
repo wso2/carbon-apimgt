@@ -964,6 +964,7 @@ public final class APIConstants {
     public static final String AUTH_TYPE_APP = "APP";
 
     public static final String TIER_PERMISSION_ALLOW = "allow";
+    public static final String TIER_PERMISSION_DENY = "deny";
 
     public static final String SUBSCRIPTION_TO_CURRENT_TENANT = "current_tenant";
     public static final String SUBSCRIPTION_TO_ALL_TENANTS = "all_tenants";

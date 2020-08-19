@@ -554,6 +554,14 @@ public interface APIProvider extends APIManager {
     Set getTierPermissions() throws APIManagementException;
 
     /**
+     * Get the given Subscription Throttle Policy Permission
+     *
+     * @return Subscription Throttle Policy
+     * @throws APIManagementException If failed to retrieve Subscription Throttle Policy Permission
+     */
+    Object getThrottleTierPermission(String tierName) throws APIManagementException;
+
+    /**
      * Get the list of Custom InSequences.
      * @return List of available sequences
      * @throws APIManagementException
