@@ -41,13 +41,13 @@ export default function HelpLinks() {
                     <Link
                         target='_blank'
                         href={Configurations.app.docUrl
-                + `learn/rate-limiting/
-                introducing-throttling-use-cases/`}
+                + 'learn/rate-limiting/'
+                + 'introducing-throttling-use-cases/'}
                     >
                         <ListItemText primary={(
                             <FormattedMessage
                                 id='Throttling.Advanced.List.help.link.one'
-                                defaultMessage='Introducing Throttling Use-Cases'
+                                defaultMessage='Introducing Rate Limiting Use-Cases'
                             />
                         )}
                         />
@@ -61,13 +61,13 @@ export default function HelpLinks() {
                     <Link
                         target='_blank'
                         href={Configurations.app.docUrl
-                + `learn/rate-limiting/adding-new-throttling-policies/
-                #adding-a-new-advanced-throttling-policy`}
+                + 'learn/rate-limiting/adding-new-throttling-policies/'
+                + '#adding-a-new-advanced-throttling-policy'}
                     >
                         <ListItemText primary={(
                             <FormattedMessage
                                 id='Throttling.Advanced.List.help.link.two'
-                                defaultMessage='Adding a new advanced throttling policy'
+                                defaultMessage='Adding a new advanced rate limiting policy'
                             />
                         )}
                         />
