@@ -11566,7 +11566,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            pipelinesStatement = connection.prepareStatement(ThrottleSQLConstants.GET_PIPELINES_SQL);
+            pipelinesStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_PIPELINES_SQL);
             int unitTime = 0;
             int quota = 0;
             int pipelineId = -1;
