@@ -13554,12 +13554,14 @@ public class ApiMgtDAO {
         try {
             if (attributes != null) {
                 ps = conn.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
-                for (String key : attributes.keySet()) {
-                    ps.setInt(1, applicationId);
-                    ps.setString(2, key);
-                    ps.setString(3, attributes.get(key));
-                    ps.setInt(4, tenantId);
-                    ps.addBatch();
+                for (Map.Entry<String, String> attribute : attributes.entrySet()) {
+                    if (StringUtils.isNotEmpty(attribute.getKey()) && StringUtils.isNotEmpty(attribute.getValue())) {
+                        ps.setInt(1, applicationId);
+                        ps.setString(2, attribute.getKey());
+                        ps.setString(3, attribute.getValue());
+                        ps.setInt(4, tenantId);
+                        ps.addBatch();
+                    }
                 }
                 int[] update = ps.executeBatch();
             }
