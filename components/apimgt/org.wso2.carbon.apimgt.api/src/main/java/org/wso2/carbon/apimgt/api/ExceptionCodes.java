@@ -360,9 +360,13 @@ ExceptionCodes implements ErrorHandler {
             "Super Tenant %s is not allowed to import a tenant theme"),
 
 
-    //Mediation policies related
+    //API mediation policies related
     MEDIATION_POLICY_API_ALREADY_EXISTS(901800, "Mediation Policy Already Exists", 409,
-                                            "A mediation policy with the given name is already attached to the API");
+                                            "A mediation policy with the given name is already attached to the API"),
+
+    //mediation policies related common errors
+    MEDIATION_POLICY_NAME_TOO_LONG(90850, "Mediation Policy Name Too Long", 400,
+                                                "The name of the mediation policy exceeds the max length (%s)");
 
     private final long errorCode;
     private final String errorMessage;
