@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class JWTValidationServiceImpl implements JWTValidationService {
 
@@ -43,6 +44,8 @@ public class JWTValidationServiceImpl implements JWTValidationService {
             if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
                 JWTValidationInfo validationInfo = keyManagerDto.getJwtValidator().validateToken(signedJWTInfo);
                 validationInfo.setKeyManager(keyManagerDto.getName());
+                // append keymanager tenant domain to username if not present
+                appendTenantDomainForEndUsername(validationInfo, tenantDomain);
                 return validationInfo;
             }
         }
@@ -61,6 +64,26 @@ public class JWTValidationServiceImpl implements JWTValidationService {
             return keyManagerDto.getName();
         }else{
             return null;
+        }
+    }
+
+    /**
+     * Append tenant domain to username of JWTValidationInfo if the tenant domain is not already present in username
+     * for both cases when email as username enabled and disabled.
+     *
+     * @param jwtValidationInfo JWTValidationInfo
+     * @param tenantDomain      Tenant Domain to append
+     */
+    private void appendTenantDomainForEndUsername(JWTValidationInfo jwtValidationInfo, String tenantDomain) {
+
+        String usernameFromJWT = jwtValidationInfo.getUser();
+        if (usernameFromJWT != null) {
+            if ((!usernameFromJWT.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR) && !MultitenantUtils.isEmailUserName())
+                    || (MultitenantUtils.isEmailUserName()
+                    && StringUtils.countMatches(usernameFromJWT, APIConstants.EMAIL_DOMAIN_SEPARATOR) == 1)) {
+                usernameFromJWT += APIConstants.EMAIL_DOMAIN_SEPARATOR + tenantDomain;
+            }
+            jwtValidationInfo.setUser(usernameFromJWT);
         }
     }
 
