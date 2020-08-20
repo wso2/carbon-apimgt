@@ -1340,6 +1340,9 @@ function AddEdit(props) {
                                             helperText={intl.formatMessage({
                                                 id: 'Throttling.Subscription.enter.permission.allowed',
                                                 defaultMessage: 'This policy is "Allowed" for above roles.',
+                                            }) + ' ' + intl.formatMessage({
+                                                id: 'Throttling.Subscription.enter.role.separation.help.text',
+                                                defaultMessage: 'Use comma to seperate roles.',
                                             })}
                                             variant='outlined'
                                         />
@@ -1358,6 +1361,9 @@ function AddEdit(props) {
                                             helperText={intl.formatMessage({
                                                 id: 'Throttling.Subscription.enter.permission.denied',
                                                 defaultMessage: 'This policy is "Denied" for above roles.',
+                                            }) + ' ' + intl.formatMessage({
+                                                id: 'Throttling.Subscription.enter.role.separation.help.text',
+                                                defaultMessage: 'Use comma to seperate roles.',
                                             })}
                                             variant='outlined'
                                         />

@@ -553,6 +553,7 @@
   "Throttling.Subscription.dynamic.usage.tooltip": "Price per request for the given billing cycle in the given currency",
   "Throttling.Subscription.enter.permission.allowed": "This policy is \"Allowed\" for above roles.",
   "Throttling.Subscription.enter.permission.denied": "This policy is \"Denied\" for above roles.",
+  "Throttling.Subscription.enter.role.separation.help.text": "Use comma to seperate roles.",
   "Throttling.Subscription.fixed.rate.tooltip": "Fixed rate for the given billing cycle",
   "Throttling.Subscription.monetization.plan": "Monetization Plan",
   "Throttling.Subscription.monetization.plan.tooltip": "Monetization category type",
