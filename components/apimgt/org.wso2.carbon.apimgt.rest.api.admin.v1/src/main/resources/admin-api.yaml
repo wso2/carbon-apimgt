@@ -5250,6 +5250,12 @@ definitions:
             displayName:
               type: string
               example: 'default'
+            defaultConsumerKeyClaim:
+              type: string
+              example: 'azp'
+            defaultScopesClaim:
+              type: string
+              example: 'scope'
             configurations:
               type: array
               items:

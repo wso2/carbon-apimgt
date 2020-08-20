@@ -66,4 +66,15 @@ public class DefaultKeyManagerConnectorConfiguration implements KeyManagerConnec
         return APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE;
     }
 
+    @Override
+    public String getDefaultScopesClaim() {
+
+        return APIConstants.JwtTokenConstants.SCOPE;
+    }
+
+    @Override
+    public String getDefaultConsumerKeyClaim() {
+
+        return APIConstants.JwtTokenConstants.AUTHORIZED_PARTY;
+    }
 }
