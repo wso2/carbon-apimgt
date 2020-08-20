@@ -270,6 +270,7 @@
   "Apis.Details.Documents.CreateEditForm.document.summary.helper.text": "",
   "Apis.Details.Documents.CreateEditForm.duplicate.document.name.helper.text": "",
   "Apis.Details.Documents.CreateEditForm.empty.document.name.helper.text": "",
+  "Apis.Details.Documents.CreateEditForm.exceeds.document.name.length.helper.text": "",
   "Apis.Details.Documents.CreateEditForm.source": "",
   "Apis.Details.Documents.CreateEditForm.source.file": "",
   "Apis.Details.Documents.CreateEditForm.source.inline": "",
