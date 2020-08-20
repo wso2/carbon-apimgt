@@ -30,6 +30,7 @@ public class JWTConfigurationDto {
     private String signatureAlgorithm = "SHA256withRSA";
     private String jwtGeneratorImplClass = "org.wso2.carbon.apimgt.keymgt.token.JWTGenerator";
     private String claimRetrieverImplClass;
+    private boolean enableUserClaims;
     private String gatewayJWTGeneratorImpl;
     private Map<String,TokenIssuerDto> tokenIssuerDtoMap = new HashMap();
     private Set<String> jwtExcludedClaims = new HashSet<>();
@@ -122,5 +123,15 @@ public class JWTConfigurationDto {
     public void setJwtExcludedClaims(Set<String> jwtClaims) {
 
         this.jwtExcludedClaims = jwtClaims;
+    }
+
+    public boolean isEnableUserClaims() {
+
+        return enableUserClaims;
+    }
+
+    public void setEnableUserClaims(boolean enableUserClaims) {
+
+        this.enableUserClaims = enableUserClaims;
     }
 }
