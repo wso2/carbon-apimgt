@@ -182,8 +182,8 @@ function AddEdit(props) {
         customAttributes: [],
         stopOnQuotaReach: true,
         permissions: {
-            roles: ['Internal/everyone'],
-            permissionStatus: 'allow',
+            roles: 'Internal/everyone',
+            permissionStatus: 'ALLOW',
         },
         graphQL: {
             maxComplexity: '',
@@ -239,8 +239,8 @@ function AddEdit(props) {
                     customAttributes: setCustomAttributes(result.body.customAttributes),
                     stopOnQuotaReach: result.body.stopOnQuotaReach,
                     permissions: {
-                        roles: ['Internal/everyone'],
-                        permissionStatus: 'allow',
+                        roles: 'Internal/everyone',
+                        permissionStatus: 'ALLOW',
                     },
                     graphQL: {
                         maxComplexity: (result.body.graphQLMaxComplexity === 0) ? '' : result.body.graphQLMaxComplexity,
@@ -274,8 +274,8 @@ function AddEdit(props) {
             customAttributes: [],
             stopOnQuotaReach: true,
             permissions: {
-                roles: ['Internal/everyone'],
-                permissionStatus: 'allow',
+                roles: 'Internal/everyone',
+                permissionStatus: 'ALLOW',
             },
             graphQL: {
                 maxComplexity: '',
@@ -398,6 +398,17 @@ function AddEdit(props) {
         return errorText;
     };
 
+    const getRoleList = (rolesString) => {
+        // Split the roles string using comma, trim spaces and remove empty strings (if any)
+        if (rolesString.indexOf(',') === -1) {
+            return [rolesString];
+        } else {
+            return rolesString.split(',').map((role) => {
+                return role.trim();
+            }).filter((role) => role !== '');
+        }
+    };
+
     const formSaveCallback = () => {
         const formErrors = getAllFormErrors();
         if (formErrors !== '') {
@@ -435,6 +446,10 @@ function AddEdit(props) {
                         billingCycle: state.monetization.billingCycle,
                     },
                 },
+                permissions: {
+                    permissionType: state.permissions.permissionStatus,
+                    roles: getRoleList(state.permissions.roles),
+                },
             };
         } else {
             subscriptionThrottlingPolicy = {
@@ -464,6 +479,10 @@ function AddEdit(props) {
                         currencyType: state.monetization.currencyType,
                         billingCycle: state.monetization.billingCycle,
                     },
+                },
+                permissions: {
+                    permissionType: state.permissions.permissionStatus,
+                    roles: getRoleList(state.permissions.roles),
                 },
             };
         }
@@ -1300,7 +1319,7 @@ function AddEdit(props) {
                     <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
                             <Box display='flex' flexDirection='row' alignItems='center'>
-                                {permissionStatus === 'allow' ? (
+                                {permissionStatus === 'ALLOW' ? (
                                     <Box flex='1'>
                                         <TextField
                                             name='roles'
@@ -1321,6 +1340,9 @@ function AddEdit(props) {
                                             helperText={intl.formatMessage({
                                                 id: 'Throttling.Subscription.enter.permission.allowed',
                                                 defaultMessage: 'This policy is "Allowed" for above roles.',
+                                            }) + ' ' + intl.formatMessage({
+                                                id: 'Throttling.Subscription.enter.role.separation.help.text',
+                                                defaultMessage: 'Use comma to seperate roles.',
                                             })}
                                             variant='outlined'
                                         />
@@ -1339,6 +1361,9 @@ function AddEdit(props) {
                                             helperText={intl.formatMessage({
                                                 id: 'Throttling.Subscription.enter.permission.denied',
                                                 defaultMessage: 'This policy is "Denied" for above roles.',
+                                            }) + ' ' + intl.formatMessage({
+                                                id: 'Throttling.Subscription.enter.role.separation.help.text',
+                                                defaultMessage: 'Use comma to seperate roles.',
                                             })}
                                             variant='outlined'
                                         />
@@ -1352,8 +1377,8 @@ function AddEdit(props) {
                                     onChange={onChange}
                                     className={classes.radioGroup}
                                 >
-                                    <FormControlLabel value='allow' control={<Radio />} label='Allow' />
-                                    <FormControlLabel value='deny' control={<Radio />} label='Deny' />
+                                    <FormControlLabel value='ALLOW' control={<Radio />} label='Allow' />
+                                    <FormControlLabel value='DENY' control={<Radio />} label='Deny' />
                                 </RadioGroup>
                             </Box>
                         </Box>
