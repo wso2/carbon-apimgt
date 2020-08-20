@@ -10605,7 +10605,6 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to update API policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         }
-
         return policy;
     }
 
