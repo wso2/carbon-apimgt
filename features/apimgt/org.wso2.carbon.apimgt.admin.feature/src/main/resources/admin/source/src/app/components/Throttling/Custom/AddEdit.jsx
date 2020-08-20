@@ -372,13 +372,14 @@ function AddEdit(props) {
                                 <FormattedMessage
                                     id='dsdds'
                                     defaultMessage={'The specific combination of attributes being checked '
-                                    + 'in the policy need to be defined as the key template'}
+                                        + 'in the policy need to be defined as the key template. Allowed values are : '
+                                        + '$userId, $apiContext, $apiVersion, $resourceKey, $appTenant, $apiTenant,'
+                                        + ' $appId, $clientIp'}
                                 />
                             )}
                         />
                         <FormHelperText className={classes.helperText}>
-                            Eg: $userId, $apiContext, $apiVersion, $resourceKey, $appTenant, $apiTenant,
-                            $appId, $clientIp
+                            Eg: $userId:$apiContext:$apiVersion
                         </FormHelperText>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>

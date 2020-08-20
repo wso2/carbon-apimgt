@@ -671,7 +671,7 @@
   "Workflow.UserCreation.updateStatus.has.errors": "Unable to complete User creation approve/reject process.",
   "Workflow.apistatechange.search.default": "Search by API, Request state, Current state or Creator",
   "Workflow.applicationcreation.search.default": "Search by Application, Throttling Policy or Creator",
-  "dsdds": "The specific combination of attributes being checked in the policy need to be defined as the key template",
+  "dsdds": "The specific combination of attributes being checked in the policy need to be defined as the key template. Allowed values are : $userId, $apiContext, $apiVersion, $resourceKey, $appTenant, $apiTenant, $appId, $clientIp",
   "error.list.401": "401 : Authorization Required.",
   "error.list.401.description": "The server could not verify that you are authorized to access the requested resource",
   "error.list.403": "403 : Forbidden.",
