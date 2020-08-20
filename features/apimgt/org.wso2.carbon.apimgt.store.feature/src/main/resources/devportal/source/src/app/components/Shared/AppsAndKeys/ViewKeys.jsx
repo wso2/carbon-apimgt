@@ -20,6 +20,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
+import Alert1 from 'AppComponents/Shared/Alert';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
@@ -36,7 +37,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import Alert from '../Alert';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
 import Application from '../../../data/Application';
@@ -290,13 +290,13 @@ class ViewKeys extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 400) {
-                     Alert.error(error.description ||
+                     Alert1.error(error.description ||
                          intl.formatMessage({
                              id: 'Shared.AppsAndKeys.TokenManager.key.generate.bad.request.error',
                               defaultMessage: 'Error occurred when generating Access Token',
                          })
                      );
-                     }
+                }
                 this.setState({ isUpdating: false });
             });
     };
