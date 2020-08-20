@@ -431,6 +431,11 @@ class TableView extends React.Component {
             options.download = true;
             options.viewColumns = true;
         }
+        if (page === 0 && this.count <= rowsPerPage && rowsPerPage === 10) {
+            options.pagination = false;
+        } else {
+            options.pagination = true;
+        }
         if (loading || !apisAndApiProducts) {
             return <Progress per={90} message='Loading APIs ...' />;
         }
