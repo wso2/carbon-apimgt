@@ -99,10 +99,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
+import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
@@ -10525,14 +10522,12 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public APIPolicy updateAPIPolicy(APIPolicy policy) throws APIManagementException {
-        Connection connection = null;
         PreparedStatement updateStatement = null;
         PreparedStatement deleteStatement = null ;
         PreparedStatement selectStatement = null;
         String updateQuery;
         int policyId = 0;
-        try {
-            connection = APIMgtDBUtil.getConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             if (policy != null) {
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
@@ -10615,18 +10610,7 @@ public class ApiMgtDAO {
             }
             connection.commit();
         } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    // Rollback failed. Exception will be thrown later for upper exception
-                    log.error("Failed to rollback the API Application Policy: " + policy.toString(), ex);
-                }
-            }
-            handleException(
-                    "Failed to update API policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
+            handleException("Failed to update API policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         }
         return policy;
     }
