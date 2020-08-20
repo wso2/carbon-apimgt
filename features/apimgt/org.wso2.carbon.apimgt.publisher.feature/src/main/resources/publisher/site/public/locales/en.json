@@ -270,7 +270,7 @@
   "Apis.Details.Documents.CreateEditForm.document.summary.helper.text": "Provide a brief description for the document",
   "Apis.Details.Documents.CreateEditForm.duplicate.document.name.helper.text": "Duplicate document name",
   "Apis.Details.Documents.CreateEditForm.empty.document.name.helper.text": "Document name cannot be empty",
-  "Apis.Details.Documents.CreateEditForm.exceeds.document.name.length.helper.text": "Document name exceeds the max length(60)",
+  "Apis.Details.Documents.CreateEditForm.exceeds.document.name.length.helper.text": "Document name exceeds the maximum length of 60 characters",
   "Apis.Details.Documents.CreateEditForm.source": "Source",
   "Apis.Details.Documents.CreateEditForm.source.file": "File",
   "Apis.Details.Documents.CreateEditForm.source.inline": "Inline",

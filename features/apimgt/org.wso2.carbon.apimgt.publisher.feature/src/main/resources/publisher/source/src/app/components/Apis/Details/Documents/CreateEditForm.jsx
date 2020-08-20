@@ -300,7 +300,7 @@ class CreateEditForm extends React.Component {
             return (
                 <FormattedMessage
                     id='Apis.Details.Documents.CreateEditForm.exceeds.document.name.length.helper.text'
-                    defaultMessage='Document name exceeds the max length(60)'
+                    defaultMessage='Document name exceeds the maximum length of 60 characters'
                 />
             );
         } else if (nameNotDuplicate && !nameEmpty) {
