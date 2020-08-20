@@ -357,7 +357,12 @@ ExceptionCodes implements ErrorHandler {
     TENANT_THEME_EXPORT_FAILED(901701, "Failed to export tenant theme of tenant %s", 500,
             "%s"),
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
-            "Super Tenant %s is not allowed to import a tenant theme");
+            "Super Tenant %s is not allowed to import a tenant theme"),
+
+
+    //Mediation policies related
+    MEDIATION_POLICY_API_ALREADY_EXISTS(901800, "Mediation Policy Already Exists", 409,
+                                            "A mediation policy with the given name is already attached to the API");
 
     private final long errorCode;
     private final String errorMessage;
