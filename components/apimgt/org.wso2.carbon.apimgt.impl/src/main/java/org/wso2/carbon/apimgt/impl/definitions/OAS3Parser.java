@@ -256,9 +256,14 @@ public class OAS3Parser extends APIDefinition {
      * @param genCode String builder
      */
     private void setDefaultGeneratedResponse(StringBuilder genCode, String responseCode) {
-        genCode.append("\n/*if (!responses[").append(responseCode).append("]) {\n").append("  responses[")
-                .append(responseCode).append("] = [];\n").append("}\n").append("responses[")
-                .append(responseCode).append("][\"application/(json or xml)\"] = {}/<>*/\n");
+        if (responseCode.equals("default")) {
+            responseCode = "\"" + responseCode + "\"";
+        }
+        genCode.append("if (!responses[").append(responseCode).append("]) {\n" +
+                "  responses[").append(responseCode).append("] = [];\n" +
+                "}\n" +
+                "responses[").append(responseCode).append("][\"application/json\"] = \"\";\n" +
+                "responses[").append(responseCode).append("][\"application/xml\"] = \"\";\n\n");
     }
 
     /**
@@ -272,10 +277,16 @@ public class OAS3Parser extends APIDefinition {
      */
     private String getGeneratedResponsePayloads(String responseCode, String example, String type, boolean initialized) {
         StringBuilder genRespPayload = new StringBuilder();
+        if (responseCode.equals("default")) {
+            responseCode = "\"" + responseCode + "\"";
+        }
+        if (StringUtils.isBlank(example) || example.equals("null")) {
+            example = "\"\"";
+        }
         if (!initialized) {
             genRespPayload.append("\nif (!responses[").append(responseCode).append("]) {").append("\n responses [").append(responseCode).append("] = [];").append("\n}");
         }
-        genRespPayload.append("\nresponses[").append(responseCode).append("][\"application/").append(type).append("\"] = \n").append(example).append("\n");
+        genRespPayload.append("\nresponses[").append(responseCode).append("][\"application/").append(type).append("\"] = ").append(example).append(";\n");
         return genRespPayload.toString();
     }
 
@@ -288,9 +299,9 @@ public class OAS3Parser extends APIDefinition {
      * @return script with mock payloads and conditions to handle not implemented
      */
     private String getMandatoryScriptSection(int minResponseCode, StringBuilder payloadVariables) {
-        return "var accept = \"\\\"\"+mc.getProperty('AcceptHeader')+\"\\\"\";" +
+        return "var accept = mc.getProperty('AcceptHeader');" +
                 "\nvar responseCode = mc.getProperty('query.param.responseCode');" +
-                "\nvar responseCodeStr = \"\\\"\"+responseCode+\"\\\"\";" +
+                "\nvar responseCodeSC;" +
                 "\nvar responses = [];\n" +
                 payloadVariables +
                 "\nresponses[501] = [];" +
@@ -299,13 +310,21 @@ public class OAS3Parser extends APIDefinition {
                 "\n\"description\" : \"Not Implemented\"" +
                 "}\n" +
                 "responses[501][\"application/xml\"] = <response><code>501</code><description>Not Implemented</description></response>;\n\n" +
-                "if (!responses[responseCode]) {\n" +
-                " responseCode = 501;\n" +
-                "}\n\n" +
                 "if (responseCode == null) {\n" +
                 " responseCode = " + minResponseCode + ";\n" +   //assign lowest response code
-                " responseCodeStr = \"" + minResponseCode + "\";\n" +
                 "}\n\n" +
+                "if (!responses[responseCode]) {\n" +
+                "  if (responses[\"default\"]) {\n" +
+                "    responseCode = \"default\"\n" +
+                "  } else {\n" +
+                "    responseCode = 501;\n" +
+                "  }\n" +
+                "}\n" +
+                "if (responseCode === \"default\") {\n" +
+                "  responseCodeSC = mc.getProperty('query.param.responseCode');\n" +
+                "} else {\n" +
+                "  responseCodeSC = responseCode;\n" +
+                "}\n" +
                 "if (accept == null || !responses[responseCode][accept]) {\n";
     }
 
@@ -321,29 +340,29 @@ public class OAS3Parser extends APIDefinition {
         if (hasJsonPayload && hasXmlPayload) {
             responseSection = " accept = \"application/json\";\n" +
                     "}\n\n" +
-                    "if (accept === \"application/json\") {\n" +
+                    "if (accept == \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
-                    "} else if (accept === \"application/xml\") {\n" +
+                    "} else if (accept == \"application/xml\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
         } else if (hasJsonPayload) {
             responseSection = " accept = \"application/json\"; // assign whatever available\n" +
                     "}\n\n" +
-                    "if (accept === \"application/json\") {\n" +
+                    "if (accept == \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
                     "}";
         } else if (hasXmlPayload) {
             responseSection = " accept = \"application/xml\"; // assign whatever available\n" +
                     "}\n\n" +
-                    "if (accept === \"application/xml\") {\n" +
+                    "if (accept == \"application/xml\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
         }

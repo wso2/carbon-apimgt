@@ -4498,6 +4498,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getTierPermissions(tenantId);
     }
 
+    @Override
+    public TierPermissionDTO getThrottleTierPermission(String tierName) throws APIManagementException {
+        return apiMgtDAO.getThrottleTierPermission(tierName, tenantId);
+    }
 
     /**
      * Update the Tier Permissions
