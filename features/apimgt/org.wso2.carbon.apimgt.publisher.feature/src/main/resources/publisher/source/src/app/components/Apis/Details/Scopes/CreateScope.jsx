@@ -389,6 +389,7 @@ class CreateScope extends React.Component {
                                         }}
                                         value={this.state.apiScope.name || ''}
                                         onChange={this.handleScopeNameInput}
+                                        inputProps={{ maxLength: 60 }}
                                     />
                                 </FormControl>
                                 <FormControl margin='normal' classes={{ root: classes.descriptionForm }}>
