@@ -22,9 +22,25 @@ var appUtils = require("/services/utils.js");
 var settings = require("/site/public/theme/settings.js");
 response.contentType = "application/javascript";
 settings.Settings.app.context = appUtils.getTenantBaseStoreContext();
+
+var serverUrl = '';
+var forwarded_for = request.getHeader(settings.Settings.app.customUrl.forwardedHeader);
+if (settings.Settings.app.customUrl.enabled && forwarded_for) {
+    serverUrl = "https://" + forwarded_for;
+} else {
+    serverUrl = appUtils.getIDPOrigin();
+}
+
+var customIDPCheckSessionEndpoint = '';
+if (settings.Settings.app.customUrl.enabled && forwarded_for) {
+    customIDPCheckSessionEndpoint = "https://" + forwarded_for + "/oidc/checksession";
+} else {
+    customIDPCheckSessionEndpoint = appUtils.getIDPCheckSessionEndpoint();
+}
+
 settings.Settings.idp = {
-    origin: appUtils.getIDPOrigin(),
-    checkSessionEndpoint: appUtils.getIDPCheckSessionEndpoint(),
+    origin: serverUrl,
+    checkSessionEndpoint: customIDPCheckSessionEndpoint,
 }
 var content = "const Settings ="+stringify(settings.Settings)+";";
 print(content);

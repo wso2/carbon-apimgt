@@ -2650,7 +2650,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 fileName = seqElement.getAttributeValue(new QName("name"));
                 //Constructing mediation resource path
                 mediationResourcePath = mediationResourcePath + fileName;
-                checkMediationPolicy(apiProvider, mediationResourcePath);
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
                     //Adding api specific mediation policy
