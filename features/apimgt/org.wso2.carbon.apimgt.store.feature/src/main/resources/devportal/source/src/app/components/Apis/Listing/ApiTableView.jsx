@@ -78,7 +78,7 @@ class ApiTableView extends React.Component {
         };
         this.page = 0;
         this.count = 100;
-        this.rowsPerPage = localStorage.getItem('rowsPerPage') || 10;
+        this.rowsPerPage = localStorage.getItem('portal.numberOfRows') || 10;
         this.pageType = null;
     }
 
@@ -509,7 +509,7 @@ class ApiTableView extends React.Component {
                     this.page = 0;
                 }
                 this.rowsPerPage = numberOfRows;
-                localStorage.setItem('numberOfRows', numberOfRows);
+                localStorage.setItem('portal.numberOfRows', numberOfRows);
                 this.getData();
             },
         };
