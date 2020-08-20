@@ -34,8 +34,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurat
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +70,8 @@ public class SettingsMappingUtil {
         keyManagerConnectorConfigurationMap.forEach((keyManagerName, keyManagerConfiguration) -> {
             if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerName)){
                 list.add(fromKeyManagerConfigurationToSettingsKeyManagerConfigurationDTO(keyManagerName,
-                        keyManagerConfiguration.getDisplayName(),
+                        keyManagerConfiguration.getDisplayName(),keyManagerConfiguration.getDefaultScopesClaim(),
+                        keyManagerConfiguration.getDefaultConsumerKeyClaim(),
                         keyManagerConfiguration.getConnectionConfigurations()));
             }
         });
@@ -95,13 +96,15 @@ public class SettingsMappingUtil {
     }
 
     private static SettingsKeyManagerConfigurationDTO fromKeyManagerConfigurationToSettingsKeyManagerConfigurationDTO(
-            String name,String displayName,
+            String name, String displayName, String scopesClaim, String consumerKeyClaim,
             List<ConfigurationDto> connectionConfigurationDtoList) {
 
         SettingsKeyManagerConfigurationDTO settingsKeyManagerConfigurationDTO =
                 new SettingsKeyManagerConfigurationDTO();
         settingsKeyManagerConfigurationDTO.setDisplayName(displayName);
         settingsKeyManagerConfigurationDTO.setType(name);
+        settingsKeyManagerConfigurationDTO.setDefaultScopesClaim(scopesClaim);
+        settingsKeyManagerConfigurationDTO.setDefaultConsumerKeyClaim(consumerKeyClaim);
         if (connectionConfigurationDtoList != null) {
             for (ConfigurationDto configurationDto : connectionConfigurationDtoList) {
                 KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
