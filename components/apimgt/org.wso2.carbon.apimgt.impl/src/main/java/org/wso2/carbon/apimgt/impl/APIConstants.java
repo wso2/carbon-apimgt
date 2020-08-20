@@ -2123,6 +2123,7 @@ public final class APIConstants {
     public static final int MAX_LENGTH_VERSION = 30;
     public static final int MAX_LENGTH_PROVIDER = 50;
     public static final int MAX_LENGTH_CONTEXT = 82; //context becomes context + version + two '/'. so max context is 50
+    public static final int MAX_LENGTH_MEDIATION_POLICY_NAME = 255;
 
     /**
      * Constants for trust store access
