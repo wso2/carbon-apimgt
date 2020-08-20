@@ -365,7 +365,7 @@ ExceptionCodes implements ErrorHandler {
                                             "A mediation policy with the given name is already attached to the API"),
 
     //mediation policies related common errors
-    MEDIATION_POLICY_NAME_TOO_LONG(90850, "Mediation Policy Name Too Long", 400,
+    MEDIATION_POLICY_NAME_TOO_LONG(900850, "Mediation Policy Name Too Long", 400,
                                                 "The name of the mediation policy exceeds the max length (%s)");
 
     private final long errorCode;
