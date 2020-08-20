@@ -5784,14 +5784,14 @@ public class ApiMgtDAO {
 
             if (workflow.getMetadata() != null) {
                 byte[] metadataByte = workflow.getMetadata().toJSONString().getBytes("UTF-8");
-                prepStmt.setBlob(9, new ByteArrayInputStream(metadataByte));
+                prepStmt.setBinaryStream(9, new ByteArrayInputStream(metadataByte));
             } else {
                 prepStmt.setNull(9, java.sql.Types.BLOB);
             }
 
             if (workflow.getProperties() != null) {
                 byte[] propertiesByte = workflow.getProperties().toJSONString().getBytes("UTF-8");
-                prepStmt.setBlob(10, new ByteArrayInputStream(propertiesByte));
+                prepStmt.setBinaryStream(10, new ByteArrayInputStream(propertiesByte));
             } else {
                 prepStmt.setNull(10, java.sql.Types.BLOB);
             }
@@ -14738,13 +14738,11 @@ public class ApiMgtDAO {
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                     workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                    Blob metadatablob = rs.getBlob("WF_METADATA");
+                    InputStream metadatablob = rs.getBinaryStream("WF_METADATA");
 
                     byte[] metadataByte;
                     if (metadatablob != null) {
-                        metadataByte = metadatablob.getBytes(1L, (int) metadatablob.length());
-                        InputStream targetStream = new ByteArrayInputStream(metadataByte);
-                        String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
+                        String metadata = APIMgtDBUtil.getStringFromInputStream(metadatablob);
                         Gson metadataGson = new Gson();
                         JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
                         workflow.setMetadata(metadataJson);
@@ -14812,14 +14810,11 @@ public class ApiMgtDAO {
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                     workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
                     workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
-                    Blob metadataBlob = rs.getBlob("WF_METADATA");
-                    Blob propertiesBlob = rs.getBlob("WF_PROPERTIES");
+                    InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
+                    InputStream propertiesBlob = rs.getBinaryStream("WF_PROPERTIES");
 
-                    byte[] metadataByte;
                     if (metadataBlob != null) {
-                        metadataByte = metadataBlob.getBytes(1L, (int) metadataBlob.length());
-                        InputStream targetStream = new ByteArrayInputStream(metadataByte);
-                        String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
+                        String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
                         Gson metadataGson = new Gson();
                         JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
                         workflow.setMetadata(metadataJson);
@@ -14828,11 +14823,8 @@ public class ApiMgtDAO {
                         workflow.setMetadata(metadataJson);
                     }
 
-                    byte[] propertiesByte;
                     if (propertiesBlob != null) {
-                        propertiesByte = propertiesBlob.getBytes(1L, (int) propertiesBlob.length());
-                        InputStream propertiesTargetStream = new ByteArrayInputStream(propertiesByte);
-                        String properties = APIMgtDBUtil.getStringFromInputStream(propertiesTargetStream);
+                        String properties = APIMgtDBUtil.getStringFromInputStream(propertiesBlob);
                         Gson propertiesGson = new Gson();
                         JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
                         workflow.setProperties(propertiesJson);
