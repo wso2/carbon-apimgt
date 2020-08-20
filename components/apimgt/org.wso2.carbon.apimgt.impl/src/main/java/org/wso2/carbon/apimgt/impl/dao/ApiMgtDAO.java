@@ -10525,48 +10525,15 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public APIPolicy updateAPIPolicy(APIPolicy policy) throws APIManagementException {
-        PreparedStatement updateStatement = null;
-        PreparedStatement deleteStatement = null ;
-        PreparedStatement selectStatement = null;
         String updateQuery;
         int policyId = 0;
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-            if (policy != null) {
-                if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    selectStatement  = connection
-                            .prepareStatement(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL);
-                    selectStatement .setString(1, policy.getPolicyName());
-                    selectStatement .setInt(2, policy.getTenantId());
-                } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    selectStatement = connection
-                            .prepareStatement(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_BY_UUID_SQL);
-                    selectStatement .setString(1, policy.getUUID());
-                } else {
-                    String errorMsg =
-                            "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
-                                    + " should be provided. Name: " + policy.getPolicyName()
-                                    + ", Tenant Id: " + policy.getTenantId() + ", UUID: " + policy.getUUID();
-                    log.error(errorMsg);
-                    throw new APIManagementException(errorMsg);
-                }
-            } else {
-                String errorMsg = "Provided Policy to update is null";
-                log.error(errorMsg);
-                throw new APIManagementException(errorMsg);
-            }
-
-            ResultSet resultSet = selectStatement.executeQuery();
-            if (resultSet.next()) {
-                policyId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID);
-            }
-            deleteStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.DELETE_CONDITION_GROUP_SQL);
-            deleteStatement.setInt(1, policyId);
-            deleteStatement.executeUpdate();
-
+        String selectQuery;
+        if (policy != null) {
             if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+                selectQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL;
                 updateQuery = SQLConstants.ThrottleSQLConstants.UPDATE_API_POLICY_SQL;
             } else if (!StringUtils.isBlank(policy.getUUID())) {
+                selectQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_BY_UUID_SQL;
                 updateQuery = ThrottleSQLConstants.UPDATE_API_POLICY_BY_UUID_SQL;
             } else {
                 String errorMsg = "Policy object doesn't contain mandatory parameters. At least UUID or Name,Tenant Id"
@@ -10575,43 +10542,68 @@ public class ApiMgtDAO {
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg);
             }
-            updateStatement = connection.prepareStatement(updateQuery);
-            if (!StringUtils.isEmpty(policy.getDisplayName())) {
-                updateStatement.setString(1, policy.getDisplayName());
-            } else {
-                updateStatement.setString(1, policy.getPolicyName());
-            }
-            updateStatement.setString(2, policy.getDescription());
-            updateStatement.setString(3, policy.getDefaultQuotaPolicy().getType());
-
-            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
-                RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
-                updateStatement.setLong(4, limit.getRequestCount());
-                updateStatement.setString(5, null);
-            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
-                BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
-                updateStatement.setLong(4, limit.getDataAmount());
-                updateStatement.setString(5, limit.getDataUnit());
-            }
-            updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-            updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-
-            if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                updateStatement.setString(8, policy.getPolicyName());
-                updateStatement.setInt(9, policy.getTenantId());
-            } else if (!StringUtils.isBlank(policy.getUUID())) {
-                updateStatement.setString(8, policy.getUUID());
-            }
-            int updatedRawCount = updateStatement.executeUpdate();
-            if (updatedRawCount > 0) {
-                List<Pipeline> pipelines = policy.getPipelines();
-                if (pipelines != null) {
-                    for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
-                        addPipeline(pipeline, policyId, connection);
+        } else {
+            String errorMsg = "Provided Policy to update is null";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
+                 PreparedStatement deleteStatement = connection.prepareStatement(SQLConstants
+                         .ThrottleSQLConstants.DELETE_CONDITION_GROUP_SQL);
+                 PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
+                if (selectQuery.equals(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL)) {
+                    selectStatement .setString(1, policy.getPolicyName());
+                    selectStatement .setInt(2, policy.getTenantId());
+                } else {
+                    selectStatement .setString(1, policy.getUUID());
+                }
+                try (ResultSet resultSet = selectStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        policyId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID);
                     }
                 }
+                deleteStatement.setInt(1, policyId);
+                deleteStatement.executeUpdate();
+
+                if (!StringUtils.isEmpty(policy.getDisplayName())) {
+                    updateStatement.setString(1, policy.getDisplayName());
+                } else {
+                    updateStatement.setString(1, policy.getPolicyName());
+                }
+                updateStatement.setString(2, policy.getDescription());
+                updateStatement.setString(3, policy.getDefaultQuotaPolicy().getType());
+
+                if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                    RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+                    updateStatement.setLong(4, limit.getRequestCount());
+                    updateStatement.setString(5, null);
+                } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                    BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
+                    updateStatement.setLong(4, limit.getDataAmount());
+                    updateStatement.setString(5, limit.getDataUnit());
+                }
+                updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+                updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+
+                if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+                    updateStatement.setString(8, policy.getPolicyName());
+                    updateStatement.setInt(9, policy.getTenantId());
+                } else if (!StringUtils.isBlank(policy.getUUID())) {
+                    updateStatement.setString(8, policy.getUUID());
+                }
+                int updatedRawCount = updateStatement.executeUpdate();
+                if (updatedRawCount > 0) {
+                    List<Pipeline> pipelines = policy.getPipelines();
+                    if (pipelines != null) {
+                        for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
+                            addPipeline(pipeline, policyId, connection);
+                        }
+                    }
+                }
+                connection.commit();
             }
-            connection.commit();
         } catch (SQLException e) {
             handleException("Failed to update API policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         }
