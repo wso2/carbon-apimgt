@@ -236,10 +236,10 @@ function AddEditKeyManager(props) {
                 type: key, defaultConsumerKeyClaim, defaultScopesClaim, configurations,
             }) => {
                 if (key === keyManagerType) {
-                    if (defaultConsumerKeyClaim !== null) {
+                    if (defaultConsumerKeyClaim) {
                         dispatch({ field: 'consumerKeyClaim', value: defaultConsumerKeyClaim });
                     }
-                    if (defaultScopesClaim !== null) {
+                    if (defaultScopesClaim) {
                         dispatch({ field: 'scopesClaim', value: defaultScopesClaim });
                     }
                     setKeyManagerConfiguration(configurations);
