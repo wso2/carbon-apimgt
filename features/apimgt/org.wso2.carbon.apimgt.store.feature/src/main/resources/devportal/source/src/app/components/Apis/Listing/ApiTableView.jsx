@@ -26,6 +26,7 @@ import cloneDeep from 'lodash.clonedeep';
 import queryString from 'query-string';
 import API from 'AppData/api';
 import { withTheme } from '@material-ui/styles';
+import Typography from '@material-ui/core/Typography';
 import Configurations from 'Config';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import withSettings from 'AppComponents/Shared/withSettingsContext';
@@ -77,7 +78,7 @@ class ApiTableView extends React.Component {
         };
         this.page = 0;
         this.count = 100;
-        this.rowsPerPage = 10;
+        this.rowsPerPage = localStorage.getItem('rowsPerPage') || 10;
         this.pageType = null;
     }
 
@@ -109,6 +110,7 @@ class ApiTableView extends React.Component {
                         },
                         '& td': {
                             whiteSpace: 'nowrap',
+                            lineHeight: 1,
                         },
                         '& tr:nth-child(even)': {
                             backgroundColor: theme.custom.listView.tableBodyEvenBackgrund,
@@ -126,12 +128,6 @@ class ApiTableView extends React.Component {
                             backgroundColor: theme.custom.listView.tableHeadBackground,
                             color: theme.palette.getContrastText(theme.custom.listView.tableHeadBackground),
                         },
-                    },
-                },
-                MUIDataTableBodyCell: {
-                    root: {
-                        backgroundColor: 'transparent',
-                        width: '100%',
                     },
                 },
                 MUIDataTablePagination: {
@@ -185,6 +181,12 @@ class ApiTableView extends React.Component {
                             backgroundColor: 'transparent',
                         },
                     },
+                    MUIDataTableBodyCell: {
+                        root: {
+                            backgroundColor: 'transparent',
+                            width: '100%',
+                        },
+                    },
                 },
             };
         }
@@ -205,6 +207,7 @@ class ApiTableView extends React.Component {
             || query !== prevProps.query
             || prevProps.selectedTag !== selectedTag
         ) {
+            this.page = 0;
             this.apiType = this.context.apiType;
             this.getData();
         }
@@ -396,10 +399,35 @@ class ApiTableView extends React.Component {
                 name: 'provider',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.provider',
-                    defaultMessage: 'Provider',
+                    defaultMessage: 'Provider/Business Owner',
                 }),
                 options: {
                     sort: false,
+                    customBodyRender: (value, tableMeta) => {
+                        if (tableMeta.rowData) {
+                            if (
+                                tableMeta.rowData[9].businessOwner
+                            ) {
+                                return (
+                                    <>
+                                        <div>{tableMeta.rowData[9].businessOwner}</div>
+                                        <Typography variant='caption'>
+                                            <FormattedMessage defaultMessage='(Business Owner)' id='Apis.Listing.ApiTableView.business.owner.caption' />
+                                        </Typography>
+                                    </>
+                                );
+                            } else {
+                                return (
+                                    <>
+                                        <div>{value}</div>
+                                        <Typography variant='caption'>
+                                            <FormattedMessage defaultMessage='(Provider)' id='Apis.Listing.ApiTableView.provider.caption' />
+                                        </Typography>
+                                    </>
+                                );
+                            }
+                        }
+                    }
                 },
             },
             {
@@ -449,6 +477,13 @@ class ApiTableView extends React.Component {
                     filter: false,
                 },
             },
+            {
+                name: 'businessInformation',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                },
+            },
         ];
         const { page, count, rowsPerPage } = this;
         const { data } = this.state;
@@ -474,6 +509,7 @@ class ApiTableView extends React.Component {
                     this.page = 0;
                 }
                 this.rowsPerPage = numberOfRows;
+                localStorage.setItem('numberOfRows', numberOfRows);
                 this.getData();
             },
         };

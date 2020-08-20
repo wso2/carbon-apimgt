@@ -75,6 +75,8 @@ class TableView extends React.Component {
                 this.showToggle = false;
             }
             defaultApiView = defaultApiView[defaultApiView.length - 1];
+        } else {
+            defaultApiView = localStorage.getItem('publisher.listType') || defaultApiView;
         }
         this.state = {
             apisAndApiProducts: null,
@@ -85,21 +87,18 @@ class TableView extends React.Component {
         };
         this.page = 0;
         this.count = 100;
-        this.rowsPerPage = 10;
-        this.getLocalStorage();
+        this.rowsPerPage = localStorage.getItem('publisher.rowsPerPage') || 10;
         this.setListType = this.setListType.bind(this);
         this.updateData = this.updateData.bind(this);
     }
 
     componentDidMount() {
-        this.getLocalStorage();
         this.getData();
     }
 
     componentDidUpdate(prevProps) {
         const { isAPIProduct, query } = this.props;
         if (isAPIProduct !== prevProps.isAPIProduct || query !== prevProps.query) {
-            this.getLocalStorage();
             this.getData();
         }
     }
@@ -188,7 +187,6 @@ class TableView extends React.Component {
             // We remove the local storage and redo the api call
             if (this.count > 0 && total === 0) {
                 this.page = 0;
-                this.removeLocalStorage();
                 this.getData();
             }
             this.count = total;
@@ -203,26 +201,6 @@ class TableView extends React.Component {
         });
     };
 
-    removeLocalStorage = () => {
-        const { isAPIProduct } = this.props;
-        const paginationSufix = isAPIProduct ? 'products' : 'apis';
-        window.localStorage.removeItem('pagination-' + paginationSufix);
-    }
-
-    getLocalStorage = () => {
-        const { isAPIProduct } = this.props;
-        const paginationSufix = isAPIProduct ? 'products' : 'apis';
-        const storedPagination = window.localStorage.getItem('pagination-' + paginationSufix);
-        if (storedPagination) {
-            const pagination = JSON.parse(storedPagination);
-            if (pagination.page && pagination.count && pagination.rowsPerPage) {
-                this.page = pagination.page;
-                this.count = pagination.count;
-                this.rowsPerPage = pagination.rowsPerPage;
-            }
-        }
-    };
-
     /**
      *
      * Switch the view between grid and list view
@@ -230,15 +208,8 @@ class TableView extends React.Component {
      * @memberof Listing
      */
     setListType = (value) => {
+        localStorage.setItem('publisher.listType', value);
         this.setState({ listType: value });
-    };
-
-    setLocalStorage = () => {
-        // Set the page to the localstorage
-        const { isAPIProduct } = this.props;
-        const paginationSufix = isAPIProduct ? 'products' : 'apis';
-        const pagination = { page: this.page, count: this.count, rowsPerPage: this.rowsPerPage };
-        window.localStorage.setItem('pagination-' + paginationSufix, JSON.stringify(pagination));
     };
 
     changePage = (page) => {
@@ -253,7 +224,6 @@ class TableView extends React.Component {
                 notFound: false,
                 displayCount: count,
             });
-            this.setLocalStorage();
         }).catch(() => {
             Alert.error(intl.formatMessage({
                 defaultMessage: 'Error While Loading APIs',
@@ -425,8 +395,8 @@ class TableView extends React.Component {
                 } else if (count - 1 === rowsPerPage * page && page !== 0) {
                     this.page = page - 1;
                 }
+                localStorage.setItem('publisher.rowsPerPage', numberOfRows);
                 this.getData();
-                this.setLocalStorage();
             },
         };
         if (listType === 'grid') {
