@@ -163,6 +163,7 @@ function AddEdit(props) {
                 }
                 break;
             case 'description':
+                break;
             case 'requestCount':
             case 'dataAmount':
             case 'unitTime':
