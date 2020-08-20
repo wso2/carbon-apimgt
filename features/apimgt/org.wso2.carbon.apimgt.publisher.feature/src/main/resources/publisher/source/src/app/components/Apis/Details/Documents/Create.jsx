@@ -98,7 +98,6 @@ function Create(props) {
                                 defaultMessage: 'File uploaded successfully.',
                             })}`);
                             history.push(listingPath);
-                            props.getDocumentsList();
                         })
                         .catch((error) => {
                             if (process.env.NODE_ENV !== 'production') {
