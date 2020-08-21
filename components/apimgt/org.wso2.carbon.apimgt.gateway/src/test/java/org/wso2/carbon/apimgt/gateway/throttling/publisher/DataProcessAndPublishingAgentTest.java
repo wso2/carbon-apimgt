@@ -357,7 +357,7 @@ public class DataProcessAndPublishingAgentTest {
     }
 
     @Test
-    public void testIgnoreClientPortFromXForwardedForHeaderIPV6() throws Exception {
+    public void testXForwardedForHeaderIPV6() throws Exception {
         ThrottleProperties throttleProperties = new ThrottleProperties();
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
