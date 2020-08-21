@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
@@ -53,21 +53,12 @@ function Edit(props) {
     const {
         updateList, dataRow, icon, triggerButtonText, title, applicationList,
     } = props;
-    let id = null;
-    let initialState = {
+    const [id, SetId] = useState();
+    const initialState = {
         name: '',
         owner: '',
     };
 
-    if (dataRow) {
-        const { name: originalName, owner: originalOwner } = dataRow;
-        id = dataRow.applicationId;
-
-        initialState = {
-            name: originalName,
-            owner: originalOwner,
-        };
-    }
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, owner } = state;
 
@@ -134,6 +125,12 @@ function Edit(props) {
         });
     };
 
+    const dialogOpenCallback = () => {
+        SetId(dataRow.applicationId);
+        dispatch({ field: 'name', value: dataRow.name });
+        dispatch({ field: 'owner', value: dataRow.owner });
+    };
+
     return (
         <FormDialogBase
             title={title}
@@ -141,6 +138,7 @@ function Edit(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
+            dialogOpenCallback={dialogOpenCallback}
         >
             <TextField
                 margin='dense'

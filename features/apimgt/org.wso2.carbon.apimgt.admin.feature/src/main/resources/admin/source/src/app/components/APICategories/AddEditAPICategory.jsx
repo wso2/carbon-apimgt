@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
@@ -54,21 +54,10 @@ function AddEdit(props) {
     } = props;
     const classes = useStyles();
 
-    let id = null;
-    let initialState = {
+    const [id, SetId] = useState();
+    const initialState = {
         description: '',
     };
-
-    // If the dataRow is there, assign data to initialState
-    if (dataRow) {
-        const { name: originalName, description: originalDescription } = dataRow;
-        id = dataRow.id;
-
-        initialState = {
-            name: originalName,
-            description: originalDescription,
-        };
-    }
 
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, description } = state;
@@ -160,6 +149,14 @@ function AddEdit(props) {
             });
     };
 
+    const dialogOpenCallback = () => {
+        if (dataRow) {
+            SetId(dataRow.id);
+            dispatch({ field: 'name', value: dataRow.name });
+            dispatch({ field: 'description', value: dataRow.description });
+        }
+    };
+
     return (
         <FormDialogBase
             title={title}
@@ -167,6 +164,7 @@ function AddEdit(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
+            dialogOpenCallback={dialogOpenCallback}
         >
             <TextField
                 autoFocus

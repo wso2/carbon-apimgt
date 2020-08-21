@@ -101,6 +101,7 @@ function ListBase(props) {
                     Alert.error(e);
                 });
         }
+        setSearchText('');
     };
 
     useEffect(() => {

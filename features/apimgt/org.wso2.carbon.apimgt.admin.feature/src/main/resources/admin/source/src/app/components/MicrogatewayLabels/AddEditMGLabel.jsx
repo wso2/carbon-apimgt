@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import Joi from '@hapi/joi';
@@ -62,23 +62,11 @@ function AddEditMGLabel(props) {
     } = props;
     const classes = useStyles();
 
-    let id = null;
-    let initialState = {
+    const [id, SetId] = useState();
+    const initialState = {
         description: '',
         hosts: [],
     };
-
-    // If the dataRow is there, assign data to initialState
-    if (dataRow) {
-        const { name: originalName, description: originalDescription, accessUrls: originalHosts } = dataRow;
-        id = dataRow.id;
-
-        initialState = {
-            name: originalName,
-            description: originalDescription,
-            hosts: originalHosts,
-        };
-    }
 
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, description, hosts } = state;
@@ -206,6 +194,15 @@ function AddEditMGLabel(props) {
         dispatch({ field: 'hosts', value: userHosts });
     };
 
+    const dialogOpenCallback = () => {
+        if (dataRow) {
+            SetId(dataRow.id);
+            dispatch({ field: 'name', value: dataRow.name });
+            dispatch({ field: 'description', value: dataRow.description });
+            dispatch({ field: 'hosts', value: dataRow.accessUrls });
+        }
+    };
+
     return (
         <FormDialogBase
             title={title}
@@ -218,6 +215,7 @@ function AddEditMGLabel(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
+            dialogOpenCallback={dialogOpenCallback}
         >
             <FormControl component='fieldset' className={classes.addEditFormControl}>
                 <TextField
