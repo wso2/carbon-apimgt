@@ -181,7 +181,7 @@ function AddEdit(props) {
                         id: 'Throttling.Custom.Policy.policy.name.space',
                         defaultMessage: 'Name contains spaces',
                     });
-                } else if (value.length > 60) {
+                } else if (value.length > 30) {
                     error = intl.formatMessage({
                         id: 'Throttling.Custom.Policy.policy.name.too.long.error.msg',
                         defaultMessage: 'Custom policy name is too long',
