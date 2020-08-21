@@ -205,18 +205,6 @@ const Alerts = (props) => {
         setEmailsList(email);
     };
 
-    /**
-     * Handles the email deletion event.
-     *
-     * @param {string} email : The email that is being deleted.
-     * */
-    const handleEmailDeletion = (email) => {
-        const newEmails = emails.filter((oldEmail) => {
-            return oldEmail !== email;
-        });
-        setEmailsList(newEmails);
-    };
-
     useEffect(() => {
         const supportedAlertsPromise = API.getSupportedAlertTypes();
         const subscribedAlertsPromise = API.getSubscribedAlertTypesByUser();
@@ -363,7 +351,7 @@ const Alerts = (props) => {
                                             label='Emails'
                                             variant='outlined'
                                             className={classes.chipInput}
-                                            value={emails}
+                                            defaultValue={emails}
                                             placeholder='Enter email address and press Enter'
                                             required
                                             helperText={'Email address to receive alerts of selected'
@@ -371,9 +359,6 @@ const Alerts = (props) => {
                                                 + ' address and press Enter to add'}
                                             onChange={(chip) => {
                                                 handleAddEmail(chip);
-                                            }}
-                                            onDelete={(chip) => {
-                                                handleEmailDeletion(chip);
                                             }}
                                         />
                                         <Grid container direction='row' spacing={2} className={classes.btnContainer}>
