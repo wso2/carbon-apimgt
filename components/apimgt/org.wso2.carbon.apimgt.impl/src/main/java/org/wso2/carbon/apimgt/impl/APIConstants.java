@@ -442,6 +442,7 @@ public final class APIConstants {
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
     public static final String JWT_CONFIGS = "JWTConfiguration";
     public static final String JWT_HEADER = "JWTHeader";
+    public static final String ENABLE_USER_CLAIMS = "EnableUserClaims";
     public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
     public static final String CLAIMS_RETRIEVER_CLASS = "ClaimsRetrieverImplClass";
