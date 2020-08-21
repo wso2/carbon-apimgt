@@ -150,14 +150,10 @@ function Properties(props) {
     const [isAdditionalPropertiesStale, setIsAdditionalPropertiesStale] = useState(false);
     const iff = (condition, then, otherwise) => (condition ? then : otherwise);
 
-    let isKeyWord = false;
     const keywords = ['provider', 'version', 'context', 'status', 'description',
         'subcontext', 'doc', 'lcState', 'name', 'tags'];
-    if (keywords.includes(propertyKey)) {
-        isKeyWord = true;
-    } else {
-        isKeyWord = false;
-    }
+    const isInvalidName = keywords.includes(propertyKey) || /\s/g.test(propertyKey)
+        || (propertyKey && propertyKey.length > 80);
 
     const toggleAddProperty = () => {
         setShowAddProperty(!showAddProperty);
@@ -463,8 +459,8 @@ function Properties(props) {
                                                         onChange={handleChange('propertyKey')}
                                                         onKeyDown={handleKeyDown('propertyKey')}
                                                         helperText={validateEmpty(propertyKey) ? ''
-                                                            : iff(isKeyWord, 'Invalid property name', '')}
-                                                        error={validateEmpty(propertyKey) || isKeyWord}
+                                                            : iff(isInvalidName, 'Invalid property name', '')}
+                                                        error={validateEmpty(propertyKey) || isInvalidName}
                                                         disabled={isRestricted(
                                                             ['apim:api_create', 'apim:api_publish'],
                                                             api,
@@ -503,7 +499,7 @@ function Properties(props) {
                                                             || isRestricted(
                                                                 ['apim:api_create', 'apim:api_publish'], api,
                                                             )
-                                                            || isKeyWord
+                                                            || isInvalidName
                                                         }
                                                         onClick={handleAddToList}
                                                         className={classes.marginRight}
@@ -529,8 +525,9 @@ function Properties(props) {
                                                             id='Apis.Details.Properties.Properties.help'
                                                             defaultMessage={
                                                                 'Property name should be unique, should not contain '
-                                                                + 'spaces and cannot be any '
-                                                                + 'of the following reserved keywords : '
+                                                                + 'spaces, cannot be more than 80 chars '
+                                                                + 'and cannot be any of the following '
+                                                                + 'reserved keywords : '
                                                                 + 'provider, version, context, status, description, '
                                                                 + 'subcontext, doc, lcState, name, tags.'
                                                             }
