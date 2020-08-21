@@ -4489,7 +4489,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     String type = tierPermission.getPermissionType();
 
                     List<String> currentRolesList = new ArrayList<String>(Arrays.asList(currentUserRoles));
-                    List<String> roles = new ArrayList<String>(Arrays.asList(tierPermission.getRoles()));
+                    String[] rolesList = tierPermission.getRoles();
+                    List<String> roles = new ArrayList<>();
+                    if (rolesList != null) {
+                        roles = new ArrayList<>(Arrays.asList(rolesList));
+                    }
                     currentRolesList.retainAll(roles);
 
                     if (APIConstants.TIER_PERMISSION_ALLOW.equals(type)) {
