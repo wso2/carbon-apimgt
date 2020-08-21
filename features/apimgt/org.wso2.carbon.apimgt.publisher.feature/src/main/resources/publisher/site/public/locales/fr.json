@@ -1058,6 +1058,7 @@
   "Scopes.Create.CreateScope.short.description.display.name": "",
   "Scopes.Create.CreateScope.short.description.name": "",
   "Scopes.Create.Scope.description.length.exceeded": "",
+  "Scopes.Create.Scope.name.length.exceeded": "",
   "Scopes.Create.ScopeCreate.Roles.Invalid": "",
   "Scopes.Delete.Delete.document.scope.label.ok.confirm": "",
   "Scopes.Delete.Delete.scope.delete": "",
