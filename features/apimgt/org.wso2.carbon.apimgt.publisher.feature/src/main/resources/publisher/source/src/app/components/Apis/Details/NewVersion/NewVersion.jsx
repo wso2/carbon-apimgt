@@ -205,7 +205,7 @@ class CreateNewVersion extends React.Component {
         } else if (valid.version.hasSpecialChars) {
             helperText = 'API Version should not contain special characters';
         } else if (valid.version.MaxLengthExceeds) {
-            helperText = 'API Version cannot be more than 30 characters';
+            helperText = 'API version exceeds maximum length of 30 characters';
         }
 
         return (
