@@ -86,7 +86,8 @@ public class SearchApiServiceImpl implements SearchApiService {
                 String searchString = APIConstants.API_STATUS + "=" ;
                 query = StringUtils.replaceIgnoreCase(query, searchString, APIConstants.LCSTATE_SEARCH_TYPE_KEY);
             }
-
+            String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
+            query = query + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
