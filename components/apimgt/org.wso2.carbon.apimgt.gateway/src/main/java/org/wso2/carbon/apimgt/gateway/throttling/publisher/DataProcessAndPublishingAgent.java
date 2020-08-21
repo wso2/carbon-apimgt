@@ -200,7 +200,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         if (remoteIP != null && remoteIP.length() > 0) {
-            if (remoteIP.contains(":")) {
+            if (remoteIP.contains(":") && remoteIP.split(":").length == 2) {
                 log.warn("Client port will be ignored and only the IP address will concern from " + remoteIP);
                 remoteIP = remoteIP.split(":")[0];
             }
