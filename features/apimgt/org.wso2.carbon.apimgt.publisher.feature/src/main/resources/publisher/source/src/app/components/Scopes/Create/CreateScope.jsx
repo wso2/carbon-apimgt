@@ -243,6 +243,10 @@ class CreateScope extends React.Component {
         if (valid[id].invalid) {
             valid[id].error = 'Scope name cannot be empty';
         }
+        valid[id].invalid = !(value && value.length <= 60);
+        if (valid[id].invalid) {
+            valid[id].error = 'Scope name cannot be more than 60 characters';
+        }
 
         if (/\s/.test(value)) {
             valid[id].invalid = true;
