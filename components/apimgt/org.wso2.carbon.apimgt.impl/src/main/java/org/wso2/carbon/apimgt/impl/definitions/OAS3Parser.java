@@ -445,7 +445,6 @@ public class OAS3Parser extends APIDefinition {
         OpenAPI openAPI = getOpenAPI(resourceConfigsJSON);
         Map<String, SecurityScheme> securitySchemes;
         SecurityScheme securityScheme;
-        OAuthFlows oAuthFlows;
         OAuthFlow oAuthFlow;
         OAuthFlows oAuthFlows;
         Scopes scopes;
