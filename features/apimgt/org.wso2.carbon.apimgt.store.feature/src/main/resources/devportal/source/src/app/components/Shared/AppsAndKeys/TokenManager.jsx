@@ -412,6 +412,8 @@ class TokenManager extends React.Component {
                 const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
+                } else if (status === 500) {
+                    this.loadApplication();
                 }
                 Alert.error(intl.formatMessage({
                     id: 'Shared.AppsAndKeys.TokenManager.key.generate.error',
@@ -459,11 +461,13 @@ class TokenManager extends React.Component {
                 const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
+                } else if (status === 500) {
+                    this.loadApplication();
                 }
-                Alert.error(intl.formatMessage({
-                    id: 'Shared.AppsAndKeys.TokenManager.key.update.error',
-                    defaultMessage: 'Error occurred when updating application keys',
-                }));
+                const { response } = error;
+                if (response && response.body) {
+                    Alert.error(response.body.message);
+                }
             }).finally(() => this.setState({ isLoading: false }));
     }
 

@@ -931,6 +931,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                                     String ifMatch,
                                                                                     MessageContext messageContext)
             throws APIManagementException {
+
         String username = RestApiUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
         Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -952,19 +953,25 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                 "application " + applicationId + ". Invalid jsonInput \'"
                                 + body.getAdditionalProperties() + "\' provided.", log);
                     }
-                    if (StringUtils.isNotEmpty(body.getConsumerSecret())){
+                    if (StringUtils.isNotEmpty(body.getConsumerSecret())) {
                         appKey.setConsumerSecret(body.getConsumerSecret());
                     }
                     String[] scopes = body.getScopes().toArray(new String[0]);
-                    AccessTokenInfo response = apiConsumer.renewAccessToken(body.getRevokeToken(),
-                            appKey.getConsumerKey(), appKey.getConsumerSecret(),
-                            body.getValidityPeriod().toString(), scopes, jsonInput, appKey.getKeyManager());
 
-                    ApplicationTokenDTO appToken = new ApplicationTokenDTO();
-                    appToken.setAccessToken(response.getAccessToken());
-                    appToken.setTokenScopes(Arrays.asList(response.getScopes()));
-                    appToken.setValidityTime(response.getValidityPeriod());
-                    return Response.ok().entity(appToken).build();
+                    try {
+                        AccessTokenInfo response = apiConsumer.renewAccessToken(body.getRevokeToken(),
+                                appKey.getConsumerKey(), appKey.getConsumerSecret(),
+                                body.getValidityPeriod().toString(), scopes, jsonInput, appKey.getKeyManager());
+                        ApplicationTokenDTO appToken = new ApplicationTokenDTO();
+                        appToken.setAccessToken(response.getAccessToken());
+                        if (response.getScopes() != null) {
+                            appToken.setTokenScopes(Arrays.asList(response.getScopes()));
+                        }
+                        appToken.setValidityTime(response.getValidityPeriod());
+                        return Response.ok().entity(appToken).build();
+                    } catch (APIManagementException e) {
+                        RestApiUtil.handleBadRequest(e.getErrorHandler(), log);
+                    }
                 } else {
                     RestApiUtil
                             .handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId, log);

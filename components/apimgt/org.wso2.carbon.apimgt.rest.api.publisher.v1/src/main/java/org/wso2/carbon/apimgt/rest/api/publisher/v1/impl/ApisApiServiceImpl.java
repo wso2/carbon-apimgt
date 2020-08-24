@@ -2605,7 +2605,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated mediation DTO as response
      */
     @Override
-    public Response apisApiIdMediationPoliciesPost(String type, String apiId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdMediationPoliciesPost(String type, String apiId, InputStream fileInputStream,
+            Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
 
         String fileName = "";
         String mediationPolicyUrl = "";
@@ -2650,6 +2652,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 fileName = seqElement.getAttributeValue(new QName("name"));
                 //Constructing mediation resource path
                 mediationResourcePath = mediationResourcePath + fileName;
+                checkMediationPolicy(apiProvider, mediationResourcePath, fileName);
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
                     //Adding api specific mediation policy
@@ -2664,7 +2667,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 //Constructing mediation resource path
                 mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR + type +
                         RegistryConstants.PATH_SEPARATOR + fileName;
-                checkMediationPolicy(apiProvider,mediationResourcePath);
+                checkMediationPolicy(apiProvider,mediationResourcePath, fileName);
                 InputStream contentStream = new ByteArrayInputStream(inlineContent.getBytes(StandardCharsets.UTF_8));
                 String contentType = URLConnection.guessContentTypeFromName(fileName);
                 ResourceFile contentFile = new ResourceFile(contentStream, contentType);
@@ -2693,9 +2696,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while adding mediation policy for the API " + apiId, e, log);
             } else {
-                String errorMessage = "Error while adding the mediation policy : " + fileName +
-                        "of API " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw e;
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while getting location header for created " +
@@ -4444,10 +4445,13 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param mediationResourcePath mediation config content
      *
      */
-    public void checkMediationPolicy(APIProvider apiProvider, String mediationResourcePath) throws APIManagementException {
+    public void checkMediationPolicy(APIProvider apiProvider, String mediationResourcePath, String name) throws APIManagementException {
         if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
-            RestApiUtil.handleConflict("Mediation policy already " +
-                    "exists in the given resource path, cannot create new", log);
+            throw new APIManagementException(ExceptionCodes.MEDIATION_POLICY_API_ALREADY_EXISTS);
+        }
+        if (StringUtils.isNotBlank(name) && name.length() > APIConstants.MAX_LENGTH_MEDIATION_POLICY_NAME) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.MEDIATION_POLICY_NAME_TOO_LONG,
+                    APIConstants.MAX_LENGTH_MEDIATION_POLICY_NAME + ""));
         }
     }
     /**

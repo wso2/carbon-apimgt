@@ -735,6 +735,20 @@ public class APIAdminImpl implements APIAdmin {
                             missingRequiredConfigurations) + " is/are required",
                             ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
                 }
+                if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                        .containsKey(APIConstants.KeyManager.CONSUMER_KEY_CLAIM)) {
+                    if (StringUtils.isNotEmpty(keyManagerConnectorConfiguration.getDefaultConsumerKeyClaim())) {
+                        keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CONSUMER_KEY_CLAIM,
+                                keyManagerConnectorConfiguration.getDefaultConsumerKeyClaim());
+                    }
+                }
+                if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                        .containsKey(APIConstants.KeyManager.SCOPES_CLAIM)) {
+                    if (StringUtils.isNotEmpty(keyManagerConnectorConfiguration.getDefaultScopesClaim())) {
+                        keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.SCOPES_CLAIM,
+                                keyManagerConnectorConfiguration.getDefaultScopesClaim());
+                    }
+                }
             } else {
                 throw new APIManagementException(
                         "Key Manager Type " + keyManagerConfigurationDTO.getType() + " is invalid.",

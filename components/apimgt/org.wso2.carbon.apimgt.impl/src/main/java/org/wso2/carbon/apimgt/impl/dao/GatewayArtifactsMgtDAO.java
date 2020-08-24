@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 
 import java.io.ByteArrayInputStream;
@@ -56,15 +57,17 @@ public class GatewayArtifactsMgtDAO {
         boolean result = false;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             connection.setAutoCommit(false);
-                try (PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.ADD_GW_PUBLISHED_API_DETAILS)) {
-                    statement.setString(1, APIId);
-                    statement.setString(2, APIName);
-                    statement.setString(3, version);
-                    statement.setString(4, tenantDomain);
-                    result = statement.executeUpdate() == 1;
-                }
-            connection.commit();
+            try (PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_PUBLISHED_API_DETAILS)) {
+                statement.setString(1, APIId);
+                statement.setString(2, APIName);
+                statement.setString(3, version);
+                statement.setString(4, tenantDomain);
+                result = statement.executeUpdate() == 1;
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection,
+                        "Failed to rollback add API details for " + APIName, e);
+            }
         } catch (SQLException e) {
             handleException("Failed to add API details for " + APIName, e);
         }
@@ -87,14 +90,18 @@ public class GatewayArtifactsMgtDAO {
         boolean result = false;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             connection.setAutoCommit(false);
-                try (PreparedStatement statement = connection.prepareStatement(query)) {
-                    statement.setBinaryStream(1, bais, streamLength);
-                    statement.setString(2, gatewayInstruction);
-                    statement.setString(3, APIId);
-                    statement.setString(4, gatewayLabel);
-                    result = statement.executeUpdate() == 1;
-                }
-            connection.commit();
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setBinaryStream(1, bais, streamLength);
+                statement.setString(2, gatewayInstruction);
+                statement.setString(3, APIId);
+                statement.setString(4, gatewayLabel);
+                result = statement.executeUpdate() == 1;
+
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection,
+                        "Failed to rollback add artifacts for " + APIId, e);
+            }
         } catch (SQLException e) {
             handleException("Failed to add artifacts for " + APIId, e);
         }

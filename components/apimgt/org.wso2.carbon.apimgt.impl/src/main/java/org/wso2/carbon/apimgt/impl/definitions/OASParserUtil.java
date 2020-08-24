@@ -710,6 +710,9 @@ public class OASParserUtil {
         File[] listOfFiles = new File(extractedLocation).listFiles();
         File archiveDirectory = null;
         if (listOfFiles != null) {
+            if (listOfFiles.length > 1) {
+                throw new APIManagementException("Swagger Definitions should be placed under one root folder.");
+            }
             for (File file: listOfFiles) {
                 if (file.isDirectory()) {
                     archiveDirectory = file.getAbsoluteFile();
@@ -717,7 +720,8 @@ public class OASParserUtil {
                 }
             }
         }
-        //verify whether the zipped input is archive or file.
+        //Verify whether the zipped input is archive or file.
+        //If it is a single  swagger file without remote references it can be imported directly, without zipping.
         if (archiveDirectory == null) {
             throw new APIManagementException("Could not find an archive in the given ZIP file.");
         }

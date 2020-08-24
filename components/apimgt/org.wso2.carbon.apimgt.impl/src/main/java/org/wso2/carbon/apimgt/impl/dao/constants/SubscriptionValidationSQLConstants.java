@@ -186,7 +186,7 @@ public class SubscriptionValidationSQLConstants {
                     "      URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID" +
                     "      AND API.API_ID = URL.API_ID" +
                     "      AND URL.API_ID = PROD.API_ID" +
-                    "  ) AS APIS " +
+                    "  ) APIS " +
                     "  LEFT JOIN AM_API_DEFAULT_VERSION DEF ON APIS.API_NAME = DEF.API_NAME" +
                     "  AND APIS.API_PROVIDER = DEF.API_PROVIDER AND " +
                     "  APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
@@ -433,7 +433,7 @@ public class SubscriptionValidationSQLConstants {
                     "         AND API.API_ID = PROD.API_ID " +
                     "         AND CONTEXT LIKE ? " +
                     "   )" +
-                    "   AS APIS " +
+                    "    APIS " +
                     "   LEFT JOIN" +
                     "      AM_API_DEFAULT_VERSION DEF " +
                     "      ON APIS.API_NAME = DEF.API_NAME " +
@@ -508,7 +508,7 @@ public class SubscriptionValidationSQLConstants {
                     "         AND API.API_ID = PROD.API_ID " +
                     "         AND CONTEXT NOT LIKE ? " +
                     "   )" +
-                    "   AS APIS " +
+                    "    APIS " +
                     "   LEFT JOIN" +
                     "      AM_API_DEFAULT_VERSION DEF " +
                     "      ON APIS.API_NAME = DEF.API_NAME " +
@@ -558,7 +558,7 @@ public class SubscriptionValidationSQLConstants {
                     "         AND API.API_VERSION = ?" +
                     "         AND API.CONTEXT = ?" +
                     "   )" +
-                    "   AS APIS " +
+                    "   APIS " +
                     "   LEFT JOIN " +
                     "      AM_API_DEFAULT_VERSION DEF" +
                     "      ON APIS.API_NAME = DEF.API_NAME" +
@@ -611,7 +611,7 @@ public class SubscriptionValidationSQLConstants {
                     "         AND API.API_VERSION = ?" +
                     "         AND API.CONTEXT = ?" +
                     "   )" +
-                    "   AS APIS " +
+                    "   APIS " +
                     "   LEFT JOIN " +
                     "      AM_API_DEFAULT_VERSION DEF " +
                     "      ON APIS.API_NAME = DEF.API_NAME" +

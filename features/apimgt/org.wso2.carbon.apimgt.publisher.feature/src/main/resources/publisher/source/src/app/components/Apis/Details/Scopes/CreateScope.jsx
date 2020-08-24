@@ -185,9 +185,18 @@ class CreateScope extends React.Component {
 
     validateScopeDescription({ target: { id, value } }) {
         const { valid, apiScope } = this.state;
+        const { intl } = this.props;
         apiScope[id] = value;
-        valid[id].invalid = false;
-        valid[id].error = '';
+        if (value && value.length !== '' && value.length >= 512) {
+            valid[id].invalid = true;
+            valid[id].error = intl.formatMessage({
+                id: 'Scopes.Create.Scope.description.length.exceeded',
+                defaultMessage: 'Exceeds maximum length limit of 512 characters',
+            });
+        } else {
+            valid[id].invalid = false;
+            valid[id].error = '';
+        }
         this.setState({
             valid,
             apiScope,
@@ -202,8 +211,13 @@ class CreateScope extends React.Component {
 
         apiScope[id] = value;
         valid[id].invalid = !(value && value.length > 0);
+        // length validation
         if (valid[id].invalid) {
             valid[id].error = 'Scope name cannot be empty';
+        }
+        valid[id].invalid = !(value && value.length <= 60);
+        if (valid[id].invalid) {
+            valid[id].error = 'Scope name cannot be more than 60 characters';
         }
 
         if (/\s/.test(value)) {
@@ -388,12 +402,17 @@ class CreateScope extends React.Component {
                                         label='Description'
                                         variant='outlined'
                                         placeholder='Short description about the scope'
-                                        helperText={(
-                                            <FormattedMessage
-                                                id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
-                                                defaultMessage='Short description about the scope'
-                                            />
-                                        )}
+                                        error={this.state.valid.description.invalid}
+                                        helperText={
+                                            this.state.valid.description.invalid ? (
+                                                this.state.valid.description.error
+                                            ) : (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Scopes.CreateScope.description.about.the.scope'
+                                                    defaultMessage='Short description about the scope'
+                                                />
+                                            )
+                                        }
                                         margin='normal'
                                         InputLabelProps={{
                                             shrink: true,
@@ -462,6 +481,7 @@ class CreateScope extends React.Component {
                                             || this.state.valid.name.invalid
                                             || invalidRoles.length !== 0
                                             || scopeAddDisabled
+                                            || this.state.valid.description.invalid
                                         }
                                         className={classes.saveButton}
                                     >

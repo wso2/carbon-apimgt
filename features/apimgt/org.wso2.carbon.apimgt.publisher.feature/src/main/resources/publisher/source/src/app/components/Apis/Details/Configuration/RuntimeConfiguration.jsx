@@ -16,7 +16,9 @@
  * under the License.
  */
 
-import React, { useReducer, useContext, useState } from 'react';
+import React, {
+    useReducer, useContext, useState, useEffect,
+} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -24,7 +26,7 @@ import Paper from '@material-ui/core/Paper';
 import { Link } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
@@ -161,6 +163,7 @@ function copyAPIConfig(api) {
  * @returns
  */
 export default function RuntimeConfiguration() {
+    const [keyManagersConfigured, setKeyManagersConfigured] = useState([]);
     /**
      *
      * Reduce the configuration UI related actions in to updated state
@@ -274,7 +277,7 @@ export default function RuntimeConfiguration() {
                 if (value) {
                     nextState.keyManagers = ['all'];
                 } else {
-                    nextState.keyManagers = [];
+                    nextState.keyManagers = keyManagersConfigured;
                 }
                 return nextState;
             default:
@@ -290,6 +293,24 @@ export default function RuntimeConfiguration() {
     const [inPolicy, setInPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'IN')[0]);
     const [outPolicy, setOutPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'OUT')[0]);
     const [faultPolicy, setFaultPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'FAULT')[0]);
+    const intl = useIntl();
+    useEffect(() => {
+        Api.keyManagers().then((response) => {
+            const kmNameList = [];
+            if (response.body.list) {
+                response.body.list.forEach((km) => kmNameList.push(km.name));
+            }
+            setKeyManagersConfigured(kmNameList);
+        })
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    const { description } = response.body;
+                    Alert.error(description);
+                }
+            });
+    }, []);
+
     const getMediationPoliciesToSave = () => {
         const NONE = 'none';
         const newMediationPolicies = [];
@@ -341,7 +362,6 @@ export default function RuntimeConfiguration() {
      * Handle the configuration view save button action
      */
     function handleSave() {
-        setIsUpdating(true);
         const newMediationPolicies = getMediationPoliciesToSave();
         if (api.isAPIProduct()) {
             delete apiConfig.keyManagers; // remove keyManagers property if API type is API Product
@@ -351,7 +371,24 @@ export default function RuntimeConfiguration() {
         if (updateComplexityList !== null) {
             updateComplexity();
         }
-
+        // Validate the key managers
+        if (
+            !api.isAPIProduct()
+            && apiConfig.securityScheme.includes('oauth2')
+            && !apiConfig.keyManagers.includes('all')
+            && (apiConfig.keyManagers && apiConfig.keyManagers.length === 0)
+        ) {
+            Alert.error(
+                intl.formatMessage(
+                    {
+                        id: 'Apis.Details.Configuration.RuntimeConfiguration.no.km.error',
+                        defaultMessage: 'Select one or more Key Managers',
+                    },
+                ),
+            );
+            return;
+        }
+        setIsUpdating(true);
         updateAPI(apiConfig)
             .catch((error) => {
                 if (error.response) {

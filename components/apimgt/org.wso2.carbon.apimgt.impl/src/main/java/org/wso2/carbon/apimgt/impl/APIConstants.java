@@ -442,6 +442,7 @@ public final class APIConstants {
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
     public static final String JWT_CONFIGS = "JWTConfiguration";
     public static final String JWT_HEADER = "JWTHeader";
+    public static final String ENABLE_USER_CLAIMS = "EnableUserClaims";
     public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
     public static final String CLAIMS_RETRIEVER_CLASS = "ClaimsRetrieverImplClass";
@@ -964,6 +965,7 @@ public final class APIConstants {
     public static final String AUTH_TYPE_APP = "APP";
 
     public static final String TIER_PERMISSION_ALLOW = "allow";
+    public static final String TIER_PERMISSION_DENY = "deny";
 
     public static final String SUBSCRIPTION_TO_CURRENT_TENANT = "current_tenant";
     public static final String SUBSCRIPTION_TO_ALL_TENANTS = "all_tenants";
@@ -2123,6 +2125,7 @@ public final class APIConstants {
     public static final int MAX_LENGTH_VERSION = 30;
     public static final int MAX_LENGTH_PROVIDER = 50;
     public static final int MAX_LENGTH_CONTEXT = 82; //context becomes context + version + two '/'. so max context is 50
+    public static final int MAX_LENGTH_MEDIATION_POLICY_NAME = 255;
 
     /**
      * Constants for trust store access
