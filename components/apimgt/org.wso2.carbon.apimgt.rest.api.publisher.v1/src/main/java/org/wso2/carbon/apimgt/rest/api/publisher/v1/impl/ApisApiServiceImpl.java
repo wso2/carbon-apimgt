@@ -2650,7 +2650,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 fileName = seqElement.getAttributeValue(new QName("name"));
                 //Constructing mediation resource path
                 mediationResourcePath = mediationResourcePath + fileName;
-                checkMediationPolicy(apiProvider, mediationResourcePath);
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
                     //Adding api specific mediation policy
@@ -3117,9 +3116,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 updatedSwagger = updateSwagger(apiId, validationResponse);
             } else {
                 updatedSwagger = updateSwagger(apiId, apiDefinition);
-            }
-            if (isSoapToRestConvertedAPI) {
-                SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiIdentifier);
             }
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
@@ -4026,7 +4022,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus);
+                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus, format);
             } catch (APIManagementException e) {
                 if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);

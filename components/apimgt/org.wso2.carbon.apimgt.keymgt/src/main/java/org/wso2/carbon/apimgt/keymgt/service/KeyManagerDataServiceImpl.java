@@ -40,10 +40,11 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
 
 public class KeyManagerDataServiceImpl implements KeyManagerDataService {
 
-    private static final Log log = LogFactory.getLog(KeyManagerDataServiceImpl.class); 
-    
+    private static final Log log = LogFactory.getLog(KeyManagerDataServiceImpl.class);
+
     @Override
     public void addOrUpdateApplication(ApplicationEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Add or Update Application in datastore in tenant " + event.getTenantDomain());
         }
@@ -54,59 +55,94 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
 
     @Override
     public void addOrUpdateAPI(APIEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Add or Update API in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.addOrUpdateAPIWithUrlTemplates(getAPIFromAPIEvent(event));
     }
 
     @Override
     public void addOrUpdateSubscription(SubscriptionEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Add or Update Subscription in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.addOrUpdateSubscription(getSubscriptionFromSubscriptionEvent(event));
     }
 
     @Override
     public void addOrUpdateApplicationKeyMapping(ApplicationRegistrationEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Add or Update Application keymapping in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.addOrUpdateApplicationKeyMapping(getApplicationKeyMappingFromApplicationRegistrationEvent(event));
-        
+
     }
 
     @Override
     public void addOrUpdateSubscriptionPolicy(SubscriptionPolicyEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Add or Update Subscription Policy in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.addOrUpdateSubscriptionPolicy(getSubscriptionPolicyFromSubscriptionPolicyEvent(event));
-        
+
     }
-    
+
     @Override
     public void addOrUpdateApplicationPolicy(ApplicationPolicyEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Add or Update Application Policy in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.addOrUpdateApplicationPolicy(getApplicationPolicyFromApplicationPolicyEvent(event));
-        
     }
 
     @Override
     public void addOrUpdateAPIPolicy(APIPolicyEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Add or Update API Policy in datastore in tenant " + event.getTenantDomain());
         }
@@ -117,82 +153,132 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
 
     @Override
     public void removeApplication(ApplicationEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Remove Application in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.removeApplication(getApplicationFromApplicationEvent(event));
     }
 
     @Override
     public void removeAPI(APIEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Remove API in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.removeAPI(getAPIFromAPIEvent(event));
     }
 
     @Override
     public void removeSubscription(SubscriptionEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Remove Subscription in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.removeSubscription(getSubscriptionFromSubscriptionEvent(event));
     }
 
     @Override
     public void removeApplicationKeyMapping(ApplicationRegistrationEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Remove ApplicationKey Mapping in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.removeApplicationKeyMapping(getApplicationKeyMappingFromApplicationRegistrationEvent(event));
     }
 
     @Override
     public void removeSubscriptionPolicy(SubscriptionPolicyEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Remove Subscription Policy in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.removeSubscriptionPolicy(getSubscriptionPolicyFromSubscriptionPolicyEvent(event));
     }
 
     @Override
     public void removeApplicationPolicy(ApplicationPolicyEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Remove Application Policy in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.removeApplicationPolicy(getApplicationPolicyFromApplicationPolicyEvent(event));
     }
-    
+
     @Override
     public void removeAPIPolicy(APIPolicyEvent event) {
+
         if (log.isDebugEnabled()) {
             log.debug("Remove API Policy in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.removeApiPolicy(getAPIPolicyFromAPIPolicyEvent(event));
     }
 
     private ApplicationKeyMapping getApplicationKeyMappingFromApplicationRegistrationEvent(
             ApplicationRegistrationEvent event) {
+
         ApplicationKeyMapping mapping = new ApplicationKeyMapping();
         mapping.setApplicationId(event.getApplicationId());
         mapping.setConsumerKey(event.getConsumerKey());
         mapping.setKeyType(event.getKeyType());
         mapping.setKeyManager(event.getKeyManager());
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + mapping.toString());
         }
@@ -200,58 +286,69 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
     }
 
     private Application getApplicationFromApplicationEvent(ApplicationEvent event) {
+
         Application application = new Application();
         application.setId(event.getApplicationId());
         application.setName(event.getApplicationName());
         application.setPolicy(event.getApplicationPolicy());
         application.setTokenType(event.getTokenType());
+        application.setUUID(event.getUuid());
+        event.getAttributes().forEach(application::addAttribute);
         application.setSubName(event.getSubscriber());
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + application.toString());
         }
         return application;
     }
+
     private Subscription getSubscriptionFromSubscriptionEvent(SubscriptionEvent event) {
+
         Subscription sub = new Subscription();
-        sub.setApiId(event.getApiId()); 
+        sub.setApiId(event.getApiId());
         sub.setAppId(event.getApplicationId());
         sub.setPolicyId(event.getPolicyId());
         sub.setSubscriptionId(String.valueOf(event.getSubscriptionId()));
         sub.setSubscriptionState(event.getSubscriptionState());
         sub.setTimeStamp(event.getTimeStamp());
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + sub.toString());
         }
         return sub;
     }
+
     private API getAPIFromAPIEvent(APIEvent event) {
+
         API api = new API();
         api.setApiId(event.getApiId());
         api.setApiName(event.getApiName());
         api.setApiProvider(event.getApiProvider());
         api.setApiVersion(event.getApiVersion());
         api.setContext(event.getApiContext());
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + api.toString());
         }
         return api;
     }
+
     private ApplicationPolicy getApplicationPolicyFromApplicationPolicyEvent(ApplicationPolicyEvent event) {
+
         ApplicationPolicy policy = new ApplicationPolicy();
         policy.setId(event.getPolicyId());
         policy.setQuotaType(event.getQuotaType());
         policy.setTenantId(event.getTenantId());
         policy.setTierName(event.getPolicyName());
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + policy.toString());
         }
         return policy;
     }
+
     private SubscriptionPolicy getSubscriptionPolicyFromSubscriptionPolicyEvent(SubscriptionPolicyEvent event) {
+
         SubscriptionPolicy policy = new SubscriptionPolicy();
         policy.setId(event.getPolicyId());
         policy.setQuotaType(event.getQuotaType());
@@ -262,19 +359,20 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         policy.setTierName(event.getPolicyName());
         policy.setGraphQLMaxComplexity(event.getGraphQLMaxComplexity());
         policy.setGraphQLMaxDepth(event.getGraphQLMaxDepth());
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + policy.toString());
         }
         return policy;
     }
-    
+
     private ApiPolicy getAPIPolicyFromAPIPolicyEvent(APIPolicyEvent event) {
+
         ApiPolicy policy = new ApiPolicy();
         policy.setId(event.getPolicyId());
         policy.setTierName(event.getPolicyName());
         policy.setTenantId(event.getTenantId());
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + policy.toString());
         }

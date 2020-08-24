@@ -6,10 +6,10 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.junit.runners.MethodSorters;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -17,7 +17,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -33,6 +32,7 @@ import java.io.InputStream;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class GatewayArtifactsMgtDAOTest {
     public static GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     String apiUUID = "1236233";
@@ -117,34 +117,4 @@ public class GatewayArtifactsMgtDAOTest {
         Assert.assertTrue(result);
     }
 
-    @Test
-    public void testGetGatewayPublishedAPIArtifacts() throws APIManagementException {
-        String gatewayPublishedAPIArtifacts = gatewayArtifactsMgtDAO.getGatewayPublishedAPIArtifacts(apiUUID, label,
-                        APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-        Assert.assertNotNull(gatewayPublishedAPIArtifacts);
-    }
-
-    @Test
-    public void testGetAllGatewayPublishedAPIArtifacts() throws APIManagementException {
-        List<String> gatewayRuntimeArtifactsArray = gatewayArtifactsMgtDAO.getAllGatewayPublishedAPIArtifacts(label);
-        Assert.assertTrue(gatewayRuntimeArtifactsArray.size() > 0);
-    }
-
-    @Test
-    public void testIsAPIPublishedInAnyGateway() throws APIManagementException {
-        boolean isApiPublished = gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiUUID);
-        Assert.assertTrue(isApiPublished);
-    }
-
-    @Test
-    public void testIsAPIArtifactExists() throws APIManagementException {
-        boolean isApiArtifactsExists = gatewayArtifactsMgtDAO.isAPIArtifactExists(apiUUID, label);
-        Assert.assertTrue(isApiArtifactsExists);
-    }
-
-    @Test
-    public void testIsAPIDetailExists() throws APIManagementException {
-        boolean isApiDetailsExists = gatewayArtifactsMgtDAO.isAPIDetailsExists(apiUUID);
-        Assert.assertTrue(isApiDetailsExists);
-    }
 }

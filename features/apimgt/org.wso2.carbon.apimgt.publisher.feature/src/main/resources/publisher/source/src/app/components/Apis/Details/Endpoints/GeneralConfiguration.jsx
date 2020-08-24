@@ -22,9 +22,11 @@ import {
     Grid,
     Typography,
     withStyles,
+    Box,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { isRestricted } from 'AppData/AuthManager';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Certificates from './GeneralConfiguration/Certificates';
 import API from '../../../../data/api'; // TODO: Use webpack aliases instead of relative paths ~tmkb
@@ -150,27 +152,31 @@ function GeneralConfiguration(props) {
 
     // Get the certificates from backend.
     useEffect(() => {
-        API.getEndpointCertificates()
-            .then((resp) => {
-                const { certificates } = resp.obj;
-                const endpoints = endpointsToList(epConfig);
-                const aliases = [];
-                const filteredCertificates = certificates.filter((cert) => {
-                    aliases.push(cert.alias);
-                    for (const endpoint of endpoints) {
-                        if (endpoint && endpoint.url.indexOf(cert.endpoint) !== -1) {
-                            return true;
+        if (!isRestricted(['apim:ep_certificates_view'])) {
+            API.getEndpointCertificates()
+                .then((resp) => {
+                    const { certificates } = resp.obj;
+                    const endpoints = endpointsToList(epConfig);
+                    const aliases = [];
+                    const filteredCertificates = certificates.filter((cert) => {
+                        aliases.push(cert.alias);
+                        for (const endpoint of endpoints) {
+                            if (endpoint && endpoint.url.indexOf(cert.endpoint) !== -1) {
+                                return true;
+                            }
                         }
-                    }
-                    return false;
+                        return false;
+                    });
+                    setEndpointCertificates(filteredCertificates);
+                    setAliasList(aliases);
+                })
+                .catch((err) => {
+                    console.error(err);
+                    setEndpointCertificates([]);
                 });
-                setEndpointCertificates(filteredCertificates);
-                setAliasList(aliases);
-            })
-            .catch((err) => {
-                console.error(err);
-                setEndpointCertificates([]);
-            });
+        } else {
+            setEndpointCertificates([]);
+        }
     }, []);
 
     return (
@@ -179,6 +185,7 @@ function GeneralConfiguration(props) {
                 expanded={isConfigExpanded}
                 onChange={() => setConfigExpand(!isConfigExpanded)}
                 className={classes.generalConfigPanel}
+                disabled={isRestricted(['apim:ep_certificates_view'])}
             >
                 <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
@@ -200,6 +207,17 @@ function GeneralConfiguration(props) {
                             :
                             {' '}
                             {endpointCertificates.length}
+                            {isRestricted(['apim:ep_certificates_view']) && (
+                                <Box ml={2}>
+                                    <Typography variant='body2' color='primary'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Endpoints.GeneralConfiguration.not.allowed'
+                                            defaultMessage={'*You are not authorized to view certificates'
+                                        + ' due to insufficient permissions'}
+                                        />
+                                    </Typography>
+                                </Box>
+                            )}
                         </Typography>
                     )}
                 </ExpansionPanelSummary>

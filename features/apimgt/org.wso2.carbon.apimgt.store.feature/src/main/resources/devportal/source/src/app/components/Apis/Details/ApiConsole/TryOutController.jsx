@@ -107,11 +107,14 @@ function TryOutController(props) {
     const {
         securitySchemeType, selectedEnvironment, environments, containerMngEnvironments, labels,
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
-        selectedKeyManager, setSelectedKeyManager,
+        setSelectedKeyManager,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
         setSecurityScheme, setUsername, setPassword, username, password, updateSwagger,
         setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey, environmentObject, setURLs, api,
     } = props;
+    let { selectedKeyManager } = props;
+    selectedKeyManager = selectedKeyManager || 'Resident Key Manager';
+
     const classes = styles();
     const [showToken, setShowToken] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -419,6 +422,8 @@ function TryOutController(props) {
         }
     }
     const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
+    const isPublished = api.lifeCycleStatus.toLowerCase() === 'published';
+    const showSecurityType = isPublished || (isPrototypedAPI && api.enableStore === true);
 
     let tokenValue = '';
     if (securitySchemeType === 'API-KEY') {
@@ -507,7 +512,7 @@ function TryOutController(props) {
                             </Typography>
                         </>
                     )}
-                    {(isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && (
+                    {((isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && showSecurityType) && (
                         <FormControl component='fieldset'>
                             <RadioGroup
                                 name='securityScheme'

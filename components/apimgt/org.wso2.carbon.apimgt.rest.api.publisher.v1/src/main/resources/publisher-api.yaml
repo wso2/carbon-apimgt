@@ -7664,6 +7664,8 @@ definitions:
       lifeCycleStatus:  # NEED TO RENAME AS lifeCycleState
         type: string
         example: CREATED
+        x-otherScopes:
+        - apim:api_publish
       wsdlInfo:
         $ref: '#/definitions/WSDLInfo'
       wsdlUrl:
@@ -7693,6 +7695,8 @@ definitions:
       enableStore:
         type: boolean
         example: true
+        x-otherScopes:
+          - apim:api_publish
       type:
         type: string
         description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
@@ -7996,6 +8000,8 @@ definitions:
         items:
           type: string
           example: ["Finance"]
+        x-otherScopes:
+          - apim:api_publish
       keyManagers:
         description: |
           API Key Managers

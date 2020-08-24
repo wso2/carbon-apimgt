@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -16,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class SynapseAttributesDTO   {
   
     private Integer count = null;
-    private String label = null;
+    private List<String> labels = new ArrayList<>();
     private String apiId = null;
 
   /**
@@ -38,19 +40,19 @@ public class SynapseAttributesDTO   {
 
   /**
    **/
-  public SynapseAttributesDTO label(String label) {
-    this.label = label;
+  public SynapseAttributesDTO labels(List<String> labels) {
+    this.labels = labels;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("label")
-  public String getLabel() {
-    return label;
+  @JsonProperty("labels")
+  public List<String> getLabels() {
+    return labels;
   }
-  public void setLabel(String label) {
-    this.label = label;
+  public void setLabels(List<String> labels) {
+    this.labels = labels;
   }
 
   /**
@@ -81,13 +83,13 @@ public class SynapseAttributesDTO   {
     }
     SynapseAttributesDTO synapseAttributes = (SynapseAttributesDTO) o;
     return Objects.equals(count, synapseAttributes.count) &&
-        Objects.equals(label, synapseAttributes.label) &&
+        Objects.equals(labels, synapseAttributes.labels) &&
         Objects.equals(apiId, synapseAttributes.apiId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, label, apiId);
+    return Objects.hash(count, labels, apiId);
   }
 
   @Override
@@ -96,7 +98,7 @@ public class SynapseAttributesDTO   {
     sb.append("class SynapseAttributesDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
-    sb.append("    label: ").append(toIndentedString(label)).append("\n");
+    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("}");
     return sb.toString();

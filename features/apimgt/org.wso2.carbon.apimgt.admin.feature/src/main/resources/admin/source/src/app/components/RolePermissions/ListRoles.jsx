@@ -24,7 +24,8 @@ import Progress from 'AppComponents/Shared/Progress';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import cloneDeep from 'lodash.clonedeep';
-
+import { FormattedMessage, useIntl } from 'react-intl';
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 import PermissionsSelector from './TreeView/PermissionsSelector';
 import AdminTable from './AdminTable/AdminTable';
 import AdminTableHead from './AdminTable/AdminTableHead';
@@ -62,7 +63,8 @@ function extractMappings(permissionMapping) {
         } else {
             appMapping[tag] = [mapping];
         }
-        for (const role of roles) {
+        for (const $role of roles) {
+            const role = $role.trim && $role.trim();
             if (roleMapping[role]) {
                 roleMapping[role].push(mapping);
             } else {
@@ -132,6 +134,8 @@ export default function ListRoles() {
     const [roleAliases, setRoleAliases] = useState();
     const [systemScopes, setSystemScopes] = useState();
     const [isOpen, setIsOpen] = useState(false);
+    const [hasListPermission, setHasListPermission] = useState(true);
+    const intl = useIntl();
 
     useEffect(() => {
         PermissionAPI.getRoleAliases();
@@ -142,8 +146,13 @@ export default function ListRoles() {
             },
         ).catch((error) => {
             // TODO: Proper error handling here ~tmkb
-            Alert.error('Error while retrieving permission info');
-            console.error(error);
+            const { status } = error;
+            if (status === 401) {
+                setHasListPermission(false);
+            } else {
+                Alert.error('Error while retrieving permission info');
+                console.error(error);
+            }
         });
     }, []);
 
@@ -178,14 +187,47 @@ export default function ListRoles() {
             }
             return handleScopeMappingUpdate(updatedAppMappings);
         } else {
-            const updatedRoleAliases = cloneDeep(roleAliases.list).map(({ role, aliases }) => {
-                return { role, aliases: aliases.filter((roleAlias) => roleAlias !== deletedRole) };
-            });
+            const clonedRoleAliases = cloneDeep(roleAliases.list);
+            const updatedRoleAliases = [];
+            for (const { role, aliases } of clonedRoleAliases) {
+                const filteredAliases = aliases.filter((roleAlias) => roleAlias !== deletedRole);
+                if (filteredAliases.length) {
+                    updatedRoleAliases.push({ role, aliases: filteredAliases });
+                }
+            }
             return PermissionAPI.updateRoleAliases(updatedRoleAliases).then((response) => {
                 setRoleAliases(response.body);
             });
         }
     };
+    if (!hasListPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'RolePermissions.ListRoles.title.role.permissions',
+                        defaultMessage: 'Role Permissions',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='RolePermissions.ListRoles.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='RolePermissions.ListRoles.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view Role Permissions.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    }
     if (!permissionMappings || !appMappings) {
         return <Progress message='Resolving user ...' />;
     }

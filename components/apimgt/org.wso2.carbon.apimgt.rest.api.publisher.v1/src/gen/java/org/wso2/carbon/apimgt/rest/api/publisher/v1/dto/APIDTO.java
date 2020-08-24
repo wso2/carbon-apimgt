@@ -36,6 +36,7 @@ public class APIDTO   {
     private String context = null;
     private String version = null;
     private String provider = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private String lifeCycleStatus = null;
     private WSDLInfoDTO wsdlInfo = null;
     private String wsdlUrl = null;
@@ -46,6 +47,7 @@ public class APIDTO   {
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
     private Boolean enableSchemaValidation = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private Boolean enableStore = null;
 
 @XmlType(name="TypeEnum")
@@ -255,6 +257,7 @@ public enum EndpointImplementationTypeEnum {
     private List<APIScopeDTO> scopes = new ArrayList<>();
     private List<APIOperationsDTO> operations = new ArrayList<>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> categories = new ArrayList<>();
     private Object keyManagers = null;
 

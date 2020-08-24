@@ -498,7 +498,7 @@ class ApiTableView extends React.Component {
         } else {
             options.filter = false;
         }
-        if (page === 0 && this.count <= rowsPerPage) {
+        if (page === 0 && this.count <= rowsPerPage && rowsPerPage === 10) {
             options.pagination = false;
         } else {
             options.pagination = true;

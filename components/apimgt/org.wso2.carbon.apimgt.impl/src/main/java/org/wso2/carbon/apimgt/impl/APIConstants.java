@@ -422,6 +422,7 @@ public final class APIConstants {
     //table columns for AM_APPLICATION
     public static final String APPLICATION_ID = "APPLICATION_ID";
     public static final String APPLICATION_NAME = "NAME";
+    public static final String APPLICATION_CREATED_BY = "CREATED_BY";
     public static final String APPLICATION_SUBSCRIBER_ID = "SUBSCRIBER_ID";
     public static final String APPLICATION_TIER = "APPLICATION_TIER";
     public static final String APPLICATION_STATUS = "APPLICATION_STATUS";
@@ -837,6 +838,7 @@ public final class APIConstants {
     public static final String BILLING_AND_USAGE_CONFIGURATION = "EnableBillingAndUsage";
 
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
+    public static final String DEFAULT_APPLICATION_DESCRIPTION = "This is the default application";
     public static final String BASIC_AUTH_APPLICATION_NAME = "BasicAuthApplication";
 
     public static final QName POLICY_ELEMENT = new QName("http://schemas.xmlsoap.org/ws/2004/09/policy",
@@ -1314,6 +1316,9 @@ public final class APIConstants {
 
     public static final String HTTP_PROXY_HOST = "http.proxyHost";
     public static final String HTTP_PROXY_PORT = "http.proxyPort";
+
+    public static final String HTTP_CLIENT_MAX_TOTAL = "HttpClient.MaxTotal";
+    public static final String HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE = "HttpClient.DefaultMaxPerRoute";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
@@ -2378,6 +2383,7 @@ public final class APIConstants {
         public static final String DB_RETRIEVER_NAME = "DBRetriever";
         public static final String GATEWAY_INSTRUCTION_PUBLISH = "Publish";
         public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
+        public static final String GATEWAY_INSTRUCTION_ANY = "ANY";
         public static final String SYNAPSE_ARTIFACTS = "/synapse-artifacts";
         public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
         public static final String GATEAY_SYNAPSE_ARTIFACTS = "/gateway-synapse-artifacts";
@@ -2387,6 +2393,7 @@ public final class APIConstants {
         public static final String GATEWAY_STARTUP_ASYNC= "async";
         public static final String API_ID = "apiId";
         public static final String LABEL = "label";
+        public static final String LABELS = "labels";
 
     }
 

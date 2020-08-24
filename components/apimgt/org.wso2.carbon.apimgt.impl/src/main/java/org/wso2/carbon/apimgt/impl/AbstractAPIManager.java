@@ -130,6 +130,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -1713,6 +1714,8 @@ public abstract class AbstractAPIManager implements APIManager {
         //application will not be shared within the group
         defaultApp.setGroupId("");
         defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        defaultApp.setUUID(UUID.randomUUID().toString());
+        defaultApp.setDescription(APIConstants.DEFAULT_APPLICATION_DESCRIPTION);
         apiMgtDAO.addApplication(defaultApp, subscriber.getName());
     }
 
@@ -2186,7 +2189,9 @@ public abstract class AbstractAPIManager implements APIManager {
                 APIUtil.loadTenantRegistry(tenantIDLocal);
                 userRegistry = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
                 userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
-                APIUtil.loadTenantConfigBlockingMode(requestedTenantDomain);
+                if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                    APIUtil.loadTenantConfigBlockingMode(requestedTenantDomain);
+                }
             } else {
                 userRegistry = this.registry;
                 tenantIDLocal = tenantId;

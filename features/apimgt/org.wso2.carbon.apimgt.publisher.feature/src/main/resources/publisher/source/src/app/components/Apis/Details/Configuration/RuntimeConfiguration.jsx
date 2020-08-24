@@ -123,8 +123,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Object} Deep copy of an object
  */
 function copyAPIConfig(api) {
-    const keyManagers = api.apiType === 'APIProduct' ? ['all'] : [...api.keyManagers];
-    return {
+    const apiConfigJson = {
         id: api.id,
         name: api.name,
         description: api.description,
@@ -143,6 +142,7 @@ function copyAPIConfig(api) {
         wsdlUrl: api.wsdlUrl,
         transport: [...api.transport],
         securityScheme: [...api.securityScheme],
+        keyManagers: [...api.keyManagers || []],
         corsConfiguration: {
             corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
             accessControlAllowCredentials: api.corsConfiguration.accessControlAllowCredentials,
@@ -150,8 +150,8 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
-        keyManagers,
     };
+    return apiConfigJson;
 }
 /**
  * This component handles the basic configurations UI in the API details page
@@ -343,7 +343,9 @@ export default function RuntimeConfiguration() {
     function handleSave() {
         setIsUpdating(true);
         const newMediationPolicies = getMediationPoliciesToSave();
-        if (!api.isAPIProduct()) {
+        if (api.isAPIProduct()) {
+            delete apiConfig.keyManagers; // remove keyManagers property if API type is API Product
+        } else {
             apiConfig.mediationPolicies = newMediationPolicies;
         }
         if (updateComplexityList !== null) {

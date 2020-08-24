@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.endpoint.EndpointAdminException;
 
 import javax.ws.rs.core.Response;
+
 import java.util.Map;
 
 public class EndPointsApiServiceImpl implements EndPointsApiService {
@@ -41,18 +42,24 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
     private static final Log log = LogFactory.getLog(EndPointsApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
-    public Response endPointsGet(String apiName, String version , String tenantDomain, MessageContext messageContext) {
+    public Response endPointsGet(String apiName, String version, String tenantDomain, MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
         GatewayAPIDTO gatewayAPIDTO = null;
+        JSONObject responseObj = new JSONObject();
         try {
             Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version,
                     tenantDomain);
             String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
             String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
+
+            if (label == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(apiName + " is not deployed in the Gateway")
+                        .build();
+            }
             gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
             if (debugEnabled) {
                 log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
@@ -62,8 +69,6 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
             log.error(errorMessage, e);
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-
-        JSONObject responseObj = new JSONObject();
 
         if (gatewayAPIDTO != null) {
             try {
@@ -91,9 +96,7 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
             String responseStringObj = String.valueOf(responseObj);
             return Response.ok().entity(responseStringObj).build();
         } else {
-            responseObj.put("Message", "Error");
-            String responseStringObj = String.valueOf(responseObj);
-            return Response.serverError().entity(responseStringObj).build();
+            return Response.serverError().entity("Unexpected error occurred").build();
         }
     }
 }

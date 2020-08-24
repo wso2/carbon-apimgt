@@ -39,6 +39,7 @@ import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import KeyManager from 'AppComponents/Apis/Details/Configuration/components/KeyManager';
+import API from 'AppData/api';
 
 import {
     DEFAULT_API_SECURITY_OAUTH2,
@@ -243,8 +244,12 @@ export default function ApplicationLevel(props) {
                                 />
                             </FormHelperText>
                         </FormControl>
-                        <KeyManager api={api} configDispatcher={configDispatcher} />
-
+                        {(apiFromContext.apiType === API.CONSTS.API) && (
+                            <KeyManager
+                                api={api}
+                                configDispatcher={configDispatcher}
+                            />
+                        )}
                         <AuthorizationHeader api={api} configDispatcher={configDispatcher} />
                         <FormControl>
                             {!hasResourceWithSecurity

@@ -31,7 +31,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import MUIDataTable from 'mui-datatables';
@@ -195,12 +194,10 @@ function ListBase(props) {
                 pageStyle='small'
             >
                 <Card className={classes.root}>
-                    <CardActionArea>
-                        <CardContent>
-                            {emptyBoxTitle}
-                            {emptyBoxContent}
-                        </CardContent>
-                    </CardActionArea>
+                    <CardContent>
+                        {emptyBoxTitle}
+                        {emptyBoxContent}
+                    </CardContent>
                     <CardActions>
                         {addButtonOverride || (
                             EditComponent && (<EditComponent updateList={fetchData} {...addButtonProps} />)

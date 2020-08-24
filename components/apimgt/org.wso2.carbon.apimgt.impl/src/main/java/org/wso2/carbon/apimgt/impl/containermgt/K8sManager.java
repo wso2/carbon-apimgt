@@ -89,7 +89,7 @@ public class K8sManager implements ContainerManager {
      */
     @Override
     public void changeLCStateCreatedToPublished(API api, APIIdentifier apiIdentifier, Registry registry)
-            throws ParseException, APIManagementException {
+            throws APIManagementException {
 
         if (masterURL != null && saToken != null && !"".equals(saToken) && !"".equals(masterURL)) {
 
@@ -175,7 +175,7 @@ public class K8sManager implements ContainerManager {
      */
     @Override
     public void apiRepublish(API api, APIIdentifier apiId, Registry registry, JSONObject containerMgtInfoDetails)
-            throws ParseException, APIManagementException {
+            throws APIManagementException {
 
         String apiName = apiId.getApiName();
         JSONObject propreties = (JSONObject) containerMgtInfoDetails.get(PROPERTIES);
@@ -253,55 +253,18 @@ public class K8sManager implements ContainerManager {
 
     /**
      * Represents the LC change Blocked --> Republish
-     * Redeploy the API CR with "override : false"
+     * Redeploy the API CR with "override : true"
      *
+     * @param api                     API
      * @param apiId                   API Identifier
+     * @param registry                API registry
      * @param containerMgtInfoDetails Clusters which the API has published
-     * @param configMapName           Name of the Config Map
+     * @throws APIManagementException API management exception during publishing to cluster
      */
     @Override
-    public void changeLCStateBlockedToRepublished(APIIdentifier apiId, JSONObject containerMgtInfoDetails,
-                                                  String[] configMapName) {
-
-        String apiName = apiId.getApiName();
-
-        JSONObject propreties = (JSONObject) containerMgtInfoDetails.get(ContainerBasedConstants.PROPERTIES);
-        //get openShiftClient Object
-        OpenShiftClient client = getClient(propreties);
-        if (client != null) {
-            try {
-                applyAPICustomResourceDefinition(client, configMapName, Integer.parseInt(propreties.get(REPLICAS).toString())
-                        , apiId, false);
-                CustomResourceDefinition crd = client.customResourceDefinitions().withName(API_CRD_NAME).get();
-
-                NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
-                        DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
-                        DoneableAPICustomResourceDefinition>> crdClient = getCRDClient(client, crd);
-
-                List<APICustomResourceDefinition> apiCustomResourceDefinitionList = crdClient.list().getItems();
-
-                for (APICustomResourceDefinition apiCustomResourceDefinition : apiCustomResourceDefinitionList) {
-
-                    if (apiCustomResourceDefinition.getMetadata().getName().equals(apiName.toLowerCase())) {
-
-                        apiCustomResourceDefinition.getSpec().setOverride(false);
-                        //update with interceptors
-                        Interceptors interceptors = new Interceptors();
-                        interceptors.setBallerina(new String[]{});
-                        interceptors.setJava(new String[]{});
-                        apiCustomResourceDefinition.getSpec().getDefinition().setInterceptors(interceptors);
-                        crdClient.createOrReplace(apiCustomResourceDefinition);
-                        log.info("Successfully Re-Published the [API] " + apiName);
-                        return;
-                    }
-                }
-                log.error("The requested custom resource for the [API] " + apiName + " was not found");
-            } catch (KubernetesClientException e) {
-                log.error("Error occurred while Re-Publishing the [API] " + apiName, e);
-            }
-        } else {
-            log.error("Error occurred while establishing the connection to the Kubernetes cluster");
-        }
+    public void changeLCStateBlockedToRepublished(API api, APIIdentifier apiId, Registry registry,
+                                                  JSONObject containerMgtInfoDetails) throws APIManagementException {
+        apiRepublish(api, apiId, registry, containerMgtInfoDetails);
     }
 
     /**
@@ -403,7 +366,7 @@ public class K8sManager implements ContainerManager {
      */
     private String[] deployConfigMap(API api, APIIdentifier apiIdentifier, Registry registry, OpenShiftClient client, String jwtSecurityCRName,
                                      String oauthSecurityCRName, String basicAuthSecurityCRName, String nameSuffix)
-            throws APIManagementException, ParseException {
+            throws APIManagementException {
 
         SwaggerCreator swaggerCreator = new SwaggerCreator(basicAuthSecurityCRName, jwtSecurityCRName,
                 oauthSecurityCRName);

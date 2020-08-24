@@ -5670,6 +5670,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                         ContainerManager containerManager =
                                                                 getContainerManagerInstance(containerMgtDetails
                                                                         .get(ContainerBasedConstants.CLASS_NAME).toString());
+                                                        containerManager.initManager(containerMgtInfoDetails);
                                                         if (action.equals(ContainerBasedConstants.BLOCK)) {
                                                             containerManager.changeLCStateToBlocked(apiIdentifier,
                                                                     containerMgtInfoDetails);
@@ -5677,10 +5678,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                             containerManager.changeLCStatePublishedToCreated(
                                                                     apiIdentifier, containerMgtInfoDetails);
                                                         } else if (action.equals(ContainerBasedConstants.REPUBLISH)) {
-                                                            String configmapName = apiIdentifier.getApiName().toLowerCase() + "-swagger";
-                                                            String[] configmapNames = new String[]{configmapName};
-                                                            containerManager.changeLCStateBlockedToRepublished(apiIdentifier,
-                                                                    containerMgtInfoDetails, configmapNames);
+                                                            containerManager.changeLCStateBlockedToRepublished(
+                                                                    getAPI(apiIdentifier), apiIdentifier, registry,
+                                                                    containerMgtInfoDetails);
                                                         } else if (currentStatus.equals(ContainerBasedConstants.PUBLISHED)
                                                                 && action.equals(ContainerBasedConstants.PUBLISH)) {
                                                             containerManager.apiRepublish(getAPI(apiIdentifier),

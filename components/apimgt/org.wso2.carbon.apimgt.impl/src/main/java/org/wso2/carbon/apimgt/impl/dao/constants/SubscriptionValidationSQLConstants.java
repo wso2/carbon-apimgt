@@ -25,7 +25,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.UUID AS APP_UUID," +
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.APPLICATION_TIER AS TIER," +
-                    "   APP.NAME AS NAME," +
+                    "   APP.NAME AS APS_NAME," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME," +
                     "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
@@ -42,7 +42,7 @@ public class SubscriptionValidationSQLConstants {
             " SELECT " +
                     "   APP.UUID AS APP_UUID," +
                     "   APP.APPLICATION_ID AS APP_ID," +
-                    "   APP.NAME AS NAME," +
+                    "   APP.NAME AS APS_NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME," +
@@ -61,7 +61,7 @@ public class SubscriptionValidationSQLConstants {
             " SELECT " +
                     "   APP.UUID AS APP_UUID," +
                     "   APP.APPLICATION_ID AS APP_ID," +
-                    "   APP.NAME AS NAME," +
+                    "   APP.NAME AS APS_NAME," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME," +
@@ -163,7 +163,7 @@ public class SubscriptionValidationSQLConstants {
                     "    FROM " +
                     "      AM_API API," +
                     "      AM_API_URL_MAPPING URL" +
-                    "      LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING AS SCOPE ON" +
+                    "      LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING SCOPE ON" +
                     "      URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
                     "    WHERE " +
                     "      API.API_ID = URL.API_ID" +
@@ -193,7 +193,7 @@ public class SubscriptionValidationSQLConstants {
                     "      AND API.API_ID = URL.API_ID" +
                     "      AND URL.API_ID = PROD.API_ID" +
                     "  ) AS APIS " +
-                    "  LEFT JOIN AM_API_DEFAULT_VERSION AS DEF ON APIS.API_NAME = DEF.API_NAME" +
+                    "  LEFT JOIN AM_API_DEFAULT_VERSION DEF ON APIS.API_NAME = DEF.API_NAME" +
                     "  AND APIS.API_PROVIDER = DEF.API_PROVIDER AND " +
                     "  APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
 
@@ -250,7 +250,7 @@ public class SubscriptionValidationSQLConstants {
     public static final String GET_TENANT_SUBSCRIPTION_POLICIES_SQL =
             "SELECT " +
                     "   APS.POLICY_ID AS POLICY_ID," +
-                    "   APS.NAME AS NAME," +
+                    "   APS.NAME AS POLICY_NAME," +
                     "   APS.RATE_LIMIT_COUNT AS RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT AS RATE_LIMIT_TIME_UNIT," +
                     "   APS.QUOTA_TYPE AS QUOTA_TYPE," +
@@ -266,7 +266,7 @@ public class SubscriptionValidationSQLConstants {
     public static final String GET_SUBSCRIPTION_POLICY_SQL =
             "SELECT " +
                     "   APS.POLICY_ID AS POLICY_ID," +
-                    "   APS.NAME AS APS_NAME," +
+                    "   APS.NAME AS POLICY_NAME," +
                     "   APS.RATE_LIMIT_COUNT AS RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT AS RATE_LIMIT_TIME_UNIT," +
                     "   APS.QUOTA_TYPE AS QUOTA_TYPE," +
@@ -441,7 +441,7 @@ public class SubscriptionValidationSQLConstants {
                     "   )" +
                     "   AS APIS " +
                     "   LEFT JOIN" +
-                    "      AM_API_DEFAULT_VERSION AS DEF " +
+                    "      AM_API_DEFAULT_VERSION DEF " +
                     "      ON APIS.API_NAME = DEF.API_NAME " +
                     "      AND APIS.API_PROVIDER = DEF.API_PROVIDER " +
                     "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
@@ -516,7 +516,7 @@ public class SubscriptionValidationSQLConstants {
                     "   )" +
                     "   AS APIS " +
                     "   LEFT JOIN" +
-                    "      AM_API_DEFAULT_VERSION AS DEF " +
+                    "      AM_API_DEFAULT_VERSION DEF " +
                     "      ON APIS.API_NAME = DEF.API_NAME " +
                     "      AND APIS.API_PROVIDER = DEF.API_PROVIDER " +
                     "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
@@ -566,7 +566,7 @@ public class SubscriptionValidationSQLConstants {
                     "   )" +
                     "   AS APIS " +
                     "   LEFT JOIN " +
-                    "      AM_API_DEFAULT_VERSION AS DEF" +
+                    "      AM_API_DEFAULT_VERSION DEF" +
                     "      ON APIS.API_NAME = DEF.API_NAME" +
                     "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
                     "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
@@ -619,7 +619,7 @@ public class SubscriptionValidationSQLConstants {
                     "   )" +
                     "   AS APIS " +
                     "   LEFT JOIN " +
-                    "      AM_API_DEFAULT_VERSION AS DEF " +
+                    "      AM_API_DEFAULT_VERSION DEF " +
                     "      ON APIS.API_NAME = DEF.API_NAME" +
                     "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
                     "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";

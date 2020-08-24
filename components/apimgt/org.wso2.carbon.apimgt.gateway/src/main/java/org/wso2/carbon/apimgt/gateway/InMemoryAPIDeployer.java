@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway;
 
 import com.google.gson.Gson;
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
@@ -29,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -70,9 +72,10 @@ public class InMemoryAPIDeployer {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(apiId, gatewayLabel,
                             APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                    if (gatewayRuntimeArtifact != null) {
+                    if (StringUtils.isNotEmpty(gatewayRuntimeArtifact)) {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
-                        apiGatewayAdmin.deployAPI(gatewayAPIDTO);
+                        APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
+                        apiGatewayAdminClient.deployAPI(gatewayAPIDTO);
                         if (debugEnabled) {
                             log.debug("API with " + apiId + " is deployed in gateway with the label of " + gatewayLabel);
                         }
@@ -110,25 +113,27 @@ public class InMemoryAPIDeployer {
             if (artifactRetriever != null) {
                 try {
                     Iterator<String> it = assignedGatewayLabels.iterator();
+                    APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
                     while (it.hasNext()) {
                         String label = it.next();
                         List<String> gatewayRuntimeArtifacts = ServiceReferenceHolder
                                 .getInstance().getArtifactRetriever().retrieveAllArtifacts(label);
-                        for (String APIruntimeArtifact :gatewayRuntimeArtifacts){
+                        for (String runtimeArtifact :gatewayRuntimeArtifacts){
                             GatewayAPIDTO gatewayAPIDTO = null;
                             try {
-                                if (APIruntimeArtifact != null) {
-                                    gatewayAPIDTO = new Gson().fromJson(APIruntimeArtifact, GatewayAPIDTO.class);
+                                if (StringUtils.isNotEmpty(runtimeArtifact)) {
+                                    gatewayAPIDTO = new Gson().fromJson(runtimeArtifact, GatewayAPIDTO.class);
                                     log.info("Deploying synapse artifacts of " + gatewayAPIDTO.getName());
-                                    apiGatewayAdmin.deployAPI(gatewayAPIDTO);
+                                    apiGatewayAdminClient.deployAPI(gatewayAPIDTO);
                                 }
-                            if (debugEnabled) {
-                                log.debug("APIs deployed in gateway with the label of " + label);
-                            }
                             } catch (AxisFault axisFault) {
                                 log.error("Error in deploying" + gatewayAPIDTO.getName()+ " to the Gateway ");
                                 continue;
                             }
+                        }
+
+                        if (debugEnabled) {
+                            log.debug("APIs deployed in gateway with the label of " + label);
                         }
                     }
                     return true;
@@ -161,10 +166,11 @@ public class InMemoryAPIDeployer {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever
                             .retrieveArtifact(apiId, gatewayLabel,
-                                    APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
-                    if (gatewayRuntimeArtifact != null) {
+                                    APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_ANY);
+                    if (StringUtils.isNotEmpty(gatewayRuntimeArtifact)) {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
-                        apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
+                        APIGatewayAdminClient apiGatewayAdminClient = new APIGatewayAdminClient();
+                        apiGatewayAdminClient.unDeployAPI(gatewayAPIDTO);
                         if (debugEnabled) {
                             log.debug("API with " + apiId + " is undeployed in gateway with the label of " + gatewayLabel);
                         }
@@ -203,7 +209,7 @@ public class InMemoryAPIDeployer {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(apiId, gatewayLabel,
                             APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                    if (gatewayRuntimeArtifact != null) {
+                    if (StringUtils.isNotEmpty(gatewayRuntimeArtifact)) {
                         gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
                         if (debugEnabled) {
                             log.debug("Retrieved artifacts for API  " + apiId + " retrieved from eventhub");

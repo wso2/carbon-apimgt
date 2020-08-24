@@ -1539,9 +1539,13 @@ public class APIManagerConfiguration {
         OMElement enableElement = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.ENABLE));
         if (enableElement != null && Boolean.parseBoolean(enableElement.getText())) {
             eventHubConfigurationDto.setEnabled(true);
-            OMElement serviceUrl = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.SERVICE_URL));
-            if (serviceUrl != null) {
-                eventHubConfigurationDto.setServiceUrl(APIUtil.replaceSystemProperty(serviceUrl.getText()));
+            OMElement serviceUrlElement = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.SERVICE_URL));
+            if (serviceUrlElement != null) {
+                String serviceUrl = APIUtil.replaceSystemProperty(serviceUrlElement.getText());
+                if (StringUtils.isNotEmpty(serviceUrl)) {
+                    serviceUrl = serviceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0];
+                    eventHubConfigurationDto.setServiceUrl(serviceUrl);
+                }
             }
             OMElement initDelay = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.INIT_DELAY));
             if (initDelay != null) {

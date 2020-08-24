@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
 
 const generateAccessTokenStep = (props) => {
     const [keyType, setKeyType] = useState('PRODUCTION');
-    const [selectedTab, setSelectedTab] = useState('Default');
+    const [selectedTab, setSelectedTab] = useState('Resident Key Manager');
     const [subscriptionScopes, setSubscriptionScopes] = useState([]);
     const [notFound, setNotFound] = useState(false);
 

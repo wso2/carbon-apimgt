@@ -33,6 +33,7 @@ import org.wso2.carbon.core.util.KeyStoreManager;
 import java.nio.charset.Charset;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.util.Date;
 import java.util.Map;
 
 public abstract class AbstractAPIMgtGatewayJWTGenerator {
@@ -188,7 +189,11 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
             }
         }
         for (Map.Entry<String, Object> claimEntry : claims.entrySet()) {
-            jwtClaimSetBuilder.claim(claimEntry.getKey(), claimEntry.getValue());
+            if (APIConstants.JwtTokenConstants.EXPIRY_TIME.equals(claimEntry.getKey())) {
+                jwtClaimSetBuilder.claim(claimEntry.getKey(), new Date(Long.parseLong((String) claimEntry.getValue())));
+            } else {
+                jwtClaimSetBuilder.claim(claimEntry.getKey(), claimEntry.getValue());
+            }
         }
         JWTClaimsSet jwtClaimsSet = jwtClaimSetBuilder.build();
         return jwtClaimsSet.toJSONObject().toString();

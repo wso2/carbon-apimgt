@@ -173,8 +173,8 @@ const RouteMenuMapping = (intl) => [
     },
     {
         id: intl.formatMessage({
-            id: 'Base.RouteMenuMapping.microgateways',
-            defaultMessage: 'Microgateways',
+            id: 'Base.RouteMenuMapping.gateways',
+            defaultMessage: 'Gateways',
         }),
         path: '/settings/mg-labels',
         component: MicrogatewayLabels,

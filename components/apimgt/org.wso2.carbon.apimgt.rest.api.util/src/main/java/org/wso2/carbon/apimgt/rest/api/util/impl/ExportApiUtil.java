@@ -136,15 +136,18 @@ public class ExportApiUtil {
      *
      * @param apiIdentifier
      * @param preserveStatus Preserve API status on export
+     * @param format         Format of output documents. Can be YAML or JSON
      * @return Zipped file containing exported API
      */
-    public Response exportApiById(APIIdentifier apiIdentifier, Boolean preserveStatus) {
+    public Response exportApiById(APIIdentifier apiIdentifier, Boolean preserveStatus, String format) {
         ExportFormat exportFormat;
         APIProvider apiProvider;
         String userName;
         File file;
         try {
-            exportFormat = ExportFormat.YAML;
+            //Default export format is YAML
+            exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
+                    ExportFormat.YAML;
             apiProvider = RestApiUtil.getLoggedInUserProvider();
             userName = RestApiUtil.getLoggedInUsername();
             file = APIExportUtil.exportApi(apiProvider, apiIdentifier, userName, exportFormat, preserveStatus);

@@ -77,11 +77,10 @@ public class SwaggerCreator {
      * @param oasDefinition     Open API definition
      * @return OAS definition
      * @throws APIManagementException throws if an error occurred
-     * @throws ParseException         throws if the oasDefinition is not in json format
      */
 
     public String getOASDefinitionForPrivateJetMode(API api, String oasDefinition)
-            throws APIManagementException, ParseException {
+            throws APIManagementException {
 
         APIDefinition oasParser = OASParserUtil.getOASParser(oasDefinition);
         String apiDefinition = oasParser.getOASDefinitionForPublisher(api, oasDefinition);
@@ -100,7 +99,12 @@ public class SwaggerCreator {
 
         //get Json object from parsed openAPI definition
         JSONParser jsonParser = new JSONParser();
-        JSONObject apiDefinitionJsonObject = (JSONObject) jsonParser.parse(apiDefinition);
+        JSONObject apiDefinitionJsonObject = null;
+        try {
+            apiDefinitionJsonObject = (JSONObject) jsonParser.parse(apiDefinition);
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while parsing API definition as a JSON", e);
+        }
 
         /**
          * Removing the "security" key from the JSONObject

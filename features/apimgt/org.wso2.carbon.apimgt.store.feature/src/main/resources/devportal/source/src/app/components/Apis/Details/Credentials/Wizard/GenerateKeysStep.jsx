@@ -115,7 +115,7 @@ const generateKeysStep = (props) => {
     const [nextActive, setNextActive] = useState(true);
     const [isUserOwner, setIsUserOwner] = useState(false);
     const [keyManager, setKeyManager] = useState(null);
-    const [selectedTab, setSelectedTab] = useState('Default');
+    const [selectedTab, setSelectedTab] = useState('Resident Key Manager');
 
     const [keyRequest, setKeyRequest] = useState({
         keyType: 'SANDBOX',
@@ -164,7 +164,7 @@ const generateKeysStep = (props) => {
                 // Selecting a key manager from the list of key managers.
                 let selectedKeyManager;
                 if (responseKeyManagerList.length > 0) {
-                    const responseKeyManagerList_default = responseKeyManagerList.filter(x => x.name === 'Default');
+                    const responseKeyManagerList_default = responseKeyManagerList.filter(x => x.name === 'Resident Key Manager');
                     selectedKeyManager = responseKeyManagerList_default.length > 0 ? responseKeyManagerList_default[0]
                         : responseKeyManagerList[0];
                 }

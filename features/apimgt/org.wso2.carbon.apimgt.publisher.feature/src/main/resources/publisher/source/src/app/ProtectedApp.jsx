@@ -19,18 +19,17 @@
 import React, { Component, Suspense, lazy } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import { ThemeProvider } from '@material-ui/core/styles';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
-import User from 'AppData/User';
-import Utils from 'AppData/Utils';
 import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
-import Themes from 'Themes';
+import userThemes from 'userCustomThemes';
+import defaultTheme from 'AppData/defaultTheme';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
@@ -65,8 +64,6 @@ export default class Protected extends Component {
         super(props);
         this.state = {
             settings: null,
-            clientId: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_CLIENT_ID),
-            sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_SESSION_STATE),
             theme: null,
         };
         this.environments = [];
@@ -91,7 +88,7 @@ export default class Protected extends Component {
                 const tenant = user.name.split('@')[user.name.split('@').length - 1];
                 this.setTenantTheme(tenant);
             } else {
-                this.setState({ theme: Themes.light });
+                this.setState({ theme: userThemes.light });
             }
         } else {
             // If no user data available , Get the user info from existing token information
@@ -103,7 +100,7 @@ export default class Protected extends Component {
                     const tenant = loggedUser.name.split('@')[loggedUser.name.split('@').length - 1];
                     this.setTenantTheme(tenant);
                 } else {
-                    this.setState({ theme: Themes.light });
+                    this.setState({ theme: userThemes.light });
                 }
                 this.setState({ user: loggedUser });
             });
@@ -146,15 +143,15 @@ export default class Protected extends Component {
                         this.setState({ theme: data.light });
                     } else {
                         console.log('Error loading teant theme. Loading the default theme.');
-                        this.setState({ theme: Themes.light });
+                        this.setState({ theme: userThemes.light });
                     }
                 })
                 .catch(() => {
                     console.log('Error loading teant theme. Loading the default theme.');
-                    this.setState({ theme: Themes.light });
+                    this.setState({ theme: userThemes.light });
                 });
         } else {
-            this.setState({ theme: Themes.light });
+            this.setState({ theme: userThemes.light });
         }
     }
 
@@ -169,13 +166,14 @@ export default class Protected extends Component {
     }
 
     /**
-     * Invoke checksession oidc endpoint.
+     * Invoke check session OIDC endpoint.
      */
     checkSession() {
         if (Configurations.app.singleLogout && Configurations.app.singleLogout.enabled) {
             setInterval(() => {
-                const { clientId, sessionStateCookie } = this.state;
-                const msg = clientId + ' ' + sessionStateCookie;
+                // Check session will only trigger if user is available
+                const { clientId, sessionState } = AuthManager.getUser().getAppInfo();
+                const msg = clientId + ' ' + sessionState;
                 document.getElementById('iframeOP').contentWindow.postMessage(msg, Configurations.idp.origin);
             }, Configurations.app.singleLogout.timeout);
         }
@@ -189,12 +187,8 @@ export default class Protected extends Component {
     render() {
         const { user = AuthManager.getUser(), messages } = this.state;
         const header = <Header avatar={<Avatar user={user} />} user={user} />;
-        const { settings, clientId } = this.state;
+        const { settings } = this.state;
         const { theme } = this.state;
-        const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
-        + clientId + '&redirect_uri=https://' + window.location.host
-        + Configurations.app.context + '/services/auth/callback/login';
-
         if (!user) {
             return (
                 <IntlProvider locale={language} messages={messages}>
@@ -206,36 +200,34 @@ export default class Protected extends Component {
             return (<Progress />);
         }
         return (
-            <MuiThemeProvider theme={createMuiTheme(theme)}>
-                <AppErrorBoundary>
-                    <Base header={header}>
-                        <iframe
-                            title='iframeOP'
-                            id='iframeOP'
-                            src={checkSessionURL}
-                            width='0px'
-                            height='0px'
-                        />
-                        {settings ? (
-                            <AppContextProvider value={{
-                                settings, user,
-                            }}
-                            >
-                                <Switch>
-                                    <Redirect exact from='/' to='/apis' />
-                                    <Route path='/apis' component={DeferredAPIs} />
-                                    <Route path='/api-products' component={DeferredAPIs} />
-                                    <Route path='/scopes' component={Scopes} />
-                                    <Route path='/settings' component={SettingsBase} />
-                                    <Route component={ResourceNotFound} />
-                                </Switch>
-                            </AppContextProvider>
-                        ) : (
-                            <Progress per={20} message='Loading Settings ...' />
-                        )}
-                    </Base>
-                </AppErrorBoundary>
-            </MuiThemeProvider>
+            <ThemeProvider theme={createMuiTheme(defaultTheme)}>
+                <ThemeProvider theme={(currentTheme) => createMuiTheme(
+                    { ...currentTheme, ...(typeof v === 'function' ? theme(currentTheme) : theme) },
+                )}
+                >
+                    <AppErrorBoundary>
+                        <Base header={header}>
+                            {settings ? (
+                                <AppContextProvider value={{
+                                    settings, user,
+                                }}
+                                >
+                                    <Switch>
+                                        <Redirect exact from='/' to='/apis' />
+                                        <Route path='/apis' component={DeferredAPIs} />
+                                        <Route path='/api-products' component={DeferredAPIs} />
+                                        <Route path='/scopes' component={Scopes} />
+                                        <Route path='/settings' component={SettingsBase} />
+                                        <Route component={ResourceNotFound} />
+                                    </Switch>
+                                </AppContextProvider>
+                            ) : (
+                                <Progress per={20} message='Loading Settings ...' />
+                            )}
+                        </Base>
+                    </AppErrorBoundary>
+                </ThemeProvider>
+            </ThemeProvider>
         );
     }
 }

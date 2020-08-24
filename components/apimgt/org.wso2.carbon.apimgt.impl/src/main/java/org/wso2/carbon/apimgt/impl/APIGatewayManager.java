@@ -157,10 +157,9 @@ public class APIGatewayManager {
             }
         }
 
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantId,
+                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
                 api.getUUID(), publishedGateways);
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         if (debugEnabled) {
@@ -621,10 +620,9 @@ public class APIGatewayManager {
             }
         }
 
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantId,
+                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
                 apiProduct.getUuid(), publishedGateways);
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
 
@@ -705,10 +703,9 @@ public class APIGatewayManager {
             }
         }
 
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantId,
+                System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
                 api.getUUID(), removedGateways);
         APIUtil.sendNotification(deployAPIInGatewayEvent,
                 APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
@@ -885,11 +882,10 @@ public class APIGatewayManager {
             }
         }
 
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(),
-                APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantId, apiProduct.getUuid(),
+                APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain, apiProduct.getUuid(),
                 removedGateways);
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         return failedEnvironmentsMap;

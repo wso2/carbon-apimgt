@@ -21,7 +21,7 @@ import Autosuggest from 'react-autosuggest';
 import { MemoryRouter } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import Themes from 'Themes';
+import Themes from 'AppData/defaultTheme';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import API from 'AppData/api.js';
 import AuthManager from 'AppData/AuthManager';

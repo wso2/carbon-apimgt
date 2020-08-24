@@ -20,7 +20,7 @@ import React from 'react';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
-import Themes from 'Themes';
+import Themes from 'AppData/defaultTheme';
 import LeftMenuItem from './LeftMenuItem';
 
 describe('<LeftMenuItem/> tests', () => {

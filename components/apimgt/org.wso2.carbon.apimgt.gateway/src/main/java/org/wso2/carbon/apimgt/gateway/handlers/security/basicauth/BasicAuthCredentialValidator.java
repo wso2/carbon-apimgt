@@ -49,6 +49,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
@@ -200,12 +201,20 @@ public class BasicAuthCredentialValidator {
         }
 
         if (openAPI != null) {
-            // retrieve the user roles related to the scope of the API resource
             String resourceRoles = null;
-            String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
-            if (resourceScope != null) {
-                resourceRoles = OpenAPIUtils.getRolesOfScope(openAPI, synCtx, resourceScope);
+            // retrieve the user roles related to the scope of the API resource
+            List<String> resourceScopes = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
+            List<String> resourceRolesList = new ArrayList<>();
+            if (resourceScopes != null && resourceScopes.size() > 0) {
+                for (String resourceScope : resourceScopes) {
+                    String roles = OpenAPIUtils.getRolesOfScope(openAPI, synCtx, resourceScope);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        resourceRolesList.add(roles);
+                    }
+                }
+                resourceRoles = String.join(",", resourceRolesList);
             }
+
 
             if (StringUtils.isNotBlank(resourceRoles)) {
                 userRoles = getUserRoles(username);
@@ -293,7 +302,8 @@ public class BasicAuthCredentialValidator {
      * @return true if the validation passed
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    @MethodStats public boolean validateScopes(String username, OpenAPI openAPI, MessageContext synCtx,
+    @MethodStats
+    public boolean validateScopes(String username, OpenAPI openAPI, MessageContext synCtx,
             String[] userRoleList) throws APISecurityException {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
@@ -311,11 +321,18 @@ public class BasicAuthCredentialValidator {
         }
 
         if (openAPI != null) {
-            // retrieve the user roles related to the scope of the API resource
             String resourceRoles = null;
-            String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
-            if (resourceScope != null) {
-                resourceRoles = OpenAPIUtils.getRolesOfScope(openAPI, synCtx, resourceScope);
+            // retrieve the user roles related to the scope of the API resource
+            List<String> resourceScopes = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
+            List<String> resourceRolesList = new ArrayList<>();
+            if (resourceScopes != null && resourceScopes.size() > 0) {
+                for (String resourceScope : resourceScopes) {
+                    String roles = OpenAPIUtils.getRolesOfScope(openAPI, synCtx, resourceScope);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        resourceRolesList.add(roles);
+                    }
+                }
+                resourceRoles = String.join(",", resourceRolesList);
             }
 
             if (StringUtils.isNotBlank(resourceRoles)) {

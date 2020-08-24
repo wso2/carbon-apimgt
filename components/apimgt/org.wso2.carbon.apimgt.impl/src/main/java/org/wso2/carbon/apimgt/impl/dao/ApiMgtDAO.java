@@ -468,24 +468,7 @@ public class ApiMgtDAO {
     }
 
 
-    public boolean validateSubscriptionDetails(String context, String version, String consumerKey,String keyManager,
-                                               APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
-        boolean defaultVersionInvoked = false;
-        String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
-        if (apiTenantDomain == null) {
-            apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
-        //Check if the api version has been prefixed with _default_
-        if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
-            defaultVersionInvoked = true;
-            //Remove the prefix from the version.
-            version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
-        }
 
-        validateSubscriptionDetails(infoDTO, context, version, consumerKey, keyManager, defaultVersionInvoked);
-        return infoDTO.isAuthorized();
-    }
 
     private boolean isAnyPolicyContentAware(Connection conn, String apiPolicy, String appPolicy,
                                             String subPolicy, int subscriptionTenantId, int appTenantId, int apiId) throws APIManagementException {
@@ -4065,7 +4048,7 @@ public class ApiMgtDAO {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             ps.setTimestamp(9, timestamp);
             ps.setTimestamp(10, timestamp);
-            ps.setString(11, UUID.randomUUID().toString());
+            ps.setString(11, application.getUUID());
             ps.setString(12, String.valueOf(application.getTokenType()));
             ps.executeUpdate();
 
@@ -12993,150 +12976,6 @@ public class ApiMgtDAO {
         return new String[]{apiName, apiProvider};
     }
 
-    /**
-     * Check for the subscription of the user
-     *
-     * @param infoDTO
-     * @param context
-     * @param version
-     * @param consumerKey
-     * @return APIKeyValidationInfoDTO including data of api and application
-     * @throws APIManagementException
-     */
-    public APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO,
-                                                               String context, String version,
-                                                               String consumerKey, String keyManager,
-                                                               boolean defaultVersionInvoked)
-            throws APIManagementException {
-        String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
-        if (apiTenantDomain == null) {
-            apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-
-        int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
-        String sql;
-
-            if (defaultVersionInvoked) {
-                sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
-            } else {
-                sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
-            }
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, context);
-            ps.setString(2, consumerKey);
-            ps.setString(3,keyManager);
-
-            ps.setInt(4, apiOwnerTenantId);
-            if (!defaultVersionInvoked) {
-                ps.setString(5, version);
-            }
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                String subscriptionStatus = rs.getString("SUB_STATUS");
-                String type = rs.getString("KEY_TYPE");
-                if (APIConstants.SubscriptionStatus.BLOCKED.equals(subscriptionStatus)) {
-                    infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
-                    infoDTO.setAuthorized(false);
-                    return infoDTO;
-                } else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) ||
-                        APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
-                    infoDTO.setValidationStatus(
-                            APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
-                    infoDTO.setAuthorized(false);
-                    return infoDTO;
-                } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED
-                        .equals(subscriptionStatus) &&
-                        !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
-                    infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
-                    infoDTO.setType(type);
-                    infoDTO.setAuthorized(false);
-                    return infoDTO;
-                }
-
-                final String API_PROVIDER = rs.getString("API_PROVIDER");
-                final String SUB_TIER = rs.getString("TIER_ID");
-                final String APP_TIER = rs.getString("APPLICATION_TIER");
-                infoDTO.setTier(SUB_TIER);
-                infoDTO.setSubscriber(rs.getString("USER_ID"));
-                infoDTO.setApplicationId(rs.getString("APPLICATION_ID"));
-                infoDTO.setApiName(rs.getString("API_NAME"));
-                infoDTO.setApiPublisher(API_PROVIDER);
-                infoDTO.setApplicationName(rs.getString("NAME"));
-                infoDTO.setApplicationTier(APP_TIER);
-                infoDTO.setType(type);
-
-                //Advanced Level Throttling Related Properties
-                String apiTier = rs.getString("API_TIER");
-                String subscriberUserId = rs.getString("USER_ID");
-                String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
-                int apiId = rs.getInt("API_ID");
-                int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
-                int apiTenantId = APIUtil.getTenantId(API_PROVIDER);
-                //TODO isContentAware
-                boolean isContentAware =
-                        isAnyPolicyContentAware(conn, apiTier, APP_TIER, SUB_TIER,
-                                subscriberTenantId, apiTenantId, apiId);
-                infoDTO.setContentAware(isContentAware);
-
-                //TODO this must implement as a part of throttling implementation.
-                int spikeArrest = 0;
-                String apiLevelThrottlingKey = "api_level_throttling_key";
-                if (rs.getInt("RATE_LIMIT_COUNT") > 0) {
-                    spikeArrest = rs.getInt("RATE_LIMIT_COUNT");
-                }
-
-                String spikeArrestUnit = null;
-                if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
-                    spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
-                }
-                boolean stopOnQuotaReach = rs.getBoolean("STOP_ON_QUOTA_REACH");
-                int graphQLMaxDepth = 0;
-                if (rs.getInt("MAX_DEPTH") > 0) {
-                    graphQLMaxDepth = rs.getInt("MAX_DEPTH");
-                }
-                int graphQLMaxComplexity = 0;
-                if (rs.getInt("MAX_COMPLEXITY") > 0) {
-                    graphQLMaxComplexity = rs.getInt("MAX_COMPLEXITY");
-                }
-                List<String> list = new ArrayList<String>();
-                list.add(apiLevelThrottlingKey);
-                infoDTO.setSpikeArrestLimit(spikeArrest);
-                infoDTO.setSpikeArrestUnit(spikeArrestUnit);
-                infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
-                infoDTO.setSubscriberTenantDomain(subscriberTenant);
-                infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
-                infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
-                if (apiTier != null && apiTier.trim().length() > 0) {
-                    infoDTO.setApiTier(apiTier);
-                }
-                //We also need to set throttling data list associated with given API. This need to have policy id and
-                // condition id list for all throttling tiers associated with this API.
-                infoDTO.setThrottlingDataList(list);
-                infoDTO.setAuthorized(true);
-                return infoDTO;
-            }
-            infoDTO.setAuthorized(false);
-            infoDTO.setValidationStatus(
-                    APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
-        } catch (SQLException e) {
-            handleException("Exception occurred while validating Subscription.", e);
-        } finally {
-            try {
-                conn.setAutoCommit(false);
-            } catch (SQLException e) {
-                log.error("Error occurred while fetching data: " + e.getMessage(), e);
-            }
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return infoDTO;
-    }
 
     /**
      * Returns a Prepared statement after setting all the dynamic parameters. Dynamic parameters will be added in

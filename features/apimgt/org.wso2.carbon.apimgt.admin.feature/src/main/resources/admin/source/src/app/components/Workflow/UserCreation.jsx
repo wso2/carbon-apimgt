@@ -30,12 +30,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import MUIDataTable from 'mui-datatables';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 import Alert from 'AppComponents/Shared/Alert';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -88,7 +88,7 @@ function ListLabels() {
     const [searchText, setSearchText] = useState('');
     const [isUpdating, setIsUpdating] = useState(null);
     const [buttonValue, setButtonValue] = useState();
-
+    const [hasListPermission, setHasListPermission] = useState(true);
     /**
      * API call to get Detected Data
      * @returns {Promise}.
@@ -110,11 +110,16 @@ function ListLabels() {
                 return workflowlist;
             })
             .catch((error) => {
-                Alert.error(intl.formatMessage({
-                    id: 'Workflow.UserCreation.apicall.has.errors',
-                    defaultMessage: 'Unable to get workflow pending requests for User Creation',
-                }));
-                throw (error);
+                const { status } = error;
+                if (status === 401) {
+                    setHasListPermission(false);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Workflow.UserCreation.apicall.has.errors',
+                        defaultMessage: 'Unable to get workflow pending requests for User Creation',
+                    }));
+                    throw (error);
+                }
             });
     }
 
@@ -158,8 +163,11 @@ function ListLabels() {
                 }));
             })
             .catch((error) => {
-                const { response } = error;
-                if (response.body) {
+                const { response, status } = error;
+                const { body: { description } } = response;
+                if (status === 401) {
+                    Alert.error(description);
+                } else if (response.body) {
                     Alert.error(intl.formatMessage({
                         id: 'Workflow.UserCreation.updateStatus.has.errors',
                         defaultMessage: 'Unable to complete User creation approve/reject process.',
@@ -360,25 +368,23 @@ function ListLabels() {
                 pageStyle='small'
             >
                 <Card className={classes.root}>
-                    <CardActionArea>
-                        <CardContent>
-                            <Typography gutterBottom variant='h5' component='h2'>
-                                <FormattedMessage
-                                    id='Workflow.UserCreation.List.empty.title.usercreations'
-                                    defaultMessage='User Creation'
-                                />
-                            </Typography>
-                            <Typography variant='body2' color='textSecondary' component='p'>
-                                <FormattedMessage
-                                    id='Workflow.UserCreation.List.empty.content.usercreations'
-                                    defaultMessage={'There are no workflow pending requests for user creation.'
-                                    + 'It is possible to approve or reject workflow pending requests of user sign up.'
-                                    + ' Workflow Approval Executor needs to be enabled to approve or reject the '
-                                    + 'requests. '}
-                                />
-                            </Typography>
-                        </CardContent>
-                    </CardActionArea>
+                    <CardContent>
+                        <Typography gutterBottom variant='h5' component='h2'>
+                            <FormattedMessage
+                                id='Workflow.UserCreation.List.empty.title.usercreations'
+                                defaultMessage='User Creation'
+                            />
+                        </Typography>
+                        <Typography variant='body2' color='textSecondary' component='p'>
+                            <FormattedMessage
+                                id='Workflow.UserCreation.List.empty.content.usercreations'
+                                defaultMessage={'There are no workflow pending requests for user creation.'
+                                + 'It is possible to approve or reject workflow pending requests of user sign up.'
+                                + ' Workflow Approval Executor needs to be enabled to approve or reject the '
+                                + 'requests. '}
+                            />
+                        </Typography>
+                    </CardContent>
                     <CardActions>
                         {addButtonOverride || (
                             <span updateList={fetchData} {...addButtonProps} />
@@ -386,6 +392,26 @@ function ListLabels() {
                     </CardActions>
                 </Card>
             </ContentBase>
+        );
+    }
+    if (!hasListPermission) {
+        return (
+            <WarningBase
+                pageProps={pageProps}
+                title={(
+                    <FormattedMessage
+                        id='Workflow.UserCreation.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='Workflow.UserCreation.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view User Creation - '
+                        + 'Approval Tasks. Please contact the site administrator.'}
+                    />
+                )}
+            />
         );
     }
     if (!data) {
