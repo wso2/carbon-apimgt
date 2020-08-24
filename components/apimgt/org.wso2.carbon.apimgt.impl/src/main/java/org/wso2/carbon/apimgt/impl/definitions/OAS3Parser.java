@@ -447,7 +447,6 @@ public class OAS3Parser extends APIDefinition {
         SecurityScheme securityScheme;
         OAuthFlows oAuthFlows;
         OAuthFlow oAuthFlow;
-        OAuthFlows oAuthFlows;
         Scopes scopes;
         if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null
                 && (securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null
