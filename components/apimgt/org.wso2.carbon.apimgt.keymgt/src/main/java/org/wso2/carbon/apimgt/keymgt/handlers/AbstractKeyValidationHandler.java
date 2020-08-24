@@ -69,7 +69,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             if (validationContext.getTokenInfo().isApplicationToken()) {
                 dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             } else {
-                dto.setUserType("APPLICATION_USER");
+                dto.setUserType(APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN);
             }
 
             AccessTokenInfo tokenInfo = validationContext.getTokenInfo();

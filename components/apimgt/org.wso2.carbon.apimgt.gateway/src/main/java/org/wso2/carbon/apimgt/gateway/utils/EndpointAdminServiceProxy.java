@@ -154,16 +154,9 @@ public class EndpointAdminServiceProxy {
             throws EndpointAdminException {
 
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            String[] endPointsNames = endpointAdmin.getEndPointsNames();
-            if (endPointsNames != null) {
-                return Arrays.asList(endPointsNames).contains(endpointName);
-            }
+            return endpointAdmin.isEndpointExist(endpointName);
         } else {
-            String[] endPointsNames = endpointAdmin.getEndPointsNamesForTenant(tenantDomain);
-            if (endPointsNames != null) {
-                return Arrays.asList(endPointsNames).contains(endpointName);
-            }
+            return endpointAdmin.isEndpointExistForTenant(endpointName, tenantDomain);
         }
-        return false;
     }
 }

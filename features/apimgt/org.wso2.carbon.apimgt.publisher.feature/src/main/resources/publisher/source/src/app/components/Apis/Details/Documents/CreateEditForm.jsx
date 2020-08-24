@@ -128,6 +128,7 @@ class CreateEditForm extends React.Component {
             disableName: false,
             otherTypeName: null,
             nameNotDuplicate: true,
+            nameMaxLengthExceeds: false,
             invalidUrl: true,
             nameEmpty: false,
             summeryEmpty: false,
@@ -272,9 +273,11 @@ class CreateEditForm extends React.Component {
             }
 
             if (value === '') {
-                this.setState({ nameEmpty: true });
+                this.setState({ nameEmpty: true, nameMaxLengthExceeds: false });
+            } else if (value && value.length > 60) {
+                this.setState({ nameEmpty: false, nameMaxLengthExceeds: true });
             } else {
-                this.setState({ nameEmpty: false });
+                this.setState({ nameEmpty: false, nameMaxLengthExceeds: false });
             }
         } else if (field === 'summary') {
             if (value === '') {
@@ -292,8 +295,15 @@ class CreateEditForm extends React.Component {
         }
     }
     showNameHelper() {
-        const { nameEmpty, nameNotDuplicate } = this.state;
-        if (nameNotDuplicate && !nameEmpty) {
+        const { nameEmpty, nameNotDuplicate, nameMaxLengthExceeds } = this.state;
+        if (nameMaxLengthExceeds) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Documents.CreateEditForm.exceeds.document.name.length.helper.text'
+                    defaultMessage='Document name exceeds the maximum length of 60 characters'
+                />
+            );
+        } else if (nameNotDuplicate && !nameEmpty) {
             return (
                 <FormattedMessage
                     id='Apis.Details.Documents.CreateEditForm.document.name.helper.text'
@@ -354,6 +364,7 @@ class CreateEditForm extends React.Component {
             otherTypeName,
             invalidUrl,
             nameNotDuplicate,
+            nameMaxLengthExceeds,
             nameEmpty,
             summeryEmpty,
             urlEmpty,
@@ -365,6 +376,7 @@ class CreateEditForm extends React.Component {
             name !== '' &&
             summary !== '' &&
             nameNotDuplicate &&
+            !nameMaxLengthExceeds &&
             ((!invalidUrl && sourceUrl !== '') || sourceType !== 'URL')
         ) {
             setSaveDisabled(false);
@@ -399,7 +411,7 @@ class CreateEditForm extends React.Component {
                         }}
                         autoFocus
                         disabled={disableName}
-                        error={!nameNotDuplicate || nameEmpty}
+                        error={!nameNotDuplicate || nameEmpty || nameMaxLengthExceeds}
                     />
                 </FormControl>
                 <FormControl margin='normal' className={classes.FormControlOdd}>

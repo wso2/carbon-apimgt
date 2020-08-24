@@ -275,22 +275,26 @@ public class SubscriptionValidationDAO {
      * @return {@link List<API>}
      * */
     public List<API> getAllApis(String tenantDomain) {
+        String query;
+        String contextSearchString;
+
+        if (tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            query = SubscriptionValidationSQLConstants.GET_ST_APIS_SQL;
+            contextSearchString = APIConstants.TENANT_PREFIX + "%";
+        } else {
+            query = SubscriptionValidationSQLConstants.GET_TENANT_APIS_SQL;
+            contextSearchString = APIConstants.TENANT_PREFIX + tenantDomain + "%";
+        }
 
         List<API> apiList = new ArrayList<>();
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();) {
-            PreparedStatement ps;
-            if (tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ST_APIS_SQL);
-                ps.setString(1, APIConstants.TENANT_PREFIX + "%");
-                ps.setString(2, APIConstants.TENANT_PREFIX + "%");
-            } else {
-                ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APIS_SQL);
-                ps.setString(1, APIConstants.TENANT_PREFIX + tenantDomain + "%");
-                ps.setString(2, APIConstants.TENANT_PREFIX + tenantDomain + "%");
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, contextSearchString);
+            ps.setString(2, contextSearchString);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateAPIList(resultSet, apiList);
             }
-            ResultSet resultSet = ps.executeQuery();
-            populateAPIList(resultSet, apiList);
 
         } catch (SQLException e) {
             log.error("Error in loading Apis for tenantId : " + tenantDomain, e);
@@ -308,48 +312,49 @@ public class SubscriptionValidationDAO {
     public API getApi(String version, String context) {
 
         API api = null;
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL + " UNION "
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL + " UNION "
                         + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
             ps.setString(1, version);
             ps.setString(2, context);
             ps.setString(3, version);
             ps.setString(4, context);
-            ResultSet resultSet = ps.executeQuery();
-            Map<Integer, API> temp = new ConcurrentHashMap<>();
-            while (resultSet.next()) {
-                int apiId = resultSet.getInt("API_ID");
-                api = temp.get(apiId);
-                if (api == null) {
-                    api = new API();
-                    api.setApiId(apiId);
-                    api.setProvider(resultSet.getString("API_PROVIDER"));
-                    api.setName(resultSet.getString("API_NAME"));
-                    api.setPolicy(resultSet.getString("API_TIER"));
-                    String apiVersionFromDB = resultSet.getString("API_VERSION");
-                    api.setVersion(apiVersionFromDB);
-                    api.setContext(resultSet.getString("CONTEXT"));
-                    String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                    if (apiVersionFromDB != null) {
-                        api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                Map<Integer, API> temp = new ConcurrentHashMap<>();
+                while (resultSet.next()) {
+                    int apiId = resultSet.getInt("API_ID");
+                    api = temp.get(apiId);
+                    if (api == null) {
+                        api = new API();
+                        api.setApiId(apiId);
+                        api.setProvider(resultSet.getString("API_PROVIDER"));
+                        api.setName(resultSet.getString("API_NAME"));
+                        api.setPolicy(resultSet.getString("API_TIER"));
+                        String apiVersionFromDB = resultSet.getString("API_VERSION");
+                        api.setVersion(apiVersionFromDB);
+                        api.setContext(resultSet.getString("CONTEXT"));
+                        String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
+                        if (apiVersionFromDB != null) {
+                            api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
+                        }
+                        temp.put(apiId, api);
                     }
-                    temp.put(apiId, api);
-                }
-                String urlPattern = resultSet.getString("URL_PATTERN");
-                String httpMethod = resultSet.getString("HTTP_METHOD");
-                URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
-                if (urlMapping == null) {
-                    urlMapping = new URLMapping();
-                    urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
-                    urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                    urlMapping.setHttpMethod(httpMethod);
-                    urlMapping.setUrlPattern(urlPattern);
-                    api.addResource(urlMapping);
-                }
-                String scopeName = resultSet.getString("SCOPE_NAME");
-                if (StringUtils.isNotEmpty(scopeName)) {
-                    urlMapping.addScope(scopeName);
+                    String urlPattern = resultSet.getString("URL_PATTERN");
+                    String httpMethod = resultSet.getString("HTTP_METHOD");
+                    URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
+                    if (urlMapping == null) {
+                        urlMapping = new URLMapping();
+                        urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
+                        urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                        urlMapping.setHttpMethod(httpMethod);
+                        urlMapping.setUrlPattern(urlPattern);
+                        api.addResource(urlMapping);
+                    }
+                    String scopeName = resultSet.getString("SCOPE_NAME");
+                    if (StringUtils.isNotEmpty(scopeName)) {
+                        urlMapping.addScope(scopeName);
+                    }
                 }
             }
 
@@ -390,14 +395,6 @@ public class SubscriptionValidationDAO {
         }
     }
 
-    private ResultSet getAPIProductURLTemplates(int apiId, Connection conn) throws SQLException {
-
-        PreparedStatement ps =
-                conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_PRODUCT_URL_MAPPING_SQL);
-        ps.setInt(1, apiId);
-        return ps.executeQuery();
-    }
-
     private void createURLMapping(ResultSet resultSet, Map<Integer, URLMapping> tempUrls, API api) throws SQLException {
 
         int urlId = resultSet.getInt("URL_MAPPING_ID");
@@ -430,8 +427,7 @@ public class SubscriptionValidationDAO {
         List<Subscription> subscriptions = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTIONS_SQL)
-        ) {
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTIONS_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -474,14 +470,16 @@ public class SubscriptionValidationDAO {
 
         ArrayList<Application> applications = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATIONS_SQL);
-        ) {
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATIONS_SQL)) {
             try {
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
                 ps.setInt(1, tenantId);
-                ResultSet resultSet = ps.executeQuery();
-                addToApplicationList(applications, resultSet);
+
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    addToApplicationList(applications, resultSet);
+                }
             } catch (UserStoreException e) {
                 log.error("Error in getting tenant id for loading Applications for tenant : " + tenantDomain, e);
             }
@@ -501,10 +499,9 @@ public class SubscriptionValidationDAO {
 
         List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
 
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_AM_KEY_MAPPING_SQL);) {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_AM_KEY_MAPPING_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -513,8 +510,10 @@ public class SubscriptionValidationDAO {
                 log.error("Error in loading ApplicationKeyMappings for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
-            ResultSet resultSet = ps.executeQuery();
-            populateApplicationKeyMappingsList(keyMappings, resultSet);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateApplicationKeyMappingsList(keyMappings, resultSet);
+            }
         } catch (SQLException e) {
             log.error("Error in loading Application key mappings for tenantId : " + tenantDomain, e);
         }
@@ -546,11 +545,9 @@ public class SubscriptionValidationDAO {
     public List<SubscriptionPolicy> getAllSubscriptionPolicies(String tenantDomain) {
 
         ArrayList<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTION_POLICIES_SQL);
-        ) {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTION_POLICIES_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -559,8 +556,10 @@ public class SubscriptionValidationDAO {
                 log.error("Error in loading SubscriptionPolicies for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
-            ResultSet resultSet = ps.executeQuery();
-            populateSubscriptionPolicyList(subscriptionPolicies, resultSet);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateSubscriptionPolicyList(subscriptionPolicies, resultSet);
+            }
 
         } catch (SQLException e) {
             log.error("Error in loading Subscription Policies for tenanatId : " + tenantDomain, e);
@@ -576,10 +575,9 @@ public class SubscriptionValidationDAO {
     public List<ApplicationPolicy> getAllApplicationPolicies(String tenantDomain) {
 
         ArrayList<ApplicationPolicy> applicationPolicies = new ArrayList<>();
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATION_POLICIES_SQL);) {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATION_POLICIES_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -588,9 +586,10 @@ public class SubscriptionValidationDAO {
                 log.error("Error in loading ApplicationPolicies for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
-            ResultSet resultSet = ps.executeQuery();
 
-            populateApplicationPolicyList(applicationPolicies, resultSet);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateApplicationPolicyList(applicationPolicies, resultSet);
+            }
 
         } catch (SQLException e) {
             log.error("Error in loading application policies for tenantId : " + tenantDomain, e);
@@ -621,10 +620,9 @@ public class SubscriptionValidationDAO {
     public List<APIPolicy> getAllApiPolicies(String tenantDomain) {
 
         ArrayList<APIPolicy> apiPolicies = new ArrayList<>();
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICIES_SQL);) {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICIES_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -633,9 +631,10 @@ public class SubscriptionValidationDAO {
                 log.error("Error in loading ApplicationPolicies for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
-            ResultSet resultSet = ps.executeQuery();
 
-            populateApiPolicyList(apiPolicies, resultSet);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateApiPolicyList(apiPolicies, resultSet);
+            }
 
         } catch (SQLException e) {
             log.error("Error in loading api policies for tenantId : " + tenantDomain, e);
@@ -689,13 +688,11 @@ public class SubscriptionValidationDAO {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_SUBSCRIPTION_SQL);
-        ) {
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_SUBSCRIPTION_SQL)) {
             ps.setInt(1, apiId);
             ps.setInt(2, appId);
 
-            try (ResultSet resultSet = ps.executeQuery();) {
-
+            try (ResultSet resultSet = ps.executeQuery()) {
                 if (resultSet.next()) {
                     Subscription subscription = new Subscription();
 
@@ -723,11 +720,13 @@ public class SubscriptionValidationDAO {
         List<Application> applicationList = new ArrayList<>();
 
         try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_BY_ID_SQL);
-        ) {
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_BY_ID_SQL)) {
             ps.setInt(1, applicationId);
-            ResultSet resultSet = ps.executeQuery();
-            addToApplicationList(applicationList, resultSet);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                addToApplicationList(applicationList, resultSet);
+            }
 
         } catch (SQLException e) {
             log.error("Error in loading Application by applicationId : " + applicationId, e);
@@ -741,11 +740,9 @@ public class SubscriptionValidationDAO {
      * */
     public ApplicationPolicy getApplicationPolicyByNameForTenant(String policyName, String tenantDomain) {
 
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_POLICY_SQL);
-        ) {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_POLICY_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -755,17 +752,18 @@ public class SubscriptionValidationDAO {
             }
             ps.setString(1, policyName);
             ps.setInt(2, tenantId);
-            ResultSet resultSet = ps.executeQuery();
 
-            if (resultSet.next()) {
-                ApplicationPolicy applicationPolicy = new ApplicationPolicy();
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    ApplicationPolicy applicationPolicy = new ApplicationPolicy();
 
-                applicationPolicy.setId(resultSet.getInt("POLICY_ID"));
-                applicationPolicy.setName(resultSet.getString("NAME"));
-                applicationPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                applicationPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    applicationPolicy.setId(resultSet.getInt("POLICY_ID"));
+                    applicationPolicy.setName(resultSet.getString("NAME"));
+                    applicationPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                    applicationPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
 
-                return applicationPolicy;
+                    return applicationPolicy;
+                }
             }
 
         } catch (SQLException e) {
@@ -781,11 +779,9 @@ public class SubscriptionValidationDAO {
      * */
     public APIPolicy getApiPolicyByNameForTenant(String policyName, String tenantDomain) {
         APIPolicy policy = null;
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICY_SQL);
-        ) {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICY_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -795,12 +791,13 @@ public class SubscriptionValidationDAO {
             }
             ps.setInt(1, tenantId);
             ps.setString(2, policyName);
-            ResultSet resultSet = ps.executeQuery();
 
-            List<APIPolicy> apiPolicies = new ArrayList<APIPolicy>();
-            populateApiPolicyList(apiPolicies , resultSet);
-            if (!apiPolicies.isEmpty()) {
-                policy = apiPolicies.get(0);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                List<APIPolicy> apiPolicies = new ArrayList<APIPolicy>();
+                populateApiPolicyList(apiPolicies, resultSet);
+                if (!apiPolicies.isEmpty()) {
+                    policy = apiPolicies.get(0);
+                }
             }
 
         } catch (SQLException e) {
@@ -817,11 +814,9 @@ public class SubscriptionValidationDAO {
     public SubscriptionPolicy getSubscriptionPolicyByNameForTenant(String policyName, String tenantDomain) {
 
         if (StringUtils.isNotEmpty(policyName) && StringUtils.isNotEmpty(tenantDomain)) {
-            try (
-                    Connection conn = APIMgtDBUtil.getConnection();
-                    PreparedStatement ps =
-                            conn.prepareStatement(SubscriptionValidationSQLConstants.GET_SUBSCRIPTION_POLICY_SQL);
-            ) {
+            try (Connection conn = APIMgtDBUtil.getConnection();
+                 PreparedStatement ps =
+                         conn.prepareStatement(SubscriptionValidationSQLConstants.GET_SUBSCRIPTION_POLICY_SQL)) {
                 int tenantId = 0;
                 try {
                     tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -831,22 +826,23 @@ public class SubscriptionValidationDAO {
                 }
                 ps.setString(1, policyName);
                 ps.setInt(2, tenantId);
-                ResultSet resultSet = ps.executeQuery();
 
-                if (resultSet.next()) {
-                    SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+                        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
 
-                    subscriptionPolicy.setId(resultSet.getInt("POLICY_ID"));
-                    subscriptionPolicy.setName(resultSet.getString("POLICY_NAME"));
-                    subscriptionPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                    subscriptionPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                        subscriptionPolicy.setId(resultSet.getInt("POLICY_ID"));
+                        subscriptionPolicy.setName(resultSet.getString("POLICY_NAME"));
+                        subscriptionPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                        subscriptionPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
 
-                    subscriptionPolicy.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
-                    subscriptionPolicy.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
-                    subscriptionPolicy.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
-                    subscriptionPolicy.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
-                    subscriptionPolicy.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
-                    return subscriptionPolicy;
+                        subscriptionPolicy.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
+                        subscriptionPolicy.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
+                        subscriptionPolicy.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
+                        subscriptionPolicy.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
+                        subscriptionPolicy.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
+                        return subscriptionPolicy;
+                    }
                 }
 
             } catch (SQLException e) {
@@ -864,20 +860,19 @@ public class SubscriptionValidationDAO {
      * */
     public ApplicationKeyMapping getApplicationKeyMapping(int appId, String keyType) {
 
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_SQL);
-        ) {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_SQL)) {
             ps.setInt(1, appId);
             ps.setString(2, keyType);
-            ResultSet resultSet = ps.executeQuery();
 
-            while (resultSet.next()) {
-                ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
-                keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
-                keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
-                keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
-                return keyMapping;
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
+                    keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
+                    keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                    keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
+                    return keyMapping;
+                }
             }
 
         } catch (SQLException e) {
@@ -893,21 +888,20 @@ public class SubscriptionValidationDAO {
      * */
     public ApplicationKeyMapping getApplicationKeyMapping(String consumerKey) {
 
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(
-                        SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL);
-        ) {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL)) {
             ps.setString(1, consumerKey);
-            ResultSet resultSet = ps.executeQuery();
 
-            while (resultSet.next()) {
-                ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
-                keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
-                keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
-                keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
-                keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
-                return keyMapping;
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
+                    keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
+                    keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                    keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
+                    keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                    return keyMapping;
+                }
             }
 
         } catch (SQLException e) {
@@ -928,8 +922,7 @@ public class SubscriptionValidationDAO {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
-        ) {
-            ResultSet resultSet = ps.executeQuery();
+             ResultSet resultSet = ps.executeQuery()) {
 
             while (resultSet.next()) {
                 URLMapping urlMapping = new URLMapping();
@@ -971,14 +964,15 @@ public class SubscriptionValidationDAO {
             if (contextParam != null) {
                 ps.setString(1, contextParam);
             }
-            ResultSet resultSet = ps.executeQuery();
 
-            while (resultSet.next()) {
-                URLMapping urlMapping = new URLMapping();
-                urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
-                urlMapping.setThrottlingPolicy(resultSet.getString("POLICY"));
-                urlMappings.add(urlMapping);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    URLMapping urlMapping = new URLMapping();
+                    urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                    urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
+                    urlMapping.setThrottlingPolicy(resultSet.getString("POLICY"));
+                    urlMappings.add(urlMapping);
+                }
             }
         } catch (SQLException e) {
             log.error("Error in loading URLMappings for tenantId : " + tenantId, e);

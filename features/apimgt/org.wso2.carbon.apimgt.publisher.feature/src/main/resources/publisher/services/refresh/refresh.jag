@@ -22,10 +22,7 @@
     var app = require("/site/public/conf/settings.js").AppConfig.app;
 
     app.context = appUtils.getTenantBasePublisherContext();
-    var tenantDomain;
-    if (appUtils.isPerTenantServiceProviderEnabled()) {
-        tenantDomain = appUtils.getTenantDomain();
-    }
+    var tenantDomain = appUtils.getServiceProviderTenantDomain();
     var log = new Log();
     var cookieToken = request.getCookie("AM_REF_TOKEN_DEFAULT_P2");
     var tokenParam = request.getParameter("refresh_token", "UTF-8")

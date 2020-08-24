@@ -166,7 +166,7 @@ function AddEdit(props) {
     const validate = (fieldName, value) => {
         let error = '';
         let keys;
-        const schema = Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/);
+        const schema = Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/);
         const validateKeyTemplates = ['$userId', '$apiContext', '$apiVersion', '$resourceKey',
             '$appTenant', '$apiTenant', '$appId', '$clientIp'];
         switch (fieldName) {
@@ -180,6 +180,11 @@ function AddEdit(props) {
                     error = intl.formatMessage({
                         id: 'Throttling.Custom.Policy.policy.name.space',
                         defaultMessage: 'Name contains spaces',
+                    });
+                } else if (value.length > 60) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Custom.Policy.policy.name.too.long.error.msg',
+                        defaultMessage: 'Custom policy name is too long',
                     });
                 } else if (schema.validate(value).error) {
                     error = intl.formatMessage({
@@ -367,13 +372,14 @@ function AddEdit(props) {
                                 <FormattedMessage
                                     id='dsdds'
                                     defaultMessage={'The specific combination of attributes being checked '
-                                    + 'in the policy need to be defined as the key template'}
+                                        + 'in the policy need to be defined as the key template. Allowed values are : '
+                                        + '$userId, $apiContext, $apiVersion, $resourceKey, $appTenant, $apiTenant,'
+                                        + ' $appId, $clientIp'}
                                 />
                             )}
                         />
                         <FormHelperText className={classes.helperText}>
-                            Eg: $userId, $apiContext, $apiVersion, $resourceKey, $appTenant, $apiTenant,
-                            $appId, $clientIp
+                            Eg: $userId:$apiContext:$apiVersion
                         </FormHelperText>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>

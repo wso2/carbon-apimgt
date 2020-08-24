@@ -117,23 +117,16 @@ public class LocalEntryServiceProxy {
 
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             try {
-                OMElement entry = localEntryAdmin.getEntry(key);
-                if (entry != null) {
-                    return true;
-                }
+                return localEntryAdmin.isEntryExist(key);
             } catch (LocalEntryAdminException e) {
                 return false;
             }
         } else {
             try {
-                OMElement entryForTenant = localEntryAdmin.getEntryForTenant(key, tenantDomain);
-                if (entryForTenant != null) {
-                    return true;
-                }
+                return localEntryAdmin.isEntryExistForTenant(key, tenantDomain);
             } catch (LocalEntryAdminException e) {
                 return false;
             }
         }
-        return false;
     }
 }

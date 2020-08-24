@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -3095,59 +3096,62 @@ public abstract class AbstractAPIManager implements APIManager {
             String keyManagerName = apiKey.getKeyManager();
             String consumerKey = apiKey.getConsumerKey();
             if (StringUtils.isNotEmpty(consumerKey)) {
-                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
-                if (keyManager != null) {
-                    OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
-                    if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
-                        OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetaData()
-                                , OAuthApplicationInfo.class);
-                        if (storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES)
-                                instanceof String) {
-                            oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
-                                    ((String) storedOAuthApplicationInfo
-                                            .getParameter(APIConstants.JSON_GRANT_TYPES))
-                                            .replace(",", " "));
-                        }
-                        if (oAuthApplicationInfo == null) {
-                            oAuthApplicationInfo = storedOAuthApplicationInfo;
-                        } else {
-
-                            if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL())) {
-                                oAuthApplicationInfo.setCallBackURL(storedOAuthApplicationInfo.getCallBackURL());
-                            }
-                            if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&
-                                    storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
+                KeyManagerConfigurationDTO keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+                if (keyManagerConfigurationDTO  != null && keyManagerConfigurationDTO.isEnabled()) {
+                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                    if (keyManager != null) {
+                        OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                        if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
+                            OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetaData()
+                                    , OAuthApplicationInfo.class);
+                            if (storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES)
+                                    instanceof String) {
                                 oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
-                                        storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                                        ((String) storedOAuthApplicationInfo
+                                                .getParameter(APIConstants.JSON_GRANT_TYPES))
+                                                .replace(",", " "));
                             }
-                            if (StringUtils.isEmpty(oAuthApplicationInfo.getClientSecret()) &&
-                                    StringUtils.isNotEmpty(storedOAuthApplicationInfo.getClientSecret())) {
-                                oAuthApplicationInfo.setClientSecret(storedOAuthApplicationInfo.getClientSecret());
+                            if (oAuthApplicationInfo == null) {
+                                oAuthApplicationInfo = storedOAuthApplicationInfo;
+                            } else {
+
+                                if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL())) {
+                                    oAuthApplicationInfo.setCallBackURL(storedOAuthApplicationInfo.getCallBackURL());
+                                }
+                                if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&
+                                        storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
+                                    oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                            storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                                }
+                                if (StringUtils.isEmpty(oAuthApplicationInfo.getClientSecret()) &&
+                                        StringUtils.isNotEmpty(storedOAuthApplicationInfo.getClientSecret())) {
+                                    oAuthApplicationInfo.setClientSecret(storedOAuthApplicationInfo.getClientSecret());
+                                }
                             }
                         }
-                    }
-                    AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
-                    if (oAuthApplicationInfo != null) {
-                        apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
-                        apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
-                        apiKey.setGrantTypes(
-                                (String) oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
-                        if (oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES) != null) {
-                            apiKey.setAdditionalProperties(
-                                    oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES));
+                        AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
+                        if (oAuthApplicationInfo != null) {
+                            apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
+                            apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
+                            apiKey.setGrantTypes(
+                                    (String) oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                            if (oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES) != null) {
+                                apiKey.setAdditionalProperties(
+                                        oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES));
+                            }
                         }
-                    }
-                    if (tokenInfo != null) {
-                        apiKey.setAccessToken(tokenInfo.getAccessToken());
-                        apiKey.setValidityPeriod(tokenInfo.getValidityPeriod());
-                        apiKey.setTokenScope(getScopeString(tokenInfo.getScopes()));
+                        if (tokenInfo != null) {
+                            apiKey.setAccessToken(tokenInfo.getAccessToken());
+                            apiKey.setValidityPeriod(tokenInfo.getValidityPeriod());
+                            apiKey.setTokenScope(getScopeString(tokenInfo.getScopes()));
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Access token does not exist for Consumer Key: " + consumerKey);
+                            }
+                        }
                     } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Access token does not exist for Consumer Key: " + consumerKey);
-                        }
+                        log.error("Key Manager " + keyManagerName + " not initialized in tenant " + tenantDomain);
                     }
-                } else {
-                    log.error("Key Manager " + keyManagerName + " not initialized in tenant " + tenantDomain);
                 }
             }
         }

@@ -39,7 +39,7 @@ class TracingConstants {
      * */
     static final String JAEGER = "JAEGER";
     static final String JAEGER_CONFIG_PORT = "OpenTracer.RemoteTracer.Properties.Port";
-    static final String JAEGER_CONFIG_HOST = "OpenTracer.RemoteTracer.Properties.Hostname";
+    static final String JAEGER_CONFIG_HOST = "OpenTracer.RemoteTracer.Properties.HostName";
     static final String CONFIG_SAMPLER_PARAM = "OpenTracer.RemoteTracer.Properties.SamplerParam";
     static final String CONFIG_SAMPLER_TYPE = "OpenTracer.RemoteTracer.Properties.SamplerType";
     static final String CONFIG_REPORTER_FLUSH_INTERVAL = "OpenTracer.RemoteTracer.Properties.ReporterFlushInterval";

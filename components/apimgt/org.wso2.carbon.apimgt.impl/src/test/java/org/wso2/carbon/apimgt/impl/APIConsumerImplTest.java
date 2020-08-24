@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -119,8 +118,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
         KeyManagerHolder.class, WorkflowExecutorFactory.class, AbstractApplicationRegistrationWorkflowExecutor.class,
-        ServiceReferenceHolder.class, MultitenantUtils.class, CacheInvalidator.class,
-        RegistryUtils.class, Caching.class})
+        ServiceReferenceHolder.class, MultitenantUtils.class, RegistryUtils.class, Caching.class})
 @SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
@@ -132,11 +130,11 @@ public class APIConsumerImplTest {
     private TenantManager tenantManager;
     private UserStoreManager userStoreManager;
     private KeyManager keyManager;
-    private CacheInvalidator cacheInvalidator;
     private GenericArtifactManager genericArtifactManager;
     private Registry registry;
     private UserRegistry userRegistry;
     private AuthorizationManager authorizationManager;
+    private KeyManagerConfigurationDTO keyManagerConfigurationDTO;
     private static final String SAMPLE_API_NAME = "test";
     private static final String API_PROVIDER = "admin";
     private static final String SAMPLE_API_VERSION = "1.0.0";
@@ -144,7 +142,7 @@ public class APIConsumerImplTest {
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
 
     @Before
-    public void init() throws UserStoreException, RegistryException {
+    public void init() throws UserStoreException, RegistryException, APIManagementException {
         apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         userRealm = Mockito.mock(UserRealm.class);
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -152,21 +150,20 @@ public class APIConsumerImplTest {
         tenantManager = Mockito.mock(TenantManager.class);
         userStoreManager = Mockito.mock(UserStoreManager.class);
         keyManager = Mockito.mock(KeyManager.class);
-        cacheInvalidator = Mockito.mock(CacheInvalidator.class);
         registryService = Mockito.mock(RegistryService.class);
         genericArtifactManager = Mockito.mock(GenericArtifactManager.class);
         registry = Mockito.mock(Registry.class);
         userRegistry = Mockito.mock(UserRegistry.class);
         authorizationManager = Mockito.mock(AuthorizationManager.class);
+        authorizationManager = Mockito.mock(AuthorizationManager.class);
+        keyManagerConfigurationDTO = Mockito.mock(KeyManagerConfigurationDTO.class);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(ApplicationUtils.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(MultitenantUtils.class);
         PowerMockito.mockStatic(KeyManagerHolder.class);
-        PowerMockito.mockStatic(CacheInvalidator.class);
         PowerMockito.mockStatic(RegistryUtils.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        PowerMockito.when(CacheInvalidator.getInstance()).thenReturn(cacheInvalidator);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(userRealm);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
@@ -174,7 +171,10 @@ public class APIConsumerImplTest {
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
         Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
-        Mockito.when(KeyManagerHolder.getKeyManagerInstance(Mockito.anyString(),Mockito.anyString())).thenReturn(keyManager);
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(keyManagerConfigurationDTO);
+        Mockito.when(KeyManagerHolder.getKeyManagerInstance(Mockito.anyString(),Mockito.anyString()))
+                .thenReturn(keyManager);
         PowerMockito.when(APIUtil.replaceSystemProperty(anyString())).thenAnswer((Answer<String>) invocation -> {
             Object[] args = invocation.getArguments();
             return (String) args[0];
@@ -1463,6 +1463,7 @@ public class APIConsumerImplTest {
 
         assertNotNull(apiConsumer.getApplicationKeys(1));
         assertEquals(apiConsumer.getApplicationKeys(1).size(),2);
+        Mockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
         assertNotNull(apiConsumer.getApplicationKeys(1).iterator().next().getAccessToken());
     }
 }

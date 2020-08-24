@@ -69,7 +69,6 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
-import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -2959,9 +2958,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
 
-            if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-                invalidateCachedKeys(applicationId);
-            }
+
 
             //to handle on-the-fly subscription rejection (and removal of subscription entry from the database)
             //the response should have {"Status":"REJECTED"} in the json payload for this to work.
@@ -3137,9 +3134,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
 
-            if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-                invalidateCachedKeys(applicationId);
-            }
+
 
             //to handle on-the-fly subscription rejection (and removal of subscription entry from the database)
             //the response should have {"Status":"REJECTED"} in the json payload for this to work.
@@ -3389,9 +3384,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
 
-        if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-            invalidateCachedKeys(applicationId);
-        }
+
         if (log.isDebugEnabled()) {
             String logMessage = "Subscription removed from app " + applicationName + " by " + userId + " For Id: "
                     + identifier.toString();
@@ -3459,14 +3452,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    /**
-     *
-     * @param applicationId Application ID related cache keys to be cleared
-     * @throws APIManagementException
-     */
-    private void invalidateCachedKeys(int applicationId) throws APIManagementException {
-        CacheInvalidator.getInstance().invalidateCacheForApp(applicationId);
-    }
+
 
     @Override
     public void removeSubscriber(APIIdentifier identifier, String userId)
@@ -3828,12 +3814,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
 
-        try {
-            invalidateCachedKeys(application.getId());
-        } catch (APIManagementException ignore) {
-            //Log and ignore since we do not want to throw exceptions to the front end due to cache invalidation failure.
-            log.warn("Failed to invalidate Gateway Cache " + ignore.getMessage(), ignore);
-        }
+
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
@@ -3910,9 +3891,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
 
-            // Remove from cache first since we won't be able to find active access tokens
-            // once the application is removed.
-            invalidateCachedKeys(application.getId());
 
             // clean up pending subscription tasks
             Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByApplicationId(applicationId);
