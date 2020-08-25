@@ -11555,6 +11555,7 @@ public final class APIUtil {
      *
      * @param existingTenantConfScopes Existing (old) scope-role mappings
      * @param newTenantConfScopes      Modified (new) scope-role mappings
+     * @return JsonObject with merged tenant-sconf scope mappings
      */
     public static JsonObject mergeTenantConfScopes(JsonElement existingTenantConfScopes, JsonElement newTenantConfScopes) {
         JsonArray existingTenantConfScopesArray = (JsonArray) existingTenantConfScopes.getAsJsonObject().
@@ -11565,15 +11566,15 @@ public final class APIUtil {
                 getAsJsonArray();
 
         // Iterating the existing (old) scope-role mappings
-        for (int i = 0; i < existingTenantConfScopesArray.size(); i++) {
-            JsonObject existingScopeRoleMapping = existingTenantConfScopesArray.get(i).getAsJsonObject();
-            String existingScopeName = existingScopeRoleMapping.get(APIConstants.REST_API_SCOPE_NAME).getAsString();
+        for (JsonElement existingScopeRoleMapping : existingTenantConfScopesArray) {
+            String existingScopeName = existingScopeRoleMapping.getAsJsonObject().get(APIConstants.REST_API_SCOPE_NAME).
+                    getAsString();
             Boolean scopeRoleMappingExists = false;
             // Iterating the modified (new) scope-role mappings and add the old scope mappings
             // if those are not present in the list (merging)
-            for (int j = 0; j < newTenantConfScopesArray.size(); j++) {
-                JsonObject newScopeRoleMapping = newTenantConfScopesArray.get(j).getAsJsonObject();
-                String newScopeName = newScopeRoleMapping.get(APIConstants.REST_API_SCOPE_NAME).getAsString();
+            for (JsonElement newScopeRoleMapping : newTenantConfScopesArray) {
+                String newScopeName = newScopeRoleMapping.getAsJsonObject().get(APIConstants.REST_API_SCOPE_NAME).
+                        getAsString();
                 if (StringUtils.equals(existingScopeName, newScopeName)) {
                     // If a particular mapping is already there, skip it
                     scopeRoleMappingExists = true;
@@ -11582,7 +11583,7 @@ public final class APIUtil {
             }
             // If the particular old mapping does not exist in the new list, add it to the new list
             if (!scopeRoleMappingExists) {
-                mergedTenantConfScopesArray.add(existingTenantConfScopesArray.get(i));
+                mergedTenantConfScopesArray.add(existingScopeRoleMapping);
             }
         }
         JsonObject mergedTenantConfScopes = new JsonObject();
