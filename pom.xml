@@ -81,18 +81,6 @@
                     <!--<version>${swagger3-codegen-maven-plugin.version}</version>-->
                 <!--</plugin>-->
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <configuration>
-                        <preparationGoals>clean install</preparationGoals>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                </plugin>
-                <plugin>
                     <groupId>org.wso2.maven</groupId>
                     <artifactId>carbon-p2-plugin</artifactId>
                     <version>${carbon.p2.plugin.version}</version>
@@ -1740,8 +1728,6 @@
     </dependencyManagement>
 
     <properties>
-        <project.scm.id>scm-server</project.scm.id>
-
         <!-- File encoding of build -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
