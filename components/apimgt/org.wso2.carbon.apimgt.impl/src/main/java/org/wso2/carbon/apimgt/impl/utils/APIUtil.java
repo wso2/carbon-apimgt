@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.impl.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -11525,26 +11527,68 @@ public final class APIUtil {
         } catch (UserStoreException e) {
             APIUtil.handleException("Couldn't read tenant configuration from user-store", e);
         }
-        //Here we are removing RESTAPIScopes from the existing tenant-conf
-        // Adding new RESTAPIScopes to the existing tenant-conf.
+        JsonElement existingTenantConfScopes = existingTenantConfObject.get(APIConstants.REST_API_SCOPES_CONFIG);
+        JsonElement newTenantConfScopes = new JsonParser().parse(newScopeRoleJson.toJSONString());
+        JsonObject mergedTenantConfScopes = mergeTenantConfScopes(existingTenantConfScopes, newTenantConfScopes);
+
+        // Removing the old RESTAPIScopes config from the existing tenant-conf
         existingTenantConfObject.remove(APIConstants.REST_API_SCOPES_CONFIG);
-        JsonElement jsonElement = new JsonParser().parse(newScopeRoleJson.toJSONString());
-        existingTenantConfObject.add(APIConstants.REST_API_SCOPES_CONFIG, jsonElement);
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(existingTenantConfObject.toString());
-            APIUtil.updateTenantConf(existingTenantConfObject.toString(), tenantDomain);
-            if (log.isDebugEnabled()) {
-                log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
-            }
-        } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error while formatting tenant-conf.json of tenant", e);
+        // Adding the merged RESTAPIScopes config to the tenant-conf
+        existingTenantConfObject.add(APIConstants.REST_API_SCOPES_CONFIG, mergedTenantConfScopes);
+
+        // Prettify the tenant-conf
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String formattedTenantConf = gson.toJson(existingTenantConfObject);
+
+        APIUtil.updateTenantConf(formattedTenantConf, tenantDomain);
+        if (log.isDebugEnabled()) {
+            log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
         // Invalidate Cache
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                 .getCache(APIConstants.REST_API_SCOPE_CACHE)
                 .put(tenantDomain, null);
+    }
+
+    /**
+     * Merge the existing and new scope-role mappings (RESTAPIScopes config) in the tenant-conf
+     *
+     * @param existingTenantConfScopes Existing (old) scope-role mappings
+     * @param newTenantConfScopes      Modified (new) scope-role mappings
+     * @return JsonObject with merged tenant-sconf scope mappings
+     */
+    public static JsonObject mergeTenantConfScopes(JsonElement existingTenantConfScopes, JsonElement newTenantConfScopes) {
+        JsonArray existingTenantConfScopesArray = (JsonArray) existingTenantConfScopes.getAsJsonObject().
+                get(APIConstants.REST_API_SCOPE);
+        JsonArray newTenantConfScopesArray = (JsonArray) newTenantConfScopes.getAsJsonObject().
+                get(APIConstants.REST_API_SCOPE);
+        JsonArray mergedTenantConfScopesArray = new JsonParser().parse(newTenantConfScopesArray.toString()).
+                getAsJsonArray();
+
+        // Iterating the existing (old) scope-role mappings
+        for (JsonElement existingScopeRoleMapping : existingTenantConfScopesArray) {
+            String existingScopeName = existingScopeRoleMapping.getAsJsonObject().get(APIConstants.REST_API_SCOPE_NAME).
+                    getAsString();
+            Boolean scopeRoleMappingExists = false;
+            // Iterating the modified (new) scope-role mappings and add the old scope mappings
+            // if those are not present in the list (merging)
+            for (JsonElement newScopeRoleMapping : newTenantConfScopesArray) {
+                String newScopeName = newScopeRoleMapping.getAsJsonObject().get(APIConstants.REST_API_SCOPE_NAME).
+                        getAsString();
+                if (StringUtils.equals(existingScopeName, newScopeName)) {
+                    // If a particular mapping is already there, skip it
+                    scopeRoleMappingExists = true;
+                    break;
+                }
+            }
+            // If the particular old mapping does not exist in the new list, add it to the new list
+            if (!scopeRoleMappingExists) {
+                mergedTenantConfScopesArray.add(existingScopeRoleMapping);
+            }
+        }
+        JsonObject mergedTenantConfScopes = new JsonObject();
+        mergedTenantConfScopes.add(APIConstants.REST_API_SCOPE, mergedTenantConfScopesArray);
+        return mergedTenantConfScopes;
     }
 
     /**
@@ -11572,16 +11616,14 @@ public final class APIUtil {
         existingTenantConfObject.remove(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
         JsonElement jsonElement = new JsonParser().parse(String.valueOf(newRoleMappingJson));
         existingTenantConfObject.add(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG, jsonElement);
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(existingTenantConfObject.toString());
-            APIUtil.updateTenantConf(existingTenantConfObject.toString(), tenantDomain);
-            if (log.isDebugEnabled()) {
-                log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
-            }
-        } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error while formatting tenant-conf.json of tenant: " + tenantDomain, e);
+
+        // Prettify the tenant-conf
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String formattedTenantConf = gson.toJson(existingTenantConfObject);
+
+        APIUtil.updateTenantConf(formattedTenantConf, tenantDomain);
+        if (log.isDebugEnabled()) {
+            log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
     }
 
