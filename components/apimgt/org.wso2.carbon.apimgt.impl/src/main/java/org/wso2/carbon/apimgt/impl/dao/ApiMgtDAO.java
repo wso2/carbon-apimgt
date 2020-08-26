@@ -11526,8 +11526,7 @@ public class ApiMgtDAO {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
                     policy.setCustomAttributes(customAttrib);
                 }
-                if (policy.getBillingPlan() != null && policy.getBillingPlan().equals(APIConstants
-                        .COMMERCIAL_TIER_PLAN)) {
+                if (APIConstants.COMMERCIAL_TIER_PLAN.equals(policy.getBillingPlan())) {
                     policy.setMonetizationPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
                     Map<String, String> tierMonetizationProperties = new HashMap<>();
                     tierMonetizationProperties.put(APIConstants.Monetization.CURRENCY, resultSet

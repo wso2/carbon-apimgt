@@ -105,7 +105,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
             policyDTO.setDefaultLimit(
                     CommonThrottleMappingUtil.fromQuotaPolicyToDTO(subscriptionPolicy.getDefaultQuotaPolicy()));
         }
-        if (subscriptionPolicy.getBillingPlan().equals(APIConstants.COMMERCIAL_TIER_PLAN)) {
+        if (APIConstants.COMMERCIAL_TIER_PLAN.equals(subscriptionPolicy.getBillingPlan())) {
             MonetizationInfoDTO monetizationInfoDTO = new MonetizationInfoDTO();
             MonetizationInfoDTO.MonetizationPlanEnum monetizationPlanEnum = MonetizationInfoDTO.MonetizationPlanEnum
                     .fromValue(subscriptionPolicy.getMonetizationPlan());
