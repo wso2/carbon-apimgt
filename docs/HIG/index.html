@@ -69,6 +69,16 @@
                     <li><a href="#selection" id="toc-selection">Selection Options</a></li>
                 </ol>
             </li>
+            <li><a href="#accessibility" id="toc-accessibility">Accessibility Guidelines</a>
+                <ol>
+                    <li><a href="#Laws" id="toc-Laws">Accessibility Laws</a></li>
+                    <li><a href="#WCAGMap" id="toc-WCAGMap">WCAG 2.1 Map</a></li>
+                    <li><a href="#perceivable" id="toc-perceivable">Perceivable</a></li>
+                    <li><a href="#operable" id="toc-operable">Operable</a></li>
+                    <li><a href="#understandable" id="toc-understandable">Understandable</a></li>
+                    <li><a href="#robust" id="toc-robust">Robust</a></li>
+                </ol>
+            </li>
             <li><a href="#ui_elements" id="toc-ui_elements">UI Elements</a>
                 <ol>
                     <li><a href="#buttons" id="toc-buttons">Buttons</a></li>
@@ -590,6 +600,439 @@
                 selector if there are
             </p>
         </section>
+
+        <hr>
+
+        <h2 id="accessibility" class="waypoint">Accessibility Guidelines</h2>
+
+        <p>
+            The <b>WSO2 APIM  Developer Portal</b> is now in Conformance to Level A and Level AA Success Criterias of the Conformance requirements of the <b>Web Content Accessibility Guidelines 2.1</b>
+            (  <a href="https://www.w3.org/WAI/WCAG21/quickref/?showtechniques=111%2C123%2C141%2C143%2C144%2C146%2C1412%2C1413%2C211%2C231%2C243%2C244%2C245%2C246%2C247%2C248%2C249%2C2410%2C251%2C252%2C253%2C254%2C311%2C316%2C321%2C322%2C323%2C324%2C325%2C331%2C332%2C411%2C412%2C1411&currentsidebar=%23col_overview&levels=aaa&technologies=smil%2Cpdf%2Cflash%2Csl"
+            target="blank">WCAG 2.1</a> ).
+        </p>
+
+        <p>
+            This will make content more accessible to a wider range of people with disabilities and more usable to users in general.
+            With this all functionality of the Developer Portal, it is now operable through a keyboard interface. 
+            Color is not used as the only visual means of conveying information anymore. Content is now robust and understandable making it more user friendly and easy to use.
+        </p>
+
+        <section id="Laws" class="waypoint">
+            <h3>Accessibility Laws</h3>
+            <ul>
+                <li>
+                    Section 508 of the Rehabilitation Act of 1973
+                </li>
+                <li>
+                    Section 255 of the Telecommunications Act of 1996
+                </li>
+                <li>
+                    The Americans with Disabilities Act of 1990 - ADA
+                </li>
+                <li>
+                    Information and Communication Technology (ICT) Final Standards and Guidelines - 2017
+                </li>
+                <li>
+                    EU Web Accessibility Directive  - 2016
+                </li>
+                <li>
+                    European Accessibility Act of 2019
+                </li>
+                <li>
+                    Australia Disability Discrimination Act 1992 (DDA)
+                </li>
+            </ul>
+           
+            <p> Find more on
+                <a href="https://www.smashingmagazine.com/2014/03/design-principles-visual-perception-and-the-principles-of-gestalt/"
+                   target="blank">Accessibility Laws</a>
+            </p>
+        </section>
+
+        <h3 id="WCAGMap" class="waypoint"> WCAG Quick Reference</h3>
+
+        <iframe src="assets/images/wcag2.1_map.pdf#toolbar=0" width="100%" height="517px"></iframe>
+        <a href="https://uxhints.com/wp-content/uploads/wcag2.1_map_uxhints.com_.pdf"
+                   target="blank">View large Map</a>
+
+        <h3 id="perceivable" class="waypoint">Perceivable</h3>
+
+        <p>
+            Information and user interface components must be presentable to users in ways they can perceive.
+        </p>
+
+        <p>
+            This principle addresses the fundamentals of information and content presentation, such as compositional sequence, 
+            colors, contrasts, contextual relationships and display of text
+        </p>
+
+        <h6><a href="https://www.w3.org/WAI/WCAG21/quickref/?showtechniques=111%2C123%2C141%2C143%2C144%2C146%2C1412%2C1413%2C211%2C231%2C243%2C244%2C245%2C246%2C247%2C248%2C249%2C2410%2C251%2C252%2C253%2C254%2C311%2C316%2C321%2C322%2C323%2C324%2C325%2C331%2C332%2C411%2C412%2C1411&currentsidebar=%23col_overview&levels=aaa&technologies=smil%2Cpdf%2Cflash%2Csl#text-alternatives" target="blank">1.1 – Text Alternatives </a></h6>
+
+        <p>Provide text alternatives for any non-text content. Add descriptive text for image alternate text. Group image and text to same element.</p>
+
+        <section class="example" id="example-2">
+        <pre xml:space="preserve">
+    &lt;a href="home.html"&gt;Zz
+        &lt;img src="house.gif" alt="home page icon"&gt;
+        Go to the home page
+    &lt;/a&gt;</pre></section>
+
+        <div class="white-space"></div>
+
+        <p>Use aria-label to provide labels for objects/groups</p>
+
+            <section class="example" id="example-1-distinguishing-navigation-landmarks">
+                <pre xml:space="preserve">      
+    &lt;div role="navigation" aria-label="Primary"&gt;
+        &lt;ul&gt;&lt;li&gt;...a list of links here ...&lt;/li&gt;&lt;/ul&gt;
+    &lt;/div&gt;
+ 
+    &lt;div role="navigation" aria-label="Secondary"&gt;
+        &lt;ul&gt;&lt;li&gt;...a list of links here ...&lt;/li&gt; &lt;/ul&gt;
+    &lt;/div&gt;</pre></section>    
+
+    <div class="white-space"></div>
+    
+    <p>Use aria-labelledby to provide short description for a complex graphics</p>
+
+    <section class="example" id="example-1-providing-a-short-description-for-a-complex-graphic">
+        <p>This example shows how to use the <code class="att">aria-labelledby</code> attribute to provide a short text description for a read-only complex graphic of
+           an star rating pattern; the graphic is composed of several image elements. The text
+           alternative for the graphic is the label, visible on the page beneath the star pattern.
+        </p>
+        <pre xml:space="preserve">    &lt;div role="img" aria-labelledby="star_id"&gt;
+        &lt;img src="fullstar.png" alt=""/&gt;
+        &lt;img src="fullstar.png" alt=""/&gt;
+        &lt;img src="fullstar.png" alt=""/&gt;
+        &lt;img src="fullstar.png" alt=""/&gt;
+        &lt;img src="emptystar.png" alt=""/&gt;
+    &lt;/div&gt;
+
+    &lt;div id="star_id"&gt;4 of 5&lt;/div&gt;</pre>
+     </section>
+
+     <h6><a href="https://www.w3.org/WAI/WCAG21/quickref/?showtechniques=111%2C123%2C141%2C143%2C144%2C146%2C1411%2C1412%2C1413%2C211%2C231%2C243%2C244%2C245%2C246%2C247%2C248%2C249%2C2410%2C251%2C252%2C253%2C254%2C311%2C316%2C321%2C322%2C323%2C324%2C325%2C331%2C332%2C411%2C412%2C131&currentsidebar=%23col_overview&levels=aaa&technologies=smil%2Cpdf%2Cflash%2Csl#adaptable" target="blank">1.3 – Adaptable </a></h6>
+
+    <p>Create content that can be presented in different ways (for example simpler layout) without losing information or structure.</p>
+
+    <div class="white-space"></div>
+    
+     <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA11.html" target="blank">ARIA11</a> Using ARIA landmarks to identify regions of a page. Landmarks are inserted into the page using the role attribute</p>
+
+     <ul>
+       <li><b>banner:</b> A region that contains the prime heading or internal title of a page.</li>
+       <li><b>complementary:</b> Any section of the document that supports the main content, yet is separate and meaningful on its own.</li>
+       <li><b>contentinfo:</b> A region that contains information about the parent document such as copyrights and links to privacy statements.</li>
+       <li><b>form:</b> A region of the document that represents a collection of form-associated elements, some of which can represent editable values that can be submitted to a server for processing.</li>
+       <li><b>main:</b> Main content in a document. In almost all cases a page will have only one role="main".</li>
+       <li><b>navigation:</b> A collection of links suitable for use when navigating the document or related documents.</li>
+       <li><b>search:</b> The search tool of a Web document.</li>
+       <li><b>application:</b> A region declared as a web application, as opposed to a web document.</li>
+     </ul>
+
+     <section class="example" id="example-1-simple-landmarks">
+        <p>The following example shows how landmarks might be added
+        </p><pre xml:space="preserve">
+    &lt;div id="header" role="banner"&gt;A banner image and introductory title&lt;/div&gt;
+    &lt;div id="sitelookup" role="search"&gt;....&lt;/div&gt;
+    &lt;div id="nav" role="navigation"&gt;...a list of links here ... &lt;/div&gt;
+    &lt;div id="content" role="main"&gt; ... Ottawa is the capital of Canada ...&lt;/div&gt;
+    &lt;div id="rightsideadvert" role="complementary"&gt;....an advertisement here...&lt;/div&gt;
+    &lt;div id="footer" role="contentinfo"&gt;(c)The Freedom Company, 123 Freedom Way, Helpville, USA&lt;/div&gt;</pre>
+
+<pre xml:space="preserve">
+    &lt;div id="leftnav" role="navigaton" aria-labelledby="leftnavheading"&gt;
+    &lt;h2 id="leftnavheading"&gt;Institutional Links&lt;/h2&gt;
+    &lt;ul&gt;&lt;li&gt;...a list of links here ...&lt;/li&gt; &lt;/ul&gt;&lt;/div&gt;
+    &lt;div id="rightnav" role="navigation" aria-labelledby="rightnavheading"&gt;
+    &lt;h2 id="rightnavheading"&gt;Related topics&lt;/h2&gt;
+    &lt;ul&gt;&lt;li&gt;...a list of links here ...&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</pre>
+</section>
+<div class="white-space"></div>
+<p><a href="https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA12.html" target="blank">ARIA12</a> Use role=heading to identify headings</p>
+
+<section class="example" id="example-1-simple-headings">
+    <pre xml:space="preserve">
+    &lt;div role="heading"&gt;Global News items&lt;/div&gt;
+    ... a list of global news with editorial comment....
+
+</pre>
+
+<pre xml:space="preserve">
+    &lt;h5&gt;Fruit Trees&lt;/h5&gt;
+    ...
+    &lt;h6&gt;Apples&lt;/h6&gt;
+    &lt;p&gt;Apples grow on trees in areas known as orchards...&lt;/p&gt;
+    ...
+    &lt;div role="heading" aria-level="7"&gt;Jonagold/div&gt;
+    &lt;p&gt;Jonagold is a cross between the Golden Delicious and Jonathan varieties...&lt;/p&gt;
+</pre>
+
+</section>
+
+        <h6><a href="https://www.w3.org/WAI/WCAG21/quickref/?showtechniques=111%2C123%2C131%2C132%2C133%2C141%2C143%2C144%2C146%2C1411%2C1412%2C1413%2C211%2C231%2C243%2C244%2C245%2C246%2C247%2C248%2C249%2C2410%2C251%2C252%2C253%2C254%2C311%2C316%2C321%2C322%2C323%2C324%2C325%2C331%2C332%2C411%2C412%2C134&currentsidebar=%23col_overview&levels=aaa&technologies=smil%2Cpdf%2Cflash%2Csl#distinguishable" target="blank">1.4 – Distinguishable </a></h6>
+
+        <p>Make it easier for users to see and hear content including separating foreground from background.</p>
+        
+        <p>Color is not used as the only visual means of conveying information, indicating an action, prompting a response, or distinguishing a visual element.</p>
+
+        <div class="white-space"></div>
+
+        <p> <a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G14.html" target="blank">G14</a> Information conveyed by color differences is also available in text</p>
+
+        <p>A form using red color asterisk to indicate required fields, should state instructions at the top of the form</p>
+        
+        <img width="600" src="assets/images/required_fields.png" alt=""/>
+
+        <div class="white-space"></div>
+
+        <p> <a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G14.html" target="blank">G183</a> Using a contrast ratio of 3:1 with surrounding text and providing additional visual cues on focus for links or controls where color alone is used to identify them</p>
+        
+        <section class="example" id="example-1-colors-that-would-provide-31-contrast-with-black-words-and-4.51-contrast-with-a-white-background">
+            <p>Use colors that would provide 3:1 contrast with black words and 4.5:1 contrast
+               with a white background
+            </p>
+            <p class="working-example">Refer to
+                <a href="https://www.w3.org/WAI/WCAG21/working-examples/link-contrast/" target="blank">Links with a 3:1 contrast ratio with surrounding text</a>  
+            </p>
+         </section>
+
+         <div class="white-space"></div>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/failures/F81.html" target="blank">F81</a> Error fields should not be identified using color differences only.</p>
+
+        <img width="600" src="assets/images/error_fields.png" alt=""/>
+
+        <div class="white-space"></div>
+         
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G18.html" target="blank">G18</a> Ensure that a contrast ratio of at least 4.5:1 exists between text (and images of text) and background behind the text.</p>
+
+        <div class="white-space"></div>
+        
+        <h3 id="operable" class="waypoint">Operable</h3>
+
+        <p>User interface components and navigation must be operable.</p>
+
+        <h6><a href="https://www.w3.org/WAI/WCAG21/quickref/?showtechniques=111%2C123%2C131%2C132%2C133%2C134%2C141%2C143%2C144%2C146%2C1410%2C1411%2C1412%2C1413%2C211%2C231%2C243%2C244%2C245%2C246%2C247%2C248%2C249%2C2410%2C251%2C252%2C253%2C254%2C311%2C316%2C321%2C322%2C323%2C324%2C325%2C331%2C332%2C411%2C412%2C124&currentsidebar=%23col_overview&levels=aaa&technologies=smil%2Cpdf%2Cflash%2Csl#keyboard" target="blank">2.1.1 Keyboard </a></h6>
+
+        <p>All functionality of the content is operable through a keyboard interface without requiring specific timings for individual keystrokes.</p>
+        
+        <h6><a href="https://www.w3.org/WAI/WCAG21/quickref/?showtechniques=111%2C123%2C124%2C131%2C132%2C133%2C134%2C141%2C143%2C144%2C146%2C1410%2C1411%2C1412%2C1413%2C211%2C222%2C231%2C243%2C244%2C245%2C246%2C247%2C248%2C249%2C2410%2C251%2C252%2C253%2C254%2C311%2C316%2C321%2C322%2C323%2C324%2C325%2C331%2C332%2C411%2C412&currentsidebar=%23col_overview&levels=aaa&technologies=smil%2Cpdf%2Cflash%2Csl#seizures-and-physical-reactions" target="blank">2.3 – Seizures and Physical Reactions</a></h6>
+
+        <p>Do not design content in a way that is known to cause seizures or physical reactions.</p>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G19.html" target="blank">G19</a> Ensuring that no component of the content flashes more than three times in any 1-second period.</p>
+
+        <h6><a href="https://www.w3.org/WAI/WCAG21/quickref/?showtechniques=111%2C123%2C124%2C131%2C132%2C133%2C134%2C141%2C143%2C144%2C146%2C1410%2C1411%2C1412%2C1413%2C211%2C231%2C241%2C243%2C244%2C245%2C246%2C247%2C248%2C249%2C2410%2C251%2C252%2C253%2C254%2C311%2C316%2C321%2C322%2C323%2C324%2C325%2C331%2C332%2C411%2C412%2C242&currentsidebar=%23col_overview&levels=aaa&technologies=smil%2Cpdf%2Cflash%2Csl#navigable" target="blank">2.4 – Navigable</a></h6>
+
+        <p>Provide ways to help users navigate, find content, and determine where they are.</p>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G88.html" target="blank">G88</a> Providing descriptive titles for Web pages.</p>
+
+        <section class="example" id="example-1">
+        <pre xml:space="preserve">&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;   
+&lt;head&gt;     
+   &lt;title&gt;The World Wide Web Consortium&lt;/title&gt;     
+&lt;/head&gt;   
+&lt;body&gt;     
+   ...   
+&lt;/body&gt; 
+&lt;/html&gt;  </pre></section>
+
+        
+        <h6><a href="https://www.w3.org/WAI/WCAG21/quickref/?showtechniques=111%2C123%2C124%2C131%2C132%2C133%2C134%2C141%2C143%2C144%2C146%2C1410%2C1411%2C1412%2C1413%2C211%2C231%2C241%2C243%2C244%2C245%2C246%2C247%2C248%2C249%2C2410%2C251%2C252%2C253%2C254%2C311%2C316%2C321%2C322%2C323%2C324%2C325%2C331%2C332%2C411%2C412%2C242&currentsidebar=%23col_overview&levels=aaa&technologies=smil%2Cpdf%2Cflash%2Csl#navigable" target="blank">2.4 – Navigable</a></h6>
+
+        <p>Provide ways to help users navigate, find content, and determine where they are.</p>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G88.html" target="blank">G88</a> Providing descriptive titles for Web pages.</p>
+
+        <section class="example" id="example-1">
+        <pre xml:space="preserve">&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+&lt;head&gt;
+   &lt;title&gt;The World Wide Web Consortium&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+   ...
+&lt;/body&gt;
+&lt;/html&gt;  </pre></section>
+
+
+        <div class="white-space"></div>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/html/H4.html" target="blank">H4</a> Create a logical tab order.</p>
+
+        <section class="example" id="example-2">
+            <p>A Web page contains a search field in the upper right corner. The field is given
+                tabindex="1" so that it will occur first in the tab order, even though it is not
+                first in the content order.
+            </p>
+        </section>
+
+        <div class="white-space"></div>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G91.html" target="blank">G91</a> Provide link text that describes the purpose of a link.</p>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G130.html" target="blank">G130</a> Provide descriptive headings.</p>
+
+        <p>Page should have a H1 heading </p>
+
+        <section class="example" id="example-1">
+            <p>An HTML page that describes the range of tasks for disaster preparation may have the
+                following headings:
+            </p><pre xml:space="preserve">              &lt;h1&gt;Disaster preparation&lt;/h1&gt;
+             &lt;h2&gt;Flood preparation&lt;/h2&gt;
+             &lt;h2&gt;Fire preparation&lt;/h2&gt;
+         </pre>
+        </section>
+
+        <div class="white-space"></div>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G211.html" target="blank">G211</a> Match the accessible name to the visible label.</p>
+
+        <h3 id="understandable" class="waypoint">Understandable</h3>
+
+        <p>Information and the operation of the user interface must be understandable.</p>
+
+        <div class="white-space"></div>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/html/H57.html" target="blank">H57</a> Set the page language attribute </p>
+
+        <div class="white-space"></div>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G107.html" target="blank">G107</a> On Focus should not be used as action trigger.</p>
+
+        <div class="white-space"></div>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G61.html" target="blank">G61</a> Navigation should be consistent across pages.</p>
+
+        <div class="white-space"></div>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G197.html" target="blank">G197</a> Consistent identification for the same functionality,throught the application.</p>
+
+        <div class="white-space"></div>
+
+        <h6><a href="https://www.w3.org/WAI/WCAG21/quickref/?showtechniques=111%2C123%2C124%2C131%2C132%2C133%2C134%2C141%2C143%2C144%2C146%2C1410%2C1411%2C1412%2C1413%2C211%2C231%2C241%2C242%2C243%2C244%2C245%2C246%2C247%2C248%2C249%2C2410%2C251%2C252%2C253%2C254%2C311%2C316%2C321%2C322%2C323%2C324%2C325%2C331%2C332%2C411%2C412%2C312&amp;currentsidebar=%23col_overview&amp;levels=aaa&amp;technologies=smil%2Cpdf%2Cflash%2Csl#input-assistance" target="blank">3.3 – Input Assistance</a></h6>
+
+        <p>Help users avoid and correct mistakes.</p>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA18.html" target="blank">ARIA18</a> Use aria-alertdialog to Identify Errors</p>
+
+        <section class="example" id="example-1-alert-dialog">
+            <p>This example shows how a notification using role="alertdialog" can be used to notify
+                someone they have entered invalid information.
+            </p><pre xml:space="preserve">&lt;div role="alertdialog" aria-labelledby="alertHeading" aria-describedby="alertText"&gt;
+&lt;h1 id="alertHeading"&gt;Error&lt;/h1&gt;
+&lt;div id="alertText"&gt;Employee's Birth Date is after their hire date. Please verify the birth date and hire date.&lt;/div&gt;
+&lt;button&gt;Save and Continue&lt;/button&gt;
+&lt;button&gt;Return to page and correct error&lt;/button&gt;
+&lt;/div&gt;</pre>
+        </section>
+
+        <div class="white-space"></div>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA1.html" target="blank">ARIA1</a> Use the aria-describedby property to provide a descriptive label for user interface controls</p>
+
+        <section class="example" id="example-2-using-aria-describedby-to-associate-instructions-with-form-fields">
+            <p>Sample form field using <code class="att">aria-describedby</code> to associate instructions with form fields while there is a form label.
+            </p><pre xml:space="preserve">&lt;form&gt;
+&lt;label for="fname"&gt;First name&lt;/label&gt;
+&lt;input name="" type="text" id="fname" aria-describedby="int2"&gt;
+&lt;p id="int2"&gt;A bit of instructions for this field linked with aria-describedby. &lt;/p&gt;
+&lt;/form&gt;
+</pre></section>
+
+        <h3 id="robust" class="waypoint">Robust</h3>
+
+        <p>Content must be robust enough that it can be interpreted by a wide variety of user agents, including assistive technologies.</p>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/general/G134.html" target="blank">G134</a> Validate Web pages</p>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/failures/F77.html" target="blank">F77</a> Avoid duplicate IDs</p>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/failures/F70.html" target="blank">F70</a> Avoid incorrect use of start and end tags or attribute markup</p>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA14.html" target="blank">ARIA14</a> Use aria-label to provide an invisible label where a visible label cannot be used</p>
+
+        <section class="example" id="example-1-a-close-button-x-in-a-pop-up-box">
+            <p>On a page, a link displays a pop-up box (a div) with additional information. The 'close'
+                element is implemented as a button containing merely the letter 'x'. The property
+                aria-label="close" is used to provide an accessible name to the button.
+
+            </p><pre xml:space="preserve">&lt;div id="box"&gt;
+This is a pop-up box.
+&lt;button aria-label="Close" onclick="document.getElementById('box').style.display='none';" class="close-button"&gt;X&lt;/button&gt;
+&lt;/div&gt;</pre>
+        </section>
+
+        <div class="white-space"></div>
+
+        <section class="example" id="example-2-a-phone-number-with-multiple-fields">
+             <pre xml:space="preserve">&lt;div role="group" aria-labelledby="groupLabel"&gt;
+&lt;span id="groupLabel&gt;Work Phone&lt;/span&gt;
++&lt;input type="number" aria-label="country code"&gt;
+&lt;input type="number" aria-label="area code"&gt;
+&lt;input type="number" aria-label="subscriber number"&gt;
+&lt;/div&gt;</pre></section>
+
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA16.html" target="blank">ARIA16</a> Use aria-labelledby to provide a name for user interface controls</p>
+
+        <section class="example" id="example-1-labelling-a-simple-text-field">
+            <p>The following is an example of <code class="att">aria-labelledby</code> used on a simple text field to provide a label in a situation where there is no text
+                available for a dedicated label but there is other text on the page that can be used
+                to accurately label the control.
+            </p><pre xml:space="preserve">&lt;input name="searchtxt" type="text" aria-labelledby="searchbtn"&gt;
+&lt;input name="searchbtn" id="searchbtn" type="submit" value="Search"&gt;</pre></section>
+
+        <section class="example" id="example-3-a-label-from-multiple-sources">
+            <p>The following example of <code class="att">aria-labelledby</code> with multiple references uses the <code class="el">label</code> element. For additional detail on concatenating multiple sources of information into
+                a label with <code class="att">aria-labelledby</code>, please view the technique <a href="https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA9">ARIA9: Using aria-labelledby to concatenate a label from several text nodes</a>.
+
+            </p><pre xml:space="preserve">&lt;label id="l1" for="f3"&gt;Notify me&lt;/label&gt;
+&lt;select name="amt" id="f3" aria-labelledby="l1 f3 l2"&gt;
+&lt;option value="1"&gt;1&lt;/option&gt;
+&lt;option value="2"&gt;2&lt;/option&gt;
+&lt;/select&gt;
+&lt;span id="l2" tabindex="-1"&gt;days in advance&lt;/span&gt;</pre><p>Note: The use of the <code class="el">label</code> element is included for a number of reasons. If the user clicks on the text of the
+            <code class="el">label</code> element, the corresponding form field will receive focus, which makes the clicking
+            target larger for people with dexterity problems. Also the <code class="el">label</code> element will always be exposed via the accessibility API. A <code class="el">span</code> could have been used (but if so, it should receive a tabindex="-1" so that it will
+            be exposed via the accessibility API in all versions of Internet Explorer). However,
+            a <code class="el">span</code> would lose the advantage of the larger clickable region.
+
+        </p>
+        </section>
+
+        <div class="white-space"></div>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA22.html" target="blank">ARIA22</a> Use role=status to present status messages.</p>
+
+        <section class="example" id="example-1-including-a-search-results-message">
+            <p>After a user presses a Search button, the page content is updated to include the results
+                of the search, which are displayed in a section below the Search button. The change
+                to content also includes the message "5 results returned" near the top of this new
+                content. This text is given an appropriate role for a status message. A screen reader
+                will announce "Five results returned".
+            </p><pre xml:space="preserve"><code>
+ &lt;div role="status"&gt;5 results returned.&lt;/div&gt;
+</code>
+                 </pre>
+        </section>
+
+        <p><a href="https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA23.html" target="blank">ARIA23</a> Use rrole=log to identify sequential information updates.</p>
+
+        <section class="example" id="example-1-updating-the-contents-of-a-chat-conversation">
+            <pre xml:space="preserve"><code>
+ &lt;div id="chatRegion" role="log" aria-labelledby="chatHeading"&gt;
+     &lt;h4 id="chatHeading"&gt;Chat History&lt;/h4&gt;
+     &lt;ul id="conversation"&gt;
+         &lt;li&gt;The latest chat message&lt;/li&gt;
+     &lt;/ul&gt;
+ &lt;/div&gt;
+</code>
+</pre>
+        </section>
+
+        <div class="white-space"></div>
 
         <hr>
 
