@@ -920,7 +920,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
                 if (keyManager != null) {
                     String scopeKey = scope.getKey();
-                    try{
+                    try {
                         // Check if key already registered in KM. Scope Key may be already registered for a different
                         // version.
                         if (!keyManager.isScopeExists(scopeKey)) {
@@ -928,10 +928,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             keyManager.registerScope(scope);
                         } else {
                             if (log.isDebugEnabled()) {
-                                log.debug("Scope: " + scopeKey + " already registered in KM. Skipping registering scope.");
+                                log.debug("Scope: " + scopeKey +
+                                        " already registered in KM. Skipping registering scope.");
                             }
                         }
-                    }catch (APIManagementException e){
+                    } catch (APIManagementException e) {
                         log.error("Error while registering Scope " + scopeKey + "in KeyManager " +
                                 keyManagerDtoEntry.getKey(), e);
                     }
@@ -1004,9 +1005,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
             if (keyManager != null) {
-                try{
+                try {
                     keyManager.attachResourceScopes(api, api.getUriTemplates());
-                }catch (APIManagementException e){
+                } catch (APIManagementException e) {
                     log.error("Error while Attaching Resource to scope in KeyManager " + keyManagerDtoEntry.getKey(),
                             e);
                 }
@@ -1027,7 +1028,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
             if (keyManager != null) {
-                try{
+                try {
                     Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
                     if (registeredResource == null) {
                         boolean isNewResourceRegistered = keyManager.registerNewResource(api, null);
@@ -1045,8 +1046,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                         keyManager.updateRegisteredResource(api, registeredResource);
                     }
-                }catch (APIManagementException e){
-                    log.error("API Resource Registration failed in KeyManager "+keyManagerDtoEntry.getKey(),e);
+                } catch (APIManagementException e) {
+                    log.error("API Resource Registration failed in KeyManager " + keyManagerDtoEntry.getKey(), e);
                 }
             }
         }
@@ -4281,10 +4282,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
                     KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
                     if (keyManager != null) {
-                        try{
+                        try {
                             keyManager.deleteRegisteredResourceByAPIId(identifier.toString());
-                        }catch (APIManagementException e){
-                            log.error("Error while deleting Resource Registration for API "+ identifier.toString() +
+                        } catch (APIManagementException e) {
+                            log.error("Error while deleting Resource Registration for API " + identifier.toString() +
                                     " in KeyManager " + keyManagerDtoEntry.getKey(), e);
                         }
                     }
@@ -4324,7 +4325,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
             if (keyManager != null) {
-                try{
+                try {
                     keyManager.detachResourceScopes(api, uriTemplates);
                     if (log.isDebugEnabled()) {
                         log.debug("Resource scopes are successfully detached for the API : " + apiIdentifier
@@ -4338,8 +4339,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         log.debug("Local scopes are successfully deleted for the API : " + apiIdentifier
                                 + " from KeyManager : " + keyManagerDtoEntry.getKey() + ".");
                     }
-                }catch (APIManagementException e){
-                    log.error("Error while Detach and Delete Scope from KeyManager "+ keyManagerDtoEntry.getKey());
+                } catch (APIManagementException e) {
+                    log.error("Error while Detach and Delete Scope from KeyManager " + keyManagerDtoEntry.getKey());
                 }
             }
         }
@@ -8688,6 +8689,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (Scope scope : allSharedScopes) {
             for (Scope tempScope : allScopes) {
                 if (scope.getKey().equals(tempScope.getKey())) {
+                    scope.setName(tempScope.getName());
                     scope.setDescription(tempScope.getDescription());
                     scope.setRoles(tempScope.getRoles());
                     break;
@@ -8751,12 +8753,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("Deleting shared scope " + scopeName);
         }
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
-        for (Map.Entry<String,KeyManagerDto> keyManagerEntry : tenantKeyManagers.entrySet()){
+        for (Map.Entry<String, KeyManagerDto> keyManagerEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerEntry.getValue().getKeyManager();
-            if (keyManager != null){
-                try{
+            if (keyManager != null) {
+                try {
                     keyManager.deleteScope(scopeName);
-                }catch (APIManagementException e){
+                } catch (APIManagementException e) {
                     log.error("Error while Deleting Shared Scope " + scopeName + " from KeyManager " +
                             keyManagerEntry.getKey(), e);
                 }
@@ -8781,9 +8783,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (Map.Entry<String, KeyManagerDto> keyManagerEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerEntry.getValue().getKeyManager();
             if (keyManager != null) {
-                try{
+                try {
                     keyManager.updateScope(sharedScope);
-                }catch (APIManagementException e){
+                } catch (APIManagementException e) {
                     log.error("Error while Updating Shared Scope " + sharedScope.getKey() + " from KeyManager " +
                             keyManagerEntry.getKey(), e);
                 }
@@ -8802,9 +8804,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void validateSharedScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException {
 
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
-        for (Map.Entry<String,KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()){
+        for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
-            if (keyManager != null){
+            if (keyManager != null) {
                 keyManager.validateScopes(scopes);
             }
         }
