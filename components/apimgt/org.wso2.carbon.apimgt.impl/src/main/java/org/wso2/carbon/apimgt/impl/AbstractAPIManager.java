@@ -1588,8 +1588,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Check whether the given shared scope name exists in the tenant domain.
-     * If the scope does not exists in API-M (AM_DB) as a shared scope, check the existence of scope name in the KM.
+     * Check the scope exist in Tenant.
      *
      * @param scopeKey     candidate scope key
      * @param tenantid     tenant id
