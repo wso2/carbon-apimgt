@@ -6,8 +6,8 @@
     "scripts": {
         "test": "jest",
         "test:coverage": "jest --coverage",
-        "build:prod": "rm -R site/public/dist/; npm rum i18n && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
-        "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack -d --watch ",
+        "build:prod": "rimraf site/public/dist/; npm rum i18n && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
+        "build:dev": "rimraf site/public/dist/; NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
         "lint": "eslint source",
         "i18n": "extract-messages -l=en,fr -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'"
