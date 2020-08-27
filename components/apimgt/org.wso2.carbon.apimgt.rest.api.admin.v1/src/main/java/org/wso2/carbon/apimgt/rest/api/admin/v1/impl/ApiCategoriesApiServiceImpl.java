@@ -74,7 +74,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
                 if (matcher.find()) {
                     RestApiUtil.handleBadRequest("Name field contains special characters.", log);
                 }
-                if(apiCategory.getName().length() > 255) {
+                if (apiCategory.getName().length() > 255) {
                     RestApiUtil.handleBadRequest("API Category name is too long.", log);
                 }
             } else {
