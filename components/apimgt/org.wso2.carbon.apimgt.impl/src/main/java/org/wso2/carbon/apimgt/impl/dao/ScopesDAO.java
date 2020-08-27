@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -190,19 +190,20 @@ public class ScopesDAO {
         }
         return null;
     }
-    private boolean isScopeExist(Connection connection,String scopeKey, int tenantId) throws APIManagementException {
 
-            try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.SCOPE_EXIST_SQL)) {
-                preparedStatement.setString(1, scopeKey);
-                preparedStatement.setInt(2, tenantId);
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    return resultSet.next();
-                }
-            } catch (SQLException e) {
-                log.error("Error while checking scopes from db", e);
-                throw new APIManagementException("Error while checking existence of scopes from db", e,
-                        ExceptionCodes.INTERNAL_ERROR);
+    private boolean isScopeExist(Connection connection, String scopeKey, int tenantId) throws APIManagementException {
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.SCOPE_EXIST_SQL)) {
+            preparedStatement.setString(1, scopeKey);
+            preparedStatement.setInt(2, tenantId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
             }
+        } catch (SQLException e) {
+            log.error("Error while checking scopes from db", e);
+            throw new APIManagementException("Error while checking existence of scopes from db", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
     }
 
     public boolean isScopeExist(String scopeKey, int tenantId) throws APIManagementException {
@@ -252,9 +253,9 @@ public class ScopesDAO {
         if (StringUtils.isNotEmpty(scope.getRoles()) && scope.getRoles().split(",").length > 0) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.ADD_SCOPE_MAPPING)) {
                 for (String role : scope.getRoles().split(",")) {
-                    preparedStatement.setString(1,scope.getKey());
-                    preparedStatement.setInt(2,tenantId);
-                    preparedStatement.setString(3,role);
+                    preparedStatement.setString(1, scope.getKey());
+                    preparedStatement.setInt(2, tenantId);
+                    preparedStatement.setString(3, role);
                     preparedStatement.setString(4, APIConstants.DEFAULT_SCOPE_TYPE);
                     preparedStatement.addBatch();
                 }
