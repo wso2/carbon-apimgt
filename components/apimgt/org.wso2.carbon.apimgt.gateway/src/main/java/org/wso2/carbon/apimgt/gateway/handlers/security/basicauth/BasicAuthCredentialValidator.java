@@ -193,8 +193,9 @@ public class BasicAuthCredentialValidator {
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
-        String resourceKey = apiContext + ":" + apiVersion + ":" + apiElectedResource + ":" + httpMethod;
-        String resourceCacheKey = resourceKey + ":" + username;
+        String resourceKey =
+                String.join(APIConstants.DELEM_COLON, apiContext, apiVersion, apiElectedResource, httpMethod);
+        String resourceCacheKey = String.join(APIConstants.DELEM_COLON, resourceKey, username);
 
         if (gatewayKeyCacheEnabled && getGatewayBasicAuthResourceCache().get(resourceCacheKey) != null) {
             return true;
@@ -313,8 +314,9 @@ public class BasicAuthCredentialValidator {
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx)
                 .getAxis2MessageContext();
         String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
-        String resourceKey = apiContext + ":" + apiVersion + ":" + apiElectedResource + ":" + httpMethod;
-        String resourceCacheKey = resourceKey + ":" + username;
+        String resourceKey =
+                String.join(APIConstants.DELEM_COLON, apiContext, apiVersion, apiElectedResource, httpMethod);
+        String resourceCacheKey = String.join(APIConstants.DELEM_COLON, resourceKey, username);
 
         if (gatewayKeyCacheEnabled && getGatewayBasicAuthResourceCache().get(resourceCacheKey) != null) {
             return true;
