@@ -270,8 +270,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), RESOURCE_THROTTLE));
                         Timer.Context context1 = timer1.start();
 
-                        if (getThrottleDataHolder().isAPIThrottled
-                                (resourceLevelThrottleKey)) {
+                        if (getThrottleDataHolder().isAPIThrottled(resourceLevelThrottleKey)) {
                             if (getThrottleDataHolder().isConditionsAvailable(resourceLevelThrottleKey)) {
                                 Map<String, List<ConditionDto>> conditionDtoMap = getThrottleDataHolder()
                                         .getConditionDtoMap(resourceLevelThrottleKey);
@@ -305,7 +304,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 }
                             } else {
                                 if (conditionGroupDTOs != null && conditionGroupDTOs.length > 0) {
-
                                     if (log.isDebugEnabled()) {
                                         log.debug("Evaluating Conditional Groups for " + apiLevelThrottleKey);
                                     }
