@@ -42,6 +42,10 @@ import java.util.Map;
 public class APISecurityUtilsTestCase {
 
     public void testSetAuthenticationContext() {
+        final String CALLER_TOKEN = "callertoken";
+        final String NEW_CALLER_TOKEN = "newCallerToken";
+        final String KEY_TYPE = "keyType";
+
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
@@ -50,12 +54,12 @@ public class APISecurityUtilsTestCase {
         Mockito.when(apiMgtConfig.getFirstProperty(APIConstants.API_KEY_VALIDATOR_CLIENT_TYPE)).thenReturn("WSClient");
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         AuthenticationContext authenticationContext = Mockito.mock(AuthenticationContext.class);
-        Mockito.when(authenticationContext.getKeyType()).thenReturn("keyType");
+        Mockito.when(authenticationContext.getKeyType()).thenReturn(KEY_TYPE);
 
         APISecurityUtils.setAuthenticationContext(messageContext, authenticationContext, "abc");
         //test when caller token is not null
-        Mockito.when(authenticationContext.getCallerToken()).thenReturn("callertoken");
-        Mockito.when(messageContext.getProperty(APIConstants.API_KEY_TYPE)).thenReturn("keyType");
+        Mockito.when(authenticationContext.getCallerToken()).thenReturn(CALLER_TOKEN);
+        Mockito.when(messageContext.getProperty(APIConstants.API_KEY_TYPE)).thenReturn(KEY_TYPE);
 //        Axis2MessageContext axis2MessageContext = Mockito.mock(Axis2MessageContext.class);
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
@@ -66,18 +70,18 @@ public class APISecurityUtilsTestCase {
         APISecurityUtils.setAuthenticationContext(messageContext, authenticationContext, "abc");
 
         Assert.assertEquals(APISecurityUtils.getAuthenticationContext(messageContext).getCallerToken(),
-                "callertoken");
+                CALLER_TOKEN);
 
-        Assert.assertEquals("keyType", messageContext.getProperty(APIConstants.API_KEY_TYPE));
+        Assert.assertEquals(KEY_TYPE, messageContext.getProperty(APIConstants.API_KEY_TYPE));
 
         //test for IllegalStateException
         String API_AUTH_CONTEXT = "__API_AUTH_CONTEXT";
-        Mockito.when(authenticationContext.getCallerToken()).thenReturn("newCallerToken");
+        Mockito.when(authenticationContext.getCallerToken()).thenReturn(NEW_CALLER_TOKEN);
         Mockito.when(messageContext.getProperty(API_AUTH_CONTEXT)).thenReturn("abc");
         APISecurityUtils.setAuthenticationContext(messageContext, authenticationContext, "abc");
 
         Assert.assertEquals(APISecurityUtils.getAuthenticationContext(messageContext).getCallerToken(),
-                "newCallerToken");
+                NEW_CALLER_TOKEN);
     }
 
 }
