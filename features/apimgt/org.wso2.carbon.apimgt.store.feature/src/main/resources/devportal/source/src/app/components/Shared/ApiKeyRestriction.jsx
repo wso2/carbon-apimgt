@@ -174,7 +174,7 @@ const apiKeyRestrictions = (props) => {
           </RadioGroup>
         </FormControl>
 
-        {restrictSchema === "ip" && (
+        { restrictSchema === "ip" && (
           <Box component="div" id="ipPanel">
             <Grid
               container
@@ -231,7 +231,7 @@ const apiKeyRestrictions = (props) => {
               md={10}
               xs={10}
             >
-              {ipList.length > 0 && (
+              { ipList.length > 0 && (
                 <List>
                   {ipList.map((ip, index) => (
                     <ListItem>
@@ -255,7 +255,7 @@ const apiKeyRestrictions = (props) => {
           </Box>
         )}
 
-        {restrictSchema === "referer" && (
+        { restrictSchema === "referer" && (
           <Box component="div" id="refererPanel">
             <Grid
               container
@@ -311,7 +311,7 @@ const apiKeyRestrictions = (props) => {
               md={10}
               xs={10}
             >
-              {refererList.length > 0 && (
+              { refererList.length > 0 && (
                 <List>
                   {refererList.map((referer, index) => (
                     <ListItem>

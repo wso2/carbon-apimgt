@@ -393,7 +393,6 @@ public class ApiKeyAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         "Access forbidden for the invocations");
             }
-
         }
 
         String permittedRefererList = null;
@@ -410,8 +409,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                 String referer = transportHeaderMap.get("Referer");
                 if (StringUtils.isNotEmpty(referer)) {
                     for (String restrictedReferer : permittedRefererList.split(",")) {
-                        String restrictedRefererRegExp = restrictedReferer.trim()
-                                .replace("*", "[^ ]*");
+                        String restrictedRefererRegExp = restrictedReferer.trim().replace("*", "[^ ]*");
                         if (referer.matches(restrictedRefererRegExp)) {
                             // Referer is allowed
                             return;
