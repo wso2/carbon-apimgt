@@ -234,6 +234,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
 
+    private final String CONFIG_KEY = "configKey";
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
 
@@ -2898,7 +2899,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     , Collections.<String, String>emptyMap());
 
             properties = new HashMap<String, String>();
-            properties.put("configKey", APIConstants.GA_CONF_KEY);
+            properties.put(CONFIG_KEY, APIConstants.GA_CONF_KEY);
             vtb.addHandler(
                     "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
                     , properties);
@@ -3049,7 +3050,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 , Collections.<String, String>emptyMap());
 
         properties = new HashMap<String, String>();
-        properties.put("configKey", APIConstants.GA_CONF_KEY);
+        properties.put(CONFIG_KEY, APIConstants.GA_CONF_KEY);
         vtb.addHandler(
                 "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
                 , properties);
