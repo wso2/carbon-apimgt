@@ -60,35 +60,14 @@ const styles = (theme) => ({
         '& > td[class^=MUIDataTableBodyCell-cellHide-]': {
             display: 'none',
         },
-        // '& tr': {
-        //     display: 'block',
-        //     maxWidth: '100%',
-        // },
         '& .MUIDataTableBodyCell-cellHide-793': {
             display: 'none',
         },
-        // '& tbody': {
-        //     display: 'block',
-        //     maxWidth: '100%',
-        // },
-        // '& thead': {
-        //     display: 'block',
-        //     maxWidth: '100%',
-        // },
-        // '& table': {
-        //     display: 'block',
-        //     maxWidth: '100%',
-        // },
         '& td': {
-            // minWidth: '250px',
-            // maxWidth: '200px',
-            // display: 'inline-block',
-            // width: '100%',
             wordBreak: 'break-word',
         },
         '& th': {
             minWidth: '150px',
-            // display: 'inline-block',
         },
     },
     root: {
