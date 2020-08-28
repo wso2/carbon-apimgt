@@ -81,8 +81,10 @@ public class APIMappingUtil {
                 ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO().
                         key(scope.getKey()).
                         name(scope.getName()).
-                        description(scope.getDescription()).
-                        roles(Arrays.asList(scope.getRoles().split(",")));
+                        description(scope.getDescription());
+                if (StringUtils.isNotBlank(scope.getRoles())) {
+                    scopeInfoDTO.roles(Arrays.asList(scope.getRoles().split(",")));
+                }
                 uniqueScope.put(scope.getKey(), scopeInfoDTO);
             }
         }
@@ -343,8 +345,10 @@ public class APIMappingUtil {
                     ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO().
                             key(scope.getKey()).
                             name(scope.getName()).
-                            description(scope.getDescription()).
-                            roles(Arrays.asList(scope.getRoles().split(",")));
+                            description(scope.getDescription());
+                    if (StringUtils.isNotBlank(scope.getRoles())) {
+                        scopeInfoDTO.roles(Arrays.asList(scope.getRoles().split(",")));
+                    }
                     uniqueScopes.put(scope.getKey(), scopeInfoDTO);
                 }
             }
