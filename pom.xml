@@ -17,13 +17,6 @@
         <version>1.2</version>
     </parent>
 
-    <scm>
-        <url>https://github.com/wso2/carbon-apimgt.git</url>
-        <developerConnection>scm:git:https://github.com/wso2/carbon-apimgt.git</developerConnection>
-        <connection>scm:git:https://github.com/wso2/carbon-apimgt.git</connection>
-        <tag>v6.7.206</tag>
-    </scm>
-
     <modules>
         <module>service-stubs/apimgt</module>
         <module>service-stubs/oidc-authenticator</module>
@@ -80,6 +73,18 @@
                     <!--<artifactId>swagger-codegen-maven-plugin</artifactId>-->
                     <!--<version>${swagger3-codegen-maven-plugin.version}</version>-->
                 <!--</plugin>-->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <configuration>
+                        <preparationGoals>clean install</preparationGoals>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                </plugin>
                 <plugin>
                     <groupId>org.wso2.maven</groupId>
                     <artifactId>carbon-p2-plugin</artifactId>
