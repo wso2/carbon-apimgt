@@ -542,14 +542,16 @@ public class APIKeyValidator {
     }
 
     @MethodStats
-    private APIInfoDTO doGetAPIInfo(MessageContext messageContext, String context, String apiVersion) throws APISecurityException {
+    private APIInfoDTO doGetAPIInfo(MessageContext messageContext, String context, String apiVersion)
+            throws APISecurityException {
         ArrayList<URITemplate> uriTemplates = getAllURITemplates(messageContext, context, apiVersion);
 
         return mapToAPIInfo(uriTemplates, context, apiVersion);
     }
 
     @MethodStats
-    private APIInfoDTO doGetAPIProductInfo(MessageContext messageContext, String context, String apiVersion) throws APISecurityException {
+    private APIInfoDTO doGetAPIProductInfo(MessageContext messageContext, String context, String apiVersion)
+            throws APISecurityException {
         ArrayList<URITemplate> uriTemplates = getAPIProductURITemplates(messageContext, context, apiVersion);
 
         return mapToAPIInfo(uriTemplates, context, apiVersion);
@@ -600,7 +602,8 @@ public class APIKeyValidator {
      * @param httpMethod  http method of request
      * @return verbInfoDTO which contains throttling tier for given resource and verb+resource key
      */
-    public VerbInfoDTO getVerbInfoDTOFromAPIData(MessageContext messageContext, String context, String apiVersion, String requestPath, String httpMethod)
+    public VerbInfoDTO getVerbInfoDTOFromAPIData(MessageContext messageContext, String context, String apiVersion,
+                                                 String requestPath, String httpMethod)
             throws APISecurityException {
 
         String cacheKey = context + ':' + apiVersion;
