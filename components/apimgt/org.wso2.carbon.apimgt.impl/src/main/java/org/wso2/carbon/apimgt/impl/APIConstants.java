@@ -579,6 +579,7 @@ public final class APIConstants {
     public static final String VALUE = "value";
 
     public static String DELEM_COLON = ":";
+    public static String DELEM_SLASH = "/";
 
     public static class TokenStatus {
 

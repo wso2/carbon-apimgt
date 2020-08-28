@@ -151,7 +151,8 @@ public class BasicAuthAuthenticator implements Authenticator {
                     verbInfoDTO.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
                 }
                 verbInfoDTO.setThrottling(operationThrottlingMappingList.get(operation));
-                verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + operation + ":" + httpMethod);
+                verbInfoDTO.setRequestKey(apiContext + APIConstants.DELEM_SLASH + apiVersion + operation +
+                        APIConstants.DELEM_COLON + httpMethod);
                 verbInfoList.add(verbInfoDTO);
             }
         } else {
@@ -160,7 +161,8 @@ public class BasicAuthAuthenticator implements Authenticator {
             VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
             verbInfoDTO.setAuthType(authenticationScheme);
             verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
-            verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + matchingResource + ":" + httpMethod);
+            verbInfoDTO.setRequestKey(apiContext + APIConstants.DELEM_SLASH + apiVersion + matchingResource +
+                    APIConstants.DELEM_COLON + httpMethod);
             verbInfoList.add(verbInfoDTO);
         }
 
