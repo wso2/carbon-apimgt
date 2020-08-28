@@ -196,7 +196,7 @@ public class OAuthAuthenticator implements Authenticator {
                     if (StringUtils.countMatches(accessToken, APIConstants.DOT) != 2) {
                         log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                "Invalid JWT token");
+                                "Invalid JWT token. The expected token format is <header.payload.signature>");
                     }
 
                     signedJWTInfo = getSignedJwt(accessToken);
@@ -299,7 +299,10 @@ public class OAuthAuthenticator implements Authenticator {
                 try {
                     AuthenticationContext authenticationContext = jwtValidator.authenticate(signedJWTInfo, synCtx);
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
-                    log.debug("User is authorized using JWT token to access the resource.");
+                    if (log.isDebugEnabled()) {
+                        log.debug("User[" + authenticationContext.getUsername() + "] is authorized using " +
+                                "JWT token to access the resource.");
+                    }
                     return new AuthenticationResponse(true, isMandatory, false, 0, null);
 
                 } catch (APISecurityException ex) {

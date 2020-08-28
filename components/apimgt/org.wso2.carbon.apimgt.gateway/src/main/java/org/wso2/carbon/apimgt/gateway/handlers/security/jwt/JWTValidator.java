@@ -200,8 +200,8 @@ public class JWTValidator {
 
         String endUserToken = null;
         boolean valid = false;
-        String jwtTokenCacheKey = jwtInfoDto.getApicontext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
-                .concat(tokenSignature);
+        String jwtTokenCacheKey = String.join(APIConstants.DELEM_COLON, jwtInfoDto.getApicontext(),
+                jwtInfoDto.getVersion(), tokenSignature);
         if (isGatewayTokenCacheEnabled) {
             Object token = getGatewayJWTTokenCache().get(jwtTokenCacheKey);
             if (token != null) {
