@@ -663,8 +663,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         scopeDTO.setName(scopeKey);
         scopeDTO.setDisplayName(scope.getName());
         scopeDTO.setDescription(scope.getDescription());
-        if (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().split(",").length > 0) {
-            scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
+        if (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().trim().split(",").length > 0) {
+            scopeDTO.setBindings(Arrays.asList(scope.getRoles().trim().split(",")));
         }
         try (Response response = scopeClient.registerScope(scopeDTO)) {
             if (response.status() != HttpStatus.SC_CREATED) {
@@ -867,8 +867,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             ScopeDTO scopeDTO = new ScopeDTO();
             scopeDTO.setDisplayName(scope.getName());
             scopeDTO.setDescription(scope.getDescription());
-            if (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().split(",").length > 0) {
-                scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
+            if (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().trim().split(",").length > 0) {
+                scopeDTO.setBindings(Arrays.asList(scope.getRoles().trim().split(",")));
             }
             scopeClient.updateScope(scopeDTO, scope.getKey());
         } catch (KeyManagerClientException e) {
