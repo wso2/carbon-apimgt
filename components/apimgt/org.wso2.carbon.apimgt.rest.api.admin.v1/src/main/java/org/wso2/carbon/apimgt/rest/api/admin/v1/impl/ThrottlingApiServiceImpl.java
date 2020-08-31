@@ -984,10 +984,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 if (body.getConditionValue() instanceof Map) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.putAll((Map) body.getConditionValue());
-                    if(APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType())){
+                    if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType())) {
                         RestApiAdminUtils.validateIPAddress(jsonObject.get("fixedIp").toString());
                     }
-                    if(APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())){
+                    if (APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())) {
                         RestApiAdminUtils.validateIPAddress(jsonObject.get("startingIp").toString());
                         RestApiAdminUtils.validateIPAddress(jsonObject.get("endingIp").toString());
                     }
