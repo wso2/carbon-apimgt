@@ -950,8 +950,8 @@ public class OAS3Parser extends APIDefinition {
             for (Scope scope : scopes) {
                 String description = scope.getDescription() != null ? scope.getDescription() : "";
                 oas3Scopes.put(scope.getKey(), description);
-                String roles = (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().split(",").length > 0)
-                        ? scope.getRoles() : StringUtils.EMPTY;
+                String roles = (StringUtils.isNotBlank(scope.getRoles())
+                        && scope.getRoles().trim().split(",").length > 0) ? scope.getRoles() : StringUtils.EMPTY;
                 scopeBindings.put(scope.getKey(), roles);
             }
             oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
@@ -1454,7 +1454,8 @@ public class OAS3Parser extends APIDefinition {
                 }
                 for (Scope scope : scopes) {
                     oas3Scopes.put(scope.getKey(), scope.getDescription());
-                    String roles = (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().split(",").length > 0)
+                    String roles = (StringUtils.isNotBlank(scope.getRoles())
+                            && scope.getRoles().trim().split(",").length > 0)
                             ? scope.getRoles() : StringUtils.EMPTY;
                     scopeBindings.put(scope.getKey(), roles);
                 }

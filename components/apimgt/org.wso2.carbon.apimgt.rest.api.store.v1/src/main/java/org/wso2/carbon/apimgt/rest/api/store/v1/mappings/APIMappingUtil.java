@@ -83,7 +83,7 @@ public class APIMappingUtil {
                         name(scope.getName()).
                         description(scope.getDescription());
                 if (StringUtils.isNotBlank(scope.getRoles())) {
-                    scopeInfoDTO.roles(Arrays.asList(scope.getRoles().split(",")));
+                    scopeInfoDTO.roles(Arrays.asList(scope.getRoles().trim().split(",")));
                 }
                 uniqueScope.put(scope.getKey(), scopeInfoDTO);
             }
@@ -347,7 +347,7 @@ public class APIMappingUtil {
                             name(scope.getName()).
                             description(scope.getDescription());
                     if (StringUtils.isNotBlank(scope.getRoles())) {
-                        scopeInfoDTO.roles(Arrays.asList(scope.getRoles().split(",")));
+                        scopeInfoDTO.roles(Arrays.asList(scope.getRoles().trim().split(",")));
                     }
                     uniqueScopes.put(scope.getKey(), scopeInfoDTO);
                 }
