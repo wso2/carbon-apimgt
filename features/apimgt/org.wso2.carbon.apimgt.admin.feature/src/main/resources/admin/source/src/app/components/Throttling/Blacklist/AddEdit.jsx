@@ -20,7 +20,7 @@ import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import { FormattedMessage } from 'react-intl';
+import { useIntl, FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import {
@@ -101,6 +101,7 @@ function AddEdit(props) {
     const {
         updateList, icon, triggerButtonText, title,
     } = props;
+    const intl = useIntl();
     const [initialState, setInitialState] = useState({
         conditionType: 'API',
         conditionValue: {
@@ -158,29 +159,56 @@ function AddEdit(props) {
         switch (fieldName) {
             case 'startingIp':
                 if (value === '') {
-                    error = 'Starting Ip address field is empty. ';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.startingIp.blank',
+                        defaultMessage: 'Starting Ip address field is empty.',
+                    });
                 } else if (/\s/g.test(value)) {
-                    error = 'Starting Ip address field contains white spaces. ';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.startingIp.white.spaces',
+                        defaultMessage: 'Starting Ip address field contains white spaces. ',
+                    });
                 } else if (!regexIpv4.test(value) && !regexIpv6.test(value)) {
-                    error = 'Starting Ip address entered is not valid. ';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.startingIp.invalid',
+                        defaultMessage: 'Starting Ip address entered is not valid.  ',
+                    });
                 }
                 break;
             case 'endingIp':
                 if (value === '') {
-                    error = 'Ending Ip address field is empty. ';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.endingIp.blank',
+                        defaultMessage: 'Ending Ip address field is empty.  ',
+                    });
                 } else if (/\s/g.test(value)) {
-                    error = 'Ending Ip address field contains white spaces. ';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.endingIp.white.spaces',
+                        defaultMessage: 'Starting Ip address field contains white spaces. ',
+                    });
                 } else if (!regexIpv4.test(value) && !regexIpv6.test(value)) {
-                    error = 'Ending Ip address entered is not valid. ';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.endingIp.invalid',
+                        defaultMessage: 'Starting Ip address entered is not valid.  ',
+                    });
                 }
                 break;
             case 'fixedIp':
                 if (value === '') {
-                    error = 'Ip address field is empty. ';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.fixedIp.blank',
+                        defaultMessage: 'Ending Ip address field is empty.  ',
+                    });
                 } else if (/\s/g.test(value)) {
-                    error = 'Ip address field contains white spaces. ';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.fixedIp.white.spaces',
+                        defaultMessage: 'Starting Ip address field contains white spaces. ',
+                    });
                 } else if (!regexIpv4.test(value) && !regexIpv6.test(value)) {
-                    error = 'Ip address entered is not valid. ';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.fixedIp.invalid',
+                        defaultMessage: 'Starting Ip address entered is not valid.  ',
+                    });
                 }
                 break;
             case 'conditionValue':
