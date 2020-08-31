@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -59,6 +60,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.cache.Cache;
@@ -767,5 +769,9 @@ public class APIKeyValidator {
     public boolean validateScopes(TokenValidationContext tokenValidationContext, String tenantDomain)
             throws APISecurityException {
         return dataStore.validateScopes(tokenValidationContext, tenantDomain);
+    }
+
+    public Map<String, Scope> retrieveScopes(String tenantDomain) {
+        return dataStore.retrieveScopes(tenantDomain);
     }
 }
