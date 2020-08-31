@@ -23,10 +23,12 @@ import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provides a web service interface for the API key data store. This implementation
@@ -120,5 +122,11 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
 
     public void cleanup() {
 
+    }
+
+    @Override
+    public Map<String, Scope> retrieveScopes(String tenantDomain) {
+        APIKeyValidatorClient client = new APIKeyValidatorClient();
+        return client.retrieveScopes(tenantDomain);
     }
 }

@@ -38,11 +38,13 @@ import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Condition;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
@@ -57,6 +59,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -541,5 +544,15 @@ public class APIKeyValidationService {
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         return keyValidationHandler.validateScopes(tokenValidationContext);
+    }
+
+    public Map<String, Scope> retrieveScopes(String tenantDomain) {
+
+        SubscriptionDataStore subscriptionDataStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (subscriptionDataStore == null) {
+            return new HashMap<>();
+        }
+        return subscriptionDataStore.getScopesByTenant(tenantDomain);
     }
 }

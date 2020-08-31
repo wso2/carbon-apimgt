@@ -21,7 +21,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -29,6 +28,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -38,8 +38,10 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceStub;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -50,6 +52,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
@@ -63,7 +66,7 @@ public class BasicAuthCredentialValidator {
 
     protected Log log = LogFactory.getLog(getClass());
     private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
-
+    private APIKeyValidator apiKeyValidator;
     /**
      * Initialize the validator with the synapse environment.
      *
@@ -72,7 +75,7 @@ public class BasicAuthCredentialValidator {
     public BasicAuthCredentialValidator() throws APISecurityException {
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
         this.getGatewayUsernameCache();
-
+        this.apiKeyValidator = new APIKeyValidator();
         ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         EventHubConfigurationDto eventHubConfigurationDto = config.getEventHubConfigurationDto();
@@ -177,124 +180,6 @@ public class BasicAuthCredentialValidator {
     /**
      * Validates the roles of the given user against the roles of the scopes of the API resource.
      *
-     * @param username given username
-     * @param openAPI  OpenAPI of the API
-     * @param synCtx   The message to be authenticated
-     * @return true if the validation passed
-     * @throws APISecurityException If an authentication failure or some other error occurs
-     */
-    @MethodStats
-    public boolean validateScopes(String username, OpenAPI openAPI, MessageContext synCtx) throws APISecurityException {
-        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
-        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
-
-        String[] userRoles = null;
-        org.apache.axis2.context.MessageContext axis2MessageContext =
-                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-        String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
-        String resourceKey = apiContext + ":" + apiVersion + ":" + apiElectedResource + ":" + httpMethod;
-        String resourceCacheKey = resourceKey + ":" + username;
-
-        if (gatewayKeyCacheEnabled && getGatewayBasicAuthResourceCache().get(resourceCacheKey) != null) {
-            return true;
-        }
-
-        if (openAPI != null) {
-            String resourceRoles = null;
-            // retrieve the user roles related to the scope of the API resource
-            List<String> resourceScopes = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
-            List<String> resourceRolesList = new ArrayList<>();
-            if (resourceScopes != null && resourceScopes.size() > 0) {
-                for (String resourceScope : resourceScopes) {
-                    String roles = OpenAPIUtils.getRolesOfScope(openAPI, synCtx, resourceScope);
-                    if (StringUtils.isNotEmpty(roles)) {
-                        resourceRolesList.add(roles);
-                    }
-                }
-                resourceRoles = String.join(",", resourceRolesList);
-            }
-
-
-            if (StringUtils.isNotBlank(resourceRoles)) {
-                userRoles = getUserRoles(username);
-
-                //check if the roles related to the API resource contains internal role which matches
-                // any of the role of the user
-                if (validateInternalUserRoles(resourceRoles, userRoles)) {
-                    if (gatewayKeyCacheEnabled) {
-                        getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
-                    }
-                    return true;
-                }
-
-                // check if the roles related to the API resource contains any of the role of the user
-                for (String role : userRoles) {
-                    if (resourceRoles.contains(role)) {
-                        if (gatewayKeyCacheEnabled) {
-                            getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
-                        }
-                        return true;
-                    }
-                }
-            } else {
-                // No scopes for the requested resource
-                if (gatewayKeyCacheEnabled) {
-                    getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Basic Authentication: No scopes for the API resource: ".concat(resourceKey));
-                }
-                return true;
-            }
-        } else if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-            HashMap<String, String> operationScopeMappingList =
-                    (HashMap<String, String>) synCtx.getProperty(APIConstants.SCOPE_OPERATION_MAPPING);
-            HashMap<String, ArrayList<String>> scopeRoleMappingList =
-                    (HashMap<String, ArrayList<String>>) synCtx.getProperty(APIConstants.SCOPE_ROLE_MAPPING);
-            String[] operationList = ((String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).split(",");
-            userRoles = getUserRoles(username);
-            for (String operation : operationList) {
-                String operationScope = operationScopeMappingList.get(operation);
-                if (operationScope != null) {
-                    ArrayList<String> operationRoles = scopeRoleMappingList.get(operationScope);
-                    boolean userHasOperationRole = false;
-                    for (String role : userRoles) {
-                        for (String operationRole : operationRoles) {
-                            if (operationRole.equals(role)) {
-                                userHasOperationRole = true;
-                                break;
-                            }
-                        }
-                        if (userHasOperationRole) {
-                            break;
-                        }
-                    }
-                    if (!userHasOperationRole) {
-                        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
-                    }
-                }
-            }
-            if (gatewayKeyCacheEnabled) {
-                getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
-            }
-            return true;
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Basic Authentication: No OpenAPI found in the gateway for the API: ".concat(apiContext)
-                        .concat(":").concat(apiVersion));
-            }
-            return true;
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Basic Authentication: Scope validation failed for the API resource: ".concat(apiElectedResource));
-        }
-        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
-    }
-
-    /**
-     * Validates the roles of the given user against the roles of the scopes of the API resource.
-     *
      * @param username     given username
      * @param openAPI      OpenAPI of the API
      * @param synCtx       The message to be authenticated
@@ -308,12 +193,12 @@ public class BasicAuthCredentialValidator {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
-
-        String[] userRoles = userRoleList;
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx)
                 .getAxis2MessageContext();
         String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
         String resourceKey = apiContext + ":" + apiVersion + ":" + apiElectedResource + ":" + httpMethod;
+        Map<String, Scope> scopeMap = apiKeyValidator.retrieveScopes(tenantDomain);
         String resourceCacheKey = resourceKey + ":" + username;
 
         if (gatewayKeyCacheEnabled && getGatewayBasicAuthResourceCache().get(resourceCacheKey) != null) {
@@ -321,24 +206,27 @@ public class BasicAuthCredentialValidator {
         }
 
         if (openAPI != null) {
-            String resourceRoles = null;
             // retrieve the user roles related to the scope of the API resource
             List<String> resourceScopes = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
             List<String> resourceRolesList = new ArrayList<>();
             if (resourceScopes != null && resourceScopes.size() > 0) {
                 for (String resourceScope : resourceScopes) {
-                    String roles = OpenAPIUtils.getRolesOfScope(openAPI, synCtx, resourceScope);
-                    if (StringUtils.isNotEmpty(roles)) {
-                        resourceRolesList.add(roles);
+                    Scope scope = scopeMap.get(resourceScope);
+                    if (scope != null) {
+                        if (scope.getRoles().isEmpty()) {
+                            log.debug("Scope " + resourceScope + " Didn't have roles");
+                            return true;
+                        } else {
+                            resourceRolesList.addAll(scope.getRoles());
+                        }
                     }
                 }
-                resourceRoles = String.join(",", resourceRolesList);
             }
 
-            if (StringUtils.isNotBlank(resourceRoles)) {
+            if (!resourceRolesList.isEmpty()) {
                 //check if the roles related to the API resource contains internal role which matches
                 // any of the role of the user
-                if (validateInternalUserRoles(resourceRoles, userRoles)) {
+                if (validateInternalUserRoles(resourceRolesList, userRoleList)) {
                     if (gatewayKeyCacheEnabled) {
                         getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
                     }
@@ -346,8 +234,8 @@ public class BasicAuthCredentialValidator {
                 }
 
                 // check if the roles related to the API resource contains any of the role of the user
-                for (String role : userRoles) {
-                    if (resourceRoles.contains(role)) {
+                for (String role : userRoleList) {
+                    if (resourceRolesList.contains(role)) {
                         if (gatewayKeyCacheEnabled) {
                             getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
                         }
@@ -367,27 +255,35 @@ public class BasicAuthCredentialValidator {
         } else if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
             HashMap<String, String> operationScopeMappingList = (HashMap<String, String>) synCtx
                     .getProperty(APIConstants.SCOPE_OPERATION_MAPPING);
-            HashMap<String, ArrayList<String>> scopeRoleMappingList = (HashMap<String, ArrayList<String>>) synCtx
-                    .getProperty(APIConstants.SCOPE_ROLE_MAPPING);
             String[] operationList = ((String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).split(",");
             for (String operation : operationList) {
                 String operationScope = operationScopeMappingList.get(operation);
                 if (operationScope != null) {
-                    ArrayList<String> operationRoles = scopeRoleMappingList.get(operationScope);
-                    boolean userHasOperationRole = false;
-                    for (String role : userRoles) {
-                        for (String operationRole : operationRoles) {
-                            if (operationRole.equals(role)) {
-                                userHasOperationRole = true;
-                                break;
+                    if (scopeMap.containsKey(operationScope)) {
+                        List<String> operationRoles = scopeMap.get(operationScope).getRoles();
+                        boolean userHasOperationRole = false;
+                        if (operationRoles.isEmpty()) {
+                            userHasOperationRole = true;
+                        } else {
+                            for (String role : userRoleList) {
+                                for (String operationRole : operationRoles) {
+                                    if (operationRole.equals(role)) {
+                                        userHasOperationRole = true;
+                                        break;
+                                    }
+                                }
+                                if (userHasOperationRole) {
+                                    break;
+                                }
                             }
                         }
-                        if (userHasOperationRole) {
-                            break;
+                        if (!userHasOperationRole) {
+                            throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
                         }
-                    }
-                    if (!userHasOperationRole) {
-                        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+
+                    } else {
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
                     }
                 }
             }
@@ -416,19 +312,17 @@ public class BasicAuthCredentialValidator {
      * @param userRoles     roles of user
      * @return true if one of userRoles match with any internal role of resource scope
      */
-    private boolean validateInternalUserRoles(String resourceRoles, String[] userRoles) {
-        String[] separatedRoles = resourceRoles.split(",");
-        if (resourceRoles.contains(CarbonConstants.DOMAIN_SEPARATOR)) {
-            for (String role : separatedRoles) {
-                if (role.contains(CarbonConstants.DOMAIN_SEPARATOR)) {
-                    int index = role.indexOf(CarbonConstants.DOMAIN_SEPARATOR);
-                    if (index > 0) {
-                        String domain = role.substring(0, index);
-                        if (UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
-                            for (String userRole : userRoles) {
-                                if (role.equalsIgnoreCase(userRole)) {
-                                    return true;
-                                }
+    private boolean validateInternalUserRoles(List<String> resourceRoles, String[] userRoles) {
+
+        for (String role : resourceRoles) {
+            if (role.contains(CarbonConstants.DOMAIN_SEPARATOR)) {
+                int index = role.indexOf(CarbonConstants.DOMAIN_SEPARATOR);
+                if (index > 0) {
+                    String domain = role.substring(0, index);
+                    if (UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
+                        for (String userRole : userRoles) {
+                            if (role.equalsIgnoreCase(userRole)) {
+                                return true;
                             }
                         }
                     }
@@ -436,16 +330,6 @@ public class BasicAuthCredentialValidator {
             }
         }
         return false;
-    }
-
-    private String[] getUserRoles(String username) throws APISecurityException {
-        String[] userRoles;
-        try {
-            userRoles = apiKeyMgtRemoteUserStoreMgtServiceStub.getUserRoles(username);
-        } catch (APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException | RemoteException e) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
-        }
-        return userRoles;
     }
 
     /**

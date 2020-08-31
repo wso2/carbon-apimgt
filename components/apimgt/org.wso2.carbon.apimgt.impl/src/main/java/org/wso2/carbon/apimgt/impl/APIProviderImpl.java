@@ -128,6 +128,7 @@ import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
@@ -914,7 +915,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Get the local scopes set to register for the API from URI templates
         Set<Scope> scopesToRegister = getScopesToRegisterFromURITemplates(apiIdentifier, tenantId, uriTemplates);
         //Register scopes
-        scopesDAO.addScopes(scopesToRegister, tenantId);
         for (Scope scope : scopesToRegister) {
             for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
                 KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
@@ -940,6 +940,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
+        addScopes(scopesToRegister, tenantId);
     }
 
     /**
@@ -1677,8 +1678,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Update the resource scopes of the API in KM.
         // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings
         // using the updated URI templates of the API.
-        scopesDAO.deleteScopes(oldLocalScopeKeys, tenantId);
-        scopesDAO.addScopes(newLocalScopes, tenantId);
+        deleteScopes(oldLocalScopeKeys, tenantId);
+        addScopes(newLocalScopes, tenantId);
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
@@ -8650,7 +8651,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<Scope> scopeSet = new HashSet<>();
         scopeSet.add(scope);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        scopesDAO.addScopes(scopeSet, tenantId);
+        addScopes(scopeSet, tenantId);
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
@@ -8765,7 +8766,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         apiMgtDAO.deleteSharedScope(scopeName, tenantDomain);
-        scopesDAO.deleteScope(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain));
+        deleteScope(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain));
     }
 
     /**
@@ -8791,7 +8792,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
-        scopesDAO.updateScope(sharedScope, tenantId);
+        updateScope(sharedScope, tenantId);
     }
 
     /**
@@ -9016,5 +9017,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return removedReusedResources;
+    }
+    private void addScopes(Set<Scope> scopes, int tenantId) throws APIManagementException {
+        if (scopes != null){
+            scopesDAO.addScopes(scopes, tenantId);
+            for (Scope scope : scopes) {
+                ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.SCOPE_CREATE.name(), tenantId,
+                        tenantDomain,scope.getKey(),scope.getName(),scope.getDescription());
+                if (StringUtils.isNotEmpty(scope.getRoles())&& scope.getRoles().trim().length()>0){
+                    scopeEvent.setRoles(Arrays.asList(scope.getRoles().split(",")));
+                }
+                APIUtil.sendNotification(scopeEvent, APIConstants.NotifierType.SCOPE.name());
+            }
+        }
+
+    }
+
+    private void updateScope(Scope scope, int tenantId) throws APIManagementException {
+
+        if (scope != null) {
+            scopesDAO.updateScope(scope, tenantId);
+            ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.SCOPE_UPDATE.name(), tenantId,
+                    tenantDomain, scope.getKey(), scope.getName(), scope.getDescription());
+            if (StringUtils.isNotEmpty(scope.getRoles()) && scope.getRoles().trim().length() > 0) {
+                scopeEvent.setRoles(Arrays.asList(scope.getRoles().split(",")));
+            }
+            APIUtil.sendNotification(scopeEvent, APIConstants.NotifierType.SCOPE.name());
+        }
+    }
+
+    private void deleteScope(String scopeKey, int tenantId) throws APIManagementException {
+
+        if (StringUtils.isNotEmpty(scopeKey)) {
+            scopesDAO.deleteScope(scopeKey, tenantId);
+            ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.SCOPE_DELETE.name(), tenantId,
+                    tenantDomain, scopeKey, null, null);
+            APIUtil.sendNotification(scopeEvent, APIConstants.NotifierType.SCOPE.name());
+        }
+    }
+
+    private void deleteScopes(Set<String> scopes, int tenantId) throws APIManagementException {
+
+        if (scopes != null) {
+            for (String scope : scopes) {
+                deleteScope(scope, tenantId);
+            }
+        }
     }
 }

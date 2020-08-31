@@ -18,26 +18,26 @@
 
 package org.wso2.carbon.apimgt.impl.notifier;
 
+import com.google.gson.Gson;
+import org.apache.commons.codec.binary.Base64;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
-import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
- * The default API notification service implementation in which API creation, update, delete and LifeCycle change
- * events are published to gateway.
+ * Abstract class to handle common implementations related to notifiers
  */
-public class ApisNotifier extends AbstractNotifier {
+public abstract class AbstractNotifier implements Notifier {
 
-    @Override
-    public boolean publishEvent(Event event) throws NotifierException {
+    protected void publishEventToEventHub(Event event) {
 
-        publishEventToEventHub(event);
-        return true;
+        byte[] bytesEncoded = Base64.encodeBase64(new Gson().toJson(event).getBytes());
+        Object[] objects = new Object[]{event.getType(), event.getTimeStamp(), new String(bytesEncoded)};
+        org.wso2.carbon.databridge.commons.Event payload = new org.wso2.carbon.databridge.commons.Event(
+                APIConstants.NOTIFICATION_STREAM_ID, System.currentTimeMillis(),
+                null, null, objects);
+        APIUtil.publishEventToEventHub(null, payload);
+
     }
 
-    @Override
-    public String getType() {
-
-        return APIConstants.NotifierType.API.name();
-    }
 }

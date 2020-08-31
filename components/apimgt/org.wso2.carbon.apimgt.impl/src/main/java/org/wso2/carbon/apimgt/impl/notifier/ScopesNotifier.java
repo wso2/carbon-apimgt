@@ -23,10 +23,9 @@ import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 
 /**
- * The default API notification service implementation in which API creation, update, delete and LifeCycle change
- * events are published to gateway.
+ * This class used to send Scopes related events.
  */
-public class ApisNotifier extends AbstractNotifier {
+public class ScopesNotifier extends AbstractNotifier {
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
@@ -38,6 +37,7 @@ public class ApisNotifier extends AbstractNotifier {
     @Override
     public String getType() {
 
-        return APIConstants.NotifierType.API.name();
+        return APIConstants.NotifierType.SCOPE.name();
     }
+
 }
