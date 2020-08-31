@@ -41,6 +41,8 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMappingList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicyList;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ScopesList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
@@ -372,6 +374,25 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             }
         }
         return apiPolicy;
+    }
+
+    @Override
+    public List<Scope> loadAllScopes(String tenantDomain) throws DataLoadingException {
+        String scopesEp = APIConstants.SubscriptionValidationResources.SCOPES;
+        List<Scope> scopes = new ArrayList<>();
+        String responseString;
+        try {
+            responseString = invokeService(scopesEp, tenantDomain);
+        } catch (IOException e) {
+            String msg = "Error while executing the http client " + scopesEp;
+            log.error(msg, e);
+            throw new DataLoadingException(msg, e);
+        }
+        if (responseString != null && !responseString.isEmpty()) {
+            scopes = (new Gson().fromJson(responseString, ScopesList.class)).getList();
+        }
+        return scopes;
+
     }
 
     private String invokeService(String path, String tenantDomain) throws DataLoadingException, IOException {
