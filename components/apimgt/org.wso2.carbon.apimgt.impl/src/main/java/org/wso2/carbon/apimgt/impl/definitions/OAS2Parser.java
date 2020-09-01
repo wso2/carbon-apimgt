@@ -846,12 +846,14 @@ public class OAS2Parser extends APIDefinition {
         String authType = resource.getAuthType();
         if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType)) {
             authType = APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER;
-        }
-        if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authType)) {
+        } else if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authType)) {
             authType = APIConstants.OASResourceAuthTypes.APPLICATION_USER;
-        }
-        if (APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authType)) {
+        } else if (APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authType)) {
             authType = APIConstants.OASResourceAuthTypes.APPLICATION;
+        } else if (APIConstants.AUTH_NO_AUTHENTICATION.equals(authType)) {
+            authType = APIConstants.OASResourceAuthTypes.NONE;
+        } else {
+            authType = APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER;
         }
         operation.setVendorExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
         operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
