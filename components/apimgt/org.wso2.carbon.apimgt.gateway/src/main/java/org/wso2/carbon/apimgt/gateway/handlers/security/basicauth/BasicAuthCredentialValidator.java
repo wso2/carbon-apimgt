@@ -214,7 +214,7 @@ public class BasicAuthCredentialValidator {
                     Scope scope = scopeMap.get(resourceScope);
                     if (scope != null) {
                         if (scope.getRoles().isEmpty()) {
-                            log.debug("Scope " + resourceScope + " Didn't have roles");
+                            log.debug("Scope " + resourceScope + " didn't have roles");
                             return true;
                         } else {
                             resourceRolesList.addAll(scope.getRoles());
@@ -266,13 +266,8 @@ public class BasicAuthCredentialValidator {
                             userHasOperationRole = true;
                         } else {
                             for (String role : userRoleList) {
-                                for (String operationRole : operationRoles) {
-                                    if (operationRole.equals(role)) {
-                                        userHasOperationRole = true;
-                                        break;
-                                    }
-                                }
-                                if (userHasOperationRole) {
+                                if (operationRoles.contains(role)) {
+                                    userHasOperationRole = true;
                                     break;
                                 }
                             }
