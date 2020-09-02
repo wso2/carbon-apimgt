@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.Charset;
-import java.security.*;
+
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -80,17 +82,17 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
         }
         String issuerIdentifier = OAuthServerConfiguration.getInstance().getOpenIDConnectIDTokenIssuerIdentifier();
         JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
-        jwtClaimsSetBuilder.claim("sub", APIUtil.getUserNameWithTenantSuffix(jwtTokenInfoDTO.getEndUserName()));
-        jwtClaimsSetBuilder.claim("jti", UUID.randomUUID().toString());
-        jwtClaimsSetBuilder.claim("iss", issuerIdentifier);
-        jwtClaimsSetBuilder.claim("iat", currentTime);
+        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.END_USERNAME, APIUtil.getUserNameWithTenantSuffix(jwtTokenInfoDTO.getEndUserName()));
+        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.JWT_ID, UUID.randomUUID().toString());
+        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.ISSUER_IDENTIFIER, issuerIdentifier);
+        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.ISSUED_TIME, currentTime);
         if (expireIn != -1) {
-            jwtClaimsSetBuilder.claim("exp", expireIn);
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.EXPIRY_TIME, expireIn);
         }
-        jwtClaimsSetBuilder.claim("subscribedAPIs", jwtTokenInfoDTO.getSubscribedApiDTOList());
-        jwtClaimsSetBuilder.claim("tierInfo", jwtTokenInfoDTO.getSubscriptionPolicyDTOList());
-        jwtClaimsSetBuilder.claim("application", jwtTokenInfoDTO.getApplication());
-        jwtClaimsSetBuilder.claim("keytype", jwtTokenInfoDTO.getKeyType());
+        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS, jwtTokenInfoDTO.getSubscribedApiDTOList());
+        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.TIER_INFO, jwtTokenInfoDTO.getSubscriptionPolicyDTOList());
+        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.APPLICATION, jwtTokenInfoDTO.getApplication());
+        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.KEY_TYPE, jwtTokenInfoDTO.getKeyType());
 
         return jwtClaimsSetBuilder.build().toJSONObject().toJSONString();
     }
@@ -171,5 +173,4 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
             throw new APIManagementException("Error while encoding the Api Key ",e);
         }
     }
-
 }

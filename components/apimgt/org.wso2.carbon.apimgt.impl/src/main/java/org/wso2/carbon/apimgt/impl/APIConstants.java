@@ -1922,6 +1922,8 @@ public final class APIConstants {
         public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
         public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
         public static final String AUTHORIZED_USER_TYPE = "aut";
+        public static final String ISSUER_IDENTIFIER = "iss";
+        public static final String END_USERNAME = "sub";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
