@@ -20,6 +20,9 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.swagger.models.HttpMethod;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
 import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
@@ -1400,6 +1403,33 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
+     * This method returns openAPI definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in openAPI file(openAPI version 3)
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent);
+        Paths paths = openAPI.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<PathItem.HttpMethod, Operation> operationsMap = paths.get(pathKey).readOperationsMap();
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> extensions = operation.getExtensions();
+                if (extensions != null && extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
+                    Object tier = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, tier);
+                }
+            }
+        }
+        return Json.pretty(openAPI);
+    }
+
+    /**
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param openAPI openAPI definition
      * @return
@@ -1669,7 +1699,8 @@ public class OAS3Parser extends APIDefinition {
             if (APIConstants.OPTIONAL.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
             } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
-                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
+                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL + "," +
+                        APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }
             api.setApiSecurity(securityList);
         }
