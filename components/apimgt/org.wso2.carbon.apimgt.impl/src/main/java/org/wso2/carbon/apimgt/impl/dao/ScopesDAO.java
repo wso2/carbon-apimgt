@@ -180,9 +180,9 @@ public class ScopesDAO {
                     }
                 }
             } catch (SQLException e) {
-                log.error("Error while deleting scopes from db", e);
-                throw new APIManagementException("Error while deleting scopes from db", e,
-                        ExceptionCodes.INTERNAL_ERROR);
+                String msg = String.format("Error while retrieving scope %s from db", name);
+                log.error(msg, e);
+                throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error while retrieving database connection", e,

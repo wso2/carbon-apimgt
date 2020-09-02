@@ -860,12 +860,12 @@ definitions:
   # The Scopes List resource
   #-----------------------------------------------------
   ScopesList:
-    title: ApplicationKeyMapping List
+    title: Scopes List
     properties:
       count:
         type: integer
         description: |
-          Number of ApplicationKeyMappings returned.
+          Number of Scopes returned.
         example: 1
       list:
         type: array
@@ -874,7 +874,7 @@ definitions:
       pagination:
         $ref: '#/definitions/Pagination'
   #-----------------------------------------------------
-  # The Application Key Mapping resource
+  # The Scope resource
   #-----------------------------------------------------
   Scope:
     properties:

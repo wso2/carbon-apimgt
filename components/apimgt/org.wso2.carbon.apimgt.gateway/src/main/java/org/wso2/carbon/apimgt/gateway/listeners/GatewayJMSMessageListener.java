@@ -201,11 +201,11 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.SCOPE_CREATE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson,ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
-        }else if (EventType.SCOPE_UPDATE.toString().equals(eventType)) {
-            ScopeEvent event = new Gson().fromJson(eventJson,ScopeEvent.class);
+        } else if (EventType.SCOPE_UPDATE.toString().equals(eventType)) {
+            ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
-        }else if (EventType.SCOPE_DELETE.toString().equals(eventType)) {
-            ScopeEvent event = new Gson().fromJson(eventJson,ScopeEvent.class);
+        } else if (EventType.SCOPE_DELETE.toString().equals(eventType)) {
+            ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().deleteScope(event);
         } else {
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);

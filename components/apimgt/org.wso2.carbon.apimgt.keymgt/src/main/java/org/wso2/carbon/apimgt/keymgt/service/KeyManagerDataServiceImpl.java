@@ -285,7 +285,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
                 .getTenantSubscriptionStore(event.getTenantDomain());
         if (store == null) {
             if (log.isDebugEnabled()) {
-                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+                log.debug("Ignoring the event as the tenant " + event.getTenantDomain() + " is not loaded");
             }
             return;
         }
@@ -302,7 +302,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
                 .getTenantSubscriptionStore(event.getTenantDomain());
         if (store == null) {
             if (log.isDebugEnabled()) {
-                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+                log.debug("Ignoring the event as the tenant " + event.getTenantDomain() + " is not loaded");
             }
             return;
         }
