@@ -3568,6 +3568,90 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Validate AsyncAPI Specification and retrieve as the response
+     * 
+     * @param url URL of the AsyncAPI Specification
+     * @param fileInputStream InputStream for the provided file
+     * @param fileDetail File meta-data
+     * @param returnContent Whether to return the definition content
+     * @param messageContext CXF message context
+     * @return AsyncAPI Specification Validation response
+     */
+    @override
+    public Response validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail, 
+          Boolean returnContent, MessageContext messageContext){
+            
+        //validate and retrieve the AsyncAPI specification
+        Map validationResponseMap = null;
+        try {
+            validationResponseMap = validateAsyncAPISpecification(url, fileInputStream, fileDetail, returnContent);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occured while validating API Definition", e, log);
+        }
+
+        AsyncAPISpecificationValidationResponseDTO validationResponseDTO = 
+                (AsyncAPISpecificationValidationResponseDTO)validateResponseMap.get(RestApiConstants.RETURN_DTO);
+        return Response.ok().entity(validationResponseDTO).build();
+    }
+
+    /**
+     * Importing and AsyncAPI Speciication and create and API
+     * 
+     * @param fileInputStream InputStream for the provided file
+     * @param fileDetail File meta-data
+     * @param url URL of the AsyncAPI Specification
+     * @param additionalProperties API oject (json) including additional properties like name, version, context
+     * @param messageContext CXF message context
+     * @return API import using AspyncAPI specification response
+     */
+    @override
+    public Response importAsyncAPISpecification(InputStream fileInputStream, Attachment fileDetail, String url, 
+                String additionalProperties, MessageContext messageContext){
+        
+        //validate and retrieve the AsyncAPI specification
+        Map validationResponseMap = null;
+        try {
+            validationResponseMap = validateAsyncAPISpecification(url, fileInputStream, fileDetail, true);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occured while validating API Definition", e, log);
+        }
+
+        AsyncAPISpecificationValidationResponseDTO validationResponseDTO = 
+                (AsyncAPISpecificationValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        APIDefinitionValidationResponse validationResponse = 
+                (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+
+        if (!validationResponseDTO.isIsValid()) {
+            ErrorDTO errorDTO = APIMappingUtil.getErrorDTOFromErrorListItems(validationResponseDTO.getErrors());
+            throw RestApiUtil.buildBadRequestException(errorDTO);
+        }
+
+        // Convert the 'additionalProperties' json into an APIDTO object
+        ObjectMapper objectMapper = new ObjectMapper();
+        APIDTO apiDTOFromProperties;
+        try {
+            apiDTOFromProperties = objectMapper.readValue(additionalProperties, APIDTO.class);
+        } catch (IOException e) {
+            throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
+        }
+
+        //Only WS type APIs should be allowed
+        if (!APIDTO.TypeEnum.WS.equals(apiDTOFromProperties.getType())){
+            throw RestApiUtil.buildBadRequestException("The API's type should only be WS when "+
+                    "importing an AsyncAPI defnition");
+        }
+
+        //Import the API and definition
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggerInUserProvider();
+            API apiToAdd = prepareToCreateAPIByDTO(apiDTOFromProperties);
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
+
+    }
+
+    /**
      * Validate a provided WSDL definition via a URL or a file/zip
      *
      * @param url WSDL URL
