@@ -384,12 +384,12 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         try {
             responseString = invokeService(scopesEp, tenantDomain);
         } catch (IOException e) {
-            String msg = "Error while executing the http client " + scopesEp;
+            String msg = "Error while executing the HTTP client " + scopesEp;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            scopes = (new Gson().fromJson(responseString, ScopesList.class)).getList();
+            scopes = new Gson().fromJson(responseString, ScopesList.class).getList();
         }
         return scopes;
 

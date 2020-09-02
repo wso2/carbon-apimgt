@@ -24,7 +24,7 @@ public class ScopesListDTO   {
     private PaginationDTO pagination = null;
 
   /**
-   * Number of ApplicationKeyMappings returned. 
+   * Number of Scopes returned. 
    **/
   public ScopesListDTO count(Integer count) {
     this.count = count;
@@ -32,7 +32,7 @@ public class ScopesListDTO   {
   }
 
   
-  @ApiModelProperty(example = "1", value = "Number of ApplicationKeyMappings returned. ")
+  @ApiModelProperty(example = "1", value = "Number of Scopes returned. ")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
