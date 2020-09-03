@@ -355,6 +355,7 @@ public final class APIConstants {
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
     public static final String API_OVERVIEW_DEPLOYMENTS = "overview_deployments";
     public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
+    public static final String BEGIN_CERTIFICATE_STRING_SPACE = "-----BEGIN CERTIFICATE----- ";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
@@ -2212,6 +2213,7 @@ public final class APIConstants {
 
         public static final String MUTUAL_SSL_CONFIG_ROOT = "MutualSSL";
         public static final String CLIENT_CERTIFICATE_HEADER = MUTUAL_SSL_CONFIG_ROOT + ".ClientCertificateHeader";
+        public static final String CLIENT_CERTIFICATE_ENCODE = MUTUAL_SSL_CONFIG_ROOT + ".ClientCertificateEncode";
         public static final String ENABLE_CLIENT_CERTIFICATE_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
                 ".EnableClientCertificateValidation";
     }
