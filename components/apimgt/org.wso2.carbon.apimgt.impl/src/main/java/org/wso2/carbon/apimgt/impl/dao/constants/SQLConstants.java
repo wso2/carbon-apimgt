@@ -3578,12 +3578,25 @@ public class SQLConstants {
             " SELECT ARSM.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM "
                     + "WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.API_ID = ?";
 
-    /**
-     * Static class to hold database queries related to key management.
-     */
-    public static class KeyMgtConstants {
+    public static final String INSERT_SCOPE_SQL = "INSERT INTO AM_SCOPE (NAME,DISPLAY_NAME,DESCRIPTION,TENANT_ID," +
+            "SCOPE_TYPE) VALUES (?,?,?,?,?)";
+    public static final String UPDATE_SCOPE_SQL = "UPDATE AM_SCOPE SET DISPLAY_NAME = ?, DESCRIPTION = ? " +
+            "WHERE NAME = ? AND TENANT_ID = ?";
+    public static final String DELETE_SCOPE_SQL = "DELETE FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
+    public static final String GET_SCOPE_SQL = "SELECT NAME AS SCOPE_KEY,DISPLAY_NAME AS DISPLAY_NAME,DESCRIPTION AS " +
+            "DESCRIPTION,TENANT_ID AS TENANT_ID FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
+    public static final String ADD_SCOPE_MAPPING = "INSERT INTO AM_SCOPE_BINDING (SCOPE_ID, SCOPE_BINDING, " +
+            "BINDING_TYPE) VALUES((SELECT SCOPE_ID FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?),?,?)";
+    public static final String DELETE_SCOPE_MAPPING =
+            "DELETE FROM AM_SCOPE_BINDING WHERE SCOPE_ID = (SELECT SCOPE_ID FROM AM_SCOPE WHERE NAME = ? " +
+                    "AND TENANT_ID = ?)";
+    public static final String RETRIEVE_SCOPE_MAPPING =
+            "SELECT SCOPE_BINDING FROM AM_SCOPE_BINDING WHERE SCOPE_ID = (SELECT SCOPE_ID FROM AM_SCOPE " +
+                    "WHERE NAME = ? AND TENANT_ID = ?) AND BINDING_TYPE = ?";
+    public static final String GET_SCOPES_SQL = "SELECT NAME AS SCOPE_KEY,DISPLAY_NAME AS DISPLAY_NAME,DESCRIPTION AS " +
+            "DESCRIPTION,TENANT_ID AS TENANT_ID FROM AM_SCOPE WHERE TENANT_ID = ?";
 
-    }
+    public static final String SCOPE_EXIST_SQL = "SELECT 1 FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
 
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =
