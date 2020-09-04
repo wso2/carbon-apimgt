@@ -232,8 +232,8 @@ public class ApplicationMappingUtil {
             scopeInfoDTO.setKey(scope.getKey());
             scopeInfoDTO.setName(scope.getName());
             scopeInfoDTO.setDescription(scope.getDescription());
-            if (scope.getRoles() != null) {
-                scopeInfoDTO.setRoles(Arrays.asList(scope.getRoles().split(",")));
+            if (StringUtils.isNotBlank(scope.getRoles())) {
+                scopeInfoDTO.setRoles(Arrays.asList(scope.getRoles().trim().split(",")));
             }
             scopeDto.add(scopeInfoDTO);
         }
