@@ -222,6 +222,7 @@ public class ScopesDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_SCOPES_SQL)) {
                 preparedStatement.setInt(1, tenantId);
+                preparedStatement.setString(2, APIConstants.DEFAULT_SCOPE_TYPE);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String name = resultSet.getString("SCOPE_KEY");
@@ -256,7 +257,7 @@ public class ScopesDAO {
                     preparedStatement.setString(1, scope.getKey());
                     preparedStatement.setInt(2, tenantId);
                     preparedStatement.setString(3, role);
-                    preparedStatement.setString(4, APIConstants.DEFAULT_SCOPE_TYPE);
+                    preparedStatement.setString(4, APIConstants.DEFAULT_BINDING_TYPE);
                     preparedStatement.addBatch();
                 }
                 preparedStatement.executeBatch();
@@ -271,7 +272,7 @@ public class ScopesDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.RETRIEVE_SCOPE_MAPPING)) {
             preparedStatement.setString(1, scopeKey);
             preparedStatement.setInt(2, tenantId);
-            preparedStatement.setString(3, APIConstants.DEFAULT_SCOPE_TYPE);
+            preparedStatement.setString(3, APIConstants.DEFAULT_BINDING_TYPE);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String binding = resultSet.getString("SCOPE_BINDING");
