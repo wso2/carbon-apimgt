@@ -2652,7 +2652,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 fileName = seqElement.getAttributeValue(new QName("name"));
                 //Constructing mediation resource path
                 mediationResourcePath = mediationResourcePath + fileName;
-                checkMediationPolicy(apiProvider, mediationResourcePath, fileName);
+                checkMediationPolicy(fileName);
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
                     //Adding api specific mediation policy
@@ -2667,7 +2667,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 //Constructing mediation resource path
                 mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR + type +
                         RegistryConstants.PATH_SEPARATOR + fileName;
-                checkMediationPolicy(apiProvider,mediationResourcePath, fileName);
+                checkMediationPolicy(fileName);
                 InputStream contentStream = new ByteArrayInputStream(inlineContent.getBytes(StandardCharsets.UTF_8));
                 String contentType = URLConnection.guessContentTypeFromName(fileName);
                 ResourceFile contentFile = new ResourceFile(contentStream, contentType);
@@ -4440,15 +4440,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Check the existence of the mediation policy
+     * Check the length of the mediation policy name
      *
-     * @param mediationResourcePath mediation config content
+     * @param name name of the mediation
      *
      */
-    public void checkMediationPolicy(APIProvider apiProvider, String mediationResourcePath, String name) throws APIManagementException {
-        if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
-            throw new APIManagementException(ExceptionCodes.MEDIATION_POLICY_API_ALREADY_EXISTS);
-        }
+    public void checkMediationPolicy(String name) throws APIManagementException {
         if (StringUtils.isNotBlank(name) && name.length() > APIConstants.MAX_LENGTH_MEDIATION_POLICY_NAME) {
             throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.MEDIATION_POLICY_NAME_TOO_LONG,
                     APIConstants.MAX_LENGTH_MEDIATION_POLICY_NAME + ""));
