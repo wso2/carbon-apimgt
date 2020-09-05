@@ -142,7 +142,11 @@ class AuthManager {
     }
 
     static isNotCreator() {
-        return !AuthManager.getUser().scopes.includes('apim:api_create');
+        if(AuthManager.getUser() !== null) {
+            return !AuthManager.getUser().scopes.includes('apim:api_create');
+        } else {
+            return false;
+        }
     }
 
 
@@ -154,7 +158,11 @@ class AuthManager {
      * @memberof AuthManager
      */
     static isNotPublisher() {
-        return !AuthManager.getUser().scopes.includes('apim:api_publish'); // TODO: make this scope name configurable
+        if(AuthManager.getUser() !== null) {
+            return !AuthManager.getUser().scopes.includes('apim:api_publish'); // TODO: make this scope name configurable
+        } else {
+            return false;
+        }
     }
 
     /**
