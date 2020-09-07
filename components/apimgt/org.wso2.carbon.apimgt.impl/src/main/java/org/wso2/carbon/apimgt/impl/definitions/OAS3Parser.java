@@ -1479,6 +1479,15 @@ public class OAS3Parser extends APIDefinition {
             if (defaultScheme == null) {
                 SecurityScheme newDefault = new SecurityScheme();
                 newDefault.setType(SecurityScheme.Type.OAUTH2);
+                // Populating the default security scheme with default values
+                OAuthFlows newDefaultFlows = new OAuthFlows();
+                OAuthFlow newDefaultFlow = new OAuthFlow();
+                newDefaultFlow.setAuthorizationUrl("https://test.com");
+                Scopes newDefaultScopes = new Scopes();
+                newDefaultFlow.setScopes(newDefaultScopes);
+                newDefaultFlows.setImplicit(newDefaultFlow);
+                newDefault.setFlows(newDefaultFlows);
+
                 securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, newDefault);
             }
             for (Map.Entry<String, SecurityScheme> entry : securitySchemes.entrySet()) {
