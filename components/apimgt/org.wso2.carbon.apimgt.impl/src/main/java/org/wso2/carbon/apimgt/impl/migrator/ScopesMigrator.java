@@ -6,7 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.identity.core.util.IdentityIOStreamUtils;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
@@ -22,10 +24,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -37,63 +42,68 @@ import javax.xml.stream.XMLStreamReader;
  */
 public class ScopesMigrator {
 
-    private static final String DATABASE_LOCK_INSERT_QUERY = "INSERT INTO AM_SCOPE (SCOPE_ID,NAME,DISPLAY_NAME," +
-            "TENANT_ID,SCOPE_TYPE) VALUES(?,?,?,?,?)";
+    private static final String DATABASE_LOCK_INSERT_QUERY = "INSERT INTO AM_USER (USER_ID,USER_NAME) VALUES(?,?)";
+    private static final String DATABASE_LOCK_DELETE_QUERY = "DELETE FROM AM_USER WHERE USER_ID = ?";
     private static final Log log = LogFactory.getLog(ScopesMigrator.class);
-    private static final String BULK_INSERT_SCOPES_QUERY_LEFT = "INSERT INTO AM_SCOPE (SCOPE_ID,NAME,DISPLAY_NAME," +
-            "TENANT_ID,SCOPE_TYPE) SELECT SCOPE_ID,NAME,DISPLAY_NAME,TENANT_ID,SCOPE_TYPE FROM IDN_OAUTH2_SCOPE WHERE" +
-            " NAME NOT IN (";
-    private static final String BULK_INSERT_SCOPES_QUERY_RIGHT = ")";
-    private static final String BULK_INSERT_SCOPE_MAPPING_QUERY_LEFT =
-            "INSERT INTO AM_SCOPE_BINDING SELECT * FROM IDN_OAUTH2_SCOPE_BINDING WHERE SCOPE_ID NOT IN (SELECT " +
-                    "SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME IN (";
-    private static final String BULK_INSERT_SCOPE_MAPPING_QUERY_RIGHT = "))";
+    private static final String SELECT_SCOPES_QUERY_LEFT = " SELECT SCOPE_ID AS SCOPE_ID,NAME AS SCOPE_KEY," +
+            "DISPLAY_NAME AS DISPLAY_NAME,DESCRIPTION AS DESCRIPTION,TENANT_ID AS TENANT_ID,SCOPE_TYPE AS SCOPE_TYPE " +
+            "FROM IDN_OAUTH2_SCOPE WHERE NAME NOT IN (";
+    private static final String SELECT_SCOPES_QUERY_RIGHT = ") AND SCOPE_TYPE = 'OAUTH2'";
+    public static final String SELECT_SCOPE_MAPPING =
+            "SELECT SCOPE_BINDING FROM IDN_OAUTH2_SCOPE_BINDING WHERE SCOPE_ID = ? AND BINDING_TYPE = ?";
     private static final String IDENTITY_PATH = "identity";
     private static final String NAME = "name";
 
     public void migrateScopes() throws APIManagementException {
 
+        Map<Integer, Set<Scope>> scopesMap = new HashMap<>();
         boolean scopesMigrated = isScopesMigrated();
         if (!scopesMigrated) {
             boolean acquired = acquireDatabaseLock();
             if (acquired) {
-                String query = BULK_INSERT_SCOPES_QUERY_LEFT;
+                String query = SELECT_SCOPES_QUERY_LEFT;
                 List<String> identityScopes = retrieveIdentityScopes();
                 query = query.concat(StringUtils.repeat("?", ",", identityScopes.size()))
-                        .concat(BULK_INSERT_SCOPES_QUERY_RIGHT);
-
+                        .concat(SELECT_SCOPES_QUERY_RIGHT);
                 try (Connection connection = APIMgtDBUtil.getConnection()) {
-                    connection.setAutoCommit(false);
-                    try {
-                        try (PreparedStatement preparedStatement = connection
-                                .prepareStatement(query)) {
-                            String driverName = connection.getMetaData().getDriverName();
-                            if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                                try (Statement identityStatement = connection.createStatement()) {
-                                    identityStatement.executeUpdate("SET IDENTITY_INSERT AM_SCOPE ON");
+                    try (PreparedStatement preparedStatement = connection
+                            .prepareStatement(query)) {
+                        for (int i = 0; i < identityScopes.size(); i++) {
+                            preparedStatement.setString(i + 1, identityScopes.get(i));
+                        }
+                        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                            while (resultSet.next()) {
+                                int scopeId = resultSet.getInt("SCOPE_ID");
+                                String scopeKey = resultSet.getString("SCOPE_KEY");
+                                String displayName = resultSet.getString("DISPLAY_NAME");
+                                String description = resultSet.getString("DESCRIPTION");
+                                int tenantId = resultSet.getInt("TENANT_ID");
+                                Scope scope = new Scope();
+                                scope.setKey(scopeKey);
+                                scope.setName(displayName);
+                                scope.setDescription(description);
+                                List<String> bindings = retrieveScopeBindings(connection, scopeId);
+                                scope.setRoles(String.join(",", bindings));
+                                Set<Scope> scopeList = scopesMap.get(tenantId);
+                                if (scopeList != null) {
+                                    scopeList.add(scope);
+                                } else {
+                                    scopeList = new HashSet<>();
+                                    scopeList.add(scope);
+                                    scopesMap.put(tenantId, scopeList);
                                 }
                             }
-                            for (int i = 0; i < identityScopes.size(); i++) {
-                                preparedStatement.setString(i + 1, identityScopes.get(i));
-                            }
-                            preparedStatement.executeUpdate();
                         }
-                        String finalScopeMappingQuery = BULK_INSERT_SCOPE_MAPPING_QUERY_LEFT;
-                        finalScopeMappingQuery = finalScopeMappingQuery.concat(StringUtils.repeat("?", ",",
-                                identityScopes.size())).concat(BULK_INSERT_SCOPE_MAPPING_QUERY_RIGHT);
-                        try (PreparedStatement preparedStatement = connection
-                                .prepareStatement(finalScopeMappingQuery)) {
-                            for (int i = 0; i < identityScopes.size(); i++) {
-                                preparedStatement.setString(i + 1, identityScopes.get(i));
-                            }
-                            preparedStatement.executeUpdate();
-                        }
-                        connection.commit();
-                    } catch (SQLException e) {
-                        connection.rollback();
+                    }
+                    for (Map.Entry<Integer, Set<Scope>> scopesMapEntry : scopesMap.entrySet()) {
+                        ScopesDAO scopesDAO = ScopesDAO.getInstance();
+                        scopesDAO.addScopes(scopesMapEntry.getValue(), scopesMapEntry.getKey());
+
                     }
                 } catch (SQLException e) {
                     throw new APIManagementException("Error while retrieving database connection", e);
+                } finally {
+                    releaseDatabaseLock();
                 }
             }
         }
@@ -105,16 +115,8 @@ public class ScopesMigrator {
             connection.setAutoCommit(false);
             try (PreparedStatement preparedStatement = connection.prepareStatement(DATABASE_LOCK_INSERT_QUERY)) {
                 String driverName = connection.getMetaData().getDriverName();
-                if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                    try (Statement identityStatement = connection.createStatement()) {
-                        identityStatement.executeUpdate("SET IDENTITY_INSERT AM_SCOPE ON");
-                    }
-                }
-                preparedStatement.setInt(1, -100);
+                preparedStatement.setString(1, "am_lock_table");
                 preparedStatement.setString(2, "am_lock_table");
-                preparedStatement.setString(3, "am_lock_table");
-                preparedStatement.setInt(4, -1234);
-                preparedStatement.setString(5, "AM_LOCK_TYPE");
                 preparedStatement.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -127,6 +129,23 @@ public class ScopesMigrator {
                 }
             }
 
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving database connection", e);
+        }
+        return true;
+    }
+
+    private boolean releaseDatabaseLock() throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(DATABASE_LOCK_DELETE_QUERY)) {
+                preparedStatement.setString(1, "am_lock_table");
+                preparedStatement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+            }
         } catch (SQLException e) {
             throw new APIManagementException("Error while retrieving database connection", e);
         }
@@ -197,4 +216,18 @@ public class ScopesMigrator {
         return scopes;
     }
 
+    private List<String> retrieveScopeBindings(Connection connection, int scopeId) throws SQLException {
+
+        List<String> bindings = new ArrayList<>();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(SELECT_SCOPE_MAPPING)) {
+            preparedStatement.setInt(1, scopeId);
+            preparedStatement.setString(2, APIConstants.DEFAULT_BINDING_TYPE);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    bindings.add(resultSet.getString("SCOPE_BINDING"));
+                }
+            }
+        }
+        return bindings;
+    }
 }
