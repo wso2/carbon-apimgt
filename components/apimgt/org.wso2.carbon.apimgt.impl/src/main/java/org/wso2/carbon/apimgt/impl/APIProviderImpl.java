@@ -4343,7 +4343,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + " from Key Manager : " + keyManagerDtoEntry.getKey() + ".");
                     }
                 } catch (APIManagementException e) {
-                    log.error("Error while Detach and Delete Scope from Key Manager " + keyManagerDtoEntry.getKey());
+                    log.error("Error while Detach and Delete Scope from Key Manager " + keyManagerDtoEntry.getKey(), e);
                 }
             }
         }
