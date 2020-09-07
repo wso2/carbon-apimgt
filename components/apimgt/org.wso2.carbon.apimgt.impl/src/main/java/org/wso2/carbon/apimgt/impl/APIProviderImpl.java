@@ -3308,7 +3308,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         String propertyName = (String) propertyNames.nextElement();
                         if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
                             apiTargetArtifact.setProperty(propertyName, apiSourceArtifact.getProperty(propertyName));
-                            additionProperties.put(propertyName, apiSourceArtifact.getProperty(propertyName));
+                            additionProperties.put(propertyName
+                                            .substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
+                                    apiSourceArtifact.getProperty(propertyName));
                         }
                     }
                 }
