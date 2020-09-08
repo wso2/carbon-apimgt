@@ -196,6 +196,17 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     /**
+     * This method returns OAS definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in OAS file
+     *
+     * @param swaggerContent String
+     * @return OpenAPI
+     * @throws APIManagementException
+     */
+    public abstract String injectMgwThrottlingExtensionsToDefault(String swaggerContent)
+            throws APIManagementException;
+
+    /**
      * This method returns api that is attached with api extensions related to micro-gw
      *
      * @param swaggerContent String
