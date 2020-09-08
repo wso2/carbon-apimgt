@@ -30,6 +30,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.MDC;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class provides AspectJ configurations
@@ -122,8 +123,13 @@ public class MethodTimeLogger
             Map headers = (Map) messageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
                 String correlationId = (String) headers.get(APIConstants.AM_ACTIVITY_ID);
-                if (correlationId != null) {
+                if (StringUtils.isNotEmpty(correlationId)) {
                     MDC.put(APIConstants.CORRELATION_ID, correlationId);
+                }
+                if (StringUtils.isEmpty(MDC.get(APIConstants.CORRELATION_ID))) {
+                    correlationId = UUID.randomUUID().toString();
+                    MDC.put(APIConstants.CORRELATION_ID, correlationId);
+                    headers.put(APIConstants.AM_ACTIVITY_ID, correlationId);
                 }
             }
         }
