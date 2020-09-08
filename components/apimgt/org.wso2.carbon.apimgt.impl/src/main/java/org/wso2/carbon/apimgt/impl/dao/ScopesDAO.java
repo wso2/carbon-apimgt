@@ -60,31 +60,48 @@ public class ScopesDAO {
         }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
+            PreparedStatement addScopeStatement = null;
+            PreparedStatement addScopeBindingStatement = null;
             try {
+                addScopeStatement = connection.prepareStatement(SQLConstants.INSERT_SCOPE_SQL);
+                addScopeBindingStatement = connection.prepareStatement(SQLConstants.ADD_SCOPE_MAPPING);
                 for (Scope scope : scopeSet) {
                     if (!isScopeExist(connection, scope.getKey(), tenantId)) {
-                        try (PreparedStatement preparedStatement = connection
-                                .prepareStatement(SQLConstants.INSERT_SCOPE_SQL)) {
-                            preparedStatement.setString(1, scope.getKey());
-                            preparedStatement.setString(2, scope.getName());
-                            preparedStatement.setString(3, scope.getDescription());
-                            preparedStatement.setInt(4, tenantId);
-                            preparedStatement.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
-                            preparedStatement.executeUpdate();
-                            addScopeBindings(connection, scope, tenantId);
-                        }
+                        addScopeStatement.setString(1, scope.getKey());
+                        addScopeStatement.setString(2, scope.getName());
+                        addScopeStatement.setString(3, scope.getDescription());
+                        addScopeStatement.setInt(4, tenantId);
+                        addScopeStatement.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
+                        addScopeStatement.addBatch();
+                        addScopeBindingsToBatch(addScopeBindingStatement, scope, tenantId);
                     }
                 }
+                addScopeStatement.executeBatch();
+                addScopeBindingStatement.executeBatch();
                 connection.commit();
                 return true;
             } catch (SQLException e) {
-                log.error("Error while saving scopes into db", e);
                 connection.rollback();
                 throw new APIManagementException("Error while saving scopes into db", e, ExceptionCodes.INTERNAL_ERROR);
+            }finally {
+                APIMgtDBUtil.closeStatement(addScopeBindingStatement);
+                APIMgtDBUtil.closeStatement(addScopeStatement);
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error while retrieving database connection", e,
                     ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
+    private void addScopeBindingsToBatch(PreparedStatement addScopeBindingStatement, Scope scope, int tenantId)
+            throws SQLException {
+
+        for (String role : scope.getRoles().split(",")) {
+            addScopeBindingStatement.setString(1, scope.getKey());
+            addScopeBindingStatement.setInt(2, tenantId);
+            addScopeBindingStatement.setString(3, role);
+            addScopeBindingStatement.setString(4, APIConstants.DEFAULT_BINDING_TYPE);
+            addScopeBindingStatement.addBatch();
         }
     }
 
@@ -125,7 +142,6 @@ public class ScopesDAO {
                 connection.commit();
                 return true;
             } catch (SQLException e) {
-                log.error("Error while deleting scopes from db", e);
                 connection.rollback();
                 throw new APIManagementException("Error while deleting scopes from db", e,
                         ExceptionCodes.INTERNAL_ERROR);
@@ -150,7 +166,6 @@ public class ScopesDAO {
                 connection.commit();
                 return true;
             } catch (SQLException e) {
-                log.error("Error while deleting scopes from db", e);
                 connection.rollback();
                 throw new APIManagementException("Error while deleting scopes from db", e,
                         ExceptionCodes.INTERNAL_ERROR);
@@ -191,7 +206,7 @@ public class ScopesDAO {
         return null;
     }
 
-    private boolean isScopeExist(Connection connection, String scopeKey, int tenantId) throws APIManagementException {
+    private boolean isScopeExist(Connection connection, String scopeKey, int tenantId) throws SQLException {
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.SCOPE_EXIST_SQL)) {
             preparedStatement.setString(1, scopeKey);
@@ -199,10 +214,6 @@ public class ScopesDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 return resultSet.next();
             }
-        } catch (SQLException e) {
-            log.error("Error while checking scopes from db", e);
-            throw new APIManagementException("Error while checking existence of scopes from db", e,
-                    ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -210,7 +221,7 @@ public class ScopesDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             return isScopeExist(connection, scopeKey, tenantId);
-        } catch (SQLException | APIManagementException e) {
+        } catch (SQLException e) {
             throw new APIManagementException("Error while retrieving database connection", e,
                     ExceptionCodes.INTERNAL_ERROR);
         }
@@ -222,6 +233,7 @@ public class ScopesDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_SCOPES_SQL)) {
                 preparedStatement.setInt(1, tenantId);
+                preparedStatement.setString(2, APIConstants.DEFAULT_SCOPE_TYPE);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String name = resultSet.getString("SCOPE_KEY");
@@ -236,7 +248,6 @@ public class ScopesDAO {
                     }
                 }
             } catch (SQLException e) {
-                log.error("Error while deleting scopes from db", e);
                 throw new APIManagementException("Error while retrieving scopes from db", e,
                         ExceptionCodes.INTERNAL_ERROR);
             }
@@ -256,7 +267,7 @@ public class ScopesDAO {
                     preparedStatement.setString(1, scope.getKey());
                     preparedStatement.setInt(2, tenantId);
                     preparedStatement.setString(3, role);
-                    preparedStatement.setString(4, APIConstants.DEFAULT_SCOPE_TYPE);
+                    preparedStatement.setString(4, APIConstants.DEFAULT_BINDING_TYPE);
                     preparedStatement.addBatch();
                 }
                 preparedStatement.executeBatch();
@@ -271,7 +282,7 @@ public class ScopesDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.RETRIEVE_SCOPE_MAPPING)) {
             preparedStatement.setString(1, scopeKey);
             preparedStatement.setInt(2, tenantId);
-            preparedStatement.setString(3, APIConstants.DEFAULT_SCOPE_TYPE);
+            preparedStatement.setString(3, APIConstants.DEFAULT_BINDING_TYPE);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String binding = resultSet.getString("SCOPE_BINDING");
