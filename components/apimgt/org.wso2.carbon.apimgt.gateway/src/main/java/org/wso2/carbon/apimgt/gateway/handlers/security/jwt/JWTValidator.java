@@ -51,7 +51,6 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
-import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
@@ -118,13 +117,11 @@ public class JWTValidator {
         String httpMethod = (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
-        String jti;
-        JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-        jti = jwtClaimsSet.getJWTID();
+        String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
 
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-        if (StringUtils.isNotEmpty(jti)) {
-            if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jti)) {
+        if (StringUtils.isNotEmpty(jwtTokenIdentifier)) {
+            if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
                             getMaskedToken(jwtHeader));
@@ -136,7 +133,7 @@ public class JWTValidator {
 
         }
 
-        JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo, jti);
+        JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
 
         if (jwtValidationInfo != null) {
             if (jwtValidationInfo.isValid()) {
@@ -181,9 +178,9 @@ public class JWTValidator {
                 if (jwtGenerationEnabled) {
                     JWTInfoDto jwtInfoDto = GatewayUtils
                             .generateJWTInfoDto(jwtValidationInfo, apiKeyValidationInfoDTO, synCtx);
-                    endUserToken = generateAndRetrieveJWTToken(jti, jwtInfoDto);
+                    endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
                 }
-                return GatewayUtils.generateAuthenticationContext(jti, jwtValidationInfo, apiKeyValidationInfoDTO,
+                return GatewayUtils.generateAuthenticationContext(jwtTokenIdentifier, jwtValidationInfo, apiKeyValidationInfoDTO,
                         endUserToken, true);
             } else {
                 throw new APISecurityException(jwtValidationInfo.getValidationCode(),
@@ -484,6 +481,15 @@ public class JWTValidator {
         return jwtValidationInfo;
     }
 
+    private String getJWTTokenIdentifier(SignedJWTInfo signedJWTInfo) {
+
+        JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
+        String jwtid = jwtClaimsSet.getJWTID();
+        if (StringUtils.isNotEmpty(jwtid)) {
+            return jwtid;
+        }
+        return signedJWTInfo.getSignedJWT().getSignature().toString();
+    }
     protected Cache getGatewayTokenCache() {
 
         return CacheProvider.getGatewayTokenCache();
@@ -504,8 +510,4 @@ public class JWTValidator {
         return CacheProvider.getGatewayJWTTokenCache();
     }
 
-    protected APIManagerConfiguration getApiManagerConfiguration() {
-
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-    }
 }
