@@ -50,7 +50,10 @@ const config = {
                 ? path.resolve('../../../../../node_modules/react-dom') : path.resolve('../node_modules/react-dom'),
         },
         extensions: ['.mjs','.js', '.jsx'],
+       
     },
+    node: { fs: 'empty' },
+
     module: {
         rules: [
             {

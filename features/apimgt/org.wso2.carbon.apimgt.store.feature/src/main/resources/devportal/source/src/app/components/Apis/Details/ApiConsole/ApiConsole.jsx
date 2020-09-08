@@ -33,6 +33,8 @@ import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
 import TryOutController from './TryOutController';
 import Application from '../../../../data/Application';
+import Dialog from 'react-dialog';
+//import fs-react from 'fs-react';
 
 /**
  * @inheritdoc
@@ -93,6 +95,7 @@ class ApiConsole extends React.Component {
             productionApiKey: '',
             sandboxApiKey: '',
             selectedKeyManager: 'Resident Key Manager',
+            isDialogOpen: false,
         };
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.updateSwagger = this.updateSwagger.bind(this);
@@ -108,6 +111,9 @@ class ApiConsole extends React.Component {
         this.updateAccessToken = this.updateAccessToken.bind(this);
         this.setProductionApiKey = this.setProductionApiKey.bind(this);
         this.setSandboxApiKey = this.setSandboxApiKey.bind(this);
+        this.converttopostman = this.converttopostman.bind(this);
+        this.openDialog = this.openDialog.bind(this);
+        this.handleClose = this.handleClose.bind(this);
     }
 
     /**
@@ -303,7 +309,7 @@ class ApiConsole extends React.Component {
                 })
                 .then((appKeys) => {
                     if (appKeys.get(selectedKeyManager)
-                    && appKeys.get(selectedKeyManager).keyType === selectedKeyType) {
+                        && appKeys.get(selectedKeyManager).keyType === selectedKeyType) {
                         ({ accessToken } = appKeys.get(selectedKeyManager).token);
                     }
                     if (appKeys.get(selectedKeyManager).keyType === 'PRODUCTION') {
@@ -372,6 +378,54 @@ class ApiConsole extends React.Component {
     }
 
     /**
+     * Converting an OpenAPI file to a postman collection 
+     * @memberof ApiConsole
+     */
+    converttopostman(fr) {
+        // console.log('fileReader.result');
+        //console.log(fr.result);
+        //console.log(fr);
+        // var fileDownload = require('js-file-download'),
+        var Converter = require('openapi-to-postmanv2');
+        // openapiData = downloadLink;
+
+        Converter.convert({ type: 'string', data: fr },
+            {}, (err, conversionResult) => {
+
+                if (!conversionResult.result) {
+                    console.log('Could not convert', conversionResult.reason);
+                }
+                else {
+                    console.log(
+                        "The collection object is: ",
+                        conversionResult.output[0].data,
+
+                    )
+
+                }
+            }
+        );
+    }
+
+    openDialog() {
+        console.log("open dialog");
+        this.setState({ isDialogOpen: true })
+    }
+
+    handleClose() {
+        this.setState({ isDialogOpen: false })
+    }
+
+    /**
+     * Downloading function of postman collection
+     * @memberof ApiConsole
+     */
+    postmanButton() {
+
+
+    }
+
+    /**
      * @inheritdoc
      * @memberof ApiConsole
      */
@@ -385,7 +439,10 @@ class ApiConsole extends React.Component {
         const user = AuthManager.getUser();
         const downloadSwagger = JSON.stringify({ ...swagger });
         const downloadLink = 'data:text/json;charset=utf-8, ' + encodeURIComponent(downloadSwagger);
+        //const downloadLink2 = 'data:text/json;charset=utf-16, ' + this.converttopostman(downloadSwagger);
+
         const fileName = 'swagger.json';
+        // const fileName2 = 'postman.json';
 
         if (api == null || swagger == null) {
             return <Progress />;
@@ -421,8 +478,8 @@ class ApiConsole extends React.Component {
                                         <FormattedMessage
                                             id='api.console.require.access.token'
                                             defaultMessage={'You need an access token to try the API. Please log '
-                                            + 'in and subscribe to the API to generate an access token. If you already '
-                                            + 'have an access token, please provide it below.'}
+                                                + 'in and subscribe to the API to generate an access token. If you already '
+                                                + 'have an access token, please provide it below.'}
                                         />
                                     </Typography>
                                 </Paper>
@@ -462,7 +519,22 @@ class ApiConsole extends React.Component {
                     />
 
                     <Grid container>
-                        <Grid xs={10} item />
+                        {/* <Grid xs={10} item /> */}
+                        <Grid item xs={8}></Grid>
+                        <Grid xs={2} item>
+                            {/* <a  href={downloadLink2} download={fileName2}> */}
+                            <Button size='small' onClick={this.postmanButton} >
+                                {/* onClick={() => this.converttopostman(downloadSwagger)} */}
+
+                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                <FormattedMessage
+                                    id='Apis.Details.APIConsole.APIConsole.download.postman'
+                                    defaultMessage='Postman collection'
+                                />
+                            </Button>
+                            {/* </a> */}
+
+                        </Grid>
                         <Grid xs={2} item>
                             <a href={downloadLink} download={fileName}>
                                 <Button size='small'>
@@ -475,6 +547,26 @@ class ApiConsole extends React.Component {
                             </a>
                         </Grid>
                     </Grid>
+                    <div className="container">
+                        <button type="button" onClick={this.openDialog}>Open Dialog</button>
+                        {
+                            this.state.isDialogOpen &&
+                            <Dialog
+                                title="Dialog Title"
+                                modal={true}
+                                onClose={this.handleClose}
+                                buttons={
+                                    [{
+                                        text: "Close",
+                                        onClick: () => this.handleClose()
+                                    }]
+                                }>
+                                <h1>Dialog Content</h1>
+                                <p>More Content. Anything goes here</p>
+                            </Dialog>
+                        }
+                    </div>
+
                 </Paper>
                 <Paper className={classes.swaggerUIPaper}>
                     <SwaggerUI
