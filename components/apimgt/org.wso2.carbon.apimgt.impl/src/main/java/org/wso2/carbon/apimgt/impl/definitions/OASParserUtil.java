@@ -1473,4 +1473,40 @@ public class OASParserUtil {
         return authorizationHeader == null ? null : authorizationHeader.toString();
     }
 
+    /**
+     * This method returns extension of application security types related to micro-gw
+     *
+     * @param extensions Map<String, Object>
+     * @return String
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static List<String> getApplicationSecurityTypes(Map<String, Object> extensions) throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        List<String> appSecurityTypes = new ArrayList<>();
+        if (extensions.containsKey(APIConstants.X_WSO2_APP_SECURITY)) {
+            Object applicationSecurityTypes = extensions.get(APIConstants.X_WSO2_APP_SECURITY);
+            ObjectNode appSecurityTypesNode = mapper.convertValue(applicationSecurityTypes, ObjectNode.class);
+            appSecurityTypes = mapper.convertValue(appSecurityTypesNode.get("security-types"), ArrayList.class);
+        }
+        return appSecurityTypes;
+    }
+
+    /**
+     * This method returns extension of application security types state related to micro-gw
+     *
+     * @param extensions Map<String, Object>
+     * @return boolean
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static boolean getAppSecurityStateFromSwagger(Map<String, Object> extensions) throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        boolean appSecurityState = false;
+        if (extensions.containsKey(APIConstants.X_WSO2_APP_SECURITY)) {
+            Object applicationSecurityTypes = extensions.get(APIConstants.X_WSO2_APP_SECURITY);
+            ObjectNode appSecurityTypesNode = mapper.convertValue(applicationSecurityTypes, ObjectNode.class);
+            appSecurityState = Boolean.parseBoolean(String.valueOf(appSecurityTypesNode.get("optional")));
+        }
+        return appSecurityState;
+    }
+
 }
