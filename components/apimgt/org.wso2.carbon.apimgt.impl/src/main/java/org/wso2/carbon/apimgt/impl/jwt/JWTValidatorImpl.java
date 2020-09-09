@@ -39,7 +39,6 @@ import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
