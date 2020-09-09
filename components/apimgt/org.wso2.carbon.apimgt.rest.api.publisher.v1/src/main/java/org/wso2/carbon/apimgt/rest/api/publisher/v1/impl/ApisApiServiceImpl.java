@@ -28,6 +28,7 @@ import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.FunctionConfiguration;
 import com.amazonaws.services.lambda.model.ListFunctionsResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
@@ -62,45 +63,23 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONTokener;
 import org.json.XML;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.FaultGatewaysException;
-import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
@@ -122,11 +101,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.CertificateMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ExternalStoreMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.MediationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
@@ -138,40 +113,14 @@ import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GraphqlQueryAnalysisMappingUtil;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -3577,7 +3526,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param messageContext CXF message context
      * @return AsyncAPI Specification Validation response
      */
-    @override
+    @Override
     public Response validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail, 
           Boolean returnContent, MessageContext messageContext){
             
@@ -3586,25 +3535,26 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             validationResponseMap = validateAsyncAPISpecification(url, fileInputStream, fileDetail, returnContent);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occured while validating API Definition", e, log);
+            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
 
-        AsyncAPISpecificationValidationResponseDTO validationResponseDTO = 
+        /*AsyncAPISpecificationValidationResponseDTO validationResponseDTO =
                 (AsyncAPISpecificationValidationResponseDTO)validateResponseMap.get(RestApiConstants.RETURN_DTO);
-        return Response.ok().entity(validationResponseDTO).build();
+        return Response.ok().entity(validationResponseDTO).build();*/
+        return null;
     }
 
     /**
-     * Importing and AsyncAPI Speciication and create and API
+     * Importing and AsyncAPI Specification and create and API
      * 
      * @param fileInputStream InputStream for the provided file
      * @param fileDetail File meta-data
      * @param url URL of the AsyncAPI Specification
-     * @param additionalProperties API oject (json) including additional properties like name, version, context
+     * @param additionalProperties API object (json) including additional properties like name, version, context
      * @param messageContext CXF message context
-     * @return API import using AspyncAPI specification response
+     * @return API import using AsyncAPI specification response
      */
-    @override
+    @Override
     public Response importAsyncAPISpecification(InputStream fileInputStream, Attachment fileDetail, String url, 
                 String additionalProperties, MessageContext messageContext){
         
@@ -3613,7 +3563,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             validationResponseMap = validateAsyncAPISpecification(url, fileInputStream, fileDetail, true);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occured while validating API Definition", e, log);
+            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
 
         AsyncAPISpecificationValidationResponseDTO validationResponseDTO = 
@@ -3643,12 +3593,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //Import the API and definition
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggerInUserProvider();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(apiDTOFromProperties);
         } catch (Exception e) {
             //TODO: handle exception
         }
 
+        return null;
     }
 
     /**
@@ -4399,6 +4350,69 @@ public class ApisApiServiceImpl implements ApisApiService {
         response.put(RestApiConstants.RETURN_MODEL, validationResponse);
         response.put(RestApiConstants.RETURN_DTO, responseDTO);
         return response;
+    }
+
+    /**
+     * Validate the provided AsyncAPI specification (via file or url) and return a Map with the validation response
+     * information
+     * 
+     * @param url AsyncAPI specification url
+     * @param fileInputStream file as input stream
+     * @param returnContent whether to return the content of the definition in the response DTO
+     * @return Map with the validation response information. A value with key 'dto' will have the response DTO
+     *  of type AsyncAPISpecificationValidationResponseDTO for the REST API. A value with the key 'model' will have the
+     *  validation response of type APIDefinitionValidationResponse coming from the impl level 
+     */
+    private Map validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail,
+            Boolean returnContent) throws APIManagementException {
+        //validate inputs
+        handleInvalidParams(fileInputStream, fileDetail, url);
+
+        AsyncAPISpecificationValidationResponseDTO responseDTO;
+        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        if (url != null) {
+            //validate AsyncAPI Specification using URL
+        } else if (fileInputStream != null){
+            //validate AsyncAPI Specification file
+            String fileName = fileDetail.getContentDisposition().getFilename();
+            org.json.JSONObject hyperSchema = null;
+            org.json.JSONObject toBeValidated = null;
+            if (fileName.endsWith(".yaml") || fileName.endsWith(".yml")){
+                //convert .yml or .yaml to JSON for validation
+                ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+                try {
+                    Object obj = yamlReader.readValue(fileInputStream, Object.class);
+                    ObjectMapper jsonWriter = new ObjectMapper();
+                    String json = jsonWriter.writeValueAsString(obj);
+                    toBeValidated = new org.json.JSONObject(json);
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            } else if (fileName.endsWith(".json")){
+                //continue with .json
+                JSONTokener jsonDataFile = new JSONTokener(fileInputStream);
+                toBeValidated = new org.json.JSONObject(jsonDataFile);
+            } else {
+                //exception for other file types
+            }
+            //Import AsyncAPI HyperSchema
+            File asyncAPIHyperSchema = new File("AsyncAPIHyperSchema.json");
+            try {
+                hyperSchema = new org.json.JSONObject(new JSONTokener(new FileInputStream(asyncAPIHyperSchema)));
+            } catch (FileNotFoundException e) {
+                //e.printStackTrace();
+            }
+
+            //validate AsyncAPI using JSON schema validation
+            Schema schemaValidator = SchemaLoader.load(hyperSchema);
+            try {
+                schemaValidator.validate(toBeValidated);
+            } catch (ValidationException e){
+                //validation error messages
+                e.getAllMessages();
+            }
+        }
+        return null;
     }
 
     /**
