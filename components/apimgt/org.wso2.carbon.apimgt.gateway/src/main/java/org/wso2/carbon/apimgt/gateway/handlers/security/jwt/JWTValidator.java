@@ -421,15 +421,18 @@ public class JWTValidator {
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
         String tenantDomain = GatewayUtils.getTenantDomain();
         JWTValidationInfo jwtValidationInfo = null;
-        if (isGatewayTokenCacheEnabled) {
+        if (isGatewayTokenCacheEnabled &&
+                !SignedJWTInfo.ValidationStatus.NOT_VALIDATED.equals(signedJWTInfo.getValidationStatus())) {
             String cacheToken = (String) getGatewayTokenCache().get(jti);
-            if (cacheToken != null) {
+            if (SignedJWTInfo.ValidationStatus.VALID.equals(signedJWTInfo.getValidationStatus())
+                    && cacheToken != null) {
                 if (getGatewayKeyCache().get(jti) != null) {
                     JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) getGatewayKeyCache().get(jti);
                     checkTokenExpiration(jti, tempJWTValidationInfo, tenantDomain);
                     jwtValidationInfo = tempJWTValidationInfo;
                 }
-            } else if (getInvalidTokenCache().get(jti) != null) {
+            } else if (SignedJWTInfo.ValidationStatus.INVALID.equals(signedJWTInfo.getValidationStatus())
+                    && getInvalidTokenCache().get(jti) != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
                             .getMaskedToken(jwtHeader));
@@ -445,6 +448,9 @@ public class JWTValidator {
 
             try {
                 jwtValidationInfo = jwtValidationService.validateJWTToken(signedJWTInfo);
+                signedJWTInfo.setValidationStatus(jwtValidationInfo.isValid() ?
+                        SignedJWTInfo.ValidationStatus.VALID : SignedJWTInfo.ValidationStatus.INVALID);
+
                 if (isGatewayTokenCacheEnabled) {
                     // Add token to tenant token cache
                     if (jwtValidationInfo.isValid()) {
