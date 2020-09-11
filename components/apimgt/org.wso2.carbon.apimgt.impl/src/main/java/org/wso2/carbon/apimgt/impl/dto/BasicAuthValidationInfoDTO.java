@@ -30,6 +30,7 @@ public class BasicAuthValidationInfoDTO implements Serializable {
     private String hashedPassword = null;
     private String domainQualifiedUsername = null;
     private String[] userRoleList = null;
+    private boolean cached;
 
     public boolean isAuthenticated() {
         return isAuthenticated;
@@ -61,6 +62,16 @@ public class BasicAuthValidationInfoDTO implements Serializable {
 
     public void setUserRoleList(String[] userRoleList) {
         this.userRoleList = userRoleList;
+    }
+
+    public boolean isCached() {
+
+        return cached;
+    }
+
+    public void setCached(boolean cached) {
+
+        this.cached = cached;
     }
 
     public String toString() {
