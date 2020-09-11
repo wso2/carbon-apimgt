@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.dto.UserInfoDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.kmclient.FormEncoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
@@ -206,6 +207,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public OAuthApplicationInfo updateApplication(OAuthAppRequest appInfoDTO) throws APIManagementException {
 
+        String oauthAppValidation = getAPIManagerConfiguration().getFirstProperty(APIConstants.
+                API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
+        if (StringUtils.isNotEmpty(oauthAppValidation) && !Boolean.parseBoolean(oauthAppValidation)) {
+            return null;
+        }
         OAuthApplicationInfo oAuthApplicationInfo = appInfoDTO.getOAuthApplicationInfo();
 
         String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
@@ -267,6 +273,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void deleteApplication(String consumerKey) throws APIManagementException {
 
+        String oauthAppValidation = getAPIManagerConfiguration().getFirstProperty(APIConstants.
+                API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
+        if (StringUtils.isNotEmpty(oauthAppValidation) && !Boolean.parseBoolean(oauthAppValidation)) {
+            return;
+        }
+
         if (log.isDebugEnabled()) {
             log.debug("Trying to delete OAuth application for consumer key :" + consumerKey);
         }
@@ -281,6 +293,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public OAuthApplicationInfo retrieveApplication(String consumerKey) throws APIManagementException {
 
+        String oauthAppValidation = getAPIManagerConfiguration().getFirstProperty(APIConstants.
+                API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
+        if (StringUtils.isNotEmpty(oauthAppValidation) && !Boolean.parseBoolean(oauthAppValidation)) {
+            return null;
+        }
         if (log.isDebugEnabled()) {
             log.debug("Trying to retrieve OAuth application for consumer key :" + consumerKey);
         }
@@ -1022,5 +1039,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             handleException("Error while getting user info", e);
         }
         return map;
+    }
+
+    /**
+     * Returns API manager configurations.
+     * @return APIManagerConfiguration object
+     */
+    private APIManagerConfiguration getAPIManagerConfiguration() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
     }
 }
