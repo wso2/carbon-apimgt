@@ -37,7 +37,10 @@ import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.util.xpath.SynapseXPath;
 import org.jaxen.JaxenException;
 import org.json.JSONException;
+import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -45,34 +48,45 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
+import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
+import javax.cache.Cache;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.cache.Cache;
-
 public class ApiKeyAuthenticator implements Authenticator {
 
     private static final Log log = LogFactory.getLog(ApiKeyAuthenticator.class);
+    private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator;
+    private JWTConfigurationDto jwtConfigurationDto;
+    private boolean jwtGenerationEnabled;
     private boolean isGatewayTokenCacheEnabled;
     private static boolean gatewayApiKeyCacheInit = false;
     private static boolean gatewayApiKeyKeyCacheInit = false;
     private static boolean gatewayInvalidApiKeyCacheInit = false;
+    private String contextHeader = null;
     private String securityParam;
     private String apiLevelPolicy;
     private boolean isMandatory;
@@ -82,11 +96,17 @@ public class ApiKeyAuthenticator implements Authenticator {
         this.apiLevelPolicy = apiLevelPolicy;
         this.isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
         this.isMandatory = isApiKeyMandatory;
+        this.jwtConfigurationDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
+        this.jwtGenerationEnabled  = jwtConfigurationDto.isEnabled();
+        this.apiMgtGatewayJWTGenerator =
+                ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
+                        .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
     }
 
     @Override
     public void init(SynapseEnvironment env) {
-
+        initParams();
     }
 
     @Override
@@ -334,10 +354,24 @@ public class ApiKeyAuthenticator implements Authenticator {
                 if (log.isDebugEnabled()) {
                     log.debug("Api Key authentication successful.");
                 }
-                AuthenticationContext authenticationContext;
-                authenticationContext = GatewayUtils
-                        .generateAuthenticationContext(tokenSignature, payload, api, getApiLevelPolicy(), null, synCtx);
-                APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, null);
+
+                if (jwtGenerationEnabled) {
+                    SignedJWTInfo signedJWTInfo = new SignedJWTInfo(apiKey, signedJWT, payload);
+                    JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo);
+                    JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(api, jwtValidationInfo, null, synCtx);
+                    String endUserToken = generateAndRetrieveBackendJWTToken(tokenSignature, jwtInfoDto);
+
+                    AuthenticationContext authenticationContext;
+                    authenticationContext = GatewayUtils
+                            .generateAuthenticationContext(tokenSignature, payload, api, getApiLevelPolicy(), endUserToken, synCtx);
+                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, getContextHeader());
+                } else {
+                    AuthenticationContext authenticationContext;
+                    authenticationContext = GatewayUtils
+                            .generateAuthenticationContext(tokenSignature, payload, api, getApiLevelPolicy(), null, synCtx);
+                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, null);
+                }
+
                 if (log.isDebugEnabled()) {
                     log.debug("User is authorized to access the resource using Api Key.");
                 }
@@ -433,6 +467,45 @@ public class ApiKeyAuthenticator implements Authenticator {
         }
     }
 
+    private String generateAndRetrieveBackendJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
+            throws APISecurityException {
+
+        String endUserToken = null;
+        boolean valid = false;
+        String jwtTokenCacheKey =
+                jwtInfoDto.getApicontext().concat(":").concat(jwtInfoDto.getVersion()).concat(":").concat(tokenSignature);
+        if (isGatewayTokenCacheEnabled) {
+            Object token = getGatewayApiKeyCache().get(jwtTokenCacheKey);
+            if (token != null) {
+                endUserToken = (String) token;
+                String[] splitToken = ((String) token).split("\\.");
+                JSONObject payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                long exp = payload.getLong("exp");
+                long timestampSkew = OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds() * 1000;
+                valid = (exp - System.currentTimeMillis() > timestampSkew);
+            }
+            if (org.apache.commons.lang.StringUtils.isEmpty(endUserToken) || !valid) {
+                try {
+                    endUserToken = apiMgtGatewayJWTGenerator.generateToken(jwtInfoDto);
+                    getGatewayApiKeyCache().put(jwtTokenCacheKey, endUserToken);
+                } catch (APIManagementException e) {
+                    log.error("Error while Generating Backend JWT", e);
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                            APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                }
+            }
+        } else {
+            try {
+                endUserToken = apiMgtGatewayJWTGenerator.generateToken(jwtInfoDto);
+            } catch (APIManagementException e) {
+                log.error("Error while Generating Backend JWT", e);
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+            }
+        }
+        return endUserToken;
+    }
+
     private String extractApiKey(MessageContext mCtx) throws APISecurityException {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mCtx).getAxis2MessageContext();
@@ -512,8 +585,32 @@ public class ApiKeyAuthenticator implements Authenticator {
         return false;
     }
 
+    private JWTValidationInfo getJwtValidationInfo(SignedJWTInfo signedJWTInfo) {
+        JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
+        jwtValidationInfo.setClaims(signedJWTInfo.getJwtClaimsSet().getClaims());
+        jwtValidationInfo.setUser(signedJWTInfo.getJwtClaimsSet().getSubject());
+        return jwtValidationInfo;
+    }
+
     private byte[] decode(String payload) throws IllegalArgumentException {
         return java.util.Base64.getUrlDecoder().decode(payload.getBytes(StandardCharsets.UTF_8));
+    }
+
+    protected void initParams () {
+        APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
+        String header = jwtConfigDto.getJwtHeader();
+        if (header != null) {
+            setContextHeader(header);
+        }
+    }
+
+    public String getContextHeader() {
+        return contextHeader;
+    }
+
+    public void setContextHeader(String contextHeader) {
+        this.contextHeader = contextHeader;
     }
 
     //first level cache
