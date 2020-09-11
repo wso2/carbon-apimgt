@@ -46,11 +46,12 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))" +
+            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID = ?))" +
             " And " +
             "    NAME like ?" +
+            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 limit ? , ?";
+            " ORDER BY $1 $2 " ;
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID =
@@ -76,8 +77,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER (?)))"+
             " And "+
             "    NAME like ?"+
+            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 limit ? , ?";
+            " ORDER BY $1 $2 " ;
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID =
             "select distinct x.*,bl.ENABLED from (" +
@@ -107,9 +109,10 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "     (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " And " +
-                    "    NAME like ?"+
+                    "    NAME like ?" +
+                    " limit ? , ? "+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-                    " ORDER BY $1 $2 limit ? , ?";
+                    " ORDER BY $1 $2 " ;
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID =
@@ -140,8 +143,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " )" +
                     " And "+
                     "    NAME like ?"+
+                    " limit ? , ? "+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-                    " ORDER BY $1 $2 limit ? , ?";
+                    " ORDER BY $1 $2 " ;
 
 
 
@@ -165,11 +169,12 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "    LOWER(SUB.USER_ID) = LOWER(?)"+
+            "    SUB.USER_ID = ? "+
             " And "+
             "    NAME like ?"+
+            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-             " ORDER BY $1 $2 limit ? , ?";
+             " ORDER BY $1 $2 " ;
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE =
             "select distinct x.*,bl.ENABLED from (" +
@@ -194,9 +199,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   LOWER (SUB.USER_ID) =LOWER (?)" +
             " And "+
             "    NAME like ?"+
+            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 limit ? , ?";
-
+            " ORDER BY $1 $2 " ;
 
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
