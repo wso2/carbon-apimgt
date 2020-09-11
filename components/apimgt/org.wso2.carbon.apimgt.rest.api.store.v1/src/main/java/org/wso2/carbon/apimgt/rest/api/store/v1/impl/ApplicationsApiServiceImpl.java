@@ -123,8 +123,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(applications);
-            ApplicationMappingUtil.setPaginationParamsWithSortParams(applicationListDTO, groupId, limit, offset,
-                    applicationCount, sortOrder, sortBy.toLowerCase());
+            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset, applicationCount);
 
             return Response.ok().entity(applicationListDTO).build();
         } catch (APIManagementException e) {
@@ -364,7 +363,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             restrictedReferer = (String) additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
                         }
                     }
-                    String apiKey = apiConsumer.generateApiKey(application, userName, validityPeriod,
+                    String apiKey = apiConsumer.generateApiKey(application, userName, (long) validityPeriod,
                             restrictedIP, restrictedReferer);
                     APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod);
                     return Response.ok().entity(apiKeyDto).build();
@@ -384,7 +383,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String apiKey = body.getApikey();
         if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
             try {
-                String[] splitToken = apiKey.split("\\.");
+                String splitToken[] = apiKey.split("\\.");
                 String signatureAlgorithm = APIUtil.getSignatureAlgorithm(splitToken);
                 String certAlias = APIUtil.getSigningAlias(splitToken);
                 Certificate certificate = APIUtil.getCertificateFromTrustStore(certAlias);
@@ -658,8 +657,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             }
                         } catch (JsonProcessingException | ParseException | ClassCastException e) {
                             RestApiUtil.handleBadRequest("Error while generating " + keyType + " token for " +
-                                    "application " + applicationId + ". Invalid jsonInput '"
-                                    + body.getAdditionalProperties() + "' provided.", log);
+                                    "application " + applicationId + ". Invalid jsonInput \'"
+                                    + body.getAdditionalProperties() + "\' provided.", log);
                         }
                         if (StringUtils.isNotEmpty(body.getConsumerSecret())){
                             appKey.setConsumerSecret(body.getConsumerSecret());
@@ -951,8 +950,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         }
                     } catch (JsonProcessingException | ClassCastException e) {
                         RestApiUtil.handleBadRequest("Error while generating " + appKey.getKeyType() + " token for " +
-                                "application " + applicationId + ". Invalid jsonInput '"
-                                + body.getAdditionalProperties() + "' provided.", log);
+                                "application " + applicationId + ". Invalid jsonInput \'"
+                                + body.getAdditionalProperties() + "\' provided.", log);
                     }
                     if (StringUtils.isNotEmpty(body.getConsumerSecret())) {
                         appKey.setConsumerSecret(body.getConsumerSecret());
