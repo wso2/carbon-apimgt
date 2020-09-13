@@ -355,22 +355,20 @@ public class ApiKeyAuthenticator implements Authenticator {
                     log.debug("Api Key authentication successful.");
                 }
 
+                String endUserToken = null;
+                String contextHeader = null;
                 if (jwtGenerationEnabled) {
                     SignedJWTInfo signedJWTInfo = new SignedJWTInfo(apiKey, signedJWT, payload);
                     JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo);
                     JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(api, jwtValidationInfo, null, synCtx);
-                    String endUserToken = generateAndRetrieveBackendJWTToken(tokenSignature, jwtInfoDto);
-
-                    AuthenticationContext authenticationContext;
-                    authenticationContext = GatewayUtils
-                            .generateAuthenticationContext(tokenSignature, payload, api, getApiLevelPolicy(), endUserToken, synCtx);
-                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, getContextHeader());
-                } else {
-                    AuthenticationContext authenticationContext;
-                    authenticationContext = GatewayUtils
-                            .generateAuthenticationContext(tokenSignature, payload, api, getApiLevelPolicy(), null, synCtx);
-                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, null);
+                    endUserToken = generateAndRetrieveBackendJWTToken(tokenSignature, jwtInfoDto);
+                    contextHeader = getContextHeader();
                 }
+
+                AuthenticationContext authenticationContext;
+                authenticationContext = GatewayUtils
+                        .generateAuthenticationContext(tokenSignature, payload, api, getApiLevelPolicy(), endUserToken, synCtx);
+                APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, contextHeader);
 
                 if (log.isDebugEnabled()) {
                     log.debug("User is authorized to access the resource using Api Key.");
@@ -484,7 +482,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                 long timestampSkew = OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds() * 1000;
                 valid = (exp - System.currentTimeMillis() > timestampSkew);
             }
-            if (org.apache.commons.lang.StringUtils.isEmpty(endUserToken) || !valid) {
+            if (StringUtils.isEmpty(endUserToken) || !valid) {
                 try {
                     endUserToken = apiMgtGatewayJWTGenerator.generateToken(jwtInfoDto);
                     getGatewayApiKeyCache().put(jwtTokenCacheKey, endUserToken);
