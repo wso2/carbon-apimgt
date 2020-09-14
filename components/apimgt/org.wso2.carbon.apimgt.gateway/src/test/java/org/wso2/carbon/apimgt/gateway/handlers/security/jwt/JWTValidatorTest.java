@@ -33,7 +33,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -134,8 +133,6 @@ public class JWTValidatorTest {
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION))
                 .thenReturn("true");
         jwtValidator.setApiManagerConfiguration(apiManagerConfiguration);
-        OpenAPIParser parser = new OpenAPIParser();
-        String swagger = IOUtils.toString(this.getClass().getResourceAsStream("/swaggerEntry/openapi.json"));
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
         apiKeyValidationInfoDTO.setApiName("api1");
         apiKeyValidationInfoDTO.setApiPublisher("admin");
@@ -162,6 +159,85 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
         Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
+    }
+
+    @Test
+    public void testJWTValidatorForNonJTIScenario() throws ParseException, APISecurityException, APIManagementException,
+            IOException {
+
+        Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn("carbon.super");
+        SignedJWT signedJWT =
+                SignedJWT
+                        .parse("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" +
+                                ".eyJpc3MiOiJodHRwczovL2xvY2FsaG9zdCIsImlhdCI6MTU5OTU0ODE3NCwiZXhwIjoxNjMxMDg0MTc0LC" +
+                                "JhdWQiOiJ3d3cuZXhhbXBsZS5jb20iLCJzdWIiOiJqcm9ja2V0QGV4YW1wbGUuY29tIiwiR2l2ZW5OYW1l" +
+                                "IjoiSm9obm55IiwiU3VybmFtZSI6IlJvY2tldCIsIkVtYWlsIjoianJvY2tldEBleGFtcGxlLmNvbSIsIl" +
+                                "JvbGUiOlsiTWFuYWdlciIsIlByb2plY3QgQWRtaW5pc3RyYXRvciJdfQ.SSQyg_VTxF5drIogztn2SyEK" +
+                                "2wRE07wG6OW3tufD3vo");
+        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
+        APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
+        Cache gatewayTokenCache = Mockito.mock(Cache.class);
+        Cache invalidTokenCache = Mockito.mock(Cache.class);
+        Cache gatewayKeyCache = Mockito.mock(Cache.class);
+        Cache gatewayJWTTokenCache = Mockito.mock(Cache.class);
+        JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
+        jwtValidationInfo.setValid(true);
+        jwtValidationInfo.setIssuer("https://localhost");
+        jwtValidationInfo.setRawPayload(signedJWT.getParsedString());
+        jwtValidationInfo.setJti(UUID.randomUUID().toString());
+        jwtValidationInfo.setIssuedTime(System.currentTimeMillis());
+        jwtValidationInfo.setExpiryTime(System.currentTimeMillis() + 5000L);
+        jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
+        jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Default");
+        SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
+                signedJWT.getJWTClaimsSet());
+        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
+        JWTValidatorWrapper jwtValidator
+                = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
+                jwtValidationService, invalidTokenCache, gatewayTokenCache, gatewayKeyCache, gatewayJWTTokenCache);
+        MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        org.apache.axis2.context.MessageContext axis2MsgCntxt =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
+        Map<String, String> headers = new HashMap<>();
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(headers);
+        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
+        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
+        Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION))
+                .thenReturn("true");
+        jwtValidator.setApiManagerConfiguration(apiManagerConfiguration);
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+        apiKeyValidationInfoDTO.setApiName("api1");
+        apiKeyValidationInfoDTO.setApiPublisher("admin");
+        apiKeyValidationInfoDTO.setApiTier("Unlimited");
+        apiKeyValidationInfoDTO.setAuthorized(true);
+        Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class), Mockito.anyString()))
+                .thenReturn(true);
+        Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
+        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWTInfo, messageContext);
+        Mockito.verify(apiKeyValidator)
+                .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                        Mockito.anyString(), Mockito.anyString());
+        Assert.assertNotNull(authenticate);
+        Assert.assertEquals(authenticate.getApiName(), "api1");
+        Assert.assertEquals(authenticate.getApiPublisher(), "admin");
+        Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
+        Mockito.when(gatewayTokenCache.get(signedJWT.getSignature().toString())).thenReturn("carbon.super");
+        Mockito.when(gatewayKeyCache.get(signedJWT.getSignature().toString())).thenReturn(jwtValidationInfo);
+        authenticate = jwtValidator.authenticate(signedJWTInfo, messageContext);
+        Assert.assertNotNull(authenticate);
+        Assert.assertEquals(authenticate.getApiName(), "api1");
+        Assert.assertEquals(authenticate.getApiPublisher(), "admin");
+        Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
+        Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getSignature().toString());
     }
 
     @Test
