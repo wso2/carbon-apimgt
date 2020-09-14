@@ -35,6 +35,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.core.Response;
 
 public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
@@ -63,6 +65,22 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
             APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiUtil.getLoggedInUsername();
             apiCategory = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
+            
+            if (!org.apache.commons.lang3.StringUtils.isEmpty(apiCategory.getName())) {
+                String regExSpecialChars = "!@#$%^&*(),?\"{}[\\]|<>";
+                String regExSpecialCharsReplaced = regExSpecialChars.replaceAll(".", "\\\\$0");
+                Pattern pattern = Pattern.compile("[" + regExSpecialCharsReplaced + "\\s" + "]");// include \n,\t, space
+                Matcher matcher = pattern.matcher(apiCategory.getName());
+                if (matcher.find()) {
+                    RestApiUtil.handleBadRequest("Name field contains special characters.", log);
+                }
+                if (apiCategory.getName().length() > 255) {
+                    RestApiUtil.handleBadRequest("API Category name is too long.", log);
+                }
+            } else {
+                RestApiUtil.handleBadRequest("API Category name is empty.", log);
+            }
+            
             APICategoryDTO categoryDTO = APICategoryMappingUtil.
                     fromCategoryToCategoryDTO(apiAdmin.addCategory(apiCategory, userName));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_CATEGORY + "/" + categoryDTO.getId());

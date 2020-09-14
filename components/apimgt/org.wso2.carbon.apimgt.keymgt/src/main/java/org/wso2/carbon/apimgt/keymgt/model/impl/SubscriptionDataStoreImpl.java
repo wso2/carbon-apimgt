@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMappingCacheKey;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Policy;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
@@ -49,6 +50,8 @@ import java.util.stream.Collectors;
 public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     private static final Log log = LogFactory.getLog(SubscriptionDataStoreImpl.class);
+    private boolean scopesInitialized;
+
     public enum POLICY_TYPE {
         SUBSCRIPTION,
         APPLICATION,
@@ -64,6 +67,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
     private Map<String, ApplicationPolicy> appPolicyMap;
     private Map<String, Subscription> subscriptionMap;
+    private Map<String,Scope> scopesMap;
     private boolean apisInitialized;
     private boolean applicationsInitialized;
     private boolean subscriptionsInitialized;
@@ -95,6 +99,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.appPolicyMap = new ConcurrentHashMap<>();
         this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
+        this.scopesMap = new ConcurrentHashMap<>();
         initializeLoadingTasks();
     }
 
@@ -263,6 +268,22 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         });
 
         executorService.schedule(appPolicyLoadingTask, 0, TimeUnit.SECONDS);
+        Runnable scopesLoadingTask =
+                new PopulateTask<>(scopesMap,
+                        () -> {
+                            try {
+                                log.debug("Calling loadAllScopes.");
+                                List<Scope> scopeList =
+                                        new SubscriptionDataLoaderImpl().loadAllScopes(tenantDomain);
+                                scopesInitialized = true;
+                                return scopeList;
+                            } catch (APIManagementException e) {
+                                log.error("Exception while loading Scopes " + e);
+                            }
+                            return null;
+                        });
+
+        executorService.schedule(scopesLoadingTask, 0, TimeUnit.SECONDS);
     }
 
     private <T extends Policy> T getPolicy(String policyName, int tenantId,
@@ -472,5 +493,27 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             }
         }
         return null;
+    }
+
+    public boolean isScopesInitialized() {
+
+        return scopesInitialized;
+    }
+
+    @Override
+    public void addOrUpdateScope(Scope scope) {
+
+        scopesMap.put(scope.getCacheKey(), scope);
+    }
+
+    @Override
+    public void deleteScope(Scope scope) {
+
+        scopesMap.remove(scope.getCacheKey());
+    }
+
+    @Override
+    public Map<String, Scope> getScopesByTenant(String tenantDomain) {
+        return scopesMap;
     }
 }

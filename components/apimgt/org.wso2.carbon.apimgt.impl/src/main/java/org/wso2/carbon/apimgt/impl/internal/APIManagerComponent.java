@@ -60,12 +60,14 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.migrator.ScopesMigrator;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
@@ -198,7 +200,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ApplicationRegistrationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
-
+            bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
 
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
@@ -320,7 +322,10 @@ public class APIManagerComponent {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
+            // Migrate scope from IDN table to AM tables
 
+            ScopesMigrator scopesMigrator = new ScopesMigrator();
+            scopesMigrator.migrateScopes();
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {

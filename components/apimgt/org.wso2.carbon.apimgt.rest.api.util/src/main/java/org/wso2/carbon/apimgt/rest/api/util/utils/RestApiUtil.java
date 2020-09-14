@@ -76,6 +76,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -94,6 +95,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.Response;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class RestApiUtil {
 
@@ -287,11 +291,7 @@ public class RestApiUtil {
         JSONObject loginInfoJsonObj = new JSONObject();
         try {
             loginInfoJsonObj.put("user", username);
-            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                loginInfoJsonObj.put("isSuperTenant", true);
-            } else {
-                loginInfoJsonObj.put("isSuperTenant", false);
-            }
+            loginInfoJsonObj.put("isSuperTenant", tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
             String loginInfoString = loginInfoJsonObj.toJSONString();
             String[] groupIdArr = getGroupIds(loginInfoString);
             String groupId = "";
@@ -1095,8 +1095,30 @@ public class RestApiUtil {
      * @return constructed paginated url
      */
     public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
+       return getApplicationPaginatedURLWithSortParams(offset, limit, groupId, null, null);
+    }
+
+    /**
+     * Returns the paginated url for Applications API when it comes to sortOrder and sortBy
+     *
+     * @param offset    starting index
+     * @param limit     max number of objects returned
+     * @param groupId   group ID of the application
+     * @param sortOrder specified sorting order ex: ASC
+     * @param sortBy    specified parameter for the sort ex: name
+     * @return constructed paginated url
+     */
+    public static String getApplicationPaginatedURLWithSortParams(Integer offset, Integer limit, String groupId,
+                                                                  String sortOrder, String sortBy) {
         groupId = groupId == null ? "" : groupId;
         String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
+        if (StringUtils.isNoneBlank(sortBy) || StringUtils.isNotBlank(sortOrder)) {
+            sortOrder = sortOrder == null ? "" : sortOrder;
+            sortBy = sortBy == null ? "" : sortBy;
+            paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL_WITH_SORTBY_SORTORDER;
+            paginatedURL = paginatedURL.replace(RestApiConstants.SORTBY_PARAM, sortBy);
+            paginatedURL = paginatedURL.replace(RestApiConstants.SORTORDER_PARAM, sortOrder);
+        }
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
@@ -1337,10 +1359,10 @@ public class RestApiUtil {
                 String definition;
                 if (RestApiConstants.REST_API_STORE_VERSION_0.equals(version)) {
                     definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
+                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), StandardCharsets.UTF_8);
                 } else {
                     definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
+                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), StandardCharsets.UTF_8);
                 }
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content w created
@@ -1373,10 +1395,10 @@ public class RestApiUtil {
                 String definition;
                 if (RestApiConstants.REST_API_PUBLISHER_VERSION_0.equals(version)) {
                     definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.json"), "UTF-8");
+                            .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.json"), StandardCharsets.UTF_8);
                 } else {
                     definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
+                            .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), StandardCharsets.UTF_8);
                 }
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
@@ -1409,10 +1431,10 @@ public class RestApiUtil {
                 String definition;
                 if (RestApiConstants.REST_API_ADMIN_VERSION_0.equals(version)) {
                     definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
+                            .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), StandardCharsets.UTF_8);
                 } else {
                     definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/admin-api.yaml"), "UTF-8");
+                            .toString(RestApiUtil.class.getResourceAsStream("/admin-api.yaml"), StandardCharsets.UTF_8);
                 }
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
@@ -1673,13 +1695,13 @@ public class RestApiUtil {
      */
     public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
 
-        Map<String, List<String>>   portalScopeList = new HashMap<>();
-        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/store-api.yaml"};
+        Map<String, List<String>> portalScopeList = new HashMap<>();
+        String[] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/store-api.yaml"};
         for (String fileName : fileNameArray) {
             String definition = null;
             try {
                 definition = IOUtils
-                        .toString(RestApiUtil.class.getResourceAsStream(fileName), "UTF-8");
+                        .toString(RestApiUtil.class.getResourceAsStream(fileName), StandardCharsets.UTF_8);
             } catch (IOException  e) {
                 throw new APIManagementException("Error while reading the swagger definition ,",
                         ExceptionCodes.DEFINITION_EXCEPTION);
@@ -1687,12 +1709,24 @@ public class RestApiUtil {
             APIDefinition oasParser = OASParserUtil.getOASParser(definition);
             Set<Scope> scopeSet = oasParser.getScopes(definition);
             for (Scope entry : scopeSet) {
-                List <String> list = new ArrayList<>();
+                List<String> list = new ArrayList<>();
                 list.add(entry.getDescription());
-                list.add((fileName.replaceAll("-api.yaml", "").replace("/","")));
+                list.add((fileName.replaceAll("-api.yaml", "").replace("/", "")));
                 portalScopeList.put(entry.getName(), list);
             }
         }
         return portalScopeList;
+    }
+
+     /** Convert the date to UTC format
+     *
+     * @param date to be converted date
+     * @return UTC time
+     */
+    public static String convertToUTC(Date date) {
+        Instant ofEpochMilli = Instant.ofEpochMilli(date.getTime());
+        ZonedDateTime timeInUTC = ZonedDateTime.ofInstant(ofEpochMilli, ZoneOffset.systemDefault())
+                .withZoneSameInstant(ZoneOffset.UTC);
+        return timeInUTC.toString();
     }
 }

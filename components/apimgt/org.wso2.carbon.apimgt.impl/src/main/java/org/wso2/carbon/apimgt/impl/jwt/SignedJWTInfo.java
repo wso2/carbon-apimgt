@@ -31,6 +31,11 @@ public class SignedJWTInfo implements Serializable {
     private String token;
     private SignedJWT signedJWT;
     private JWTClaimsSet jwtClaimsSet;
+    private ValidationStatus validationStatus = ValidationStatus.NOT_VALIDATED;
+
+    public enum ValidationStatus {
+        NOT_VALIDATED, INVALID, VALID
+    }
 
     public SignedJWTInfo(String token, SignedJWT signedJWT, JWTClaimsSet jwtClaimsSet) {
 
@@ -71,5 +76,13 @@ public class SignedJWTInfo implements Serializable {
     public void setToken(String token) {
 
         this.token = token;
+    }
+
+    public ValidationStatus getValidationStatus() {
+        return validationStatus;
+    }
+
+    public void setValidationStatus(ValidationStatus validationStatus) {
+        this.validationStatus = validationStatus;
     }
 }
