@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
@@ -103,6 +104,14 @@ public class SubscriptionThrottlePolicyMappingUtil {
         if (subscriptionPolicy.getDefaultQuotaPolicy() != null) {
             policyDTO.setDefaultLimit(
                     CommonThrottleMappingUtil.fromQuotaPolicyToDTO(subscriptionPolicy.getDefaultQuotaPolicy()));
+        }
+        if (APIConstants.COMMERCIAL_TIER_PLAN.equals(subscriptionPolicy.getBillingPlan())) {
+            MonetizationInfoDTO monetizationInfoDTO = new MonetizationInfoDTO();
+            MonetizationInfoDTO.MonetizationPlanEnum monetizationPlanEnum = MonetizationInfoDTO.MonetizationPlanEnum
+                    .fromValue(subscriptionPolicy.getMonetizationPlan());
+            monetizationInfoDTO.setMonetizationPlan(monetizationPlanEnum);
+            monetizationInfoDTO.setProperties(subscriptionPolicy.getMonetizationPlanProperties());
+            policyDTO.setMonetization(monetizationInfoDTO);
         }
         return policyDTO;
     }
