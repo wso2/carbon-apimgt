@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -59,8 +58,10 @@ import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -106,6 +107,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.UUID;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -129,6 +131,7 @@ public class AbstractAPIManagerTestCase {
     private PrivilegedCarbonContext privilegedCarbonContext;
     private PaginationContext paginationContext;
     private ApiMgtDAO apiMgtDAO;
+    private ScopesDAO scopesDAO;
     private Registry registry;
     private GenericArtifactManager genericArtifactManager;
     private RegistryService registryService;
@@ -147,6 +150,7 @@ public class AbstractAPIManagerTestCase {
         PowerMockito.mockStatic(PaginationContext.class);
         PowerMockito.when(PaginationContext.getInstance()).thenReturn(paginationContext);
         apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        scopesDAO = Mockito.mock(ScopesDAO.class);
         registry = Mockito.mock(Registry.class);
         genericArtifactManager = Mockito.mock(GenericArtifactManager.class);
         registryService = Mockito.mock(RegistryService.class);
@@ -154,7 +158,13 @@ public class AbstractAPIManagerTestCase {
         graphQLSchemaDefinition = Mockito.mock(GraphQLSchemaDefinition.class);
         keyManager = Mockito.mock(KeyManager.class);
         PowerMockito.mockStatic(KeyManagerHolder.class);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
+        KeyManagerDto keyManagerDto = new KeyManagerDto();
+        keyManagerDto.setName("default");
+        keyManagerDto.setKeyManager(keyManager);
+        keyManagerDto.setIssuer("https://localhost");
+        Map<String, KeyManagerDto> tenantKeyManagerDtoMap = new HashMap<>();
+        tenantKeyManagerDtoMap.put("default", keyManagerDto);
+        PowerMockito.when(KeyManagerHolder.getTenantKeyManagers("carbon.super")).thenReturn(tenantKeyManagerDtoMap);
     }
 
     @Test
@@ -1125,10 +1135,10 @@ public class AbstractAPIManagerTestCase {
     @Test
     public void testIsScopeKeyExist() throws APIManagementException {
 
-        Mockito.when(apiMgtDAO.isSharedScopeExists(Mockito.anyString(), Mockito.anyInt()))
+        Mockito.when(scopesDAO.isScopeExist(Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn(false, true, false);
         Mockito.when(keyManager.isScopeExists(Mockito.anyString())).thenReturn(false, false);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(scopesDAO);
         Assert.assertFalse(abstractAPIManager.isScopeKeyExist("sample", -1234));
         Assert.assertTrue(abstractAPIManager.isScopeKeyExist("sample1", -1234));
         Assert.assertFalse(abstractAPIManager.isScopeKeyExist("sample2", -1234));

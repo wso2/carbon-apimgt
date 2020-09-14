@@ -350,6 +350,30 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /scopes:
+    get:
+      summary: Get all scopes.
+      description: |
+        This will provide access to the Scopes created in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: scopeKey
+          in: query
+          description: |
+            **Search condition**.
+             Scope Key
+          type: string
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: An array of Scopes in Database.
+          schema:
+            $ref: '#/definitions/ScopesList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /synapse-artifacts:
     get:
       summary: Get all the synapse artifacts for a given API UUID and gateway label
@@ -831,6 +855,43 @@ definitions:
         type: string
       keyManager:
         type: string
+
+  #-----------------------------------------------------
+  # The Scopes List resource
+  #-----------------------------------------------------
+  ScopesList:
+    title: Scopes List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Scopes returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Scope'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  #-----------------------------------------------------
+  # The Scope resource
+  #-----------------------------------------------------
+  Scope:
+    properties:
+      name:
+        type: string
+      displayName:
+        type: string
+      description:
+        type: string
+      roles:
+        type: array
+        items:
+          type: string
+
+
+
+
 
   #---------------------  --------------------------------
   # The Throttle Policy resource

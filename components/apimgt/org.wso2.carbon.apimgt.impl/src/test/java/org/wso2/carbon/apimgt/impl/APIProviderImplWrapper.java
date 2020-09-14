@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.axis2.AxisFault;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -33,7 +32,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
@@ -47,10 +46,11 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     private Map<String, Map<String,String>> failedGateways;
     private List<Documentation> documentationList;
 
-    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, List<Documentation> documentationList,
+    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, ScopesDAO scopesDAO, List<Documentation> documentationList,
                                   Map<String, Map<String,String>> failedGateways) throws APIManagementException {
         super(null);
         this.apiMgtDAO = apiMgtDAO;
+        this.scopesDAO = scopesDAO;
         if (documentationList != null) {
             this.documentationList = documentationList;
         }
