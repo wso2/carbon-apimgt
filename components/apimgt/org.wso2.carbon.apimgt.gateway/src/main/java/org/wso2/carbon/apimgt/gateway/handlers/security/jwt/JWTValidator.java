@@ -177,7 +177,7 @@ public class JWTValidator {
                 String endUserToken = null;
                 if (jwtGenerationEnabled) {
                     JWTInfoDto jwtInfoDto = GatewayUtils
-                            .generateJWTInfoDto(jwtValidationInfo, apiKeyValidationInfoDTO, synCtx);
+                            .generateJWTInfoDto(null, jwtValidationInfo, apiKeyValidationInfoDTO, synCtx);
                     endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
                 }
                 return GatewayUtils.generateAuthenticationContext(jwtTokenIdentifier, jwtValidationInfo, apiKeyValidationInfoDTO,
