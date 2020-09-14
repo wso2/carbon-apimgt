@@ -158,7 +158,7 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(1)).get(signedJWT.getJWTClaimsSet().getJWTID());
     }
 
     @Test
@@ -237,7 +237,7 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getSignature().toString());
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(1)).get(signedJWT.getSignature().toString());
     }
 
     @Test
@@ -332,7 +332,7 @@ public class JWTValidatorTest {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         }
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(1)).get(signedJWT.getJWTClaimsSet().getJWTID());
         Mockito.verify(invalidTokenCache, Mockito.times(1)).put(signedJWT.getJWTClaimsSet().getJWTID(), "carbon.super");
     }
 
@@ -426,7 +426,7 @@ public class JWTValidatorTest {
             Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         }
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(1)).get(signedJWT.getJWTClaimsSet().getJWTID());
         Mockito.verify(invalidTokenCache, Mockito.times(1)).put(signedJWT.getJWTClaimsSet().getJWTID(), "abc.com");
     }
 
@@ -516,7 +516,7 @@ public class JWTValidatorTest {
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
         Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(1)).get(signedJWT.getJWTClaimsSet().getJWTID());
     }
 
     @Test
@@ -605,7 +605,7 @@ public class JWTValidatorTest {
         Mockito.verify(apiKeyValidator, Mockito.never())
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString());
-        Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getJWTClaimsSet().getJWTID());
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(1)).get(signedJWT.getJWTClaimsSet().getJWTID());
         Mockito.verify(gatewayKeyCache, Mockito.never()).get(cacheKey);
     }
 
