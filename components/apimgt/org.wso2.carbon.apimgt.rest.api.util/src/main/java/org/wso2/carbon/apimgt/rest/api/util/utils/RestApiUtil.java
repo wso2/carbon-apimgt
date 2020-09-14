@@ -95,6 +95,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.Response;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class RestApiUtil {
 
@@ -1692,8 +1695,8 @@ public class RestApiUtil {
      */
     public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
 
-        Map<String, List<String>>   portalScopeList = new HashMap<>();
-        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/store-api.yaml"};
+        Map<String, List<String>> portalScopeList = new HashMap<>();
+        String[] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/store-api.yaml"};
         for (String fileName : fileNameArray) {
             String definition = null;
             try {
@@ -1706,12 +1709,24 @@ public class RestApiUtil {
             APIDefinition oasParser = OASParserUtil.getOASParser(definition);
             Set<Scope> scopeSet = oasParser.getScopes(definition);
             for (Scope entry : scopeSet) {
-                List <String> list = new ArrayList<>();
+                List<String> list = new ArrayList<>();
                 list.add(entry.getDescription());
-                list.add((fileName.replaceAll("-api.yaml", "").replace("/","")));
+                list.add((fileName.replaceAll("-api.yaml", "").replace("/", "")));
                 portalScopeList.put(entry.getName(), list);
             }
         }
         return portalScopeList;
+    }
+
+     /** Convert the date to UTC format
+     *
+     * @param date to be converted date
+     * @return UTC time
+     */
+    public static String convertToUTC(Date date) {
+        Instant ofEpochMilli = Instant.ofEpochMilli(date.getTime());
+        ZonedDateTime timeInUTC = ZonedDateTime.ofInstant(ofEpochMilli, ZoneOffset.systemDefault())
+                .withZoneSameInstant(ZoneOffset.UTC);
+        return timeInUTC.toString();
     }
 }
