@@ -1099,6 +1099,7 @@ public final class APIConstants {
         public static final String APPLICATION_POLICIES = "/application-policies";
         public static final String API_POLICIES = "/api-policies";
         public static final String SUBSCRIPTION_POLICIES = "/subscription-policies";
+        public static final String SCOPES = "/scopes";
 
         private SubscriptionValidationResources() {
 
@@ -2351,7 +2352,8 @@ public final class APIConstants {
         APPLICATION,
         APPLICATION_REGISTRATION,
         POLICY,
-        SUBSCRIPTIONS
+        SUBSCRIPTIONS,
+        SCOPE
     }
 
     // Supported Event Types
@@ -2371,7 +2373,10 @@ public final class APIConstants {
         SUBSCRIPTIONS_UPDATE,
         SUBSCRIPTIONS_DELETE,
         DEPLOY_API_IN_GATEWAY,
-        REMOVE_API_FROM_GATEWAY
+        REMOVE_API_FROM_GATEWAY,
+        SCOPE_CREATE,
+        SCOPE_UPDATE,
+        SCOPE_DELETE
     }
 
     public static class GatewayArtifactSynchronizer {
