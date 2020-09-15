@@ -18,26 +18,35 @@
 
 package org.wso2.carbon.apimgt.impl.notifier;
 
+import com.google.gson.Gson;
+import org.apache.commons.codec.binary.Base64;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
  * The default Throttling Policy notification service implementation in which Policy creation, update and delete
  * events are published to gateway.
  */
-public class PolicyNotifier extends AbstractNotifier {
-
+public class PolicyNotifier implements Notifier {
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
-
-        publishEventToEventHub(event);
-        return true;
+        try {
+            byte[] bytesEncoded = Base64.encodeBase64(new Gson().toJson(event).getBytes());
+            Object[] objects = new Object[]{event.getType(), event.getTimeStamp(), new String(bytesEncoded)};
+            org.wso2.carbon.databridge.commons.Event payload = new org.wso2.carbon.databridge.commons.Event(
+                    APIConstants.NOTIFICATION_STREAM_ID, System.currentTimeMillis(),
+                    null, null, objects);
+            APIUtil.publishEventToEventHub(null, payload);
+            return true;
+        } catch (Exception e) {
+            throw new NotifierException(e);
+        }
     }
 
     @Override
     public String getType() {
-
         return APIConstants.NotifierType.POLICY.name();
     }
 }

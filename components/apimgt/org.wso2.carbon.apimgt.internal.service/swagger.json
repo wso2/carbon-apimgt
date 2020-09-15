@@ -451,40 +451,6 @@
         }
       }
     },
-    "/scopes" : {
-      "get" : {
-        "tags" : [ "Subscription Validation" ],
-        "summary" : "Get all scopes.",
-        "description" : "This will provide access to the Scopes created in database.\n",
-        "parameters" : [ {
-          "name" : "xWSO2Tenant",
-          "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
-          "required" : true,
-          "type" : "string"
-        }, {
-          "name" : "scopeKey",
-          "in" : "query",
-          "description" : "**Search condition**.\n Scope Key\n",
-          "required" : false,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An array of Scopes in Database.",
-            "schema" : {
-              "$ref" : "#/definitions/ScopesList"
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/synapse-artifacts" : {
       "get" : {
         "tags" : [ "Retrieving Synapse artifacts" ],
@@ -1049,44 +1015,6 @@
         },
         "keyManager" : {
           "type" : "string"
-        }
-      }
-    },
-    "ScopesList" : {
-      "properties" : {
-        "count" : {
-          "type" : "integer",
-          "example" : 1,
-          "description" : "Number of ApplicationKeyMappings returned.\n"
-        },
-        "list" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Scope"
-          }
-        },
-        "pagination" : {
-          "$ref" : "#/definitions/Pagination"
-        }
-      },
-      "title" : "ApplicationKeyMapping List"
-    },
-    "Scope" : {
-      "properties" : {
-        "name" : {
-          "type" : "string"
-        },
-        "displayName" : {
-          "type" : "string"
-        },
-        "description" : {
-          "type" : "string"
-        },
-        "roles" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          }
         }
       }
     },

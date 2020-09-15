@@ -19,12 +19,10 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents the interface used by the APIKeyValidator to interact with the API
@@ -114,5 +112,4 @@ public interface APIKeyDataStore {
      */
     void cleanup();
 
-    Map<String, Scope> retrieveScopes(String tenantDomain);
 }

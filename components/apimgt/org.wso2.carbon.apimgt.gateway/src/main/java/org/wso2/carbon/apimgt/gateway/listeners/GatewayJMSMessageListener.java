@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -48,7 +47,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
@@ -198,15 +196,6 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.APPLICATION_DELETE.toString().equals(eventType)) {
             ApplicationEvent event = new Gson().fromJson(eventJson, ApplicationEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeApplication(event);
-        } else if (EventType.SCOPE_CREATE.toString().equals(eventType)) {
-            ScopeEvent event = new Gson().fromJson(eventJson,ScopeEvent.class);
-            ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
-        } else if (EventType.SCOPE_UPDATE.toString().equals(eventType)) {
-            ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
-            ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
-        } else if (EventType.SCOPE_DELETE.toString().equals(eventType)) {
-            ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
-            ServiceReferenceHolder.getInstance().getKeyManagerDataService().deleteScope(event);
         } else {
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
             boolean updatePolicy = false;
@@ -244,7 +233,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService()
                             .removeApplicationPolicy(policyEvent);
                 }
-            }
+            } 
         }
     }
 
