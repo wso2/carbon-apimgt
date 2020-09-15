@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -36,8 +35,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
@@ -134,17 +133,16 @@ public class CacheInvalidationServiceImpl implements CacheInvalidationService {
             boolean startTenantFlow = false;
             try {
                 startTenantFlow = startTenantFlow(tenantEntry.getKey());
-                Cache gatewayUsernameCache = CacheProvider.getGatewayUsernameCache();
-                Cache gatewayInvalidUsernameCache = CacheProvider.getInvalidUsernameCache();
+                Cache gatewayUsernameCache = getCacheManager().
+                        getCache(APIConstants.GATEWAY_USERNAME_CACHE_NAME);
+                Cache gatewayInvalidUsernameCache = getCacheManager().
+                        getCache(APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME);
                 for (String username : tenantEntry.getValue()) {
                     if (gatewayUsernameCache != null) {
                         gatewayUsernameCache.remove(username);
                     }
                     if (gatewayInvalidUsernameCache != null) {
-                        BasicAuthValidationInfoDTO basicAuthValidationInfoDTO = new BasicAuthValidationInfoDTO();
-                        basicAuthValidationInfoDTO.setAuthenticated(false);
-                        basicAuthValidationInfoDTO.setDomainQualifiedUsername(username);
-                        gatewayInvalidUsernameCache.put(username, basicAuthValidationInfoDTO);
+                        gatewayInvalidUsernameCache.put(username, UUID.randomUUID().toString());
                     }
                 }
             } finally {

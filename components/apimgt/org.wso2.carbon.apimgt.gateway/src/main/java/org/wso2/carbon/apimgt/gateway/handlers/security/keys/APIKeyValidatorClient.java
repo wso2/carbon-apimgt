@@ -24,13 +24,11 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
-import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.service.APIKeyValidationService;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class APIKeyValidatorClient {
 
@@ -111,8 +109,4 @@ public class APIKeyValidatorClient {
         }
     }
 
-    public Map<String, Scope> retrieveScopes(String tenantDomain) {
-        return apiKeyValidationService.retrieveScopes(tenantDomain);
-
-    }
 }

@@ -23,7 +23,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 
@@ -61,8 +60,4 @@ public interface KeyManagerDataService {
     void removeApplicationPolicy(ApplicationPolicyEvent event);
 
     void removeAPIPolicy(APIPolicyEvent policyEvent);
-
-    void addScope(ScopeEvent event);
-
-    void deleteScope(ScopeEvent event);
 }

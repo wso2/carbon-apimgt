@@ -76,6 +76,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -650,7 +651,19 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString)
             throws APIManagementException {
 
-        return null;
+        Map<String, Set<Scope>> apiToScopeMapping = new HashMap<>();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        Map<String, Set<String>> apiToScopeKeyMapping = apiMgtDAO.getScopesForAPIS(apiIdsString);
+        for (String apiId : apiToScopeKeyMapping.keySet()) {
+            Set<Scope> apiScopes = new LinkedHashSet<>();
+            Set<String> scopeKeys = apiToScopeKeyMapping.get(apiId);
+            for (String scopeKey : scopeKeys) {
+                Scope scope = getScopeByName(scopeKey);
+                apiScopes.add(scope);
+            }
+            apiToScopeMapping.put(apiId, apiScopes);
+        }
+        return apiToScopeMapping;
     }
 
     /**
