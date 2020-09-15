@@ -357,7 +357,11 @@ ExceptionCodes implements ErrorHandler {
     TENANT_THEME_EXPORT_FAILED(901701, "Failed to export tenant theme of tenant %s", 500,
             "%s"),
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
-            "Super Tenant %s is not allowed to import a tenant theme");
+            "Super Tenant %s is not allowed to import a tenant theme"),
+
+    //AsyncAPI related codes
+    ASYNCAPI_URL_MALFORMED(901703, "AsyncAPI Specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI specification from URL"),
+    ASYNCAPI_URL_NO_200(9001704, "AsyncAPI Specification retrieval from URL failed", 400, "Response didn't return a 200 OK status");
 
     private final long errorCode;
     private final String errorMessage;
