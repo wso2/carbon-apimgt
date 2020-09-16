@@ -237,11 +237,18 @@ class CreateScope extends React.Component {
      */
     validateScopeName(id, value) {
         const { valid, sharedScope } = this.state;
-
+        const { intl } = this.props;
         sharedScope[id] = value;
         valid[id].invalid = !(value && value.length > 0);
         if (valid[id].invalid) {
             valid[id].error = 'Scope name cannot be empty';
+        }
+        valid[id].invalid = !(value && value.length <= 60);
+        if (valid[id].invalid) {
+            valid[id].error = intl.formatMessage({
+                id: 'Scopes.Create.Scope.name.length.exceeded',
+                defaultMessage: 'Exceeds maximum length limit of 60 characters',
+            });
         }
 
         if (/\s/.test(value)) {

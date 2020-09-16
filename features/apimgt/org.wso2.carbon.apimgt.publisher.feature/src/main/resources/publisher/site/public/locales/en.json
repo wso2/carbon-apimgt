@@ -1060,6 +1060,7 @@
   "Scopes.Create.CreateScope.short.description.display.name": "Enter Scope Display Name ( E.g.,: creator )",
   "Scopes.Create.CreateScope.short.description.name": "Enter Scope Name ( E.g.,: creator )",
   "Scopes.Create.Scope.description.length.exceeded": "Exceeds maximum length limit of 512 characters",
+  "Scopes.Create.Scope.name.length.exceeded": "Exceeds maximum length limit of 60 characters",
   "Scopes.Create.ScopeCreate.Roles.Invalid": "Role is invalid",
   "Scopes.Delete.Delete.document.scope.label.ok.confirm": "Are you sure you want to delete scope {scope} ?",
   "Scopes.Delete.Delete.scope.delete": "Delete",

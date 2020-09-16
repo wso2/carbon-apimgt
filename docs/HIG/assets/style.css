@@ -112,6 +112,7 @@ h5 {
 h6 {
     font-size: 1em;
     font-weight: 600;
+    margin-top: 50px;
 }
 
 ol.padded li, ul.padded li {
@@ -153,6 +154,11 @@ nav {
     position: fixed;
     top: 60px;
     width: 240px;
+}
+
+iframe {
+    border: 0;
+    margin-top: 20px;
 }
 
 article {
@@ -460,3 +466,25 @@ form.vertical label {
 }
 
 #roles h4 {margin: 40px 0 0}
+
+.example {
+    padding: .5em;
+    border: .5em;
+    border-left-style: solid;
+    page-break-inside: avoid;
+    border-color: #E0CB52;
+    background: #FCFAEE;
+    counter-increment: example;
+    overflow: auto;
+    clear: both;
+}
+.example::before, .example > .marker {
+    text-transform: uppercase;
+    color: #827017;
+    min-width: 7.5em;
+    display: block;
+}
+
+.white-space {
+    margin: 50px 0 0;
+}

@@ -73,8 +73,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -633,19 +633,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString)
             throws APIManagementException {
 
-        Map<String, Set<Scope>> apiToScopeMapping = new HashMap<>();
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        Map<String, Set<String>> apiToScopeKeyMapping = apiMgtDAO.getScopesForAPIS(apiIdsString);
-        for (String apiId : apiToScopeKeyMapping.keySet()) {
-            Set<Scope> apiScopes = new LinkedHashSet<>();
-            Set<String> scopeKeys = apiToScopeKeyMapping.get(apiId);
-            for (String scopeKey : scopeKeys) {
-                Scope scope = getScopeByName(scopeKey);
-                apiScopes.add(scope);
-            }
-            apiToScopeMapping.put(apiId, apiScopes);
-        }
-        return apiToScopeMapping;
+        return null;
     }
 
     /**
@@ -662,8 +650,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         scopeDTO.setName(scopeKey);
         scopeDTO.setDisplayName(scope.getName());
         scopeDTO.setDescription(scope.getDescription());
-        if (scope.getRoles() != null) {
-            scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
+        if (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().trim().split(",").length > 0) {
+            scopeDTO.setBindings(Arrays.asList(scope.getRoles().trim().split(",")));
         }
         try (Response response = scopeClient.registerScope(scopeDTO)) {
             if (response.status() != HttpStatus.SC_CREATED) {
@@ -672,7 +660,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         " Status: " + response.status() + " . Error Response: " + responseString);
             }
         } catch (KeyManagerClientException e) {
-            handleException("Can not scope : " + scopeKey, e);
+            handleException("Cannot register scope : " + scopeKey, e);
         }
     }
 
@@ -707,7 +695,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             scopeDTO = scopeClient.getScopeByName(name);
         } catch (KeyManagerClientException ex) {
-            handleException("Can read scope : " + name, ex);
+            handleException("Cannot read scope : " + name, ex);
         }
         return fromDTOToScope(scopeDTO);
     }
@@ -724,7 +712,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         scope.setName(scopeDTO.getDisplayName());
         scope.setKey(scopeDTO.getName());
         scope.setDescription(scopeDTO.getDescription());
-        scope.setRoles(String.join(",", scopeDTO.getBindings()));
+        scope.setRoles((scopeDTO.getBindings() != null && !scopeDTO.getBindings().isEmpty())
+                ? String.join(",", scopeDTO.getBindings()) : StringUtils.EMPTY);
         return scope;
     }
 
@@ -865,8 +854,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             ScopeDTO scopeDTO = new ScopeDTO();
             scopeDTO.setDisplayName(scope.getName());
             scopeDTO.setDescription(scope.getDescription());
-            if (scope.getRoles() != null) {
-                scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
+            if (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().trim().split(",").length > 0) {
+                scopeDTO.setBindings(Arrays.asList(scope.getRoles().trim().split(",")));
             }
             scopeClient.updateScope(scopeDTO, scope.getKey());
         } catch (KeyManagerClientException e) {

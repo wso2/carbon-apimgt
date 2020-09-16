@@ -66,6 +66,7 @@ import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
@@ -198,7 +199,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ApplicationRegistrationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
-
+            bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
 
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);

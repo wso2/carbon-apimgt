@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -72,6 +73,9 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
 
     public AbstractAPIManagerWrapper(ApiMgtDAO apiMgtDAO) throws APIManagementException {
         this.apiMgtDAO = apiMgtDAO;
+    }
+    public AbstractAPIManagerWrapper(ScopesDAO scopesDAO) throws APIManagementException {
+        this.scopesDAO = scopesDAO;
     }
 
     public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
