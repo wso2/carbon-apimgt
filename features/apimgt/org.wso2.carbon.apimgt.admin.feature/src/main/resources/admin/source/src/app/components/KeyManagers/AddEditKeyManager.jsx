@@ -232,8 +232,16 @@ function AddEditKeyManager(props) {
     const restApi = new API();
     const updateKeyManagerConnectorConfiguration = (keyManagerType) => {
         if (settings.keyManagerConfiguration) {
-            settings.keyManagerConfiguration.map(({ type: key, configurations }) => {
+            settings.keyManagerConfiguration.map(({
+                type: key, defaultConsumerKeyClaim, defaultScopesClaim, configurations,
+            }) => {
                 if (key === keyManagerType) {
+                    if (defaultConsumerKeyClaim) {
+                        dispatch({ field: 'consumerKeyClaim', value: defaultConsumerKeyClaim });
+                    }
+                    if (defaultScopesClaim) {
+                        dispatch({ field: 'scopesClaim', value: defaultScopesClaim });
+                    }
                     setKeyManagerConfiguration(configurations);
                     return true;
                 } else {

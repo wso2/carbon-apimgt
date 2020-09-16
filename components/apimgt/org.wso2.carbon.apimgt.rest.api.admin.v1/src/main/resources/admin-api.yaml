@@ -4430,6 +4430,29 @@ definitions:
             type: string
             description: |
               define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL.
+          permissions:
+            $ref: '#/definitions/SubscriptionThrottlePolicyPermission'
+
+  #-----------------------------------------------------
+  # The Subscription Throttle Policy Permission resource
+  #-----------------------------------------------------
+  SubscriptionThrottlePolicyPermission:
+    title: SubscriptionThrottlePolicyPermission
+    required:
+      - permissionType
+      - roles
+    properties:
+      permissionType:
+        type: string
+        enum:
+          - ALLOW
+          - DENY
+        example: deny
+      roles:
+        type: array
+        items:
+          type: string
+        example: ["Internal/everyone"]
 
 #-----------------------------------------------------
 # The GraphQL Query resource
@@ -5227,6 +5250,12 @@ definitions:
             displayName:
               type: string
               example: 'default'
+            defaultConsumerKeyClaim:
+              type: string
+              example: 'azp'
+            defaultScopesClaim:
+              type: string
+              example: 'scope'
             configurations:
               type: array
               items:

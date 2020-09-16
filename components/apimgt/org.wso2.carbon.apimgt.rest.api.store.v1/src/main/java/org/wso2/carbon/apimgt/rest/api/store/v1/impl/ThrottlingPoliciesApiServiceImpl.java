@@ -130,8 +130,10 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
                     Set<TierPermission> tierPermissions = apiConsumer.getTierPermissions();
                     for (TierPermission tierPermission : tierPermissions) {
                         Tier tier = apiTierMap.get(tierPermission.getTierName());
-                        tier.setTierPermission(tierPermission);
-                        apiTierMap.put(tierPermission.getTierName(), tier);
+                        if (tier != null) {
+                            tier.setTierPermission(tierPermission);
+                            apiTierMap.put(tierPermission.getTierName(), tier);
+                        }
                     }
 
                     // Removing denied Tiers

@@ -61,4 +61,14 @@ public interface KeyManagerConnectorConfiguration {
 
         return getType();
     }
+
+    public default String getDefaultScopesClaim() {
+
+        return "";
+    }
+
+    public default String getDefaultConsumerKeyClaim() {
+
+        return "";
+    }
 }

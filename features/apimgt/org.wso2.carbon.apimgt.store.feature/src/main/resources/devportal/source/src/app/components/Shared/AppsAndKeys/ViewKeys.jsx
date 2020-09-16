@@ -20,7 +20,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import InputLabel from '@material-ui/core/InputLabel';
+import Alert1 from 'AppComponents/Shared/Alert';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
@@ -36,6 +36,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
+import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
@@ -262,7 +263,7 @@ class ViewKeys extends React.Component {
      * */
     generateAccessToken = () => {
         const { accessTokenRequest, isUpdating } = this.state;
-        const { selectedTab } = this.props;
+        const { selectedTab, intl } = this.props;
         this.setState({ isUpdating: true });
         this.applicationPromise
             .then((application) => application.generateToken(
@@ -289,8 +290,19 @@ class ViewKeys extends React.Component {
                 const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
+                } else if (status === 400) {
+                     Alert1.error(error.description ||
+                         intl.formatMessage({
+                             id: 'Shared.AppsAndKeys.TokenManager.key.generate.bad.request.error',
+                              defaultMessage: 'Error occurred when generating Access Token',
+                         })
+                     );
                 }
                 this.setState({ isUpdating: false });
+                const { response } = error;
+                if (response && response.body) {
+                    Alert.error(response.body.message);
+                }
             });
     };
 

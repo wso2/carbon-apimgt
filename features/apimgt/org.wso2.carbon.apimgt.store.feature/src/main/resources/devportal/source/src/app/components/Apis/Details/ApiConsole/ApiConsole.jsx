@@ -140,7 +140,7 @@ class ApiConsole extends React.Component {
                     labels = apiData.labels.map((label) => { return label.name; });
                 }
                 if (apiData.scopes) {
-                    const scopeList = apiData.scopes.map((scope) => { return scope.name; });
+                    const scopeList = apiData.scopes.map((scope) => { return scope.key; });
                     this.setState({ scopes: scopeList });
                 }
                 if (environments && environments.length > 0) {

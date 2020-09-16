@@ -212,9 +212,14 @@ public class OAS2Parser extends APIDefinition {
      * @param genCode String builder
      */
     private void setDefaultGeneratedResponse(StringBuilder genCode, String responseCode) {
-        genCode.append("\n/*if (!responses[").append(responseCode).append("]) {\n").append("  responses[")
-                .append(responseCode).append("] = [];\n").append("}\n").append("responses[")
-                .append(responseCode).append("][\"application/(json or xml)\"] = {}/<>*/\n");
+        if (responseCode.equals("default")) {
+            responseCode = "\"" + responseCode + "\"";
+        }
+        genCode.append("if (!responses[").append(responseCode).append("]) {\n" +
+                "  responses[").append(responseCode).append("] = [];\n" +
+                "}\n" +
+                "responses[").append(responseCode).append("][\"application/json\"] = \"\";\n" +
+                "responses[").append(responseCode).append("][\"application/xml\"] = \"\";\n\n");
     }
 
     /**
@@ -228,12 +233,18 @@ public class OAS2Parser extends APIDefinition {
      */
     private String getGeneratedResponsePayloads(String responseCode, String example, String type, boolean initialized) {
         StringBuilder genRespPayload = new StringBuilder();
+        if (responseCode.equals("default")) {
+            responseCode = "\"" + responseCode + "\"";
+        }
+        if (StringUtils.isBlank(example) || example.equals("null")) {
+            example = "\"\"";
+        }
         if (!initialized) {
             genRespPayload.append("\nif (!responses[").append(responseCode).append("]) {").append("\n responses [")
                     .append(responseCode).append("] = [];").append("\n}");
         }
         genRespPayload.append("\nresponses[").append(responseCode).append("][\"application/").append(type)
-                .append("\"] = \n").append(example).append("\n");
+                .append("\"] = ").append(example).append(";\n");
         return genRespPayload.toString();
     }
 
@@ -246,10 +257,10 @@ public class OAS2Parser extends APIDefinition {
      * @return script with mock payloads and conditions to handle not implemented
      */
     private String getMandatoryScriptSection(int minResponseCode, StringBuilder payloadVariables) {
-        return "var accept = \"\\\"\"+mc.getProperty('AcceptHeader')+\"\\\"\";" +
+        return "var accept = mc.getProperty('AcceptHeader');" +
                 "\nvar responseCode = mc.getProperty('query.param.responseCode');" +
-                "\nvar responseCodeStr = \"\\\"\"+responseCode+\"\\\"\";" +
                 "\nvar responses = [];\n" +
+                "\nvar responseCodeSC;\n" +
                 payloadVariables +
                 "\nresponses[501] = [];" +
                 "\nresponses[501][\"application/json\"] = {" +
@@ -257,13 +268,17 @@ public class OAS2Parser extends APIDefinition {
                 "\n\"description\" : \"Not Implemented\"" +
                 "}\n" +
                 "responses[501][\"application/xml\"] = <response><code>501</code><description>Not Implemented</description></response>;\n\n" +
+                "if (responseCode == null) {\n" +
+                " responseCode = " + minResponseCode + ";\n" +   //assign lowest response code
+                "}\n\n" +
                 "if (!responses[responseCode]) {\n" +
                 " responseCode = 501;\n" +
                 "}\n\n" +
-                "if (responseCode == null) {\n" +
-                " responseCode = " + minResponseCode + ";\n" +   //assign lowest response code
-                " responseCodeStr = \"" + minResponseCode + "\";\n" +
-                "}\n\n" +
+                "if (responseCode === \"default\") {\n" +
+                "  responseCodeSC = mc.getProperty('query.param.responseCode');\n" +
+                "} else {\n" +
+                "  responseCodeSC = responseCode;\n" +
+                "}\n" +
                 "if (accept == null || !responses[responseCode][accept]) {\n";
     }
 
@@ -279,29 +294,29 @@ public class OAS2Parser extends APIDefinition {
         if (hasJsonPayload && hasXmlPayload) {
             responseSection = " accept = \"application/json\";\n" +
                     "}\n\n" +
-                    "if (accept === \"application/json\") {\n" +
+                    "if (accept == \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
-                    "} else if (accept === \"application/xml\") {\n" +
+                    "} else if (accept == \"application/xml\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
         } else if (hasJsonPayload) {
             responseSection = " accept = \"application/json\"; // assign whatever available\n" +
                     "}\n\n" +
-                    "if (accept === \"application/json\") {\n" +
+                    "if (accept == \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
                     "}";
         } else if (hasXmlPayload) {
             responseSection = " accept = \"application/xml\"; // assign whatever available\n" +
                     "}\n\n" +
-                    "if (accept === \"application/xml\") {\n" +
+                    "if (accept == \"application/xml\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
         }
@@ -809,7 +824,9 @@ public class OAS2Parser extends APIDefinition {
             for (Scope scope : scopes) {
                 String description = scope.getDescription() != null ? scope.getDescription() : "";
                 oAuth2Definition.addScope(scope.getKey(), description);
-                scopeBindings.put(scope.getKey(), scope.getRoles());
+                String roles = (StringUtils.isNotBlank(scope.getRoles())
+                        && scope.getRoles().trim().split(",").length > 0) ? scope.getRoles() : StringUtils.EMPTY;
+                scopeBindings.put(scope.getKey(), roles);
             }
             oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
@@ -1289,6 +1306,33 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
+     * This method returns swagger definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in swagger file(Swagger version 2)
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
+        Map<String, Path> paths = swagger.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<HttpMethod, Operation> operationsMap = paths.get(pathKey).getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> extensions = operation.getVendorExtensions();
+                if (extensions != null && extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
+                    Object tier = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, tier);
+                }
+            }
+        }
+        return getSwaggerJsonString(swagger);
+    }
+
+    /**
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param swagger swagger definition
      * @return
@@ -1310,7 +1354,9 @@ public class OAS2Parser extends APIDefinition {
         if (scopes != null && !scopes.isEmpty()) {
             for (Scope scope : scopes) {
                 oAuth2Definition.addScope(scope.getKey(), scope.getDescription());
-                scopeBindings.put(scope.getKey(), scope.getRoles());
+                String roles = (StringUtils.isNotBlank(scope.getRoles())
+                        && scope.getRoles().trim().split(",").length > 0) ? scope.getRoles() : StringUtils.EMPTY;
+                scopeBindings.put(scope.getKey(), roles);
             }
             oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
@@ -1457,6 +1503,27 @@ public class OAS2Parser extends APIDefinition {
         if (StringUtils.isNotBlank(authHeader)) {
             api.setAuthorizationHeader(authHeader);
         }
+        //Setup application Security
+        List<String> applicationSecurity = OASParserUtil.getApplicationSecurityTypes(extensions);
+        Boolean isOptional = OASParserUtil.getAppSecurityStateFromSwagger(extensions);
+        if (!applicationSecurity.isEmpty()) {
+            String securityList = api.getApiSecurity();
+            for (String securityType : applicationSecurity) {
+                if (APIConstants.DEFAULT_API_SECURITY_OAUTH2.equals(securityType)) {
+                    securityList = securityList + "," + APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+                }
+                if (APIConstants.API_SECURITY_BASIC_AUTH.equals(securityType)) {
+                    securityList = securityList + "," + APIConstants.API_SECURITY_BASIC_AUTH;
+                }
+                if (APIConstants.API_SECURITY_API_KEY.equals(securityType)) {
+                    securityList = securityList + "," + APIConstants.API_SECURITY_API_KEY;
+                }
+            }
+            if (!isOptional) {
+                securityList = securityList + "," + APIConstants.MANDATORY;
+            }
+            api.setApiSecurity(securityList);
+        }
         //Setup mutualSSL configuration
         String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
         if (StringUtils.isNotBlank(mutualSSL)) {
@@ -1467,7 +1534,8 @@ public class OAS2Parser extends APIDefinition {
             if (APIConstants.OPTIONAL.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
             } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
-                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
+                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL + "," +
+                        APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }
             api.setApiSecurity(securityList);
         }
@@ -1498,6 +1566,52 @@ public class OAS2Parser extends APIDefinition {
         }
 
         return api;
+    }
+
+    /**
+     * This method will extractX-WSO2-disable-security extension provided in API level
+     * by mgw and inject that extension to all resources in OAS file
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
+        Map<String, Object> apiExtensions = swagger.getVendorExtensions();
+        if (apiExtensions == null) {
+            return swaggerContent;
+        }
+        //Check Disable Security is enabled in API level
+        boolean apiLevelDisableSecurity = OASParserUtil.getDisableSecurity(apiExtensions);
+        Map<String, Path> paths = swagger.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<HttpMethod, Operation> operationsMap = paths.get(pathKey).getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> resourceExtensions = operation.getVendorExtensions();
+                boolean extensionsAreEmpty = false;
+                if (apiLevelDisableSecurity) {
+                    if (resourceExtensions == null) {
+                        resourceExtensions = new HashMap<>();
+                        extensionsAreEmpty = true;
+                    }
+                    resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
+                    if (extensionsAreEmpty) {
+                        operation.setVendorExtensions(resourceExtensions);
+                    }
+                } else if (resourceExtensions != null && resourceExtensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+                    //Check Disable Security is enabled in resource level
+                    boolean resourceLevelDisableSecurity = Boolean.parseBoolean(String.valueOf(resourceExtensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
+                    if (resourceLevelDisableSecurity) {
+                        resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
+                    }
+                }
+            }
+        }
+
+        return getSwaggerJsonString(swagger);
     }
 
 }

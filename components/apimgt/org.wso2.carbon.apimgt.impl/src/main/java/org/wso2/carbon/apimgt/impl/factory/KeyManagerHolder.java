@@ -118,16 +118,6 @@ public class KeyManagerHolder {
 
     }
 
-    /**
-     * This method will take hardcoded class name from api-manager.xml file and will return that class's instance.
-     * This class should be implementation class of keyManager.
-     *
-     * @return keyManager instance.
-     */
-    public static KeyManager getKeyManagerInstance(String tenantDomain) {
-
-        return getKeyManagerInstance(tenantDomain, APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
-    }
 
     public static Map<String, KeyManagerDto> getTenantKeyManagers(String tenantDomain) {
 

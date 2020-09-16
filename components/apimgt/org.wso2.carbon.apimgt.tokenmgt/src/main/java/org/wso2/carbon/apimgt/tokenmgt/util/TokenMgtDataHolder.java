@@ -24,12 +24,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.tokenmgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class TokenMgtDataHolder {
 
@@ -37,7 +33,6 @@ public class TokenMgtDataHolder {
     private static RealmService realmService;
     private static APIManagerConfigurationService amConfigService;
     private static Boolean isKeyCacheEnabledKeyMgt = true;
-    private static Map<String, AbstractScopesIssuer> scopesIssuers = new HashMap<String, AbstractScopesIssuer>();
     private static final Log log = LogFactory.getLog(TokenMgtDataHolder.class);
 
     // Scope used for marking Application Tokens
@@ -98,20 +93,4 @@ public class TokenMgtDataHolder {
         return applicationTokenScope;
     }
 
-    /**
-     * Add scope issuers to the map.
-     * @param prefix prefix of the scope issuer.
-     * @param scopesIssuer scope issuer instance.
-     */
-    public static void addScopesIssuer(String prefix, AbstractScopesIssuer scopesIssuer) {
-        scopesIssuers.put(prefix, scopesIssuer);
-    }
-
-    public static void setScopesIssuers(Map<String, AbstractScopesIssuer> scpIssuers) {
-        scopesIssuers = scpIssuers;
-    }
-
-    public static Map<String, AbstractScopesIssuer> getScopesIssuers() {
-        return scopesIssuers;
-    }
 }

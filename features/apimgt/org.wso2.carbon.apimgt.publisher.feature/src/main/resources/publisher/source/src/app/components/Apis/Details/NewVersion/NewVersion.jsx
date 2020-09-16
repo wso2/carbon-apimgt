@@ -97,7 +97,14 @@ class CreateNewVersion extends React.Component {
         super(props);
         this.state = {
             isDefaultVersion: 'no',
-            valid: { version: { empty: false, alreadyExists: false, hasSpecialChars: false } },
+            valid: {
+                version: {
+                    empty: false,
+                    alreadyExists: false,
+                    hasSpecialChars: false,
+                    MaxLengthExceeds: false,
+                },
+            },
         };
     }
 
@@ -112,7 +119,14 @@ class CreateNewVersion extends React.Component {
         const { value } = event.target;
         this.setState({
             newVersion: value,
-            valid: { version: { empty: !value, alreadyExists: false, hasSpecialChars: this.hasSpecialChars(value) } },
+            valid: {
+                version: {
+                    empty: !value,
+                    alreadyExists: false,
+                    hasSpecialChars: this.hasSpecialChars(value),
+                    MaxLengthExceeds: this.isMaxLengthExceeds(value),
+                },
+            },
         });
     };
 
@@ -121,6 +135,14 @@ class CreateNewVersion extends React.Component {
             return false;
         } else {
             return true;
+        }
+    }
+
+    isMaxLengthExceeds(value) {
+        if (value.length > 30) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -182,6 +204,8 @@ class CreateNewVersion extends React.Component {
             helperText = 'An API with version "' + newVersion + '" already exists.';
         } else if (valid.version.hasSpecialChars) {
             helperText = 'API Version should not contain special characters';
+        } else if (valid.version.MaxLengthExceeds) {
+            helperText = 'API version exceeds maximum length of 30 characters';
         }
 
         return (
@@ -206,6 +230,7 @@ class CreateNewVersion extends React.Component {
                                             valid.version.empty
                                             || valid.version.alreadyExists
                                             || valid.version.hasSpecialChars
+                                            || valid.version.MaxLengthExceeds
                                         }
                                         label={(
                                             <FormattedMessage
@@ -292,6 +317,7 @@ class CreateNewVersion extends React.Component {
                                                         valid.version.empty
                                                         || valid.version.alreadyExists
                                                         || valid.version.hasSpecialChars
+                                                        || valid.version.MaxLengthExceeds
                                                     }
                                                 >
                                                     <FormattedMessage

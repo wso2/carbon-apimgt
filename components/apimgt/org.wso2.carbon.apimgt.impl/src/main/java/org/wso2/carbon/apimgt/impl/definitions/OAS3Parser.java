@@ -20,6 +20,9 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.swagger.models.HttpMethod;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
 import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
@@ -256,9 +259,14 @@ public class OAS3Parser extends APIDefinition {
      * @param genCode String builder
      */
     private void setDefaultGeneratedResponse(StringBuilder genCode, String responseCode) {
-        genCode.append("\n/*if (!responses[").append(responseCode).append("]) {\n").append("  responses[")
-                .append(responseCode).append("] = [];\n").append("}\n").append("responses[")
-                .append(responseCode).append("][\"application/(json or xml)\"] = {}/<>*/\n");
+        if (responseCode.equals("default")) {
+            responseCode = "\"" + responseCode + "\"";
+        }
+        genCode.append("if (!responses[").append(responseCode).append("]) {\n" +
+                "  responses[").append(responseCode).append("] = [];\n" +
+                "}\n" +
+                "responses[").append(responseCode).append("][\"application/json\"] = \"\";\n" +
+                "responses[").append(responseCode).append("][\"application/xml\"] = \"\";\n\n");
     }
 
     /**
@@ -272,10 +280,16 @@ public class OAS3Parser extends APIDefinition {
      */
     private String getGeneratedResponsePayloads(String responseCode, String example, String type, boolean initialized) {
         StringBuilder genRespPayload = new StringBuilder();
+        if (responseCode.equals("default")) {
+            responseCode = "\"" + responseCode + "\"";
+        }
+        if (StringUtils.isBlank(example) || example.equals("null")) {
+            example = "\"\"";
+        }
         if (!initialized) {
             genRespPayload.append("\nif (!responses[").append(responseCode).append("]) {").append("\n responses [").append(responseCode).append("] = [];").append("\n}");
         }
-        genRespPayload.append("\nresponses[").append(responseCode).append("][\"application/").append(type).append("\"] = \n").append(example).append("\n");
+        genRespPayload.append("\nresponses[").append(responseCode).append("][\"application/").append(type).append("\"] = ").append(example).append(";\n");
         return genRespPayload.toString();
     }
 
@@ -288,9 +302,9 @@ public class OAS3Parser extends APIDefinition {
      * @return script with mock payloads and conditions to handle not implemented
      */
     private String getMandatoryScriptSection(int minResponseCode, StringBuilder payloadVariables) {
-        return "var accept = \"\\\"\"+mc.getProperty('AcceptHeader')+\"\\\"\";" +
+        return "var accept = mc.getProperty('AcceptHeader');" +
                 "\nvar responseCode = mc.getProperty('query.param.responseCode');" +
-                "\nvar responseCodeStr = \"\\\"\"+responseCode+\"\\\"\";" +
+                "\nvar responseCodeSC;" +
                 "\nvar responses = [];\n" +
                 payloadVariables +
                 "\nresponses[501] = [];" +
@@ -299,13 +313,21 @@ public class OAS3Parser extends APIDefinition {
                 "\n\"description\" : \"Not Implemented\"" +
                 "}\n" +
                 "responses[501][\"application/xml\"] = <response><code>501</code><description>Not Implemented</description></response>;\n\n" +
-                "if (!responses[responseCode]) {\n" +
-                " responseCode = 501;\n" +
-                "}\n\n" +
                 "if (responseCode == null) {\n" +
                 " responseCode = " + minResponseCode + ";\n" +   //assign lowest response code
-                " responseCodeStr = \"" + minResponseCode + "\";\n" +
                 "}\n\n" +
+                "if (!responses[responseCode]) {\n" +
+                "  if (responses[\"default\"]) {\n" +
+                "    responseCode = \"default\"\n" +
+                "  } else {\n" +
+                "    responseCode = 501;\n" +
+                "  }\n" +
+                "}\n" +
+                "if (responseCode === \"default\") {\n" +
+                "  responseCodeSC = mc.getProperty('query.param.responseCode');\n" +
+                "} else {\n" +
+                "  responseCodeSC = responseCode;\n" +
+                "}\n" +
                 "if (accept == null || !responses[responseCode][accept]) {\n";
     }
 
@@ -321,29 +343,29 @@ public class OAS3Parser extends APIDefinition {
         if (hasJsonPayload && hasXmlPayload) {
             responseSection = " accept = \"application/json\";\n" +
                     "}\n\n" +
-                    "if (accept === \"application/json\") {\n" +
+                    "if (accept == \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
-                    "} else if (accept === \"application/xml\") {\n" +
+                    "} else if (accept == \"application/xml\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
         } else if (hasJsonPayload) {
             responseSection = " accept = \"application/json\"; // assign whatever available\n" +
                     "}\n\n" +
-                    "if (accept === \"application/json\") {\n" +
+                    "if (accept == \"application/json\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadJSON(responses[responseCode][\"application/json\"]);\n" +
                     "}";
         } else if (hasXmlPayload) {
             responseSection = " accept = \"application/xml\"; // assign whatever available\n" +
                     "}\n\n" +
-                    "if (accept === \"application/xml\") {\n" +
+                    "if (accept == \"application/xml\") {\n" +
                     " mc.setProperty('CONTENT_TYPE', 'application/xml');\n" +
-                    " mc.setProperty('HTTP_SC', responseCodeStr);\n" +
+                    " mc.setProperty('HTTP_SC', responseCodeSC + \"\");\n" +
                     " mc.setPayloadXML(responses[responseCode][\"application/xml\"]);\n" +
                     "}";
         }
@@ -931,7 +953,9 @@ public class OAS3Parser extends APIDefinition {
             for (Scope scope : scopes) {
                 String description = scope.getDescription() != null ? scope.getDescription() : "";
                 oas3Scopes.put(scope.getKey(), description);
-                scopeBindings.put(scope.getKey(), scope.getRoles());
+                String roles = (StringUtils.isNotBlank(scope.getRoles())
+                        && scope.getRoles().trim().split(",").length > 0) ? scope.getRoles() : StringUtils.EMPTY;
+                scopeBindings.put(scope.getKey(), roles);
             }
             oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
@@ -1381,6 +1405,33 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
+     * This method returns openAPI definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in openAPI file(openAPI version 3)
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent);
+        Paths paths = openAPI.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<PathItem.HttpMethod, Operation> operationsMap = paths.get(pathKey).readOperationsMap();
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> extensions = operation.getExtensions();
+                if (extensions != null && extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
+                    Object tier = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, tier);
+                }
+            }
+        }
+        return Json.pretty(openAPI);
+    }
+
+    /**
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param openAPI openAPI definition
      * @return
@@ -1433,7 +1484,10 @@ public class OAS3Parser extends APIDefinition {
                 }
                 for (Scope scope : scopes) {
                     oas3Scopes.put(scope.getKey(), scope.getDescription());
-                    scopeBindings.put(scope.getKey(), scope.getRoles());
+                    String roles = (StringUtils.isNotBlank(scope.getRoles())
+                            && scope.getRoles().trim().split(",").length > 0)
+                            ? scope.getRoles() : StringUtils.EMPTY;
+                    scopeBindings.put(scope.getKey(), roles);
                 }
                 oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
             }
@@ -1640,6 +1694,27 @@ public class OAS3Parser extends APIDefinition {
         if (StringUtils.isNotBlank(authHeader)) {
             api.setAuthorizationHeader(authHeader);
         }
+        //Setup application Security
+        List<String> applicationSecurity = OASParserUtil.getApplicationSecurityTypes(extensions);
+        Boolean isOptional = OASParserUtil.getAppSecurityStateFromSwagger(extensions);
+        if (!applicationSecurity.isEmpty()) {
+            String securityList = api.getApiSecurity();
+            for (String securityType : applicationSecurity) {
+                if (APIConstants.DEFAULT_API_SECURITY_OAUTH2.equals(securityType)) {
+                    securityList = securityList + "," + APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+                }
+                if (APIConstants.API_SECURITY_BASIC_AUTH.equals(securityType)) {
+                    securityList = securityList + "," + APIConstants.API_SECURITY_BASIC_AUTH;
+                }
+                if (APIConstants.API_SECURITY_API_KEY.equals(securityType)) {
+                    securityList = securityList + "," + APIConstants.API_SECURITY_API_KEY;
+                }
+            }
+            if (!isOptional) {
+                securityList = securityList + "," + APIConstants.MANDATORY;
+            }
+            api.setApiSecurity(securityList);
+        }
         //Setup mutualSSL configuration
         String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
         if (StringUtils.isNotBlank(mutualSSL)) {
@@ -1650,7 +1725,8 @@ public class OAS3Parser extends APIDefinition {
             if (APIConstants.OPTIONAL.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
             } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
-                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
+                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL + "," +
+                        APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }
             api.setApiSecurity(securityList);
         }
@@ -1710,6 +1786,51 @@ public class OAS3Parser extends APIDefinition {
             throw new APIManagementException("Error while removing examples from OpenAPI definition", e,
                     ExceptionCodes.ERROR_REMOVING_EXAMPLES);
         }
+    }
+
+    /**
+     * This method will extractX-WSO2-disable-security extension provided in API level
+     * by mgw and inject that extension to all resources in OAS file
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent);
+        Map<String, Object> apiExtensions = openAPI.getExtensions();
+        if (apiExtensions == null) {
+            return swaggerContent;
+        }
+        //Check Disable Security is enabled in API level
+        boolean apiLevelDisableSecurity = OASParserUtil.getDisableSecurity(apiExtensions);
+        Paths paths = openAPI.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<PathItem.HttpMethod, Operation> operationsMap = paths.get(pathKey).readOperationsMap();
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> resourceExtensions = operation.getExtensions();
+                boolean extensionsAreEmpty = false;
+                if (apiLevelDisableSecurity) {
+                    if (resourceExtensions == null) {
+                        resourceExtensions = new HashMap<>();
+                        extensionsAreEmpty = true;
+                    }
+                    resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
+                    if (extensionsAreEmpty) {
+                        operation.setExtensions(resourceExtensions);
+                    }
+                } else if (resourceExtensions != null && resourceExtensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+                    //Check Disable Security is enabled in resource level
+                    boolean resourceLevelDisableSecurity = Boolean.parseBoolean(String.valueOf(resourceExtensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
+                    if (resourceLevelDisableSecurity) {
+                        resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
+                    }
+                }
+            }
+        }
+        return Json.pretty(openAPI);
     }
 
 }

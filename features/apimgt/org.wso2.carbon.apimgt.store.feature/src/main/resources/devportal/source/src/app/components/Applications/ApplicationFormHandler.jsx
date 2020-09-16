@@ -236,7 +236,7 @@ class ApplicationFormHandler extends React.Component {
         const attributeNameList = Object.keys(attributes);
         if (allAppAttributes.length > 0) {
             for (let i = 0; i < allAppAttributes.length; i++) {
-                if (allAppAttributes[i].required === 'true' && allAppAttributes[i].hidden === 'false') {
+                if (allAppAttributes[i].required === 'true' && allAppAttributes[i].hidden !== 'true') {
                     if (attributeNameList.indexOf(allAppAttributes[i].attribute) === -1) {
                         isValidAttribute = false;
                     } else if (attributeNameList.indexOf(allAppAttributes[i].attribute) > -1

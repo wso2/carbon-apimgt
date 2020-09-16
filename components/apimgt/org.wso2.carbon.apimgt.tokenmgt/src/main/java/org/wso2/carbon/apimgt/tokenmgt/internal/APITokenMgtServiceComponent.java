@@ -27,22 +27,14 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.tokenmgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.tokenmgt.handlers.SessionDataPublisherImpl;
-import org.wso2.carbon.apimgt.tokenmgt.issuers.AbstractScopesIssuer;
-import org.wso2.carbon.apimgt.tokenmgt.issuers.PermissionBasedScopeIssuer;
-import org.wso2.carbon.apimgt.tokenmgt.issuers.RoleBasedScopesIssuer;
 import org.wso2.carbon.apimgt.tokenmgt.listeners.KeyManagerUserOperationListener;
 import org.wso2.carbon.apimgt.tokenmgt.util.TokenMgtDataHolder;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component(
         name = "api.tokenmgt.component",
@@ -72,35 +64,6 @@ public class APITokenMgtServiceComponent {
                 log.debug("SessionDataPublisherImpl bundle is activated");
             } catch (Throwable e) {
                 log.error("SessionDataPublisherImpl bundle activation Failed", e);
-            }
-            // loading white listed scopes
-            List<String> whitelist = null;
-            APIManagerConfigurationService configurationService =
-                    org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                            .getAPIManagerConfigurationService();
-            if (configurationService != null) {
-                // Read scope whitelist from Configuration.
-                whitelist =
-                        configurationService.getAPIManagerConfiguration().getProperty(APIConstants.ALLOWED_SCOPES);
-                // If whitelist is null, default scopes will be put.
-                if (whitelist == null) {
-                    whitelist = new ArrayList<String>();
-                    whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
-                    whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
-                }
-            } else {
-                log.debug("API Manager Configuration couldn't be read successfully. Scopes might not work correctly.");
-            }
-            PermissionBasedScopeIssuer permissionBasedScopeIssuer = new PermissionBasedScopeIssuer();
-            RoleBasedScopesIssuer roleBasedScopesIssuer = new RoleBasedScopesIssuer();
-            TokenMgtDataHolder.addScopesIssuer(permissionBasedScopeIssuer.getPrefix(), permissionBasedScopeIssuer);
-            TokenMgtDataHolder.addScopesIssuer(roleBasedScopesIssuer.getPrefix(), roleBasedScopesIssuer);
-            if (log.isDebugEnabled()) {
-                log.debug("Permission based scope Issuer and Role based scope issuers are loaded.");
-            }
-            ScopesIssuer.loadInstance(whitelist);
-            if (log.isDebugEnabled()) {
-                log.debug("Identity API Key Mgt Bundle is started.");
             }
         } catch (Exception e) {
             log.error("Failed to initialize key management service.", e);
@@ -185,30 +148,5 @@ public class APITokenMgtServiceComponent {
         TokenMgtDataHolder.setAmConfigService(null);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
-
-    /**
-     * Add scope issuer to the map.
-     * @param scopesIssuer scope issuer.
-     */
-    @Reference(
-            name = "scope.issuer.service",
-            service = org.wso2.carbon.apimgt.tokenmgt.issuers.AbstractScopesIssuer.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "removeScopeIssuers")
-    protected void addScopeIssuer(AbstractScopesIssuer scopesIssuer) {
-
-        TokenMgtDataHolder.addScopesIssuer(scopesIssuer.getPrefix(), scopesIssuer);
-    }
-
-    /**
-     * unset scope issuer.
-     * @param scopesIssuer
-     */
-    protected void removeScopeIssuers(AbstractScopesIssuer scopesIssuer) {
-
-        TokenMgtDataHolder.setScopesIssuers(null);
-    }
-
 }
 

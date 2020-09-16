@@ -90,6 +90,7 @@
     "Apis.Details.Documents.CreateEditForm.document.create.type.sample": "නියැදිය සහ එස්ඩීකේ",
     "Apis.Details.Documents.CreateEditForm.document.create.type.support.forum": "සහාය සංසදය",
     "Apis.Details.Documents.CreateEditForm.document.name": "නම *",
+    "Apis.Details.Documents.CreateEditForm.exceeds.document.name.length.helper.text": "ලේඛනයේ නම උපරිම දිග අක්ෂර 60 ඉක්මවයි",
     "Apis.Details.Documents.CreateEditForm.document.name.helper.text": "ලේඛනය සඳහා නම සපයන්න",
     "Apis.Details.Documents.CreateEditForm.document.summary": "සාරාංශය *",
     "Apis.Details.Documents.CreateEditForm.document.summary.helper.text": "ලේඛනය සඳහා කෙටි විස්තරයක් සපයන්න",

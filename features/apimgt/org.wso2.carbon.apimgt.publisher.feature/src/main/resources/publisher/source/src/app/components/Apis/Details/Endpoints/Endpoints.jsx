@@ -130,6 +130,9 @@ function Endpoints(props) {
             }
             case 'set_inline': {
                 const { endpointImplementationType, endpointConfig } = value;
+                api.generateMockScripts(api.id).then((res) => { // generates mock/sample payloads
+                    setSwagger(res.obj);
+                });
                 return { ...initState, endpointConfig, endpointImplementationType };
             }
             case 'set_prototyped': {

@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -46,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -58,6 +60,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.cache.Cache;
@@ -159,7 +162,8 @@ public class APIKeyValidator {
 
                 if (info != null) {
                     if (APIUtil.isAccessTokenExpired(info)) {
-                        log.info("Invalid OAuth Token : Access Token " + apiKey + " expired.");
+                        log.info("Invalid OAuth Token : Access Token " + GatewayUtils.getMaskedToken(apiKey) + " " +
+                                "expired.");
                         info.setAuthorized(false);
                         // in cache, if token is expired  remove cache entry.
                         getGatewayKeyCache().remove(cacheKey);
@@ -765,5 +769,9 @@ public class APIKeyValidator {
     public boolean validateScopes(TokenValidationContext tokenValidationContext, String tenantDomain)
             throws APISecurityException {
         return dataStore.validateScopes(tokenValidationContext, tenantDomain);
+    }
+
+    public Map<String, Scope> retrieveScopes(String tenantDomain) {
+        return dataStore.retrieveScopes(tenantDomain);
     }
 }

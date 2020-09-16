@@ -62,15 +62,12 @@ const styles = {
     heading: {
         margin: 'auto',
         color: 'rgba(0, 0, 0, 0.40)',
+        wordBreak: 'break-all',
+        whiteSpace: 'normal',
     },
     paper: {
         padding: '10px 24px',
         width: 'auto',
-    },
-    editIcon: {
-        position: 'absolute',
-        top: 8,
-        right: 0,
     },
 };
 
@@ -107,7 +104,6 @@ function InFlow(props) {
                             )}
                         </Typography>
                         <Button
-                            className={classes.editIcon}
                             size='small'
                             onClick={startEditing}
                             disabled={isRestricted}
