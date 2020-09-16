@@ -33,8 +33,11 @@ import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
 import TryOutController from './TryOutController';
 import Application from '../../../../data/Application';
-import Dialog from 'react-dialog';
-//import fs-react from 'fs-react';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 /**
  * @inheritdoc
@@ -95,7 +98,8 @@ class ApiConsole extends React.Component {
             productionApiKey: '',
             sandboxApiKey: '',
             selectedKeyManager: 'Resident Key Manager',
-            isDialogOpen: false,
+            open: false,
+
         };
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.updateSwagger = this.updateSwagger.bind(this);
@@ -112,8 +116,8 @@ class ApiConsole extends React.Component {
         this.setProductionApiKey = this.setProductionApiKey.bind(this);
         this.setSandboxApiKey = this.setSandboxApiKey.bind(this);
         this.converttopostman = this.converttopostman.bind(this);
-        this.openDialog = this.openDialog.bind(this);
-        this.handleClose = this.handleClose.bind(this);
+    
+
     }
 
     /**
@@ -385,8 +389,8 @@ class ApiConsole extends React.Component {
         // console.log('fileReader.result');
         //console.log(fr.result);
         //console.log(fr);
-        // var fileDownload = require('js-file-download'),
-        var Converter = require('openapi-to-postmanv2');
+        var fileDownload = require('js-file-download'),
+            Converter = require('openapi-to-postmanv2');
         // openapiData = downloadLink;
 
         Converter.convert({ type: 'string', data: fr },
@@ -401,29 +405,30 @@ class ApiConsole extends React.Component {
                         conversionResult.output[0].data,
 
                     )
+                    fileDownload(
+                        JSON.stringify(conversionResult.output[0].data),
+                        "postman collection "
+                    )
 
                 }
             }
         );
     }
 
-    openDialog() {
-        console.log("open dialog");
-        this.setState({ isDialogOpen: true })
-    }
-
-    handleClose() {
-        this.setState({ isDialogOpen: false })
-    }
-
-    /**
-     * Downloading function of postman collection
-     * @memberof ApiConsole
-     */
-    postmanButton() {
 
 
-    }
+    handleClickOpen = () => {
+        this.setState({
+            open: true
+        });
+    };
+
+    handleClose = () => {
+        this.setState({
+
+            open: false
+        });
+    };
 
     /**
      * @inheritdoc
@@ -439,10 +444,8 @@ class ApiConsole extends React.Component {
         const user = AuthManager.getUser();
         const downloadSwagger = JSON.stringify({ ...swagger });
         const downloadLink = 'data:text/json;charset=utf-8, ' + encodeURIComponent(downloadSwagger);
-        //const downloadLink2 = 'data:text/json;charset=utf-16, ' + this.converttopostman(downloadSwagger);
 
         const fileName = 'swagger.json';
-        // const fileName2 = 'postman.json';
 
         if (api == null || swagger == null) {
             return <Progress />;
@@ -518,12 +521,49 @@ class ApiConsole extends React.Component {
                         api={this.state.api}
                     />
 
+                    <div>
+                        <Dialog
+
+                            open={this.state.open}
+                            onClose={this.handleClose}
+                            aria-labelledby="alert-dialog-title"
+                            aria-describedby="alert-dialog-description"
+                        >
+                            <DialogTitle id="alert-dialog-title">{"Get a Postman collection"}</DialogTitle>
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                    You can download the postman collection to your computer or you can open it with the postman web application
+                             </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={() => this.converttopostman(downloadSwagger)} color="primary">
+                                    Download
+                                 </Button>
+                                <a href="postman://app">
+                                    <Button color="primary" autoFocus>
+                                        Postman App
+                                 </Button>
+                                </a>
+
+                                <a href="https://go.postman.co/build/workspace" target="_blank">
+                                    <Button color="primary" autoFocus>
+                                        Postman Web
+                                 </Button>
+                                </a>
+                                <Button onClick={this.handleClose} color="primary" autoFocus>
+                                    Close
+                                 </Button>
+                            </DialogActions>
+                        </Dialog>
+                    </div>
+
+
                     <Grid container>
                         {/* <Grid xs={10} item /> */}
                         <Grid item xs={8}></Grid>
                         <Grid xs={2} item>
                             {/* <a  href={downloadLink2} download={fileName2}> */}
-                            <Button size='small' onClick={this.postmanButton} >
+                            <Button size='small' onClick={this.handleClickOpen} >
                                 {/* onClick={() => this.converttopostman(downloadSwagger)} */}
 
                                 <CloudDownloadRounded className={classes.buttonIcon} />
@@ -547,25 +587,7 @@ class ApiConsole extends React.Component {
                             </a>
                         </Grid>
                     </Grid>
-                    <div className="container">
-                        <button type="button" onClick={this.openDialog}>Open Dialog</button>
-                        {
-                            this.state.isDialogOpen &&
-                            <Dialog
-                                title="Dialog Title"
-                                modal={true}
-                                onClose={this.handleClose}
-                                buttons={
-                                    [{
-                                        text: "Close",
-                                        onClick: () => this.handleClose()
-                                    }]
-                                }>
-                                <h1>Dialog Content</h1>
-                                <p>More Content. Anything goes here</p>
-                            </Dialog>
-                        }
-                    </div>
+
 
                 </Paper>
                 <Paper className={classes.swaggerUIPaper}>
