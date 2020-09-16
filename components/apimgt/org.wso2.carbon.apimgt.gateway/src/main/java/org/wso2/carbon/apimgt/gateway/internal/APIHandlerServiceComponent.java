@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClie
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
+import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
 import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationServiceImpl;
 import org.wso2.carbon.apimgt.gateway.service.RevokedTokenDataImpl;
@@ -106,18 +107,7 @@ public class APIHandlerServiceComponent {
                 // Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();
                 bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
-                    ServiceReferenceHolder.getInstance().setThrottleDataPublisher(new ThrottleDataPublisher());
-                    ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-                    APIThrottleDataServiceImpl throttleDataServiceImpl =
-                            new APIThrottleDataServiceImpl(throttleDataHolder);
-                    CacheInvalidationService cacheInvalidationService = new CacheInvalidationServiceImpl();
-                    // Register APIThrottleDataService so that ThrottleData maps are available to other components.
-                    ServiceReferenceHolder.getInstance().setCacheInvalidationService(cacheInvalidationService);
-                    ServiceReferenceHolder.getInstance().setAPIThrottleDataService(throttleDataServiceImpl);
-                    ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
-                    ServiceReferenceHolder.getInstance().setRevokedTokenService(new RevokedTokenDataImpl());
-                    log.debug("APIThrottleDataService Registered...");
-                    // start web service throttle data retriever as separate thread and start it.
+                bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
 
                 // Set APIM Gateway JWT Generator
 
