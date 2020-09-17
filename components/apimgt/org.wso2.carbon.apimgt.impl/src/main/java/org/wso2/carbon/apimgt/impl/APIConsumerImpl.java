@@ -137,6 +137,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -1390,7 +1392,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setPermittedIP(permittedIP);
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
-        return ApiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
+        return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+    }
+
+    private ApiKeyGenerator loadApiKeyGenerator() {
+        ApiKeyGenerator apiKeyGenerator = null;
+        String keyGeneratorClassName = APIUtil.getApiKeyGeneratorImpl();
+
+        try {
+            Class keyGeneratorClass = APIConsumerImpl.class.getClassLoader().loadClass(keyGeneratorClassName);
+            Constructor constructor = keyGeneratorClass.getDeclaredConstructor();
+            apiKeyGenerator = (ApiKeyGenerator) constructor.newInstance();
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
+                InvocationTargetException e) {
+            log.error("Error while loading the api key generator class: " + keyGeneratorClassName, e);
+        }
+        return apiKeyGenerator;
     }
 
     /**

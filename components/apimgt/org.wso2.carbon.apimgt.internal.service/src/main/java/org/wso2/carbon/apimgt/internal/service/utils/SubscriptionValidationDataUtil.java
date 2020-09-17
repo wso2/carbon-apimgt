@@ -18,8 +18,11 @@
 
 package org.wso2.carbon.apimgt.internal.service.utils;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
@@ -41,6 +44,8 @@ import org.wso2.carbon.apimgt.internal.service.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ScopesListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
@@ -323,4 +328,27 @@ public class SubscriptionValidationDataUtil {
 
     }
 
+    public static ScopesListDTO fromScopeListToScopeDtoList(List<Scope> model) {
+
+        ScopesListDTO scopesListDTO = new ScopesListDTO();
+        List<ScopeDTO> scopeDTOList = new ArrayList<>();
+        for (Scope scope : model) {
+            scopeDTOList.add(fromScopeToScopeDto(scope));
+        }
+        scopesListDTO.setList(scopeDTOList);
+        scopesListDTO.setCount(scopeDTOList.size());
+        return scopesListDTO;
+    }
+
+    private static ScopeDTO fromScopeToScopeDto(Scope scope) {
+        ScopeDTO scopeDTO = new ScopeDTO();
+        scopeDTO.setName(scope.getKey());
+        scopeDTO.setDisplayName(scope.getName());
+        scopeDTO.setDescription(scope.getDescription());
+        String roles = scope.getRoles();
+        if (StringUtils.isNotEmpty(roles) && roles.trim().length() > 0) {
+            scopeDTO.setRoles(Arrays.asList(roles.split(",")));
+        }
+        return scopeDTO;
+    }
 }

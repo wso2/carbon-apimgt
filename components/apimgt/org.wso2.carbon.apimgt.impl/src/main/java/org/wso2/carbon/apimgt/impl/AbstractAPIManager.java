@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -125,6 +126,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -149,6 +151,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected Registry registry;
     protected UserRegistry configRegistry;
     protected ApiMgtDAO apiMgtDAO;
+    protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
     protected String username;
@@ -164,7 +167,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public AbstractAPIManager(String username) throws APIManagementException {
         apiMgtDAO = ApiMgtDAO.getInstance();
-
+        scopesDAO = ScopesDAO.getInstance();
         try {
             if (username == null) {
 
@@ -1585,8 +1588,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Check whether the given shared scope name exists in the tenant domain.
-     * If the scope does not exists in API-M (AM_DB) as a shared scope, check the existence of scope name in the KM.
+     * Check the scope exist in Tenant.
      *
      * @param scopeKey     candidate scope key
      * @param tenantid     tenant id
@@ -1596,14 +1598,7 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
 
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantid);
-        if (!apiMgtDAO.isSharedScopeExists(scopeKey, tenantid)) {
-            return KeyManagerHolder.getKeyManagerInstance(tenantDomain).isScopeExists(scopeKey);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Scope name: " + scopeKey + " exists as a shared scope in tenant: " + tenantDomain);
-        }
-        return true;
+        return scopesDAO.isScopeExist(scopeKey, tenantid);
     }
 
     /**
@@ -2736,9 +2731,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
             // setting scope
             if (!apiIdsString.isEmpty() && !reducedPublisherAPIInfo) {
-                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
-                Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString);
+
+                Map<String, Set<Scope>> apiScopeSet = getScopesForAPIS(apiIdsString);
                 if (apiScopeSet.size() > 0) {
                     for (int i = 0; i < apiCount; i++) {
                         Object api = apiList.get(i);
@@ -2770,6 +2764,22 @@ public abstract class AbstractAPIManager implements APIManager {
         result.put("length", totalLength);
         result.put("isMore", isMore);
         return result;
+    }
+
+    private Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
+
+        Map<String, Set<Scope>> apiToScopeMapping = new HashMap<>();
+        Map<String, Set<String>> apiToScopeKeyMapping = apiMgtDAO.getScopesForAPIS(apiIdsString);
+        for (String apiId : apiToScopeKeyMapping.keySet()) {
+            Set<Scope> apiScopes = new LinkedHashSet<>();
+            Set<String> scopeKeys = apiToScopeKeyMapping.get(apiId);
+            for (String scopeKey : scopeKeys) {
+                Scope scope = scopesDAO.getScope(scopeKey, tenantId);
+                apiScopes.add(scope);
+            }
+            apiToScopeMapping.put(apiId, apiScopes);
+        }
+        return apiToScopeMapping;
     }
 
     /**

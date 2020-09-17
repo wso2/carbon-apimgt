@@ -110,6 +110,10 @@ public class LogsHandler extends AbstractSynapseHandler {
                 messageContext.setProperty(SRC_ID_HEADER, SrcIdHeader);
                 messageContext.setProperty(APP_ID_HEADER, applIdHeader);
                 messageContext.setProperty(UUID_HEADER, uuIdHeader);
+
+                if (MDC.get(APIConstants.CORRELATION_ID) != null) {
+                    correlationIdHeader = (String) MDC.get(APIConstants.CORRELATION_ID);
+                }
                 messageContext.setProperty(CORRELATION_ID_HEADER, correlationIdHeader);
                 apiName = LogUtils.getAPIName(messageContext);
                 apiCTX = LogUtils.getAPICtx(messageContext);
@@ -154,7 +158,6 @@ public class LogsHandler extends AbstractSynapseHandler {
                             + "|" + applIdHeader + "|" + uuIdHeader + "|" + requestSize
                             + "|" + responseSize + "|" + apiResponseSC + "|"
                             + applicationName + "|" + apiConsumerKey + "|" + responseTime);
-                    MDC.remove(APIConstants.CORRELATION_ID);
                     return true;
                 } catch (Exception e) {
                     log.error(RESPONSE_EVENT_PUBLICATION_ERROR + e.getMessage(), e);

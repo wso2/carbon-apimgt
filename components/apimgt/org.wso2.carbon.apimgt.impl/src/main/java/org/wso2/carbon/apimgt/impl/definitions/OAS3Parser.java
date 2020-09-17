@@ -183,8 +183,14 @@ public class OAS3Parser extends APIDefinition {
                 String responseConditions = getResponseConditionsSection(hasJsonPayload, hasXmlPayload);
                 String finalScript = finalGenCode + responseConditions;
                 apiResourceMediationPolicyObject.setContent(finalScript);
-                //sets script to each resource in the swagger
-                op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
+                if (op.getExtensions() != null && op.getExtensions().get
+                        (APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
+                    if (op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
+                        op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+                    }
+                } else if (op.getExtensions() == null) {
+                    op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+                }
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
             checkAndSetEmptyScope(swagger);
@@ -1402,6 +1408,33 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
+     * This method returns openAPI definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in openAPI file(openAPI version 3)
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent);
+        Paths paths = openAPI.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<PathItem.HttpMethod, Operation> operationsMap = paths.get(pathKey).readOperationsMap();
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> extensions = operation.getExtensions();
+                if (extensions != null && extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
+                    Object tier = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, tier);
+                }
+            }
+        }
+        return Json.pretty(openAPI);
+    }
+
+    /**
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param openAPI openAPI definition
      * @return
@@ -1484,6 +1517,15 @@ public class OAS3Parser extends APIDefinition {
             if (defaultScheme == null) {
                 SecurityScheme newDefault = new SecurityScheme();
                 newDefault.setType(SecurityScheme.Type.OAUTH2);
+                // Populating the default security scheme with default values
+                OAuthFlows newDefaultFlows = new OAuthFlows();
+                OAuthFlow newDefaultFlow = new OAuthFlow();
+                newDefaultFlow.setAuthorizationUrl("https://test.com");
+                Scopes newDefaultScopes = new Scopes();
+                newDefaultFlow.setScopes(newDefaultScopes);
+                newDefaultFlows.setImplicit(newDefaultFlow);
+                newDefault.setFlows(newDefaultFlows);
+
                 securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, newDefault);
             }
             for (Map.Entry<String, SecurityScheme> entry : securitySchemes.entrySet()) {
@@ -1665,7 +1707,8 @@ public class OAS3Parser extends APIDefinition {
             if (APIConstants.OPTIONAL.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
             } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
-                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
+                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL + "," +
+                        APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }
             api.setApiSecurity(securityList);
         }

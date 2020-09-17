@@ -42,6 +42,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -121,13 +123,42 @@ public class RestApiAdminUtils {
      */
     public static void validateThrottlePolicyNameProperty(String policyName)
             throws APIManagementException {
-
+        String propertyName = "policyName";
+        Pattern pattern = Pattern.compile("[^A-Za-z0-9]");//. represents single character
+        Matcher matcher = pattern.matcher(policyName);
         if (StringUtils.isBlank(policyName)) {
-            String propertyName = "policyName";
             throw new APIManagementException(propertyName + " property value of payload cannot be blank",
                     ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
+
+        if (matcher.find()) {
+            throw new APIManagementException(propertyName +
+                    " property value of payload cannot contain invalid characters",
+                    ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS, propertyName));
+        }
     }
+
+    public static void validateIPAddress(String ipAddress) throws APIManagementException {
+        String ip4 = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}" +
+                "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+        String ip6 = "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:)" +
+                "{1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}" +
+                "(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}" +
+                "(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)" +
+                "|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0," +
+                "1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:(" +
+                "(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
+
+        Pattern ip4Pattern = Pattern.compile(ip4);
+        Pattern ip6Pattern = Pattern.compile(ip6);
+        Matcher ip4Matcher = ip4Pattern.matcher(ipAddress);
+        Matcher ip6Matcher = ip6Pattern.matcher(ipAddress);
+        boolean result = !ip4Matcher.find() && !ip6Matcher.find();
+        if (result) {
+            throw new APIManagementException(ipAddress + " is an invalid ip address format");
+        }
+    }
+
 
     /**
      * Constructs an error message to indicate that the object corresponding to the specified type has not been provided

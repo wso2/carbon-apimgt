@@ -165,6 +165,11 @@ function AddEdit(props) {
                         id: 'Throttling.Advanced.AddEdit.empty.error',
                         defaultMessage: ' contains white spaces.',
                     })}`;
+                } else if (/[^A-Za-z0-9]/.test(fieldValue)) {
+                    error = `Policy name ${intl.formatMessage({
+                        id: 'Throttling.Advanced.AddEdit.special.characters.error',
+                        defaultMessage: ' contains invalid characters.',
+                    })}`;
                 }
                 break;
             case 'description':

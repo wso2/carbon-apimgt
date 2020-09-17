@@ -39,7 +39,6 @@ import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -173,10 +172,6 @@ public class JWTValidatorImpl implements JWTValidator {
         jwtValidationInfo.setIssuedTime(jwtClaimsSet.getIssueTime().getTime());
         jwtValidationInfo.setUser(jwtClaimsSet.getSubject());
         jwtValidationInfo.setJti(jwtClaimsSet.getJWTID());
-        if(jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.SCOPE) != null){
-            jwtValidationInfo.setScopes(Arrays.asList(jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.SCOPE)
-                    .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
-        }
     }
     private JWKSet retrieveJWKSet() throws IOException, ParseException {
         String jwksInfo = JWTUtil

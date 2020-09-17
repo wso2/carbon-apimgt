@@ -757,6 +757,8 @@ public final class APIConstants {
     public static final String API_STORE_GROUP_EXTRACTOR_CLAIM_URI = API_STORE + "DefaultGroupExtractorClaimUri";
     public static final String API_STORE_MAP_EXISTING_AUTH_APPS = API_STORE + "MapExistingAuthApps";
     public static final String API_STORE_API_KEY_ALIAS = API_STORE + "ApiKeyAlias";
+    public static final String API_STORE_API_KEY_GENERATOR_IMPL = API_STORE + "ApiKeyGeneratorImpl";
+    public static final String API_STORE_API_KEY_SIGN_KEY_STORE = API_STORE + "APIKeyKeystore";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
     public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
     public static final String API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION = API_STORE +
@@ -1097,6 +1099,7 @@ public final class APIConstants {
         public static final String APPLICATION_POLICIES = "/application-policies";
         public static final String API_POLICIES = "/api-policies";
         public static final String SUBSCRIPTION_POLICIES = "/subscription-policies";
+        public static final String SCOPES = "/scopes";
 
         private SubscriptionValidationResources() {
 
@@ -2087,7 +2090,10 @@ public final class APIConstants {
     public static final String TENANT_STATE_ACTIVE = "ACTIVE";
     public static final String TENANT_STATE_INACTIVE = "INACTIVE";
 
+    public static final String DEFAULT_API_KEY_SIGN_KEY_STORE = "InternalKeyStore";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
+    public static final String DEFAULT_API_KEY_GENERATOR_IMPL = "org.wso2.carbon.apimgt.impl.token" +
+            ".DefaultApiKeyGenerator";
 
     //Constants for user API ratings
     public static final String API_ID = "apiId";
@@ -2347,7 +2353,8 @@ public final class APIConstants {
         APPLICATION,
         APPLICATION_REGISTRATION,
         POLICY,
-        SUBSCRIPTIONS
+        SUBSCRIPTIONS,
+        SCOPE
     }
 
     // Supported Event Types
@@ -2367,7 +2374,10 @@ public final class APIConstants {
         SUBSCRIPTIONS_UPDATE,
         SUBSCRIPTIONS_DELETE,
         DEPLOY_API_IN_GATEWAY,
-        REMOVE_API_FROM_GATEWAY
+        REMOVE_API_FROM_GATEWAY,
+        SCOPE_CREATE,
+        SCOPE_UPDATE,
+        SCOPE_DELETE
     }
 
     public static class GatewayArtifactSynchronizer {
@@ -2441,4 +2451,13 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_MAX_LENGTH_PROPERTY = "passwordPolicy.max.length";
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
+
+    public static class KeyStoreManagement {
+        public static final String KeyStoreName = "KeyStoreName";
+        public static final String SERVER_APIKEYSIGN_KEYSTORE_FILE = "Security.KeyStoreName.Location";
+        public static final String SERVER_APIKEYSIGN_KEYSTORE_PASSWORD = "Security.KeyStoreName.Password";
+        public static final String SERVER_APIKEYSIGN_KEYSTORE_KEY_ALIAS = "Security.KeyStoreName.KeyAlias";
+        public static final String SERVER_APIKEYSIGN_KEYSTORE_TYPE = "Security.KeyStoreName.Type";
+        public static final String SERVER_APIKEYSIGN_PRIVATE_KEY_PASSWORD = "Security.KeyStoreName.KeyPassword";
+    }
 }

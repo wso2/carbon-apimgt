@@ -1115,13 +1115,11 @@ public class APIMappingUtil {
         }
         if (null != model.getLastUpdated()) {
             Date lastUpdateDate = model.getLastUpdated();
-            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
-            dto.setLastUpdatedTime(String.valueOf(timeStamp));
+            dto.setLastUpdatedTime(RestApiUtil.convertToUTC(lastUpdateDate));
         }
         if (null != model.getCreatedTime()) {
             Date createdTime = new Date(Long.parseLong(model.getCreatedTime()));
-            Timestamp timeStamp = new Timestamp(createdTime.getTime());
-            dto.setCreatedTime(String.valueOf(timeStamp));
+            dto.setCreatedTime(RestApiUtil.convertToUTC(createdTime));
         }
         dto.setWorkflowStatus(model.getWorkflowStatus());
 
@@ -2121,13 +2119,11 @@ public class APIMappingUtil {
 
         if (null != product.getLastUpdated()) {
             Date lastUpdateDate = product.getLastUpdated();
-            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
-            productDto.setLastUpdatedTime(String.valueOf(timeStamp));
+            productDto.setLastUpdatedTime(RestApiUtil.convertToUTC(lastUpdateDate));
         }
         if (null != product.getCreatedTime()) {
             Date createdTime = product.getCreatedTime();
-            Timestamp timeStamp = new Timestamp(createdTime.getTime());
-            productDto.setCreatedTime(String.valueOf(timeStamp));
+            productDto.setLastUpdatedTime(RestApiUtil.convertToUTC(createdTime));
         }
 
         return productDto;
