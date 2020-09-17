@@ -187,6 +187,8 @@ public class SOAPOperationBindingUtils {
             } else if (wsdlInfo.hasSoapBindingOperations()) {
                 extensions.put(SOAPToRESTConstants.Swagger.SOAP_VERSION, SOAPToRESTConstants.SOAP_VERSION_11);
             }
+            extensions.put(SOAPToRESTConstants.Swagger.SOAP_STYLE, operation.getStyle());
+            extensions.put(SOAPToRESTConstants.Swagger.SOAP_MESSAGE_TYPE, operation.getMessageType());
             op.setVendorExtension(SOAPToRESTConstants.Swagger.WSO2_SOAP, extensions);
 
             if (!HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
