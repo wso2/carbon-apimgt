@@ -215,4 +215,16 @@ public abstract class APIDefinition {
      */
     public abstract API setExtensionsToAPI(String swaggerContent, API api)
             throws APIManagementException;
+
+    /**
+     * This method will extractX-WSO2-disable-security extension provided in API level
+     * by mgw and inject that extension to all resources in OAS file
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    public abstract String processDisableSecurityExtension(String swaggerContent)
+            throws APIManagementException;
+
 }
