@@ -230,7 +230,7 @@ function AddEdit(props) {
                     rateLimitTimeUnit: (result.body.rateLimitCount === 0) ? 'sec' : result.body.rateLimitTimeUnit,
                     billingPlan: result.body.billingPlan,
                     monetization: {
-                        monetizationPlan: (result.body.monetization === null) ? '' : result.body.monetization
+                        monetizationPlan: (result.body.monetization === null) ? 'FIXEDRATE' : result.body.monetization
                             .monetizationPlan,
                         fixedPrice: (result.body.monetization === null) ? '' : result.body.monetization.properties
                             .fixedPrice,
@@ -238,7 +238,7 @@ function AddEdit(props) {
                             .pricePerRequest,
                         currencyType: (result.body.monetization === null) ? '' : result.body.monetization.properties
                             .currencyType,
-                        billingCycle: (result.body.monetization === null) ? '' : result.body.monetization.properties
+                        billingCycle: (result.body.monetization === null) ? 'week' : result.body.monetization.properties
                             .billingCycle,
                     },
                     customAttributes: setCustomAttributes(result.body.customAttributes),
