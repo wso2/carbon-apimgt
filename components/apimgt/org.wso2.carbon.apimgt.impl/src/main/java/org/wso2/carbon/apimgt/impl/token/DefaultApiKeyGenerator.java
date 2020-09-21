@@ -94,6 +94,13 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.APPLICATION, jwtTokenInfoDTO.getApplication());
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.KEY_TYPE, jwtTokenInfoDTO.getKeyType());
 
+        if (jwtTokenInfoDTO.getPermittedIP() != null) {
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.PERMITTED_IP, jwtTokenInfoDTO.getPermittedIP());
+        }
+        if (jwtTokenInfoDTO.getPermittedReferer() != null) {
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.PERMITTED_REFERER, jwtTokenInfoDTO.getPermittedReferer());
+        }
+
         return jwtClaimsSetBuilder.build().toJSONObject().toJSONString();
     }
 
