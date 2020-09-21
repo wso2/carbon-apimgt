@@ -20,6 +20,18 @@ public class JWTValidationInfo implements Serializable {
     private int validationCode;
     private String rawPayload;
     private String keyManager;
+    private Boolean isAppToken;
+
+    public Boolean isAppToken() {
+
+        return isAppToken;
+    }
+
+    public void setAppToken(Boolean appToken) {
+
+        isAppToken = appToken;
+    }
+
     public String getUser() {
 
         return user;

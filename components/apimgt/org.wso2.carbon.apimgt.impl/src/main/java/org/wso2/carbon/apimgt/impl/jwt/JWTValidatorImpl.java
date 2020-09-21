@@ -61,6 +61,7 @@ public class JWTValidatorImpl implements JWTValidator {
                 if (state) {
                     jwtValidationInfo.setConsumerKey(getConsumerKey(jwtClaimsSet));
                     jwtValidationInfo.setScopes(getScopes(jwtClaimsSet));
+                    jwtValidationInfo.setAppToken(getIsAppToken(jwtClaimsSet));
                     JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
                     createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
                     jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
@@ -153,6 +154,11 @@ public class JWTValidatorImpl implements JWTValidator {
     protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
 
         return jwtTransformer.getTransformedScopes(jwtClaimsSet);
+    }
+
+    protected Boolean getIsAppToken(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+
+        return jwtTransformer.getTransformedIsAppTokenType(jwtClaimsSet);
     }
 
     private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo,

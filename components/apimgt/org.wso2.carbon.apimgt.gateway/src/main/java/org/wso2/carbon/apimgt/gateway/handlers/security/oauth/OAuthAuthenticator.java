@@ -206,13 +206,13 @@ public class OAuthAuthenticator implements Authenticator {
                         if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                                 keyManagerList.contains(keyManager)) {
                             isJwtToken = true;
-                        }else{
+                        } else {
                             return new AuthenticationResponse(false, isMandatory, true,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                         }
                     }
-                } catch ( ParseException | IllegalArgumentException e) {
+                } catch (ParseException | IllegalArgumentException e) {
                     log.debug("Not a JWT token. Failed to decode the token header.", e);
                 } catch (APIManagementException e) {
                     log.error("error while check validation of JWt", e);

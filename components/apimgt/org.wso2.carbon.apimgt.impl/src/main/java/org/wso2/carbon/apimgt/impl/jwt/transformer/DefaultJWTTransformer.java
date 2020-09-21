@@ -107,4 +107,24 @@ public class DefaultJWTTransformer implements JWTTransformer {
         this.tokenIssuer = tokenIssuerConfiguration;
     }
 
+    /**
+     * Returns whether the token type is Application or not by checking if 'aut' claim is APPLICATION or not. If 'aut'
+     * claim is not present, returns null.
+     *
+     * @param jwtClaimsSet JWT Claim set
+     * @return Boolean whether Application token type or not
+     */
+    @Override
+    public Boolean getTransformedIsAppTokenType(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+
+        try {
+            if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.AUTHORIZED_USER_TYPE) != null) {
+                String aut = jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.AUTHORIZED_USER_TYPE);
+                return StringUtils.equalsIgnoreCase(aut, APIConstants.JwtTokenConstants.APPLICATION);
+            }
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while parsing JWT claims", e);
+        }
+        return null;
+    }
 }
