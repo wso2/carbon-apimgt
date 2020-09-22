@@ -61,7 +61,7 @@ function MetaData(props) {
                         <Typography component='p' variant='body1'>
                             {api.description
                             && (
-                                    <ReactMarkdown source={capitalizeFirstLetter(api.description)} />
+                                <ReactMarkdown source={capitalizeFirstLetter(api.description)} />
                             )}
                         </Typography>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
