@@ -120,6 +120,10 @@ const BaseThumbnail = (props) => {
                 if (response && response.data) {
                     if (response.headers['content-type'] === 'application/json') {
                         setIconJson(JSON.parse(response.data));
+                    } else if (response.headers['content-type'] === 'image/svg+xml') {
+                        const blob = new Blob([response.data], { type: 'image/svg+xml' });
+                        const url = windowURL.createObjectURL(blob);
+                        setThumbnail(url);
                     } else if (response && response.data.size > 0) {
                         const url = windowURL.createObjectURL(response.data);
                         setThumbnail(url);
