@@ -212,6 +212,10 @@ class ApiThumb extends React.Component {
                         color: iconJson.color,
                         backgroundIndex: iconJson.backgroundIndex,
                     });
+                } else if (response.headers['content-type'] === 'image/svg+xml') {
+                    const blob = new Blob([response.data], { type: 'image/svg+xml' });
+                    const url = windowURL.createObjectURL(blob);
+                    this.setState({ imageObj: url });
                 } else if (response && response.data.size > 0) {
                     const url = windowURL.createObjectURL(response.data);
                     this.setState({ imageObj: url });
