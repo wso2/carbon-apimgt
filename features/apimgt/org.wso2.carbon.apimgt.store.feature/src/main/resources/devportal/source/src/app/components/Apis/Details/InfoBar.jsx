@@ -154,6 +154,7 @@ const styles = (theme) => {
             background: theme.custom.infoBar.tagChipBackground,
             color: theme.palette.getContrastText(theme.custom.infoBar.tagChipBackground),
             marginRight: theme.spacing(1),
+            marginBottom: theme.spacing(0.5),
         },
         expandWrapper: {
             cursor: 'pointer',
