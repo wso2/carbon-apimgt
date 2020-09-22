@@ -65,15 +65,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -649,8 +641,9 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     public List<APICategory> getAllAPICategoriesOfTenant(int tenantId) throws APIManagementException {
-
-        return apiMgtDAO.getAllCategories(tenantId);
+        List<APICategory> categories = apiMgtDAO.getAllCategories(tenantId);
+        categories.sort(Comparator.comparing(APICategory::getName));
+        return categories;
     }
     @Override
     public List<APICategory> getAPICategoriesOfTenant(int tenantId) throws APIManagementException {

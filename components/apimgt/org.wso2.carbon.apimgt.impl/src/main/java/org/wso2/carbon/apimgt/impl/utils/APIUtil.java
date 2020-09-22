@@ -10673,7 +10673,9 @@ public final class APIUtil {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         int tenantId = getTenantIdFromTenantDomain(tenantDomain);
-        return apiMgtDAO.getAllCategories(tenantId);
+        List<APICategory> categories = apiMgtDAO.getAllCategories(tenantId);
+        categories.sort(Comparator.comparing(APICategory::getName));
+        return categories;
     }
 
     /**
