@@ -27,18 +27,20 @@ import AuthManager from 'AppData/AuthManager';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
 import TryOutController from './TryOutController';
 import Application from '../../../../data/Application';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 
+const fileDownload = require('js-file-download');
+const Converter = require('openapi-to-postmanv2');
 /**
  * @inheritdoc
  * @param {*} theme theme
@@ -116,13 +118,11 @@ class ApiConsole extends React.Component {
         this.setProductionApiKey = this.setProductionApiKey.bind(this);
         this.setSandboxApiKey = this.setSandboxApiKey.bind(this);
         this.converttopostman = this.converttopostman.bind(this);
-    
-
     }
-
     /**
      * @memberof ApiConsole
      */
+
     componentDidMount() {
         const { api } = this.context;
         const apiID = api.id;
@@ -290,6 +290,70 @@ class ApiConsole extends React.Component {
         this.setState({ keys });
     }
 
+    handleClickOpen = () => {
+        this.setState({
+            open: true,
+        });
+    }
+
+    handleClose = () => {
+        this.setState({
+
+            open: false,
+        });
+    }
+
+    /**
+     * Converting an OpenAPI file to a postman collection
+     * @memberof ApiConsole
+     */
+    converttopostman(fr) {
+        // openapiData = downloadLink;
+
+        Converter.convert({ type: 'string', data: fr },
+            {}, (err, conversionResult) => {
+                if (!conversionResult.result) {
+                    console.log('Could not convert', conversionResult.reason);
+                } else {
+                    console.log(
+                        'The collection object is: ',
+                        conversionResult.output[0].data,
+                    );
+                    fileDownload(
+                        JSON.stringify(conversionResult.output[0].data),
+                        'postman collection',
+                    );
+                }
+            });
+    }
+
+    /**
+     * Load the swagger file of the given environment
+     * @memberof ApiConsole
+     */
+    updateSwagger(environment) {
+        const {
+            api, environments, containerMngEnvironments,
+        } = this.state;
+        let promiseSwagger;
+
+        if (environment) {
+            if (environments.includes(environment)) {
+                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(api.id, environment);
+            } else if (containerMngEnvironments.some((env) => env.clusterDetails.length > 0
+                && env.clusterDetails.some((cluster) => cluster.clusterName === environment))) {
+                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndClusterName(api.id, environment);
+            } else {
+                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndLabel(api.id, environment);
+            }
+        } else {
+            promiseSwagger = this.apiClient.getSwaggerByAPIId(api.id);
+        }
+        promiseSwagger.then((swaggerResponse) => {
+            this.setState({ swagger: swaggerResponse.obj });
+        });
+    }
+
     /**
      * Load the access token for given key type
      * @memberof TryOutController
@@ -353,82 +417,6 @@ class ApiConsole extends React.Component {
             return sandboxAccessToken;
         }
     }
-
-    /**
-     * Load the swagger file of the given environment
-     * @memberof ApiConsole
-     */
-    updateSwagger(environment) {
-        const {
-            api, environments, containerMngEnvironments,
-        } = this.state;
-        let promiseSwagger;
-
-        if (environment) {
-            if (environments.includes(environment)) {
-                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(api.id, environment);
-            } else if (containerMngEnvironments.some((env) => env.clusterDetails.length > 0
-                && env.clusterDetails.some((cluster) => cluster.clusterName === environment))) {
-                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndClusterName(api.id, environment);
-            } else {
-                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndLabel(api.id, environment);
-            }
-        } else {
-            promiseSwagger = this.apiClient.getSwaggerByAPIId(api.id);
-        }
-        promiseSwagger.then((swaggerResponse) => {
-            this.setState({ swagger: swaggerResponse.obj });
-        });
-    }
-
-    /**
-     * Converting an OpenAPI file to a postman collection 
-     * @memberof ApiConsole
-     */
-    converttopostman(fr) {
-        // console.log('fileReader.result');
-        //console.log(fr.result);
-        //console.log(fr);
-        var fileDownload = require('js-file-download'),
-            Converter = require('openapi-to-postmanv2');
-        // openapiData = downloadLink;
-
-        Converter.convert({ type: 'string', data: fr },
-            {}, (err, conversionResult) => {
-
-                if (!conversionResult.result) {
-                    console.log('Could not convert', conversionResult.reason);
-                }
-                else {
-                    console.log(
-                        "The collection object is: ",
-                        conversionResult.output[0].data,
-
-                    )
-                    fileDownload(
-                        JSON.stringify(conversionResult.output[0].data),
-                        "postman collection "
-                    )
-
-                }
-            }
-        );
-    }
-
-
-
-    handleClickOpen = () => {
-        this.setState({
-            open: true
-        });
-    };
-
-    handleClose = () => {
-        this.setState({
-
-            open: false
-        });
-    };
 
     /**
      * @inheritdoc
@@ -526,33 +514,34 @@ class ApiConsole extends React.Component {
 
                             open={this.state.open}
                             onClose={this.handleClose}
-                            aria-labelledby="alert-dialog-title"
-                            aria-describedby="alert-dialog-description"
+                            aria-labelledby='alert-dialog-title'
+                            aria-describedby='alert-dialog-description'
                         >
-                            <DialogTitle id="alert-dialog-title">{"Get a Postman collection"}</DialogTitle>
+                            <DialogTitle id='alert-dialog-title'>Get a Postman collection</DialogTitle>
                             <DialogContent>
-                                <DialogContentText id="alert-dialog-description">
-                                    You can download the postman collection to your computer or you can open it with the postman web application
-                             </DialogContentText>
+                                <DialogContentText id='alert-dialog-description'>
+                                    You can download the postman collection to your computer or
+                                    you can open it with the postman web application
+                                </DialogContentText>
                             </DialogContent>
                             <DialogActions>
-                                <Button onClick={() => this.converttopostman(downloadSwagger)} color="primary">
+                                <Button onClick={() => this.converttopostman(downloadSwagger)} color='primary'>
                                     Download
-                                 </Button>
-                                <a href="postman://app">
-                                    <Button color="primary" autoFocus>
+                                </Button>
+                                <a href='postman://app'>
+                                    <Button color='primary' autoFocus>
                                         Postman App
-                                 </Button>
+                                    </Button>
                                 </a>
 
-                                <a href="https://go.postman.co/build/workspace" target="_blank">
-                                    <Button color="primary" autoFocus>
+                                <a href='https://go.postman.co/build/workspace' target='_blank' rel='noopener noreferrer'>
+                                    <Button color='primary' autoFocus>
                                         Postman Web
-                                 </Button>
+                                    </Button>
                                 </a>
-                                <Button onClick={this.handleClose} color="primary" autoFocus>
+                                <Button onClick={this.handleClose} color='primary' autoFocus>
                                     Close
-                                 </Button>
+                                </Button>
                             </DialogActions>
                         </Dialog>
                     </div>
@@ -560,10 +549,10 @@ class ApiConsole extends React.Component {
 
                     <Grid container>
                         {/* <Grid xs={10} item /> */}
-                        <Grid item xs={8}></Grid>
+                        <Grid item xs={8} />
                         <Grid xs={2} item>
                             {/* <a  href={downloadLink2} download={fileName2}> */}
-                            <Button size='small' onClick={this.handleClickOpen} >
+                            <Button size='small' onClick={this.handleClickOpen}>
                                 {/* onClick={() => this.converttopostman(downloadSwagger)} */}
 
                                 <CloudDownloadRounded className={classes.buttonIcon} />
