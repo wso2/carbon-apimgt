@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -67,8 +68,12 @@ public class TagMappingUtil {
         int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
         int end = offset + limit - 1 <= size - 1 ? offset + limit - 1 : size - 1;
 
-        for (int i = start; i <= end; i++) {
-            Tag tag = tags.get(i);
+        tags.sort(Comparator.comparing(Tag::getNoOfOccurrences).reversed());
+
+        List<Tag> paginatedTags = tags.subList(start, end);
+        paginatedTags.sort(Comparator.comparing(Tag::getName));
+
+        for (Tag tag : paginatedTags) {
             tierDTOs.add(fromTagToDTO(tag));
         }
         tagListDTO.setCount(tierDTOs.size());

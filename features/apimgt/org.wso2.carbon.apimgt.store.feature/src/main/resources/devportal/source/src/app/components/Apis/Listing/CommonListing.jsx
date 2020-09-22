@@ -209,7 +209,7 @@ class CommonListing extends React.Component {
      */
     componentDidMount() {
         const restApiClient = new API();
-        const promisedTags = restApiClient.getAllTags();
+        const promisedTags = restApiClient.getAllTags({ limit:2147483647, offset:0 });
         promisedTags
             .then((response) => {
                 this.setState({ allTags: response.body.list });
