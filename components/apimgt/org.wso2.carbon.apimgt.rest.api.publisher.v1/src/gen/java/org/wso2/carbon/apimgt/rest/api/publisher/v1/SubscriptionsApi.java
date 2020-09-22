@@ -52,9 +52,15 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested subscription does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response subscriptionsBlockSubscriptionPost( @NotNull @ApiParam(value = "Subscription Id ",required=true)  @QueryParam("subscriptionId") String subscriptionId,  @NotNull @ApiParam(value = "Subscription block state. ",required=true, allowableValues="BLOCKED, PROD_ONLY_BLOCKED")  @QueryParam("blockState") String blockState, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+    public Response subscriptionsBlockSubscriptionPost(     @NotNull 
+        @ApiParam(value = "Subscription Id ",required=true)  @QueryParam("subscriptionId") String subscriptionId
+,      @NotNull 
+        @ApiParam(value = "Subscription block state. ",required=true, allowableValues="BLOCKED, PROD_ONLY_BLOCKED")  @QueryParam("blockState") BlockStateEnum blockState
+, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.subscriptionsBlockSubscriptionPost(subscriptionId, blockState, ifMatch, securityContext);
-    }
+    }public enum BlockStateEnum {
+BLOCKED,PROD_ONLY_BLOCKED,
+}
 
     @GET
     
@@ -69,7 +75,15 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Subscription list returned. ", response = SubscriptionListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response subscriptionsGet( @ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ")  @QueryParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Keywords to filter subscriptions ")  @QueryParam("query") String query) throws APIManagementException{
+    public Response subscriptionsGet(     
+        @ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ")  @QueryParam("apiId") String apiId
+,      
+        @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
+,      
+        @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
+, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,      
+        @ApiParam(value = "Keywords to filter subscriptions ")  @QueryParam("query") String query
+) throws APIManagementException{
         return delegate.subscriptionsGet(apiId, limit, offset, ifNoneMatch, query, securityContext);
     }
 
@@ -120,7 +134,9 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested subscription does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response subscriptionsUnblockSubscriptionPost( @NotNull @ApiParam(value = "Subscription Id ",required=true)  @QueryParam("subscriptionId") String subscriptionId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+    public Response subscriptionsUnblockSubscriptionPost(     @NotNull 
+        @ApiParam(value = "Subscription Id ",required=true)  @QueryParam("subscriptionId") String subscriptionId
+, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.subscriptionsUnblockSubscriptionPost(subscriptionId, ifMatch, securityContext);
     }
 }

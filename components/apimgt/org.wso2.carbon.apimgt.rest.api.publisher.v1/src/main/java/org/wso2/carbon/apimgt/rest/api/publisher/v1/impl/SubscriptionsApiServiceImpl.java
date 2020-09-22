@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApi;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberInfoDTO;
@@ -61,8 +62,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @param ifMatch If-Match header value
      * @return 200 response and the updated subscription if subscription block is successful
      */
-    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
-            MessageContext messageContext) {
+    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, SubscriptionsApi.BlockStateEnum blockState, String ifMatch,
+                                                       MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
@@ -126,7 +127,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             }
 
             SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
-            subscribedAPI.setSubStatus(blockState);
+            subscribedAPI.setSubStatus(blockState.toString());
             apiProvider.updateSubscription(subscribedAPI);
 
             SubscribedAPI updatedSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);

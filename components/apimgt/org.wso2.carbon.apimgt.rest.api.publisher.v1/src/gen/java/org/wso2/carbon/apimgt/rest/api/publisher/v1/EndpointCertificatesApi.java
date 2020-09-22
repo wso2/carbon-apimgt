@@ -130,7 +130,15 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response endpointCertificatesGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Alias for the certificate")  @QueryParam("alias") String alias,  @ApiParam(value = "Endpoint of which the certificate is uploaded")  @QueryParam("endpoint") String endpoint) throws APIManagementException{
+    public Response endpointCertificatesGet(     
+        @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
+,      
+        @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
+,      
+        @ApiParam(value = "Alias for the certificate")  @QueryParam("alias") String alias
+,      
+        @ApiParam(value = "Endpoint of which the certificate is uploaded")  @QueryParam("endpoint") String endpoint
+) throws APIManagementException{
         return delegate.endpointCertificatesGet(limit, offset, alias, endpoint, securityContext);
     }
 

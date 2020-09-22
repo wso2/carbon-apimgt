@@ -290,7 +290,7 @@ public enum EndpointImplementationTypeEnum {
   @ApiModelProperty(example = "CalculatorAPI", required = true, value = "")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=50)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -307,7 +307,7 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(example = "A calculator API that supports basic operations", value = "")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=32766)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
@@ -325,7 +325,7 @@ public enum EndpointImplementationTypeEnum {
   @ApiModelProperty(example = "CalculatorAPI", required = true, value = "")
   @JsonProperty("context")
   @NotNull
-  public String getContext() {
+ @Size(min=1,max=82)  public String getContext() {
     return context;
   }
   public void setContext(String context) {
@@ -343,7 +343,7 @@ public enum EndpointImplementationTypeEnum {
   @ApiModelProperty(example = "1.0.0", required = true, value = "")
   @JsonProperty("version")
   @NotNull
-  public String getVersion() {
+ @Size(min=1,max=30)  public String getVersion() {
     return version;
   }
   public void setVersion(String version) {
@@ -361,7 +361,7 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(example = "admin", value = "If the provider value is not given user invoking the api will be used as the provider. ")
   @JsonProperty("provider")
-  public String getProvider() {
+ @Size(max=50)  public String getProvider() {
     return provider;
   }
   public void setProvider(String provider) {

@@ -216,9 +216,8 @@ paths:
           name: openAPIVersion
           description: Open api version
           type: string
-          enum:
-            - V2
-            - V3
+          enum: [V2, V3]
+          default: V3
       tags:
         - APIs
       responses:
@@ -1201,6 +1200,7 @@ paths:
           type: string
           in: query
           required: true
+          maxLength: 30
         - name: defaultVersion
           description: Specifies whether new API should be added as default version.
           type: boolean
@@ -1266,19 +1266,19 @@ paths:
           description: |
             The action to demote or promote the state of the API.
 
-            Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]
+            Supported actions are [ **Publish, Deploy_as_a_Prototype, Demote_to_Created, Demote_to_Prototyped, Block, Deprecate, Re_Publish, Retire **]
 
           in: query
           type: string
           required: true
           enum:
             - Publish
-            - Deploy as a Prototype
-            - Demote to Created
-            - Demote to Prototyped
+            - Deploy_as_a_Prototype
+            - Demote_to_Created
+            - Demote_to_Prototyped
             - Block
             - Deprecate
-            - Re-Publish
+            - Re_Publish
             - Retire
         - name: lifecycleChecklist
           description: |
@@ -7647,20 +7647,28 @@ definitions:
       name:
         type: string
         example: CalculatorAPI
+        minLength: 1
+        maxLength: 50
       description:
         type: string
         example: A calculator API that supports basic operations
+        maxLength: 32766
       context:
         type: string
         example: CalculatorAPI
+        minLength: 1
+        maxLength: 82
       version:
         type: string
         example: 1.0.0
+        minLength: 1
+        maxLength: 30
       provider:
         description: |
           If the provider value is not given user invoking the api will be used as the provider.
         type: string
         example: admin
+        maxLength: 50
       lifeCycleStatus:  # NEED TO RENAME AS lifeCycleState
         type: string
         example: CREATED
@@ -8484,6 +8492,7 @@ definitions:
       name:
         type: string
         example: CalculatorDoc
+
       type:
         type: string
         enum:
@@ -9043,12 +9052,14 @@ definitions:
         example: businessowner
       businessOwnerEmail:
         type: string
+        format: email
         example: businessowner@wso2.com
       technicalOwner:
         type: string
         example: technicalowner
       technicalOwnerEmail:
         type: string
+        format: email
         example: technicalowner@wso2.com
 
   #-----------------------------------------------------

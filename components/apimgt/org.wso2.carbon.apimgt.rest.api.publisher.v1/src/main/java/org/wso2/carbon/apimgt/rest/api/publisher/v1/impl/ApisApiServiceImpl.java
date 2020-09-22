@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
@@ -248,7 +249,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisPost(APIDTO body, String oasVersion, MessageContext messageContext) {
+    public Response apisPost(APIDTO body, ApisApi.OpenAPIVersionEnum oasVersion, MessageContext messageContext) {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
@@ -288,7 +289,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (!isWSAPI) {
                 APIDefinition oasParser;
-                if (RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
+                if (RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion.toString())) {
                     oasParser = new OAS2Parser();
                 } else {
                     oasParser = new OAS3Parser();
@@ -3901,8 +3902,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
-            String ifMatch, MessageContext messageContext) {
+    public Response apisChangeLifecyclePost(ApisApi.ActionEnum action, String apiId, String lifecycleChecklist,
+                                            String ifMatch, MessageContext messageContext) {
         //pre-processing
         String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
@@ -3929,7 +3930,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //todo: check if API's tiers are properly set before Publishing
-            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action);
+            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action.toString());
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId);
@@ -4012,18 +4013,18 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return
      */
     @Override
-    public Response apisExportGet(String apiId, String name, String version, String providerName, String format,
+    public Response apisExportGet(String apiId, String name, String version, String providerName, ApisApi.FormatEnum format,
                                   Boolean preserveStatus, MessageContext messageContext)
             throws APIManagementException {
         ExportApiUtil exportApiUtil = new ExportApiUtil();
         if (apiId == null) {
 
-            return exportApiUtil.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API);
+            return exportApiUtil.exportApiOrApiProductByParams(name, version, providerName, format.toString(), preserveStatus, RestApiConstants.RESOURCE_API);
         } else {
             try {
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus, format);
+                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus, format.toString());
             } catch (APIManagementException e) {
                 if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);

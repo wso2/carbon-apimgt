@@ -50,7 +50,9 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Environment list is returned. ", response = EnvironmentListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class) })
-    public Response settingsGatewayEnvironmentsGet( @NotNull @ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true)  @QueryParam("apiId") String apiId) throws APIManagementException{
+    public Response settingsGatewayEnvironmentsGet(     @NotNull 
+        @ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true)  @QueryParam("apiId") String apiId
+) throws APIManagementException{
         return delegate.settingsGatewayEnvironmentsGet(apiId, securityContext);
     }
 

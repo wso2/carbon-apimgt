@@ -18,6 +18,7 @@ import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.MediationPoliciesApi.*;
 
 
 public interface MediationPoliciesApiService {
