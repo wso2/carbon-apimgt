@@ -1,0 +1,25 @@
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0" metadata-complete="true">
+    <display-name>admin-webapp</display-name>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/public/index.html</location>
+    </error-page>
+    <error-page>
+        <error-code>400</error-code>
+        <location>/public/index.html</location>
+    </error-page>
+
+    <servlet>
+        <servlet-name>admin</servlet-name>
+        <jsp-file>/public/index.html</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>admin</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>
