@@ -146,24 +146,22 @@ class Resources extends React.Component {
         const { classes } = this.props;
 
         return (
-            <div className={classes.root}>
-                <div className={classes.contentWrapper}>
-                    {Object.keys(paths).map((key) => {
-                        const path = paths[key];
-                        return (
-                            <div className={classes.root} key={key}>
-                                <Typography className={classes.heading} variant='body1'>
-                                    {key}
-                                </Typography>
-                                {Object.keys(path).map((innerKey) => {
-                                    return CONSTS.HTTP_METHODS.includes(innerKey) ? (
-                                        <RenderMethod method={innerKey} key={innerKey} />
-                                    ) : null;
-                                })}
-                            </div>
-                        );
-                    })}
-                </div>
+            <div className={classes.contentWrapper}>
+                {Object.keys(paths).map((key) => {
+                    const path = paths[key];
+                    return (
+                        <div className={classes.root} key={key}>
+                            <Typography className={classes.heading} variant='body1'>
+                                {key}
+                            </Typography>
+                            {Object.keys(path).map((innerKey) => {
+                                return CONSTS.HTTP_METHODS.includes(innerKey) ? (
+                                    <RenderMethod method={innerKey} key={innerKey} />
+                                ) : null;
+                            })}
+                        </div>
+                    );
+                })}
             </div>
         );
     }
