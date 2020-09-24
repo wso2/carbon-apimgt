@@ -244,7 +244,11 @@ class TokenManager extends React.Component {
         const additionalProperties = {};
 
         applicationConfiguration.forEach(confItem => {
-            additionalProperties[confItem.name] = confItem.default || '';
+            if ( confItem.multiple && typeof confItem.default === 'string' ){
+                additionalProperties[confItem.name] = [];
+            } else {
+                additionalProperties[confItem.name] = confItem.default || '';
+            }
         });
         return additionalProperties;
     }
