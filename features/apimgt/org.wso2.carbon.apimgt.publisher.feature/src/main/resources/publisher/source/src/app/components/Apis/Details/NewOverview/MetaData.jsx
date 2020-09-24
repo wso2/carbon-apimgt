@@ -20,7 +20,6 @@ import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import ReactMarkdown from 'react-markdown';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -61,7 +60,9 @@ function MetaData(props) {
                         <Typography component='p' variant='body1'>
                             {api.description
                             && (
-                                <ReactMarkdown source={capitalizeFirstLetter(api.description)} />
+                                <>
+                                    {capitalizeFirstLetter(api.description)}
+                                </>
                             )}
                         </Typography>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>

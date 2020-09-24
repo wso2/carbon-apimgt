@@ -17,7 +17,6 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import ReactMarkdown from 'react-markdown';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -412,9 +411,7 @@ class InfoBar extends React.Component {
                     <Collapse in={showOverview}>
                         <div className={classes.infoContent}>
                             <div className={classes.contentWrapper}>
-                                <Typography>
-                                    <ReactMarkdown source={api.description} />
-                                </Typography>
+                                <Typography>{api.description}</Typography>
                                 <Table className={classes.table}>
                                     <TableBody>
                                         <TableRow>
