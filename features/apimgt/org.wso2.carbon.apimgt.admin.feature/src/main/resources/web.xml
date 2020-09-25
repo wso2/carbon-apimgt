@@ -6,20 +6,93 @@
 
     <error-page>
         <error-code>404</error-code>
-        <location>/public/index.html</location>
-    </error-page>
-    <error-page>
-        <error-code>400</error-code>
-        <location>/public/index.html</location>
+        <location>/public/pages/index.jsp</location>
     </error-page>
 
+    <!--servlets -->
     <servlet>
-        <servlet-name>admin</servlet-name>
-        <jsp-file>/public/index.html</jsp-file>
+        <servlet-name>admin-webapp</servlet-name>
+        <jsp-file>/public/pages/index.jsp</jsp-file>
     </servlet>
+    <servlet>
+        <servlet-name>tasks</servlet-name>
+        <jsp-file>/public/pages/index.jsp</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>settings</servlet-name>
+        <jsp-file>/public/pages/index.jsp</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>microgateway</servlet-name>
+        <jsp-file>/public/pages/index.jsp</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>categories</servlet-name>
+        <jsp-file>/public/pages/index.jsp</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>throttling</servlet-name>
+        <jsp-file>/public/pages/index.jsp</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>analytics</servlet-name>
+        <jsp-file>/public/pages/index.jsp</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>dashboard</servlet-name>
+        <jsp-file>/public/pages/index.jsp</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>login</servlet-name>
+        <jsp-file>/public/pages/index.jsp</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>logout</servlet-name>
+        <jsp-file>/public/pages/index.jsp</jsp-file>
+    </servlet>
+
+
+    <!--servlet mappings -->
     <servlet-mapping>
-        <servlet-name>admin</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <servlet-name>admin-webapp</servlet-name>
+        <url-pattern>/admin-webapp</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>tasks</servlet-name>
+        <url-pattern>/admin-webapp/tasks/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>settings</servlet-name>
+        <url-pattern>/admin-webapp/settings/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>microgateway</servlet-name>
+        <jsp-file>/admin-webapp/microgateway/*</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>categories</servlet-name>
+        <jsp-file>/admin-webapp/categories/*</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>throttling</servlet-name>
+        <jsp-file>/admin-webapp/throttling/*</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>analytics</servlet-name>
+        <jsp-file>/admin-webapp/analytics/*</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>dashboard</servlet-name>
+        <jsp-file>/admin-webapp/dashboard/*</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>login</servlet-name>
+        <jsp-file>/admin-webapp/login/*</jsp-file>
+    </servlet>
+    <servlet>
+        <servlet-name>logout</servlet-name>
+        <jsp-file>/admin-webapp/logout/*</jsp-file>
+    </servlet>
+
 
 </web-app>

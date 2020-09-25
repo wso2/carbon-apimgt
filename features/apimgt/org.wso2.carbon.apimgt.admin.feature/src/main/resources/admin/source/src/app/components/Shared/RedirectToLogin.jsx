@@ -19,10 +19,11 @@
 import React from 'react';
 import Configurations from 'Config';
 import { FormattedMessage } from 'react-intl';
-import AuthManager from 'AppData/AuthManager';
+// import AuthManager from 'AppData/AuthManager';
 import ErrorPage from '../../errorPages/ErrorPage';
 
-const page = Configurations.app.context + '/services/auth/login';
+// const page = Configurations.app.context + '/services/auth/login';
+const page = Configurations.app.context;
 
 /**
  * This component is created to unify the login process from react UI.
@@ -51,7 +52,7 @@ class RedirectToLogin extends React.Component {
             this.setState({ errorCode: code[1] });
             this.setState({ isError: true });
         } else {
-            AuthManager.discardUser();
+            // AuthManager.discardUser();
             window.location = page;
             this.setState({ isError: false });
             return page;

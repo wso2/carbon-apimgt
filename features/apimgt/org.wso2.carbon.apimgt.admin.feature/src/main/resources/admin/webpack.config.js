@@ -26,7 +26,7 @@ const config = {
         path: path.resolve(__dirname, 'site/public/dist'),
         filename: '[name].[contenthash].bundle.js',
         chunkFilename: '[name].[contenthash].bundle.js',
-        publicPath: 'site/public/dist/',
+        publicPath: 'public/dist/',
     },
     node: {
         fs: 'empty',
@@ -87,7 +87,7 @@ const config = {
             // Until https://github.com/jantimon/html-webpack-plugin/issues/1483 ~tmkb
             // This was added to generate the index.jag from a hbs template file including the hashed bundle file
             {
-                test: /\.jag\.hbs$/,
+                test: /\.jsp\.hbs$/,
                 loader: 'underscore-template-loader',
                 query: {
                     engine: 'lodash',
@@ -110,8 +110,8 @@ const config = {
         }),
         new HtmlWebpackPlugin({
             inject: false,
-            template: path.resolve(__dirname, 'site/public/pages/index.jag.hbs'),
-            filename: path.resolve(__dirname, 'site/public/pages/index.jag'),
+            template: path.resolve(__dirname, 'site/public/pages/index.jsp.hbs'),
+            filename: path.resolve(__dirname, 'site/public/pages/index.jsp'),
             minify: false, // Make this true to get exploded, formatted index.jag file
         }),
     ],
