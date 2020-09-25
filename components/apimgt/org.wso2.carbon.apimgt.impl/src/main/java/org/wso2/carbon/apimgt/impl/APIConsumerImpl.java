@@ -5550,7 +5550,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             resultAPIandProductSet.sort(new ContentSearchResultNameComparator());
 
             if (apiObj instanceof Set) {
-                searchResults.put("apis", new HashSet<>(resultAPIandProductSet));
+                searchResults.put("apis", new LinkedHashSet<>(resultAPIandProductSet));
             } else {
                 searchResults.put("apis", resultAPIandProductSet);
             }
