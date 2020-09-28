@@ -4,7 +4,7 @@
  */
 const AppConfig = {
     app: {
-        context: '/admin', // Note the leading `/` and no trailing `/`
+        context: '/admin-webapp', // Note the leading `/` and no trailing `/`
         customUrl: { // Dynamically set the redirect origin according to the forwardedHeader host|proxyPort combination
             enabled: false,
             forwardedHeader: 'X-Forwarded-For',
