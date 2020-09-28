@@ -28,10 +28,27 @@
         </repository>
     </repositories>
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>com.github.everit-org.json-schema</groupId>
             <artifactId>org.everit.json.schema</artifactId>
             <version>1.12.1</version>
+            <scope>compile</scope>
+        </dependency>-->
+        <!--<dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>-->
+        <dependency>
+            <groupId>org.wso2.orbit.org.everit.json.asyncapi</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+            <version>1.12.1.wso2.v1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -437,6 +454,17 @@
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.stream.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -561,6 +589,7 @@
                             !org.apache.commons.collections4.*,
                         </Export-Package>
                         <Import-Package>
+                            org.everit.json.schema.*;version="[1.12.1, 1.12.2)",
                             org.wso2.carbon.governance.api.*,
                             org.wso2.carbon.registry.ws.client.*,
                             org.apache.woden.*,
@@ -651,3 +680,6 @@
         </plugins>
     </build>
 </project>
+
+<!--
+org.everit.json.schema.*;version="${org.everit.json.schema.version}",-->

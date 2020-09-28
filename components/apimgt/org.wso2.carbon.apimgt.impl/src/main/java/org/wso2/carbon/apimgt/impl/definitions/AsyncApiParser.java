@@ -3,9 +3,10 @@ package org.wso2.carbon.apimgt.impl.definitions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -1378,6 +1379,13 @@ public class AsyncApiParser extends APIDefinition {
             "  }\n" +
             "}";
     private static final Log log = LogFactory.getLog(AsyncApiParser.class);
+    private List<String> otherSchemes;
+    public List<String> getOtherSchemes() {
+        return otherSchemes;
+    }
+    public void setOtherSchemes(List<String> otherSchemes) {
+        this.otherSchemes = otherSchemes;
+    }
 
     @Override
     public Map<String, Object> generateExample(String apiDefinition) {
@@ -1413,6 +1421,18 @@ public class AsyncApiParser extends APIDefinition {
         JSONObject hyperSchema = new JSONObject(ASYNCAPI_JSON_HYPERSCHEMA);
         Schema schemaValidator = SchemaLoader.load(hyperSchema);
 
+        /*File schemaData = new File("AsyncAPIHyperSchema.json");
+        JSONTokener schemaDataFile = null;
+        try {
+            schemaDataFile = new JSONTokener(new FileInputStream(schemaData));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        Schema schemaValidator = null;
+        if (schemaDataFile != null) {
+            schemaValidator = SchemaLoader.load(new JSONObject(schemaDataFile));
+        }*/
+
         boolean validationSuccess = false;
         List<String> validationErrorMessages = null;
 
@@ -1439,7 +1459,7 @@ public class AsyncApiParser extends APIDefinition {
                     schemaToBeValidated.getString("asyncapi"),
                     schemaToBeValidated.getJSONObject("info").getString("title"),
                     schemaToBeValidated.getJSONObject("info").getString("version"),
-                    "ToBeDecided",
+                    null,
                     schemaToBeValidated.getJSONObject("info").getString("description"),
                     endpoints
             );
@@ -1495,6 +1515,16 @@ public class AsyncApiParser extends APIDefinition {
 
     @Override
     public API setExtensionsToAPI(String swaggerContent, API api) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException{
+        return null;
+    }
+
+    @Override
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException{
         return null;
     }
 }

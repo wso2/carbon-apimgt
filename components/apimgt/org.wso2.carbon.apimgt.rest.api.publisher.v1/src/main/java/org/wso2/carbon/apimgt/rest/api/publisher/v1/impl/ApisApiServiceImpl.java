@@ -4895,10 +4895,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
 
-        /*AsyncAPISpecificationValidationResponseDTO validationResponseDTO =
-                (AsyncAPISpecificationValidationResponseDTO)validateResponseMap.get(RestApiConstants.RETURN_DTO);
-        return Response.ok().entity(validationResponseDTO).build();*/
-        return null;
+        AsyncAPISpecificationValidationResponseDTO validationResponseDTO =
+                (AsyncAPISpecificationValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        return Response.ok().entity(validationResponseDTO).build();
     }
 
     /**
@@ -4956,6 +4955,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             boolean syncOperation = apiDTOFromProperties.getOperations().size() > 0;
 
             APIDefinition apiDefinition = validationResponse.getParser();
+
 
 
         } catch (APIManagementException e) {
@@ -5732,6 +5732,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private Map validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail,
             Boolean returnContent) throws APIManagementException {
         //validate inputs
+
         handleInvalidParams(fileInputStream, fileDetail, url);
 
         AsyncAPISpecificationValidationResponseDTO responseDTO;

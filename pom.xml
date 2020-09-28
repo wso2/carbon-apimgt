@@ -407,6 +407,13 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <!--<dependency>
+                <groupId>com.github.everit-org.json-schema</groupId>
+                <artifactId>org.everit.json.schema</artifactId>
+                <version>1.12.1</version>
+            </dependency>-->
+
             <dependency>
                 <groupId>org.jacoco</groupId>
                 <artifactId>org.jacoco.agent</artifactId>
@@ -1789,6 +1796,8 @@
         <carbon.commons.imp.pkg.version>[4.7.1, 4.8.0)</carbon.commons.imp.pkg.version>
         <commons.logging.imp.pkg.version>[1.2.0, 1.3.0)</commons.logging.imp.pkg.version>
 
+        <!--<org.everit.json.schema.version>[1.12.1, 1.12.1)</org.everit.json.schema.version>-->
+
         <!-- Carbon Identity import version ranges -->
         <carbon.identity.imp.pkg.version>[5.14.0, 6.0.0)</carbon.identity.imp.pkg.version>
         <carbon.identity.recovery.pkg.version>[1.4.0, 1.5.0)</carbon.identity.recovery.pkg.version>
@@ -1964,7 +1973,7 @@
         <opentracing.api.version>0.31.0</opentracing.api.version>
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
         <aspectj.version>1.9.5</aspectj.version>
-        <everit.version>1.5.0.wso2.v1</everit.version>
+        <everit.version>1.5.0.wso2.v2</everit.version>
         <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
         <aspectj.version>1.9.4</aspectj.version>
         <wso2.securevault.version>1.1.3</wso2.securevault.version>

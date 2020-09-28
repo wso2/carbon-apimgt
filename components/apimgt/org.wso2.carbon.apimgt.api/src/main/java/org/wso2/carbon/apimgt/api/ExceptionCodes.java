@@ -359,11 +359,6 @@ ExceptionCodes implements ErrorHandler {
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme"),
 
-<<<<<<< HEAD
-    //AsyncAPI related codes
-    ASYNCAPI_URL_MALFORMED(901703, "AsyncAPI Specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI specification from URL"),
-    ASYNCAPI_URL_NO_200(9001704, "AsyncAPI Specification retrieval from URL failed", 400, "Response didn't return a 200 OK status");
-=======
 
     //API mediation policies related
     MEDIATION_POLICY_API_ALREADY_EXISTS(901800, "Mediation Policy Already Exists", 409,
@@ -371,8 +366,11 @@ ExceptionCodes implements ErrorHandler {
 
     //mediation policies related common errors
     MEDIATION_POLICY_NAME_TOO_LONG(900850, "Mediation Policy Name Too Long", 400,
-                                                "The name of the mediation policy exceeds the max length (%s)");
->>>>>>> upstream/master
+                                                "The name of the mediation policy exceeds the max length (%s)"),
+
+    //AsyncApi related error codes
+    ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
+    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status");
 
     private final long errorCode;
     private final String errorMessage;
