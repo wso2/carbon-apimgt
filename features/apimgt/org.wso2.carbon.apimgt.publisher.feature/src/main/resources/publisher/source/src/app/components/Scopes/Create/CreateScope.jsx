@@ -301,13 +301,19 @@ class CreateScope extends React.Component {
      */
     validateScopeDisplayName(id, value) {
         const { valid, sharedScope } = this.state;
-
+        const { intl } = this.props;
         sharedScope[id] = value;
         valid[id].invalid = !(value && value.length > 0);
         if (valid[id].invalid) {
             valid[id].error = 'Scope display name cannot be empty';
         }
-
+        valid[id].invalid = !(value && value.length <= 255);
+        if (valid[id].invalid) {
+            valid[id].error = intl.formatMessage({
+                id: 'Scopes.Create.Scope.displayName.length.exceeded',
+                defaultMessage: 'Exceeds maximum length limit of 255 characters',
+            });
+        }
         if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]|(^apim:)/i.test(value)) {
             valid[id].invalid = true;
             valid[id].error = 'Field contains special characters';

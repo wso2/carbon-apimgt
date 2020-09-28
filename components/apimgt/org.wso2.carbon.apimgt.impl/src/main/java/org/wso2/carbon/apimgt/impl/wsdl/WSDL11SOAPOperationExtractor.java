@@ -920,6 +920,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                 wsdlOperation.setStyle(soapOperation.getStyle());
                 wsdlOperation.setInputParameterModel(getSoapInputParameterModel(bindingOperation));
                 wsdlOperation.setOutputParameterModel(getSoapOutputParameterModel(bindingOperation));
+                wsdlOperation.setMessageType(getSoapMessageType(bindingOperation));
             } else if (boExtElement instanceof SOAP12Operation) {
                 SOAP12Operation soapOperation = (SOAP12Operation) boExtElement;
                 wsdlOperation = new WSDLSOAPOperation();
@@ -929,6 +930,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                 wsdlOperation.setStyle(soapOperation.getStyle());
                 wsdlOperation.setInputParameterModel(getSoapInputParameterModel(bindingOperation));
                 wsdlOperation.setOutputParameterModel(getSoapOutputParameterModel(bindingOperation));
+                wsdlOperation.setMessageType(getSoapMessageType(bindingOperation));
             }
         }
         return wsdlOperation;
@@ -1088,6 +1090,48 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
             }
         }
         return outputParameterModelList;
+    }
+
+    /**
+     * Gets message type for a given soap operation
+     *
+     * @param bindingOperation soap operation
+     * @return String for message type
+     * @throws APIMgtWSDLException
+     */
+    private String getSoapMessageType(BindingOperation bindingOperation) throws APIMgtWSDLException {
+
+        Operation operation = bindingOperation.getOperation();
+        String messageType = "";
+        boolean hasRPCMessages = false;
+        if (operation != null) {
+            Input input = operation.getInput();
+
+            if (input != null) {
+                Message message = input.getMessage();
+                if (message != null) {
+                    Map map = message.getParts();
+
+                    for (Object obj : map.entrySet()) {
+                        Map.Entry entry = (Map.Entry) obj;
+                        Part part = (Part) entry.getValue();
+                        if (part != null) {
+                            if (part.getElementName() != null) {
+                                messageType = "document";
+                            } else if (part.getTypeName() != null) {
+                                messageType = "rpc";
+                                hasRPCMessages = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (hasRPCMessages) {
+            return "rpc";
+        } else {
+            return messageType;
+        }
     }
 
     /**

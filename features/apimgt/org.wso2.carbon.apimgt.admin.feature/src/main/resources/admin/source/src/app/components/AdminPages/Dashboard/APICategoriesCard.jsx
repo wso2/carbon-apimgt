@@ -43,6 +43,11 @@ const useStyles = makeStyles(() => ({
         fontSize: 20,
         fontWeight: 'fontWeightBold',
     },
+    cardText: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+    },
 }));
 
 /**
@@ -158,11 +163,11 @@ export default function APICategoriesCard() {
                         {apiCategoriesList.map((category) => {
                             return (
                                 <Box display='flex' alignItems='center'>
-                                    <Box flexGrow={1} mt={0.5}>
-                                        <Typography variant='subtitle2'>
+                                    <Box width={50} flexGrow={1} mt={0.5}>
+                                        <Typography className={classes.cardText} variant='subtitle2'>
                                             {category.name}
                                         </Typography>
-                                        <Typography variant='body2'>
+                                        <Typography className={classes.cardText} variant='body2'>
                                             {category.description || (
                                                 <FormattedMessage
                                                     id='Dashboard.apiCategories.apiCategoriesListing.no.description'

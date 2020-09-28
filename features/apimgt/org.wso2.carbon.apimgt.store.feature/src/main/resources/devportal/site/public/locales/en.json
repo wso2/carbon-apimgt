@@ -507,7 +507,7 @@
   "Shared.AppsAndKeys.ViewToken.info.third": " and the token has (",
   "Shared.AppsAndKeys.ViewToken.please.copy": "Please Copy the Access Token",
   "Shared.AppsAndKeys.ViewToken.please.copy.apikey": "Please Copy the API Key",
-  "Shared.AppsAndKeys.ViewToken.please.copy.help": "Please copy this generated token value as it will be displayed only for the current browser session. ( The token will not be visible in the UI after the page is refreshed. )",
+  "Shared.AppsAndKeys.ViewToken.please.copy.help": "If the token type is JWT or API Key, please copy this generated token value as it will be displayed only for the current browser session. ( The token will not be visible in the UI after the page is refreshed. )",
   "Shared.AppsAndKeys.WaitingForApproval.msg.ok": "A request to register this application has been sent and is pending approval.",
   "Shared.AppsAndKeys.WaitingForApproval.msg.reject": "This application has been rejected from generating keys",
   "Shared.ConfirmDialog.cancel": "Cancel",
