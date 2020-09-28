@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,11 +113,11 @@ public abstract class APIDefinition {
      * @return a structured uri template map using provided Swagger Data Resource Paths
      */
     public Map<String, Map<String, SwaggerData.Resource>> getResourceMap(SwaggerData swaggerData) {
-        Map<String, Map<String, SwaggerData.Resource>> uriTemplateMap = new HashMap<>();
+        Map<String, Map<String, SwaggerData.Resource>> uriTemplateMap = new LinkedHashMap<>();
         for (SwaggerData.Resource resource : swaggerData.getResources()) {
             Map<String, SwaggerData.Resource> resources = uriTemplateMap.get(resource.getPath());
             if (resources == null) {
-                resources = new HashMap<>();
+                resources = new LinkedHashMap<>();
                 uriTemplateMap.put(resource.getPath(), resources);
             }
             resources.put(resource.getVerb().toUpperCase(), resource);
