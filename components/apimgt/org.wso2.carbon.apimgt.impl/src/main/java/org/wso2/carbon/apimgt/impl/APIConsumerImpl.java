@@ -3840,7 +3840,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
-        
+
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId, tenantDomain,
@@ -5564,7 +5564,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             resultAPIandProductSet.sort(new ContentSearchResultNameComparator());
 
             if (apiObj instanceof Set) {
-                searchResults.put("apis", new HashSet<>(resultAPIandProductSet));
+                searchResults.put("apis", new LinkedHashSet<>(resultAPIandProductSet));
             } else {
                 searchResults.put("apis", resultAPIandProductSet);
             }
