@@ -42,10 +42,15 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.cert.Certificate;
@@ -54,7 +59,8 @@ import java.util.Map;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( {AbstractJWTGenerator.class,APIUtil.class,KeyStoreManager.class,CarbonUtils.class,
+@PrepareForTest(value = {CarbonUtils.class, ServiceReferenceHolder.class, AbstractJWTGenerator.class, APIUtil.class,
+        KeyStoreManager.class, System.class, OAuth2Util.class, IdentityUtil.class, OAuthServerConfiguration.class,
         SubscriptionDataHolder.class})
 public class TokenGenTest {
     private static final Log log = LogFactory.getLog(TokenGenTest.class);
@@ -71,6 +77,16 @@ public class TokenGenTest {
         config.load(dbConfigPath);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(
                 new APIManagerConfigurationServiceImpl(config));
+        OAuthServerConfiguration oauthServerConfigurationMock = Mockito
+                .mock(OAuthServerConfiguration.class);
+        PowerMockito.mockStatic(OAuthServerConfiguration.class);
+        PowerMockito.when(OAuthServerConfiguration.getInstance()).thenReturn(oauthServerConfigurationMock);
+        PowerMockito.mockStatic(OAuth2Util.class);
+        OAuth2Util oAuth2Util = Mockito.mock(OAuth2Util.class);
+        OAuthAppDO oAuthAppDO = Mockito.mock(OAuthAppDO.class);
+        String[] audiences = {"aud1", "aud2"};
+        PowerMockito.when(OAuth2Util.getAppInformationByClientId(Mockito.anyString())).thenReturn(oAuthAppDO);
+        PowerMockito.when(oAuthAppDO.getAudiences()).thenReturn(audiences);
         SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
         SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
         PowerMockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
@@ -249,7 +265,7 @@ public class TokenGenTest {
         byte[] digestInBytes = digestValue.digest();
         String publicCertThumbprint = hexify(digestInBytes);
         String encodedThumbprint = java.util.Base64.getUrlEncoder()
-                .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+                .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
         //Check if the encoded thumbprint get matched with JWT header's x5t
         Assert.assertTrue(header.contains(encodedThumbprint));
     }
@@ -261,7 +277,7 @@ public class TokenGenTest {
      * @param bytes - The input byte array
      * @return hexadecimal representation
      */
-    private String hexify(byte bytes[]) {
+    private String hexify(byte[] bytes) {
 
         char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7',
                 '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
