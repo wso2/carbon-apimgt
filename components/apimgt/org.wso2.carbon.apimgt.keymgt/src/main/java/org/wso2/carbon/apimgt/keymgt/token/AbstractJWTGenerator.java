@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.keymgt.token;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -211,15 +212,15 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             }
 
             JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
+            ObjectMapper mapper = new ObjectMapper();
 
-            if(standardClaims != null) {
+            if (standardClaims != null) {
                 Iterator<String> it = new TreeSet(standardClaims.keySet()).iterator();
                 while (it.hasNext()) {
                     String claimURI = it.next();
                     String claimVal = standardClaims.get(claimURI);
                     List<String> claimList = new ArrayList<String>();
                     if (claimVal != null && claimVal.contains("{")) {
-                        ObjectMapper mapper = new ObjectMapper();
                         try {
                             Map<String, String> map = mapper.readValue(claimVal, Map.class);
                             jwtClaimsSetBuilder.claim(claimURI, map);
@@ -228,6 +229,18 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                             // occurred during the retrieving claims.
                             log.error(String.format("Error while reading claim values for %s", claimVal), e);
                         }
+                    } else if (claimVal != null
+                            && claimVal.contains("[\"") && claimVal.contains("\"]")){
+
+                        try {
+                            List<String> arrayList = mapper.readValue(claimVal, List.class);
+                            jwtClaimsSetBuilder.claim(claimURI, arrayList);
+                        } catch (IOException e) {
+                            // Exception isn't thrown in order to generate jwt without claim, even if an error is
+                            // occurred during the retrieving claims.
+                            log.error("Error while reading claim values", e);
+                        }
+
                     } else if (userAttributeSeparator != null && claimVal != null &&
                             claimVal.contains(userAttributeSeparator)) {
                         StringTokenizer st = new StringTokenizer(claimVal, userAttributeSeparator);
@@ -240,6 +253,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                         jwtClaimsSetBuilder.claim(claimURI, claimList);
                     } else if ("exp".equals(claimURI)) {
                         jwtClaimsSetBuilder.expirationTime(new Date(Long.valueOf(standardClaims.get(claimURI))));
+                    } else if ("iat".equals(claimURI)) {
+                        jwtClaimsSetBuilder.issueTime(new Date(Long.valueOf(standardClaims.get(claimURI))));
                     } else {
                         jwtClaimsSetBuilder.claim(claimURI, claimVal);
                     }
