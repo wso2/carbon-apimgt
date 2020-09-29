@@ -39,6 +39,7 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         Map<String, Object> claims = new HashMap<>();
         claims.put("iss", API_GATEWAY_ID);
         claims.put("exp", String.valueOf(expireIn));
+        claims.put("iat", String.valueOf(currentTime));
         if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriber())) {
             claims.put(dialect + "/subscriber", jwtInfoDto.getSubscriber());
         }
