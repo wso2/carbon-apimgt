@@ -33,17 +33,17 @@ import java.util.Comparator;
 public class APINameComparator implements Comparator<API>, Serializable {
 
     public int compare(API api1, API api2) {
-        if (api1.getId().getProviderName().equalsIgnoreCase(api2.getId().getProviderName())) {
-            if (api1.getId().getApiName().equals(api2.getId().getApiName())) {
+        if (api1.getId().getApiName().equalsIgnoreCase(api2.getId().getApiName())) {
+            if (api1.getId().getVersion().equals(api2.getId().getVersion())) {
+                //only compare provider name
+                return api1.getId().getProviderName().compareToIgnoreCase(api2.getId().getProviderName());
+            } else {
                 //only compare version
                 return api1.getId().getVersion().compareToIgnoreCase(api2.getId().getVersion());
-            } else {
-                //only compare API name
-                return api1.getId().getApiName().compareToIgnoreCase(api2.getId().getApiName());
             }
         } else {
-            //only compare provider name
-            return api1.getId().getProviderName().compareToIgnoreCase(api2.getId().getProviderName());
+            //only compare API name
+            return api1.getId().getApiName().compareToIgnoreCase(api2.getId().getApiName());
         }
     }
 }
