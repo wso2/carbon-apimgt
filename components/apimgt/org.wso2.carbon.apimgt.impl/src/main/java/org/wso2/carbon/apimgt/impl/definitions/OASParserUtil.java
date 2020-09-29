@@ -190,7 +190,7 @@ public class OASParserUtil {
 
         return oas3Parser;
     }
-
+    // NO REG USAGE
     public static SwaggerVersion getSwaggerVersion(String apiDefinition) throws APIManagementException {
         ObjectMapper mapper;
         if (apiDefinition.trim().startsWith("{")) {
@@ -228,7 +228,7 @@ public class OASParserUtil {
             throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
         }
     }
-
+    // NO REG USAGE
     public static String getOASDefinitionWithTierContentAwareProperty(String apiDefinition,
                                                                       List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
         if (contentAwareTiersList == null || contentAwareTiersList.isEmpty()) {

@@ -44,6 +44,7 @@ public class DBSaver implements ArtifactSaver {
      * profile we can access DB.Thus we don't need an HTTP request to internal service like DB retriever
      *
      */
+    // NO REG USAGE
     @Override
     public void saveArtifact(String gatewayRuntimeArtifacts, String gatewayLabel, String gatewayInstruction)
             throws ArtifactSynchronizerException {

@@ -262,6 +262,7 @@ public class WSO2APIPublisher implements APIPublisher {
      * @return Actual store host URL (Eg:https://localhost:9443)
      * @throws APIManagementException If a malformed store endpoint is provided
      */
+    //NO REG USAGE
     private String getStoreHostURLFromEndpoint(String storeEndpoint) throws APIManagementException {
 
         try {
@@ -405,6 +406,7 @@ public class WSO2APIPublisher implements APIPublisher {
      * @return Whether API is successfully deleted or not
      * @throws APIManagementException If an error occurs while deleting API from external store
      */
+    //NO REG USAGE
     @Override
     public boolean deleteFromStore(APIIdentifier apiId, APIStore store) throws APIManagementException {
 
@@ -502,6 +504,7 @@ public class WSO2APIPublisher implements APIPublisher {
      * @return UUID of the published API
      * @throws APIManagementException If an error occurs while searching the API in external store.
      */
+    //NO REG USAGE
     private String getAPIUUID(APIStore store, APIIdentifier apiIdentifier) throws APIManagementException {
 
         String apiUUID;

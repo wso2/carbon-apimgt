@@ -35,6 +35,7 @@ public class APIAuthenticationAdminClient {
 
     private static final Log log = LogFactory.getLog(APIAuthenticationAdminClient.class);
 
+    // NO REG USAGE
     public void invalidateResourceCache(String apiContext, String apiVersion, Set<URITemplate> uriTemplates) {
 
         JSONObject api = new JSONObject();

@@ -115,6 +115,7 @@ public class APIGatewayManager {
      * @param tenantDomain - Tenant Domain of the publisher
      * @return a map of environments that failed to publish the API
      */
+    // NO REG USAGE
     public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
 
         Map<String, String> failedGatewaysMap = new HashMap<String, String>(0);
@@ -189,6 +190,7 @@ public class APIGatewayManager {
      * @param failedGatewaysMap         - This map will be updated with the gateway if the publishing failed
      * @return failedEnvironmentsMap
      */
+    // NO REG USAGE
     private Map<String, String> publishAPIToGatewayEnvironment(Environment environment, API api,
             APITemplateBuilder builder,
             String tenantDomain, boolean isGatewayDefinedAsALabel,
@@ -661,6 +663,7 @@ public class APIGatewayManager {
      * @param tenantDomain - Tenant Domain of the publisher
      * @return a map of environments that failed to remove the API
      */
+    //NO REG  USAGE
     public Map<String, String> removeFromGateway(API api, String tenantDomain) {
 
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
@@ -731,6 +734,7 @@ public class APIGatewayManager {
      * @param failedEnvironmentsMap     - This map will be updated with the environment if the publishing failed
      * @return failedEnvironmentsMap
      */
+    //NO REG  USAGE
     public Map<String, String> removeAPIFromGatewayEnvironment(API api, String tenantDomain, Environment environment,
             boolean isGatewayDefinedAsALabel,
             Set<String> removedGateways,
@@ -898,6 +902,7 @@ public class APIGatewayManager {
      * @param client
      * @throws APIManagementException
      */
+    // NO REG USAGE
     public void deployWebsocketAPI(API api, APIGatewayAdminClient client, boolean isGatewayDefinedAsALabel,
             Set<String> publishedGateways,Environment environment)
             throws APIManagementException, JSONException {
@@ -1072,7 +1077,7 @@ public class APIGatewayManager {
                 "</sequence>";
         return seq;
     }
-
+    //NO REG USAGE
     public Map<String, String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
 
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
@@ -1243,6 +1248,7 @@ public class APIGatewayManager {
      * @param api          Relevant API related with teh removed certificate.
      * @param tenantDomain Tenant domain of the API.
      */
+    //NO REG USAGE
     private void updateRemovedClientCertificates(API api, String tenantDomain) {
 
         if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {

@@ -126,6 +126,7 @@ public class K8sManager implements ContainerManager {
      * @param apiId                   API Identifier
      * @param containerMgtInfoDetails Clusters which the API has published
      */
+    //NO REG USAGE
     @Override
     public void deleteAPI(APIIdentifier apiId, JSONObject containerMgtInfoDetails) {
 

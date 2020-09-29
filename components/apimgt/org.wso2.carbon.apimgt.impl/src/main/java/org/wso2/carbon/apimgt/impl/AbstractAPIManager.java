@@ -411,7 +411,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected API getApi(GovernanceArtifact artifact) throws APIManagementException {
         return APIUtil.getAPI(artifact);
     }
-
+    // moved to registry persistencemanager
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
         Registry registry;
@@ -439,7 +439,7 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
 
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
-            APIUtil.updateAPIProductDependencies(api, registry);
+            APIUtil.updateAPIProductDependencies(api, registry); //USE REG >> NO functionality ATM
 
             //check for API visibility
             if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
@@ -1290,7 +1290,7 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
     }
-
+    // HAS REG USAGE
     public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
         List<Documentation> documentationList = new ArrayList<Documentation>();
         String resourcePath = StringUtils.EMPTY;

@@ -546,6 +546,7 @@ public final class APIUtil {
      * @param registry registry
      * @throws APIManagementException
      */
+    //USE REG >> NO functionality ATM
     public static void updateAPIProductDependencies(API api, Registry registry) throws APIManagementException {
 
         for (URITemplate uriTemplate : api.getUriTemplates()) {
@@ -610,6 +611,7 @@ public final class APIUtil {
      * @param event        Event object
      * @param notifierType eventType
      */
+    // NO REG USAGE
     public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType) {
 
         List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
@@ -1848,6 +1850,7 @@ public final class APIUtil {
      * @param identifier APIIdentifier
      * @return API path
      */
+    // HAS REG USAGE
     public static String getAPIPath(APIIdentifier identifier) {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -2508,6 +2511,7 @@ public final class APIUtil {
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
+    //NO REG USAGE
     public static Set<APIStore> getExternalStores(int tenantId) throws APIManagementException {
         // First checking if ExternalStores are defined in api-manager.xml
         Set<APIStore> externalAPIStores = getGlobalExternalStores();
@@ -5133,7 +5137,7 @@ public final class APIUtil {
         }
         return inputStores;
     }
-
+    //NO REG USAGE
     public static boolean isAPIsPublishToExternalAPIStores(int tenantId)
             throws APIManagementException {
 
@@ -5154,6 +5158,7 @@ public final class APIUtil {
         return true;
     }
 
+    // NO REG USAGE
     public static Cache getAPIContextCache() {
 
         CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).
@@ -11013,7 +11018,7 @@ public final class APIUtil {
         }
 
     }
-
+    // NO REG USAGE
     public static void publishEventToEventHub(Map dynamicProperties, Event event) {
 
         boolean tenantFlowStarted = false;
