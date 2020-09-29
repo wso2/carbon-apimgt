@@ -185,7 +185,9 @@ export default function Resources(props) {
                         && securityDefScopes[selectedScope] !== '') {
                         let scopeDescription = '';
                         if (selectedScope in sharedScopesByName) {
-                            scopeDescription = sharedScopesByName[selectedScope].scope.description;
+                            if (sharedScopesByName[selectedScope].scope.description !== null) {
+                                scopeDescription = sharedScopesByName[selectedScope].scope.description;
+                            }
                             securityDefScopes[selectedScope] = scopeDescription;
                         }
                         setSecurityDefScopes(securityDefScopes);
