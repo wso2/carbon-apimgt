@@ -40,15 +40,10 @@ import org.wso2.carbon.identity.application.common.model.Claim;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataHandler;
 import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataException;
-import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCache;
-import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheEntry;
-import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheKey;
 import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
@@ -56,9 +51,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.Date;
-import java.util.List;
-import java.util.Arrays;
 
 
 @MethodStats
@@ -105,21 +97,20 @@ public class JWTGenerator extends AbstractJWTGenerator {
         }
         String usernameWithoutTenantDomain = MultitenantUtils.getTenantAwareUsername(endUserName);
         Map<String, String> claims = new LinkedHashMap<String, String>(20);
-        OAuthAppDO oAuthAppDO = null;
         try {
-            oAuthAppDO = OAuth2Util.
+            OAuthAppDO oAuthAppDO = OAuth2Util.
                     getAppInformationByClientId(validationContext.getValidationInfoDTO().getConsumerKey());
+            if (oAuthAppDO != null && oAuthAppDO.getAudiences() != null) {
+                String[] audience = oAuthAppDO.getAudiences();
+                String parsedClaims = "[\"" + StringUtils.join(audience , "\",\"") + "\"]";
+                claims.put("aud", parsedClaims);
+            }
         } catch (IdentityOAuth2Exception | InvalidOAuthClientException e) {
             log.error("Error occurred while getting JWT Token client ID : "
                     + validationContext.getValidationInfoDTO().getConsumerKey() + " when getting oAuth App " +
                     "information", e);
             throw new APIManagementException("Error occurred while getting JWT Token client ID : "
                     + validationContext.getValidationInfoDTO().getConsumerKey(), e);
-        }
-        if (oAuthAppDO != null && oAuthAppDO.getAudiences() != null) {
-            String[] audience = oAuthAppDO.getAudiences();
-            String parsedClaims = "[\"" + StringUtils.join(audience , "\",\"") + "\"]";
-            claims.put("aud", parsedClaims);
         }
 
         claims.put("iss", API_GATEWAY_ID);

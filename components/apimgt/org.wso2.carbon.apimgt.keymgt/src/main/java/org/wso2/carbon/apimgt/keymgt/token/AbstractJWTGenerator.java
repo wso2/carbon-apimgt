@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.keymgt.token;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -231,7 +230,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                         }
                     } else if (claimVal != null
                             && claimVal.contains("[\"") && claimVal.contains("\"]")){
-
                         try {
                             List<String> arrayList = mapper.readValue(claimVal, List.class);
                             jwtClaimsSetBuilder.claim(claimURI, arrayList);
@@ -240,7 +238,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                             // occurred during the retrieving claims.
                             log.error("Error while reading claim values", e);
                         }
-
                     } else if (userAttributeSeparator != null && claimVal != null &&
                             claimVal.contains(userAttributeSeparator)) {
                         StringTokenizer st = new StringTokenizer(claimVal, userAttributeSeparator);
