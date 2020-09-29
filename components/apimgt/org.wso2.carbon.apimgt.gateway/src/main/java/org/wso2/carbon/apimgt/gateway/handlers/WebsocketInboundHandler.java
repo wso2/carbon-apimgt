@@ -486,6 +486,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 new org.wso2.carbon.databridge.commons.Event(
                         "org.wso2.throttle.request.stream:1.0.0", System.currentTimeMillis(), null,
                         null, objects);
+        if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
+            log.error("Cannot publish events to traffic manager because ThrottleDataPublisher " +
+                    "has not been initialised");
+            return true;
+        }
         ServiceReferenceHolder.getInstance().getThrottleDataPublisher().getDataPublisher().tryPublish(event);
         return true;
     }
