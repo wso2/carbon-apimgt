@@ -577,6 +577,9 @@ public class GatewayUtils {
         }
         if (isOauth) {
             authContext.setConsumerKey(jwtValidationInfo.getConsumerKey());
+            if (jwtValidationInfo.getIssuer() != null) {
+                authContext.setIssuer(jwtValidationInfo.getIssuer());
+            }
         }
         // Set JWT token sent to the backend
         if (StringUtils.isNotEmpty(endUserToken)) {
