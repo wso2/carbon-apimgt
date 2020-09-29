@@ -7349,7 +7349,7 @@ public class ApiMgtDAO {
 
     public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier)
             throws APIManagementException {
-        Map<Integer, URITemplate> uriTemplates = new HashMap<>();
+        Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
 
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -7410,7 +7410,7 @@ public class ApiMgtDAO {
             handleException("Failed to get URI Templates of API" + identifier, e);
         }
 
-        return new HashSet<>(uriTemplates.values());
+        return new LinkedHashSet<>(uriTemplates.values());
     }
 
     private void setAssociatedAPIProducts(APIIdentifier identifier, Map<Integer, URITemplate> uriTemplates)
