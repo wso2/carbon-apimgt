@@ -1057,7 +1057,7 @@
         "count" : {
           "type" : "integer",
           "example" : 1,
-          "description" : "Number of ApplicationKeyMappings returned.\n"
+          "description" : "Number of Scopes returned.\n"
         },
         "list" : {
           "type" : "array",
@@ -1069,7 +1069,7 @@
           "$ref" : "#/definitions/Pagination"
         }
       },
-      "title" : "ApplicationKeyMapping List"
+      "title" : "Scopes List"
     },
     "Scope" : {
       "properties" : {

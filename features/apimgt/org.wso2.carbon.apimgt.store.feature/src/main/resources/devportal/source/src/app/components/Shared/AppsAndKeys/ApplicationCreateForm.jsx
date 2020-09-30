@@ -227,6 +227,8 @@ const ApplicationCreate = (props) => {
                             label={item[1].attribute}
                             value={getAttributeValue(item[1].attribute)}
                             helperText={item[1].description}
+                            multiline={item[1].type === 'textarea'}
+                            rows={4}
                             fullWidth
                             name={item[1].attribute}
                             onChange={handleAttributesChange(item[1].attribute)}
