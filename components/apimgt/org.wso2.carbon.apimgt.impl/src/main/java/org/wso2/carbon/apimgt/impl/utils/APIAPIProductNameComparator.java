@@ -105,17 +105,17 @@ public class APIAPIProductNameComparator implements Comparator<Object> {
     }
 
     private int compareFields(Provider provider, Name name, Version version) {
-        if (provider.getFirst().equalsIgnoreCase(provider.getSecond())) {
-            if (name.getFirst().equals(name.getSecond())) {
-                //only compare version
-                return version.getFirst().compareToIgnoreCase(version.getSecond());
+        if (name.getFirst().equalsIgnoreCase(name.getSecond())) {
+            if (version.getFirst().equals(version.getSecond())) {
+                //only compare provider
+                return provider.getFirst().compareToIgnoreCase(provider.getSecond());
             } else {
-                //only compare API name
-                return name.getFirst().compareToIgnoreCase(name.getSecond());
+                //only compare API version
+                return version.getFirst().compareToIgnoreCase(version.getSecond());
             }
         } else {
-            //only compare provider name
-            return provider.getFirst().compareToIgnoreCase(provider.getSecond());
+            //only compare API name
+            return name.getFirst().compareToIgnoreCase(name.getSecond());
         }
     }
 }
