@@ -44,7 +44,6 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     private static final String NONE = "NONE";
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     public static final String API_GATEWAY_ID = "wso2.org/products/am";
-    public static final String FORMAT_JSON_ARRAY_PROPERTY = "formatJWTJsonArray";
 
     private static volatile long ttl = -1L;
     private String dialectURI;
@@ -195,8 +194,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         ObjectMapper mapper = new ObjectMapper();
         for (Map.Entry<String, Object> claimEntry : claims.entrySet()) {
             Object claimVal = claimEntry.getValue();
-            if (claimVal != null && claimVal.getClass().equals(String.class) &&
-                    claimEntry.toString().contains("{")) {
+            if (claimVal instanceof String && claimEntry.toString().contains("{")) {
                 try {
                     Map<String, String> map = mapper.readValue(claimVal.toString(), Map.class);
                     jwtClaimSetBuilder.claim(claimEntry.getKey(), map);
@@ -205,8 +203,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                     // occurred during the retrieving claims.
                     log.error(String.format("Error while reading claim values for %s", claimVal), e);
                 }
-            } else if (Boolean.parseBoolean(System.getProperty(FORMAT_JSON_ARRAY_PROPERTY)) && claimVal != null
-                    && claimVal.getClass().equals(String.class) && claimVal.toString().contains("[\"")
+            } else if (claimVal instanceof String && claimVal.toString().contains("[\"")
                     && claimVal.toString().contains("\"]")){
 
                 try {
