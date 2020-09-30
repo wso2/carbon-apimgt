@@ -344,7 +344,7 @@
   "Change.Password.current.password.incorrect": "Current password is incorrect",
   "Change.Password.description": "Change your own password. Required fields are marked with an asterisk ( * )",
   "Change.Password.password.change.disabled": "Password change disabled",
-  "Change.Password.password.changed.success": "Password changed successfully",
+  "Change.Password.password.changed.success": "User password changed successfully. Please use the new password on next sign in",
   "Change.Password.password.empty": "Password is empty",
   "Change.Password.password.length.long": "Password is too long!",
   "Change.Password.password.length.short": "Password is too short!",
