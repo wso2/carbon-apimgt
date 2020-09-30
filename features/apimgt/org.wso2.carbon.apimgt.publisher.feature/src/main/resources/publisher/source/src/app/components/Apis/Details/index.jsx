@@ -504,6 +504,7 @@ class Details extends Component {
                         isAPIProduct,
                         setAPI: this.setAPI,
                         setImageUpdate: this.setImageUpdate,
+                        imageUpdate,
                         tenantList,
                     }}
                 >
