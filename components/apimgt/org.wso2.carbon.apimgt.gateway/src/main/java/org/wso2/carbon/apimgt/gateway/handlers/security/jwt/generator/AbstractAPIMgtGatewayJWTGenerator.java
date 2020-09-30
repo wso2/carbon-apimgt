@@ -195,8 +195,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         ObjectMapper mapper = new ObjectMapper();
         for (Map.Entry<String, Object> claimEntry : claims.entrySet()) {
             Object claimVal = claimEntry.getValue();
-            if (claimVal != null && claimVal.getClass().equals(String.class) &&
-                    claimEntry.toString().contains("{")) {
+            if (claimVal instanceof String && claimEntry.toString().contains("{")) {
                 try {
                     Map<String, String> map = mapper.readValue(claimVal.toString(), Map.class);
                     jwtClaimSetBuilder.claim(claimEntry.getKey(), map);
@@ -205,10 +204,9 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                     // occurred during the retrieving claims.
                     log.error(String.format("Error while reading claim values for %s", claimVal), e);
                 }
-            } else if (Boolean.parseBoolean(System.getProperty(FORMAT_JSON_ARRAY_PROPERTY)) && claimVal != null
-                    && claimVal.getClass().equals(String.class) && claimVal.toString().contains("[\"")
+            } else if (Boolean.parseBoolean(System.getProperty(FORMAT_JSON_ARRAY_PROPERTY)) &&
+                    claimVal instanceof String && claimVal.toString().contains("[\"")
                     && claimVal.toString().contains("\"]")){
-
                 try {
                     List<String> arrayList = mapper.readValue(claimVal.toString(), List.class);
                     jwtClaimSetBuilder.claim(claimEntry.getKey(), arrayList);
