@@ -42,8 +42,8 @@ const DefaultConfigurations = {
         },
         appBar: {
             logo: '/site/public/images/logo.svg', // You can set the url to an external image also ( ex: https://dummyimage.com/208x19/66aad1/ffffff&text=testlogo)
-            logoHeight: 19,
-            logoWidth: 208,
+            logoHeight: 34,
+            logoWidth: 'auto',
             background: '#0fa2db',
             backgroundImage: '/site/public/images/appbarBack.png',
             searchInputBackground: '#fff',
