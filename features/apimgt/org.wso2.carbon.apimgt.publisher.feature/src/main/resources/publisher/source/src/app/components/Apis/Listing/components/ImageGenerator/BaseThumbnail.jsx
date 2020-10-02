@@ -131,6 +131,8 @@ const BaseThumbnail = (props) => {
             }).finally(() => {
                 setImageLoaded(true);
             });
+        } else {
+            setImageLoaded(true);
         }
     };
     useEffect(() => {
