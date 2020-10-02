@@ -2290,17 +2290,6 @@ public class APIMappingUtil {
             }
         }
 
-        // scopes
-        for (APIScopeDTO apiScopeDTO : dto.getScopes()) {
-            ScopeDTO scope = apiScopeDTO.getScope();
-            for (String aRole : scope.getBindings()) {
-                boolean isValidRole = APIUtil.isRoleNameExist(provider, aRole);
-                if (!isValidRole) {
-                    String error = "Role '" + aRole + "' Does not exist.";
-                    RestApiUtil.handleBadRequest(error, log);
-                }
-            }
-        }
         Set<Scope> scopes = getScopes(dto);
         product.setScopes(scopes);
 

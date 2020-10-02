@@ -595,7 +595,31 @@ public class OAS2Parser extends APIDefinition {
         if (StringUtils.isEmpty(swaggerObj.getInfo().getVersion())) {
             swaggerObj.getInfo().setVersion(swaggerData.getVersion());
         }
+        preserveResourcePathOrderFromAPI(swaggerData, swaggerObj);
         return getSwaggerJsonString(swaggerObj);
+    }
+
+    /**
+     * Preserve and rearrange the Swagger definition according to the resource path order of the updating API payload.
+     *
+     * @param swaggerData Updating API swagger data
+     * @param swaggerObj  Updated Swagger definition
+     */
+    private void preserveResourcePathOrderFromAPI(SwaggerData swaggerData, Swagger swaggerObj) {
+
+        Set<String> orderedResourcePaths = new LinkedHashSet<>();
+        Map<String, Path> orderedSwaggerPaths = new LinkedHashMap<>();
+        // Iterate the URI template order given in the updating API payload (Swagger Data) and rearrange resource paths
+        // order in OpenAPI with relevance to the first matching resource path item from the swagger data path list.
+        for (SwaggerData.Resource resource : swaggerData.getResources()) {
+            String path = resource.getPath();
+            if (!orderedResourcePaths.contains(path)) {
+                orderedResourcePaths.add(path);
+                // Get the resource path item for the path from existing Swagger
+                orderedSwaggerPaths.put(path, swaggerObj.getPath(path));
+            }
+        }
+        swaggerObj.setPaths(orderedSwaggerPaths);
     }
 
     /**

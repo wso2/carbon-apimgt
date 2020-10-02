@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import TextField from '@material-ui/core/TextField';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -9,14 +9,10 @@ import FormGroup from '@material-ui/core/FormGroup';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { FormattedMessage } from 'react-intl';
-import IconButton from '@material-ui/core/IconButton';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { makeStyles } from '@material-ui/core/styles';
+import CustomInputField from 'AppComponents/KeyManagers/CustomInputField';
 
 const useStyles = makeStyles((theme) => ({
     inputLabel: {
@@ -43,7 +39,6 @@ export default function KeyManagerConfiguration(props) {
         setAdditionalProperties, hasErrors, validating,
     } = props;
     const classes = useStyles();
-    const [showPassword, setShowPassword] = useState(false);
     const onChange = (e) => {
         let finalValue;
         const { name, value, type } = e.target;
@@ -77,27 +72,13 @@ export default function KeyManagerConfiguration(props) {
                             {keymanagerConnectorConfiguration.label}
                             {keymanagerConnectorConfiguration.required && (<span className={classes.error}>*</span>)}
                         </InputLabel>
-                        <OutlinedInput
-                            type={showPassword ? 'text' : 'password'}
+                        <CustomInputField
                             value={value}
                             onChange={onChange}
-                            endAdornment={(
-                                <InputAdornment position='end'>
-                                    <IconButton
-                                        aria-label='toggle password visibility'
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        onMouseDown={() => setShowPassword(!showPassword)}
-                                        edge='end'
-                                    >
-                                        {showPassword ? <Visibility /> : <VisibilityOff />}
-                                    </IconButton>
-                                </InputAdornment>
-                            )}
                             name={keymanagerConnectorConfiguration.name}
-                            error={keymanagerConnectorConfiguration.required
-                                && hasErrors('keyconfig', value, validating)}
-                            labelWidth={70}
-                            margin='dense'
+                            required={keymanagerConnectorConfiguration.required}
+                            hasErrors={hasErrors}
+                            validating={validating}
                         />
                         <FormHelperText>
                             {hasErrors('keyconfig', value, validating) || keymanagerConnectorConfiguration.tooltip}
@@ -190,7 +171,7 @@ KeyManagerConfiguration.defaultProps = {
     required: false,
     helperText: <FormattedMessage
         id='KeyManager.Connector.Configuration.Helper.text'
-        defaultMessage='Add KeyManager Connector Configurations'
+        defaultMessage='Add Key Manager Connector Configurations'
     />,
     hasErrors: () => {},
     validating: false,
