@@ -170,7 +170,7 @@ export default {
                 },
             },
         },
-        lifeCycleImage: '/site/public/images/logo.svg',
+        // lifeCycleImage: '/site/public/images/logo.svg',
         // Uncomment above if you want to add a custom image to the lifecycle diagram.
         adminRole: 'admin',
         commentsLimit: 5,
