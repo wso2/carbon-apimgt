@@ -1060,6 +1060,7 @@
   "Scopes.Create.CreateScope.short.description.display.name": "",
   "Scopes.Create.CreateScope.short.description.name": "",
   "Scopes.Create.Scope.description.length.exceeded": "",
+  "Scopes.Create.Scope.display.name.length.exceeded": "",
   "Scopes.Create.Scope.displayName.length.exceeded": "",
   "Scopes.Create.Scope.name.length.exceeded": "",
   "Scopes.Create.ScopeCreate.Roles.Invalid": "",
