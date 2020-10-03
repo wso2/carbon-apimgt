@@ -47,7 +47,7 @@ const styles = theme => ({
         color: theme.custom.infoBar.starColor,
     },
     iconEmpty: {
-        color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
+        color: theme.custom.infoBar.starColorEmpty || '#cfcfcf',
     },
     removeRating: {
         fontSize: 20,

@@ -72,7 +72,8 @@ const DefaultConfigurations = {
             height: 70,
             background: '#ffffff',
             showThumbnail: true,
-            starColor: '#f6bf21', // By default the opasite color of infoBar.background is derived. From here you can override it.
+            starColor: '#f6bf21', // Rating star color
+            starColorEmpty: '#cfcfcf', // Rating star color empty state
             sliderBackground: '#ffffff',
             iconOddColor: '#347eff',
             iconEvenColor: '#89b4ff',
