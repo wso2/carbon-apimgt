@@ -361,10 +361,39 @@ class InfoBar extends React.Component {
                 }
             }
         }
-        const { additionalProperties } = api;
+        const { additionalProperties, securityScheme } = api;
         let additionalProperties__display = null;
         if (additionalProperties && Object.keys(additionalProperties).length > 0 && additionalProperties.constructor === Object) {
             additionalProperties__display = Object.keys(additionalProperties).filter(aProp => aProp.indexOf('__display') !== -1);
+        }
+
+        let securityScheme_display = null;
+        if(securityScheme) {
+            securityScheme_display = [];
+            securityScheme.forEach( (scm) => {
+                if(scm === 'basic_auth') {
+                    securityScheme_display.push(
+                        intl.formatMessage({
+                            defaultMessage: 'Basic',
+                            id: 'Apis.Details.InfoBar.security.basic',
+                        })
+                    );
+                } else if(scm === 'api_key') {
+                    securityScheme_display.push(
+                        intl.formatMessage({
+                            defaultMessage: 'Api Key',
+                            id: 'Apis.Details.InfoBar.security.api_key',
+                        })
+                    );
+                } else if(scm === 'oauth2') {
+                    securityScheme_display.push(
+                        intl.formatMessage({
+                            defaultMessage: 'OAuth2',
+                            id: 'Apis.Details.InfoBar.security.oauth2',
+                        })
+                    );
+                }
+            })
         }
 
         const { resourceNotFountMessage } = this.props;
@@ -634,6 +663,28 @@ class InfoBar extends React.Component {
                                                 </TableCell>
                                             </TableRow>
                                         )}
+                                        <TableRow>
+                                            <TableCell
+                                                component='th'
+                                                scope='row'
+                                                className={classes.contentToTop}
+                                            >
+                                                <div className={classes.iconAligner}>
+                                                    <Icon className={classes.iconOdd}>lock</Icon>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.application.security'
+                                                            defaultMessage='Application Level Security'
+                                                        />
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {securityScheme_display && (
+                                                    <span> {securityScheme_display.join(', ')} </span>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
                                         {additionalProperties__display && additionalProperties__display.length > 0 && (
                                             additionalProperties__display.map((displayProp, index) => (
                                                 <TableRow>
