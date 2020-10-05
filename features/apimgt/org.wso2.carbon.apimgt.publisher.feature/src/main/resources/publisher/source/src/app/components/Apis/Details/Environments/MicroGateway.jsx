@@ -30,6 +30,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import Paper from '@material-ui/core/Paper';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -55,6 +56,10 @@ const useStyles = makeStyles((theme) => ({
         maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing(3),
     },
+    progressWrapper: {
+        padding: theme.spacing(),
+        textAlign: 'center',
+    },
 }));
 
 /**
@@ -67,14 +72,20 @@ export default function MicroGateway(props) {
     const classes = useStyles();
     const { selectedMgLabel, setSelectedMgLabel, api } = props;
     const restApi = new API();
-    const [mgLabels, setMgLabels] = useState([]);
+    const [mgLabels, setMgLabels] = useState(null);
     useEffect(() => {
         restApi.microgatewayLabelsGet()
             .then((result) => {
                 setMgLabels(result.body.list);
             });
     }, []);
-
+    if (!mgLabels) {
+        return (
+            <div className={classes.progressWrapper}>
+                <CircularProgress size={20} />
+            </div>
+        );
+    }
     return (
         <>
             <Typography variant='h4' align='left' className={classes.mainTitle}>
