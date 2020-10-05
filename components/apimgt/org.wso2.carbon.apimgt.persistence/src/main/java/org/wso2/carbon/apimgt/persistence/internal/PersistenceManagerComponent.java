@@ -6,14 +6,15 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
-@Component(name = "api.keymgt.component", immediate = true)
-public class PersistenceManagerComponent {
+@Component(name = "api.keymgt.component", immediate = true) public class PersistenceManagerComponent {
 
     private static Log log = LogFactory.getLog(PersistenceManagerComponent.class);
-
     private ServiceRegistration serviceRegistration = null;
+    private static TenantRegistryLoader tenantRegistryLoader;
 
     @Activate protected void activate(ComponentContext ctxt) {
 
@@ -28,12 +29,18 @@ public class PersistenceManagerComponent {
         }
     }
 
-    @Reference(name = "registry.service", service = org.wso2.carbon.registry.core.service.RegistryService.class, cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC, unbind = "unsetRegistryService") protected void setRegistryService(
+    @Reference(
+        name = "registry.service",
+        service = org.wso2.carbon.registry.core.service.RegistryService.class,
+        cardinality = ReferenceCardinality.MANDATORY,
+        policy = ReferencePolicy.DYNAMIC,
+        unbind = "unsetRegistryService")
+    protected void setRegistryService(
                                     RegistryService registryService) {
-        PersistenceMgtDataHolder.setRegistryService(registryService);
-        if (log.isDebugEnabled()) {
-            log.debug("Registry Service is set in the API KeyMgt bundle.");
+        if (registryService != null && log.isDebugEnabled()) {
+            log.debug("Registry service initialized");
         }
+        ServiceReferenceHolder.getInstance().setRegistryService(registryService);
     }
 
     protected void unsetRegistryService(RegistryService registryService) {
@@ -41,6 +48,41 @@ public class PersistenceManagerComponent {
         if (log.isDebugEnabled()) {
             log.debug("Registry Service is unset in the API KeyMgt bundle.");
         }
+    }
+
+    @Reference(
+        name = "user.realm.service",
+        service = org.wso2.carbon.user.core.service.RealmService.class,
+        cardinality = ReferenceCardinality.MANDATORY,
+        policy = ReferencePolicy.DYNAMIC,
+        unbind = "unsetRealmService")
+    protected void setRealmService(RealmService realmService) {
+        if (realmService != null && log.isDebugEnabled()) {
+            log.debug("Realm service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        ServiceReferenceHolder.getInstance().setRealmService(null);
+    }
+
+    @Reference(
+                                    name = "tenant.registryloader",
+                                    service = org.wso2.carbon.registry.core.service.TenantRegistryLoader.class,
+                                    cardinality = ReferenceCardinality.MANDATORY,
+                                    policy = ReferencePolicy.DYNAMIC,
+                                    unbind = "unsetTenantRegistryLoader")
+    protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
+        this.tenantRegistryLoader = tenantRegistryLoader;
+    }
+
+    protected void unsetTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
+        this.tenantRegistryLoader = null;
+    }
+
+    public static TenantRegistryLoader getTenantRegistryLoader() {
+        return tenantRegistryLoader;
     }
 }
 

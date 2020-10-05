@@ -124,5 +124,20 @@ public final class APIConstants {
 
     public static final String API_LABELS_GATEWAY_LABELS = "labels_labelName";
 
+    //registry location for consumer
+    public static final String API_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
 
+    //This is the resource name of API
+    public static final String API_RESOURCE_NAME = "/api";
+
+    public static final String ANONYMOUS_ROLE = "system/wso2.anonymous.role";
+
+    public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
+    public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
+    public static final String DOCUMENT_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
+    public static final String API_PRODUCT_RXT_MEDIA_TYPE = "application/vnd.wso2-product+xml";
+
+    // registry location of the governance component
+    public static final String GOVERNANCE_COMPONENT_REGISTRY_LOCATION = "/repository/components/org.wso2.carbon" +
+                                    ".governance";
 }

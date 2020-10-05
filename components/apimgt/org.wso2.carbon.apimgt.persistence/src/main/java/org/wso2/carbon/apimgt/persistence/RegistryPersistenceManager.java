@@ -1,39 +1,31 @@
 package org.wso2.carbon.apimgt.persistence;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PersistenceManager;
+
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.persistence.utils.PersistenceUtils;
-import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
-
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.api.model.API;
 
-public class RegistryPersistenceManager implements PersistenceManager {
+import java.util.Map;
+
+public class RegistryPersistenceManager extends AbstractRegistryPersistenceManager implements PersistenceManager {
     private static final Log log = LogFactory.getLog(RegistryPersistenceManager.class);
     private static PersistenceManager instance;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected Registry registry;
+    protected String tenantDomain;
 
-    public RegistryPersistenceManager() {
+    public RegistryPersistenceManager(String username) throws APIManagementException {
+        super(username);
         try {
             this.registry = getRegistryService().getGovernanceUserRegistry();
         } catch (RegistryException e) {
@@ -45,11 +37,11 @@ public class RegistryPersistenceManager implements PersistenceManager {
         return ServiceReferenceHolder.getInstance().getRegistryService();
     }
 
-    public static PersistenceManager getInstance() {
+    public static PersistenceManager getInstance(String username) throws APIManagementException {
         if (instance == null) {
             synchronized (RegistryPersistenceManager.class) {
                 if (instance == null) {
-                    instance = new RegistryPersistenceManager();
+                    instance = new RegistryPersistenceManager(username);
                 }
             }
         }
@@ -184,63 +176,32 @@ public class RegistryPersistenceManager implements PersistenceManager {
 
     }
 
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        /*
-        String apiPath = APIUtil.getAPIPath(identifier);
-        Registry registry;
-        try {
-            String apiTenantDomain = getTenantDomain(identifier);
-            int apiTenantId = getTenantManager()
-                                            .getTenantId(apiTenantDomain);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
-                APIUtil.loadTenantRegistry(apiTenantId);
-            }
-
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
-                registry = getRegistryService().getGovernanceUserRegistry(
-                                                getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
-            } else {
-                registry = this.registry;
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                                            APIConstants.API_KEY);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
-            }
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-
-            API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
-            APIUtil.updateAPIProductDependencies(api, registry); //USE REG >> NO functionality ATM
-
-            //check for API visibility
-            if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
-                return api;
-            }
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
-                throw new APIManagementException("User " + username + " does not have permission to view API : "
-                                                + api.getId().getApiName());
-            }
-
-            return api;
-
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        }
-        */
-         return null;
+    @Override public API getAPI(String apiUUID) {
+        return null;
     }
 
     @Override public void updateApi(API api) {
 
     }
 
-    @Override public void updateWsdl() {
+    @Override public void updateWsdlFromUrl(APIIdentifier apiIdentifier, String wsdlUrl) {
+
+    }
+
+    @Override public void updateWsdlFromWsdlFile(APIIdentifier apiIdentifier, ResourceFile wsdlResourceFile) {
+
+    }
+
+    @Override public void updateWsdlFromUrl(API api) {
+
+    }
+
+    @Override public void updateWsdlFromWsdlFile(API api, ResourceFile wsdlResourceFile) {
+
+    }
+
+    @Override public void updateDocVisibility(APIIdentifier apiIdentifier, String visibility, String visibleRoles,
+                                    Documentation documentation) {
 
     }
 
@@ -250,5 +211,20 @@ public class RegistryPersistenceManager implements PersistenceManager {
 
     @Override public void createAPI(API api) {
 
+    }
+
+    @Override public Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgName, int start, int end,
+                                    boolean limitAttributes) {
+        return null;
+    }
+
+    @Override public Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start,
+                                    int end, boolean limitAttributes, boolean isPublisherListing) {
+        return null;
+    }
+
+    @Override public Map<String, Object> searchPaginatedAPIsByContent(int tenantId, String searchQuery, int start,
+                                    int end, boolean limitAttributes) {
+        return null;
     }
 }
