@@ -30,6 +30,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -162,6 +163,7 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.beans.LifecycleBea
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
@@ -173,6 +175,7 @@ import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
+import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
@@ -240,7 +243,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         super(username);
         this.userNameWithoutChange = username;
         certificateManager = CertificateManagerImpl.getInstance();
-        persistenceManager = RegistryPersistenceManager.getInstance();
+        persistenceManager = RegistryPersistenceManager.getInstance(username);
     }
 
     protected String getUserNameWithoutChange() {
@@ -803,33 +806,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
-        //RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
         //Add default API LC if it is not there
-        persistenceManager.addLifeCycle(api);
-//        try {
-//            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
-//                    registryService.getConfigSystemRegistry(tenantId))) {
-//                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
-//                        + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
-//                File file = new File(defaultLifecyclePath);
-//                String content = null;
-//                if (file != null && file.exists()) {
-//                    content = FileUtils.readFileToString(file);
-//                }
-//                if (content != null) {
-//                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
-//                            CommonUtil.getRootSystemRegistry(tenantId));
-//                }
-//            }
-//        } catch (RegistryException e) {
-//            handleException("Error occurred while adding default APILifeCycle.", e);
-//        } catch (IOException e) {
-//            handleException("Error occurred while loading APILifeCycle.xml.", e);
-//        } catch (XMLStreamException e) {
-//            handleException("Error occurred while adding default API LifeCycle.", e);
-//        }
-        //persistenceManager.createAPI(api);
+        try {
+            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
+                                            registryService.getConfigSystemRegistry(tenantId))) {
+                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
+                                                + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
+                File file = new File(defaultLifecyclePath);
+                String content = null;
+                if (file != null && file.exists()) {
+                    content = FileUtils.readFileToString(file);
+                }
+                if (content != null) {
+                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
+                                                    CommonUtil.getRootSystemRegistry(tenantId));
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Error occurred while adding default APILifeCycle.", e);
+        } catch (IOException e) {
+            handleException("Error occurred while loading APILifeCycle.xml.", e);
+        } catch (XMLStreamException e) {
+            handleException("Error occurred while adding default API LifeCycle.", e);
+        }
+
         createAPI(api);
 
         if (log.isDebugEnabled()) {
@@ -1318,13 +1320,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
-        API oldapi = persistenceManager.getAPI(api.getId());
+
         boolean isValid = isAPIUpdateValid(api);
-       // boolean isValid = isAPIUpdateValid(oldapi, api);
         if (!isValid) {
             throw new APIManagementException(" User doesn't have permission for update");
         }
-
         validateKeyManagers(api);
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
         API oldApi = getAPI(api.getId());
@@ -1363,8 +1363,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
                     // happen
                     // Remove the previous default API entry from the Registry
-                    persistenceManager.updateApi(api);
-                    updateDefaultAPIInRegistry(defaultAPIId, false);// check
+                    updateDefaultAPIInRegistry(defaultAPIId, false);
                     if (!api.isDefaultVersion()) {// default api tick is removed
                         // todo: if it is ok, these two variables can be put to the top of the function to remove
                         // duplication
@@ -1379,12 +1378,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             //Update WSDL in the registry
             if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {
-                persistenceManager.updateWsdl();
-                //updateWsdlFromUrl(api);
+                updateWsdlFromUrl(api);
             }
 
             if (api.getWsdlResource() != null) {
-                persistenceManager.updateWsdlFromResourceFile();
                 updateWsdlFromResourceFile(api);
             }
 
@@ -3868,13 +3865,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to create API
      */
     protected void createAPI(API api) throws APIManagementException {
-//        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-//
-//        if (artifactManager == null) {
-//            String errorMessage = "Failed to retrieve artifact manager when creating API " + api.getId().getApiName();
-//            log.error(errorMessage);
-//            throw new APIManagementException(errorMessage);
-//        }
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+
+        if (artifactManager == null) {
+            String errorMessage = "Failed to retrieve artifact manager when creating API " + api.getId().getApiName();
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
 
         if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
             String errorMessage = "Empty password is given for endpointSecurity when creating API "
@@ -3886,101 +3883,86 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
         boolean transactionCommitted = false;
-        persistenceManager.createAPI(api);
-////////
-//        1 - save api generic data - artifact
-//        2 - save  LC
-//        3 - addAssociation
-//        4 - apply tags
-//        5 - addwsdl - will call updateWSDLUriInAPIArtifact
-//        6 - attachMGW LabelsToAPIArtifact >>> this should be interfaced separately
-//        7 - set api status
-//        8 - set pub access contorol roles
-//        9 - set Resource Permissions
+        try {
+            registry.beginTransaction();
+            GenericArtifact genericArtifact =
+                                            artifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
+            if (genericArtifact == null) {
+                String errorMessage = "Generic artifact is null when creating API " + api.getId().getApiName();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+            GenericArtifact artifact = APIUtil.createAPIArtifactContent(genericArtifact, api);
+            artifactManager.addGenericArtifact(artifact);
+            //Attach the API lifecycle
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            String providerPath = APIUtil.getAPIProviderPath(api.getId());
+            //provider ------provides----> API
+            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
+            Set<String> tagSet = api.getTags();
+            if (tagSet != null) {
+                for (String tag : tagSet) {
+                    registry.applyTag(artifactPath, tag);
+                }
+            }
+            if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
+                String path = APIUtil.createWSDL(registry, api);
+                updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
+            }
 
-//        try {
-//            registry.beginTransaction();
-//            GenericArtifact genericArtifact =
-//                    artifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
-//            if (genericArtifact == null) {
-//                String errorMessage = "Generic artifact is null when creating API " + api.getId().getApiName();
-//                log.error(errorMessage);
-//                throw new APIManagementException(errorMessage);
-//            }
-//            GenericArtifact artifact = APIUtil.createAPIArtifactContent(genericArtifact, api);
-//            artifactManager.addGenericArtifact(artifact);
-//            //Attach the API lifecycle
-//            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
-//            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-//            String providerPath = APIUtil.getAPIProviderPath(api.getId());
-//            //provider ------provides----> API
-//            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
-//            Set<String> tagSet = api.getTags();
-//            if (tagSet != null) {
-//                for (String tag : tagSet) {
-//                    registry.applyTag(artifactPath, tag);
-//                }
-//            }
-//            if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
-//                String path = APIUtil.createWSDL(registry, api);
-//                updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
-//            }
-//
-//            if (api.getWsdlResource() != null) {
-//                String path = APIUtil.saveWSDLResource(registry, api);
-//                updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
-//            }
-//
-//            //attaching micro-gateway labels to the API
-//            List<Label> gatewayLabelList = APIUtil.getAllLabels(tenantDomain);
-//            PersistenceManager.attachLabelsToAPI(gatewayLabelList, );
-//            APIUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain);
-//
-//            //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
-//            //to gain performance
-//            String apiStatus = api.getStatus();
-//            saveAPIStatus(artifactPath, apiStatus);
-//            String visibleRolesList = api.getVisibleRoles();
-//            String[] visibleRoles = new String[0];
-//            if (visibleRolesList != null) {
-//                visibleRoles = visibleRolesList.split(",");
-//            }
-//
-//            String publisherAccessControlRoles = api.getAccessControlRoles();
-//            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
-//                    api.getAdditionalProperties());
-//            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-//                    artifactPath, registry);
-//
-//            registry.commitTransaction();
-//            transactionCommitted = true;
-//
-//            if (log.isDebugEnabled()) {
-//                String logMessage =
-//                        "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
-//                                + " created";
-//                log.debug(logMessage);
-//            }
-//        } catch (RegistryException e) {
-//            try {
-//                registry.rollbackTransaction();
-//            } catch (RegistryException re) {
-//                // Throwing an error here would mask the original exception
-//                log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
-//            }
-//            handleException("Error while performing registry transaction operation", e);
-//        } catch (APIManagementException e) {
-//            handleException("Error while creating API", e);
-//        } finally {
-//            try {
-//                if (!transactionCommitted) {
-//                    registry.rollbackTransaction();
-//                }
-//            } catch (RegistryException ex) {
-//                handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
-//            }
-//        }
-        //////////////
+            if (api.getWsdlResource() != null) {
+                String path = APIUtil.saveWSDLResource(registry, api);
+                updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
+            }
+
+            //attaching micro-gateway labels to the API
+            APIUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain);
+
+            //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
+            //to gain performance
+            String apiStatus = api.getStatus();
+            saveAPIStatus(artifactPath, apiStatus);
+            String visibleRolesList = api.getVisibleRoles();
+            String[] visibleRoles = new String[0];
+            if (visibleRolesList != null) {
+                visibleRoles = visibleRolesList.split(",");
+            }
+
+            String publisherAccessControlRoles = api.getAccessControlRoles();
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+                                            api.getAdditionalProperties());
+            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                                            artifactPath, registry);
+
+            registry.commitTransaction();
+            transactionCommitted = true;
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                                                "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+                                                                                + " created";
+                log.debug(logMessage);
+            }
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error here would mask the original exception
+                log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } catch (APIManagementException e) {
+            handleException("Error while creating API", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
+            }
+        }
     }
 
     /**
