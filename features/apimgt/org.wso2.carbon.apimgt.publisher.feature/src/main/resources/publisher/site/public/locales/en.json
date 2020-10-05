@@ -771,6 +771,7 @@
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.operation.scope.select.local": "API Scopes",
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.operation.scope.select.shared": "Shared Scopes",
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.API.level": "API Level",
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.button.text": "Toggle per api rate limiting",
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.governed.by": "Rate limiting is governed by",
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.helperText.section1": "Use",
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.helperText.section2": "Operation Level",
