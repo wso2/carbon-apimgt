@@ -172,7 +172,7 @@ const ApplicationCreate = (props) => {
                 select
                 label={(
                     <FormattedMessage
-                        defaultMessage='Per Token Quota.'
+                        defaultMessage='Shared Quota for Application Tokens.'
                         id='Shared.AppsAndKeys.ApplicationCreateForm.per.token.quota'
                     />
                 )}

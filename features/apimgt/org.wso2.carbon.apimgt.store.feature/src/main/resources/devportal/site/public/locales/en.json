@@ -423,7 +423,7 @@
   "Shared.AppsAndKeys.ApplicationCreateForm.enter.a.name": "Enter a name to identify the Application.\n                                    You will be able to pick this application when subscribing to APIs",
   "Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application": "My Application",
   "Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application.placeholder": "My Mobile Application",
-  "Shared.AppsAndKeys.ApplicationCreateForm.per.token.quota": "Per Token Quota.",
+  "Shared.AppsAndKeys.ApplicationCreateForm.per.token.quota": "Shared Quota for Application Tokens.",
   "Shared.AppsAndKeys.ApplicationCreateForm.required.alt": "Required",
   "Shared.AppsAndKeys.ApplicationCreateForm.type.a.group.and.enter": "Type a group and enter",
   "Shared.AppsAndKeys.ImportExternalApp.cancel": "Cancel",
