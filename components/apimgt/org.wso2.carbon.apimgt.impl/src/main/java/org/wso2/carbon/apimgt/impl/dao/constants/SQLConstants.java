@@ -2154,7 +2154,8 @@ public class SQLConstants {
             " WHERE " +
             "  API.API_PROVIDER = ? AND " +
             "  API.API_NAME = ? AND " +
-            "  API.API_VERSION = ? ";
+            "  API.API_VERSION = ? " +
+            " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
     public static final String GET_API_PRODUCT_URI_TEMPLATE_ASSOCIATION_SQL =
             " SELECT " +

@@ -486,6 +486,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 new org.wso2.carbon.databridge.commons.Event(
                         "org.wso2.throttle.request.stream:1.0.0", System.currentTimeMillis(), null,
                         null, objects);
+        if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
+            log.error("Cannot publish events to traffic manager because ThrottleDataPublisher " +
+                    "has not been initialised");
+            return true;
+        }
         ServiceReferenceHolder.getInstance().getThrottleDataPublisher().getDataPublisher().tryPublish(event);
         return true;
     }
@@ -611,13 +616,14 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private SignedJWTInfo getSignedJwtInfo(String accessToken) throws ParseException {
 
         String signature = accessToken.split("\\.")[2];
-        SignedJWTInfo signedJWTInfo;
+        SignedJWTInfo signedJWTInfo = null;
         Cache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
         if (gatewaySignedJWTParseCache != null) {
             Object cachedEntry = gatewaySignedJWTParseCache.get(signature);
             if (cachedEntry != null) {
                 signedJWTInfo = (SignedJWTInfo) cachedEntry;
-            } else {
+            }
+            if (signedJWTInfo == null || !signedJWTInfo.getToken().equals(accessToken)) {
                 SignedJWT signedJWT = SignedJWT.parse(accessToken);
                 JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
                 signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);

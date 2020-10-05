@@ -196,7 +196,7 @@ function MarkdownEditor(props) {
                         <Grid item xs={6}>
                             <div className={classes.markdownViewWrapper}>
                                 <Suspense fallback={<CircularProgress />}>
-                                    <ReactMarkdown source={code} />
+                                    <ReactMarkdown escapeHtml={false} source={code} />
                                 </Suspense>
                             </div>
                         </Grid>

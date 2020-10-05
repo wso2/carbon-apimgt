@@ -49,6 +49,7 @@ public class JWTValidatorImpl implements JWTValidator {
     private Log log = LogFactory.getLog(JWTValidatorImpl.class);
     JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
+
     @Override
     public JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo) throws APIManagementException {
 
@@ -62,6 +63,7 @@ public class JWTValidatorImpl implements JWTValidator {
                 if (state) {
                     jwtValidationInfo.setConsumerKey(getConsumerKey(jwtClaimsSet));
                     jwtValidationInfo.setScopes(getScopes(jwtClaimsSet));
+                    jwtValidationInfo.setAppToken(getIsAppToken(jwtClaimsSet));
                     JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
                     createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
                     jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
@@ -147,13 +149,20 @@ public class JWTValidatorImpl implements JWTValidator {
 
         return jwtTransformer.transform(jwtClaimsSet);
     }
+
     protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
 
         return jwtTransformer.getTransformedConsumerKey(jwtClaimsSet);
     }
+
     protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
 
         return jwtTransformer.getTransformedScopes(jwtClaimsSet);
+    }
+
+    protected Boolean getIsAppToken(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+
+        return jwtTransformer.getTransformedIsAppTokenType(jwtClaimsSet);
     }
 
     private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo,
@@ -167,12 +176,14 @@ public class JWTValidatorImpl implements JWTValidator {
         jwtValidationInfo.setIssuedTime(jwtClaimsSet.getIssueTime().getTime());
         jwtValidationInfo.setUser(jwtClaimsSet.getSubject());
         jwtValidationInfo.setJti(jwtClaimsSet.getJWTID());
-        if(jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.SCOPE) != null){
+        if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.SCOPE) != null) {
             jwtValidationInfo.setScopes(Arrays.asList(jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.SCOPE)
                     .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
         }
     }
+
     private JWKSet retrieveJWKSet() throws IOException, ParseException {
+
         String jwksInfo = JWTUtil
                 .retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
         jwkSet = JWKSet.parse(jwksInfo);

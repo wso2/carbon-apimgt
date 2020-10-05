@@ -44,8 +44,6 @@ public class APINameComparatorTest {
 
     @Test
     public void testVersionCompare() throws Exception {
-        Mockito.when(apiIdentifier1.getProviderName()).thenReturn(PROVIDER_NAME_1);
-        Mockito.when(apiIdentifier2.getProviderName()).thenReturn(PROVIDER_NAME_1);
         Mockito.when(apiIdentifier1.getApiName()).thenReturn(API_NAME_1);
         Mockito.when(apiIdentifier2.getApiName()).thenReturn(API_NAME_1);
         Mockito.when(apiIdentifier1.getVersion()).thenReturn(VERSION_1);
@@ -57,8 +55,6 @@ public class APINameComparatorTest {
 
     @Test
     public void testApiNameCompare() throws Exception {
-        Mockito.when(apiIdentifier1.getProviderName()).thenReturn(PROVIDER_NAME_1);
-        Mockito.when(apiIdentifier2.getProviderName()).thenReturn(PROVIDER_NAME_1);
         Mockito.when(apiIdentifier1.getApiName()).thenReturn(API_NAME_1);
         Mockito.when(apiIdentifier2.getApiName()).thenReturn(API_NAME_2);
 
@@ -68,6 +64,10 @@ public class APINameComparatorTest {
 
     @Test
     public void testProviderNameCompare() throws Exception {
+        Mockito.when(apiIdentifier1.getApiName()).thenReturn(API_NAME_1);
+        Mockito.when(apiIdentifier2.getApiName()).thenReturn(API_NAME_1);
+        Mockito.when(apiIdentifier1.getVersion()).thenReturn(VERSION_1);
+        Mockito.when(apiIdentifier2.getVersion()).thenReturn(VERSION_1);
         Mockito.when(apiIdentifier1.getProviderName()).thenReturn(PROVIDER_NAME_1);
         Mockito.when(apiIdentifier2.getProviderName()).thenReturn(PROVIDER_NAME_2);
 

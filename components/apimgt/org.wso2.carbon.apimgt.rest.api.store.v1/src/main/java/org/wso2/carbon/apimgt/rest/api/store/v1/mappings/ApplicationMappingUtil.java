@@ -208,6 +208,8 @@ public class ApplicationMappingUtil {
         applicationAttributeDTO.setDescription((String) attribute.get(APIConstants.ApplicationAttributes.DESCRIPTION));
         applicationAttributeDTO.setRequired(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.REQUIRED)));
         applicationAttributeDTO.setHidden(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.HIDDEN)));
+        applicationAttributeDTO.setType(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.TYPE)));
+        applicationAttributeDTO.setTooltip(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.TOOLTIP)));
         return applicationAttributeDTO;
     }
 

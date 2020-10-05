@@ -523,6 +523,7 @@ public final class APIConstants {
     public static final String LC_CHECK_ITEM_NAME = "name:";
     public static final String LC_CHECK_ITEM_VALUE = "value:";
     public static final String LC_CHECK_ITEM_ORDER = "order:";
+    public static final String LC_PUBLISH_LC_STATE = "Publish";
 
     public static final String SUPER_TENANT_DOMAIN = "carbon.super";
     public static final String TENANT_PREFIX = "/t/";
@@ -1796,6 +1797,8 @@ public final class APIConstants {
         public static final String DESCRIPTION = "Description";
         public static final String DEFAULT = "Default";
         public static final String NAME = "Name";
+        public static final String TOOLTIP = "Tooltip";
+        public static final String TYPE = "Type";
     }
 
     public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";
@@ -1889,6 +1892,7 @@ public final class APIConstants {
         public static final String PERMITTED_REFERER = "permittedReferer";
         public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
         public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
+        public static final String AUTHORIZED_USER_TYPE = "aut";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

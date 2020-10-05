@@ -206,7 +206,8 @@ ExceptionCodes implements ErrorHandler {
             "One of the provided input character length exceeds the allowable limit."),
     BLANK_PROPERTY_VALUE(900705, "Blank value for required property", 400,
             "%s property value of payload cannot be blank"),
-
+    CONTAIN_SPECIAL_CHARACTERS(900706, "contain invalid characters", 400,
+            "%s property value of payload cannot contain invalid characters"),
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),

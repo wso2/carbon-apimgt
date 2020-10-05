@@ -155,7 +155,12 @@ const ApplicationCreate = (props) => {
                 })}
                 onBlur={(e) => validateName(e.target.value)}
                 error={!isNameValid}
-                inputProps={{ maxLength: 70 }}
+                inputProps={{
+                    maxLength: 70, alt: intl.formatMessage({
+                        defaultMessage: 'Required',
+                        id: 'Shared.AppsAndKeys.ApplicationCreateForm.required.alt',
+                    })
+                }}
             />
             <TextField
                 classes={{
@@ -184,6 +189,12 @@ const ApplicationCreate = (props) => {
                 )}
                 margin='normal'
                 variant='outlined'
+                inputProps={{
+                    alt: intl.formatMessage({
+                        defaultMessage: 'Required',
+                        id: 'Shared.AppsAndKeys.ApplicationCreateForm.required.alt',
+                    })
+                }}
             >
                 {throttlingPolicyList.map((policy) => (
                     <MenuItem key={policy} value={policy}>
@@ -227,11 +238,19 @@ const ApplicationCreate = (props) => {
                             label={item[1].attribute}
                             value={getAttributeValue(item[1].attribute)}
                             helperText={item[1].description}
+                            multiline={item[1].type === 'textarea'}
+                            rows={4}
                             fullWidth
                             name={item[1].attribute}
                             onChange={handleAttributesChange(item[1].attribute)}
                             placeholder={'Enter ' + item[1].attribute}
                             className={classes.inputText}
+                            inputProps={{
+                                alt: isRequiredAttribute(item[1].attribute) && intl.formatMessage({
+                                    defaultMessage: 'Required',
+                                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.required.alt',
+                                })
+                            }}
                         />
                     ) : (null)))
             )}
