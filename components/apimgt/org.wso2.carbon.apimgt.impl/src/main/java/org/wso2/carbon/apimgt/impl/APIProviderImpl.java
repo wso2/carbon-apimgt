@@ -1141,6 +1141,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiStatus  Current status of the API
      * @throws APIManagementException on error
      */
+    // HAS REG USAGE
     private void saveAPIStatus(String artifactId, String apiStatus) throws APIManagementException {
         try {
             Resource resource = registry.get(artifactId);
