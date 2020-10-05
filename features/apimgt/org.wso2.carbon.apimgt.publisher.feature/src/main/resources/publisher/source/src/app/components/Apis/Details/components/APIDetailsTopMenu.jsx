@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
-
+import Box from '@material-ui/core/Box';
 import Utils from 'AppData/Utils';
 import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -131,7 +131,9 @@ const APIDetailsTopMenu = (props) => {
                     : `/apis/${api.id}/overview`}
                 className={classes.backLink}
             >
-                <ThumbnailView api={api} width={70} height={50} imageUpdate={imageUpdate} />
+                <Box width={70} height={50} marginLeft={1}>
+                    <ThumbnailView api={api} width={70} height={50} imageUpdate={imageUpdate} />
+                </Box>
                 <div style={{ marginLeft: theme.spacing(1), maxWidth: 500 }}>
                     <Typography variant='h4' className={classes.apiName}>
                         {api.name}

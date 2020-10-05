@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,10 +31,12 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractAPIMgtGatewayJWTGenerator {
@@ -188,8 +191,32 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 }
             }
         }
+        ObjectMapper mapper = new ObjectMapper();
         for (Map.Entry<String, Object> claimEntry : claims.entrySet()) {
-            if (APIConstants.JwtTokenConstants.EXPIRY_TIME.equals(claimEntry.getKey())) {
+            Object claimVal = claimEntry.getValue();
+            if (claimVal instanceof String && claimEntry.toString().contains("{")) {
+                try {
+                    Map<String, String> map = mapper.readValue(claimVal.toString(), Map.class);
+                    jwtClaimSetBuilder.claim(claimEntry.getKey(), map);
+                } catch (IOException e) {
+                    // Exception isn't thrown in order to generate jwt without claim, even if an error is
+                    // occurred during the retrieving claims.
+                    log.error(String.format("Error while reading claim values for %s", claimVal), e);
+                }
+            } else if (claimVal instanceof String && claimVal.toString().contains("[\"")
+                    && claimVal.toString().contains("\"]")){
+
+                try {
+                    List<String> arrayList = mapper.readValue(claimVal.toString(), List.class);
+                    jwtClaimSetBuilder.claim(claimEntry.getKey(), arrayList);
+                } catch (IOException e) {
+                    // Exception isn't thrown in order to generate jwt without claim, even if an error is
+                    // occurred during the retrieving claims.
+                    log.error("Error while reading claim values", e);
+                }
+            } else if (APIConstants.JwtTokenConstants.EXPIRY_TIME.equals(claimEntry.getKey())) {
+                jwtClaimSetBuilder.claim(claimEntry.getKey(), new Date(Long.parseLong((String) claimEntry.getValue())));
+            } else if (APIConstants.JwtTokenConstants.ISSUED_TIME.equals(claimEntry.getKey())) {
                 jwtClaimSetBuilder.claim(claimEntry.getKey(), new Date(Long.parseLong((String) claimEntry.getValue())));
             } else {
                 jwtClaimSetBuilder.claim(claimEntry.getKey(), claimEntry.getValue());

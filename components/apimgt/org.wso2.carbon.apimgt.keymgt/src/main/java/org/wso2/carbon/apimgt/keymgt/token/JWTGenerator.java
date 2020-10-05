@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.keymgt.token;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -40,6 +40,11 @@ import org.wso2.carbon.identity.application.common.model.Claim;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataHandler;
 import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataException;
+import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
+import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
+import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,10 +95,28 @@ public class JWTGenerator extends AbstractJWTGenerator {
             appAttributes = application.getAttributes();
             uuid = application.getUUID();
         }
+        String usernameWithoutTenantDomain = MultitenantUtils.getTenantAwareUsername(endUserName);
         Map<String, String> claims = new LinkedHashMap<String, String>(20);
+        try {
+            OAuthAppDO oAuthAppDO = OAuth2Util.
+                    getAppInformationByClientId(validationContext.getValidationInfoDTO().getConsumerKey());
+            if (oAuthAppDO != null && oAuthAppDO.getAudiences() != null) {
+                String[] audience = oAuthAppDO.getAudiences();
+                String parsedClaims = "[\"" + StringUtils.join(audience , "\",\"") + "\"]";
+                claims.put("aud", parsedClaims);
+            }
+        } catch (IdentityOAuth2Exception | InvalidOAuthClientException e) {
+            log.error("Error occurred while getting JWT Token client ID : "
+                    + validationContext.getValidationInfoDTO().getConsumerKey() + " when getting oAuth App " +
+                    "information", e);
+            throw new APIManagementException("Error occurred while getting JWT Token client ID : "
+                    + validationContext.getValidationInfoDTO().getConsumerKey(), e);
+        }
 
         claims.put("iss", API_GATEWAY_ID);
         claims.put("exp", String.valueOf(expireIn));
+        claims.put("iat", String.valueOf(currentTime));
+        claims.put("sub", usernameWithoutTenantDomain);
         claims.put(dialect + "/subscriber", subscriber);
         claims.put(dialect + "/applicationid", applicationId);
         claims.put(dialect + "/applicationname", applicationName);

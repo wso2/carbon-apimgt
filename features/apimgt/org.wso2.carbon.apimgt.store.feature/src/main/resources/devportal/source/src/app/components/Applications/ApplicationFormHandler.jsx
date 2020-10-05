@@ -431,6 +431,14 @@ class ApplicationFormHandler extends React.Component {
                         }
                     />
                 </Typography>
+                <Typography variant='caption' component='div'>
+                    <FormattedMessage
+                        id='Applications.Create.ApplicationFormHandler.create.application.sub.heading.required'
+                        defaultMessage={
+                            'Required fields are marked with an asterisk ( * )'
+                        }
+                    />
+                </Typography>
             </>
         );
         const EditPageTitle = (
@@ -447,6 +455,14 @@ class ApplicationFormHandler extends React.Component {
                         defaultMessage={
                             'Edit this application. Name, quota and token type are mandatory parameters'
                             + ' and description is optional'
+                        }
+                    />
+                </Typography>
+                <Typography variant='caption' Component='div'>
+                    <FormattedMessage
+                        id='Applications.Create.ApplicationFormHandler.create.application.sub.heading.required'
+                        defaultMessage={
+                            'Required fields are marked with an asterisk ( * )'
                         }
                     />
                 </Typography>

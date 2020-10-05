@@ -188,7 +188,7 @@ const ChangePassword = () => {
                 Alert.success(
                     <FormattedMessage
                         id='Change.Password.password.changed.success'
-                        defaultMessage='Password changed successfully'
+                        defaultMessage='User password changed successfully. Please use the new password on next sign in'
                     />
                 );
                 window.history.back();
