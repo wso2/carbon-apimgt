@@ -12,10 +12,7 @@ import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -93,8 +90,10 @@ public class GatewayArtifactsMgtDAO {
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 statement.setBinaryStream(1, bais, streamLength);
                 statement.setString(2, gatewayInstruction);
-                statement.setString(3, APIId);
-                statement.setString(4, gatewayLabel);
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                statement.setTimestamp(3, timestamp);
+                statement.setString(4, APIId);
+                statement.setString(5, gatewayLabel);
                 result = statement.executeUpdate() == 1;
 
                 connection.commit();
