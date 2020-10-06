@@ -44,7 +44,9 @@ SubscriptionPoliciesApiService delegate = new SubscriptionPoliciesApiServiceImpl
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of subscription policies in the database", response = SubscriptionPolicyListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response subscriptionPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Subscription policy name ")  @QueryParam("policyName") String policyName) throws APIManagementException{
+    public Response subscriptionPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,      
+        @ApiParam(value = "**Search condition**.  Subscription policy name ")  @QueryParam("policyName") String policyName
+) throws APIManagementException{
         return delegate.subscriptionPoliciesGet(xWSO2Tenant, policyName, securityContext);
     }
 }

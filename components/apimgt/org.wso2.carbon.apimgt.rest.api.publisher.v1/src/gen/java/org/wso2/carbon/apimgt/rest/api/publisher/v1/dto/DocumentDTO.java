@@ -157,7 +157,7 @@ public enum VisibilityEnum {
   @ApiModelProperty(example = "CalculatorDoc", required = true, value = "")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=60)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -192,7 +192,7 @@ public enum VisibilityEnum {
   
   @ApiModelProperty(example = "Summary of Calculator Documentation", value = "")
   @JsonProperty("summary")
-  public String getSummary() {
+ @Size(min=1,max=32766)  public String getSummary() {
     return summary;
   }
   public void setSummary(String summary) {

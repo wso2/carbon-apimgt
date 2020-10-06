@@ -44,7 +44,13 @@ SynapseAttributesApiService delegate = new SynapseAttributesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of gatewayRuntimeArtifacts", response = SynapseAttributesDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response synapseAttributesGet( @ApiParam(value = "**Search condition**.   API Name ")  @QueryParam("apiName") String apiName,  @ApiParam(value = "**Search condition**.  tenantDomain associated with the API ")  @QueryParam("tenantDomain") String tenantDomain,  @ApiParam(value = "**Search condition**. version of the API ")  @QueryParam("version") String version) throws APIManagementException{
+    public Response synapseAttributesGet(     
+        @ApiParam(value = "**Search condition**.   API Name ")  @QueryParam("apiName") String apiName
+,      
+        @ApiParam(value = "**Search condition**.  tenantDomain associated with the API ")  @QueryParam("tenantDomain") String tenantDomain
+,      
+        @ApiParam(value = "**Search condition**. version of the API ")  @QueryParam("version") String version
+) throws APIManagementException{
         return delegate.synapseAttributesGet(apiName, tenantDomain, version, securityContext);
     }
 }

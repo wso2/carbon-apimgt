@@ -171,7 +171,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Failure due to not providing alias. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Updating certificate failed. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response apisApiIdClientCertificatesAliasPut(@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias, @ApiParam(value = "The api identifier",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "certificate", required = false) InputStream certificateInputStream, @Multipart(value = "certificate" , required = false) Attachment certificateDetail, @Multipart(value = "tier", required = false)  String tier) throws APIManagementException{
+    public Response apisApiIdClientCertificatesAliasPut( @Size(max=30)@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias, @ApiParam(value = "The api identifier",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "certificate", required = false) InputStream certificateInputStream, @Multipart(value = "certificate" , required = false) Attachment certificateDetail, @Multipart(value = "tier", required = false)  String tier) throws APIManagementException{
         return delegate.apisApiIdClientCertificatesAliasPut(alias, apiId, certificateInputStream, certificateDetail, tier, securityContext);
     }
 
@@ -1021,11 +1021,11 @@ JSON,YAML,
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = ErrorDTO.class) })
     public Response apisPost(@ApiParam(value = "API object that needs to be added " ,required=true) APIDTO body,      
-        @ApiParam(value = "Open api version", allowableValues="V2, V3", defaultValue="V3") @DefaultValue("V3") @QueryParam("openAPIVersion") OpenAPIVersionEnum openAPIVersion
+        @ApiParam(value = "Open api version", allowableValues="v2, v3", defaultValue="v3") @DefaultValue("v3") @QueryParam("openAPIVersion") OpenAPIVersionEnum openAPIVersion
 ) throws APIManagementException{
         return delegate.apisPost(body, openAPIVersion, securityContext);
     }public enum OpenAPIVersionEnum {
-V2,V3,
+v2,v3,
 }
 
     @POST

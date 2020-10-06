@@ -3913,7 +3913,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
             String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
-            if (!ArrayUtils.contains(nextAllowedStates, action)) {
+            if (!ArrayUtils.contains(nextAllowedStates, action.toString())) {
                 RestApiUtil.handleBadRequest(
                         "Action '" + action + "' is not allowed. Allowed actions are " + Arrays
                                 .toString(nextAllowedStates), log);

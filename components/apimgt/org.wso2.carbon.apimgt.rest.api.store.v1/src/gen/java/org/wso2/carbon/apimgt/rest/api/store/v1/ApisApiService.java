@@ -27,6 +27,7 @@ import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApi.*;
 
 
 public interface ApisApiService {

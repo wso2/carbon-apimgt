@@ -216,8 +216,8 @@ paths:
           name: openAPIVersion
           description: Open api version
           type: string
-          enum: [V2, V3]
-          default: V3
+          enum: [v2, v3]
+          default: v3
       tags:
         - APIs
       responses:
@@ -4555,6 +4555,7 @@ paths:
           description: Alias for the certificate
           required: true
           type: string
+          maxLength: 30
         - in: formData
           name : tier
           description: The tier of the certificate
@@ -4821,6 +4822,7 @@ paths:
           required: false
           type: string
           description: Alias for the certificate
+          maxLength: 30
         - in: query
           name: endpoint
           required: false
@@ -4953,6 +4955,8 @@ paths:
           description: Alias for the certificate
           required: true
           type: string
+          minLength: 1
+          maxLength: 30
       tags:
         - Endpoint Certificates
       responses:
@@ -8121,9 +8125,13 @@ definitions:
         type: string
         description: Name of the API Product
         example: CalculatorAPIProduct
+        minLength: 1
+        maxLength: 50
       context:
         type: string
         example: CalculatorAPI
+        minLength: 1
+        maxLength: 60
       description:
         type: string
         description: A brief description about the API
@@ -8204,6 +8212,9 @@ definitions:
       apiType:
         type: string
         description: The api type to be used. Accepted values are API, API PRODUCT
+        enum:
+          - API
+          - APIProduct
         example: APIProduct
       transport:
         description: |
@@ -8366,12 +8377,14 @@ definitions:
       businessOwner:
         type: string
         example: businessowner
+        maxLength: 120
       businessOwnerEmail:
         type: string
         example: businessowner@wso2.com
       technicalOwner:
         type: string
         example: technicalowner
+        maxLength: 120
       technicalOwnerEmail:
         type: string
         example: technicalowner@wso2.com
@@ -8492,7 +8505,8 @@ definitions:
       name:
         type: string
         example: CalculatorDoc
-
+        minLength: 1
+        maxLength: 60
       type:
         type: string
         enum:
@@ -8507,6 +8521,8 @@ definitions:
       summary:
         type: string
         example: "Summary of Calculator Documentation"
+        minLength: 1
+        maxLength: 32766
       sourceType:
         type: string
         enum:
@@ -9050,6 +9066,7 @@ definitions:
       businessOwner:
         type: string
         example: businessowner
+        maxLength: 120
       businessOwnerEmail:
         type: string
         format: email
@@ -9057,6 +9074,7 @@ definitions:
       technicalOwner:
         type: string
         example: technicalowner
+        maxLength: 120
       technicalOwnerEmail:
         type: string
         format: email
@@ -9200,16 +9218,20 @@ definitions:
         description: |
           name of Scope
         example: apim:api_view
+        minLength: 1
+        maxLength: 255
       displayName:
         type: string
         description: |
           display name of Scope
         example: api_view
+        maxLength: 255
       description:
         type: string
         description: |
           description of Scope
         example: 'This Scope can used to view Apis'
+        maxLength: 512
       bindings:
         description: |
           role bindings list of the Scope

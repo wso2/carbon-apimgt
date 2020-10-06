@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApi;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
@@ -94,15 +95,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return Response object containing resulted applications
      */
     @Override
-    public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder,
-            Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) {
+    public Response applicationsGet(String groupId, String query, ApplicationsApi.SortByEnum sortBy, ApplicationsApi.SortOrderEnum sortOrder,
+                                    Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DEFAULT_SORT_ORDER;
-        sortBy = sortBy != null ?
-                ApplicationMappingUtil.getApplicationSortByField(sortBy) :
-                APIConstants.APPLICATION_NAME;
+//        sortBy = sortBy != null ?
+//                ApplicationMappingUtil.getApplicationSortByField(sortBy) :
+//                APIConstants.APPLICATION_NAME;
         query = query == null ? "" : query;
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
 
@@ -117,8 +117,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Subscriber subscriber = new Subscriber(username);
             Application[] applications;
             applications = apiConsumer
-                    .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy,
-                            sortOrder);
+                    .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy.toString(),
+                            sortOrder.toString());
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 

@@ -30,7 +30,7 @@ public class APIProductBusinessInformationDTO   {
   
   @ApiModelProperty(example = "businessowner", value = "")
   @JsonProperty("businessOwner")
-  public String getBusinessOwner() {
+ @Size(max=120)  public String getBusinessOwner() {
     return businessOwner;
   }
   public void setBusinessOwner(String businessOwner) {
@@ -64,7 +64,7 @@ public class APIProductBusinessInformationDTO   {
   
   @ApiModelProperty(example = "technicalowner", value = "")
   @JsonProperty("technicalOwner")
-  public String getTechnicalOwner() {
+ @Size(max=120)  public String getTechnicalOwner() {
     return technicalOwner;
   }
   public void setTechnicalOwner(String technicalOwner) {

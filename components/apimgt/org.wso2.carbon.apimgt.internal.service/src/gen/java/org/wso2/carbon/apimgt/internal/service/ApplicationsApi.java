@@ -44,7 +44,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of applications in the database", response = ApplicationListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response applicationsGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Application ID of the application ")  @QueryParam("appId") Integer appId) throws APIManagementException{
+    public Response applicationsGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,      
+        @ApiParam(value = "**Search condition**.  Application ID of the application ")  @QueryParam("appId") Integer appId
+) throws APIManagementException{
         return delegate.applicationsGet(xWSO2Tenant, appId, securityContext);
     }
 }

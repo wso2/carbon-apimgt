@@ -141,7 +141,40 @@ public enum AccessControlEnum {
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<>();
     private List<String> gatewayEnvironments = new ArrayList<>();
-    private String apiType = null;
+
+@XmlType(name="ApiTypeEnum")
+@XmlEnum(String.class)
+public enum ApiTypeEnum {
+
+    @XmlEnumValue("API") API(String.valueOf("API")), @XmlEnumValue("APIProduct") APIPRODUCT(String.valueOf("APIProduct"));
+
+
+    private String value;
+
+    ApiTypeEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static ApiTypeEnum fromValue(String v) {
+        for (ApiTypeEnum b : ApiTypeEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private ApiTypeEnum apiType = null;
     private List<String> transport = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
     private List<String> policies = new ArrayList<>();
@@ -224,7 +257,7 @@ public enum SubscriptionAvailabilityEnum {
   @ApiModelProperty(example = "CalculatorAPIProduct", required = true, value = "Name of the API Product")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=50)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -241,7 +274,7 @@ public enum SubscriptionAvailabilityEnum {
   
   @ApiModelProperty(example = "CalculatorAPI", value = "")
   @JsonProperty("context")
-  public String getContext() {
+ @Size(min=1,max=60)  public String getContext() {
     return context;
   }
   public void setContext(String context) {
@@ -514,7 +547,7 @@ public enum SubscriptionAvailabilityEnum {
   /**
    * The api type to be used. Accepted values are API, API PRODUCT
    **/
-  public APIProductDTO apiType(String apiType) {
+  public APIProductDTO apiType(ApiTypeEnum apiType) {
     this.apiType = apiType;
     return this;
   }
@@ -522,10 +555,10 @@ public enum SubscriptionAvailabilityEnum {
   
   @ApiModelProperty(example = "APIProduct", value = "The api type to be used. Accepted values are API, API PRODUCT")
   @JsonProperty("apiType")
-  public String getApiType() {
+  public ApiTypeEnum getApiType() {
     return apiType;
   }
-  public void setApiType(String apiType) {
+  public void setApiType(ApiTypeEnum apiType) {
     this.apiType = apiType;
   }
 

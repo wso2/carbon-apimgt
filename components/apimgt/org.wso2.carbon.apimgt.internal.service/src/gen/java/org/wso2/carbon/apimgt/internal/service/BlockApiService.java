@@ -17,6 +17,7 @@ import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import org.wso2.carbon.apimgt.internal.service.BlockApi.*;
 
 
 public interface BlockApiService {

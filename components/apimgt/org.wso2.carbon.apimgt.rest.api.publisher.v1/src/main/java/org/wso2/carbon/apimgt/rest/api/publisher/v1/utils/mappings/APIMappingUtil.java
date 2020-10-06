@@ -1973,7 +1973,7 @@ public class APIMappingUtil {
         productDto.setId(product.getUuid());
         productDto.setContext(product.getContext());
         productDto.setDescription(product.getDescription());
-        productDto.setApiType(APIConstants.AuditLogConstants.API_PRODUCT);
+        productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
 
         Set<String> apiTags = product.getTags();

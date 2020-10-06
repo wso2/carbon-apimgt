@@ -44,7 +44,9 @@ IsThrottledApiService delegate = new IsThrottledApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Throttle Event", response = ThrottledEventDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response isThrottledGet( @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query) throws APIManagementException{
+    public Response isThrottledGet(     
+        @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query
+) throws APIManagementException{
         return delegate.isThrottledGet(query, securityContext);
     }
 }

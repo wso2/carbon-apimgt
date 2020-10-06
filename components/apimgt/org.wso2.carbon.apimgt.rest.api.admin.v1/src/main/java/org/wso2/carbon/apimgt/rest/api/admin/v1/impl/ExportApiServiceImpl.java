@@ -25,6 +25,8 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.ExportApi.FormatEnum;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.ExportApi.FileFormatEnum;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.FileBasedApplicationImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -61,10 +63,11 @@ public class ExportApiServiceImpl implements ExportApiService {
      * @return Zipped file containing exported API
      */
     @Override
-    public Response exportApiGet(String name, String version, String providerName, String format,
+    public Response exportApiGet(String name, String version, String providerName, FormatEnum format,
                                  Boolean preserveStatus, MessageContext messageContext) {
         ExportApiUtil exportApi = new ExportApiUtil();
-        return exportApi.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API);
+        return exportApi.exportApiOrApiProductByParams(name, version, providerName, format.toString(), preserveStatus,
+                RestApiConstants.RESOURCE_API);
     }
 
     /**
@@ -75,15 +78,16 @@ public class ExportApiServiceImpl implements ExportApiService {
      * @param name           Name of the API Product that needs to be exported
      * @param version        Version of the API Product that needs to be exported
      * @param providerName   Provider name of the API Product that needs to be exported
-     * @param format         Format of output documents. Can be YAML or JSON
+     * @param fileFormat         Format of output documents. Can be YAML or JSON
      * @param preserveStatus Preserve API Product status on export
      * @return Zipped file containing exported API Product
      */
     @Override
-    public Response exportApiProductGet(String name, String version, String providerName, String format,
+    public Response exportApiProductGet(String name, String version, String providerName, FileFormatEnum fileFormat,
                                         Boolean preserveStatus, MessageContext messageContext) {
         ExportApiUtil exportApi = new ExportApiUtil();
-        return exportApi.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API_PRODUCT);
+        return exportApi.exportApiOrApiProductByParams(name, version, providerName, fileFormat.toString(),
+                preserveStatus, RestApiConstants.RESOURCE_API_PRODUCT);
     }
 
     /**
