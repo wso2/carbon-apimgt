@@ -73,7 +73,35 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
         @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ) throws APIManagementException{
         return delegate.getTenantsByState(state, limit, offset, securityContext);
-    }public enum StateEnum {
-active,inactive,
+    }
+    public enum StateEnum {
+
+        ACTIVE("active"),
+        
+        INACTIVE("inactive");
+        private String value;
+
+        StateEnum (String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public static StateEnum fromValue(String v) {
+            for (StateEnum b : StateEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+            return null;
+        }
 }
+    
 }

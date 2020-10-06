@@ -48,7 +48,7 @@ public class CommentDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("content")
   @NotNull
-  public String getContent() {
+ @Size(max=512)  public String getContent() {
     return content;
   }
   public void setContent(String content) {

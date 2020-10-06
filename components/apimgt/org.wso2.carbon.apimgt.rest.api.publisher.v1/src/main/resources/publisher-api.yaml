@@ -1266,19 +1266,19 @@ paths:
           description: |
             The action to demote or promote the state of the API.
 
-            Supported actions are [ **Publish, Deploy_as_a_Prototype, Demote_to_Created, Demote_to_Prototyped, Block, Deprecate, Re_Publish, Retire **]
+            Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]
 
           in: query
           type: string
           required: true
           enum:
             - Publish
-            - Deploy_as_a_Prototype
-            - Demote_to_Created
-            - Demote_to_Prototyped
+            - Deploy as a Prototype
+            - Demote to Created
+            - Demote to Prototyped
             - Block
             - Deprecate
-            - Re_Publish
+            - Re-Publish
             - Retire
         - name: lifecycleChecklist
           description: |
@@ -9069,7 +9069,6 @@ definitions:
         maxLength: 120
       businessOwnerEmail:
         type: string
-        format: email
         example: businessowner@wso2.com
       technicalOwner:
         type: string
@@ -9077,7 +9076,6 @@ definitions:
         maxLength: 120
       technicalOwnerEmail:
         type: string
-        format: email
         example: technicalowner@wso2.com
 
   #-----------------------------------------------------

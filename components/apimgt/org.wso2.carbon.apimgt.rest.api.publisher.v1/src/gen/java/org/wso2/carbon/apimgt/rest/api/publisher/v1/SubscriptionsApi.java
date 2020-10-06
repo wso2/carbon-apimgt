@@ -58,9 +58,37 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiParam(value = "Subscription block state. ",required=true, allowableValues="BLOCKED, PROD_ONLY_BLOCKED")  @QueryParam("blockState") BlockStateEnum blockState
 , @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.subscriptionsBlockSubscriptionPost(subscriptionId, blockState, ifMatch, securityContext);
-    }public enum BlockStateEnum {
-BLOCKED,PROD_ONLY_BLOCKED,
+    }
+    public enum BlockStateEnum {
+
+        BLOCKED("BLOCKED"),
+        
+        PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED");
+        private String value;
+
+        BlockStateEnum (String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public static BlockStateEnum fromValue(String v) {
+            for (BlockStateEnum b : BlockStateEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+            return null;
+        }
 }
+    
 
     @GET
     

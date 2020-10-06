@@ -64,7 +64,7 @@ public class RatingDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("ratedBy")
-  public String getRatedBy() {
+ @Size(max=50)  public String getRatedBy() {
     return ratedBy;
   }
   public void setRatedBy(String ratedBy) {

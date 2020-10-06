@@ -62,9 +62,37 @@ ExportApiService delegate = new ExportApiServiceImpl();
         @ApiParam(value = "Preserve API Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus
 ) throws APIManagementException{
         return delegate.exportApiGet(name, version, providerName, format, preserveStatus, securityContext);
-    }public enum FormatEnum {
-JSON,YAML,
+    }
+    public enum FormatEnum {
+
+        JSON("JSON"),
+        
+        YAML("YAML");
+        private String value;
+
+        FormatEnum (String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public static FormatEnum fromValue(String v) {
+            for (FormatEnum b : FormatEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+            return null;
+        }
 }
+    
 
     @GET
     @Path("/api-product")
@@ -92,9 +120,37 @@ JSON,YAML,
         @ApiParam(value = "Preserve API Product Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus
 ) throws APIManagementException{
         return delegate.exportApiProductGet(name, version, providerName, fileFormat, preserveStatus, securityContext);
-    }public enum FileFormatEnum {
-JSON,YAML,
+    }
+    public enum FileFormatEnum {
+
+        JSON("JSON"),
+        
+        YAML("YAML");
+        private String value;
+
+        FileFormatEnum (String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public static FileFormatEnum fromValue(String v) {
+            for (FileFormatEnum b : FileFormatEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+            return null;
+        }
 }
+    
 
     @GET
     @Path("/applications")

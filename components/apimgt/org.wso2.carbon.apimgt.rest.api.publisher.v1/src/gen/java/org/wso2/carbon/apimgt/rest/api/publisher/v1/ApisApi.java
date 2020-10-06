@@ -898,16 +898,56 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 409, message = "Conflict. Pending workflow task exists. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
     public Response apisChangeLifecyclePost(     @NotNull 
-        @ApiParam(value = "The action to demote or promote the state of the API.  Supported actions are [ **Publish, Deploy_as_a_Prototype, Demote_to_Created, Demote_to_Prototyped, Block, Deprecate, Re_Publish, Retire **] ",required=true, allowableValues="Publish, Deploy_as_a_Prototype, Demote_to_Created, Demote_to_Prototyped, Block, Deprecate, Re_Publish, Retire")  @QueryParam("action") ActionEnum action
+        @ApiParam(value = "The action to demote or promote the state of the API.  Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **] ",required=true, allowableValues="Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire")  @QueryParam("action") ActionEnum action
 ,      @NotNull 
         @ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true)  @QueryParam("apiId") String apiId
 ,      
         @ApiParam(value = " Supported checklist items are as follows. 1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state. 2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.  You can specify additional checklist items by using an **\"attribute:\"** modifier.  Eg: \"Deprecate Old Versions:true\" will deprecate older versions of a particular API when it is promoted to Published state from Created state. Multiple checklist items can be given in \"attribute1:true, attribute2:false\" format.  **Sample CURL :**  curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/publisher/v1/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish&lifecycleChecklist=Deprecate Old Versions:true,Require Re-Subscription:true\" ")  @QueryParam("lifecycleChecklist") String lifecycleChecklist
 , @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apisChangeLifecyclePost(action, apiId, lifecycleChecklist, ifMatch, securityContext);
-    }public enum ActionEnum {
-Publish,Deploy_as_a_Prototype,Demote_to_Created,Demote_to_Prototyped,Block,Deprecate,Re_Publish,Retire,
+    }
+    public enum ActionEnum {
+
+        PUBLISH("Publish"),
+        
+        DEPLOY_AS_A_PROTOTYPE("Deploy as a Prototype"),
+        
+        DEMOTE_TO_CREATED("Demote to Created"),
+        
+        DEMOTE_TO_PROTOTYPED("Demote to Prototyped"),
+        
+        BLOCK("Block"),
+        
+        DEPRECATE("Deprecate"),
+        
+        RE_PUBLISH("Re-Publish"),
+        
+        RETIRE("Retire");
+        private String value;
+
+        ActionEnum (String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public static ActionEnum fromValue(String v) {
+            for (ActionEnum b : ActionEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+            return null;
+        }
 }
+    
 
     @POST
     @Path("/copy-api")
@@ -960,9 +1000,37 @@ Publish,Deploy_as_a_Prototype,Demote_to_Created,Demote_to_Prototyped,Block,Depre
         @ApiParam(value = "Preserve API Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus
 ) throws APIManagementException{
         return delegate.apisExportGet(apiId, name, version, providerName, format, preserveStatus, securityContext);
-    }public enum FormatEnum {
-JSON,YAML,
+    }
+    public enum FormatEnum {
+
+        JSON("JSON"),
+        
+        YAML("YAML");
+        private String value;
+
+        FormatEnum (String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public static FormatEnum fromValue(String v) {
+            for (FormatEnum b : FormatEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+            return null;
+        }
 }
+    
 
     @GET
     
@@ -1024,9 +1092,37 @@ JSON,YAML,
         @ApiParam(value = "Open api version", allowableValues="v2, v3", defaultValue="v3") @DefaultValue("v3") @QueryParam("openAPIVersion") OpenAPIVersionEnum openAPIVersion
 ) throws APIManagementException{
         return delegate.apisPost(body, openAPIVersion, securityContext);
-    }public enum OpenAPIVersionEnum {
-v2,v3,
+    }
+    public enum OpenAPIVersionEnum {
+
+        V2("v2"),
+        
+        V3("v3");
+        private String value;
+
+        OpenAPIVersionEnum (String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public static OpenAPIVersionEnum fromValue(String v) {
+            for (OpenAPIVersionEnum b : OpenAPIVersionEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+            return null;
+        }
 }
+    
 
     @POST
     @Path("/validate-graphql-schema")

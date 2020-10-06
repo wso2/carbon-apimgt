@@ -81,9 +81,49 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
         @ApiParam(value = "We need to show the values of each workflow process separately .for that we use workflow type. Workflow type can be AM_APPLICATION_CREATION, AM_SUBSCRIPTION_CREATION,   AM_USER_SIGNUP, AM_APPLICATION_REGISTRATION_PRODUCTION, AM_APPLICATION_REGISTRATION_SANDBOX. ", allowableValues="AM_APPLICATION_CREATION, AM_SUBSCRIPTION_CREATION, AM_USER_SIGNUP, AM_APPLICATION_REGISTRATION_PRODUCTION, AM_APPLICATION_REGISTRATION_SANDBOX, AM_SUBSCRIPTION_DELETION, AM_APPLICATION_DELETION, AM_API_STATE")  @QueryParam("workflowType") WorkflowTypeEnum workflowType
 ) throws APIManagementException{
         return delegate.workflowsGet(limit, offset, accept, ifNoneMatch, workflowType, securityContext);
-    }public enum WorkflowTypeEnum {
-AM_APPLICATION_CREATION,AM_SUBSCRIPTION_CREATION,AM_USER_SIGNUP,AM_APPLICATION_REGISTRATION_PRODUCTION,AM_APPLICATION_REGISTRATION_SANDBOX,AM_SUBSCRIPTION_DELETION,AM_APPLICATION_DELETION,AM_API_STATE,
+    }
+    public enum WorkflowTypeEnum {
+
+        APPLICATION_CREATION("AM_APPLICATION_CREATION"),
+        
+        SUBSCRIPTION_CREATION("AM_SUBSCRIPTION_CREATION"),
+        
+        USER_SIGNUP("AM_USER_SIGNUP"),
+        
+        APPLICATION_REGISTRATION_PRODUCTION("AM_APPLICATION_REGISTRATION_PRODUCTION"),
+        
+        APPLICATION_REGISTRATION_SANDBOX("AM_APPLICATION_REGISTRATION_SANDBOX"),
+        
+        SUBSCRIPTION_DELETION("AM_SUBSCRIPTION_DELETION"),
+        
+        APPLICATION_DELETION("AM_APPLICATION_DELETION"),
+        
+        API_STATE("AM_API_STATE");
+        private String value;
+
+        WorkflowTypeEnum (String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public static WorkflowTypeEnum fromValue(String v) {
+            for (WorkflowTypeEnum b : WorkflowTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+            return null;
+        }
 }
+    
 
     @POST
     @Path("/update-workflow-status")

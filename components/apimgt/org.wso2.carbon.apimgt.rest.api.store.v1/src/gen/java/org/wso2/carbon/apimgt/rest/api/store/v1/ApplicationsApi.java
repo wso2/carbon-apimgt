@@ -445,11 +445,69 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 , @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.applicationsGet(groupId, query, sortBy, sortOrder, limit, offset, ifNoneMatch, securityContext);
-    }public enum SortByEnum {
-name,owner,throttlingTier,
-}public enum SortOrderEnum {
-asc,desc,
+    }
+    public enum SortByEnum {
+
+        NAME("name"),
+        
+        OWNER("owner"),
+        
+        THROTTLINGTIER("throttlingTier");
+        private String value;
+
+        SortByEnum (String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public static SortByEnum fromValue(String v) {
+            for (SortByEnum b : SortByEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+            return null;
+        }
 }
+    
+    public enum SortOrderEnum {
+
+        ASC("asc"),
+        
+        DESC("desc");
+        private String value;
+
+        SortOrderEnum (String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public static SortOrderEnum fromValue(String v) {
+            for (SortOrderEnum b : SortOrderEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+            return null;
+        }
+}
+    
 
     @POST
     

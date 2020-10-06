@@ -96,7 +96,7 @@ public enum TokenTypeEnum {
   @ApiModelProperty(example = "CalculatorApp", required = true, value = "")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=70)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -114,7 +114,7 @@ public enum TokenTypeEnum {
   @ApiModelProperty(example = "Unlimited", required = true, value = "")
   @JsonProperty("throttlingPolicy")
   @NotNull
-  public String getThrottlingPolicy() {
+ @Size(min=1)  public String getThrottlingPolicy() {
     return throttlingPolicy;
   }
   public void setThrottlingPolicy(String throttlingPolicy) {
@@ -131,7 +131,7 @@ public enum TokenTypeEnum {
   
   @ApiModelProperty(example = "Sample calculator application", value = "")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=512)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
