@@ -38,6 +38,7 @@ import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
 import Progress from 'AppComponents/Shared/Progress';
 import Configurations from 'Config';
 import Scopes from 'AppComponents/Scopes/Scopes';
+import merge from 'lodash/merge';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
@@ -202,7 +203,7 @@ export default class Protected extends Component {
         return (
             <ThemeProvider theme={createMuiTheme(defaultTheme)}>
                 <ThemeProvider theme={(currentTheme) => createMuiTheme(
-                    { ...currentTheme, ...(typeof v === 'function' ? theme(currentTheme) : theme) },
+                    merge(currentTheme, (typeof theme === 'function' ? theme(currentTheme) : theme)),
                 )}
                 >
                     <AppErrorBoundary>
