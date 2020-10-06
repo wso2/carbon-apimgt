@@ -12,10 +12,14 @@ import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
 
 public class GatewayArtifactsMgtDAO {
     private static final Log log = LogFactory.getLog(GatewayArtifactsMgtDAO.class);
