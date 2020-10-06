@@ -202,7 +202,7 @@ export default class Protected extends Component {
         return (
             <ThemeProvider theme={createMuiTheme(defaultTheme)}>
                 <ThemeProvider theme={(currentTheme) => createMuiTheme(
-                    { ...currentTheme, ...(typeof theme === 'function' ? theme(currentTheme) : theme) },
+                    merge(currentTheme, (typeof theme === 'function' ? theme(currentTheme) : theme))
                 )}
                 >
                     <AppErrorBoundary>
