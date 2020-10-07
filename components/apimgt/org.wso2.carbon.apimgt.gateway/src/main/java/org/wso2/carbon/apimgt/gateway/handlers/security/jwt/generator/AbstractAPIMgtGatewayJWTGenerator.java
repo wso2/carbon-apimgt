@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -47,13 +48,14 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     private String signatureAlgorithm;
 
     public AbstractAPIMgtGatewayJWTGenerator() {
-        dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
+        JWTConfigurationDto jwtConfigurationDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                        .getJwtConfigurationDto();
+        dialectURI = jwtConfigurationDto.getConsumerDialectUri();
         if (dialectURI == null) {
             dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
         }
-        signatureAlgorithm = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.JWT_SIGNATURE_ALGORITHM);
+        signatureAlgorithm = jwtConfigurationDto.getSignatureAlgorithm();
         if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm)
                 || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
             signatureAlgorithm = SHA256_WITH_RSA;
