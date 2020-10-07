@@ -8819,6 +8819,7 @@ definitions:
           - UNBLOCKED
           - ON_HOLD
           - REJECTED
+          - TIER_UPDATE_PENDING
         example: BLOCKED
 
   #-----------------------------------------------------
