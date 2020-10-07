@@ -3132,10 +3132,10 @@ public class SQLConstants {
             "API_NAME, API_VERSION, TENANT_DOMAIN) VALUES (?,?,?,?)";
 
     public static final String ADD_GW_API_ARTIFACT = "INSERT INTO AM_GW_API_ARTIFACTS (ARTIFACT, GATEWAY_INSTRUCTION," +
-            " API_ID, GATEWAY_LABEL) VALUES (?,?,?,?)";
+            " TIME_STAMP, API_ID, GATEWAY_LABEL) VALUES (?,?,?,?,?)";
 
-    public static final String UPDATE_API_ARTIFACT = "UPDATE AM_GW_API_ARTIFACTS SET ARTIFACT = ?, GATEWAY_INSTRUCTION = ?" +
-            " WHERE (API_ID = ?) AND (GATEWAY_LABEL = ?)";
+    public static final String UPDATE_API_ARTIFACT = "UPDATE AM_GW_API_ARTIFACTS SET ARTIFACT = ?, " +
+            "GATEWAY_INSTRUCTION = ?, TIME_STAMP = ? WHERE (API_ID = ?) AND (GATEWAY_LABEL = ?)";
 
     public static final String GET_API_ARTIFACT = "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE API_ID =? AND " +
             "GATEWAY_LABEL =? AND GATEWAY_INSTRUCTION = ?";
