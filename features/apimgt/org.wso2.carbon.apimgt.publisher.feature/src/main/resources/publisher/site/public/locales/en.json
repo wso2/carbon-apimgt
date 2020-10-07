@@ -726,7 +726,7 @@
   "Apis.Details.Resources.components.AddOperation.clear.inputs.tooltip": "Clear inputs",
   "Apis.Details.Resources.components.AddOperation.http.verb": "HTTP Verb",
   "Apis.Details.Resources.components.AddOperation.operation.target.or.verb.cannot.be.empty.warning": "Operation target or operation verb(s) can't be empty",
-  "Apis.Details.Resources.components.AddOperation.option": "OPTION",
+  "Apis.Details.Resources.components.AddOperation.option": "OPTIONS",
   "Apis.Details.Resources.components.AddParameter.clear.inputs.tooltip": "Clear inputs",
   "Apis.Details.Resources.components.Operation.Delete": "Delete",
   "Apis.Details.Resources.components.Operation.cannot.delete.when.used.in.api.products": "Cannot delete operation when used in an API product",
