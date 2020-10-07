@@ -8961,6 +8961,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param tenantDomain tenant domain name
      * @return JSONObject security audit properties
      */
+    // NO REG USAGE
     private JSONObject getSecurityAuditConfigurationProperties(String tenantDomain) {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();

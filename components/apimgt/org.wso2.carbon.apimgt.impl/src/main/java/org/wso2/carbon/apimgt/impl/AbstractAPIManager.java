@@ -411,7 +411,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected API getApi(GovernanceArtifact artifact) throws APIManagementException {
         return APIUtil.getAPI(artifact);
     }
-    // moved to registry persistencemanager
+
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
         Registry registry;
@@ -488,7 +488,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException { // apisApiIdGet
         boolean tenantFlowStarted = false;
         try {
             Registry registry;
