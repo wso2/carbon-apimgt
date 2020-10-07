@@ -645,7 +645,12 @@ function AddEditKeyManager(props) {
                                             })}
                                         />
                                         <Box ml={1}>
-                                            <Button margin='dense' variant='outlined' disabled={!wellKnownEndpoint} onClick={importKMConfig}>
+                                            <Button
+                                                margin='dense'
+                                                variant='outlined'
+                                                disabled={!wellKnownEndpoint}
+                                                onClick={importKMConfig}
+                                            >
                                                 <FormattedMessage
                                                     id='KeyManagers.AddEditKeyManager.form.import.button'
                                                     defaultMessage='Import'
