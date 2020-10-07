@@ -16,6 +16,8 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ApplicationAttributeDTO   {
   
     private String description = null;
+    private String type = null;
+    private String tooltip = null;
     private String required = null;
     private String attribute = null;
     private String hidden = null;
@@ -36,6 +38,42 @@ public class ApplicationAttributeDTO   {
   }
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  /**
+   * type of the input element to display
+   **/
+  public ApplicationAttributeDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "text", value = "type of the input element to display")
+  @JsonProperty("type")
+  public String getType() {
+    return type;
+  }
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  /**
+   * tooltop to display for the input element
+   **/
+  public ApplicationAttributeDTO tooltip(String tooltip) {
+    this.tooltip = tooltip;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Sample tooltip", value = "tooltop to display for the input element")
+  @JsonProperty("tooltip")
+  public String getTooltip() {
+    return tooltip;
+  }
+  public void setTooltip(String tooltip) {
+    this.tooltip = tooltip;
   }
 
   /**
@@ -103,6 +141,8 @@ public class ApplicationAttributeDTO   {
     }
     ApplicationAttributeDTO applicationAttribute = (ApplicationAttributeDTO) o;
     return Objects.equals(description, applicationAttribute.description) &&
+        Objects.equals(type, applicationAttribute.type) &&
+        Objects.equals(tooltip, applicationAttribute.tooltip) &&
         Objects.equals(required, applicationAttribute.required) &&
         Objects.equals(attribute, applicationAttribute.attribute) &&
         Objects.equals(hidden, applicationAttribute.hidden);
@@ -110,7 +150,7 @@ public class ApplicationAttributeDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, required, attribute, hidden);
+    return Objects.hash(description, type, tooltip, required, attribute, hidden);
   }
 
   @Override
@@ -119,6 +159,8 @@ public class ApplicationAttributeDTO   {
     sb.append("class ApplicationAttributeDTO {\n");
     
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    tooltip: ").append(toIndentedString(tooltip)).append("\n");
     sb.append("    required: ").append(toIndentedString(required)).append("\n");
     sb.append("    attribute: ").append(toIndentedString(attribute)).append("\n");
     sb.append("    hidden: ").append(toIndentedString(hidden)).append("\n");

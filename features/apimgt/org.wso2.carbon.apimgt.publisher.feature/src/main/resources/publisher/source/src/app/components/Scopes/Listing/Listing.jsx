@@ -41,6 +41,7 @@ import Grid from '@material-ui/core/Grid';
 import { isRestricted } from 'AppData/AuthManager';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Alert from 'AppComponents/Shared/Alert';
+import Box from '@material-ui/core/Box';
 import Delete from '../Delete/Delete';
 import Usage from '../Usage/Usage';
 
@@ -51,6 +52,22 @@ const styles = (theme) => ({
         '& > div[class^="MuiPaper-root-"]': {
             boxShadow: 'none',
             backgroundColor: 'transparent',
+        },
+    },
+    table: {
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        '& > td[class^=MUIDataTableBodyCell-cellHide-]': {
+            display: 'none',
+        },
+        '& .MUIDataTableBodyCell-cellHide-793': {
+            display: 'none',
+        },
+        '& td': {
+            wordBreak: 'break-word',
+        },
+        '& th': {
+            minWidth: '150px',
         },
     },
     root: {
@@ -70,6 +87,8 @@ const styles = (theme) => ({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: theme.spacing(2),
+        marginLeft: 'auto',
+        marginRight: 'auto',
     },
     mainTitle: {
         paddingLeft: 0,
@@ -327,18 +346,14 @@ class Listing extends React.Component {
                             const scopeName = tableMeta.rowData[1];
                             const usageCount = tableMeta.rowData[5];
                             return (
-                                <table className={classes.actionTable}>
-                                    <tr>
-                                        <td>
-                                            <Usage
-                                                scopeName={scopeName}
-                                                scopeId={scopeId}
-                                                usageCount={usageCount}
-                                            />
-                                        </td>
-                                        <td>
-                                            <Link
-                                                to={!isRestricted(['apim:shared_scope_manage'])
+                                <Box display='flex' flexDirection='column'>
+                                    <Usage
+                                        scopeName={scopeName}
+                                        scopeId={scopeId}
+                                        usageCount={usageCount}
+                                    />
+                                    <Link
+                                        to={!isRestricted(['apim:shared_scope_manage'])
                                                     && {
                                                         pathname: editUrl,
                                                         state: {
@@ -346,27 +361,23 @@ class Listing extends React.Component {
                                                             scopeId,
                                                         },
                                                     }}
-                                                className={isRestricted(['apim:shared_scope_manage'])
-                                                    ? classes.disableLink : ''}
-                                            >
-                                                <Button disabled={isRestricted(['apim:shared_scope_manage'])}>
-                                                    <Icon>edit</Icon>
-                                                    <FormattedMessage
-                                                        id='Scopes.Listing.Listing.scopes.text.editor.edit'
-                                                        defaultMessage='Edit'
-                                                    />
-                                                </Button>
-                                            </Link>
-                                        </td>
-                                        <td>
-                                            <Delete
-                                                scopeName={scopeName}
-                                                scopeId={scopeId}
-                                                fetchScopeData={this.fetchScopeData}
+                                        className={isRestricted(['apim:shared_scope_manage'])
+                                            ? classes.disableLink : ''}
+                                    >
+                                        <Button disabled={isRestricted(['apim:shared_scope_manage'])}>
+                                            <Icon>edit</Icon>
+                                            <FormattedMessage
+                                                id='Scopes.Listing.Listing.scopes.text.editor.edit'
+                                                defaultMessage='Edit'
                                             />
-                                        </td>
-                                    </tr>
-                                </table>
+                                        </Button>
+                                    </Link>
+                                    <Delete
+                                        scopeName={scopeName}
+                                        scopeId={scopeId}
+                                        fetchScopeData={this.fetchScopeData}
+                                    />
+                                </Box>
                             );
                         }
                         return false;
@@ -468,7 +479,7 @@ class Listing extends React.Component {
 
         return (
             <div className={classes.heading}>
-                <div className={classes.titleWrapper}>
+                <Grid className={classes.titleWrapper} xs={12} sm={12} md={11} lg={11} item>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage
                             id='Scopes.Listing.Listing.heading.scope.heading'
@@ -504,9 +515,10 @@ class Listing extends React.Component {
                             </Typography>
                         </Grid>
                     )}
-                </div>
-
-                <MUIDataTable title={false} data={scopesList} columns={columns} options={options} />
+                </Grid>
+                <Grid className={classes.table} xs={12} sm={12} md={11} lg={11} item>
+                    <MUIDataTable title={false} data={scopesList} columns={columns} options={options} />
+                </Grid>
             </div>
         );
     }

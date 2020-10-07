@@ -27,11 +27,6 @@ import AuthManager from 'AppData/AuthManager';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
@@ -302,23 +297,27 @@ class ApiConsole extends React.Component {
             open: false,
         });
     }
-
     /**
      * Converting an OpenAPI file to a postman collection
      * @memberof ApiConsole
      */
     converttopostman(fr) {
-        // openapiData = downloadLink;
-
+        const postman2 = require("swagger2-postman2-converter");
         Converter.convert({ type: 'string', data: fr },
             {}, (err, conversionResult) => {
                 if (!conversionResult.result) {
-                    console.log('Could not convert', conversionResult.reason);
-                } else {
-                    console.log(
-                        'The collection object is: ',
-                        conversionResult.output[0].data,
+                    var collection = postman2.convert(fr);
+                    //console.log(collection);
+                    fileDownload(
+                        JSON.stringify(collection),
+                        "postman collection",
                     );
+
+                } else {
+                    // console.log(
+                    //     'The collection object is: ',
+                    //     conversionResult.output[0].data,
+                    // );
                     fileDownload(
                         JSON.stringify(conversionResult.output[0].data),
                         'postman collection',
@@ -509,59 +508,16 @@ class ApiConsole extends React.Component {
                         api={this.state.api}
                     />
 
-                    <div>
-                        <Dialog
-
-                            open={this.state.open}
-                            onClose={this.handleClose}
-                            aria-labelledby='alert-dialog-title'
-                            aria-describedby='alert-dialog-description'
-                        >
-                            <DialogTitle id='alert-dialog-title'>Get a Postman collection</DialogTitle>
-                            <DialogContent>
-                                <DialogContentText id='alert-dialog-description'>
-                                    You can download the postman collection to your computer or
-                                    you can open it with the postman web application
-                                </DialogContentText>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={() => this.converttopostman(downloadSwagger)} color='primary'>
-                                    Download
-                                </Button>
-                                <a href='postman://app'>
-                                    <Button color='primary' autoFocus>
-                                        Postman App
-                                    </Button>
-                                </a>
-
-                                <a href='https://go.postman.co/build/workspace' target='_blank' rel='noopener noreferrer'>
-                                    <Button color='primary' autoFocus>
-                                        Postman Web
-                                    </Button>
-                                </a>
-                                <Button onClick={this.handleClose} color='primary' autoFocus>
-                                    Close
-                                </Button>
-                            </DialogActions>
-                        </Dialog>
-                    </div>
-
-
                     <Grid container>
-                        {/* <Grid xs={10} item /> */}
                         <Grid item xs={8} />
                         <Grid xs={2} item>
-                            {/* <a  href={downloadLink2} download={fileName2}> */}
-                            <Button size='small' onClick={this.handleClickOpen}>
-                                {/* onClick={() => this.converttopostman(downloadSwagger)} */}
-
+                            <Button size='small' onClick={() => this.converttopostman(downloadSwagger)} >
                                 <CloudDownloadRounded className={classes.buttonIcon} />
                                 <FormattedMessage
                                     id='Apis.Details.APIConsole.APIConsole.download.postman'
                                     defaultMessage='Postman collection'
                                 />
                             </Button>
-                            {/* </a> */}
 
                         </Grid>
                         <Grid xs={2} item>

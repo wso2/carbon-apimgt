@@ -193,6 +193,10 @@ const useStyles = makeStyles((theme) => ({
     stepIcon: {
         fontSize: theme.custom.overviewStepper.iconSize,
     },
+    progressWrapper: {
+        padding: theme.spacing(),
+        textAlign: 'center',
+    },
 }));
 
 /**
@@ -207,7 +211,7 @@ export default function CustomizedSteppers() {
     const isTierAvailable = api.policies.length !== 0;
     const isPrototypedAvailable = api.endpointConfig !== null
         && api.endpointConfig.implementation_status === 'prototyped';
-    const [lifecycleState, setlifecycleState] = useState([]);
+    const [lifecycleState, setlifecycleState] = useState(null);
     const [isUpdating, setUpdating] = useState(false);
     const { tenantList } = useContext(ApiContext);
     const userNameSplit = user.name.split('@');
@@ -369,7 +373,13 @@ export default function CustomizedSteppers() {
         }
     }
 
-
+    if (!lifecycleState) {
+        return (
+            <div className={classes.progressWrapper}>
+                <CircularProgress size={20} />
+            </div>
+        );
+    }
     let activeStep = 0;
     if (lifecycleState === 'Created' && ((isEndpointAvailable && isTierAvailable) || isPrototypedAvailable)) {
         activeStep = 2;

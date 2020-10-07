@@ -292,7 +292,7 @@ class InfoBar extends React.Component {
         if (api.keyManagers) {
             keyManagers = api.keyManagers;
             keyManagers.map(name => {
-                if (name === 'all'){
+                if (name === 'all') {
                     response = 'All Applicable';
                 } else {
                     response = keyManagers.join();
@@ -349,7 +349,7 @@ class InfoBar extends React.Component {
 
         // Remve the tags with a sufix '-group' from tags
         let apisTagsWithoutGroups = [];
-        if ( !active ){
+        if (!active) {
             apisTagsWithoutGroups = api.tags;
         }
         if (active && api.tags && api.tags.length > 0) {
@@ -360,6 +360,40 @@ class InfoBar extends React.Component {
                     apisTagsWithoutGroups.push(api.tags[i]);
                 }
             }
+        }
+        const { additionalProperties, securityScheme } = api;
+        let additionalProperties__display = null;
+        if (additionalProperties && Object.keys(additionalProperties).length > 0 && additionalProperties.constructor === Object) {
+            additionalProperties__display = Object.keys(additionalProperties).filter(aProp => aProp.indexOf('__display') !== -1);
+        }
+
+        let securityScheme_display = null;
+        if(securityScheme) {
+            securityScheme_display = [];
+            securityScheme.forEach( (scm) => {
+                if(scm === 'basic_auth') {
+                    securityScheme_display.push(
+                        intl.formatMessage({
+                            defaultMessage: 'Basic',
+                            id: 'Apis.Details.InfoBar.security.basic',
+                        })
+                    );
+                } else if(scm === 'api_key') {
+                    securityScheme_display.push(
+                        intl.formatMessage({
+                            defaultMessage: 'Api Key',
+                            id: 'Apis.Details.InfoBar.security.api_key',
+                        })
+                    );
+                } else if(scm === 'oauth2') {
+                    securityScheme_display.push(
+                        intl.formatMessage({
+                            defaultMessage: 'OAuth2',
+                            id: 'Apis.Details.InfoBar.security.oauth2',
+                        })
+                    );
+                }
+            })
         }
 
         const { resourceNotFountMessage } = this.props;
@@ -594,21 +628,21 @@ class InfoBar extends React.Component {
                                                 )}
                                             </>
                                         ) : (
-                                            <TableRow>
-                                                <TableCell component='th' scope='row'>
-                                                    <div className={classes.iconAligner}>
-                                                        <Icon className={classes.iconOdd}>account_circle</Icon>
-                                                        <span className={classes.iconTextWrapper}>
-                                                            <FormattedMessage
-                                                                id='Apis.Details.InfoBar.owner'
-                                                                defaultMessage='Owner'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>{api.advertiseInfo.apiOwner}</TableCell>
-                                            </TableRow>
-                                        )}
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row'>
+                                                        <div className={classes.iconAligner}>
+                                                            <Icon className={classes.iconOdd}>account_circle</Icon>
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.owner'
+                                                                    defaultMessage='Owner'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>{api.advertiseInfo.apiOwner}</TableCell>
+                                                </TableRow>
+                                            )}
                                         {apisTagsWithoutGroups && apisTagsWithoutGroups.length > 0 && (
                                             <TableRow>
                                                 <TableCell component='th' scope='row'>
@@ -629,6 +663,44 @@ class InfoBar extends React.Component {
                                                 </TableCell>
                                             </TableRow>
                                         )}
+                                        <TableRow>
+                                            <TableCell
+                                                component='th'
+                                                scope='row'
+                                                className={classes.contentToTop}
+                                            >
+                                                <div className={classes.iconAligner}>
+                                                    <Icon className={classes.iconOdd}>lock</Icon>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.application.security'
+                                                            defaultMessage='Application Level Security'
+                                                        />
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {securityScheme_display && (
+                                                    <span> {securityScheme_display.join(', ')} </span>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                        {additionalProperties__display && additionalProperties__display.length > 0 && (
+                                            additionalProperties__display.map((displayProp, index) => (
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row'>
+                                                        <div className={classes.iconAligner}>
+                                                            <Icon className={classes.iconEven}>adjust</Icon>
+                                                            <span className={classes.iconTextWrapper}>
+                                                                {displayProp.split('__display')[0]}
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {additionalProperties[displayProp]}
+                                                    </TableCell>
+                                                </TableRow>))
+                                        )}
                                     </TableBody>
                                 </Table>
                             </div>
@@ -643,10 +715,10 @@ class InfoBar extends React.Component {
                                     <FormattedMessage id='Apis.Details.InfoBar.less' defaultMessage='LESS' />
                                 </Typography>
                             ) : (
-                                <Typography className={classes.buttonOverviewText}>
-                                    <FormattedMessage id='Apis.Details.InfoBar.more' defaultMessage='MORE' />
-                                </Typography>
-                            )}
+                                    <Typography className={classes.buttonOverviewText}>
+                                        <FormattedMessage id='Apis.Details.InfoBar.more' defaultMessage='MORE' />
+                                    </Typography>
+                                )}
                             {showOverview ? <Icon>arrow_drop_up</Icon> : <Icon>arrow_drop_down</Icon>}
                         </div>
                     </Button>

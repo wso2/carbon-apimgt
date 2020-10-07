@@ -185,7 +185,7 @@ function View(props) {
                 </Typography>
             )}
 
-            {doc.sourceType === 'MARKDOWN' && <ReactMarkdown source={code} />}
+            {doc.sourceType === 'MARKDOWN' && <ReactMarkdown escapeHtml={false} source={code} />}
             {doc.sourceType === 'INLINE' && <ReactSafeHtml html={code} />}
             {doc.sourceType === 'URL' && (
                 <a className={classes.displayURL} href={doc.sourceUrl} target='_blank'>

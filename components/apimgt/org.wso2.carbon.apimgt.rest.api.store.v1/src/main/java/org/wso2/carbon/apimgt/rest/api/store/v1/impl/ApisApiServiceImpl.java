@@ -953,7 +953,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdSubscriptionPoliciesGet(String apiId, String ifNoneMatch, String xWSO2Tenant,
+    public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
                                                      MessageContext messageContext) {
         APIDTO apiInfo = getAPIByAPIId(apiId, xWSO2Tenant);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
@@ -964,8 +964,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (apiTiers != null && !apiTiers.isEmpty()) {
                 List<Tier> apiThrottlingPolicies = new ArrayList<>();
                 for (Tier policy : availableThrottlingPolicyList) {
-                    if (apiTiers.contains(policy.getName())) {
-                        apiThrottlingPolicies.add(policy);
+                    for (APITiersDTO apiTier :apiTiers) {
+                        if (apiTier.getTierName().equalsIgnoreCase(policy.getName())) {
+                            apiThrottlingPolicies.add(policy);
+                        }
                     }
                 }
                 return Response.ok().entity(apiThrottlingPolicies).build();

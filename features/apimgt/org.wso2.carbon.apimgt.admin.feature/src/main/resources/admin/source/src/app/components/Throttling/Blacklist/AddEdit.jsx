@@ -20,7 +20,7 @@ import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import { FormattedMessage } from 'react-intl';
+import { useIntl, FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import {
@@ -101,6 +101,7 @@ function AddEdit(props) {
     const {
         updateList, icon, triggerButtonText, title,
     } = props;
+    const intl = useIntl();
     const [initialState, setInitialState] = useState({
         conditionType: 'API',
         conditionValue: {
@@ -143,15 +144,72 @@ function AddEdit(props) {
 
     const hasErrors = (fieldName, value) => {
         let error = false;
+        // matches for both ipv4 and ipv6
+        const ip4Pattern = '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}'
+        + '([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$';
+        const ip6Pattern = '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:)'
+        + '{1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}'
+        + '(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}'
+        + '(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)'
+        + '|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,'
+        + '1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:('
+        + '(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))';
+        const regexIpv4 = new RegExp(ip4Pattern);
+        const regexIpv6 = new RegExp(ip6Pattern);
         switch (fieldName) {
             case 'startingIp':
-                error = value === '' ? fieldName + ' is Empty' : false;
+                if (value === '') {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.startingIp.blank',
+                        defaultMessage: 'Starting Ip address field is empty.',
+                    });
+                } else if (/\s/g.test(value)) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.startingIp.white.spaces',
+                        defaultMessage: 'Starting Ip address field contains white spaces. ',
+                    });
+                } else if (!regexIpv4.test(value) && !regexIpv6.test(value)) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.startingIp.invalid',
+                        defaultMessage: 'Starting Ip address entered is not valid.  ',
+                    });
+                }
                 break;
             case 'endingIp':
-                error = value === '' ? fieldName + ' is Empty' : false;
+                if (value === '') {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.endingIp.blank',
+                        defaultMessage: 'Ending Ip address field is empty.  ',
+                    });
+                } else if (/\s/g.test(value)) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.endingIp.white.spaces',
+                        defaultMessage: 'Starting Ip address field contains white spaces. ',
+                    });
+                } else if (!regexIpv4.test(value) && !regexIpv6.test(value)) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.endingIp.invalid',
+                        defaultMessage: 'Starting Ip address entered is not valid.  ',
+                    });
+                }
                 break;
             case 'fixedIp':
-                error = value === '' ? fieldName + ' is Empty' : false;
+                if (value === '') {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.fixedIp.blank',
+                        defaultMessage: 'Ending Ip address field is empty.  ',
+                    });
+                } else if (/\s/g.test(value)) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.fixedIp.white.spaces',
+                        defaultMessage: 'Starting Ip address field contains white spaces. ',
+                    });
+                } else if (!regexIpv4.test(value) && !regexIpv6.test(value)) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.policy.fixedIp.invalid',
+                        defaultMessage: 'Starting Ip address entered is not valid.  ',
+                    });
+                }
                 break;
             case 'conditionValue':
                 if (value.startingIp === '' && value.endingIp === ''

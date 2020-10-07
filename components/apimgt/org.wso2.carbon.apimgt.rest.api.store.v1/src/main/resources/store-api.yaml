@@ -5516,6 +5516,14 @@ definitions:
         type: string
         description: description of the application attribute
         example: "Sample description of the attribute"
+      type:
+        type: string
+        description: type of the input element to display
+        example: "text"
+      tooltip:
+        type: string
+        description: tooltop to display for the input element
+        example: "Sample tooltip"
       required:
         type: string
         description: whether this is a required attribute

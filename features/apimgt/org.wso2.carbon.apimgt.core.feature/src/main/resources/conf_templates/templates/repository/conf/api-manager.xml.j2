@@ -615,6 +615,10 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
+                 <URI>/api/am/store/{version}/apis/{apiId}/subscription-policies</URI>
+                 <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
                  <URI>/api/am/store/{version}/apis/{apiId}/graphql-schema</URI>
                  <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
@@ -1058,6 +1062,8 @@
                 <Name>{{attribute.name}}</Name>
                 <Description>{{attribute.description}}</Description>
                 <Default>{{attribute.default}}</Default>
+                <Type>{{attribute.type}}</Type>
+                <Tooltip>{{attribute.tooltip}}</Tooltip>
             </Attribute>
             {% endfor %}
         </ApplicationAttributes>
