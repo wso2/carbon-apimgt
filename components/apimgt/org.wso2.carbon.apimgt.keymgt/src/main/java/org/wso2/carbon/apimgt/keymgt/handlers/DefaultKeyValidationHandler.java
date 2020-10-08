@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -70,67 +71,19 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 return true;
             }
         }
-
-        AccessTokenInfo tokenInfo = null;
+        if (StringUtils.isEmpty(validationContext.getAccessToken())) {
+            APIKeyValidationInfoDTO infoDTO = validationContext.getValidationInfoDTO();
+            infoDTO.setAuthorized(false);
+            infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+            log.debug("Token Not available");
+            return false;
+        }
 
         try {
-            String electedKeyManager = null;
-            // Obtaining details about the token.
-            if (StringUtils.isNotEmpty(validationContext.getTenantDomain())) {
-                Map<String, KeyManagerDto>
-                        tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(validationContext.getTenantDomain());
-                KeyManager keyManagerInstance = null;
-                if (tenantKeyManagers.values().size() == 1){
-                    Map.Entry<String, KeyManagerDto> entry = tenantKeyManagers.entrySet().iterator().next();
-                    if (entry != null) {
-                        KeyManagerDto keyManagerDto = entry.getValue();
-                        if (keyManagerDto != null && (validationContext.getKeyManagers()
-                                .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
-                                validationContext.getKeyManagers().contains(keyManagerDto.getName()))) {
-                            keyManagerInstance = keyManagerDto.getKeyManager();
-                            electedKeyManager = entry.getKey();
-                        }
-                    }
-                } else if (tenantKeyManagers.values().size() > 1) {
-                    if (validationContext.getKeyManagers()
-                            .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS)) {
-                        for (Map.Entry<String,KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
-                            if (keyManagerDtoEntry.getValue().getKeyManager() != null &&
-                                    keyManagerDtoEntry.getValue().getKeyManager().canHandleToken(validationContext.getAccessToken())) {
-                                keyManagerInstance = keyManagerDtoEntry.getValue().getKeyManager();
-                                electedKeyManager = keyManagerDtoEntry.getKey();
-                                break;
-                            }
-                        }
-                    } else {
-                        for (String selectedKeyManager : validationContext.getKeyManagers()) {
-                            KeyManagerDto keyManagerDto = tenantKeyManagers.get(selectedKeyManager);
-                            if (keyManagerDto != null && keyManagerDto.getKeyManager() != null &&
-                                    keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
-                                keyManagerInstance = keyManagerDto.getKeyManager();
-                                electedKeyManager = selectedKeyManager;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-
-                if (keyManagerInstance != null) {
-                    tokenInfo = keyManagerInstance.getTokenMetaData(validationContext.getAccessToken());
-                }else{
-                    APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-                    validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
-                    apiKeyValidationInfoDTO
-                            .setValidationStatus(APIConstants.KeyValidationStatus.KEY_MANAGER_NOT_AVAILABLE);
-                    return false;
-                }
-            }
-
+            AccessTokenInfo tokenInfo = getAccessTokenInfo(validationContext);
             if (tokenInfo == null) {
                 return false;
             }
-
             // Setting TokenInfo in validationContext. Methods down in the chain can use TokenInfo.
             validationContext.setTokenInfo(tokenInfo);
             //TODO: Eliminate use of APIKeyValidationInfoDTO if possible
@@ -148,7 +101,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 }
                 return false;
             }
-            apiKeyValidationInfoDTO.setKeyManager(electedKeyManager);
+            apiKeyValidationInfoDTO.setKeyManager(tokenInfo.getKeyManager());
             apiKeyValidationInfoDTO.setAuthorized(tokenInfo.isTokenValid());
             apiKeyValidationInfoDTO.setEndUserName(tokenInfo.getEndUserName());
             apiKeyValidationInfoDTO.setConsumerKey(tokenInfo.getConsumerKey());
@@ -159,13 +112,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 Set<String> scopeSet = new HashSet<String>(Arrays.asList(tokenInfo.getScopes()));
                 apiKeyValidationInfoDTO.setScopes(scopeSet);
             }
-
+            return tokenInfo.isTokenValid();
         } catch (APIManagementException e) {
             log.error("Error while obtaining Token Metadata from Authorization Server", e);
             throw new APIKeyMgtException("Error while obtaining Token Metadata from Authorization Server");
         }
-
-        return tokenInfo.isTokenValid();
     }
 
     @Override
@@ -243,6 +194,68 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
         }
         return scopesValidated;
+    }
+
+    private AccessTokenInfo getAccessTokenInfo(TokenValidationContext validationContext)
+            throws APIManagementException {
+
+        Object cachedAccessTokenInfo =
+                CacheProvider.createIntrospectionCache().get(validationContext.getAccessToken());
+        if (cachedAccessTokenInfo != null) {
+            return (AccessTokenInfo) cachedAccessTokenInfo;
+        }
+        String electedKeyManager = null;
+        // Obtaining details about the token.
+        if (StringUtils.isNotEmpty(validationContext.getTenantDomain())) {
+            Map<String, KeyManagerDto>
+                    tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(validationContext.getTenantDomain());
+            KeyManager keyManagerInstance = null;
+            if (tenantKeyManagers.values().size() == 1) {
+                Map.Entry<String, KeyManagerDto> entry = tenantKeyManagers.entrySet().iterator().next();
+                if (entry != null) {
+                    KeyManagerDto keyManagerDto = entry.getValue();
+                    if (keyManagerDto != null && (validationContext.getKeyManagers()
+                            .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
+                            validationContext.getKeyManagers().contains(keyManagerDto.getName()))) {
+                        keyManagerInstance = keyManagerDto.getKeyManager();
+                        electedKeyManager = entry.getKey();
+                    }
+                }
+            } else if (tenantKeyManagers.values().size() > 1) {
+                if (validationContext.getKeyManagers()
+                        .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS)) {
+                    for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+                        if (keyManagerDtoEntry.getValue().getKeyManager() != null &&
+                                keyManagerDtoEntry.getValue().getKeyManager()
+                                        .canHandleToken(validationContext.getAccessToken())) {
+                            keyManagerInstance = keyManagerDtoEntry.getValue().getKeyManager();
+                            electedKeyManager = keyManagerDtoEntry.getKey();
+                            break;
+                        }
+                    }
+                } else {
+                    for (String selectedKeyManager : validationContext.getKeyManagers()) {
+                        KeyManagerDto keyManagerDto = tenantKeyManagers.get(selectedKeyManager);
+                        if (keyManagerDto != null && keyManagerDto.getKeyManager() != null &&
+                                keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                            keyManagerInstance = keyManagerDto.getKeyManager();
+                            electedKeyManager = selectedKeyManager;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (keyManagerInstance != null) {
+                AccessTokenInfo tokenInfo = keyManagerInstance.getTokenMetaData(validationContext.getAccessToken());
+                tokenInfo.setKeyManager(electedKeyManager);
+                CacheProvider.getGatewayIntrospectCache().put(validationContext.getAccessToken(), tokenInfo);
+                return tokenInfo;
+            } else {
+                log.debug("KeyManager not available to authorize token.");
+            }
+        }
+        return null;
     }
 
     private boolean isResourcePathMatching(String resourceString, URLMapping urlMapping) {
