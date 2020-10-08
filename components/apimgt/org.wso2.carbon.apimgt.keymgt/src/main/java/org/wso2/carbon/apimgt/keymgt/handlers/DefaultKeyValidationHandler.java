@@ -71,7 +71,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 return true;
             }
         }
-        if (!StringUtils.isNotEmpty(validationContext.getAccessToken())) {
+        if (StringUtils.isEmpty(validationContext.getAccessToken())) {
             APIKeyValidationInfoDTO infoDTO = validationContext.getValidationInfoDTO();
             infoDTO.setAuthorized(false);
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
@@ -252,7 +252,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 CacheProvider.getGatewayIntrospectCache().put(validationContext.getAccessToken(), tokenInfo);
                 return tokenInfo;
             } else {
-                log.debug("KeyManager Not available to authorize token ");
+                log.debug("KeyManager not available to authorize token.");
             }
         }
         return null;
