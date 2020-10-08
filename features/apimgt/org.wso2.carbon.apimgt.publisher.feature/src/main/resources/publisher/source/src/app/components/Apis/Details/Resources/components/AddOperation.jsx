@@ -227,11 +227,11 @@ function AddOperation(props) {
                         </Select>
 
                         <FormHelperText id='my-helper-text'>
-                            {newOperations.verbs.includes('option') && (
+                            {newOperations.verbs.includes('options') && (
                                 // TODO: Add i18n to tooltip text ~tmkb
                                 <Tooltip
                                     title={
-                                        'Select the OPTION method to send OPTIONS calls to the backend.'
+                                        'Select the OPTIONS method to send OPTIONS calls to the backend.'
                                         + ' If the OPTIONS method is not selected, OPTIONS calls will be returned '
                                         + 'from the Gateway with allowed methods.'
                                     }
@@ -240,7 +240,7 @@ function AddOperation(props) {
                                     <Badge color='error' variant='dot'>
                                         <FormattedMessage
                                             id='Apis.Details.Resources.components.AddOperation.option'
-                                            defaultMessage='OPTION'
+                                            defaultMessage='OPTIONS'
                                         />
                                     </Badge>
                                 </Tooltip>
