@@ -50,6 +50,11 @@ const styles = theme => ({
     appOwner: {
         pointerEvents: 'none',
     },
+    appName: {
+        '& a': {
+            color: '#1b9ec7 !important',
+        }
+    }
 });
 const StyledTableCell = withStyles(theme => ({
     head: {
@@ -120,7 +125,7 @@ class AppsTableContent extends Component {
                         const isAppOwner = app.owner === AuthManager.getUser().name;
                         return (
                             <StyledTableRow className={classes.tableRow} key={app.applicationId}>
-                                <StyledTableCell align='left'>
+                                <StyledTableCell align='left' className={classes.appName}>
                                     {app.status === this.APPLICATION_STATES.APPROVED ? (
                                         <Link to={'/applications/' + app.applicationId}>{app.name}</Link>
                                     ) : (
