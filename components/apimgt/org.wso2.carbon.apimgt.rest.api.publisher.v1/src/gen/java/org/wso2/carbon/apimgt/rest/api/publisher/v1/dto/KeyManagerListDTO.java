@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class KeyManagerListDTO   {
   
     private Integer count = null;
-    private List<KeyManagerInfoDTO> list = new ArrayList<>();
+    private List<KeyManagerInfoDTO> list = new ArrayList<KeyManagerInfoDTO>();
 
   /**
    * Number of Key managers returned. 

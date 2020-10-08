@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class EndpointListDTO   {
   
     private Integer count = null;
-    private List<EndpointDTO> list = new ArrayList<>();
+    private List<EndpointDTO> list = new ArrayList<EndpointDTO>();
 
   /**
    * Number of Endpoints returned. 

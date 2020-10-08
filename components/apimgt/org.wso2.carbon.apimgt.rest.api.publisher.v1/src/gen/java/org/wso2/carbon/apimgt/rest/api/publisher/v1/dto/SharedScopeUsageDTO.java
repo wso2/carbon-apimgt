@@ -20,7 +20,7 @@ public class SharedScopeUsageDTO   {
   
     private String id = null;
     private String name = null;
-    private List<SharedScopeUsedAPIInfoDTO> usedApiList = new ArrayList<>();
+    private List<SharedScopeUsedAPIInfoDTO> usedApiList = new ArrayList<SharedScopeUsedAPIInfoDTO>();
 
   /**
    * UUID of the Scope. Valid only for shared scopes. 

@@ -20,7 +20,7 @@ public class AlertDTO   {
   
     private Integer id = null;
     private String name = null;
-    private List<AlertConfigDTO> _configuration = new ArrayList<>();
+    private List<AlertConfigDTO> _configuration = new ArrayList<AlertConfigDTO>();
 
   /**
    * The alert Id

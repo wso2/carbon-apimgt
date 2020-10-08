@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class ThreatProtectionPolicyListDTO   {
   
-    private List<ThreatProtectionPolicyDTO> list = new ArrayList<>();
+    private List<ThreatProtectionPolicyDTO> list = new ArrayList<ThreatProtectionPolicyDTO>();
 
   /**
    **/

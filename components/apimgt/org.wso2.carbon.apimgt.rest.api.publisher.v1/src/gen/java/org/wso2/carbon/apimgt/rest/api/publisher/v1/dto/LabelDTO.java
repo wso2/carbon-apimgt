@@ -19,7 +19,7 @@ public class LabelDTO   {
   
     private String name = null;
     private String description = null;
-    private List<String> accessUrls = new ArrayList<>();
+    private List<String> accessUrls = new ArrayList<String>();
 
   /**
    **/

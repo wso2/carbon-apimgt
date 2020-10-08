@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class APIMonetizationUsageDTO   {
   
-    private Map<String, String> properties = new HashMap<>();
+    private Map<String, String> properties = new HashMap<String, String>();
 
   /**
    * Map of custom properties related to monetization usage

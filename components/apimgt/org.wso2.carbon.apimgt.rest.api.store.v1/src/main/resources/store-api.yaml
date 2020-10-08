@@ -2731,7 +2731,7 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
-#-----------------------------------------------------
+    #-----------------------------------------------------
     # Delete a certain subscription
     #-----------------------------------------------------
     delete:
@@ -4833,6 +4833,7 @@ definitions:
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        format: date-time
       createdBy:
         type: string
 

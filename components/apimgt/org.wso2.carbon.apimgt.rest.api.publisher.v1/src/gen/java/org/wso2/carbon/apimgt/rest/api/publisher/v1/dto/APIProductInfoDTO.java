@@ -57,7 +57,7 @@ public enum StateEnum {
 }
 
     private StateEnum state = null;
-    private List<String> securityScheme = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<String>();
 
   /**
    * UUID of the api product 

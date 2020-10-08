@@ -20,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ResourcePathListDTO   {
   
     private Integer count = null;
-    private List<ResourcePathDTO> list = new ArrayList<>();
+    private List<ResourcePathDTO> list = new ArrayList<ResourcePathDTO>();
     private PaginationDTO pagination = null;
 
   /**

@@ -20,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class TenantListDTO   {
   
     private Integer count = null;
-    private List<TenantDTO> list = new ArrayList<>();
+    private List<TenantDTO> list = new ArrayList<TenantDTO>();
     private PaginationDTO pagination = null;
 
   /**

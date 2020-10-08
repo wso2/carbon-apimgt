@@ -83,15 +83,15 @@ public enum TypeEnum {
 }
 
     private TypeEnum type = TypeEnum.HTTP;
-    private List<String> transport = new ArrayList<>();
+    private List<String> transport = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> tags = new ArrayList<>();
+    private List<String> tags = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> policies = new ArrayList<>();
+    private List<String> policies = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
-    private List<String> securityScheme = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<String>();
     private APIMaxTpsDTO maxTps = null;
 
 @XmlType(name="VisibilityEnum")
@@ -129,15 +129,15 @@ public enum VisibilityEnum {
     @Scope(name = "apim:api_publish", description="", value ="")
     private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> visibleRoles = new ArrayList<>();
-    private List<String> visibleTenants = new ArrayList<>();
+    private List<String> visibleRoles = new ArrayList<String>();
+    private List<String> visibleTenants = new ArrayList<String>();
     private APIEndpointSecurityDTO endpointSecurity = null;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> gatewayEnvironments = new ArrayList<>();
+    private List<String> gatewayEnvironments = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<DeploymentEnvironmentsDTO> deploymentEnvironments = new ArrayList<>();
-    private List<String> labels = new ArrayList<>();
-    private List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
+    private List<DeploymentEnvironmentsDTO> deploymentEnvironments = new ArrayList<DeploymentEnvironmentsDTO>();
+    private List<String> labels = new ArrayList<String>();
+    private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
 
 @XmlType(name="SubscriptionAvailabilityEnum")
 @XmlEnum(String.class)
@@ -173,9 +173,9 @@ public enum SubscriptionAvailabilityEnum {
 
     @Scope(name = "apim:api_publish", description="", value ="")
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.CURRENT_TENANT;
-    private List<String> subscriptionAvailableTenants = new ArrayList<>();
+    private List<String> subscriptionAvailableTenants = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private Map<String, String> additionalProperties = new HashMap<>();
+    private Map<String, String> additionalProperties = new HashMap<String, String>();
     private APIMonetizationInfoDTO monetization = null;
 
 @XmlType(name="AccessControlEnum")
@@ -211,7 +211,7 @@ public enum AccessControlEnum {
 }
 
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
-    private List<String> accessControlRoles = new ArrayList<>();
+    private List<String> accessControlRoles = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
     private Object businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
@@ -254,11 +254,11 @@ public enum EndpointImplementationTypeEnum {
 }
 
     private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
-    private List<APIScopeDTO> scopes = new ArrayList<>();
-    private List<APIOperationsDTO> operations = new ArrayList<>();
+    private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
+    private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> categories = new ArrayList<>();
+    private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
 
   /**

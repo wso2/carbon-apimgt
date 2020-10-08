@@ -4480,6 +4480,8 @@ paths:
           description: Alias for the certificate
           required: true
           type: string
+          maxLength: 30
+          minLength: 1
         - in: path
           name: apiId
           description: apiId to which the certificate should be applied.
@@ -4556,6 +4558,7 @@ paths:
           required: true
           type: string
           maxLength: 30
+          minLength: 1
         - in: formData
           name : tier
           description: The tier of the certificate
@@ -4890,6 +4893,8 @@ paths:
           description: Alias for the certificate
           required: true
           type: string
+          maxLength: 30
+          minLength: 1
         - in: formData
           name: endpoint
           description: Endpoint to which the certificate should be applied.
@@ -8279,9 +8284,11 @@ definitions:
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        format: date-time
       lastUpdatedTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        format: date-time
       apis:
         description: |
           APIs and resources in the API Product.
@@ -8553,11 +8560,13 @@ definitions:
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        format: date-time
       createdBy:
         type: string
       lastUpdatedTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        format: date-time
       lastUpdatedBy:
         type: string
 

@@ -27,7 +27,7 @@ public class APIInfoDTO   {
     private String lifeCycleStatus = null;
     private String workflowStatus = null;
     private Boolean hasThumbnail = null;
-    private List<String> securityScheme = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<String>();
 
   /**
    **/

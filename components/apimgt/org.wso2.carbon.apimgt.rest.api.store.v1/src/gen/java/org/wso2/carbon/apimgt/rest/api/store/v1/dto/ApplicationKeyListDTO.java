@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ApplicationKeyListDTO   {
   
     private Integer count = null;
-    private List<ApplicationKeyDTO> list = new ArrayList<>();
+    private List<ApplicationKeyDTO> list = new ArrayList<ApplicationKeyDTO>();
 
   /**
    * Number of applications keys returned. 

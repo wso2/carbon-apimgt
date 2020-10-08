@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class GraphQLSchemaTypeListDTO   {
   
-    private List<GraphQLSchemaTypeDTO> typeList = new ArrayList<>();
+    private List<GraphQLSchemaTypeDTO> typeList = new ArrayList<GraphQLSchemaTypeDTO>();
 
   /**
    **/

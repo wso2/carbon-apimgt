@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ExternalStoreListDTO   {
   
     private Integer count = null;
-    private List<ExternalStoreDTO> list = new ArrayList<>();
+    private List<ExternalStoreDTO> list = new ArrayList<ExternalStoreDTO>();
 
   /**
    * Number of external stores returned. 

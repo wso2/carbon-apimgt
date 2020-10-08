@@ -17,7 +17,7 @@ public class CommentDTO   {
   
     private String id = null;
     private String content = null;
-    private String createdTime = null;
+    private java.util.Date createdTime = null;
     private String createdBy = null;
 
   /**
@@ -57,7 +57,7 @@ public class CommentDTO   {
 
   /**
    **/
-  public CommentDTO createdTime(String createdTime) {
+  public CommentDTO createdTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -65,10 +65,10 @@ public class CommentDTO   {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("createdTime")
-  public String getCreatedTime() {
+  public java.util.Date getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(String createdTime) {
+  public void setCreatedTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
   }
 

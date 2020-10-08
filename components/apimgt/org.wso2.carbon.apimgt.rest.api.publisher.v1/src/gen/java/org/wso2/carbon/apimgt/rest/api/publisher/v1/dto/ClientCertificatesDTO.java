@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ClientCertificatesDTO   {
   
     private Integer count = null;
-    private List<ClientCertMetadataDTO> certificates = new ArrayList<>();
+    private List<ClientCertMetadataDTO> certificates = new ArrayList<ClientCertMetadataDTO>();
     private PaginationDTO pagination = null;
 
   /**

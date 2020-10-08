@@ -19,7 +19,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   
     private String consumerSecret = null;
     private Long validityPeriod = null;
-    private List<String> scopes = new ArrayList<>();
+    private List<String> scopes = new ArrayList<String>();
     private String revokeToken = null;
     private Object additionalProperties = null;
 

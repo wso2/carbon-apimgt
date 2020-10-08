@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class DeploymentStatusDTO   {
   
     private String type = null;
-    private List<DeploymentClusterStatusDTO> clusters = new ArrayList<>();
+    private List<DeploymentClusterStatusDTO> clusters = new ArrayList<DeploymentClusterStatusDTO>();
 
   /**
    **/

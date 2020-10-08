@@ -20,7 +20,7 @@ public class DeploymentClusterStatusDTO   {
   
     private String clusterName = null;
     private Integer podsRunning = null;
-    private List<PodStatusDTO> healthStatus = new ArrayList<>();
+    private List<PodStatusDTO> healthStatus = new ArrayList<PodStatusDTO>();
 
   /**
    **/

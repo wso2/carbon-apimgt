@@ -23,7 +23,7 @@ public class KeyManagerInfoDTO   {
     private String type = null;
     private String description = null;
     private Boolean enabled = null;
-    private List<Object> additionalProperties = new ArrayList<>();
+    private List<Object> additionalProperties = new ArrayList<Object>();
 
   /**
    **/

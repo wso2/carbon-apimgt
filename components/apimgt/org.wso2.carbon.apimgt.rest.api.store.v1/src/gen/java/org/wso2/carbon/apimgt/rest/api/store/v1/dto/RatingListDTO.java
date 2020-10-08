@@ -22,7 +22,7 @@ public class RatingListDTO   {
     private String avgRating = null;
     private Integer userRating = null;
     private Integer count = null;
-    private List<RatingDTO> list = new ArrayList<>();
+    private List<RatingDTO> list = new ArrayList<RatingDTO>();
     private PaginationDTO pagination = null;
 
   /**

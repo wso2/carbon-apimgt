@@ -26,7 +26,7 @@ public class OpenAPIDefinitionValidationResponseInfoDTO   {
     private String context = null;
     private String description = null;
     private String openAPIVersion = null;
-    private List<String> endpoints = new ArrayList<>();
+    private List<String> endpoints = new ArrayList<String>();
 
   /**
    **/

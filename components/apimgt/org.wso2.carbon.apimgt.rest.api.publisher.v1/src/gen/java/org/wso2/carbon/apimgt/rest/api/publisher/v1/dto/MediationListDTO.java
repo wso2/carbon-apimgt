@@ -20,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class MediationListDTO   {
   
     private Integer count = null;
-    private List<MediationInfoDTO> list = new ArrayList<>();
+    private List<MediationInfoDTO> list = new ArrayList<MediationInfoDTO>();
     private PaginationDTO pagination = null;
 
   /**

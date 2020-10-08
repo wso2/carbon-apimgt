@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class ResourcePolicyListDTO   {
   
-    private List<ResourcePolicyInfoDTO> list = new ArrayList<>();
+    private List<ResourcePolicyInfoDTO> list = new ArrayList<ResourcePolicyInfoDTO>();
     private Integer count = null;
 
   /**

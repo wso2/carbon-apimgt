@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class SearchResultListDTO   {
   
     private Integer count = null;
-    private List<Object> list = new ArrayList<>();
+    private List<Object> list = new ArrayList<Object>();
     private PaginationDTO pagination = null;
 
   /**

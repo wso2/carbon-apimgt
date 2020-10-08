@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class GraphQLSchemaTypeDTO   {
   
     private String type = null;
-    private List<String> fieldList = new ArrayList<>();
+    private List<String> fieldList = new ArrayList<String>();
 
   /**
    * Type found within the GraphQL Schema 

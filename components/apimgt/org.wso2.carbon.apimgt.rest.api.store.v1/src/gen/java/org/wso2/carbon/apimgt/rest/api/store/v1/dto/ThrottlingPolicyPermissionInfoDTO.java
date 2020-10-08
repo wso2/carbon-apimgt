@@ -51,7 +51,7 @@ public enum TypeEnum {
 }
 
     private TypeEnum type = null;
-    private List<String> roles = new ArrayList<>();
+    private List<String> roles = new ArrayList<String>();
 
   /**
    **/

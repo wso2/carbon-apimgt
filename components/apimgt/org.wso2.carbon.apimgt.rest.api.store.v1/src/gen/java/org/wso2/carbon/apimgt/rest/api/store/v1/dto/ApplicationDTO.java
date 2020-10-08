@@ -60,11 +60,11 @@ public enum TokenTypeEnum {
 
     private TokenTypeEnum tokenType = TokenTypeEnum.JWT;
     private String status = "";
-    private List<String> groups = new ArrayList<>();
+    private List<String> groups = new ArrayList<String>();
     private Integer subscriptionCount = null;
-    private List<ApplicationKeyDTO> keys = new ArrayList<>();
-    private Map<String, String> attributes = new HashMap<>();
-    private List<ScopeInfoDTO> subscriptionScopes = new ArrayList<>();
+    private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
+    private Map<String, String> attributes = new HashMap<String, String>();
+    private List<ScopeInfoDTO> subscriptionScopes = new ArrayList<ScopeInfoDTO>();
     private String owner = null;
     private Boolean hashEnabled = null;
 

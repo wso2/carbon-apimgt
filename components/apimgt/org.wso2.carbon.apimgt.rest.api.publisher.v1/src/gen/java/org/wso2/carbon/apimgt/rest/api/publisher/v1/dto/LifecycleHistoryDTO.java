@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class LifecycleHistoryDTO   {
   
     private Integer count = null;
-    private List<LifecycleHistoryItemDTO> list = new ArrayList<>();
+    private List<LifecycleHistoryItemDTO> list = new ArrayList<LifecycleHistoryItemDTO>();
 
   /**
    **/

@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class MockResponsePayloadListDTO   {
   
-    private List<MockResponsePayloadInfoDTO> list = new ArrayList<>();
+    private List<MockResponsePayloadInfoDTO> list = new ArrayList<MockResponsePayloadInfoDTO>();
 
   /**
    **/

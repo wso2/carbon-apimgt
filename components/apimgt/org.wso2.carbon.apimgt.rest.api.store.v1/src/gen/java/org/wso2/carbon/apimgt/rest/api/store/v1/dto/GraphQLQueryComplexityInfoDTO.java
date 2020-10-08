@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class GraphQLQueryComplexityInfoDTO   {
   
-    private List<GraphQLCustomComplexityInfoDTO> list = new ArrayList<>();
+    private List<GraphQLCustomComplexityInfoDTO> list = new ArrayList<GraphQLCustomComplexityInfoDTO>();
 
   /**
    **/

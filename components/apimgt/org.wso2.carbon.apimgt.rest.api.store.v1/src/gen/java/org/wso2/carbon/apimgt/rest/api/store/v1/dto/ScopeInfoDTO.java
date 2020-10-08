@@ -19,7 +19,7 @@ public class ScopeInfoDTO   {
   
     private String key = null;
     private String name = null;
-    private List<String> roles = new ArrayList<>();
+    private List<String> roles = new ArrayList<String>();
     private String description = null;
 
   /**

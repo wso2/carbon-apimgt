@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class RecommendationsDTO   {
   
     private Integer count = null;
-    private List<RecommendedAPIDTO> list = new ArrayList<>();
+    private List<RecommendedAPIDTO> list = new ArrayList<RecommendedAPIDTO>();
 
   /**
    * Number of APIs returned. 

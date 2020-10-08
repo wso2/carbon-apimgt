@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ApplicationTokenDTO   {
   
     private String accessToken = null;
-    private List<String> tokenScopes = new ArrayList<>();
+    private List<String> tokenScopes = new ArrayList<String>();
     private Long validityTime = null;
 
   /**

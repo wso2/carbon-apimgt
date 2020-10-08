@@ -21,7 +21,7 @@ public class ProductAPIDTO   {
     private String name = null;
     private String apiId = null;
     private String version = null;
-    private List<APIOperationsDTO> operations = new ArrayList<>();
+    private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
 
   /**
    **/

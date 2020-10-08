@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class EnvironmentListDTO   {
   
     private Integer count = null;
-    private List<EnvironmentDTO> list = new ArrayList<>();
+    private List<EnvironmentDTO> list = new ArrayList<EnvironmentDTO>();
 
   /**
    * Number of Environments returned. 

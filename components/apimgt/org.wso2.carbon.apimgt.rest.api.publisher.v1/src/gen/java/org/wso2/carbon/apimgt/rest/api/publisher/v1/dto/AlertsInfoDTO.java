@@ -18,8 +18,8 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class AlertsInfoDTO   {
   
-    private List<AlertDTO> alerts = new ArrayList<>();
-    private List<String> emailList = new ArrayList<>();
+    private List<AlertDTO> alerts = new ArrayList<AlertDTO>();
+    private List<String> emailList = new ArrayList<String>();
 
   /**
    **/

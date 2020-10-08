@@ -22,7 +22,7 @@ public class OpenAPIDefinitionValidationResponseDTO   {
     private Boolean isValid = null;
     private String content = null;
     private OpenAPIDefinitionValidationResponseInfoDTO info = null;
-    private List<ErrorListItemDTO> errors = new ArrayList<>();
+    private List<ErrorListItemDTO> errors = new ArrayList<ErrorListItemDTO>();
 
   /**
    * This attribute declares whether this definition is valid or not. 

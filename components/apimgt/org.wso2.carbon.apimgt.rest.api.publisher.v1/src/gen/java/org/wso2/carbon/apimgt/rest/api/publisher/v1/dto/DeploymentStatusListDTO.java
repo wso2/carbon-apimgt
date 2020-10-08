@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class DeploymentStatusListDTO   {
   
     private Integer count = null;
-    private List<DeploymentStatusDTO> list = new ArrayList<>();
+    private List<DeploymentStatusDTO> list = new ArrayList<DeploymentStatusDTO>();
 
   /**
    * Status of the deployments returned. 

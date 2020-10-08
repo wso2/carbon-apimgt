@@ -22,8 +22,8 @@ public class APIOperationsDTO   {
     private String verb = null;
     private String authType = "Any";
     private String throttlingPolicy = null;
-    private List<String> scopes = new ArrayList<>();
-    private List<String> usedProductIds = new ArrayList<>();
+    private List<String> scopes = new ArrayList<String>();
+    private List<String> usedProductIds = new ArrayList<String>();
     private String amznResourceName = null;
     private Integer amznResourceTimeout = null;
 

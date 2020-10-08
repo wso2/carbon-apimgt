@@ -124,9 +124,9 @@ public enum VisibilityEnum {
 }
 
     private VisibilityEnum visibility = null;
-    private String createdTime = null;
+    private java.util.Date createdTime = null;
     private String createdBy = null;
-    private String lastUpdatedTime = null;
+    private java.util.Date lastUpdatedTime = null;
     private String lastUpdatedBy = null;
 
   /**
@@ -305,7 +305,7 @@ public enum VisibilityEnum {
 
   /**
    **/
-  public DocumentDTO createdTime(String createdTime) {
+  public DocumentDTO createdTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -313,10 +313,10 @@ public enum VisibilityEnum {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("createdTime")
-  public String getCreatedTime() {
+  public java.util.Date getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(String createdTime) {
+  public void setCreatedTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
   }
 
@@ -339,7 +339,7 @@ public enum VisibilityEnum {
 
   /**
    **/
-  public DocumentDTO lastUpdatedTime(String lastUpdatedTime) {
+  public DocumentDTO lastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -347,10 +347,10 @@ public enum VisibilityEnum {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("lastUpdatedTime")
-  public String getLastUpdatedTime() {
+  public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;
   }
-  public void setLastUpdatedTime(String lastUpdatedTime) {
+  public void setLastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 

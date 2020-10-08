@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class GraphQLValidationResponseGraphQLInfoDTO   {
   
-    private List<APIOperationsDTO> operations = new ArrayList<>();
+    private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private GraphQLSchemaDTO graphQLSchema = null;
 
   /**

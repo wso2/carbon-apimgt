@@ -22,7 +22,7 @@ public class SharedScopeUsedAPIInfoDTO   {
     private String context = null;
     private String version = null;
     private String provider = null;
-    private List<SharedScopeUsedAPIResourceInfoDTO> usedResourceList = new ArrayList<>();
+    private List<SharedScopeUsedAPIResourceInfoDTO> usedResourceList = new ArrayList<SharedScopeUsedAPIResourceInfoDTO>();
 
   /**
    **/

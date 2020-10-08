@@ -22,7 +22,7 @@ public class ApplicationKeyDTO   {
     private String keyManager = null;
     private String consumerKey = null;
     private String consumerSecret = null;
-    private List<String> supportedGrantTypes = new ArrayList<>();
+    private List<String> supportedGrantTypes = new ArrayList<String>();
     private String callbackUrl = null;
     private String keyState = null;
 

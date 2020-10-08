@@ -20,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ThrottlingPolicyListDTO   {
   
     private Integer count = null;
-    private List<ThrottlingPolicyDTO> list = new ArrayList<>();
+    private List<ThrottlingPolicyDTO> list = new ArrayList<ThrottlingPolicyDTO>();
     private PaginationDTO pagination = null;
 
   /**

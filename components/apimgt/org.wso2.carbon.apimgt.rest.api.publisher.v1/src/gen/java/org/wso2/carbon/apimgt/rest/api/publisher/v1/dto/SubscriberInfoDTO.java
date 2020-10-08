@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class SubscriberInfoDTO   {
   
     private String name = null;
-    private List<ClaimDTO> claims = new ArrayList<>();
+    private List<ClaimDTO> claims = new ArrayList<ClaimDTO>();
 
   /**
    **/

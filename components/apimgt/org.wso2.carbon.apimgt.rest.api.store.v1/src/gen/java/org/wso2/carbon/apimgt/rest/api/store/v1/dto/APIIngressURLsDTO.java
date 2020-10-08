@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class APIIngressURLsDTO   {
   
     private String deploymentEnvironmentName = null;
-    private List<APIDeploymentClusterInfoDTO> clusterDetails = new ArrayList<>();
+    private List<APIDeploymentClusterInfoDTO> clusterDetails = new ArrayList<APIDeploymentClusterInfoDTO>();
 
   /**
    **/

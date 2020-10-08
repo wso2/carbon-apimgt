@@ -156,7 +156,9 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = CertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. * Failures due to existing alias or expired certificate. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error * Failed to add the Certificate due to an Internal Server Error ", response = ErrorDTO.class) })
-    public Response endpointCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @Multipart(value = "endpoint")  String endpoint) throws APIManagementException{
+    public Response endpointCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  @Size(min=1,max=30) 
+  String alias, @Multipart(value = "endpoint")  
+  String endpoint) throws APIManagementException{
         return delegate.endpointCertificatesPost(certificateInputStream, certificateDetail, alias, endpoint, securityContext);
     }
 }

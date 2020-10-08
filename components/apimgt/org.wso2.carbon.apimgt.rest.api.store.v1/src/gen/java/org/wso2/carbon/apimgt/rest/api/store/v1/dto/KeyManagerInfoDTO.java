@@ -24,7 +24,7 @@ public class KeyManagerInfoDTO   {
     private String displayName = null;
     private String description = null;
     private Boolean enabled = null;
-    private List<String> availableGrantTypes = new ArrayList<>();
+    private List<String> availableGrantTypes = new ArrayList<String>();
     private String tokenEndpoint = null;
     private String revokeEndpoint = null;
     private String userInfoEndpoint = null;
@@ -33,7 +33,7 @@ public class KeyManagerInfoDTO   {
     private Boolean enableTokenHashing = false;
     private Boolean enableOAuthAppCreation = true;
     private Boolean enableMapOAuthConsumerApps = false;
-    private List<KeyManagerApplicationConfigurationDTO> applicationConfiguration = new ArrayList<>();
+    private List<KeyManagerApplicationConfigurationDTO> applicationConfiguration = new ArrayList<KeyManagerApplicationConfigurationDTO>();
     private Object additionalProperties = null;
 
   /**

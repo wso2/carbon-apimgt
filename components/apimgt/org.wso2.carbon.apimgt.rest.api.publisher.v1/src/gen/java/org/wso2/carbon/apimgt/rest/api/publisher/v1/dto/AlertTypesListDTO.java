@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class AlertTypesListDTO   {
   
     private Integer count = null;
-    private List<AlertTypeDTO> alerts = new ArrayList<>();
+    private List<AlertTypeDTO> alerts = new ArrayList<AlertTypeDTO>();
 
   /**
    * The number of alerts

@@ -103,8 +103,8 @@ public enum VisibilityEnum {
 }
 
     private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
-    private List<String> visibleRoles = new ArrayList<>();
-    private List<String> visibleTenants = new ArrayList<>();
+    private List<String> visibleRoles = new ArrayList<String>();
+    private List<String> visibleTenants = new ArrayList<String>();
 
 @XmlType(name="AccessControlEnum")
 @XmlEnum(String.class)
@@ -139,8 +139,8 @@ public enum AccessControlEnum {
 }
 
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
-    private List<String> accessControlRoles = new ArrayList<>();
-    private List<String> gatewayEnvironments = new ArrayList<>();
+    private List<String> accessControlRoles = new ArrayList<String>();
+    private List<String> gatewayEnvironments = new ArrayList<String>();
 
 @XmlType(name="ApiTypeEnum")
 @XmlEnum(String.class)
@@ -175,12 +175,12 @@ public enum ApiTypeEnum {
 }
 
     private ApiTypeEnum apiType = null;
-    private List<String> transport = new ArrayList<>();
-    private List<String> tags = new ArrayList<>();
-    private List<String> policies = new ArrayList<>();
+    private List<String> transport = new ArrayList<String>();
+    private List<String> tags = new ArrayList<String>();
+    private List<String> policies = new ArrayList<String>();
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
-    private List<String> securityScheme = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<String>();
 
 @XmlType(name="SubscriptionAvailabilityEnum")
 @XmlEnum(String.class)
@@ -216,16 +216,16 @@ public enum SubscriptionAvailabilityEnum {
 
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> subscriptionAvailableTenants = new ArrayList<>();
-    private Map<String, String> additionalProperties = new HashMap<>();
+    private List<String> subscriptionAvailableTenants = new ArrayList<String>();
+    private Map<String, String> additionalProperties = new HashMap<String, String>();
     private APIMonetizationInfoDTO monetization = null;
     private APIProductBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
-    private String createdTime = null;
-    private String lastUpdatedTime = null;
-    private List<ProductAPIDTO> apis = new ArrayList<>();
-    private List<APIScopeDTO> scopes = new ArrayList<>();
-    private List<String> categories = new ArrayList<>();
+    private java.util.Date createdTime = null;
+    private java.util.Date lastUpdatedTime = null;
+    private List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
+    private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
+    private List<String> categories = new ArrayList<String>();
 
   /**
    * UUID of the api product 
@@ -774,7 +774,7 @@ public enum SubscriptionAvailabilityEnum {
 
   /**
    **/
-  public APIProductDTO createdTime(String createdTime) {
+  public APIProductDTO createdTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -782,16 +782,16 @@ public enum SubscriptionAvailabilityEnum {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("createdTime")
-  public String getCreatedTime() {
+  public java.util.Date getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(String createdTime) {
+  public void setCreatedTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
   }
 
   /**
    **/
-  public APIProductDTO lastUpdatedTime(String lastUpdatedTime) {
+  public APIProductDTO lastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -799,10 +799,10 @@ public enum SubscriptionAvailabilityEnum {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("lastUpdatedTime")
-  public String getLastUpdatedTime() {
+  public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;
   }
-  public void setLastUpdatedTime(String lastUpdatedTime) {
+  public void setLastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 

@@ -21,7 +21,7 @@ public class DeploymentClusterInfoDTO   {
     private String clusterName = null;
     private String accessURL = null;
     private String displayName = null;
-    private Map<String, String> properties = new HashMap<>();
+    private Map<String, String> properties = new HashMap<String, String>();
 
   /**
    **/

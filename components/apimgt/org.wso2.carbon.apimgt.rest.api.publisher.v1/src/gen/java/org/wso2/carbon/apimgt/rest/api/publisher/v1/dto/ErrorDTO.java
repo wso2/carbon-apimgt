@@ -22,7 +22,7 @@ public class ErrorDTO   {
     private String message = null;
     private String description = null;
     private String moreInfo = null;
-    private List<ErrorListItemDTO> error = new ArrayList<>();
+    private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
   /**
    **/

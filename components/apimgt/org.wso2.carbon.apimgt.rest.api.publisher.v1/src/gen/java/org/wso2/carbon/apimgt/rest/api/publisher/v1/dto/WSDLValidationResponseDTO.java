@@ -20,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class WSDLValidationResponseDTO   {
   
     private Boolean isValid = null;
-    private List<ErrorListItemDTO> errors = new ArrayList<>();
+    private List<ErrorListItemDTO> errors = new ArrayList<ErrorListItemDTO>();
     private WSDLValidationResponseWsdlInfoDTO wsdlInfo = null;
 
   /**

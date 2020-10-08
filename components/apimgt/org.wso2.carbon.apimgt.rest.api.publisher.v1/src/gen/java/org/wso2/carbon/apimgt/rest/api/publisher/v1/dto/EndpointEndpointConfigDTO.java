@@ -52,7 +52,7 @@ public enum EndpointTypeEnum {
 }
 
     private EndpointTypeEnum endpointType = null;
-    private List<EndpointConfigDTO> list = new ArrayList<>();
+    private List<EndpointConfigDTO> list = new ArrayList<EndpointConfigDTO>();
 
   /**
    **/

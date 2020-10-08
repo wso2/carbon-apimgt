@@ -21,7 +21,7 @@ public class ScopeDTO   {
     private String name = null;
     private String displayName = null;
     private String description = null;
-    private List<String> bindings = new ArrayList<>();
+    private List<String> bindings = new ArrayList<String>();
     private Integer usageCount = null;
 
   /**

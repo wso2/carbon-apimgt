@@ -29,7 +29,7 @@ public class APIInfoDTO   {
     private String lifeCycleStatus = null;
     private String thumbnailUri = null;
     private String avgRating = null;
-    private List<String> throttlingPolicies = new ArrayList<>();
+    private List<String> throttlingPolicies = new ArrayList<String>();
     private AdvertiseInfoDTO advertiseInfo = null;
     private APIBusinessInformationDTO businessInformation = null;
     private Boolean isSubscriptionAvailable = null;

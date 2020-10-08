@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class DeploymentListDTO   {
   
     private Integer count = null;
-    private List<DeploymentsDTO> list = new ArrayList<>();
+    private List<DeploymentsDTO> list = new ArrayList<DeploymentsDTO>();
 
   /**
    * Number of deployment clusters returned. 

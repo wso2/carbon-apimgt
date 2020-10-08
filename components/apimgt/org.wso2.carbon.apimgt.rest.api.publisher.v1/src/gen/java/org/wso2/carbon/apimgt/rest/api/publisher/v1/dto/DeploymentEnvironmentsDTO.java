@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class DeploymentEnvironmentsDTO   {
   
     private String type = null;
-    private List<String> clusterName = new ArrayList<>();
+    private List<String> clusterName = new ArrayList<String>();
 
   /**
    **/

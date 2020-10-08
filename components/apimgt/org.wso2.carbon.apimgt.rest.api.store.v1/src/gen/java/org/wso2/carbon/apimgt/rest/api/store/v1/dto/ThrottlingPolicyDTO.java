@@ -56,7 +56,7 @@ public enum PolicyLevelEnum {
 }
 
     private PolicyLevelEnum policyLevel = null;
-    private Map<String, String> attributes = new HashMap<>();
+    private Map<String, String> attributes = new HashMap<String, String>();
     private Long requestCount = null;
     private Long unitTime = null;
 

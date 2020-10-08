@@ -22,10 +22,10 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class APICorsConfigurationDTO   {
   
     private Boolean corsConfigurationEnabled = false;
-    private List<String> accessControlAllowOrigins = new ArrayList<>();
+    private List<String> accessControlAllowOrigins = new ArrayList<String>();
     private Boolean accessControlAllowCredentials = false;
-    private List<String> accessControlAllowHeaders = new ArrayList<>();
-    private List<String> accessControlAllowMethods = new ArrayList<>();
+    private List<String> accessControlAllowHeaders = new ArrayList<String>();
+    private List<String> accessControlAllowMethods = new ArrayList<String>();
 
   /**
    **/

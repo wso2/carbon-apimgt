@@ -2120,14 +2120,10 @@ public class APIMappingUtil {
         productDto.setCategories(categoryNameList);
 
         if (null != product.getLastUpdated()) {
-            Date lastUpdateDate = product.getLastUpdated();
-            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
-            productDto.setLastUpdatedTime(String.valueOf(timeStamp));
+            productDto.setLastUpdatedTime(product.getLastUpdated());
         }
         if (null != product.getCreatedTime()) {
-            Date createdTime = product.getCreatedTime();
-            Timestamp timeStamp = new Timestamp(createdTime.getTime());
-            productDto.setCreatedTime(String.valueOf(timeStamp));
+            productDto.setCreatedTime(product.getCreatedTime());
         }
 
         return productDto;

@@ -22,7 +22,7 @@ public class ApplicationInfoDTO   {
     private String throttlingPolicy = null;
     private String description = null;
     private String status = "";
-    private List<String> groups = new ArrayList<>();
+    private List<String> groups = new ArrayList<String>();
     private Integer subscriptionCount = null;
     private Object attributes = null;
     private String owner = null;

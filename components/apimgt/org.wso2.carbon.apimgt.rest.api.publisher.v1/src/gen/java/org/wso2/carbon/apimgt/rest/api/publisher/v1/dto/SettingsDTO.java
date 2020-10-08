@@ -21,14 +21,14 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class SettingsDTO   {
   
     private String storeUrl = null;
-    private List<EnvironmentDTO> environment = new ArrayList<>();
-    private List<String> scopes = new ArrayList<>();
-    private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<>();
+    private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
+    private List<String> scopes = new ArrayList<String>();
+    private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
     private Boolean crossTenantSubscriptionEnabled = false;
-    private List<DeploymentsDTO> deployments = new ArrayList<>();
+    private List<DeploymentsDTO> deployments = new ArrayList<DeploymentsDTO>();
 
   /**
    * Store URL

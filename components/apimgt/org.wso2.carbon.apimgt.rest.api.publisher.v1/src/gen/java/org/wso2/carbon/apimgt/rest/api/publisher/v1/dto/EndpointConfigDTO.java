@@ -20,7 +20,7 @@ public class EndpointConfigDTO   {
   
     private String url = null;
     private String timeout = null;
-    private List<EndpointConfigAttributesDTO> attributes = new ArrayList<>();
+    private List<EndpointConfigAttributesDTO> attributes = new ArrayList<EndpointConfigAttributesDTO>();
 
   /**
    * Service url of the endpoint 

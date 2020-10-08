@@ -19,7 +19,7 @@ public class LifecycleStateCheckItemsDTO   {
   
     private String name = null;
     private Boolean value = null;
-    private List<String> requiredStates = new ArrayList<>();
+    private List<String> requiredStates = new ArrayList<String>();
 
   /**
    **/

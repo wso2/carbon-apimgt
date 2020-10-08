@@ -20,8 +20,8 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class LifecycleStateDTO   {
   
     private String state = null;
-    private List<LifecycleStateCheckItemsDTO> checkItems = new ArrayList<>();
-    private List<LifecycleStateAvailableTransitionsDTO> availableTransitions = new ArrayList<>();
+    private List<LifecycleStateCheckItemsDTO> checkItems = new ArrayList<LifecycleStateCheckItemsDTO>();
+    private List<LifecycleStateAvailableTransitionsDTO> availableTransitions = new ArrayList<LifecycleStateAvailableTransitionsDTO>();
 
   /**
    **/

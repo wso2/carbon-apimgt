@@ -52,9 +52,9 @@ public enum KeyTypeEnum {
 
     private KeyTypeEnum keyType = null;
     private String keyManager = null;
-    private List<String> grantTypesToBeSupported = new ArrayList<>();
+    private List<String> grantTypesToBeSupported = new ArrayList<String>();
     private String callbackUrl = null;
-    private List<String> scopes = new ArrayList<>();
+    private List<String> scopes = new ArrayList<String>();
     private String validityTime = null;
     private String clientId = null;
     private String clientSecret = null;

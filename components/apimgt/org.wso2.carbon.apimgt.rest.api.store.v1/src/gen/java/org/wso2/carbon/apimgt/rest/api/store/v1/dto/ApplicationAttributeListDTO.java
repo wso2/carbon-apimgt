@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ApplicationAttributeListDTO   {
   
     private Integer count = null;
-    private List<ApplicationAttributeDTO> list = new ArrayList<>();
+    private List<ApplicationAttributeDTO> list = new ArrayList<ApplicationAttributeDTO>();
 
   /**
    * Number of application attributes returned. 

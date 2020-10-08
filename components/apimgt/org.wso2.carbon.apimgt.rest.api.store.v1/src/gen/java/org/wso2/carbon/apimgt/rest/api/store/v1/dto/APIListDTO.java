@@ -20,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class APIListDTO   {
   
     private Integer count = null;
-    private List<APIInfoDTO> list = new ArrayList<>();
+    private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
     private PaginationDTO pagination = null;
 
   /**

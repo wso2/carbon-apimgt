@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class WSDLValidationResponseWsdlInfoDTO   {
   
     private String version = null;
-    private List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpoints = new ArrayList<>();
+    private List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpoints = new ArrayList<WSDLValidationResponseWsdlInfoEndpointsDTO>();
 
   /**
    * WSDL version 
