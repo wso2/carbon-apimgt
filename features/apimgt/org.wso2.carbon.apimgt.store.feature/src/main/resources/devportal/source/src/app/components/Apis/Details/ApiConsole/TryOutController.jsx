@@ -138,7 +138,7 @@ function TryOutController(props) {
             promiseSubscriptions.then((subscriptionsResponse) => {
                 if (subscriptionsResponse !== null) {
                     subscriptionsList = subscriptionsResponse.obj.list.filter((item) => item.status === 'UNBLOCKED'
-                        || item.status === 'PROD_ONLY_BLOCKED');
+                        || item.status === 'PROD_ONLY_BLOCKED' || item.status === 'TIER_UPDATE_PENDING');
 
                     if (subscriptionsList && subscriptionsList.length > 0) {
                         newSelectedApplication = subscriptionsList[0].applicationId;
