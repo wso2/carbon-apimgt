@@ -24,7 +24,7 @@ import Typography from '@material-ui/core/Typography';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import WrappedExpansionPanel from 'AppComponents/Shared/WrappedExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -72,7 +72,7 @@ export default function MaxBackendTps(props) {
     return (
         <>
             <Grid item xs={12}>
-                <ExpansionPanel className={classes.expansionPanel} defaultExpanded>
+                <WrappedExpansionPanel className={classes.expansionPanel} defaultExpanded id='maxBackendTps'>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography className={classes.subHeading} variant='h6'>
                             <FormattedMessage
@@ -182,7 +182,7 @@ export default function MaxBackendTps(props) {
                             </Grid>
                         </Collapse>
                     </ExpansionPanelDetails>
-                </ExpansionPanel>
+                </WrappedExpansionPanel>
             </Grid>
         </>
     );

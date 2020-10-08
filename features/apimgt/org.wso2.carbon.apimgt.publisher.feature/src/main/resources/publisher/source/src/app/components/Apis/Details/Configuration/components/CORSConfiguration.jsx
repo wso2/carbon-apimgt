@@ -25,7 +25,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import WrappedExpansionPanel from 'AppComponents/Shared/WrappedExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -76,7 +76,7 @@ export default function CORSConfiguration(props) {
     const classes = useStyles();
 
     return (
-        <ExpansionPanel className={classes.expansionPanel}>
+        <WrappedExpansionPanel className={classes.expansionPanel} id='corsConfiguration'>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography className={classes.subHeading} variant='h6'>
                     <FormattedMessage
@@ -316,7 +316,7 @@ export default function CORSConfiguration(props) {
                     </Grid>
                 </Grid>
             </ExpansionPanelDetails>
-        </ExpansionPanel>
+        </WrappedExpansionPanel>
     );
 }
 

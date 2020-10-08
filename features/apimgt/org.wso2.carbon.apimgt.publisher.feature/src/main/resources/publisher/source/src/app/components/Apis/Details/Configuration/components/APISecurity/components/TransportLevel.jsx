@@ -22,7 +22,6 @@ import Grid from '@material-ui/core/Grid';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -37,6 +36,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import WrappedExpansionPanel from 'AppComponents/Shared/WrappedExpansionPanel';
 import Transports from 'AppComponents/Apis/Details/Configuration/components/Transports.jsx';
 
 import {
@@ -175,7 +175,7 @@ function TransportLevel(props) {
     return (
         <>
             <Grid item xs={12}>
-                <ExpansionPanel className={classes.expansionPanel}>
+                <WrappedExpansionPanel className={classes.expansionPanel} id='transportLevel'>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography className={classes.subHeading} variant='h6'>
                             <FormattedMessage
@@ -262,7 +262,7 @@ function TransportLevel(props) {
                             />
                         )}
                     </ExpansionPanelDetails>
-                </ExpansionPanel>
+                </WrappedExpansionPanel>
             </Grid>
         </>
     );
