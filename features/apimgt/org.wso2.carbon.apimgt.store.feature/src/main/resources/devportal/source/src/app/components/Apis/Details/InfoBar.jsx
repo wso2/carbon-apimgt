@@ -658,7 +658,9 @@ class InfoBar extends React.Component {
                                                 </TableCell>
                                                 <TableCell>
                                                     {apisTagsWithoutGroups.map((tag) => (
-                                                        <Chip label={tag} className={classes.chip} key={tag} />
+                                                        <Link to={`/apis?offset=0&query=tag:${tag}`}>
+                                                            <Chip label={tag} className={classes.chip} key={tag} style={{cursor: 'pointer'}}/>
+                                                        </Link>
                                                     ))}
                                                 </TableCell>
                                             </TableRow>
