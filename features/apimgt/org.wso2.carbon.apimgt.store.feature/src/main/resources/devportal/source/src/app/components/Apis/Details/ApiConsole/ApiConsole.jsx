@@ -36,6 +36,7 @@ import Application from '../../../../data/Application';
 
 const fileDownload = require('js-file-download');
 const Converter = require('openapi-to-postmanv2');
+const postman2 = require('swagger2-postman2-converter');
 /**
  * @inheritdoc
  * @param {*} theme theme
@@ -95,7 +96,6 @@ class ApiConsole extends React.Component {
             productionApiKey: '',
             sandboxApiKey: '',
             selectedKeyManager: 'Resident Key Manager',
-            open: false,
 
         };
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
@@ -285,34 +285,20 @@ class ApiConsole extends React.Component {
         this.setState({ keys });
     }
 
-    handleClickOpen = () => {
-        this.setState({
-            open: true,
-        });
-    }
-
-    handleClose = () => {
-        this.setState({
-
-            open: false,
-        });
-    }
     /**
      * Converting an OpenAPI file to a postman collection
      * @memberof ApiConsole
      */
     converttopostman(fr) {
-        const postman2 = require("swagger2-postman2-converter");
         Converter.convert({ type: 'string', data: fr },
             {}, (err, conversionResult) => {
                 if (!conversionResult.result) {
-                    var collection = postman2.convert(fr);
-                    //console.log(collection);
+                    const collection = postman2.convert(fr);
+                    // console.log(collection);
                     fileDownload(
                         JSON.stringify(collection),
-                        "postman collection",
+                        'postman collection',
                     );
-
                 } else {
                     // console.log(
                     //     'The collection object is: ',
@@ -511,7 +497,7 @@ class ApiConsole extends React.Component {
                     <Grid container>
                         <Grid item xs={8} />
                         <Grid xs={2} item>
-                            <Button size='small' onClick={() => this.converttopostman(downloadSwagger)} >
+                            <Button size='small' onClick={() => this.converttopostman(downloadSwagger)}>
                                 <CloudDownloadRounded className={classes.buttonIcon} />
                                 <FormattedMessage
                                     id='Apis.Details.APIConsole.APIConsole.download.postman'

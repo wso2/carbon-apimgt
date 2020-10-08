@@ -71,7 +71,6 @@
         "react-tap-event-plugin": "^2.0.1",
         "swagger-client": "^3.10.0",
         "swagger-ui": "^3.25.0",
-        "swagger-ui-react": "^3.25.0",
         "swagger2-postman2-converter": "0.0.3"
     },
     "devDependencies": {
@@ -114,6 +113,7 @@
         "rimraf": "^3.0.2",
         "sinon": "^7.2.2",
         "style-loader": "^0.18.1",
+        "swagger2-postman2-converter": "0.0.3",
         "unused-files-webpack-plugin": "^3.4.0",
         "webpack": "v4.28.4",
         "webpack-bundle-analyzer": "^3.2.0",
