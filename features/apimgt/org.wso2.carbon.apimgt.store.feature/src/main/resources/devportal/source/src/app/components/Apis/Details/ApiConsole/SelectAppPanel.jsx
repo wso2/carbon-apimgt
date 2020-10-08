@@ -100,8 +100,10 @@ const SelectAppPanel = (props) => {
                         onChange={handleSelectPanelChange}
                         row
                     >
-                        {(subscriptions != null && subscriptions.find((sub) => sub.applicationId
-                                === selectedApplication).status === 'UNBLOCKED')
+                        {(subscriptions !== null && (subscriptions.find((sub) => sub.applicationId
+                                === selectedApplication).status === 'UNBLOCKED'
+                                || subscriptions.find((sub) => sub.applicationId
+                                === selectedApplication).status === 'TIER_UPDATE_PENDING'))
                                 && (
                                     <FormControlLabel
                                         value='PRODUCTION'
