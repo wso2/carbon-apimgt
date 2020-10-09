@@ -280,7 +280,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                         || "ON_HOLD".equals(subscribedAPI.getSubStatus())
                         || "REJECTED".equals(subscribedAPI.getSubStatus())) {
                     RestApiUtil.handleBadRequest(
-                            "Cannot update subscriptions with provided status", log);
+                            "Cannot update subscriptions with provided or existing status", log);
                     return null;
                 }
             } else {
