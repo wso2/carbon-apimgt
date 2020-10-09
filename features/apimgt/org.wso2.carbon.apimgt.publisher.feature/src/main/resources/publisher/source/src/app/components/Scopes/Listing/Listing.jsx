@@ -373,6 +373,7 @@ class Listing extends React.Component {
             download: false,
             viewColumns: false,
             customToolbar: false,
+            rowsPerPageOptions: [5, 10, 25, 50, 100],
         };
 
         if (!scopes) {
