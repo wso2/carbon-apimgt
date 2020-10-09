@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
@@ -270,10 +271,14 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             String currentThrottlingPolicy = body.getThrottlingPolicy();
             String requestedThrottlingPolicy = body.getRequestedThrottlingPolicy();
 
+            SubscribedAPI subscribedAPI = ApiMgtDAO.getInstance()
+                    .getSubscriptionByUUID(subscriptionId);
             //Check whether the subscription status is not empty and also not blocked
-            if (body.getStatus() != null) {
+            if (body.getStatus() != null && subscribedAPI != null) {
                 if ("BLOCKED".equals(body.getStatus().value()) || "ON_HOLD".equals(body.getStatus().value())
-                        || "REJECTED".equals(body.getStatus().value())) {
+                        || "REJECTED".equals(body.getStatus().value()) || "BLOCKED".equals(subscribedAPI.getSubStatus())
+                        || "ON_HOLD".equals(subscribedAPI.getSubStatus())
+                        || "REJECTED".equals(subscribedAPI.getSubStatus())) {
                     RestApiUtil.handleBadRequest(
                             "Cannot update subscriptions with provided status", log);
                     return null;
