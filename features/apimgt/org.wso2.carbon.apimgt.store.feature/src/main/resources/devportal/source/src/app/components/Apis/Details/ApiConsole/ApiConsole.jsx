@@ -35,8 +35,8 @@ import TryOutController from './TryOutController';
 import Application from '../../../../data/Application';
 
 const fileDownload = require('js-file-download');
-const Converter = require('openapi-to-postmanv2');
-const postman2 = require('swagger2-postman2-converter');
+const openapiToPostman = require('openapi-to-postmanv2');
+const swaggerToPostman = require('swagger2-postman2-converter');
 /**
  * @inheritdoc
  * @param {*} theme theme
@@ -112,7 +112,7 @@ class ApiConsole extends React.Component {
         this.updateAccessToken = this.updateAccessToken.bind(this);
         this.setProductionApiKey = this.setProductionApiKey.bind(this);
         this.setSandboxApiKey = this.setSandboxApiKey.bind(this);
-        this.converttopostman = this.converttopostman.bind(this);
+        this.converttopostman = this.convertToPostman.bind(this);
     }
     /**
      * @memberof ApiConsole
@@ -289,21 +289,16 @@ class ApiConsole extends React.Component {
      * Converting an OpenAPI file to a postman collection
      * @memberof ApiConsole
      */
-    converttopostman(fr) {
-        Converter.convert({ type: 'string', data: fr },
+    convertToPostman(fr) {
+        openapiToPostman.convert({ type: 'string', data: fr },
             {}, (err, conversionResult) => {
                 if (!conversionResult.result) {
-                    const collection = postman2.convert(fr);
-                    // console.log(collection);
+                    const collection = swaggerToPostman.convert(fr);
                     fileDownload(
                         JSON.stringify(collection),
                         'postman collection',
                     );
                 } else {
-                    // console.log(
-                    //     'The collection object is: ',
-                    //     conversionResult.output[0].data,
-                    // );
                     fileDownload(
                         JSON.stringify(conversionResult.output[0].data),
                         'postman collection',
@@ -495,9 +490,9 @@ class ApiConsole extends React.Component {
                     />
 
                     <Grid container>
-                        <Grid item xs={8} />
-                        <Grid xs={2} item>
-                            <Button size='small' onClick={() => this.converttopostman(downloadSwagger)}>
+                        <Grid item xs={9} />
+                        <Grid xs={1} item>
+                            <Button size='small' onClick={() => this.convertToPostman(downloadSwagger)}>
                                 <CloudDownloadRounded className={classes.buttonIcon} />
                                 <FormattedMessage
                                     id='Apis.Details.APIConsole.APIConsole.download.postman'
