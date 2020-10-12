@@ -182,7 +182,7 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.api.PersistenceManager;
+import org.wso2.carbon.apimgt.api.APIPersistence;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -237,13 +237,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
-    private PersistenceManager persistenceManager;
+    private APIPersistence apiPersistence;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
         certificateManager = CertificateManagerImpl.getInstance();
-        persistenceManager = RegistryPersistenceManager.getInstance(username);
+        apiPersistence = RegistryPersistenceManager.getInstance(username);
     }
 
     protected String getUserNameWithoutChange() {
@@ -4804,7 +4804,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiStoreSet The APIStores set to which need to publish API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to update subscription status
      */
-
+    // NO REG USAGE
     private void updateAPIInExternalAPIStores(API api, Set<APIStore> apiStoreSet)
             throws APIManagementException {
         if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
