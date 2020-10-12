@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface APIPersistence {
-    void updateWsdlFromResourceFile();
-
     // ======= API update   =======
     API getAPI(String apiId);
 
@@ -32,14 +30,16 @@ public interface APIPersistence {
     void createAPI(API api);
 
     // ======= get APIs ======== (search apis >> identify differences of these apis)
-
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization org, int start, int end,
+    //  requestedTenantDomain
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start, int end,
                                     boolean limitAttributes);
 
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization org, int start, int end,
+    //  requestedTenantDomain
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start, int end,
                                     boolean limitAttributes, boolean isPublisherListing);
 
-    Map<String, Object> searchPaginatedAPIsByContent(Organization org, String searchQuery, int start, int end,
+    //  requestedTenantDomain
+    Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery, int start, int end,
                                     boolean limitAttributes);
 
     // ======= GraphQL =======
@@ -54,15 +54,17 @@ public interface APIPersistence {
 
 
     // ======= Documentation  =======
-    Documentation getDocumentation(String docId, Organization org);
+    //  requestedTenantDomain
+    Documentation getDocumentation(String docId, Organization requestedOrg);
 
     //APIUtil function getDocument(..) will need to use this
-    Map<String, Object> getDocumentContent(String userName, Organization org);
+    //  requestedTenantDomain
+    Map<String, Object> getDocumentContent(String userName, Organization requestedOrg);
 
     /**
      * Removes a given documentation
      *
-     * @param apiOrProductId    Identifier (Identifier of API or APIProduct)
+     * @param apiOrProductId    ID of API or APIProduct
      * @param docId ID of the doc
      */
     void removeDocumentation(String apiOrProductId, String docId);
@@ -70,7 +72,7 @@ public interface APIPersistence {
     /**
      * Updates a given documentation
      *
-     * @param apiId         APIIdentifier
+     * @param apiId         Id of API
      * @param documentation Documentation
      */
     void updateDocumentation(String apiId, Documentation documentation);
@@ -78,10 +80,10 @@ public interface APIPersistence {
     /**
      * Returns a list of documentation attached to a particular API/API Product
      *
-     * @param apiId Identifier
-     * @return List<Documentation>
+     * @param apiOrProductId        Id of API/API Product
+     * @return List<Documentation>  List of Documentation of the API or Product
      */
-    List<Documentation> getAllDocumentation(String apiId);
+    List<Documentation> getAllDocumentation(String apiOrProductId);
 
     /**
      * Add documentation to an API
@@ -98,12 +100,13 @@ public interface APIPersistence {
      * @param requestedOrg Name of the organization the API consists
      * @return API of the provided artifact id
      */
+    //  requestedTenantDomain
     API getLightweightAPIByUUID(String uuid, String requestedOrg);
 
     /*
      * This method returns the current lifecycle state and all other possible lifecycle states of an API.
      *
-     * @param apiId APIIdentifier
+     * @param apiId Id of API
      * @return Map<String,Object> a map with lifecycle data
      */
     Map<String, Object> getAPILifeCycleData(String apiId);
@@ -124,7 +127,7 @@ public interface APIPersistence {
     /**
      * Returns a list of API specific mediation policies
      *
-     * @param apiId API identifier
+     * @param apiId API Id of API
      * @return List of api specific mediation objects available
      */
     List<Mediation> getAllApiSpecificMediationPolicies(String apiId);
@@ -132,7 +135,7 @@ public interface APIPersistence {
     /**
      * Returns Mediation policy specified by given identifiers
      *
-     * @param apiOrProductId          API or Product ID
+     * @param apiOrProductId          Id of API/API Product
      * @param mediationPolicyUUID mediation policy identifier
      * @return Mediation object contains details of the mediation policy or null
      */
@@ -190,7 +193,7 @@ public interface APIPersistence {
     /**
      * Checks the api is a soap to rest converted one or a soap pass through
      *
-     * @param apiOrProductId API identifier
+     * @param apiOrProductId Id of API/API Product
      * @return true if the api is soap to rest converted one. false if the user have a pass through
      */
     boolean isSOAPToRESTApi(String apiOrProductId);
@@ -213,7 +216,7 @@ public interface APIPersistence {
     /**
      * This method returns swagger definition json of a given api/api product
      *
-     * @param apiOrProductId api/api product identifier
+     * @param apiOrProductId Id of API/API Product
      * @return api/api product swagger definition json as json string
      */
     String getOASDefinitionOfAPI(String apiOrProductId);
@@ -248,7 +251,7 @@ public interface APIPersistence {
     /**
      * Checks whether the given document already exists for the given api/product
      *
-     * @param apiOrProductId API/Product Identifier
+     * @param apiOrProductId Id of API/Product
      * @param docName    Name of the document
      * @return true if document already exists for the given api/product
      */
@@ -258,7 +261,7 @@ public interface APIPersistence {
     /**
      * Returns the wsdl content of the given API
      *
-     * @param apiId Api Identifier
+     * @param apiId Id of API
      * @return wsdl content matching if exist, else null
      */
     ResourceFile getWSDL(String apiId);
@@ -304,10 +307,11 @@ public interface APIPersistence {
      * Get API Product by registry artifact id
      *
      * @param uuid                  API Product uuid
-     * @param org tenantDomain that the API Product exists
+     * @param requestedOrg tenantDomain that the API Product exists
      * @return                      API Product of the provided artifact id
      */
-    APIProduct getAPIProductbyUUID(String uuid, Organization org);
+    //  requestedTenantDomain
+    APIProduct getAPIProductbyUUID(String uuid, Organization requestedOrg);
 
     /**
      * Get API Product by product identifier
@@ -327,8 +331,16 @@ public interface APIPersistence {
      * Get an api product documentation by artifact Id
      *
      * @param docId                 artifact id of the document
-     * @param org tenant domain of the registry where the artifact is located
+     * @param requestedOrg tenant domain of the registry where the artifact is located
      * @return Document object which represents the artifact id
      */
-    Documentation getProductDocumentation(String productId, String docId, Organization org);
+    // requestedTenantDomain
+    Documentation getProductDocumentation(String productId, String docId, Organization requestedOrg);
+
+    /**
+     * Check whether an API with given identifiers (name, version, provider exists)
+     * @param apiIdentifier Identifier of API
+     * @return
+     */
+    boolean isApiExists(APIIdentifier apiIdentifier);
 }
