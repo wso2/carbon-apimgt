@@ -153,7 +153,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
     public Map<String, String> populateCustomClaims(TokenValidationContext validationContext)
             throws APIManagementException {
 
-        Map<String, String> customClaims;
+        Map<String, String> customClaims = new HashMap<String, String>();
         Map<String, Object> properties = new HashMap<String, Object>();
 
         String accessToken = validationContext.getAccessToken();
@@ -165,18 +165,18 @@ public class JWTGenerator extends AbstractJWTGenerator {
         int tenantId = APIUtil.getTenantId(username);
 
         String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
+                .getAPIManagerConfiguration().getJwtConfigurationDto().getConsumerDialectUri();
         if (!StringUtils.isEmpty(dialectURI)) {
             properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
+            String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
+            KeyManager keymanager = KeyManagerHolder.getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId),
+                    keymanagerName);
+            customClaims = keymanager.getUserClaims(username, properties);
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved claims :" + customClaims);
+            }
         }
-        String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
-        KeyManager keymanager = KeyManagerHolder.getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId),
-                keymanagerName);
-        customClaims = keymanager.getUserClaims(username, properties);
-        if (log.isDebugEnabled()) {
-            log.debug("Retrieved claims :" + customClaims);
-        }
-
+        
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {
             customClaims.putAll(claimsRetriever.getClaims(username));
