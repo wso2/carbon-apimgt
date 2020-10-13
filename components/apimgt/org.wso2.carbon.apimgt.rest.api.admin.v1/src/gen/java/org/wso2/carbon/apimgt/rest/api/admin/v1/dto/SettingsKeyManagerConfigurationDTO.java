@@ -22,7 +22,7 @@ public class SettingsKeyManagerConfigurationDTO   {
     private String displayName = null;
     private String defaultConsumerKeyClaim = null;
     private String defaultScopesClaim = null;
-    private List<KeyManagerConfigurationDTO> configurations = new ArrayList<>();
+    private List<KeyManagerConfigurationDTO> configurations = new ArrayList<KeyManagerConfigurationDTO>();
 
   /**
    **/

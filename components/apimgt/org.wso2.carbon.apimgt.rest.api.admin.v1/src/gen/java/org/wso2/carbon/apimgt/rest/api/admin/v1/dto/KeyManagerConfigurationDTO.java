@@ -25,7 +25,7 @@ public class KeyManagerConfigurationDTO   {
     private Boolean multiple = null;
     private String tooltip = null;
     private Object _default = null;
-    private List<Object> values = new ArrayList<>();
+    private List<Object> values = new ArrayList<Object>();
 
   /**
    **/

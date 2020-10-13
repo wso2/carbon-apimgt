@@ -29,7 +29,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     private MonetizationInfoDTO monetization = null;
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
-    private List<CustomAttributeDTO> customAttributes = new ArrayList<>();
+    private List<CustomAttributeDTO> customAttributes = new ArrayList<CustomAttributeDTO>();
     private Boolean stopOnQuotaReach = false;
     private String billingPlan = null;
     private SubscriptionThrottlePolicyPermissionDTO permissions = null;

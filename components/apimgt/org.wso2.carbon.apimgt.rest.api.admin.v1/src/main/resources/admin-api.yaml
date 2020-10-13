@@ -2013,6 +2013,7 @@ paths:
 ######################################################
   /export/applications:
 
+
     get:
       security:
         - OAuth2Security:
@@ -4301,12 +4302,15 @@ definitions:
         type: string
         description: Name of policy
         example: Policy1
+        maxLength: 60
+        minLength: 1
       displayName:
         type: string
         description: Display name of the policy
       description:
         type: string
         description: Description of the policy
+        maxLength: 1024
       isDeployed:
         type: boolean
         default: false
@@ -4811,6 +4815,12 @@ definitions:
       conditionType:
         type: string
         description: Type of the blocking condition
+        enum:
+          - API
+          - APPLICATION
+          - IP
+          - IPRANGE
+          - USER
         example: IP
       conditionValue:
         type: object
@@ -5054,9 +5064,12 @@ definitions:
       name:
         type: string
         example: "Public"
+        minLength: 1
+        maxLength: 255
       description:
         type: string
         example: "Label to use for public Gateway"
+        maxLength: 1024
       accessUrls:
         type: array
         items:
@@ -5193,9 +5206,12 @@ definitions:
       name:
         type: string
         example: "Finance"
+        minLength: 1
+        maxLength: 255
       description:
         type: string
         example: "Finance related APIs"
+        maxLength: 1024
       numberOfAPIs:
         type: integer
         example: 1
@@ -5339,17 +5355,23 @@ definitions:
       name:
         type: string
         example: "WSO2 IS"
+        minLength: 0
+        maxLength: 100
       displayName:
         type: string
         description: |
           display name of Key Manager to  show in UI
         example: KeyManager1
+        maxLength: 100
       type:
         type: string
         example: "IS"
+        minLength: 0
+        maxLength: 45
       description:
         type: string
         example: "This is a key manager for Developers"
+        maxLength: 256
       wellKnownEndpoint:
         description: |
           Well-Known Endpoint of Identity Provider.
@@ -5600,6 +5622,7 @@ definitions:
         type: array
         items:
           type: string
+          format: email
           example: "admin@wso2.com"
 
   #-----------------------------------------------------
@@ -5632,6 +5655,7 @@ definitions:
         example: "urn:uuid:1ed6d2de-29df-4fed-a96a-46d2329dce65"
       email:
         type: string
+
         description: email
         example: "abc@.com"
 

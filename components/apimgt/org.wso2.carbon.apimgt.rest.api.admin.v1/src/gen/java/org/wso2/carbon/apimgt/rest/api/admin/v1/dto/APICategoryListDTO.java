@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class APICategoryListDTO   {
   
     private Integer count = null;
-    private List<APICategoryDTO> list = new ArrayList<>();
+    private List<APICategoryDTO> list = new ArrayList<APICategoryDTO>();
 
   /**
    * Number of API categories returned. 

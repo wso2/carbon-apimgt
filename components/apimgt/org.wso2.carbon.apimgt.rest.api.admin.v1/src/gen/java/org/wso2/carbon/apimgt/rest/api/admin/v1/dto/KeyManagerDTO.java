@@ -35,17 +35,17 @@ public class KeyManagerDTO   {
     private KeyManagerCertificatesDTO certificates = null;
     private String issuer = null;
     private String scopeManagementEndpoint = null;
-    private List<String> availableGrantTypes = new ArrayList<>();
+    private List<String> availableGrantTypes = new ArrayList<String>();
     private Boolean enableTokenGeneration = null;
     private Boolean enableTokenEncryption = false;
     private Boolean enableTokenHashing = false;
     private Boolean enableMapOAuthConsumerApps = false;
     private Boolean enableOAuthAppCreation = false;
     private Boolean enableSelfValidationJWT = true;
-    private List<ClaimMappingEntryDTO> claimMapping = new ArrayList<>();
+    private List<ClaimMappingEntryDTO> claimMapping = new ArrayList<ClaimMappingEntryDTO>();
     private String consumerKeyClaim = null;
     private String scopesClaim = null;
-    private List<TokenValidationDTO> tokenValidation = new ArrayList<>();
+    private List<TokenValidationDTO> tokenValidation = new ArrayList<TokenValidationDTO>();
     private Boolean enabled = null;
     private Object additionalProperties = null;
 
@@ -77,7 +77,7 @@ public class KeyManagerDTO   {
   @ApiModelProperty(example = "WSO2 IS", required = true, value = "")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=0,max=100)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -95,7 +95,7 @@ public class KeyManagerDTO   {
   
   @ApiModelProperty(example = "KeyManager1", value = "display name of Key Manager to  show in UI ")
   @JsonProperty("displayName")
-  public String getDisplayName() {
+ @Size(max=100)  public String getDisplayName() {
     return displayName;
   }
   public void setDisplayName(String displayName) {
@@ -113,7 +113,7 @@ public class KeyManagerDTO   {
   @ApiModelProperty(example = "IS", required = true, value = "")
   @JsonProperty("type")
   @NotNull
-  public String getType() {
+ @Size(min=0,max=45)  public String getType() {
     return type;
   }
   public void setType(String type) {
@@ -130,7 +130,7 @@ public class KeyManagerDTO   {
   
   @ApiModelProperty(example = "This is a key manager for Developers", value = "")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=256)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {

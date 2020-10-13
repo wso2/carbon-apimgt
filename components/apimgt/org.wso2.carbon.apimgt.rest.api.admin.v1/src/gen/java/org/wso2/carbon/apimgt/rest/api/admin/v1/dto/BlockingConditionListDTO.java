@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class BlockingConditionListDTO   {
   
     private Integer count = null;
-    private List<BlockingConditionDTO> list = new ArrayList<>();
+    private List<BlockingConditionDTO> list = new ArrayList<BlockingConditionDTO>();
 
   /**
    * Number of Blocking Conditions returned. 

@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ApplicationThrottlePolicyListDTO   {
   
     private Integer count = null;
-    private List<ApplicationThrottlePolicyDTO> list = new ArrayList<>();
+    private List<ApplicationThrottlePolicyDTO> list = new ArrayList<ApplicationThrottlePolicyDTO>();
 
   /**
    * Number of Application Throttling Policies returned. 

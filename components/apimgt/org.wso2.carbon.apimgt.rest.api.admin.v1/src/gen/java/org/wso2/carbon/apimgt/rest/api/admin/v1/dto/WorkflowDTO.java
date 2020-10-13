@@ -52,7 +52,7 @@ public enum StatusEnum {
 }
 
     private StatusEnum status = null;
-    private Map<String, String> attributes = new HashMap<>();
+    private Map<String, String> attributes = new HashMap<String, String>();
     private String description = null;
 
   /**

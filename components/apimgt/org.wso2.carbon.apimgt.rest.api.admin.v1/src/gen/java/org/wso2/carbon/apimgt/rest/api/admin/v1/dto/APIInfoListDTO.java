@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class APIInfoListDTO   {
   
     private Integer count = null;
-    private List<APIInfoDTO> list = new ArrayList<>();
+    private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
 
   /**
    * Number of API Info objects returned. 

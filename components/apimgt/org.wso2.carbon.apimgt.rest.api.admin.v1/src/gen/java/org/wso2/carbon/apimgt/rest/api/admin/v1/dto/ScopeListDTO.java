@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ScopeListDTO   {
   
     private Integer count = null;
-    private List<ScopeDTO> list = new ArrayList<>();
+    private List<ScopeDTO> list = new ArrayList<ScopeDTO>();
 
   /**
    * Number of scopes available for tenant. 

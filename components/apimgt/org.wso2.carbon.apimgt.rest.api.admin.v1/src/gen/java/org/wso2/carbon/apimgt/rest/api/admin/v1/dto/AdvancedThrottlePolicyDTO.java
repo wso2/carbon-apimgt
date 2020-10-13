@@ -21,7 +21,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class AdvancedThrottlePolicyDTO extends ThrottlePolicyDTO  {
   
     private ThrottleLimitDTO defaultLimit = null;
-    private List<ConditionalGroupDTO> conditionalGroups = new ArrayList<>();
+    private List<ConditionalGroupDTO> conditionalGroups = new ArrayList<ConditionalGroupDTO>();
 
   /**
    **/

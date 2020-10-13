@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class RoleAliasListDTO   {
   
     private Integer count = null;
-    private List<RoleAliasDTO> list = new ArrayList<>();
+    private List<RoleAliasDTO> list = new ArrayList<RoleAliasDTO>();
 
   /**
    * The number of role aliases

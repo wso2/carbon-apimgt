@@ -21,7 +21,7 @@ public class ApplicationListDTO   {
     private Integer count = null;
     private String next = null;
     private String previous = null;
-    private List<ApplicationInfoDTO> list = new ArrayList<>();
+    private List<ApplicationInfoDTO> list = new ArrayList<ApplicationInfoDTO>();
 
   /**
    * Number of applications returned. 

@@ -51,7 +51,7 @@ public enum PermissionTypeEnum {
 }
 
     private PermissionTypeEnum permissionType = null;
-    private List<String> roles = new ArrayList<>();
+    private List<String> roles = new ArrayList<String>();
 
   /**
    **/

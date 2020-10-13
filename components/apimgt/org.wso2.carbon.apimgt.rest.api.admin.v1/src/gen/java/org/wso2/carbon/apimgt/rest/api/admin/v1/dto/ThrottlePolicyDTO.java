@@ -53,7 +53,7 @@ public class ThrottlePolicyDTO   {
   @ApiModelProperty(example = "Policy1", required = true, value = "Name of policy")
   @JsonProperty("policyName")
   @NotNull
-  public String getPolicyName() {
+ @Size(min=1,max=60)  public String getPolicyName() {
     return policyName;
   }
   public void setPolicyName(String policyName) {
@@ -89,7 +89,7 @@ public class ThrottlePolicyDTO   {
   
   @ApiModelProperty(value = "Description of the policy")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=1024)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {

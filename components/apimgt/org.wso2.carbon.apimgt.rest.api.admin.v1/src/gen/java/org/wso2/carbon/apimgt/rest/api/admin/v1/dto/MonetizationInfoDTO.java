@@ -52,7 +52,7 @@ public enum MonetizationPlanEnum {
 }
 
     private MonetizationPlanEnum monetizationPlan = null;
-    private Map<String, String> properties = new HashMap<>();
+    private Map<String, String> properties = new HashMap<String, String>();
 
   /**
    * Flag to indicate the monetization plan

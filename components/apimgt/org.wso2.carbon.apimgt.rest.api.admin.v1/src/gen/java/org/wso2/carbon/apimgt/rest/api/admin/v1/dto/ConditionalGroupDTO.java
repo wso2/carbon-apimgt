@@ -20,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ConditionalGroupDTO   {
   
     private String description = null;
-    private List<ThrottleConditionDTO> conditions = new ArrayList<>();
+    private List<ThrottleConditionDTO> conditions = new ArrayList<ThrottleConditionDTO>();
     private ThrottleLimitDTO limit = null;
 
   /**

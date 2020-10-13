@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class RoleAliasDTO   {
   
     private String role = null;
-    private List<String> aliases = new ArrayList<>();
+    private List<String> aliases = new ArrayList<String>();
 
   /**
    * The original role

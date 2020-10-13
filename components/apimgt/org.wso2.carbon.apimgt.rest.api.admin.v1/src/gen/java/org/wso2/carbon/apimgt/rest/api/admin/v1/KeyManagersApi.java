@@ -50,7 +50,9 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     }, tags={ "Key Manager (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. KeyManagers returned ", response = KeyManagerWellKnownResponseDTO.class) })
-    public Response keyManagersDiscoverPost(@Multipart(value = "url", required = false)  String url, @Multipart(value = "type", required = false)  String type) throws APIManagementException{
+    public Response keyManagersDiscoverPost(@Multipart(value = "url", required = false)  
+  String url, @Multipart(value = "type", required = false)  
+  String type) throws APIManagementException{
         return delegate.keyManagersDiscoverPost(url, type, securityContext);
     }
 

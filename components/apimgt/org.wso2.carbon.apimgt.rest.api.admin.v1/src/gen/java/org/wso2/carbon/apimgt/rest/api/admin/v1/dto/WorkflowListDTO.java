@@ -21,7 +21,7 @@ public class WorkflowListDTO   {
     private Integer count = null;
     private String next = null;
     private String previous = null;
-    private List<WorkflowInfoDTO> list = new ArrayList<>();
+    private List<WorkflowInfoDTO> list = new ArrayList<WorkflowInfoDTO>();
 
   /**
    * Number of workflow processes returned. 

@@ -18,8 +18,8 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class SettingsDTO   {
   
-    private List<String> scopes = new ArrayList<>();
-    private List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration = new ArrayList<>();
+    private List<String> scopes = new ArrayList<String>();
+    private List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration = new ArrayList<SettingsKeyManagerConfigurationDTO>();
     private Boolean analyticsEnabled = null;
 
   /**

@@ -20,7 +20,7 @@ public class ScopeDTO   {
     private String tag = null;
     private String name = null;
     private String description = null;
-    private List<String> roles = new ArrayList<>();
+    private List<String> roles = new ArrayList<String>();
 
   /**
    * Portal name. 

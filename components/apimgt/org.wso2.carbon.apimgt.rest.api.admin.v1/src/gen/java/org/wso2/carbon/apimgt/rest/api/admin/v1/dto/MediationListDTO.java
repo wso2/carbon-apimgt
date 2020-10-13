@@ -21,7 +21,7 @@ public class MediationListDTO   {
     private Integer count = null;
     private String next = null;
     private String previous = null;
-    private List<MediationInfoDTO> list = new ArrayList<>();
+    private List<MediationInfoDTO> list = new ArrayList<MediationInfoDTO>();
 
   /**
    * Number of mediation sequences returned. 

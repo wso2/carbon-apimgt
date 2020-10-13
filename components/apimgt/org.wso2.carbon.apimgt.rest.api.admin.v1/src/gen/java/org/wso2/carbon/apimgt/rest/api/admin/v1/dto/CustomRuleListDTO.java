@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class CustomRuleListDTO   {
   
     private Integer count = null;
-    private List<CustomRuleDTO> list = new ArrayList<>();
+    private List<CustomRuleDTO> list = new ArrayList<CustomRuleDTO>();
 
   /**
    * Number of Custom Rules returned. 

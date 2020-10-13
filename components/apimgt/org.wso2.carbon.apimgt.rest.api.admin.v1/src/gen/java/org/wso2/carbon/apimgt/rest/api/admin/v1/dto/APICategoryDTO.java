@@ -48,7 +48,7 @@ public class APICategoryDTO   {
   @ApiModelProperty(example = "Finance", required = true, value = "")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=255)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -65,7 +65,7 @@ public class APICategoryDTO   {
   
   @ApiModelProperty(example = "Finance related APIs", value = "")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=1024)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {

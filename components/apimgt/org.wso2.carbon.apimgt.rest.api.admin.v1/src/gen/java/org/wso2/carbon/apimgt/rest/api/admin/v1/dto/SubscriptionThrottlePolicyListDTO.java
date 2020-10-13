@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class SubscriptionThrottlePolicyListDTO   {
   
     private Integer count = null;
-    private List<SubscriptionThrottlePolicyDTO> list = new ArrayList<>();
+    private List<SubscriptionThrottlePolicyDTO> list = new ArrayList<SubscriptionThrottlePolicyDTO>();
 
   /**
    * Number of Subscription Throttling Policies returned. 

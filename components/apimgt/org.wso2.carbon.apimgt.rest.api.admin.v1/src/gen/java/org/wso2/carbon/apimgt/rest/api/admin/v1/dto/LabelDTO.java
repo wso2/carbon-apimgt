@@ -20,7 +20,7 @@ public class LabelDTO   {
     private String id = null;
     private String name = null;
     private String description = null;
-    private List<String> accessUrls = new ArrayList<>();
+    private List<String> accessUrls = new ArrayList<String>();
 
   /**
    **/
@@ -50,7 +50,7 @@ public class LabelDTO   {
   @ApiModelProperty(example = "Public", required = true, value = "")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=255)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -67,7 +67,7 @@ public class LabelDTO   {
   
   @ApiModelProperty(example = "Label to use for public Gateway", value = "")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=1024)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {

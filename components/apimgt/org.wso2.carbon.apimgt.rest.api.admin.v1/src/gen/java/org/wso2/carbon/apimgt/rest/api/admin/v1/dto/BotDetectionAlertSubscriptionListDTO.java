@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class BotDetectionAlertSubscriptionListDTO   {
   
     private Integer count = null;
-    private List<BotDetectionAlertSubscriptionDTO> list = new ArrayList<>();
+    private List<BotDetectionAlertSubscriptionDTO> list = new ArrayList<BotDetectionAlertSubscriptionDTO>();
 
   /**
    * Number of Bot Detection Alert Subscriptions returned. 

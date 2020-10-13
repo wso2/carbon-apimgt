@@ -190,8 +190,10 @@
                                 <apiPackage>org.wso2.carbon.apimgt.rest.api.admin.v1</apiPackage>
                                 <modelPackage>org.wso2.carbon.apimgt.rest.api.admin.v1.dto</modelPackage>
                                 <sourceFolder>src/gen/java</sourceFolder>
-                                <dateLibrary>java8</dateLibrary>
+                                <dateLibrary>custom</dateLibrary>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                                <useBeanValidation>true</useBeanValidation>
+                                <performBeanValidation>true</performBeanValidation>
                             </configOptions>
                             <output>.</output>
                             <templateDirectory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates</templateDirectory>
