@@ -27,6 +27,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCacheKey;
@@ -64,6 +65,7 @@ public class DefaultClaimsRetrieverTestCase {
     private UserRealm userRealm = Mockito.mock(UserRealm.class);
     private ClaimManager claimManager = Mockito.mock(ClaimManager.class);
     private UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
+    private JWTConfigurationDto jwtConfigurationDto = Mockito.mock(JWTConfigurationDto.class);
 
     @Before
     public void setup() throws UserStoreException {
@@ -72,6 +74,7 @@ public class DefaultClaimsRetrieverTestCase {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getJwtConfigurationDto()).thenReturn(jwtConfigurationDto);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
                 .thenReturn(apiManagerConfigurationService);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
@@ -83,8 +86,7 @@ public class DefaultClaimsRetrieverTestCase {
     @Test
     public void testInitWhenDialectUrlNotNull() {
 
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.CONSUMER_DIALECT_URI))
-                .thenReturn("http://wso2.org/claims_new");
+        Mockito.when(jwtConfigurationDto.getConsumerDialectUri()).thenReturn("http://wso2.org/claims_new");
         DefaultClaimsRetriever defaultClaimsRetriever = new DefaultClaimsRetriever();
         defaultClaimsRetriever.init();
         String dialectUri = defaultClaimsRetriever.getDialectURI("");
