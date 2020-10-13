@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.persistence;
 
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIPersistence;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
@@ -25,9 +26,10 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.persistence.Persistence;
 import javax.persistence.PersistenceUtil;
 
-public abstract class AbstractRegistryPersistenceManager {
+public abstract class AbstractRegistryPersistenceManager implements APIPersistence {
     protected Registry registry;
     protected UserRegistry configRegistry;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
@@ -86,57 +88,6 @@ public abstract class AbstractRegistryPersistenceManager {
 
     protected void loadTenantRegistry(int apiTenantId) throws RegistryException {
         RegistryPersistenceUtil.loadTenantRegistry(apiTenantId);
-    }
-    // can send this to a super abstract class
-    public API getAPI(APIIdentifier identifier) {
-
-//        String apiPath = RegistryPersistenceUtil.getAPIPath(identifier);
-//        Registry registry;
-//        try {
-//            String apiTenantDomain = RegistryPersistenceUtil.getTenantDomain(identifier);
-//            int apiTenantId = getTenantManager().getTenantId(apiTenantDomain);
-//            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
-//                RegistryPersistenceUtil.loadTenantRegistry(apiTenantId);
-//            }
-//
-//            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
-//                registry = getRegistryService().getGovernanceUserRegistry(
-//                                                getTenantAwareUsername(RegistryPersistenceUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
-//            } else {
-//                registry = this.registry;
-//            }
-//            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-//                                            APIConstants.API_KEY);
-//            Resource apiResource = registry.get(apiPath);
-//            String artifactId = apiResource.getUUID();
-//            if (artifactId == null) {
-//                throw new APIManagementException("artifact id is null for : " + apiPath);
-//            }
-//            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-//
-//            API api = RegistryPersistenceUtil.getAPIForPublishing(apiArtifact, registry);
-//            RegistryPersistenceUtil.updateAPIProductDependencies(api, registry); //USE REG >> NO functionality ATM
-//
-//            //check for API visibility
-//            if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
-//                return api;
-//            }
-//            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
-//                throw new APIManagementException("User " + username + " does not have permission to view API : "
-//                                                + api.getId().getApiName());
-//            }
-//
-//            return api;
-//
-//        } catch (RegistryException e) {
-//            String msg = "Failed to get API from : " + apiPath;
-//            throw new APIManagementException(msg, e);
-//        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-//            String msg = "Failed to get API from : " + apiPath;
-//            throw new APIManagementException(msg, e);
-//        }
-
-        return null;
     }
 
     protected TenantManager getTenantManager() {

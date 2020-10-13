@@ -1,9 +1,19 @@
 package org.wso2.carbon.apimgt.api.model;
 
 public class Organization {
-    String name;
-    String id;
+    String name; // tenant domain
+    int id;
     String type; // Tenant or Org
+
+    public Organization(String name, int id, String type) {
+        this.name = name;
+        this.id = id;
+        this.type = type;
+    }
+
+    public Organization(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -13,11 +23,11 @@ public class Organization {
         this.name = name;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

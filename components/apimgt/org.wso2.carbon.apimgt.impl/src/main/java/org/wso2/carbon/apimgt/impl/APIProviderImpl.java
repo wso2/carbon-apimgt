@@ -59,39 +59,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
-import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.Provider;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.Usage;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
@@ -151,7 +119,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.persistence.RegistryPersistenceManager;
+import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -237,13 +205,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
-    private APIPersistence apiPersistence;
+    private APIPersistence apiPersistenceInstance;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
         certificateManager = CertificateManagerImpl.getInstance();
-        apiPersistence = RegistryPersistenceManager.getInstance(username);
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(username, organization);
+    }
+
+    /**
+     * Get a documentation by artifact Id
+     *
+     * @param docId                 artifact id of the document
+     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @return Document object which represents the artifact id
+     * @throws APIManagementException
+     */
+    @Override
+    public Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
+        return apiPersistenceInstance.getDocumentation(docId, new Organization(requestedTenantDomain));
     }
 
     protected String getUserNameWithoutChange() {

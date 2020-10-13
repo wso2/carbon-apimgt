@@ -385,7 +385,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return results;
     }
 
-
+//     public Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
+//        return null;
+//     }
     /**
      * Returns the set of APIs with the given tag, retrieved from registry
      *

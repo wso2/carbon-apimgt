@@ -7,10 +7,11 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
+import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
-@Component(name = "api.keymgt.component", immediate = true) public class PersistenceManagerComponent {
+@Component(name = "org.wso2.apimgt.persistence.services", immediate = true) public class PersistenceManagerComponent {
 
     private static Log log = LogFactory.getLog(PersistenceManagerComponent.class);
     private ServiceRegistration serviceRegistration = null;
@@ -68,11 +69,11 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
     }
 
     @Reference(
-                                    name = "tenant.registryloader",
-                                    service = org.wso2.carbon.registry.core.service.TenantRegistryLoader.class,
-                                    cardinality = ReferenceCardinality.MANDATORY,
-                                    policy = ReferencePolicy.DYNAMIC,
-                                    unbind = "unsetTenantRegistryLoader")
+        name = "tenant.registryloader",
+        service = org.wso2.carbon.registry.core.service.TenantRegistryLoader.class,
+        cardinality = ReferenceCardinality.MANDATORY,
+        policy = ReferencePolicy.DYNAMIC,
+        unbind = "unsetTenantRegistryLoader")
     protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
         this.tenantRegistryLoader = tenantRegistryLoader;
     }
@@ -83,6 +84,23 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
     public static TenantRegistryLoader getTenantRegistryLoader() {
         return tenantRegistryLoader;
+    }
+
+    @Reference(
+        name = "tenant.indexloader",
+        service = org.wso2.carbon.registry.indexing.service.TenantIndexingLoader.class,
+        cardinality = ReferenceCardinality.MANDATORY,
+        policy = ReferencePolicy.DYNAMIC,
+        unbind = "unsetIndexLoader")
+    protected void setIndexLoader(TenantIndexingLoader indexLoader) {
+        if (indexLoader != null && log.isDebugEnabled()) {
+            log.debug("IndexLoader service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setIndexLoaderService(indexLoader);
+    }
+
+    protected void unsetIndexLoader(TenantIndexingLoader registryService) {
+        ServiceReferenceHolder.getInstance().setIndexLoaderService(null);
     }
 }
 

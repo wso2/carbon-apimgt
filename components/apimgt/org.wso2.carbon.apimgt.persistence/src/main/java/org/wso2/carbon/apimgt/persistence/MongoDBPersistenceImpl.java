@@ -10,14 +10,14 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public class MongoDBPersistenceManager implements APIPersistence {
+public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override public API getAPI(String s) {
         return null;
     }
 
-    @Override public void updateApi(API api) {
-
+    @Override public API updateApi(API api) {
+        return null;
     }
 
     @Override public void updateWsdlFromUrl(String apiId, String wsdlUrl) {

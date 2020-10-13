@@ -12,7 +12,7 @@ public interface APIPersistence {
     // ======= API update   =======
     API getAPI(String apiId);
 
-    void updateApi(API api);
+    API updateApi(API api);
 
     void updateWsdlFromUrl(String apiId, String wsdlUrl);
 
@@ -55,7 +55,7 @@ public interface APIPersistence {
 
     // ======= Documentation  =======
     //  requestedTenantDomain
-    Documentation getDocumentation(String docId, Organization requestedOrg);
+    Documentation getDocumentation(String docId, Organization requestedOrg) throws APIManagementException;
 
     //APIUtil function getDocument(..) will need to use this
     //  requestedTenantDomain
