@@ -5,7 +5,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.8.27-SNAPSHOT</version>
+        <version>6.8.42-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -30,7 +30,8 @@
                         <Import-Package>
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
-                            org.wso2.carbon.governance.lcm.* version="${carbon.governance.version}"
+                            org.wso2.carbon.governance.lcm.* version="${carbon.governance.version}",
+                            org.apache.cxf.jaxrs.ext.multipart.* version="${cxf.version}"
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
@@ -70,6 +71,11 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

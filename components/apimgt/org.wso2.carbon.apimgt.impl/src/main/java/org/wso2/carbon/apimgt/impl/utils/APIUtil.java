@@ -1527,6 +1527,7 @@ public final class APIUtil {
      * @param tenantDomain domain name of the tenant
      * @throws APIManagementException if failed to attach micro-gateway labels
      */
+    // HAS REG USAGE
     public static void attachLabelsToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain)
             throws APIManagementException {
 
@@ -6524,6 +6525,7 @@ public final class APIUtil {
      * @param wsdlURL wsdl url tobe tested
      * @return true if its valid url else fale
      */
+    // NO REG USAGE
     public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
 
         if (wsdlURL != null && !"".equals(wsdlURL)) {
@@ -10921,7 +10923,7 @@ public final class APIUtil {
                 EndpointSecurity productionEndpointSecurity = new EndpointSecurity();
                 productionEndpointSecurity.setEnabled(true);
                 productionEndpointSecurity.setUsername(api.getEndpointUTUsername());
-                productionEndpointSecurity.setPassword(api.getEndpointUTUsername());
+                productionEndpointSecurity.setPassword(api.getEndpointUTPassword());
                 if (api.isEndpointAuthDigest()) {
                     productionEndpointSecurity.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
                 } else {

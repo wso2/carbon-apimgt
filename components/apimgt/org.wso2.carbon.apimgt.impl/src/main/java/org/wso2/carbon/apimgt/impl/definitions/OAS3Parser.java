@@ -605,7 +605,32 @@ public class OAS3Parser extends APIDefinition {
         if (StringUtils.isEmpty(openAPI.getInfo().getVersion())) {
             openAPI.getInfo().setVersion(swaggerData.getVersion());
         }
+        preserveResourcePathOrderFromAPI(swaggerData, openAPI);
         return Json.pretty(openAPI);
+    }
+
+    /**
+     * Preserve and rearrange the OpenAPI definition according to the resource path order of the updating API payload.
+     *
+     * @param swaggerData Updating API swagger data
+     * @param openAPI     Updated OpenAPI definition
+     */
+    private void preserveResourcePathOrderFromAPI(SwaggerData swaggerData, OpenAPI openAPI) {
+
+        Set<String> orderedResourcePaths = new LinkedHashSet<>();
+        Paths orderedOpenAPIPaths = new Paths();
+        // Iterate the URI template order given in the updating API payload (Swagger Data) and rearrange resource paths
+        // order in OpenAPI with relevance to the first matching resource path item from the swagger data path list.
+        for (SwaggerData.Resource resource : swaggerData.getResources()) {
+            String path = resource.getPath();
+            if (!orderedResourcePaths.contains(path)) {
+                orderedResourcePaths.add(path);
+                // Get the resource path item for the path from existing OpenAPI
+                PathItem resourcePathItem = openAPI.getPaths().get(path);
+                orderedOpenAPIPaths.addPathItem(path, resourcePathItem);
+            }
+        }
+        openAPI.setPaths(orderedOpenAPIPaths);
     }
 
     /**

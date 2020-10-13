@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
+import org.wso2.carbon.apimgt.api.APIPersistence;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -68,6 +69,7 @@ import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.Organization;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
@@ -86,6 +88,7 @@ import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -154,10 +157,12 @@ public abstract class AbstractAPIManager implements APIManager {
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
+    protected Organization organization;
     protected String username;
     protected static final GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
     // Property to indicate whether access control restriction feature is enabled.
     protected boolean isAccessControlRestrictionEnabled = false;
+    private APIPersistence apiPersistenceInstance;
 
     private LRUCache<String, GenericArtifactManager> genericArtifactCache = new LRUCache<String, GenericArtifactManager>(
             5);
@@ -166,8 +171,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public AbstractAPIManager(String username) throws APIManagementException {
+
         apiMgtDAO = ApiMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(username, organization);
+
         try {
             if (username == null) {
 
@@ -182,6 +190,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 int tenantId = getTenantManager().getTenantId(tenantDomainName);
                 this.tenantId = tenantId;
                 this.tenantDomain = tenantDomainName;
+                this.organization = new Organization(tenantDomain, tenantId, "registry");
                 this.username = tenantUserName;
 
                 loadTenantRegistry(tenantId);
@@ -411,7 +420,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected API getApi(GovernanceArtifact artifact) throws APIManagementException {
         return APIUtil.getAPI(artifact);
     }
-    // moved to registry persistencemanager
+
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
         Registry registry;
@@ -488,7 +497,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException { // apisApiIdGet
         boolean tenantFlowStarted = false;
         try {
             Registry registry;
@@ -1497,6 +1506,7 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
         return documentation;
+       // return apiPersistenceInstance.getDocumentation(docId, new Organization(requestedTenantDomain));
     }
 
     public String getDocumentationContent(Identifier identifier, String documentationName)

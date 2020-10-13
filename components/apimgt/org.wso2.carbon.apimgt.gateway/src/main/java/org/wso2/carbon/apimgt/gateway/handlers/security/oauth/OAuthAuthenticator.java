@@ -581,13 +581,14 @@ public class OAuthAuthenticator implements Authenticator {
     private SignedJWTInfo getSignedJwt(String accessToken) throws ParseException {
 
         String signature = accessToken.split("\\.")[2];
-        SignedJWTInfo signedJWTInfo;
+        SignedJWTInfo signedJWTInfo = null;
         Cache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
         if (gatewaySignedJWTParseCache != null) {
             Object cachedEntry = gatewaySignedJWTParseCache.get(signature);
             if (cachedEntry != null) {
                 signedJWTInfo = (SignedJWTInfo) cachedEntry;
-            } else {
+            }
+            if (signedJWTInfo == null || !signedJWTInfo.getToken().equals(accessToken)) {
                 SignedJWT signedJWT = SignedJWT.parse(accessToken);
                 JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
                 signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);

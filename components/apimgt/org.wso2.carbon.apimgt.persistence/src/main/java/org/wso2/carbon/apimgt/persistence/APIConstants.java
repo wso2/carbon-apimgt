@@ -124,5 +124,45 @@ public final class APIConstants {
 
     public static final String API_LABELS_GATEWAY_LABELS = "labels_labelName";
 
+    //registry location for consumer
+    public static final String API_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
+
+    //This is the resource name of API
+    public static final String API_RESOURCE_NAME = "/api";
+
+    public static final String ANONYMOUS_ROLE = "system/wso2.anonymous.role";
+
+    public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
+    public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
+    public static final String DOCUMENT_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
+    public static final String API_PRODUCT_RXT_MEDIA_TYPE = "application/vnd.wso2-product+xml";
+
+    // registry location of the governance component
+    public static final String GOVERNANCE_COMPONENT_REGISTRY_LOCATION = "/repository/components/org.wso2.carbon" +
+                                    ".governance";
+
+    public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
+
+    public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
+
+    public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
+
+    public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
+
+    public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
+
+    public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
+
+    public static final String DOCUMENTATION_KEY = "document";
+
+    public static final String DOC_NAME = "overview_name";
+    public static final String DOC_SUMMARY = "overview_summary";
+    public static final String DOC_TYPE = "overview_type";
+    public static final String DOC_VISIBILITY = "overview_visibility";
+    public static final String DOC_DIR = "documentation";
+    public static final String DOC_SOURCE_TYPE = "overview_sourceType";
+    public static final String DOC_SOURCE_URL = "overview_sourceURL";
+    public static final String DOC_FILE_PATH = "overview_filePath";
+    public static final String DOC_OTHER_TYPE_NAME = "overview_otherTypeName";
 
 }
