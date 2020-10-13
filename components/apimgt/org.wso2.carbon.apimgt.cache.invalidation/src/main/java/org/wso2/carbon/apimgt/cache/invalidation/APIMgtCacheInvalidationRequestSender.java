@@ -36,6 +36,9 @@ import javax.cache.event.CacheEntryListenerException;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 
+/**
+ *This class used to send Caching Events to Traffic manager node in order to distribute.
+ */
 public class APIMgtCacheInvalidationRequestSender implements CacheEntryRemovedListener, CacheEntryUpdatedListener,
         CacheEntryCreatedListener, CacheInvalidationRequestSender {
 
@@ -65,15 +68,13 @@ public class APIMgtCacheInvalidationRequestSender implements CacheEntryRemovedLi
                 Event cacheInvalidationMessage =
                         new Event(cacheInvalidationConfiguration.getStream(), System.currentTimeMillis(), null, null,
                                 objects);
-                APIUtil.publishEvent(CachingConstants.CACHING_EVENT_PUBLISHER, Collections.emptyMap(),
-                        cacheInvalidationMessage);
+                APIUtil.publishEventToEventHub(Collections.emptyMap(), cacheInvalidationMessage);
             }
         }
     }
 
     public void entryCreated(CacheEntryEvent cacheEntryEvent) throws CacheEntryListenerException {
 
-        send(Util.createCacheInfo(cacheEntryEvent));
     }
 
     public void entryRemoved(CacheEntryEvent cacheEntryEvent) throws CacheEntryListenerException {

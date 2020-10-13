@@ -18,14 +18,14 @@
 
 package org.wso2.carbon.apimgt.cache.invalidation;
 
+/**
+ *This class contains constants.
+ */
 public class CachingConstants {
 
-    public static final String CACHING_EVENT_PUBLISHER = "cachingEventPublisher";
-    public static final String CACHING_EVENT_TYPE = "wso2event";
-    public static final String CACHING_EVENT_FORMAT = "wso2event";
-    public static final String BINARY = "Binary";
     public static final String TYPE = "type";
     public static final String VALUE = "value";
+    public static final String TOPIC_NAME = "globalCacheInvalidation";
 
     private CachingConstants() {
 
