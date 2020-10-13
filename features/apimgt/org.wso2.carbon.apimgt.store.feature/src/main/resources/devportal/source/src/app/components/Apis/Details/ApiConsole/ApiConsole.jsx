@@ -33,6 +33,9 @@ import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
 import TryOutController from './TryOutController';
 import Application from '../../../../data/Application';
+import { Icon as Icons, InlineIcon } from '@iconify/react';
+import postmanIcon from '@iconify/icons-simple-icons/postman';
+import swaggerIcon from '@iconify/icons-simple-icons/swagger';
 
 const fileDownload = require('js-file-download');
 const openapiToPostman = require('openapi-to-postmanv2');
@@ -42,6 +45,10 @@ const swaggerToPostman = require('swagger2-postman2-converter');
  * @param {*} theme theme
  */
 const styles = (theme) => ({
+    iconify: {
+        marginRight: 10,
+        font: 24,
+    },
     buttonIcon: {
         marginRight: 10,
     },
@@ -294,10 +301,15 @@ class ApiConsole extends React.Component {
             {}, (err, conversionResult) => {
                 if (!conversionResult.result) {
                     const collection = swaggerToPostman.convert(fr);
+                    if (!collection.result) {
+                        console.log('Could not convert', collection.reason);
+                    }
+                    else{
                     fileDownload(
                         JSON.stringify(collection),
                         'postman collection',
                     );
+                    }
                 } else {
                     fileDownload(
                         JSON.stringify(conversionResult.output[0].data),
@@ -490,10 +502,10 @@ class ApiConsole extends React.Component {
                     />
 
                     <Grid container>
-                        <Grid item xs={9} />
+                        <Grid item xs={10} />
                         <Grid xs={1} item>
                             <Button size='small' onClick={() => this.convertToPostman(downloadSwagger)}>
-                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                <Icons icon={postmanIcon} width={20} height={20}  /> 
                                 <FormattedMessage
                                     id='Apis.Details.APIConsole.APIConsole.download.postman'
                                     defaultMessage='Postman collection'
@@ -501,13 +513,13 @@ class ApiConsole extends React.Component {
                             </Button>
 
                         </Grid>
-                        <Grid xs={2} item>
+                        <Grid xs={1} item>
                             <a href={downloadLink} download={fileName}>
                                 <Button size='small'>
-                                    <CloudDownloadRounded className={classes.buttonIcon} />
+                                <Icons icon={swaggerIcon} width={20} height={20}  className={classes.buttonIcon} /> 
                                     <FormattedMessage
                                         id='Apis.Details.APIConsole.APIConsole.download.swagger'
-                                        defaultMessage='Swagger ( /swagger.json )'
+                                        defaultMessage='Swagger'
                                     />
                                 </Button>
                             </a>
@@ -537,6 +549,7 @@ ApiConsole.propTypes = {
         grid: PropTypes.string.isRequired,
         userNotificationPaper: PropTypes.string.isRequired,
         buttonIcon: PropTypes.string.isRequired,
+        iconify: PropTypes.string.isRequired,
     }).isRequired,
 };
 
