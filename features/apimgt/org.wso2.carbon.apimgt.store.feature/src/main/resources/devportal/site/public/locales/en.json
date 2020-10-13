@@ -1,4 +1,5 @@
 {
+  "Apis.Details.APIConsole.APIConsole.download.postman": "Postman collection",
   "Apis.Details.APIConsole.APIConsole.download.swagger": "Swagger ( /swagger.json )",
   "Apis.Details.ApiCOnsole.generate.test.key": "GET TEST KEY ",
   "Apis.Details.ApiConsole.ApiConsole.keys.not.generated": "Consumer key and secret not generated for the selected application on the {what} environment. ",

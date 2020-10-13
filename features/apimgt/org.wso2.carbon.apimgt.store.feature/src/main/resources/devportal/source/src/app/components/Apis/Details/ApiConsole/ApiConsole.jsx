@@ -26,7 +26,9 @@ import Icon from '@material-ui/core/Icon';
 import AuthManager from 'AppData/AuthManager';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
-import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import postmanIcon from '@iconify/icons-simple-icons/postman';
+import swaggerIcon from '@iconify/icons-simple-icons/swagger';
+import { Icon as Icons } from '@iconify/react';
 import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
@@ -34,11 +36,19 @@ import SwaggerUI from './SwaggerUI';
 import TryOutController from './TryOutController';
 import Application from '../../../../data/Application';
 
+
+const fileDownload = require('js-file-download');
+const openapiToPostman = require('openapi-to-postmanv2');
+const swaggerToPostman = require('swagger2-postman2-converter');
 /**
  * @inheritdoc
  * @param {*} theme theme
  */
 const styles = (theme) => ({
+    iconify: {
+        marginRight: 10,
+        font: 24,
+    },
     buttonIcon: {
         marginRight: 10,
     },
@@ -108,6 +118,7 @@ class ApiConsole extends React.Component {
         this.updateAccessToken = this.updateAccessToken.bind(this);
         this.setProductionApiKey = this.setProductionApiKey.bind(this);
         this.setSandboxApiKey = this.setSandboxApiKey.bind(this);
+        this.converttopostman = this.convertToPostman.bind(this);
     }
 
     /**
@@ -278,6 +289,32 @@ class ApiConsole extends React.Component {
 
     setKeys(keys) {
         this.setState({ keys });
+    }
+    /**
+     * Converting an OpenAPI file to a postman collection
+     * @memberof ApiConsole
+   */
+
+    convertToPostman(fr) {
+        openapiToPostman.convert({ type: 'string', data: fr },
+            {}, (err, conversionResult) => {
+                if (!conversionResult.result) {
+                    const collection = swaggerToPostman.convert(fr);
+                    if (!collection.result) {
+                        console.log('Could not convert', collection.reason);
+                    } else {
+                        fileDownload(
+                            JSON.stringify(collection),
+                            'postman collection',
+                        );
+                    }
+                } else {
+                    fileDownload(
+                        JSON.stringify(conversionResult.output[0].data),
+                        'postman collection',
+                    );
+                }
+            });
     }
 
     /**
@@ -463,10 +500,20 @@ class ApiConsole extends React.Component {
 
                     <Grid container>
                         <Grid xs={10} item />
-                        <Grid xs={2} item>
+                        <Grid xs={1} item>
+                            <Button size='small' onClick={() => this.convertToPostman(downloadSwagger)}>
+                                <Icons icon={postmanIcon} width={30} height={30} />
+                                <FormattedMessage
+                                    id='Apis.Details.APIConsole.APIConsole.download.postman'
+                                    defaultMessage='Postman collection'
+                                />
+                            </Button>
+
+                        </Grid>
+                        <Grid xs={1} item>
                             <a href={downloadLink} download={fileName}>
                                 <Button size='small'>
-                                    <CloudDownloadRounded className={classes.buttonIcon} />
+                                    <Icons icon={swaggerIcon} width={30} height={30} className={classes.buttonIcon} />
                                     <FormattedMessage
                                         id='Apis.Details.APIConsole.APIConsole.download.swagger'
                                         defaultMessage='Swagger ( /swagger.json )'
@@ -497,6 +544,7 @@ ApiConsole.propTypes = {
         grid: PropTypes.string.isRequired,
         userNotificationPaper: PropTypes.string.isRequired,
         buttonIcon: PropTypes.string.isRequired,
+        iconify: PropTypes.string.isRequired,
     }).isRequired,
 };
 

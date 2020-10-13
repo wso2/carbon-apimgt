@@ -51,6 +51,8 @@ const config = {
         },
         extensions: ['.mjs','.js', '.jsx'],
     },
+    node: { fs: 'empty' },
+    
     module: {
         rules: [
             {
