@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.api;
 
+import org.apache.axiom.om.OMElement;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -9,57 +10,143 @@ import java.util.List;
 import java.util.Map;
 
 public interface APIPersistence {
-    // ======= API update   =======
-    API getAPI(String apiId);
 
+    /* ======= API update   =======
+       =========================== */
     API updateApi(API api);
+
+
+    /* =========== WSDL ============
+       =========================== */
+
+    String createWsdl(API api, InputStream wsdlContent, OMElement wsdlContentEle);
+
+    /**
+     * Returns the wsdl content of the given API
+     *
+     * @param apiId Id of API
+     * @return wsdl content matching if exist, else null
+     */
+    ResourceFile getWSDL(String apiId);
 
     void updateWsdlFromUrl(String apiId, String wsdlUrl);
 
     void updateWsdlFromWsdlFile(API api, ResourceFile wsdlResourceFile);
 
+    /**
+     *
+     * @param apiId
+     * @param wsdlResourceFile
+     * @return registry path of wsdl file
+     * @throws APIManagementException
+     */
+    String updateWsdlFromWsdlFile(String apiId, ResourceFile wsdlResourceFile)
+                                    throws APIManagementException;
+
     void updateWsdlFromUrl(API api);
 
-    void updateDocVisibility(String apiId, String visibility, String visibleRoles,
-                                    Documentation documentation); // can be called from within updateApi() function
 
-    // ======= Create API =======
+
+    /* ===== API Life Cycle =====
+    ============================= */
 
     void addLifeCycle(API api);
 
-    void createAPI(API api);
+    /*
+     * This method returns the current lifecycle state and all other possible lifecycle states of an API.
+     *
+     * @param apiId Id of API
+     * @return Map<String,Object> a map with lifecycle data
+     */
+    Map<String, Object> getAPILifeCycleData(String apiId);
 
-    // ======= get APIs ======== (search apis >> identify differences of these apis)
-    //  requestedTenantDomain
+    void changeAPILifeCycle(String apiId, String status); // need to change for reg impl
+
+    /**
+     * Retrieves API Lifecycle state information
+     *
+     * @param //apiId API Id
+     * @return API Lifecycle state information
+     */
+    // >> need  to re-define LifecycleStateDTO in apimgt.api module. (simply importing org.wso2.carbon.apimgt.rest
+    // .api.publisher.v1.dto.LifecycleStateDTO will cause  cyclic dependency issue)
+    // LifecycleStateDTO getLifecycleState(String apiId);
+
+
+
+    /* ======= Create API =======
+    =========================== */
+
+    void createAPI(API api) throws APIManagementException;
+    void createAPI(API api, List<Label> gatewayLabelList) throws APIManagementException;
+    /**
+     * Create a new version of the api with the specified new version
+     *
+     * @param api           API to create new version
+     * @param newVersion    New version
+     * @return              ID of the API created
+     */
+    int createNewAPIVersion(API api, String newVersion);
+
+    /**
+     * Check whether an API with given identifiers (name, version, provider exists)
+     * @param apiIdentifier Identifier of API
+     * @return
+     */
+    boolean isApiExists(APIIdentifier apiIdentifier);
+
+
+    /* ======= get/search APIs ======== (search apis >> identify differences of these apis)
+    =================================== */
+
+    /**
+     * Get minimal details of API by api artifact id
+     *
+     * @param uuid         API artifact id
+     * @param requestedOrg Name of the organization the API consists
+     * @return API of the provided artifact id
+     */
+    API getLightweightAPIByUUID(String uuid, String requestedOrg);
+
+    API getAPIbyId(String id, String requestedTenantDomain) throws APIManagementException;
+
+    //API getAPI(String apiId);
+
     Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start, int end,
                                     boolean limitAttributes);
-
-    //  requestedTenantDomain
     Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start, int end,
                                     boolean limitAttributes, boolean isPublisherListing);
-
-    //  requestedTenantDomain
     Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery, int start, int end,
                                     boolean limitAttributes);
 
-    // ======= GraphQL =======
+
+
+    /* ========== GraphQL ==========
+     =============================== */
 
     String getGraphqlSchema(String apiId);
 
-    void saveGraphqlSchemaDefinition(API api, String schemaDefinition);
-
-    void saveGraphqlSchemaDefinition(String apiId, String visibleRoles, String schemaDefinition);
+    void saveGraphqlSchemaDefinition(String apiId, String schemaDefinition);
 
     void deleteAPI(String apiId);
 
 
-    // ======= Documentation  =======
-    //  requestedTenantDomain
-    Documentation getDocumentation(String docId, Organization requestedOrg) throws APIManagementException;
 
-    //APIUtil function getDocument(..) will need to use this
-    //  requestedTenantDomain
-    Map<String, Object> getDocumentContent(String userName, Organization requestedOrg);
+    /* ======= Documentation  =======
+    ================================ */
+
+    Documentation getDocumentation(String apiId, String docId, Organization requestedOrg) throws APIManagementException;
+
+    /**
+     * Get an api product documentation by artifact Id
+     *
+     * @param docId                 artifact id of the document
+     * @param requestedOrg tenant domain of the registry where the artifact is located
+     * @return Document object which represents the artifact id
+     */
+    Documentation getProductDocumentation(String productId, String docId, Organization requestedOrg);
+
+    Map<String, Object> getDocumentContent(String apiId, String docId, Organization requestedOrg);
 
     /**
      * Removes a given documentation
@@ -88,46 +175,31 @@ public interface APIPersistence {
     /**
      * Add documentation to an API
      *
-     * @param api           API
+     * @param apiId           ID of API
      * @param documentation Documentation
      */
-    void addDocumentation(API api, Documentation documentation);
+    void addDocumentation(String apiId, Documentation documentation);
 
     /**
-     * Get minimal details of API by api artifact id
+     * Checks whether the given document already exists for the given api/product
      *
-     * @param uuid         API artifact id
-     * @param requestedOrg Name of the organization the API consists
-     * @return API of the provided artifact id
+     * @param apiOrProductId Id of API/Product
+     * @param docName    Name of the document
+     * @return true if document already exists for the given api/product
      */
-    //  requestedTenantDomain
-    API getLightweightAPIByUUID(String uuid, String requestedOrg);
+    boolean isDocumentationExists(String apiOrProductId, String docName);
 
-    /*
-     * This method returns the current lifecycle state and all other possible lifecycle states of an API.
-     *
-     * @param apiId Id of API
-     * @return Map<String,Object> a map with lifecycle data
-     */
-    Map<String, Object> getAPILifeCycleData(String apiId);
-
-    /**
-     * Retrieves API Lifecycle state information
-     *
-     * @param apiId API Id
-     * @return API Lifecycle state information
-     */
-    // >> need  to re-define LifecycleStateDTO in apimgt.api module. (simply importing org.wso2.carbon.apimgt.rest
-    // .api.publisher.v1.dto.LifecycleStateDTO will cause  cyclic dependency issue)
-    // LifecycleStateDTO getLifecycleState(String apiId);
+    void updateDocVisibility(String apiId, String visibility, String visibleRoles,
+                                    Documentation documentation); // can be called from within updateApi() function
 
 
-    // ======= Mediation Policy ========
+    /* ======= Mediation Policy ========
+     =================================== */
 
     /**
      * Returns a list of API specific mediation policies
      *
-     * @param apiId API Id of API
+     * @param apiId  Id of API
      * @return List of api specific mediation objects available
      */
     List<Mediation> getAllApiSpecificMediationPolicies(String apiId);
@@ -165,7 +237,12 @@ public interface APIPersistence {
      */
     void deleteApiSpecificMediationPolicy(String apiOrProductId, String mediationPolicyId);
 
-    boolean checkIfMediationPolicyExists(String mediationPolicyId);
+    /**
+     * Check the existence of the mediation policy
+     */
+    boolean isMediationPolicyExists(String mediationPolicyId);
+    // This method ca throw an exception if the given mediation policy does not exist
+    // i.e. throw new APIManagementException(ExceptionCodes.MEDIATION_POLICY_API_ALREADY_EXISTS);
 
     /**
      * @param apiOrProductId  API or Product ID
@@ -173,6 +250,11 @@ public interface APIPersistence {
      * @param contentFile Mediation policy ResourceFile
      */
     void addApiSpecificMediationPolicy(String apiOrProductId, String type, ResourceFile contentFile);
+
+
+
+    /* ===== Monetization ======
+    =========================== */
 
     /**
      * Configure monetization in the API
@@ -189,6 +271,11 @@ public interface APIPersistence {
      * @param isMonetizationEnabled  Whether to eable or disable monetization
      */
    void configureMonetizationInAPI(String apiId, JSONObject monetizationProperties, boolean isMonetizationEnabled);
+
+
+
+    /* ===== SOAP to REST related =====
+    ================================== */
 
     /**
      * Checks the api is a soap to rest converted one or a soap pass through
@@ -212,8 +299,11 @@ public interface APIPersistence {
     void updateResourcePolicyFromResourceId(String apiId, String resourceId, String content);
 
     
-    // ======= API Definition =======
-    /**
+    /* ======= API Definition =======
+    ================================= */
+
+
+    /*
      * This method returns swagger definition json of a given api/api product
      *
      * @param apiOrProductId Id of API/API Product
@@ -230,8 +320,9 @@ public interface APIPersistence {
    void saveOASAPIDefinition(String apiId, String apiDefinitionJSON);
 
     
-    // ======= API Thumbnail Icon =======
-    
+    /* ======= API Thumbnail Icon =======
+    ==================================== */
+
     /**
      * Retrieves the icon image associated with a particular API as a stream.
      *
@@ -248,60 +339,15 @@ public interface APIPersistence {
      */
     void saveAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail);
 
-    /**
-     * Checks whether the given document already exists for the given api/product
-     *
-     * @param apiOrProductId Id of API/Product
-     * @param docName    Name of the document
-     * @return true if document already exists for the given api/product
-     */
-    boolean isDocumentationExist(String apiOrProductId, String docName);
-
-
-    /**
-     * Returns the wsdl content of the given API
-     *
-     * @param apiId Id of API
-     * @return wsdl content matching if exist, else null
-     */
-    ResourceFile getWSDL(String apiId);
-
-    void changeAPILifeCycle(String apiId, String status); // need to change for reg impl
-
-    /**
-     * Create a new version of the api with the specified new version
-     *
-     * @param api           API to create new version
-     * @param newVersion    New version
-     * @return              ID of the API created
-     */
-    int createNewAPIVersion(API api, String newVersion);
 
 
     /* Add interface methods for API/Product import export related methods in org.wso2.carbon.apimgt.impl
     .importexport.utils.APIAndAPIProductCommonUtil
      */
 
-    /**
-     * This method saves schema definition of GraphQL APIs in the registry
-     *
-     * @param api               API to be saved
-     * @param schemaDefinition  Graphql API definition as String
-     * @throws APIManagementException
-     */
-    public void saveGraphQLSchemaDefinition(API api, String schemaDefinition);
 
-    /**
-     * Check the existence of the mediation policy
-     */
-    boolean isMediationPolicyExists(APIProvider apiProvider, String mediationPolicyUUID);
-    // This method ca throw an exception if the given mediation policy does not exist
-    // i.e. throw new APIManagementException(ExceptionCodes.MEDIATION_POLICY_API_ALREADY_EXISTS);
-
-
-
-    // =========== Analyzing -ApiProductsApiServiceImpl- ============
-    //===============================================================
+    /* =========== Analyzing -ApiProductsApiServiceImpl- ============
+    ===============================================================*/
 
     /**
      * Get API Product by registry artifact id
@@ -319,7 +365,7 @@ public interface APIPersistence {
      * @param apiProductId    ID of API Product
      * @return API product    identified by product identifier
      */
-    public APIProduct getAPIProduct(String apiProductId);
+    APIProduct getAPIProduct(String apiProductId);
 
     /**
      * Delete the API Product
@@ -327,20 +373,4 @@ public interface APIPersistence {
      */
     void deleteAPIProduct(String apiProductId);
 
-    /**
-     * Get an api product documentation by artifact Id
-     *
-     * @param docId                 artifact id of the document
-     * @param requestedOrg tenant domain of the registry where the artifact is located
-     * @return Document object which represents the artifact id
-     */
-    // requestedTenantDomain
-    Documentation getProductDocumentation(String productId, String docId, Organization requestedOrg);
-
-    /**
-     * Check whether an API with given identifiers (name, version, provider exists)
-     * @param apiIdentifier Identifier of API
-     * @return
-     */
-    boolean isApiExists(APIIdentifier apiIdentifier);
 }
