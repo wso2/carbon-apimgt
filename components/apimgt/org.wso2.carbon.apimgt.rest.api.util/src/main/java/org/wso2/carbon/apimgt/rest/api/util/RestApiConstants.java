@@ -286,4 +286,6 @@ public final class RestApiConstants {
     public static final String DEFAULT_ENVIRONMENT = "Production and Sandbox";
 
     public static final String TENANT_DOMAIN = "LoggedInUserTenantDomain";
+
+    public static final String AUTHENTICATION_ADMIN_SERVICE_ENDPOINT = "AuthenticationAdmin";
 }
