@@ -829,8 +829,10 @@ public class APIMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         dto.setContext(context);
-        dto.setCreatedTime(model.getCreatedTime());
-        dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
+        Date createdTime = new Date(Long.parseLong(model.getCreatedTime()));
+        Timestamp createdTimestamp = new Timestamp(createdTime.getTime());
+        dto.setCreatedTime(createdTimestamp);
+        dto.setLastUpdatedTime(model.getLastUpdated());
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
@@ -1116,12 +1118,12 @@ public class APIMappingUtil {
         if (null != model.getLastUpdated()) {
             Date lastUpdateDate = model.getLastUpdated();
             Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
-            dto.setLastUpdatedTime(String.valueOf(timeStamp));
+            dto.setLastUpdatedTime(timeStamp);
         }
         if (null != model.getCreatedTime()) {
-            Date createdTime = new Date(Long.parseLong(model.getCreatedTime()));
-            Timestamp timeStamp = new Timestamp(createdTime.getTime());
-            dto.setCreatedTime(String.valueOf(timeStamp));
+            Date created = new Date(Long.parseLong(model.getCreatedTime()));
+            Timestamp timeStamp = new Timestamp(created.getTime());
+            dto.setCreatedTime(timeStamp);
         }
         dto.setWorkflowStatus(model.getWorkflowStatus());
 

@@ -436,7 +436,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
 ,      
         @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query
 ,      
-        @ApiParam(value = "", allowableValues="name, owner, throttlingTier")  @QueryParam("sortBy") SortByEnum sortBy
+        @ApiParam(value = "", allowableValues="name, owner, throttlingTier, status")  @QueryParam("sortBy") SortByEnum sortBy
 ,      
         @ApiParam(value = "", allowableValues="asc, desc")  @QueryParam("sortOrder") SortOrderEnum sortOrder
 ,      
@@ -452,7 +452,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         
         OWNER("owner"),
         
-        THROTTLINGTIER("throttlingTier");
+        THROTTLINGTIER("throttlingTier"),
+        
+        STATUS("status");
         private String value;
 
         SortByEnum (String value) {

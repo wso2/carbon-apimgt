@@ -216,9 +216,9 @@ public enum AccessControlEnum {
     private Object businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
-    private String createdTime = null;
+    private java.util.Date createdTime = null;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private String lastUpdatedTime = null;
+    private java.util.Date lastUpdatedTime = null;
     private Object endpointConfig = null;
 
 @XmlType(name="EndpointImplementationTypeEnum")
@@ -996,7 +996,7 @@ public enum EndpointImplementationTypeEnum {
 
   /**
    **/
-  public APIDTO createdTime(String createdTime) {
+  public APIDTO createdTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -1004,16 +1004,16 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("createdTime")
-  public String getCreatedTime() {
+  public java.util.Date getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(String createdTime) {
+  public void setCreatedTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
   }
 
   /**
    **/
-  public APIDTO lastUpdatedTime(String lastUpdatedTime) {
+  public APIDTO lastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -1021,10 +1021,10 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("lastUpdatedTime")
-  public String getLastUpdatedTime() {
+  public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;
   }
-  public void setLastUpdatedTime(String lastUpdatedTime) {
+  public void setLastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 

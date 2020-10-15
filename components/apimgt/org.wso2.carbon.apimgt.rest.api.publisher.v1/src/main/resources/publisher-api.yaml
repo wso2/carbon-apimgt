@@ -7880,9 +7880,11 @@ definitions:
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        format: date-time
       lastUpdatedTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        format: date-time
         x-otherScopes:
           - apim:api_publish
       endpointConfig:
@@ -8145,6 +8147,7 @@ definitions:
         description: |
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
+        maxLength: 50
         example: admin
       hasThumbnail:
         type: boolean

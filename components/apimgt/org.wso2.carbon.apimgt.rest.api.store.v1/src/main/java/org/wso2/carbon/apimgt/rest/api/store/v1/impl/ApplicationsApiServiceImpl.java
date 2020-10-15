@@ -100,9 +100,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-//        sortBy = sortBy != null ?
-//                ApplicationMappingUtil.getApplicationSortByField(sortBy) :
-//                APIConstants.APPLICATION_NAME;
+        String sortOrderString = sortOrder != null ? sortOrder.toString() : RestApiConstants.DEFAULT_SORT_ORDER;
+        String sortByString = sortBy != null ?
+                ApplicationMappingUtil.getApplicationSortByField(sortBy) :
+                APIConstants.APPLICATION_NAME;
         query = query == null ? "" : query;
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
 
@@ -117,8 +118,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Subscriber subscriber = new Subscriber(username);
             Application[] applications;
             applications = apiConsumer
-                    .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy.toString(),
-                            sortOrder.toString());
+                    .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query,
+                            sortByString, sortOrderString);
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 

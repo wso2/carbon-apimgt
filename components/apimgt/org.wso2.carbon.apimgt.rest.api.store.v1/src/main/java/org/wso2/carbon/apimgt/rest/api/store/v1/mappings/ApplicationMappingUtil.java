@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApi.SortByEnum;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
@@ -181,18 +182,17 @@ public class ApplicationMappingUtil {
      * @param sortBy
      * @return Updated sort by field
      */
-    public static String getApplicationSortByField (String sortBy) {
+    public static String getApplicationSortByField (SortByEnum sortBy) {
         String updatedSortBy = "";
-        if (RestApiConstants.SORT_BY_NAME.equals(sortBy)) {
+        if (SortByEnum.NAME.equals(sortBy)) {
             updatedSortBy = APIConstants.APPLICATION_NAME;
-        } else if (RestApiConstants.SORT_BY_OWNER.equals(sortBy)) {
+        } else if (SortByEnum.OWNER.equals(sortBy)) {
             updatedSortBy = APIConstants.APPLICATION_CREATED_BY;
-        } else if (RestApiConstants.SORT_BY_THROTTLING_TIER.equals(sortBy)) {
+        } else if (SortByEnum.THROTTLINGTIER.equals(sortBy)) {
             updatedSortBy = APIConstants.APPLICATION_TIER;
-        } else if (RestApiConstants.SORT_BY_STATUS.equals(sortBy)) {
+        } else if (SortByEnum.STATUS.equals(sortBy)) {
             updatedSortBy = APIConstants.APPLICATION_STATUS;
         }
-
         return updatedSortBy;
     }
 

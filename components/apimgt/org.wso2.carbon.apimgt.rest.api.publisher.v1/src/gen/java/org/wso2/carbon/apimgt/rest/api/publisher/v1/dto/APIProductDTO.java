@@ -310,7 +310,7 @@ public enum SubscriptionAvailabilityEnum {
   
   @ApiModelProperty(example = "admin", value = "If the provider value is not given, the user invoking the API will be used as the provider. ")
   @JsonProperty("provider")
-  public String getProvider() {
+ @Size(max=50)  public String getProvider() {
     return provider;
   }
   public void setProvider(String provider) {
