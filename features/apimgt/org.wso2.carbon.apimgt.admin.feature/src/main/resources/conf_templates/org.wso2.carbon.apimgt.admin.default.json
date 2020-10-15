@@ -1,0 +1,13 @@
+{
+  "apim.admin.app.context": "/admin",
+  "apim.admin.app.custom_url.enabled": false,
+  "apim.admin.app.custom_url.forwarded_header": "X-Forwarded-For",
+  "apim.admin.app.origin.host": "localhost",
+  "apim.admin.app.feedback.enabled": false,
+  "apim.admin.app.feedback.service_url": "",
+  "apim.admin.app.single_logout.enabled": true,
+  "apim.admin.app.single_logout.timeout": 2000,
+  "apim.admin.app.docUrl": "https://apim.docs.wso2.com/en/3.2.0/",
+  "apim.admin.idp.origin": "https://localhost:9443",
+  "apim.admin.idp.check_session_endpoint": "https://localhost:9443/oidc/checksession"
+}

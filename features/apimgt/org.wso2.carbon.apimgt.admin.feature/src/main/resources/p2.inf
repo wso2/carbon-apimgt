@@ -1,2 +1,3 @@
 instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.admin_${feature.version}/admin/,target:${installFolder}/../../deployment/server/jaggeryapps/admin,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.admin_${feature.version}/conf_templates/,target:${installFolder}/../../resources/conf/,overwrite:true);\
