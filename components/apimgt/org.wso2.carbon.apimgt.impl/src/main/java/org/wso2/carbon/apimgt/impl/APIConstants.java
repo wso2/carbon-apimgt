@@ -645,6 +645,29 @@ public final class APIConstants {
         }
     }
 
+    public static final class ServerStartupListenerConstants {
+
+        public static final String ADMIN_CLIENT_APP_NAME = "apim_admin_portal";
+        public static final String PUBLISHER_CLIENT_APP_NAME = "apim_publisher_portal";
+        public static final String DEVPORTAL_CLIENT_APP_NAME = "apim_devportal_portal";
+        public static final String ADMIN_APP_CONTEXT = "admin-webapp";
+        public static final String PUBLISHER_APP_CONTEXT = "publisher";
+        public static final String DEVPORTAL_APP_CONTEXT = "devportal";
+        public static final String GRANT_TYPE = "authorization_code refresh_token";
+        public static final boolean IS_SAAS_APP = true;
+        public static final String SUPER_TENANT_DOMAIN = "carbon.super";
+        public static final String PATH_SEPARATOR = "/";
+        public static final String CLIENT_ID = "clientId";
+        public static final String CLIENT_SECRET = "clientSecret";
+        public static final String DCR_URL_SUFFIX = "/client-registration/v0.17/register";
+        public static final String LOGIN_CALLBACK_URL_SUFFIX = "/services/auth/callback/login";
+        public static final String LOGOUT_CALLBACK_URL_SUFFIX = "/services/auth/callback/logout";
+
+        private ServerStartupListenerConstants() {
+
+        }
+    }
+
     public static final String API_GATEWAY = "APIGateway.";
     public static final String API_GATEWAY_SERVER_URL = "ServerURL";
     public static final String API_GATEWAY_USERNAME = "Username";
