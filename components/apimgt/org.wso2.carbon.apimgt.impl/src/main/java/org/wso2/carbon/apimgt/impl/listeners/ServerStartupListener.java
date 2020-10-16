@@ -69,7 +69,11 @@ public class ServerStartupListener implements ServerStartupObserver {
         copyToExtensions();
 
         //Create Service Providers for Admin Publisher and Devportal web apps for the first time during server startup
-        createSpsForPortalApps();
+        try {
+            createSpsForPortalApps();
+        } catch (APIManagementException e) {
+            log.error("Error creating Service Providers for Portal Web Applications", e);
+        }
 
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -186,19 +190,20 @@ public class ServerStartupListener implements ServerStartupObserver {
      * Method for creating service provider applications for the Publisher, Dev portal and Admin portals
      * upon initial server startup
      */
-    private static void createSpsForPortalApps() {
+    private static void createSpsForPortalApps() throws APIManagementException {
         SystemApplicationDAO systemApplicationDAO = new SystemApplicationDAO();
         SystemApplicationDTO systemApplicationDTOAdmin;
         SystemApplicationDTO systemApplicationDTOPublisher;
         SystemApplicationDTO systemApplicationDTODevportal;
 
         String dcrUrl = getLoopbackOrigin() + APIConstants.ServerStartupListenerConstants.DCR_URL_SUFFIX;
-        String serverUrl = "";
+        String serverUrl;
         try {
             serverUrl = APIUtil.getServerURL();
         } catch (APIManagementException e) {
             String errorMsg = "Error getting Server Url";
             log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
         }
 
         try {
@@ -255,9 +260,10 @@ public class ServerStartupListener implements ServerStartupObserver {
                         + APIConstants.ServerStartupListenerConstants.DEVPORTAL_CLIENT_APP_NAME);
             }
         } catch (APIMgtDAOException e) {
-            log.error(
-                    "Error while retrieving or persisting client credentials information for the portal client applications",
+            log.error("Error while retrieving or persisting client credentials information for the portal applications",
                     e);
+        } catch (APIManagementException e) {
+            log.error("Error while registering the Service Provider for Portal Application", e);
         }
     }
 
@@ -274,7 +280,8 @@ public class ServerStartupListener implements ServerStartupObserver {
         return "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
     }
 
-    private static Map<String, String> sendDCRRequest(String clientName, String callbackUrl, String dcrUrl) {
+    private static Map<String, String> sendDCRRequest(String clientName, String callbackUrl, String dcrUrl)
+            throws APIManagementException {
         Map<String, String> result = new HashMap<>();
         try {
             String authorizationEncodedToken = APIUtil.getBase64EncodedAdminCredentials();
@@ -313,15 +320,19 @@ public class ServerStartupListener implements ServerStartupObserver {
         } catch (APIMgtInternalException e) {
             String errorMsg = "Error while retrieving admin credential information";
             log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
         } catch (ClientProtocolException e) {
             String errorMsg = "Error while creating the http client for client app " + clientName;
             log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
         } catch (IOException e) {
             String errorMsg = "Error while connecting to dcr endpoint for client app " + clientName;
             log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
         } catch (ParseException e) {
             String errorMsg = "Error while parsing response from DCR endpoint for client app " + clientName;
             log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
         }
         return result;
     }
