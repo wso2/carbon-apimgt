@@ -363,7 +363,7 @@ public final class APIUtil {
     private static String hostAddress = null;
     private static final int timeoutInSeconds = 15;
     private static final int retries = 2;
-    static APIPersistence apiPersistenceInstance;
+//    static APIPersistence apiPersistenceInstance;
 
     /**
      * To initialize the publisherRoleCache configurations, based on configurations.
@@ -376,7 +376,7 @@ public final class APIUtil {
                 .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
         isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
                 .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
-        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(null);
+//        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(null);
 
     }
 
@@ -2263,17 +2263,17 @@ public final class APIUtil {
                 //wsdlResource.setContentStream(wsdlContent);
             } else {
                 // byte[] wsdl = (byte[]) registry.get(wsdlResourcePath).getContent();
-                byte[] wsdl = (byte[]) (Object) apiPersistenceInstance.getWSDL(api.getUUID()).getContent();
-                if (isWSDL2Resource(wsdl)) {
-                    wsdlContentEle = wsdlReader.updateWSDL2(wsdl, api);
-                    //wsdlResource.setContent(wsdlContentEle.toString());
-                } else {
-                    wsdlContentEle = wsdlReader.updateWSDL(wsdl, api);
-                    // wsdlResource.setContent(wsdlContentEle.toString());
-                }
+//                byte[] wsdl = (byte[]) (Object) apiPersistenceInstance.getWSDL(api.getUUID()).getContent();
+//                if (isWSDL2Resource(wsdl)) {
+//                    wsdlContentEle = wsdlReader.updateWSDL2(wsdl, api);
+//                    //wsdlResource.setContent(wsdlContentEle.toString());
+//                } else {
+//                    wsdlContentEle = wsdlReader.updateWSDL(wsdl, api);
+//                    // wsdlResource.setContent(wsdlContentEle.toString());
+//                }
             }
             ////====
-            apiPersistenceInstance.createWsdl(api, wsdlContent, wsdlContentEle);
+          //  apiPersistenceInstance.createWsdl(api, wsdlContent, wsdlContentEle);
 
 
 
@@ -2383,7 +2383,8 @@ public final class APIUtil {
     public static String saveWSDLResource(API api) throws APIManagementException {
 
         ResourceFile wsdlResource = api.getWsdlResource();
-        return apiPersistenceInstance.updateWsdlFromWsdlFile(api.getUUID(), wsdlResource);
+        return null;
+       // return apiPersistenceInstance.updateWsdlFromWsdlFile(api.getUUID(), wsdlResource);
 
 //        String wsdlResourcePath;
 //        boolean isZip = false;
