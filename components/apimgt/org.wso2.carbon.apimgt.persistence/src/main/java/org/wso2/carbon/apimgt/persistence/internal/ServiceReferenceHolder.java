@@ -4,6 +4,7 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
@@ -12,6 +13,8 @@ public class ServiceReferenceHolder {
     private static UserRealm userRealm;
 
     private RegistryService registryService;
+
+    private static ConfigurationContextService contextService;
 
     private ServiceReferenceHolder() {
     }
@@ -50,5 +53,12 @@ public class ServiceReferenceHolder {
 
     public static UserRealm getUserRealm() {
         return userRealm;
+    }
+
+    public static ConfigurationContextService getContextService() {
+        return contextService;
+    }
+    public static void setContextService(ConfigurationContextService contextService) {
+        ServiceReferenceHolder.contextService = contextService;
     }
 }

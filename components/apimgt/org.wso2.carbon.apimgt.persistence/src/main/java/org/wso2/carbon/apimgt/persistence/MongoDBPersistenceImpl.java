@@ -1,9 +1,10 @@
 package org.wso2.carbon.apimgt.persistence;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIPersistence;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.io.InputStream;
@@ -12,11 +13,15 @@ import java.util.Map;
 
 public class MongoDBPersistenceImpl implements APIPersistence {
 
-    @Override public API getAPI(String s) {
-        return null;
+    public MongoDBPersistenceImpl(String userName) {
+
     }
 
     @Override public API updateApi(API api) {
+        return null;
+    }
+
+    @Override public String createWsdl(API api, InputStream wsdlContent, OMElement wsdlContentEle) {
         return null;
     }
 
@@ -37,11 +42,20 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
+    @Override public String updateWsdlFromWsdlFile(String apiId, ResourceFile wsdlResourceFile)
+                                    throws APIManagementException {
+        return null;
+    }
+
     @Override public void addLifeCycle(API api) {
 
     }
 
     @Override public void createAPI(API api) {
+
+    }
+
+    @Override public void createAPI(API api, List<Label> gatewayLabelList) throws APIManagementException {
 
     }
 
@@ -64,11 +78,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return null;
     }
 
-    @Override public void saveGraphqlSchemaDefinition(API api, String schemaDefinition) {
-
-    }
-
-    @Override public void saveGraphqlSchemaDefinition(String apiId, String visibleRoles, String schemaDefinition) {
+    @Override public void saveGraphqlSchemaDefinition(String apiId, String schemaDefinition) {
 
     }
 
@@ -76,16 +86,9 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
-    @Override public Documentation getDocumentation(String docId, Organization requestedOrg) {
+    @Override public Documentation getDocumentation(String apiId, String docId, Organization requestedOrg)
+                                    throws APIManagementException {
         return null;
-    }
-
-    @Override public Map<String, Object> getDocumentContent(String userName, Organization requestedOrg) {
-        return null;
-    }
-
-    @Override public void removeDocumentation(String apiOrProductId, String docId) {
-
     }
 
     @Override public void updateDocumentation(String apiId, Documentation documentation) {
@@ -96,11 +99,15 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return null;
     }
 
-    @Override public void addDocumentation(API api, Documentation documentation) {
+    @Override public void addDocumentation(String apiId, Documentation documentation) {
 
     }
 
     @Override public API getLightweightAPIByUUID(String uuid, String requestedOrg) {
+        return null;
+    }
+
+    @Override public API getAPIbyId(String id, String requestedTenantDomain) throws APIManagementException {
         return null;
     }
 
@@ -129,7 +136,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
-    @Override public boolean checkIfMediationPolicyExists(String mediationPolicyId) {
+    @Override public boolean isMediationPolicyExists(String mediationPolicyId) {
         return false;
     }
 
@@ -180,7 +187,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
-    @Override public boolean isDocumentationExist(String apiOrProductId, String docName) {
+    @Override public boolean isDocumentationExists(String apiOrProductId, String docName) {
         return false;
     }
 
@@ -194,14 +201,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override public int createNewAPIVersion(API api, String newVersion) {
         return 0;
-    }
-
-    @Override public void saveGraphQLSchemaDefinition(API api, String schemaDefinition) {
-
-    }
-
-    @Override public boolean isMediationPolicyExists(APIProvider apiProvider, String mediationPolicyUUID) {
-        return false;
     }
 
     @Override public APIProduct getAPIProductbyUUID(String uuid, Organization requestedOrg) {
@@ -218,6 +217,14 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override public Documentation getProductDocumentation(String productId, String docId, Organization requestedOrg) {
         return null;
+    }
+
+    @Override public Map<String, Object> getDocumentContent(String apiId, String docId, Organization requestedOrg) {
+        return null;
+    }
+
+    @Override public void removeDocumentation(String apiOrProductId, String docId) {
+
     }
 
     @Override public boolean isApiExists(APIIdentifier apiIdentifier) {

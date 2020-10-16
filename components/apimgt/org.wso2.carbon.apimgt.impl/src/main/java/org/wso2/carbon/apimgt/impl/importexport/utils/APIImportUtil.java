@@ -499,7 +499,7 @@ public final class APIImportUtil {
             try {
                 URL wsdlFileUrl = new File(wsdlPath).toURI().toURL();
                 importedApi.setWsdlUrl(wsdlFileUrl.toString());
-                APIUtil.createWSDL(registry, importedApi);
+                APIUtil.createWSDLfromUrl(registry, importedApi);
                 apiProvider.updateAPI(importedApi);
             } catch (MalformedURLException e) {
                 //this exception is logged and ignored since WSDL is optional for an API

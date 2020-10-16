@@ -1,16 +1,13 @@
 package org.wso2.carbon.apimgt.persistence;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIPersistence;
-import org.wso2.carbon.apimgt.api.model.Organization;
 
 public class PersistenceManager {
-    String userName;
-    Organization org;
+  //  String userName;
+  //  Organization org;
     private static APIPersistence apiPersistenceInstance;
 
-    public static APIPersistence getPersistenceInstance(String userName, Organization org)
-                                    throws APIManagementException {
+    public static APIPersistence getPersistenceInstance(String userName) {
         //condition to check the configured Persistence type
         // if (Persistence type is Registry)
         if (apiPersistenceInstance == null) {
@@ -20,14 +17,14 @@ public class PersistenceManager {
                 }
             }
         }
-        //else if (Persistence type is MongoDb)
-        if (apiPersistenceInstance == null) {
+        /*//else if (Persistence type is MongoDb)
+        else if (apiPersistenceInstance == null) {
             synchronized (RegistryPersistenceImpl.class) {
                 if (apiPersistenceInstance == null) {
-                    apiPersistenceInstance = new RegistryPersistenceImpl(userName);
+                    apiPersistenceInstance = new MongoDBPersistenceImpl(userName);
                 }
             }
-        }
+        }*/
 
 
         return apiPersistenceInstance;

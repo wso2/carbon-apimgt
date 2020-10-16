@@ -9,7 +9,7 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 @Component(name = "org.wso2.apimgt.persistence.services", immediate = true) public class PersistenceManagerComponent {
 
@@ -18,7 +18,7 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
     private static TenantRegistryLoader tenantRegistryLoader;
 
     @Activate protected void activate(ComponentContext ctxt) {
-
+        log.info("Activating PersistenceManagerComponent ");
     }
 
     @Deactivate protected void deactivate(ComponentContext context) {
@@ -101,6 +101,20 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
     protected void unsetIndexLoader(TenantIndexingLoader registryService) {
         ServiceReferenceHolder.getInstance().setIndexLoaderService(null);
+    }
+
+    @Reference(
+        name = "config.context.service",
+        service = org.wso2.carbon.utils.ConfigurationContextService.class,
+        cardinality = ReferenceCardinality.MANDATORY,
+        policy = ReferencePolicy.DYNAMIC,
+        unbind = "unsetConfigurationContextService")
+    protected void setConfigurationContextService(ConfigurationContextService contextService) {
+        ServiceReferenceHolder.setContextService(contextService);
+    }
+
+    protected void unsetConfigurationContextService(ConfigurationContextService contextService) {
+        ServiceReferenceHolder.setContextService(null);
     }
 }
 

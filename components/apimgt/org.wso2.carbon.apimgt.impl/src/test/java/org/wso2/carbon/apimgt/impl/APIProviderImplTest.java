@@ -2633,7 +2633,7 @@ public class APIProviderImplTest {
         //Test WSDL endpoint API
         api.setEndpointConfig(EP_CONFIG_WSDL);
         PowerMockito.when(APIUtil.isValidWSDLURL(WSDL_URL, true)).thenReturn(true);
-        PowerMockito.when(APIUtil.createWSDL(apiProvider.registry, api)).thenReturn("wsdl_path");
+        PowerMockito.when(APIUtil.createWSDLfromUrl(apiProvider.registry, api)).thenReturn("wsdl_path");
 
         apiProvider.updateAPI(api);
         Assert.assertEquals(1, api.getEnvironments().size());

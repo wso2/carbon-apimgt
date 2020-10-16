@@ -89,6 +89,7 @@ import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
+import org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -157,12 +158,12 @@ public abstract class AbstractAPIManager implements APIManager {
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
-    protected Organization organization;
+   // protected Organization organization;
     protected String username;
     protected static final GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
     // Property to indicate whether access control restriction feature is enabled.
     protected boolean isAccessControlRestrictionEnabled = false;
-    private APIPersistence apiPersistenceInstance;
+    APIPersistence apiPersistenceInstance;
 
     private LRUCache<String, GenericArtifactManager> genericArtifactCache = new LRUCache<String, GenericArtifactManager>(
             5);
@@ -174,7 +175,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
         apiMgtDAO = ApiMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
-        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(username, organization);
 
         try {
             if (username == null) {
@@ -190,7 +190,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 int tenantId = getTenantManager().getTenantId(tenantDomainName);
                 this.tenantId = tenantId;
                 this.tenantDomain = tenantDomainName;
-                this.organization = new Organization(tenantDomain, tenantId, "registry");
+               // this.organization = new Organization(tenantDomain, tenantId, "registry");
                 this.username = tenantUserName;
 
                 loadTenantRegistry(tenantId);
@@ -224,6 +224,7 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Error while getting user registry for user:" + username;
             throw new APIManagementException(msg, e);
         }
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance("admin");
 
     }
 
