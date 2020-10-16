@@ -44,6 +44,8 @@ const config = {
     // mapping in case need to speed up the build time & reduce size
     resolve: {
         alias: {
+            OverrideData: path.resolve(__dirname, 'override/src/app/data/'),
+            OverrideComponents: path.resolve(__dirname, 'override/src/app/components/'),
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
             AppTests: path.resolve(__dirname, 'source/Tests/'),
