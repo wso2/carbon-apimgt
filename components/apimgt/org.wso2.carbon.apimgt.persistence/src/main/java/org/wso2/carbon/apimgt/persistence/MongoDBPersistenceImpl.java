@@ -55,10 +55,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
-    @Override public void createAPI(API api, List<Label> gatewayLabelList) throws APIManagementException {
-
-    }
-
     @Override public Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start,
                                     int end, boolean limitAttributes) {
         return null;

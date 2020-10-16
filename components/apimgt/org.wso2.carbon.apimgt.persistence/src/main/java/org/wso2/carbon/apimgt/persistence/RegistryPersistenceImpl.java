@@ -733,10 +733,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return false;
     }
 
-    @Override public void createAPI(API api) throws APIManagementException {
-    }
+//    @Override public void createAPI(API api) throws APIManagementException {
+//    }
 
-    @Override public void createAPI(API api, List<Label> gatewayLabelList) throws APIManagementException {
+    @Override public void createAPI(API api) throws APIManagementException {
         //Add default API LC if it is not there
         try {
             if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
@@ -800,7 +800,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             //                String path = APIUtil.saveWSDLResource(registry, api);
             //                //updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
             //            }
-           // RegistryPersistenceUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain, gatewayLabelList);
+           // // RegistryPersistenceUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain, gatewayLabelList);
             String apiStatus = api.getStatus();
             saveAPIStatus(artifactPath, apiStatus);
 
