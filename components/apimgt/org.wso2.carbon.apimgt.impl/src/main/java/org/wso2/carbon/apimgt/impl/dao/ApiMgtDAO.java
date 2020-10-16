@@ -4641,9 +4641,8 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            if (connection.getMetaData().getDriverName().contains("MS SQL")
-                    || connection.getMetaData().getDriverName().contains("Microsoft")
-                    || connection.getMetaData().getDriverName().contains("Oracle")) {
+            String driverName = connection.getMetaData().getDriverName();
+            if (driverName.contains("MS SQL") || driverName.contains("Microsoft") || driverName.contains("Oracle")) {
                 offset = start + offset;
             }
             // sortColumn, sortOrder variable values has sanitized in jaggery level (applications-list.jag)for security.
@@ -4654,7 +4653,7 @@ public class ApiMgtDAO {
                 sqlQuery = sqlQuery.replace("$2", "asc");
             }
 
-            if (connection.getMetaData().getDriverName().contains("Oracle") && "CREATED_BY".equals(sortColumn)) {
+            if (driverName.contains("Oracle") && "CREATED_BY".equals(sortColumn)) {
                 sqlQuery = sqlQuery.replace("$3", "APP.CREATED_BY");
             } else {
                 sqlQuery = sqlQuery.replace("$3", sortColumn);
