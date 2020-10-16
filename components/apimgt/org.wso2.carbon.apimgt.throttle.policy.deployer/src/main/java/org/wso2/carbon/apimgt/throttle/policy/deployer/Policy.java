@@ -16,25 +16,26 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.api.model.subscription;
+package org.wso2.carbon.apimgt.throttle.policy.deployer;
 
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 
 /**
  * Top level entity for representing a Throttling Policy.
  */
-public class Policy implements CacheableEntity<String> {
+public class Policy {
 
     public enum POLICY_TYPE {
         SUBSCRIPTION,
-        APPLICATION
+        APPLICATION,
+        API
     }
-    private int id = -1;
-    private int tenantId = -1;
+    private Integer id = null;
+    private Integer tenantId = null;
     private String name = null;
     private String quotaType = null;
-    private QuotaPolicy quotaPolicy;
+    private QuotaPolicy defaultLimit = null;
+
 
     public int getId() {
 
@@ -76,27 +77,16 @@ public class Policy implements CacheableEntity<String> {
         return name;
     }
 
-    public void setName(String name) {
+    public void setTierName(String name) {
 
         this.name = name;
     }
 
-    @Override
-    public String getCacheKey() {
-
-        return getPolicyCacheKey(getName(), getTenantId());
+    public QuotaPolicy getDefaultLimit() {
+        return defaultLimit;
     }
 
-    public static String getPolicyCacheKey(String tierName, int tenantId) {
-
-        return tierName + DELEM_PERIOD + tenantId;
-    }
-
-    public QuotaPolicy getQuotaPolicy() {
-        return quotaPolicy;
-    }
-
-    public void setQuotaPolicy(QuotaPolicy quotaPolicy) {
-        this.quotaPolicy = quotaPolicy;
+    public void setDefaultLimit(QuotaPolicy defaultLimit) {
+        this.defaultLimit = defaultLimit;
     }
 }

@@ -937,6 +937,8 @@ definitions:
             type: string
           stopOnQuotaReach:
             type: boolean
+          defaultLimit:
+            $ref: '#/definitions/ThrottleLimit'
 
   #-----------------------------------------------------
   # The GraphQL Query resource
@@ -1078,3 +1080,83 @@ definitions:
         description: |
           Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
+
+  #-----------------------------------------------------
+  # The Throttling Limit Base resource
+  #-----------------------------------------------------
+  ThrottleLimitBase:
+    title: Throttle Limit Base
+    required:
+      - timeUnit
+      - unitTime
+    properties:
+      timeUnit:
+        type: string
+        description: Unit of the time. Allowed values are "sec", "min", "hour", "day"
+        example: min
+      unitTime:
+        type: integer
+        default: 0
+        description: Time limit that the throttling limit applies.
+        example: 10
+
+  #-----------------------------------------------------
+  # The Throttling Limit resource
+  #-----------------------------------------------------
+  ThrottleLimit:
+    title: Throttle Limit
+    required:
+      - type
+    properties:
+      type:
+        type: string
+        enum:
+          - REQUESTCOUNTLIMIT
+          - BANDWIDTHLIMIT
+        description: |
+          Type of the throttling limit. Allowed values are "REQUESTCOUNTLIMIT" and "BANDWIDTHLIMIT".
+          Please see schemas of "RequestCountLimit" and "BandwidthLimit" throttling limit types in
+          Definitions section.
+        example: REQUESTCOUNTLIMIT
+      requestCount:
+        $ref: '#/definitions/RequestCountLimit'
+      bandwidth:
+        $ref: '#/definitions/BandwidthLimit'
+
+  #-----------------------------------------------------
+  # The Throttling Bandwidth Limit resource
+  #-----------------------------------------------------
+  BandwidthLimit:
+    title: Bandwidth Limit object
+    allOf:
+      - $ref: '#/definitions/ThrottleLimitBase'
+      - required:
+          - dataAmount
+          - dataUnit
+        properties:
+          dataAmount:
+            type: integer
+            format: int64
+            description: Amount of data allowed to be transfered
+            example: 1000
+          dataUnit:
+            type: string
+            description: Unit of data allowed to be transfered. Allowed values are "KB", "MB" and "GB"
+            example: KB
+
+  #-----------------------------------------------------
+  # The Throttling Request Count Limit resource
+  #-----------------------------------------------------
+  RequestCountLimit:
+    title: Request Count Limit object
+    allOf:
+      - $ref: '#/definitions/ThrottleLimitBase'
+      - required:
+          - requestCount
+        properties:
+          requestCount:
+            type: integer
+            format: int64
+            description: Maximum number of requests allowed
+            example: 1000
+

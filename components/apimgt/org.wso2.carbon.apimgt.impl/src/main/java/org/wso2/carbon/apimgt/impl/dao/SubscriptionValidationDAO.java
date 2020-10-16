@@ -24,16 +24,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.api.model.subscription.API;
-import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
-import org.wso2.carbon.apimgt.api.model.subscription.Application;
-import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
-import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
-import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.subscription.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -216,7 +213,7 @@ public class SubscriptionValidationDAO {
                 subscriptionPolicyDTO.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
                 subscriptionPolicyDTO.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
                 subscriptionPolicyDTO.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
-
+                setCommonProperties(subscriptionPolicyDTO, resultSet);
                 subscriptionPolicies.add(subscriptionPolicyDTO);
             }
         }
@@ -841,6 +838,8 @@ public class SubscriptionValidationDAO {
                         subscriptionPolicy.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
                         subscriptionPolicy.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
                         subscriptionPolicy.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
+
+                        setCommonProperties(subscriptionPolicy, resultSet);
                         return subscriptionPolicy;
                     }
                 }
@@ -850,6 +849,34 @@ public class SubscriptionValidationDAO {
             }
         }
         return null;
+    }
+
+    private void setCommonProperties(Policy policy, ResultSet resultSet) throws SQLException {
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        String prefix = "";
+
+        if (policy instanceof APIPolicy) {
+            prefix = "DEFAULT_";
+        }
+
+        quotaPolicy.setType(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+        if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equalsIgnoreCase(PolicyConstants.REQUEST_COUNT_TYPE)) {
+            RequestCountLimit reqLimit = new RequestCountLimit();
+            reqLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            reqLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            reqLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            quotaPolicy.setLimit(reqLimit);
+        } else if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equalsIgnoreCase(PolicyConstants.BANDWIDTH_TYPE)) {
+            BandwidthLimit bandLimit = new BandwidthLimit();
+            bandLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            bandLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            bandLimit.setDataAmount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            bandLimit.setDataUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
+            quotaPolicy.setLimit(bandLimit);
+        }
+        policy.setQuotaPolicy(quotaPolicy);
     }
 
     /*

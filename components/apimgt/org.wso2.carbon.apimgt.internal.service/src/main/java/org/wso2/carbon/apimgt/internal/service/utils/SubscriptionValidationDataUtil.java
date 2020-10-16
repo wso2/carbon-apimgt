@@ -21,36 +21,15 @@ package org.wso2.carbon.apimgt.internal.service.utils;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.subscription.API;
-import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
-import org.wso2.carbon.apimgt.api.model.subscription.Application;
-import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
-import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
-import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
-import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ScopesListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.subscription.*;
+import org.wso2.carbon.apimgt.internal.service.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -212,7 +191,7 @@ public class SubscriptionValidationDataUtil {
                 subscriptionPolicyDTO.setRateLimitCount(subscriptionPolicyModel.getRateLimitCount());
                 subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicyModel.isStopOnQuotaReach());
                 subscriptionPolicyDTO.setRateLimitTimeUnit(subscriptionPolicyModel.getRateLimitTimeUnit());
-
+                subscriptionPolicyDTO.setDefaultLimit(getThrottleLimitDTO(subscriptionPolicyModel));
                 subscriptionPolicyListDTO.getList().add(subscriptionPolicyDTO);
 
             }
@@ -222,6 +201,53 @@ public class SubscriptionValidationDataUtil {
             subscriptionPolicyListDTO.setCount(0);
         }
         return subscriptionPolicyListDTO;
+    }
+
+    public static ThrottleLimitDTO getThrottleLimitDTO(Policy policy) {
+
+        QuotaPolicy quotaPolicy = policy.getQuotaPolicy();
+        ThrottleLimitDTO defaultLimit = new ThrottleLimitDTO();
+        if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
+            RequestCountLimit requestCountLimit = (RequestCountLimit) quotaPolicy.getLimit();
+            defaultLimit.setType(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT);
+            defaultLimit.setRequestCount(fromRequestCountLimitToDTO(requestCountLimit));
+        } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
+            BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
+            defaultLimit.setType(ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT);
+            defaultLimit.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
+        }
+        return defaultLimit;
+    }
+
+    /**
+     * Converts a Bandwidth Limit model object into a Bandwidth Limit DTO object
+     *
+     * @param bandwidthLimit Bandwidth Limit model object
+     * @return Bandwidth Limit DTO object derived from model
+     */
+    public static BandwidthLimitDTO fromBandwidthLimitToDTO(BandwidthLimit bandwidthLimit) {
+
+        BandwidthLimitDTO dto = new BandwidthLimitDTO();
+        dto.setTimeUnit(bandwidthLimit.getTimeUnit());
+        dto.setUnitTime(bandwidthLimit.getUnitTime());
+        dto.setDataAmount(bandwidthLimit.getDataAmount());
+        dto.setDataUnit(bandwidthLimit.getDataUnit());
+        return dto;
+    }
+
+    /**
+     * Converts a Request Count Limit model object into a Request Count Limit DTO object
+     *
+     * @param requestCountLimit Request Count Limit model object
+     * @return Request Count DTO object derived from model
+     */
+    public static RequestCountLimitDTO fromRequestCountLimitToDTO(RequestCountLimit requestCountLimit) {
+
+        RequestCountLimitDTO dto = new RequestCountLimitDTO();
+        dto.setTimeUnit(requestCountLimit.getTimeUnit());
+        dto.setUnitTime(requestCountLimit.getUnitTime());
+        dto.setRequestCount(requestCountLimit.getRequestCount());
+        return dto;
     }
 
     public static ApplicationPolicyListDTO fromApplicationPolicyToApplicationPolicyListDTO(List<ApplicationPolicy> model) {

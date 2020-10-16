@@ -51,6 +51,7 @@
         <module>org.wso2.carbon.apimgt.tokenmgt.feature</module>
         <module>org.wso2.carbon.apimgt.internal.service.feature</module>
         <module>org.wso2.carbon.apimgt.cache.invalidation.feature</module>
+        <module>org.wso2.carbon.apimgt.throttle.policy.deployer.feature</module>
     </modules>
     <build>
         <plugins>

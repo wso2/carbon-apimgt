@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.wso2.carbon.apimgt.internal.service.dto.GraphQLQueryDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.PolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -27,6 +28,7 @@ public class SubscriptionPolicyDTO   {
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
     private Boolean stopOnQuotaReach = null;
+    private ThrottleLimitDTO defaultLimit = null;
 
   /**
    **/
@@ -183,6 +185,23 @@ public class SubscriptionPolicyDTO   {
     this.stopOnQuotaReach = stopOnQuotaReach;
   }
 
+  /**
+   **/
+  public SubscriptionPolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("defaultLimit")
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
+  }
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -201,12 +220,13 @@ public class SubscriptionPolicyDTO   {
         Objects.equals(graphQLMaxDepth, subscriptionPolicy.graphQLMaxDepth) &&
         Objects.equals(rateLimitCount, subscriptionPolicy.rateLimitCount) &&
         Objects.equals(rateLimitTimeUnit, subscriptionPolicy.rateLimitTimeUnit) &&
-        Objects.equals(stopOnQuotaReach, subscriptionPolicy.stopOnQuotaReach);
+        Objects.equals(stopOnQuotaReach, subscriptionPolicy.stopOnQuotaReach) &&
+        Objects.equals(defaultLimit, subscriptionPolicy.defaultLimit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType, graphQLMaxComplexity, graphQLMaxDepth, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach);
+    return Objects.hash(id, tenantId, name, quotaType, graphQLMaxComplexity, graphQLMaxDepth, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, defaultLimit);
   }
 
   @Override
@@ -223,6 +243,7 @@ public class SubscriptionPolicyDTO   {
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
     sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");
     sb.append("    stopOnQuotaReach: ").append(toIndentedString(stopOnQuotaReach)).append("\n");
+    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

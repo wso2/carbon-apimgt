@@ -251,7 +251,12 @@ public class SubscriptionValidationSQLConstants {
                     "   APS.STOP_ON_QUOTA_REACH AS STOP_ON_QUOTA_REACH," +
                     "   APS.TENANT_ID AS TENANT_ID," +
                     "   APS.MAX_DEPTH AS MAX_DEPTH,"+
-                    "   APS.MAX_COMPLEXITY AS MAX_COMPLEXITY" +
+                    "   APS.MAX_COMPLEXITY AS MAX_COMPLEXITY, " +
+                    "   APS.QUOTA_TYPE AS QUOTA_TYPE, " +
+                    "   APS.QUOTA AS QUOTA, " +
+                    "   APS.QUOTA_UNIT AS QUOTA_UNIT, " +
+                    "   APS.UNIT_TIME AS UNIT_TIME, " +
+                    "   APS.TIME_UNIT AS TIME_UNIT " +
                     " FROM " +
                     "   AM_POLICY_SUBSCRIPTION APS" +
                     " WHERE " +
@@ -267,7 +272,12 @@ public class SubscriptionValidationSQLConstants {
                     "   APS.STOP_ON_QUOTA_REACH AS STOP_ON_QUOTA_REACH, " +
                     "   APS.TENANT_ID AS TENANT_ID, " +
                     "   APS.MAX_DEPTH AS MAX_DEPTH, " +
-                    "   APS.MAX_COMPLEXITY AS MAX_COMPLEXITY" +
+                    "   APS.MAX_COMPLEXITY AS MAX_COMPLEXITY, " +
+                    "   APS.QUOTA_TYPE AS QUOTA_TYPE, " +
+                    "   APS.QUOTA AS QUOTA, " +
+                    "   APS.QUOTA_UNIT AS QUOTA_UNIT, " +
+                    "   APS.UNIT_TIME AS UNIT_TIME, " +
+                    "   APS.TIME_UNIT AS TIME_UNIT " +
                     " FROM " +
                     "   AM_POLICY_SUBSCRIPTION APS" +
                     " WHERE " +

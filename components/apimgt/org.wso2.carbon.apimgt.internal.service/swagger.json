@@ -1140,6 +1140,9 @@
           },
           "stopOnQuotaReach" : {
             "type" : "boolean"
+          },
+          "defaultLimit" : {
+            "$ref" : "#/definitions/ThrottleLimit"
           }
         }
       } ]
@@ -1300,6 +1303,77 @@
         }
       },
       "title" : "Pagination"
+    },
+    "ThrottleLimitBase" : {
+      "required" : [ "timeUnit", "unitTime" ],
+      "properties" : {
+        "timeUnit" : {
+          "type" : "string",
+          "example" : "min",
+          "description" : "Unit of the time. Allowed values are \"sec\", \"min\", \"hour\", \"day\""
+        },
+        "unitTime" : {
+          "type" : "integer",
+          "example" : 10,
+          "description" : "Time limit that the throttling limit applies."
+        }
+      },
+      "title" : "Throttle Limit Base"
+    },
+    "ThrottleLimit" : {
+      "required" : [ "type" ],
+      "properties" : {
+        "type" : {
+          "type" : "string",
+          "example" : "REQUESTCOUNTLIMIT",
+          "description" : "Type of the throttling limit. Allowed values are \"REQUESTCOUNTLIMIT\" and \"BANDWIDTHLIMIT\".\nPlease see schemas of \"RequestCountLimit\" and \"BandwidthLimit\" throttling limit types in\nDefinitions section.\n",
+          "enum" : [ "REQUESTCOUNTLIMIT", "BANDWIDTHLIMIT" ]
+        },
+        "requestCount" : {
+          "$ref" : "#/definitions/RequestCountLimit"
+        },
+        "bandwidth" : {
+          "$ref" : "#/definitions/BandwidthLimit"
+        }
+      },
+      "title" : "Throttle Limit"
+    },
+    "BandwidthLimit" : {
+      "title" : "Bandwidth Limit object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/ThrottleLimitBase"
+      }, {
+        "required" : [ "dataAmount", "dataUnit" ],
+        "properties" : {
+          "dataAmount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 1000,
+            "description" : "Amount of data allowed to be transfered"
+          },
+          "dataUnit" : {
+            "type" : "string",
+            "example" : "KB",
+            "description" : "Unit of data allowed to be transfered. Allowed values are \"KB\", \"MB\" and \"GB\""
+          }
+        }
+      } ]
+    },
+    "RequestCountLimit" : {
+      "title" : "Request Count Limit object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/ThrottleLimitBase"
+      }, {
+        "required" : [ "requestCount" ],
+        "properties" : {
+          "requestCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 1000,
+            "description" : "Maximum number of requests allowed"
+          }
+        }
+      } ]
     }
   },
   "parameters" : {
