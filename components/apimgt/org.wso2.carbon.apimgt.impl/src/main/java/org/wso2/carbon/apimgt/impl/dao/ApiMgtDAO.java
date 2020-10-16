@@ -4654,6 +4654,12 @@ public class ApiMgtDAO {
                 sqlQuery = sqlQuery.replace("$2", "asc");
             }
 
+            if (connection.getMetaData().getDriverName().contains("Oracle") && "CREATED_BY".equals(sortColumn)) {
+                sqlQuery = sqlQuery.replace("$3", "APP.CREATED_BY");
+            } else {
+                sqlQuery = sqlQuery.replace("$3", sortColumn);
+            }
+            
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());

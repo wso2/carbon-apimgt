@@ -29,7 +29,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   row_number() over (order by $1 $2) r," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -61,7 +61,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   row_number() over (order by $1 $2) r," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -90,7 +90,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   row_number() over (order by $1 $2) r," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -125,7 +125,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   row_number() over (order by $1 $2) r," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -161,7 +161,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   row_number() over (order by $1 $2) r," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -191,7 +191,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   row_number() over (order by $1 $2) r," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
