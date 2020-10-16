@@ -342,7 +342,7 @@
   "Base.Header.headersearch.SearchUtils.lcState.published": "Production",
   "Base.index.banner.alt": "Dev Portal Banner",
   "Base.index.copyright.text": "WSO2 API-M v3.2.0 | © 2020 WSO2 Inc",
-  "Base.index.go.to.public.store": "Go to public Dev Portal",
+  "Base.index.go.to.public.store": "Switch Dev Portals",
   "Base.index.logo.alt": "Dev Portal",
   "Base.index.logout": "Logout",
   "Base.index.settingsMenu.alertConfiguration": "Configure Alerts",
