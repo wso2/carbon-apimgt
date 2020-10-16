@@ -74,8 +74,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
         this.registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         try {
             // is it ok to reuse artifactManager object TODO : resolve this concern
-            this.apiGenericArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            this.registry = getRegistryService().getGovernanceUserRegistry();
+            // this.registry = getRegistryService().getGovernanceUserRegistry();
+
 
             if (username == null) {
 
@@ -85,6 +85,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 this.username = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
                 ServiceReferenceHolder.setUserRealm((ServiceReferenceHolder.getInstance().getRealmService()
                                                 .getBootstrapRealm()));
+                this.apiGenericArtifactManager = RegistryPersistenceUtil.getArtifactManager(this.registry,
+                                                APIConstants.API_KEY);
             } else {
                 String tenantDomainName = MultitenantUtils.getTenantDomain(username);
                 String tenantUserName = getTenantAwareUsername(username);
@@ -116,6 +118,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
                 ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().
                                                 getRealmService().getTenantUserRealm(tenantId)));
+                this.apiGenericArtifactManager = RegistryPersistenceUtil.getArtifactManager(this.registry,
+                                                APIConstants.API_KEY);
             }
         } catch (RegistryException e) {
 
@@ -796,7 +800,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             //                String path = APIUtil.saveWSDLResource(registry, api);
             //                //updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
             //            }
-            RegistryPersistenceUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain, gatewayLabelList);
+           // RegistryPersistenceUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain, gatewayLabelList);
             String apiStatus = api.getStatus();
             saveAPIStatus(artifactPath, apiStatus);
 
