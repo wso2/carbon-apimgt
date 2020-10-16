@@ -323,7 +323,7 @@ const DefaultConfigurations = {
             This is the config for the public teant store.
             Set "active: false" to redirect the teant user to the url
             given by redirectToIfInactive. It will also hide the link
-            GO TO PUBLIC DEV PORTAL link at the header.
+            SWITCH DEV PORTALS link at the header.
         */
        publicTenantStore: {
             active: true,
