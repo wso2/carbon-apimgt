@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.net.URL;
@@ -78,6 +79,7 @@ public class PolicyRetriever {
             } else {
                 throw new ArtifactSynchronizerException("HTTP response is empty");
             }
+            subscriptionPolicy.setTenantDomain(APIUtil.getTenantDomainFromTenantId(subscriptionPolicy.getTenantId()));
             return subscriptionPolicy;
         } catch (IOException e) {
             String msg = "Error while executing the http client";

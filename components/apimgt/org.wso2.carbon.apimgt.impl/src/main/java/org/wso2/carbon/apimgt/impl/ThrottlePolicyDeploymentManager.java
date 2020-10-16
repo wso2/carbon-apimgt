@@ -78,7 +78,7 @@ public class ThrottlePolicyDeploymentManager {
      */
     public void updatePolicyToGlobalCEP(String policyName, String policy) throws APIManagementException {
         try {
-            globalThrottleEngineClient.updateExecutionPlan(policyName, policy);
+//            globalThrottleEngineClient.updateExecutionPlan(policyName, policy);
         } catch (Exception e) {
             log.error("Error while updating policy to global policy server." + e.getMessage());
             throw new APIManagementException(e);

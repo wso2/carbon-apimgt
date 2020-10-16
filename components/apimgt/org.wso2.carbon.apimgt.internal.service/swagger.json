@@ -1321,13 +1321,9 @@
       "title" : "Throttle Limit Base"
     },
     "ThrottleLimit" : {
-      "required" : [ "type" ],
       "properties" : {
-        "type" : {
-          "type" : "string",
-          "example" : "REQUESTCOUNTLIMIT",
-          "description" : "Type of the throttling limit. Allowed values are \"REQUESTCOUNTLIMIT\" and \"BANDWIDTHLIMIT\".\nPlease see schemas of \"RequestCountLimit\" and \"BandwidthLimit\" throttling limit types in\nDefinitions section.\n",
-          "enum" : [ "REQUESTCOUNTLIMIT", "BANDWIDTHLIMIT" ]
+        "quotaType" : {
+          "type" : "string"
         },
         "requestCount" : {
           "$ref" : "#/definitions/RequestCountLimit"

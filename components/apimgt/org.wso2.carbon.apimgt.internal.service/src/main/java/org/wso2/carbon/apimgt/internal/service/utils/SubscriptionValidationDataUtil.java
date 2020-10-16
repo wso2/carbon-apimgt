@@ -207,13 +207,12 @@ public class SubscriptionValidationDataUtil {
 
         QuotaPolicy quotaPolicy = policy.getQuotaPolicy();
         ThrottleLimitDTO defaultLimit = new ThrottleLimitDTO();
+        defaultLimit.setQuotaType(quotaPolicy.getType());
         if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
             RequestCountLimit requestCountLimit = (RequestCountLimit) quotaPolicy.getLimit();
-            defaultLimit.setType(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT);
             defaultLimit.setRequestCount(fromRequestCountLimitToDTO(requestCountLimit));
         } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
             BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
-            defaultLimit.setType(ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT);
             defaultLimit.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
         }
         return defaultLimit;

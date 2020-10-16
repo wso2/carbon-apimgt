@@ -1108,16 +1108,8 @@ definitions:
     required:
       - type
     properties:
-      type:
-        type: string
-        enum:
-          - REQUESTCOUNTLIMIT
-          - BANDWIDTHLIMIT
-        description: |
-          Type of the throttling limit. Allowed values are "REQUESTCOUNTLIMIT" and "BANDWIDTHLIMIT".
-          Please see schemas of "RequestCountLimit" and "BandwidthLimit" throttling limit types in
-          Definitions section.
-        example: REQUESTCOUNTLIMIT
+      quotaType:
+          type: string
       requestCount:
         $ref: '#/definitions/RequestCountLimit'
       bandwidth:

@@ -17,60 +17,25 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class ThrottleLimitDTO   {
   
-
-@XmlType(name="TypeEnum")
-@XmlEnum(String.class)
-public enum TypeEnum {
-
-    @XmlEnumValue("REQUESTCOUNTLIMIT") REQUESTCOUNTLIMIT(String.valueOf("REQUESTCOUNTLIMIT")), @XmlEnumValue("BANDWIDTHLIMIT") BANDWIDTHLIMIT(String.valueOf("BANDWIDTHLIMIT"));
-
-
-    private String value;
-
-    TypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TypeEnum fromValue(String v) {
-        for (TypeEnum b : TypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
-        }
-        return null;
-    }
-}
-
-    private TypeEnum type = null;
+    private String quotaType = null;
     private RequestCountLimitDTO requestCount = null;
     private BandwidthLimitDTO bandwidth = null;
 
   /**
-   * Type of the throttling limit. Allowed values are \&quot;REQUESTCOUNTLIMIT\&quot; and \&quot;BANDWIDTHLIMIT\&quot;. Please see schemas of \&quot;RequestCountLimit\&quot; and \&quot;BandwidthLimit\&quot; throttling limit types in Definitions section. 
    **/
-  public ThrottleLimitDTO type(TypeEnum type) {
-    this.type = type;
+  public ThrottleLimitDTO quotaType(String quotaType) {
+    this.quotaType = quotaType;
     return this;
   }
 
   
-  @ApiModelProperty(example = "REQUESTCOUNTLIMIT", required = true, value = "Type of the throttling limit. Allowed values are \"REQUESTCOUNTLIMIT\" and \"BANDWIDTHLIMIT\". Please see schemas of \"RequestCountLimit\" and \"BandwidthLimit\" throttling limit types in Definitions section. ")
-  @JsonProperty("type")
-  @NotNull
-  public TypeEnum getType() {
-    return type;
+  @ApiModelProperty(value = "")
+  @JsonProperty("quotaType")
+  public String getQuotaType() {
+    return quotaType;
   }
-  public void setType(TypeEnum type) {
-    this.type = type;
+  public void setQuotaType(String quotaType) {
+    this.quotaType = quotaType;
   }
 
   /**
@@ -117,14 +82,14 @@ public enum TypeEnum {
       return false;
     }
     ThrottleLimitDTO throttleLimit = (ThrottleLimitDTO) o;
-    return Objects.equals(type, throttleLimit.type) &&
+    return Objects.equals(quotaType, throttleLimit.quotaType) &&
         Objects.equals(requestCount, throttleLimit.requestCount) &&
         Objects.equals(bandwidth, throttleLimit.bandwidth);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, requestCount, bandwidth);
+    return Objects.hash(quotaType, requestCount, bandwidth);
   }
 
   @Override
@@ -132,7 +97,7 @@ public enum TypeEnum {
     StringBuilder sb = new StringBuilder();
     sb.append("class ThrottleLimitDTO {\n");
     
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("    bandwidth: ").append(toIndentedString(bandwidth)).append("\n");
     sb.append("}");

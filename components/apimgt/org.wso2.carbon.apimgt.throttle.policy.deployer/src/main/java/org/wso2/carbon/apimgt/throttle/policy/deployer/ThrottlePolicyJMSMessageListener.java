@@ -26,6 +26,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.template.APITemplateException;
+import org.wso2.carbon.event.processor.stub.EventProcessorAdminService;
 
 import javax.jms.*;
 import java.util.Enumeration;
@@ -102,8 +104,16 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                 SubscriptionPolicyEvent policyEvent = new Gson().fromJson(eventJson, SubscriptionPolicyEvent.class);
                 if (updatePolicy) {
                     try {
-                        policyRetriever.retrieveSubscriptionPolicy(policyEvent.getPolicyName(),
+                        SubscriptionPolicy subscriptionPolicy = policyRetriever.retrieveSubscriptionPolicy(policyEvent.getPolicyName(),
                                 policyEvent.getTenantDomain());
+                        ThrottlePolicyTemplateBuilder policyTemplateBuilder = new ThrottlePolicyTemplateBuilder();
+                        try {
+                            String policyString = policyTemplateBuilder.getThrottlePolicyForSubscriptionLevel(subscriptionPolicy);
+                            log.info(policyString);
+//                            EventProcessorAdminService eventProcessorAdminService = CarbonEvent
+                        } catch (APITemplateException e) {
+                            e.printStackTrace();
+                        }
                     } catch (ArtifactSynchronizerException e) {
                         e.printStackTrace();
                     }

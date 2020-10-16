@@ -21,16 +21,16 @@ package org.wso2.carbon.apimgt.throttle.policy.deployer;
 
 public class QuotaPolicy {
 
-    private String type;
+    private String quotaType;
     private RequestCountLimit requestCount;
     private BandwidthLimit bandwidth;
 
-    public String getType() {
-        return type;
+    public String getQuotaType() {
+        return quotaType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setQuotaType(String quotaType) {
+        this.quotaType = quotaType;
     }
 
     public RequestCountLimit getRequestCount() {
@@ -47,5 +47,12 @@ public class QuotaPolicy {
 
     public void setBandwidth(BandwidthLimit bandwidth) {
         this.bandwidth = bandwidth;
+    }
+
+    public Limit getLimit() {
+        if (this.requestCount != null) {
+            return this.requestCount;
+        }
+        return this.bandwidth;
     }
 }

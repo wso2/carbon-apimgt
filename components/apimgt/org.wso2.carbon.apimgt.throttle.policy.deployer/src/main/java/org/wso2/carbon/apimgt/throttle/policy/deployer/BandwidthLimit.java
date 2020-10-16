@@ -1,26 +1,8 @@
 package org.wso2.carbon.apimgt.throttle.policy.deployer;
 
-public class BandwidthLimit {
-    private String timeUnit;
-    private int unitTime;
+public class BandwidthLimit extends Limit {
     private long dataAmount;
     private String dataUnit;
-
-    public String getTimeUnit() {
-        return timeUnit;
-    }
-
-    public void setTimeUnit(String timeUnit) {
-        this.timeUnit = timeUnit;
-    }
-
-    public int getUnitTime() {
-        return unitTime;
-    }
-
-    public void setUnitTime(int unitTime) {
-        this.unitTime = unitTime;
-    }
 
     public long getDataAmount() {
         return dataAmount;

@@ -32,6 +32,7 @@ public class Policy {
     }
     private Integer id = null;
     private Integer tenantId = null;
+    private String tenantDomain = null;
     private String name = null;
     private String quotaType = null;
     private QuotaPolicy defaultLimit = null;
@@ -88,5 +89,13 @@ public class Policy {
 
     public void setDefaultLimit(QuotaPolicy defaultLimit) {
         this.defaultLimit = defaultLimit;
+    }
+
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
     }
 }

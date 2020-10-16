@@ -18,15 +18,30 @@
 
 package org.wso2.carbon.apimgt.throttle.policy.deployer;
 
-public class RequestCountLimit extends Limit {
+public class Limit {
 
-    private int requestCount;
+    private String timeUnit;
+    private int unitTime;
 
-    public int getRequestCount() {
-        return requestCount;
+    public String getTimeUnit() {
+        return timeUnit;
     }
 
-    public void setRequestCount(int requestCount) {
-        this.requestCount = requestCount;
+    public void setTimeUnit(String timeUnit) {
+        this.timeUnit = timeUnit;
     }
+
+    public int getUnitTime() {
+        return unitTime;
+    }
+
+    public void setUnitTime(int unitTime) {
+        this.unitTime = unitTime;
+    }
+
+    @Override
+    public String toString() {
+        return "Limit [timeUnit=" + timeUnit + ", unitTime=" + unitTime + "]";
+    }
+    
 }
