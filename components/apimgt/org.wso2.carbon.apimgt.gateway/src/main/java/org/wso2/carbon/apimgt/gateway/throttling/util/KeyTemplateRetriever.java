@@ -25,6 +25,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -97,8 +98,13 @@ public class KeyTemplateRetriever extends TimerTask {
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (responseString != null && !responseString.isEmpty()) {
-                JSONArray jsonArray = (JSONArray) new JSONParser().parse(responseString);
-                return (String[]) jsonArray.toArray(new String[jsonArray.size()]);
+                Object jsonObject = new JSONParser().parse(responseString);
+                if (jsonObject instanceof JSONArray) {
+                    JSONArray jsonArray = (JSONArray) new JSONParser().parse(responseString);
+                    return (String[]) jsonArray.toArray(new String[jsonArray.size()]);
+                } else {
+                    log.error("Invalid throttling data response: " + responseString);
+                }
             }
         } catch (IOException | InterruptedException | ParseException e) {
             log.error("Exception when retrieving throttling data from remote endpoint ", e);
