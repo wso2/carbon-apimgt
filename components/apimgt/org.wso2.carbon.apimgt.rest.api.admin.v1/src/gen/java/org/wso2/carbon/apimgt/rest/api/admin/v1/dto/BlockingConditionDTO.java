@@ -14,6 +14,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 @ApiModel(description = "Blocking Conditions")
 
@@ -21,38 +22,39 @@ public class BlockingConditionDTO   {
   
     private String conditionId = null;
 
-@XmlType(name="ConditionTypeEnum")
-@XmlEnum(String.class)
-public enum ConditionTypeEnum {
+    @XmlType(name="ConditionTypeEnum")
+    @XmlEnum(String.class)
+    public enum ConditionTypeEnum {
+        API("API"),
+        APPLICATION("APPLICATION"),
+        IP("IP"),
+        IPRANGE("IPRANGE"),
+        USER("USER");
+        private String value;
 
-    @XmlEnumValue("API") API(String.valueOf("API")), @XmlEnumValue("APPLICATION") APPLICATION(String.valueOf("APPLICATION")), @XmlEnumValue("IP") IP(String.valueOf("IP")), @XmlEnumValue("IPRANGE") IPRANGE(String.valueOf("IPRANGE")), @XmlEnumValue("USER") USER(String.valueOf("USER"));
-
-
-    private String value;
-
-    ConditionTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static ConditionTypeEnum fromValue(String v) {
-        for (ConditionTypeEnum b : ConditionTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        ConditionTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ConditionTypeEnum fromValue(String v) {
+            for (ConditionTypeEnum b : ConditionTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private ConditionTypeEnum conditionType = null;
     private Object conditionValue = null;
     private Boolean conditionStatus = null;

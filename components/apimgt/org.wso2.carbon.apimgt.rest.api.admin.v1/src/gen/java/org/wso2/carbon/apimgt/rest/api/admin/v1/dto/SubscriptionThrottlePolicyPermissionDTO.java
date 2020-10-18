@@ -12,44 +12,43 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class SubscriptionThrottlePolicyPermissionDTO   {
   
 
-@XmlType(name="PermissionTypeEnum")
-@XmlEnum(String.class)
-public enum PermissionTypeEnum {
+    @XmlType(name="PermissionTypeEnum")
+    @XmlEnum(String.class)
+    public enum PermissionTypeEnum {
+        ALLOW("ALLOW"),
+        DENY("DENY");
+        private String value;
 
-    @XmlEnumValue("ALLOW") ALLOW(String.valueOf("ALLOW")), @XmlEnumValue("DENY") DENY(String.valueOf("DENY"));
-
-
-    private String value;
-
-    PermissionTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static PermissionTypeEnum fromValue(String v) {
-        for (PermissionTypeEnum b : PermissionTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        PermissionTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static PermissionTypeEnum fromValue(String v) {
+            for (PermissionTypeEnum b : PermissionTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private PermissionTypeEnum permissionType = null;
     private List<String> roles = new ArrayList<String>();
 

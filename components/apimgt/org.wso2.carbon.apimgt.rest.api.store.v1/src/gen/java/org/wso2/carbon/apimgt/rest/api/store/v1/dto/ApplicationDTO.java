@@ -16,6 +16,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -26,38 +27,36 @@ public class ApplicationDTO   {
     private String throttlingPolicy = null;
     private String description = null;
 
-@XmlType(name="TokenTypeEnum")
-@XmlEnum(String.class)
-public enum TokenTypeEnum {
+    @XmlType(name="TokenTypeEnum")
+    @XmlEnum(String.class)
+    public enum TokenTypeEnum {
+        OAUTH("OAUTH"),
+        JWT("JWT");
+        private String value;
 
-    @XmlEnumValue("OAUTH") OAUTH(String.valueOf("OAUTH")), @XmlEnumValue("JWT") JWT(String.valueOf("JWT"));
-
-
-    private String value;
-
-    TokenTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TokenTypeEnum fromValue(String v) {
-        for (TokenTypeEnum b : TokenTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        TokenTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TokenTypeEnum fromValue(String v) {
+            for (TokenTypeEnum b : TokenTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private TokenTypeEnum tokenType = TokenTypeEnum.JWT;
     private String status = "";
     private List<String> groups = new ArrayList<String>();

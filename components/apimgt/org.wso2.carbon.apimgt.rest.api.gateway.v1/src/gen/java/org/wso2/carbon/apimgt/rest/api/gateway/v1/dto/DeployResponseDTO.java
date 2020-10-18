@@ -10,44 +10,43 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class DeployResponseDTO   {
   
 
-@XmlType(name="DeployStatusEnum")
-@XmlEnum(String.class)
-public enum DeployStatusEnum {
+    @XmlType(name="DeployStatusEnum")
+    @XmlEnum(String.class)
+    public enum DeployStatusEnum {
+        DEPLOYED("DEPLOYED"),
+        ERROR("ERROR");
+        private String value;
 
-    @XmlEnumValue("DEPLOYED") DEPLOYED(String.valueOf("DEPLOYED")), @XmlEnumValue("ERROR") ERROR(String.valueOf("ERROR"));
-
-
-    private String value;
-
-    DeployStatusEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static DeployStatusEnum fromValue(String v) {
-        for (DeployStatusEnum b : DeployStatusEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        DeployStatusEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static DeployStatusEnum fromValue(String v) {
+            for (DeployStatusEnum b : DeployStatusEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private DeployStatusEnum deployStatus = null;
     private String jsonPayload = null;
 

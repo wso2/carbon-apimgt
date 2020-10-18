@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -31,38 +32,36 @@ public class APIProductDTO   {
     private String provider = null;
     private Boolean hasThumbnail = null;
 
-@XmlType(name="StateEnum")
-@XmlEnum(String.class)
-public enum StateEnum {
+    @XmlType(name="StateEnum")
+    @XmlEnum(String.class)
+    public enum StateEnum {
+        CREATED("CREATED"),
+        PUBLISHED("PUBLISHED");
+        private String value;
 
-    @XmlEnumValue("CREATED") CREATED(String.valueOf("CREATED")), @XmlEnumValue("PUBLISHED") PUBLISHED(String.valueOf("PUBLISHED"));
-
-
-    private String value;
-
-    StateEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static StateEnum fromValue(String v) {
-        for (StateEnum b : StateEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        StateEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StateEnum fromValue(String v) {
+            for (StateEnum b : StateEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private StateEnum state = null;
     private Boolean enableSchemaValidation = null;
     private Boolean enableStore = null;
@@ -70,110 +69,105 @@ public enum StateEnum {
     private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
 
-@XmlType(name="VisibilityEnum")
-@XmlEnum(String.class)
-public enum VisibilityEnum {
+    @XmlType(name="VisibilityEnum")
+    @XmlEnum(String.class)
+    public enum VisibilityEnum {
+        PUBLIC("PUBLIC"),
+        PRIVATE("PRIVATE"),
+        RESTRICTED("RESTRICTED");
+        private String value;
 
-    @XmlEnumValue("PUBLIC") PUBLIC(String.valueOf("PUBLIC")), @XmlEnumValue("PRIVATE") PRIVATE(String.valueOf("PRIVATE")), @XmlEnumValue("RESTRICTED") RESTRICTED(String.valueOf("RESTRICTED"));
-
-
-    private String value;
-
-    VisibilityEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static VisibilityEnum fromValue(String v) {
-        for (VisibilityEnum b : VisibilityEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        VisibilityEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static VisibilityEnum fromValue(String v) {
+            for (VisibilityEnum b : VisibilityEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
     private List<String> visibleRoles = new ArrayList<String>();
     private List<String> visibleTenants = new ArrayList<String>();
 
-@XmlType(name="AccessControlEnum")
-@XmlEnum(String.class)
-public enum AccessControlEnum {
+    @XmlType(name="AccessControlEnum")
+    @XmlEnum(String.class)
+    public enum AccessControlEnum {
+        NONE("NONE"),
+        RESTRICTED("RESTRICTED");
+        private String value;
 
-    @XmlEnumValue("NONE") NONE(String.valueOf("NONE")), @XmlEnumValue("RESTRICTED") RESTRICTED(String.valueOf("RESTRICTED"));
-
-
-    private String value;
-
-    AccessControlEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static AccessControlEnum fromValue(String v) {
-        for (AccessControlEnum b : AccessControlEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        AccessControlEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static AccessControlEnum fromValue(String v) {
+            for (AccessControlEnum b : AccessControlEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<String>();
     private List<String> gatewayEnvironments = new ArrayList<String>();
 
-@XmlType(name="ApiTypeEnum")
-@XmlEnum(String.class)
-public enum ApiTypeEnum {
+    @XmlType(name="ApiTypeEnum")
+    @XmlEnum(String.class)
+    public enum ApiTypeEnum {
+        API("API"),
+        APIPRODUCT("APIProduct");
+        private String value;
 
-    @XmlEnumValue("API") API(String.valueOf("API")), @XmlEnumValue("APIProduct") APIPRODUCT(String.valueOf("APIProduct"));
-
-
-    private String value;
-
-    ApiTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static ApiTypeEnum fromValue(String v) {
-        for (ApiTypeEnum b : ApiTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        ApiTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ApiTypeEnum fromValue(String v) {
+            for (ApiTypeEnum b : ApiTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private ApiTypeEnum apiType = null;
     private List<String> transport = new ArrayList<String>();
     private List<String> tags = new ArrayList<String>();
@@ -182,38 +176,37 @@ public enum ApiTypeEnum {
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<String>();
 
-@XmlType(name="SubscriptionAvailabilityEnum")
-@XmlEnum(String.class)
-public enum SubscriptionAvailabilityEnum {
+    @XmlType(name="SubscriptionAvailabilityEnum")
+    @XmlEnum(String.class)
+    public enum SubscriptionAvailabilityEnum {
+        CURRENT_TENANT("CURRENT_TENANT"),
+        ALL_TENANTS("ALL_TENANTS"),
+        SPECIFIC_TENANTS("SPECIFIC_TENANTS");
+        private String value;
 
-    @XmlEnumValue("CURRENT_TENANT") CURRENT_TENANT(String.valueOf("CURRENT_TENANT")), @XmlEnumValue("ALL_TENANTS") ALL_TENANTS(String.valueOf("ALL_TENANTS")), @XmlEnumValue("SPECIFIC_TENANTS") SPECIFIC_TENANTS(String.valueOf("SPECIFIC_TENANTS"));
-
-
-    private String value;
-
-    SubscriptionAvailabilityEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static SubscriptionAvailabilityEnum fromValue(String v) {
-        for (SubscriptionAvailabilityEnum b : SubscriptionAvailabilityEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        SubscriptionAvailabilityEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static SubscriptionAvailabilityEnum fromValue(String v) {
+            for (SubscriptionAvailabilityEnum b : SubscriptionAvailabilityEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();

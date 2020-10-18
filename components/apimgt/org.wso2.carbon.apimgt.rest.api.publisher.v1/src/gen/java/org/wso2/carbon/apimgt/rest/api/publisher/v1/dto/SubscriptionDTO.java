@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -20,38 +21,39 @@ public class SubscriptionDTO   {
     private ApplicationInfoDTO applicationInfo = null;
     private String throttlingPolicy = null;
 
-@XmlType(name="SubscriptionStatusEnum")
-@XmlEnum(String.class)
-public enum SubscriptionStatusEnum {
+    @XmlType(name="SubscriptionStatusEnum")
+    @XmlEnum(String.class)
+    public enum SubscriptionStatusEnum {
+        BLOCKED("BLOCKED"),
+        PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"),
+        UNBLOCKED("UNBLOCKED"),
+        ON_HOLD("ON_HOLD"),
+        REJECTED("REJECTED");
+        private String value;
 
-    @XmlEnumValue("BLOCKED") BLOCKED(String.valueOf("BLOCKED")), @XmlEnumValue("PROD_ONLY_BLOCKED") PROD_ONLY_BLOCKED(String.valueOf("PROD_ONLY_BLOCKED")), @XmlEnumValue("UNBLOCKED") UNBLOCKED(String.valueOf("UNBLOCKED")), @XmlEnumValue("ON_HOLD") ON_HOLD(String.valueOf("ON_HOLD")), @XmlEnumValue("REJECTED") REJECTED(String.valueOf("REJECTED"));
-
-
-    private String value;
-
-    SubscriptionStatusEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static SubscriptionStatusEnum fromValue(String v) {
-        for (SubscriptionStatusEnum b : SubscriptionStatusEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        SubscriptionStatusEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static SubscriptionStatusEnum fromValue(String v) {
+            for (SubscriptionStatusEnum b : SubscriptionStatusEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private SubscriptionStatusEnum subscriptionStatus = null;
 
   /**

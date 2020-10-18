@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -19,38 +20,36 @@ public class ApplicationKeyMappingRequestDTO   {
     private String consumerSecret = null;
     private String keyManager = null;
 
-@XmlType(name="KeyTypeEnum")
-@XmlEnum(String.class)
-public enum KeyTypeEnum {
+    @XmlType(name="KeyTypeEnum")
+    @XmlEnum(String.class)
+    public enum KeyTypeEnum {
+        PRODUCTION("PRODUCTION"),
+        SANDBOX("SANDBOX");
+        private String value;
 
-    @XmlEnumValue("PRODUCTION") PRODUCTION(String.valueOf("PRODUCTION")), @XmlEnumValue("SANDBOX") SANDBOX(String.valueOf("SANDBOX"));
-
-
-    private String value;
-
-    KeyTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static KeyTypeEnum fromValue(String v) {
-        for (KeyTypeEnum b : KeyTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        KeyTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static KeyTypeEnum fromValue(String v) {
+            for (KeyTypeEnum b : KeyTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private KeyTypeEnum keyType = null;
 
   /**
