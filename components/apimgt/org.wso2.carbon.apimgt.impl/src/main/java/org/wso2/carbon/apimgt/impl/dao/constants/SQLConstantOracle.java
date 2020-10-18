@@ -29,7 +29,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   rownum r ," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -50,7 +50,7 @@ public class SQLConstantOracle extends SQLConstants{
                     "   (GROUP_ID= ?  OR  ((GROUP_ID='' OR GROUP_ID IS NULL ) AND SUB.USER_ID=?))" +
                     " And " +
                     "    NAME like ?" +
-                    " ) a WHERE r BETWEEN ?+1 AND  r+?"+
+                    " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
 
@@ -61,7 +61,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   rownum r," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -82,7 +82,7 @@ public class SQLConstantOracle extends SQLConstants{
                     "   (GROUP_ID= ?  OR ((GROUP_ID='' OR GROUP_ID IS NULL ) AND LOWER (SUB.USER_ID) = LOWER(?)))"+
                     " And "+
                     "    NAME like ?"+
-                    " ) a WHERE r BETWEEN ?+1 AND  r+?"+
+                    " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
 
@@ -90,7 +90,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   rownum r ," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -116,7 +116,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " )" +
                     " And " +
                     "    NAME like ?" +
-                    " ) a WHERE r BETWEEN ?+1 AND  r+?"+
+                    " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
 
@@ -125,7 +125,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   rownum r," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -152,7 +152,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " )" +
                     " And " +
                     "    NAME like ?"+
-                    " ) a WHERE r BETWEEN ?+1 AND  r+?"+
+                    " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
 
@@ -161,7 +161,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   rownum r," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -182,7 +182,7 @@ public class SQLConstantOracle extends SQLConstants{
                     "    SUB.USER_ID = ?"+
                     " And "+
                     "    NAME like ?"+
-                    " ) a WHERE r BETWEEN ?+1 AND  r+?"+
+                    " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
 
@@ -191,7 +191,7 @@ public class SQLConstantOracle extends SQLConstants{
             "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
-                    "   rownum r," +
+                    "   row_number() over (order by $3 $2) r," +
                     "   APPLICATION_ID, " +
                     "   NAME," +
                     "   APPLICATION_TIER," +
@@ -212,7 +212,7 @@ public class SQLConstantOracle extends SQLConstants{
                     "   LOWER(SUB.USER_ID) = LOWER(?)" +
                     " And "+
                     "    NAME like ?"+
-                    " ) a WHERE r BETWEEN ?+1 AND  r+?"+
+                    " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
 
@@ -239,7 +239,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
                     " OR APP.NAME like ?"+
-                    " )) a WHERE r BETWEEN ?+1 AND  r+?"+
+                    " )) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x "+
                     " ORDER BY $1 $2 ";
 
