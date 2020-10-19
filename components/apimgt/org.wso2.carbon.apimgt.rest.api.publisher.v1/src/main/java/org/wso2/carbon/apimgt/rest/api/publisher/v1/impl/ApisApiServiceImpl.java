@@ -3902,7 +3902,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisChangeLifecyclePost(ApisApi.ActionEnum action, String apiId, String lifecycleChecklist,
+    public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
                                             String ifMatch, MessageContext messageContext) {
         //pre-processing
         String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
@@ -3913,7 +3913,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
             String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
-            if (!ArrayUtils.contains(nextAllowedStates, action.toString())) {
+            if (!ArrayUtils.contains(nextAllowedStates, action)) {
                 RestApiUtil.handleBadRequest(
                         "Action '" + action + "' is not allowed. Allowed actions are " + Arrays
                                 .toString(nextAllowedStates), log);

@@ -96,7 +96,7 @@ public interface ApisApiService {
       public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisChangeLifecyclePost(ActionEnum action, String apiId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion, MessageContext messageContext) throws APIManagementException;
       public Response apisExportGet(String apiId, String name, String version, String providerName, FormatEnum format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) throws APIManagementException;

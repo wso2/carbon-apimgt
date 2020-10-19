@@ -1271,15 +1271,6 @@ paths:
           in: query
           type: string
           required: true
-          enum:
-            - Publish
-            - Deploy as a Prototype
-            - Demote to Created
-            - Demote to Prototyped
-            - Block
-            - Deprecate
-            - Re-Publish
-            - Retire
         - name: lifecycleChecklist
           description: |
 

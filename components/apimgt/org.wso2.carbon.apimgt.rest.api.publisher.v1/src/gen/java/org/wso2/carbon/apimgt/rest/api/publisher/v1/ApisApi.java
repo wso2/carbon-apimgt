@@ -909,7 +909,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 409, message = "Conflict. Pending workflow task exists. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
     public Response apisChangeLifecyclePost(     @NotNull 
-        @ApiParam(value = "The action to demote or promote the state of the API.  Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **] ",required=true, allowableValues="Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire")  @QueryParam("action") ActionEnum action
+        @ApiParam(value = "The action to demote or promote the state of the API.  Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **] ",required=true)  @QueryParam("action") String action
 ,      @NotNull 
         @ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true)  @QueryParam("apiId") String apiId
 ,      
@@ -917,48 +917,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
 , @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apisChangeLifecyclePost(action, apiId, lifecycleChecklist, ifMatch, securityContext);
     }
-    public enum ActionEnum {
-
-        PUBLISH("Publish"),
-        
-        DEPLOY_AS_A_PROTOTYPE("Deploy as a Prototype"),
-        
-        DEMOTE_TO_CREATED("Demote to Created"),
-        
-        DEMOTE_TO_PROTOTYPED("Demote to Prototyped"),
-        
-        BLOCK("Block"),
-        
-        DEPRECATE("Deprecate"),
-        
-        RE_PUBLISH("Re-Publish"),
-        
-        RETIRE("Retire");
-        private String value;
-
-        ActionEnum (String value) {
-            this.value = value;
-        }
-
-        public String value() {
-            return this.value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        public static ActionEnum fromValue(String v) {
-            for (ActionEnum b : ActionEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-}
-    
 
     @POST
     @Path("/copy-api")
