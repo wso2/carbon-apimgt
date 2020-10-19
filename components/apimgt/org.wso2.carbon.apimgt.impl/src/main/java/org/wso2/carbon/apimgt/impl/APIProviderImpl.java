@@ -119,7 +119,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -150,7 +149,6 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.api.APIPersistence;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -205,13 +203,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
-    private APIPersistence apiPersistenceInstance;
+    //private APIPersistence apiPersistenceInstance;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
         certificateManager = CertificateManagerImpl.getInstance();
-        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(username, organization);
+        //apiPersistenceInstance = PersistenceManager.getPersistenceInstance(username);
     }
 
     /**
@@ -224,7 +222,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
-        return apiPersistenceInstance.getDocumentation(docId, new Organization(requestedTenantDomain));
+        String apiId = "";
+        return apiPersistenceInstance.getDocumentation(apiId, docId, new Organization(requestedTenantDomain));
     }
 
     protected String getUserNameWithoutChange() {
@@ -787,32 +786,46 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
-        //Add default API LC if it is not there
-        try {
-            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
-                                            registryService.getConfigSystemRegistry(tenantId))) {
-                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
-                                                + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
-                File file = new File(defaultLifecyclePath);
-                String content = null;
-                if (file != null && file.exists()) {
-                    content = FileUtils.readFileToString(file);
-                }
-                if (content != null) {
-                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
-                                                    CommonUtil.getRootSystemRegistry(tenantId));
-                }
-            }
-        } catch (RegistryException e) {
-            handleException("Error occurred while adding default APILifeCycle.", e);
-        } catch (IOException e) {
-            handleException("Error occurred while loading APILifeCycle.xml.", e);
-        } catch (XMLStreamException e) {
-            handleException("Error occurred while adding default API LifeCycle.", e);
+        // Shifted this section from createAPI(api) method
+        if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
+            String errorMessage = "Empty password is given for endpointSecurity when creating API "
+                                            + api.getId().getApiName();
+            throw new APIManagementException(errorMessage);
         }
 
+        // Shifted this section from createAPI(api) method
+        //Validate Transports
+//        validateAndSetTransports(api);
+//        validateAndSetAPISecurity(api);
+
+        // >>>>
+//        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+//
+//        //Add default API LC if it is not there
+//        try {
+//            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
+//                                            registryService.getConfigSystemRegistry(tenantId))) {
+//                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
+//                                                + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
+//                File file = new File(defaultLifecyclePath);
+//                String content = null;
+//                if (file != null && file.exists()) {
+//                    content = FileUtils.readFileToString(file);
+//                }
+//                if (content != null) {
+//                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
+//                                                    CommonUtil.getRootSystemRegistry(tenantId));
+//                }
+//            }
+//        } catch (RegistryException e) {
+//            handleException("Error occurred while adding default APILifeCycle.", e);
+//        } catch (IOException e) {
+//            handleException("Error occurred while loading APILifeCycle.xml.", e);
+//        } catch (XMLStreamException e) {
+//            handleException("Error occurred while adding default API LifeCycle.", e);
+//        }
+        // <<<<<<<
         createAPI(api);
 
         if (log.isDebugEnabled()) {
@@ -828,6 +841,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(
                     "Error in retrieving Tenant Information while adding api :" + api.getId().getApiName(), e);
         }
+        //Add to AM db and...
         addAPI(api, tenantId);
 
         JSONObject apiLogObject = new JSONObject();
@@ -1191,7 +1205,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact apiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
             if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
-                String path = APIUtil.createWSDL(registry, api);
+                String path = APIUtil.createWSDLfromUrl(registry, api);
                 updateWSDLUriInAPIArtifact(path, artifactManager, apiArtifact, artifactPath);
             }
             registry.commitTransaction();
@@ -1868,7 +1882,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
 
                     if (APIUtil.isValidWSDLURL(wsdlURL, true)) {
-                        String path = APIUtil.createWSDL(registry, api);
+                        String path = APIUtil.createWSDLfromUrl(registry, api);
                         if (path != null) {
                             registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
                             // reset the wsdl path to permlink
@@ -3847,25 +3861,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to create API
      */
     protected void createAPI(API api) throws APIManagementException {
+        /*        Moved this to constructor
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
         if (artifactManager == null) {
             String errorMessage = "Failed to retrieve artifact manager when creating API " + api.getId().getApiName();
             log.error(errorMessage);
             throw new APIManagementException(errorMessage);
-        }
+        }*/
 
+        /* shifted this section to parent method since this is common
         if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
             String errorMessage = "Empty password is given for endpointSecurity when creating API "
                     + api.getId().getApiName();
             throw new APIManagementException(errorMessage);
         }
+        */
 
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
+
         boolean transactionCommitted = false;
         try {
+            /*  Shifted to Reg impl
             registry.beginTransaction();
             GenericArtifact genericArtifact =
                                             artifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
@@ -3887,45 +3906,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 for (String tag : tagSet) {
                     registry.applyTag(artifactPath, tag);
                 }
-            }
-            if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
-                String path = APIUtil.createWSDL(registry, api);
-                updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
-            }
+            }*/
 
-            if (api.getWsdlResource() != null) {
-                String path = APIUtil.saveWSDLResource(registry, api);
-                updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
-            }
 
             //attaching micro-gateway labels to the API
-            APIUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain);
+            //get all labels in the tenant
+            List<Label> gatewayLabelList = APIUtil.getAllLabels(tenantDomain);
+           // APIUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain);
+            apiPersistenceInstance.createAPI(api);
+
+            // If wsdl url only given
+            if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
+                // String path = APIUtil.createWSDL(registry, api);
+                String path = APIUtil.createWSDLfromUrl(api);
+                // updateWSDLUriInAPIArtifact(path, artifactManager, artifact,
+                // artifactPath);
+            }
+            // if wsdl is passed as a file
+            if (api.getWsdlResource() != null) {
+                //String path = APIUtil.saveWSDLResource(registry, api);
+                String path = APIUtil.saveWSDLResource(api);
+                // send to above saveWSDLResource >> updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
+            }
 
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
             //to gain performance
-            String apiStatus = api.getStatus();
-            saveAPIStatus(artifactPath, apiStatus);
-            String visibleRolesList = api.getVisibleRoles();
-            String[] visibleRoles = new String[0];
-            if (visibleRolesList != null) {
-                visibleRoles = visibleRolesList.split(",");
-            }
-
-            String publisherAccessControlRoles = api.getAccessControlRoles();
-            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
-                                            api.getAdditionalProperties());
-            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-                                            artifactPath, registry);
-
-            registry.commitTransaction();
-            transactionCommitted = true;
-
-            if (log.isDebugEnabled()) {
-                String logMessage =
-                                                "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
-                                                                                + " created";
-                log.debug(logMessage);
-            }
+//            String apiStatus = api.getStatus();
+//            saveAPIStatus(artifactPath, apiStatus);
+//            String visibleRolesList = api.getVisibleRoles();
+//            String[] visibleRoles = new String[0];
+//            if (visibleRolesList != null) {
+//                visibleRoles = visibleRolesList.split(",");
+//            }
+//
+//            String publisherAccessControlRoles = api.getAccessControlRoles();
+//            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+//                                            api.getAdditionalProperties());
+//            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+//                                            artifactPath, registry);
+//
+//            registry.commitTransaction();
+//            transactionCommitted = true;
+//
+//            if (log.isDebugEnabled()) {
+//                String logMessage =
+//                                                "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+//                                                                                + " created";
+//                log.debug(logMessage);
+//            }
         } catch (RegistryException e) {
             try {
                 registry.rollbackTransaction();

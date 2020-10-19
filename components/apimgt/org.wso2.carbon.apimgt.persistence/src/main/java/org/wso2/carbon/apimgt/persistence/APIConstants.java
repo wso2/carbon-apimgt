@@ -131,6 +131,7 @@ public final class APIConstants {
     public static final String API_RESOURCE_NAME = "/api";
 
     public static final String ANONYMOUS_ROLE = "system/wso2.anonymous.role";
+    public static final String EVERYONE_ROLE = "internal/everyone";
 
     public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
     public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
@@ -164,5 +165,45 @@ public final class APIConstants {
     public static final String DOC_SOURCE_URL = "overview_sourceURL";
     public static final String DOC_FILE_PATH = "overview_filePath";
     public static final String DOC_OTHER_TYPE_NAME = "overview_otherTypeName";
+
+    public static final String PROVIDER_ASSOCIATION = "provides";
+
+    // registry location for wsdl files
+    public static final String API_WSDL_RESOURCE_LOCATION = API_APPLICATION_DATA_LOCATION + "/wsdls/";
+
+    /**
+     * Publisher Access Control related registry properties and values.
+     */
+    public static final String PUBLISHER_ROLES = "publisher_roles";
+    public static final String DISPLAY_PUBLISHER_ROLES = "display_publisher_roles";
+    public static final String ACCESS_CONTROL = "publisher_access_control";
+    public static final String NO_ACCESS_CONTROL = "all";
+    public static final String NULL_USER_ROLE_LIST = "null";
+    public static final String API_RESTRICTED_VISIBILITY = "restricted";
+    public static final String API_PRIVATE_VISIBILITY = "private";
+    public static final String API_CONTROLLED_VISIBILITY = "controlled";
+    public static final String DOC_OWNER_VISIBILITY = "OWNER_ONLY";
+    public static final String API_GLOBAL_VISIBILITY = "public";
+    public static final String VISIBILITY = "visibility";
+
+    public static final String STORE_VIEW_ROLES = "store_view_roles";
+
+    public static final String WSDL_FILE_EXTENSION = ".wsdl";
+    public static final String WSDL_PROVIDER_SEPERATOR = "--";
+    public static final String API_WSDL_ARCHIVE_LOCATION = "archives/";
+
+    public static final String ZIP_FILE_EXTENSION = ".zip";
+
+    public static final String HTTP_PROTOCOL = "http";
+    public static final String HTTPS_PROTOCOL = "https";
+    public static final String APPLICATION_ZIP = "application/zip";
+
+    // Prefix used for saving the custom properties related with APIs
+    public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
+
+    /**
+     * CustomIndexer property to indicate whether it is gone through API Custom Indexer.
+     */
+    public static final String CUSTOM_API_INDEXER_PROPERTY = "registry.customIndexer";
 
 }

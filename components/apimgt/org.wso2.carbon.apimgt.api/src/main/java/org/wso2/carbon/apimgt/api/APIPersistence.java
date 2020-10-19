@@ -77,8 +77,8 @@ public interface APIPersistence {
     /* ======= Create API =======
     =========================== */
 
+   // void createAPI(API api) throws APIManagementException;
     void createAPI(API api) throws APIManagementException;
-    void createAPI(API api, List<Label> gatewayLabelList) throws APIManagementException;
     /**
      * Create a new version of the api with the specified new version
      *

@@ -1,17 +1,23 @@
 package org.wso2.carbon.apimgt.persistence.utils;
 
 import com.google.gson.Gson;
+import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -19,6 +25,7 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -34,14 +41,20 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.*;
+
+import static org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent.getRegistryService;
 
 public class RegistryPersistenceUtil {
     private static final Log log = LogFactory.getLog(RegistryPersistenceUtil.class);
@@ -439,12 +452,11 @@ public class RegistryPersistenceUtil {
             throw new APIManagementException("Error when create registry instance ", e);
         }
 
-        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" +
-                                        File.separator + "rxts";
+        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                                        + File.separator + "rxts";
         File file = new File(rxtDir);
         FilenameFilter filenameFilter = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
+            @Override public boolean accept(File dir, String name) {
                 // if the file extension is .rxt return true, else false
                 return name.endsWith(".rxt");
             }
@@ -464,12 +476,14 @@ public class RegistryPersistenceUtil {
                                                                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH));
             try {
                 // calculate resource path
-                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
-                                                (ServiceReferenceHolder.getUserRealm());
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(
+                                                ServiceReferenceHolder.getUserRealm());
                 resourcePath = authorizationManager.computePathOnMount(resourcePath);
 
-                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
-                                                getTenantUserRealm(tenantID).getAuthorizationManager();
+                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
+                                                .getRealmService().
+                                                                                getTenantUserRealm(tenantID)
+                                                .getAuthorizationManager();
 
                 if (registry.resourceExists(govRelativePath)) {
                     // set anonymous user permission to RXTs
@@ -533,237 +547,746 @@ public class RegistryPersistenceUtil {
     public static API getAPIForPublishing(GovernanceArtifact artifact, Registry registry)
                                     throws APIManagementException {
 
-//        API api;
+        //        API api;
+        //        try {
+        //            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        //            String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        //            String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        //            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+        //            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
+        //
+        //            if (apiId == -1) {
+        //                return null;
+        //            }
+        //
+        //            api = new API(apiIdentifier);
+        //            //set uuid
+        //            api.setUUID(artifact.getId());
+        //            // set rating
+        //            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+        //            api = setResourceProperties(api, registry, artifactPath);
+        //            api.setRating(getAverageRating(apiId));
+        //            //set description
+        //            api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+        //            //set last access time
+        //            api.setLastUpdated(registry.get(artifactPath).getLastModified());
+        //            // set url
+        //            api.setStatus(getLcStateFromArtifact(artifact));
+        //            api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+        //            api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
+        //            api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
+        //            api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+        //            api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+        //            api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+        //            api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+        //            api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
+        //            api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
+        //            api.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
+        //            api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(
+        //                                            APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
+        //            api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
+        //                                            APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
+        //            api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
+        //            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+        //                                            .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
+        //                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+        //            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
+        //                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
+        //            }
+        //            api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+        //            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
+        //            api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
+        //            api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
+        //            api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
+        //            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+        //            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+        //            api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
+        //            api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
+        //
+        //            int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
+        //            try {
+        //                String strCacheTimeout = artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT);
+        //                if (strCacheTimeout != null && !strCacheTimeout.isEmpty()) {
+        //                    cacheTimeout = Integer.parseInt(strCacheTimeout);
+        //                }
+        //            } catch (NumberFormatException e) {
+        //                if (log.isWarnEnabled()) {
+        //                    log.warn("Error while retrieving cache timeout from the registry for " + apiIdentifier);
+        //                }
+        //                // ignore the exception and use default cache timeout value
+        //            }
+        //
+        //            api.setCacheTimeout(cacheTimeout);
+        //
+        //            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
+        //
+        //            api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+        //            api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
+        //            api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+        //            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+        //            api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+        //            api.setSubscriptionAvailableTenants(artifact.getAttribute(
+        //                                            APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+        //
+        //            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+        //            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+        //                                            .getTenantId(tenantDomainName);
+        //
+        //            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+        //                                            .getAPIManagerConfiguration();
+        //
+        //            String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
+        //            api.setApiLevelPolicy(apiLevelTier);
+        //
+        //            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+        //            Map<String, Tier> definedTiers = getTiers(tenantId);
+        //            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName);
+        //            api.addAvailableTiers(availableTier);
+        //
+        //            // This contains the resolved context
+        //            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+        //            // We set the context template here
+        //            api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
+        //            api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
+        //            api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
+        //                                            APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
+        //            api.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
+        //            api.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
+        //
+        //            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
+        //            api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
+        //
+        //            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
+        //
+        //            // AWS Lambda: get paths
+        //            OASParserUtil oasParserUtil = new OASParserUtil();
+        //            String resourceConfigsString = oasParserUtil.getAPIDefinition(apiIdentifier, registry);
+        //            JSONParser jsonParser = new JSONParser();
+        //            JSONObject paths = null;
+        //            if (resourceConfigsString != null) {
+        //                JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
+        //                paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
+        //            }
+        //
+        //            for (URITemplate uriTemplate : uriTemplates) {
+        //                String uTemplate = uriTemplate.getUriTemplate();
+        //                String method = uriTemplate.getHTTPVerb();
+        //                List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
+        //                List<Scope> newTemplateScopes = new ArrayList<>();
+        //                if (!oldTemplateScopes.isEmpty()) {
+        //                    for (Scope templateScope : oldTemplateScopes) {
+        //                        Scope scope = scopeToKeyMapping.get(templateScope.getKey());
+        //                        newTemplateScopes.add(scope);
+        //                    }
+        //                }
+        //                uriTemplate.addAllScopes(newTemplateScopes);
+        //                uriTemplate.setResourceURI(api.getUrl());
+        //                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
+        //                // AWS Lambda: set arn & timeout to URI template
+        //                if (paths != null) {
+        //                    JSONObject path = (JSONObject) paths.get(uTemplate);
+        //                    if (path != null) {
+        //                        JSONObject operation = (JSONObject) path.get(method.toLowerCase());
+        //                        if (operation != null) {
+        //                            if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+        //                                uriTemplate.setAmznResourceName((String)
+        //                                                                operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+        //                            }
+        //                            if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+        //                                uriTemplate.setAmznResourceTimeout(((Long)
+        //                                                                operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //
+        //            if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
+        //                for (URITemplate template : uriTemplates) {
+        //                    template.setMediationScript(template.getAggregatedMediationScript());
+        //                }
+        //            }
+        //
+        //            api.setUriTemplates(uriTemplates);
+        //            api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
+        //                                            APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+        //            Set<String> tags = new HashSet<String>();
+        //            org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+        //            for (Tag tag1 : tag) {
+        //                tags.add(tag1.getTagName());
+        //            }
+        //            api.addTags(tags);
+        //            api.setLastUpdated(registry.get(artifactPath).getLastModified());
+        //            api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
+        //            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+        //            String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+        //            api.setEnvironments(extractEnvironmentsForAPI(environments));
+        //            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+        //            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+        //            api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+        //            //set data and status related to monetization
+        //            api.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
+        //                                            (APIConstants.Monetization.API_MONETIZATION_STATUS)));
+        //            String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
+        //
+        //            //set selected clusters which API needs to be deployed
+        //            String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
+        //            Set<DeploymentEnvironments> deploymentEnvironments = extractDeploymentsForAPI(deployments);
+        //            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
+        //                api.setDeploymentEnvironments(deploymentEnvironments);
+        //            }
+        //
+        //            if (StringUtils.isNotBlank(monetizationInfo)) {
+        //                JSONParser parser = new JSONParser();
+        //                JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
+        //                api.setMonetizationProperties(jsonObj);
+        //            }
+        //            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
+        //            api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
+        //            //get endpoint config string from artifact, parse it as a json and set the environment list configured with
+        //            //non empty URLs to API object
+        //            String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
+        //            if (StringUtils.isNotEmpty(keyManagers)) {
+        //                api.setKeyManagers(new Gson().fromJson(keyManagers, List.class));
+        //            } else {
+        //                api.setKeyManagers(Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+        //            }
+        //            try {
+        //                api.setEnvironmentList(extractEnvironmentListForAPI(
+        //                                                artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
+        //            } catch (ParseException e) {
+        //                String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
+        //                log.error(msg, e);
+        //                throw new APIManagementException(msg, e);
+        //            } catch (ClassCastException e) {
+        //                String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
+        //                log.error(msg, e);
+        //                throw new APIManagementException(msg, e);
+        //            }
+        //
+        //        } catch (GovernanceException e) {
+        //            String msg = "Failed to get API for artifact ";
+        //            throw new APIManagementException(msg, e);
+        //        } catch (RegistryException e) {
+        //            String msg = "Failed to get LastAccess time or Rating";
+        //            throw new APIManagementException(msg, e);
+        //        } catch (UserStoreException e) {
+        //            String msg = "Failed to get User Realm of API Provider";
+        //            throw new APIManagementException(msg, e);
+        //        } catch (ParseException e) {
+        //            String msg = "Failed to get parse monetization information.";
+        //            throw new APIManagementException(msg, e);
+        //        }
+        //        return api;
+        return null;
+    }
+
+    protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry, String keyType)
+                                    throws APIManagementException {
+        return getArtifactManager(registry, keyType);
+    }
+
+//    /**
+//     * Crate an WSDL from given wsdl url. Reset the endpoint details to gateway node
+//     * *
+//     *
+//     * @param registry - Governance Registry space to save the WSDL
+//     * @param api      -API instance
+//     * @return Path of the created resource
+//     * @throws APIManagementException If an error occurs while adding the WSDL
+//     */
+//
+//    public static String createWSDL(Registry registry, API api) throws RegistryException, APIManagementException {
+//
 //        try {
-//            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-//            String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
-//            String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-//            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-//            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
+//            GenericArtifactManager apiArtifactManager = getArtifactManager(registry, APIConstants.API_KEY);
 //
-//            if (apiId == -1) {
-//                return null;
-//            }
+//            String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + PersistenceUtil
+//                                            .createWsdlFileName(api.getId().getProviderName(), api.getId().getApiName(),
+//                                                                            api.getId().getVersion());
 //
-//            api = new API(apiIdentifier);
-//            //set uuid
-//            api.setUUID(artifact.getId());
-//            // set rating
-//            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-//            api = setResourceProperties(api, registry, artifactPath);
-//            api.setRating(getAverageRating(apiId));
-//            //set description
-//            api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
-//            //set last access time
-//            api.setLastUpdated(registry.get(artifactPath).getLastModified());
-//            // set url
-//            api.setStatus(getLcStateFromArtifact(artifact));
-//            api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-//            api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
-//            api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
-//            api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
-//            api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
-//            api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
-//            api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
-//            api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
-//            api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
-//            api.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
-//            api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(
-//                                            APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
-//            api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
-//                                            APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
-//            api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-//            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
-//                                            .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
-//                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
-//            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
-//                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
-//            }
-//            api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
-//            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
-//            api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
-//            api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
-//            api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
-//            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
-//            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
-//            api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
-//            api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
+//            String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+//                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + wsdlResourcePath;
 //
-//            int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
-//            try {
-//                String strCacheTimeout = artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT);
-//                if (strCacheTimeout != null && !strCacheTimeout.isEmpty()) {
-//                    cacheTimeout = Integer.parseInt(strCacheTimeout);
-//                }
-//            } catch (NumberFormatException e) {
-//                if (log.isWarnEnabled()) {
-//                    log.warn("Error while retrieving cache timeout from the registry for " + apiIdentifier);
-//                }
-//                // ignore the exception and use default cache timeout value
-//            }
+//            //            APIMWSDLReader wsdlReader = new APIMWSDLReader();
+//            //            OMElement wsdlContentEle;
+//            String wsdlRegistryPath;
 //
-//            api.setCacheTimeout(cacheTimeout);
-//
-//            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
-//
-//            api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
-//            api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
-//            api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
-//            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
-//            api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
-//            api.setSubscriptionAvailableTenants(artifact.getAttribute(
-//                                            APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
-//
-//            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
-//            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-//                                            .getTenantId(tenantDomainName);
-//
-//            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-//                                            .getAPIManagerConfiguration();
-//
-//            String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
-//            api.setApiLevelPolicy(apiLevelTier);
-//
-//            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-//            Map<String, Tier> definedTiers = getTiers(tenantId);
-//            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName);
-//            api.addAvailableTiers(availableTier);
-//
-//            // This contains the resolved context
-//            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
-//            // We set the context template here
-//            api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
-//            api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
-//            api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
-//                                            APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
-//            api.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
-//            api.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
-//
-//            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
-//            api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
-//
-//            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
-//
-//            // AWS Lambda: get paths
-//            OASParserUtil oasParserUtil = new OASParserUtil();
-//            String resourceConfigsString = oasParserUtil.getAPIDefinition(apiIdentifier, registry);
-//            JSONParser jsonParser = new JSONParser();
-//            JSONObject paths = null;
-//            if (resourceConfigsString != null) {
-//                JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
-//                paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
-//            }
-//
-//            for (URITemplate uriTemplate : uriTemplates) {
-//                String uTemplate = uriTemplate.getUriTemplate();
-//                String method = uriTemplate.getHTTPVerb();
-//                List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
-//                List<Scope> newTemplateScopes = new ArrayList<>();
-//                if (!oldTemplateScopes.isEmpty()) {
-//                    for (Scope templateScope : oldTemplateScopes) {
-//                        Scope scope = scopeToKeyMapping.get(templateScope.getKey());
-//                        newTemplateScopes.add(scope);
-//                    }
-//                }
-//                uriTemplate.addAllScopes(newTemplateScopes);
-//                uriTemplate.setResourceURI(api.getUrl());
-//                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-//                // AWS Lambda: set arn & timeout to URI template
-//                if (paths != null) {
-//                    JSONObject path = (JSONObject) paths.get(uTemplate);
-//                    if (path != null) {
-//                        JSONObject operation = (JSONObject) path.get(method.toLowerCase());
-//                        if (operation != null) {
-//                            if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
-//                                uriTemplate.setAmznResourceName((String)
-//                                                                operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
-//                            }
-//                            if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
-//                                uriTemplate.setAmznResourceTimeout(((Long)
-//                                                                operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//            if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
-//                for (URITemplate template : uriTemplates) {
-//                    template.setMediationScript(template.getAggregatedMediationScript());
-//                }
-//            }
-//
-//            api.setUriTemplates(uriTemplates);
-//            api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
-//                                            APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
-//            Set<String> tags = new HashSet<String>();
-//            org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-//            for (Tag tag1 : tag) {
-//                tags.add(tag1.getTagName());
-//            }
-//            api.addTags(tags);
-//            api.setLastUpdated(registry.get(artifactPath).getLastModified());
-//            api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
-//            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
-//            String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
-//            api.setEnvironments(extractEnvironmentsForAPI(environments));
-//            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
-//            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
-//            api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
-//            //set data and status related to monetization
-//            api.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
-//                                            (APIConstants.Monetization.API_MONETIZATION_STATUS)));
-//            String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
-//
-//            //set selected clusters which API needs to be deployed
-//            String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
-//            Set<DeploymentEnvironments> deploymentEnvironments = extractDeploymentsForAPI(deployments);
-//            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
-//                api.setDeploymentEnvironments(deploymentEnvironments);
-//            }
-//
-//            if (StringUtils.isNotBlank(monetizationInfo)) {
-//                JSONParser parser = new JSONParser();
-//                JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
-//                api.setMonetizationProperties(jsonObj);
-//            }
-//            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
-//            api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
-//            //get endpoint config string from artifact, parse it as a json and set the environment list configured with
-//            //non empty URLs to API object
-//            String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
-//            if (StringUtils.isNotEmpty(keyManagers)) {
-//                api.setKeyManagers(new Gson().fromJson(keyManagers, List.class));
+//            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+//            if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+//                                            .equalsIgnoreCase(tenantDomain)) {
+//                wsdlRegistryPath = RegistryConstants.PATH_SEPARATOR + "registry" + RegistryConstants.PATH_SEPARATOR
+//                                                + "resource" + absoluteWSDLResourcePath;
 //            } else {
-//                api.setKeyManagers(Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
-//            }
-//            try {
-//                api.setEnvironmentList(extractEnvironmentListForAPI(
-//                                                artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
-//            } catch (ParseException e) {
-//                String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
-//                log.error(msg, e);
-//                throw new APIManagementException(msg, e);
-//            } catch (ClassCastException e) {
-//                String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
-//                log.error(msg, e);
-//                throw new APIManagementException(msg, e);
+//                wsdlRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
+//                                                + RegistryConstants.PATH_SEPARATOR + "resource"
+//                                                + absoluteWSDLResourcePath;
 //            }
 //
-//        } catch (GovernanceException e) {
-//            String msg = "Failed to get API for artifact ";
-//            throw new APIManagementException(msg, e);
+//            Resource wsdlResource = registry.newResource();
+//            // isWSDL2Document(api.getWsdlUrl()) method only understands http or file system urls.
+//            // Hence if this is a registry url, should not go in to the following if block
+//
+//            registry.put(wsdlResourcePath, wsdlResource);
+//            //set the anonymous role for wsld resource to avoid basicauth security.
+//            String[] visibleRoles = null;
+//            if (api.getVisibleRoles() != null) {
+//                visibleRoles = api.getVisibleRoles().split(",");
+//            }
+//            setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
+//
+//            //Delete any WSDL archives if exists
+//            String wsdlArchivePath = getWsdlArchivePath(api.getId());
+//            if (registry.resourceExists(wsdlArchivePath)) {
+//                registry.delete(wsdlArchivePath);
+//            }
+//
+//            //set the wsdl resource permlink as the wsdlURL.
+//            api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
+//
+//            if (PersistenceUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
+//                //String path = APIUtil.createWSDL(api);
+//                 updateWSDLUriInAPIArtifact(wsdlRegistryPath, artifactManager, artifact,artifactPath);
+//                //
+//            }
+//
+//            if (api.getWsdlResource() != null) {
+//                String path = saveWSDLResource(registry, api);
+//                updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
+//            }
+//
+//            return wsdlRegistryPath;
+//
 //        } catch (RegistryException e) {
-//            String msg = "Failed to get LastAccess time or Rating";
-//            throw new APIManagementException(msg, e);
-//        } catch (UserStoreException e) {
-//            String msg = "Failed to get User Realm of API Provider";
-//            throw new APIManagementException(msg, e);
-//        } catch (ParseException e) {
-//            String msg = "Failed to get parse monetization information.";
+//            String msg = "Failed to add WSDL " + api.getWsdlUrl() + " to the registry";
+//            log.error(msg, e);
+//            throw new RegistryException(msg, e);
+//        } catch (APIManagementException e) {
+//            String msg = "Failed to process the WSDL : " + api.getWsdlUrl();
+//            log.error(msg, e);
 //            throw new APIManagementException(msg, e);
 //        }
-//        return api;
+//    }
+
+    public static void startTenantFlow(String tenantDomain) {
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+    }
+
+    public static API getApiForPublishing(Registry registry, GovernanceArtifact apiArtifact)
+                                    throws APIManagementException {
+        API api = getAPIForPublishing(apiArtifact, registry);
+        updateAPIProductDependencies(api, registry);
+        return api;
+    }
+
+    public static void updateAPIProductDependencies(API api, Registry registry) throws APIManagementException {
+
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
+            for (APIProductIdentifier usedByProduct : usedByProducts) {
+                //TODO : removed registry call until find a proper fix
+                String apiProductPath = RegistryPersistenceUtil.getAPIProductPath(usedByProduct);
+                usedByProduct.setUUID(apiProductPath);
+            }
+        }
+    }
+
+    /**
+     * Utility method to get api product path from APIProductIdentifier
+     *
+     * @param identifier APIProductIdentifier
+     * @return APIProduct path
+     */
+    public static String getAPIProductPath(APIProductIdentifier identifier) {
+
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + replaceEmailDomain(
+                                        identifier.getProviderName()) + RegistryConstants.PATH_SEPARATOR + identifier
+                                        .getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion()
+                                        + APIConstants.API_RESOURCE_NAME;
+    }
+
+    public static void endTenantFlow() {
+        PrivilegedCarbonContext.endTenantFlow();
+    }
+
+    /**
+     * This function is to set resource permissions based on its visibility
+     *
+     * @param username     Username
+     * @param visibility   API visibility
+     * @param roles        Authorized roles
+     * @param artifactPath API resource path
+     * @throws APIManagementException Throwing exception
+     */
+    public static void setResourcePermissions(String username, String visibility, String[] roles, String artifactPath)
+                                    throws APIManagementException {
+
+        setResourcePermissions(username, visibility, roles, artifactPath, null);
+    }
+
+    /**
+     * This function is to set resource permissions based on its visibility
+     *
+     * @param visibility   API/Product visibility
+     * @param roles        Authorized roles
+     * @param artifactPath API/Product resource path
+     * @param registry     Registry
+     * @throws APIManagementException Throwing exception
+     */
+    public static void setResourcePermissions(String username, String visibility, String[] roles, String artifactPath,
+                                    Registry registry) throws APIManagementException {
+
+        try {
+            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                            getMountedPath(RegistryContext.getBaseInstance(),
+                                                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                                                                            + artifactPath);
+            Resource registryResource = null;
+
+            if (registry != null && registry.resourceExists(artifactPath)) {
+                registryResource = registry.get(artifactPath);
+            }
+            StringBuilder publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST);
+
+            if (registryResource != null) {
+                String publisherRole = registryResource.getProperty(APIConstants.PUBLISHER_ROLES);
+                if (publisherRole != null) {
+                    publisherAccessRoles = new StringBuilder(publisherRole);
+                }
+                if (StringUtils.isEmpty(publisherAccessRoles.toString())) {
+                    publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST);
+                }
+
+                if (APIConstants.API_GLOBAL_VISIBILITY.equalsIgnoreCase(visibility)
+                                                || APIConstants.API_PRIVATE_VISIBILITY.equalsIgnoreCase(visibility)) {
+                    registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);
+                    publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST); // set publisher
+                    // access roles null since store visibility is global. We do not need to add any roles to
+                    // store_view_role property.
+                } else {
+                    registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, publisherAccessRoles.toString());
+                }
+            }
+            String tenantDomain = MultitenantUtils.getTenantDomain(PersistenceUtil.replaceEmailDomainBack(username));
+            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                                            .equals(tenantDomain)) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
+                                                getTenantManager().getTenantId(tenantDomain);
+                // calculate resource path
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(
+                                                ServiceReferenceHolder.getUserRealm());
+                resourcePath = authorizationManager.computePathOnMount(resourcePath);
+                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
+                                                .getRealmService().
+                                                                                getTenantUserRealm(tenantId)
+                                                .getAuthorizationManager();
+                if (visibility != null && APIConstants.API_RESTRICTED_VISIBILITY.equalsIgnoreCase(visibility)) {
+                    boolean isRoleEveryOne = false;
+                    /*If no roles have defined, authorize for everyone role */
+                    if (roles != null) {
+                        if (roles.length == 1 && "".equals(roles[0])) {
+                            authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                            isRoleEveryOne = true;
+                        } else {
+                            for (String role : roles) {
+                                if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
+                                    isRoleEveryOne = true;
+                                }
+                                authManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
+                                publisherAccessRoles.append(",").append(role.trim().toLowerCase());
+                            }
+                        }
+                    }
+                    if (!isRoleEveryOne) {
+                        authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                    }
+                    authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                } else if (visibility != null && APIConstants.API_PRIVATE_VISIBILITY.equalsIgnoreCase(visibility)) {
+                    authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                    authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                } else if (visibility != null && APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(visibility)) {
+
+                    /*If no roles have defined, deny access for everyone & anonymous role */
+                    if (roles == null) {
+                        authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                        authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                    } else {
+                        for (String role : roles) {
+                            authManager.denyRole(role.trim(), resourcePath, ActionConstants.GET);
+
+                        }
+                    }
+                } else {
+                    authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                    authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                }
+            } else {
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(
+                                                ServiceReferenceHolder.getUserRealm());
+
+                if (visibility != null && APIConstants.API_RESTRICTED_VISIBILITY.equalsIgnoreCase(visibility)) {
+                    boolean isRoleEveryOne = false;
+                    if (roles != null) {
+                        for (String role : roles) {
+                            if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
+                                isRoleEveryOne = true;
+                            }
+                            authorizationManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
+                            publisherAccessRoles.append(",").append(role.toLowerCase());
+                        }
+                    }
+                    if (!isRoleEveryOne) {
+                        authorizationManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                    }
+                    authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+
+                } else if (visibility != null && APIConstants.API_PRIVATE_VISIBILITY.equalsIgnoreCase(visibility)) {
+                    authorizationManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                    authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                } else if (visibility != null && APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(visibility)) {
+                    /*If no roles have defined, deny access for everyone & anonymous role */
+                    if (roles == null) {
+                        authorizationManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                        authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                    } else {
+                        for (String role : roles) {
+                            authorizationManager.denyRole(role.trim(), resourcePath, ActionConstants.GET);
+
+                        }
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Store view roles for " + artifactPath + " : " + publisherAccessRoles.toString());
+                    }
+                    authorizationManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                    authorizationManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                }
+            }
+            if (registryResource != null) {
+                registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, publisherAccessRoles.toString());
+                registry.put(artifactPath, registryResource);
+            }
+
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while adding role permissions to API", e);
+        } catch (RegistryException e) {
+            throw new APIManagementException("Registry exception while adding role permissions to API", e);
+        }
+    }
+
+    /**
+     * Utility method for get registry path for wsdl archive.
+     *
+     * @param identifier APIIdentifier
+     * @return wsdl archive path
+     */
+    public static String getWsdlArchivePath(APIIdentifier identifier) {
+
+        return APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + identifier
+                                        .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + identifier
+                                        .getApiName() + identifier.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+    }
+
+    /**
+     * This is to get the registry resource's HTTP permlink path.
+     * Once this issue is fixed (https://wso2.org/jira/browse/REGISTRY-2110),
+     * we can remove this method, and get permlink from the resource.
+     *
+     * @param path - Registry resource path
+     * @return {@link String} -HTTP permlink
+     */
+    public static String getRegistryResourceHTTPPermlink(String path) {
+
+        String schemeHttp = APIConstants.HTTP_PROTOCOL;
+        String schemeHttps = APIConstants.HTTPS_PROTOCOL;
+
+        ConfigurationContextService contetxservice = ServiceReferenceHolder.getContextService();
+        //First we will try to generate http permalink and if its disabled then only we will consider https
+        int port = CarbonUtils.getTransportProxyPort(contetxservice.getServerConfigContext(), schemeHttp);
+        if (port == -1) {
+            port = CarbonUtils.getTransportPort(contetxservice.getServerConfigContext(), schemeHttp);
+        }
+        //getting https parameters if http is disabled. If proxy port is not present we will go for default port
+        if (port == -1) {
+            port = CarbonUtils.getTransportProxyPort(contetxservice.getServerConfigContext(), schemeHttps);
+        }
+        if (port == -1) {
+            port = CarbonUtils.getTransportPort(contetxservice.getServerConfigContext(), schemeHttps);
+        }
+
+        String webContext = ServerConfiguration.getInstance().getFirstProperty("WebContextRoot");
+
+        if (webContext == null || "/".equals(webContext)) {
+            webContext = "";
+        }
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        String version = "";
+        if (registryService == null) {
+            log.error("Registry Service has not been set.");
+        } else if (path != null) {
+            try {
+                String[] versions = registryService.getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME,
+                                                CarbonContext.getThreadLocalCarbonContext().getTenantId())
+                                                .getVersions(path);
+                if (versions != null && versions.length > 0) {
+                    version = versions[0].substring(versions[0].lastIndexOf(";version:"));
+                }
+            } catch (RegistryException e) {
+                log.error("An error occurred while determining the latest version of the "
+                                                + "resource at the given path: " + path, e);
+            }
+        }
+        if (port != -1 && path != null) {
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+            return webContext + ((tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                                            .equals(tenantDomain)) ?
+                                            "/" + MultitenantConstants.TENANT_AWARE_URL_PREFIX + "/" + tenantDomain :
+                                            "") + "/registry/resource" + org.wso2.carbon.registry.app.Utils
+                                            .encodeRegistryPath(path) + version;
+        }
         return null;
+    }
+
+    /**
+     * Update WSDLUri in the API Registry artifact
+     *
+     * @param wsdlPath WSDL Registry Path
+     * @param artifactManager Artifact Manager
+     * @param artifact API Artifact
+     * @param artifactPath API Artifact path
+     * @throws RegistryException when error occurred while updating WSDL path
+     */
+    //  WILL BE ONLY CALLED FROM REGISTRY INTERFACE  METHOD
+    public static void updateWSDLUriInAPIArtifact(String wsdlPath, GenericArtifactManager artifactManager,
+                                    GenericArtifact artifact, String artifactPath) throws RegistryException {
+        Registry registry = getRegistryService().getGovernanceUserRegistry();
+
+        if (wsdlPath != null) {
+            registry.addAssociation(artifactPath, wsdlPath, CommonConstants.ASSOCIATION_TYPE01);
+            artifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, wsdlPath);
+            artifactManager.updateGenericArtifact(artifact); //update the  artifact
+        }
+    }
+
+    /**
+     * Save the provided wsdl archive file to the registry for the api
+     *
+     * @param registry Governance Registry space to save the WSDL
+     * @param api      API instance
+     * @return
+     * @throws RegistryException
+     * @throws APIManagementException
+     */
+    public static String saveWSDLResource(Registry registry, API api) throws RegistryException, APIManagementException {
+
+        ResourceFile wsdlResource = api.getWsdlResource();
+        String wsdlResourcePath;
+        boolean isZip = false;
+        String wsdlResourcePathArchive =
+                                        APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + api.getId()
+                                                                        .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + api.getId().getApiName() +
+                                                                        api.getId().getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+        String wsdlResourcePathFile = APIConstants.API_WSDL_RESOURCE_LOCATION +
+                                        PersistenceUtil.createWsdlFileName(api.getId().getProviderName(),
+                                                                        api.getId().getApiName(),
+                                                                        api.getId().getVersion());
+
+        if (wsdlResource.getContentType().equals(APIConstants.APPLICATION_ZIP)) {
+            wsdlResourcePath = wsdlResourcePathArchive;
+            isZip = true;
+        } else {
+            wsdlResourcePath = wsdlResourcePathFile;
+        }
+
+        String absoluteWSDLResourcePath = RegistryUtils
+                                        .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                                        + wsdlResourcePath;
+        try {
+            Resource wsdlResourceToUpdate = registry.newResource();
+            wsdlResourceToUpdate.setContentStream(api.getWsdlResource().getContent());
+            wsdlResourceToUpdate.setMediaType(api.getWsdlResource().getContentType());
+            registry.put(wsdlResourcePath, wsdlResourceToUpdate);
+            String[] visibleRoles = null;
+            if (api.getVisibleRoles() != null) {
+                visibleRoles = api.getVisibleRoles().split(",");
+            }
+            setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                                            wsdlResourcePath);
+
+            if (isZip) {
+                //Delete any WSDL file if exists
+                if (registry.resourceExists(wsdlResourcePathFile)) {
+                    registry.delete(wsdlResourcePathFile);
+                }
+            } else {
+                //Delete any WSDL archives if exists
+                if (registry.resourceExists(wsdlResourcePathArchive)) {
+                    registry.delete(wsdlResourcePathArchive);
+                }
+            }
+
+            api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
+        } catch (RegistryException e) {
+            String msg = "Failed to add WSDL Archive " + api.getWsdlUrl() + " to the registry";
+            log.error(msg, e);
+            throw new RegistryException(msg, e);
+        } catch (APIManagementException e) {
+            String msg = "Failed to process the WSDL Archive: " + api.getWsdlUrl();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return wsdlResourcePath;
+    }
+
+    /**
+     * This method is used to attach micro-gateway labels to the given API
+     *
+     * @param artifact     genereic artifact
+     * @param api          API
+     * @param tenantDomain domain name of the tenant
+     * @throws APIManagementException if failed to attach micro-gateway labels
+     */
+    // HAS REG USAGE
+    public static void attachLabelsToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain, List<Label> gatewayLabelList)
+                                    throws APIManagementException {
+
+        //get all labels in the tenant
+        //List<Label> gatewayLabelList = APIUtil.getAllLabels(tenantDomain);
+        //validation is performed here to cover all actions related to API artifact updates
+        if (!gatewayLabelList.isEmpty()) {
+            //put available gateway labels to a list for validation purpose
+            List<String> availableGatewayLabelListNames = new ArrayList<>();
+            for (Label x : gatewayLabelList) {
+                availableGatewayLabelListNames.add(x.getName());
+            }
+            try {
+                //clear all the existing labels first
+                artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
+                //if there are labels attached to the API object, add them to the artifact
+                if (api.getGatewayLabels() != null) {
+                    //validate and add each label to the artifact
+                    List<Label> candidateLabelsList = api.getGatewayLabels();
+                    for (Label label : candidateLabelsList) {
+                        String candidateLabel = label.getName();
+                        //validation step, add the label only if it exists in the available gateway labels
+                        if (availableGatewayLabelListNames.contains(candidateLabel)) {
+                            artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, candidateLabel);
+                        } else {
+                            log.warn("Label name : " + candidateLabel + " does not exist in the tenant : " +
+                                                            tenantDomain + ", hence skipping it.");
+                        }
+                    }
+                }
+            } catch (GovernanceException e) {
+                String msg = "Failed to add labels for API : " + api.getId().getApiName();
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No predefined labels in the tenant : " + tenantDomain + " . Skipped adding all labels");
+            }
+        }
     }
 }
