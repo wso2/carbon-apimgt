@@ -15,12 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.carbon.apimgt.throttle.policy.deployer;
 
-
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,22 +25,17 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.util.*;
 
 public class PolicyRetriever {
 
@@ -51,11 +43,11 @@ public class PolicyRetriever {
     protected EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfigurationService().getAPIManagerConfiguration().getEventHubConfigurationDto();
     private String baseURL = eventHubConfigurationDto.getServiceUrl() +
-            APIConstants.INTERNAL_WEB_APP_EP ;
+            APIConstants.INTERNAL_WEB_APP_EP;
 
 
     public SubscriptionPolicy retrieveSubscriptionPolicy(String policyName, String tenantDomain)
-            throws ArtifactSynchronizerException {
+            throws ThrottlePolicyDeployerException {
         CloseableHttpResponse httpResponse;
 
         try {
@@ -66,7 +58,7 @@ public class PolicyRetriever {
             httpResponse = invokeService(endpoint, tenantDomain);
 
             SubscriptionPolicy subscriptionPolicy = null;
-            if (httpResponse.getEntity() != null ) {
+            if (httpResponse.getEntity() != null) {
                 String responseString = EntityUtils.toString(httpResponse.getEntity(),
                         APIConstants.DigestAuthConstants.CHARSET);
                 if (responseString != null && !responseString.isEmpty()) {
@@ -77,20 +69,20 @@ public class PolicyRetriever {
                 }
                 httpResponse.close();
             } else {
-                throw new ArtifactSynchronizerException("HTTP response is empty");
+                throw new ThrottlePolicyDeployerException("HTTP response is empty");
             }
             subscriptionPolicy.setTenantDomain(APIUtil.getTenantDomainFromTenantId(subscriptionPolicy.getTenantId()));
             return subscriptionPolicy;
         } catch (IOException e) {
             String msg = "Error while executing the http client";
             log.error(msg, e);
-            throw new ArtifactSynchronizerException(msg, e);
+            throw new ThrottlePolicyDeployerException(msg, e);
         }
     }
 
 
     private CloseableHttpResponse invokeService(String endpoint, String tenantDomain)
-            throws IOException, ArtifactSynchronizerException {
+            throws IOException, ThrottlePolicyDeployerException {
         HttpGet method = new HttpGet(endpoint);
         URL url = new URL(endpoint);
         String username = eventHubConfigurationDto.getUsername();
@@ -100,10 +92,14 @@ public class PolicyRetriever {
         int port = url.getPort();
         String protocol = url.getProtocol();
         method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
-        method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT , APIConstants.AUTHORIZATION_BASIC
+        method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC
                 + new String(credentials, APIConstants.DigestAuthConstants.CHARSET));
         HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
-        return  APIUtil.executeHTTPRequest(method, httpClient);
+        try {
+            return APIUtil.executeHTTPRequest(method, httpClient);
+        } catch (APIManagementException e) {
+            throw new ThrottlePolicyDeployerException(e);
+        }
     }
 
 }

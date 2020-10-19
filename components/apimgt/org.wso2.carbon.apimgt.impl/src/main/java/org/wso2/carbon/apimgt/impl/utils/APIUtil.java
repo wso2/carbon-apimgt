@@ -567,7 +567,7 @@ public final class APIUtil {
      * @throws IOException
      */
     public static CloseableHttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient)
-            throws IOException, ArtifactSynchronizerException {
+            throws IOException, APIManagementException {
         CloseableHttpResponse httpResponse = null;
         int retryCount = 0;
         boolean retry;
@@ -599,7 +599,7 @@ public final class APIUtil {
             httpResponse.close();
             String errorMessage = EntityUtils.toString(httpResponse.getEntity(),
                     APIConstants.DigestAuthConstants.CHARSET);
-            throw new ArtifactSynchronizerException(errorMessage + "Event-Hub status code is : "
+            throw new APIManagementException(errorMessage + "Event-Hub status code is : "
                     + httpResponse.getStatusLine().getStatusCode());
         }
     }

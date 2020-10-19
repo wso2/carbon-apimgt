@@ -15,13 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.throttle.policy.deployer;
+package org.wso2.carbon.apimgt.throttle.policy.deployer.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 
@@ -54,7 +55,8 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
     public void completedServerStartup() {
 
         jmsTransportHandlerForEventHub
-                .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new ThrottlePolicyJMSMessageListener());
+                .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION,
+                        new ThrottlePolicyJMSMessageListener());
     }
 
     @Override
