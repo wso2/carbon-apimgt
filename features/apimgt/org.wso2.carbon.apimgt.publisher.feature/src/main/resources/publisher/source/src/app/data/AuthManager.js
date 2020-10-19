@@ -154,7 +154,12 @@ class AuthManager {
      * @memberof AuthManager
      */
     static isNotPublisher() {
-        return !AuthManager.getUser().scopes.includes('apim:api_publish'); // TODO: make this scope name configurable
+        if (AuthManager.getUser() === null) {
+            return false;
+        } else {
+            return !AuthManager.getUser().scopes.includes('apim:api_publish');
+            // TODO: make this scope name configurable
+        }
     }
 
     /**

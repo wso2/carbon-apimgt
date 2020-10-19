@@ -168,6 +168,7 @@
 }
 #react-root{
   overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 .apim-dual-ring {
   display: inline-block;

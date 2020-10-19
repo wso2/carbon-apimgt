@@ -25,7 +25,7 @@ import { FormattedMessage } from 'react-intl';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import HelpOutline from '@material-ui/icons/HelpOutline';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import WrappedExpansionPanel from 'AppComponents/Shared/WrappedExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -74,7 +74,7 @@ export default function ResponseCaching(props) {
 
     return (
         <>
-            <ExpansionPanel className={classes.expansionPanel}>
+            <WrappedExpansionPanel className={classes.expansionPanel} id='responseCaching'>
                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography className={classes.subHeading} variant='h6'>
                         <FormattedMessage
@@ -135,7 +135,7 @@ export default function ResponseCaching(props) {
                         </Grid>
                     </Grid>
                 </ExpansionPanelDetails>
-            </ExpansionPanel>
+            </WrappedExpansionPanel>
         </>
     );
 }
