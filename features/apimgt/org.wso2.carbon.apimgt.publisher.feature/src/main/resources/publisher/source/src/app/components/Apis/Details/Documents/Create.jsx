@@ -70,7 +70,7 @@ const styles = theme => ({
     },
     button: {
         marginLeft: theme.spacing(2),
-        color: theme.palette.getContrastText(theme.palette.primary.main),
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
 });
 

@@ -23,7 +23,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import WrappedExpansionPanel from 'AppComponents/Shared/WrappedExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -121,7 +121,7 @@ export default function ApplicationLevel(props) {
     return (
         <>
             <Grid item xs={12}>
-                <ExpansionPanel className={classes.expansionPanel}>
+                <WrappedExpansionPanel className={classes.expansionPanel} id='applicationLevel'>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography className={classes.subHeading} variant='h6'>
                             <FormattedMessage
@@ -264,7 +264,7 @@ export default function ApplicationLevel(props) {
                             )}
                         </FormControl>
                     </ExpansionPanelDetails>
-                </ExpansionPanel>
+                </WrappedExpansionPanel>
             </Grid>
         </>
     );

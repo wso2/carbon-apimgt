@@ -18,15 +18,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Cancel from '@material-ui/icons/Cancel';
-import { StarRate } from '@material-ui/icons';
+import StarRate from '@material-ui/icons/StarRate';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
 import AuthManager from 'AppData/AuthManager';
 import StarRatingSummary from 'AppComponents/Apis/Details/StarRatingSummary';
 import Rating from '@material-ui/lab/Rating';
+import { FormattedMessage } from 'react-intl';
 
 /**
  *
@@ -46,7 +47,7 @@ const styles = theme => ({
         color: theme.custom.infoBar.starColor,
     },
     iconEmpty: {
-        color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
+        color: theme.custom.infoBar.starColorEmpty || '#cfcfcf',
     },
     removeRating: {
         fontSize: 20,
@@ -113,10 +114,10 @@ class StarRatingBar extends React.Component {
                     count: response.body.count,
                     total: response.body.pagination.total,
                 });
-                if(setRatingUpdate) setRatingUpdate({
+                if (setRatingUpdate) setRatingUpdate({
                     avgRating: response.body.avgRating,
                     count: response.body.count,
-                    total: response.body.pagination.total 
+                    total: response.body.pagination.total
                 });
             });
         }
@@ -182,41 +183,50 @@ class StarRatingBar extends React.Component {
         } = this.props;
         const apiRatingNumber = parseFloat(apiRating);
         return (
-            <React.Fragment>
+            <>
                 {showSummary ? (
                     <StarRatingSummary avgRating={avgRating} reviewCount={total} returnCount={count} />
                 ) : (
-                    <React.Fragment>
-                        {isEditable ? (
-                            <React.Fragment>
-                                <div className={classes.userRating}>
-                                    {[1, 2, 3, 4, 5].map(i => (
+                        <>
+                            {isEditable ? (
+                                <>
+                                    <div className={classes.userRating}>
+                                        {[1, 2, 3, 4, 5].map(i => (
                                             <StarRate
                                                 key={i}
                                                 className={userRating >= i ? classes.starRate : classes.noStarRate}
                                                 onClick={() => this.doRate(i)}
                                             />
-                                    ))}
+                                        ))}
                                         <Cancel
                                             className={classes.removeRating}
                                             onClick={() => this.removeUserRating()}
                                         />
-                                </div>
-                            </React.Fragment>
-                        ) : (
-                            <React.Fragment>
-                                <Rating 
-                                    name='half-rating' 
-                                    value={apiRatingNumber} 
-                                    precision={0.1} 
-                                    readOnly 
-                                    classes={{iconEmpty:classes.iconEmpty,iconFilled: classes.iconFilled}}
-                                />
-                            </React.Fragment>
-                        )}
-                    </React.Fragment>
-                )}
-            </React.Fragment>
+                                    </div>
+                                </>
+                            ) : (
+                                    <>
+                                        <Rating
+                                            name='half-rating'
+                                            value={apiRatingNumber}
+                                            precision={0.1}
+                                            readOnly
+                                            classes={{ iconEmpty: classes.iconEmpty, iconFilled: classes.iconFilled }}
+                                        />
+                                        <Typography variant='caption' gutterBottom align='left' component='div'>
+                                            {`${avgRating}/5.0 (${total}`}
+                                            {total === 1 ? (
+                                                <FormattedMessage defaultMessage='user' id='Apis.Listing.StarRatingBar.user' />
+                                                ) : (
+                                                <FormattedMessage defaultMessage='users' id='Apis.Listing.StarRatingBar.users' />
+                                            )}
+                                            {')'}
+                                        </Typography>  
+                                    </>
+                                )}
+                        </>
+                    )}
+            </>
         );
     }
 }
@@ -224,7 +234,7 @@ class StarRatingBar extends React.Component {
 StarRatingBar.defaultProps = {
     apiRating: 0,
     ratingUpdate: 0,
-    setRatingUpdate: () => {},
+    setRatingUpdate: () => { },
 };
 
 StarRatingBar.propTypes = {

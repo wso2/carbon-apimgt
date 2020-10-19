@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { StarRate } from '@material-ui/icons';
+import StarRate from '@material-ui/icons/StarRate';
 import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -62,9 +62,9 @@ function StarRatingSummary(props) {
                         <Typography variant='body1' gutterBottom align='left'>
                             {reviewCount}{' '}
                             {reviewCount === 1 ? (
-                                <FormattedMessage defaultMessage='user' id='Apis.Listing.StarRatingBar.user' />
+                                <FormattedMessage defaultMessage='user' id='Apis.Details.StarRatingSummary.user' />
                             ) : (
-                                <FormattedMessage defaultMessage='users' id='Apis.Listing.StarRatingBar.users' />
+                                <FormattedMessage defaultMessage='users' id='Apis.Details.StarRatingSummary.users' />
                             )}
                         </Typography>
                     </div>
@@ -74,7 +74,7 @@ function StarRatingSummary(props) {
                     <StarRate className={classes.starRate} style={{ color: theme.palette.grey.A200 }} />
                     <div className={classes.ratingSummary}>
                         <Typography variant='caption' gutterBottom align='left'>
-                            <FormattedMessage defaultMessage='Not Rated' id='Apis.Listing.StarRatingBar.not.rated' />
+                            <FormattedMessage defaultMessage='Not Rated' id='Apis.Details.StarRatingSummary.not.rated' />
                         </Typography>
                     </div>
                 </React.Fragment>

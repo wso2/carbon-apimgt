@@ -240,7 +240,7 @@ export default function ApiCreateGraphQL(props) {
                 )}
             </Box>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={3} style={{ marginBottom: 20 }}>
                 <Grid item md={12} />
                 <Grid item md={1} />
                 <Grid item md={11}>

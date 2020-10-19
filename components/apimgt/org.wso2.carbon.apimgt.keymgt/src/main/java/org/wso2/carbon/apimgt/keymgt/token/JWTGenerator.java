@@ -160,20 +160,19 @@ public class JWTGenerator extends AbstractJWTGenerator {
             if (accessToken != null) {
                 properties.put(APIConstants.KeyManager.ACCESS_TOKEN, accessToken);
             }
-            String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
+            String dialectURI = jwtConfigurationDto.getConsumerDialectUri();
             if (!StringUtils.isEmpty(dialectURI)) {
                 properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
-            }
-            String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
-            KeyManager keymanager = KeyManagerHolder
-                    .getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId), keymanagerName);
-            if (keymanager != null) {
-                customClaims = keymanager.getUserClaims(username, properties);
-                if (log.isDebugEnabled()) {
-                    log.debug("Retrieved claims :" + customClaims);
+                String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
+                KeyManager keymanager = KeyManagerHolder
+                        .getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId), keymanagerName);
+                if (keymanager != null) {
+                    customClaims = keymanager.getUserClaims(username, properties);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Retrieved claims :" + customClaims);
+                    }
                 }
-            }
+            } 
         }
 
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
