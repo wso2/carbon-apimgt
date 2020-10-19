@@ -78,7 +78,7 @@ public class KeyManagerDTO   {
   @ApiModelProperty(example = "WSO2 IS", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Size(min=0,max=100)  public String getName() {
+ @Size(min=1,max=100)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -114,7 +114,7 @@ public class KeyManagerDTO   {
   @ApiModelProperty(example = "IS", required = true, value = "")
   @JsonProperty("type")
   @NotNull
- @Size(min=0,max=45)  public String getType() {
+ @Size(min=1,max=45)  public String getType() {
     return type;
   }
   public void setType(String type) {

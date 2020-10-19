@@ -5355,7 +5355,7 @@ definitions:
       name:
         type: string
         example: "WSO2 IS"
-        minLength: 0
+        minLength: 1
         maxLength: 100
       displayName:
         type: string
@@ -5366,7 +5366,7 @@ definitions:
       type:
         type: string
         example: "IS"
-        minLength: 0
+        minLength: 1
         maxLength: 45
       description:
         type: string
