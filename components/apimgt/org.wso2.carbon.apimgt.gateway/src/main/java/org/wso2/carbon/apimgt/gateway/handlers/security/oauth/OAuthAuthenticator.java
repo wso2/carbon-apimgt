@@ -294,6 +294,16 @@ public class OAuthAuthenticator implements Authenticator {
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Required OAuth credentials not provided");
         } else {
+            try {
+                info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion, authenticationScheme, clientDomain,
+                        matchingResource, httpMethod, defaultVersionInvoked,keyManagerList);
+            } catch (APISecurityException ex) {
+                return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
+            }
+            synCtx.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, info.getApplicationName());
+            synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, info.getEndUserName());
+            synCtx.setProperty(APIMgtGatewayConstants.SCOPES, info.getScopes() == null ? null : info.getScopes()
+                    .toString());
             //Start JWT token validation
             if (isJwtToken) {
                 try {
@@ -321,20 +331,10 @@ public class OAuthAuthenticator implements Authenticator {
                 TracingTracer tracer = Util.getGlobalTracer();
                 keyInfo = Util.startSpan(APIMgtGatewayConstants.GET_KEY_VALIDATION_INFO, keySpan, tracer);
             }
-            try {
-                info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion, authenticationScheme, clientDomain,
-                        matchingResource, httpMethod, defaultVersionInvoked,keyManagerList);
-            } catch (APISecurityException ex) {
-                return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
-            }
             if (Util.tracingEnabled()) {
                 Util.finishSpan(keyInfo);
             }
             context.stop();
-            synCtx.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, info.getApplicationName());
-            synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, info.getEndUserName());
-            synCtx.setProperty(APIMgtGatewayConstants.SCOPES, info.getScopes() == null ? null : info.getScopes()
-                                                                                                    .toString());
         }
 
         if (info.isAuthorized()) {
