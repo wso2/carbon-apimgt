@@ -9,7 +9,14 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.registry.api.Registry;
+import org.wso2.carbon.registry.api.RegistryException;
+import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -100,5 +107,45 @@ public class AsyncApiParserUtil {
         errorItem.setMessage(errMessage);
         validationResponse.getErrorItems().add(errorItem);
         return errorItem;
+    }
+
+    /**
+     *  This method saves api definition json in the registry
+     *
+     * @param api               API to be saved
+     * @param apiDefinitionJSON API definition as JSON string
+     * @param registry          user registry
+     * @throws  APIManagementException
+     */
+    public static void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry)
+            throws APIManagementException{
+        String apiName = api.getId().getApiName();
+        String apiVersion = api.getId().getVersion();
+        String apiProviderName = api.getId().getProviderName();
+
+        try{
+            String resourcePath = APIUtil.getAsyncAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
+            resourcePath = resourcePath + APIConstants.API_ASYNCAPI_DEFINITION_RESOURCE_NAME;
+            Resource resource;
+            if (!registry.resourceExists(resourcePath)){
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(resourcePath);
+            }
+            resource.setContent(apiDefinitionJSON);
+            resource.setMediaType("application/json");
+            registry.put(resourcePath, resource);
+
+            String[] visibleRoles = null;
+            if (api.getVisibleRoles() != null){
+                visibleRoles = api.getVisibleRoles().split(",");
+            }
+
+            APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
+            APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
+
+        } catch (RegistryException e){
+            handleException("Error while adding AsyncApi Definition for " + apiName + "-" + apiVersion, e);
+        }
     }
 }

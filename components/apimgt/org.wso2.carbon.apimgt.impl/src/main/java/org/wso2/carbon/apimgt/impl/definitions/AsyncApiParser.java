@@ -1,5 +1,12 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import io.apicurio.datamodels.Library;
+import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
+import io.apicurio.datamodels.asyncapi.models.AaiDocument;
+import io.apicurio.datamodels.asyncapi.models.AaiServer;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20ChannelItem;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Server;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
@@ -1448,11 +1455,13 @@ public class AsyncApiParser extends APIDefinition {
         }
 
         if (validationSuccess) {
-            ArrayList<String> endpoints = new ArrayList<>();
+            /*ArrayList<String> endpoints = new ArrayList<>();
             for (Iterator<String> it = schemaToBeValidated.getJSONObject("servers").keys(); it.hasNext(); ){
                 String server = it.next();
                 endpoints.add(schemaToBeValidated.getJSONObject("servers").getJSONObject(server).getString("url"));
             }
+            String description = null;
+            if (schemaToBeValidated.getJSONObject("info").has("description")) description = schemaToBeValidated.getJSONObject("info").getString("description");
             AsyncApiParserUtil.updateValidationResponseAsSuccess(
                     validationResponse,
                     apiDefinition,
@@ -1460,11 +1469,30 @@ public class AsyncApiParser extends APIDefinition {
                     schemaToBeValidated.getJSONObject("info").getString("title"),
                     schemaToBeValidated.getJSONObject("info").getString("version"),
                     null,
-                    schemaToBeValidated.getJSONObject("info").getString("description"),
+                    description,
                     endpoints
             );
             validationResponse.setParser(this);
             if (returnJsonContent){
+                validationResponse.setJsonContent(apiDefinition);
+            }*/
+            AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
+            ArrayList<String> endpoints = new ArrayList<>();
+            for (AaiServer x : asyncApiDocument.getServers()){
+                endpoints.add(x.url);
+            }
+            AsyncApiParserUtil.updateValidationResponseAsSuccess(
+                    validationResponse,
+                    apiDefinition,
+                    asyncApiDocument.asyncapi,
+                    asyncApiDocument.info.title,
+                    asyncApiDocument.info.version,
+                    asyncApiDocument.getChannels().get(0)._name,
+                    asyncApiDocument.info.description,
+                    endpoints
+            );
+            validationResponse.setParser(this);
+            if (returnJsonContent) {
                 validationResponse.setJsonContent(apiDefinition);
             }
         } else {
@@ -1527,4 +1555,22 @@ public class AsyncApiParser extends APIDefinition {
     public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException{
         return null;
     }
+
+    public String generateAsyncAPIDefinition(API api) throws APIManagementException {
+        Aai20Document aaiDocument = new Aai20Document();
+        aaiDocument.info = aaiDocument.createInfo();
+        aaiDocument.info.title = api.getId().getName();
+        aaiDocument.info.version = api.getId().getVersion();
+        aaiDocument.servers = new HashMap<String, AaiServer>();
+        Aai20Server server = (Aai20Server) aaiDocument.createServer("production");
+        JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+        server.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
+        server.protocol = api.getType();
+        aaiDocument.addServer("production", server);
+        aaiDocument.channels = new HashMap<String, AaiChannelItem>();
+        Aai20ChannelItem channelItem = aaiDocument.createChannelItem("/echo");
+        aaiDocument.addChannelItem(channelItem);
+        return Library.writeDocumentToJSONString(aaiDocument);
+    }
+
 }

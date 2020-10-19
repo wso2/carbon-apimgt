@@ -415,6 +415,12 @@
             </dependency>-->
 
             <dependency>
+                <groupId>io.apicurio</groupId>
+                <artifactId>apicurio-data-models</artifactId>
+                <version>1.1.5</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.jacoco</groupId>
                 <artifactId>org.jacoco.agent</artifactId>
                 <classifier>runtime</classifier>
@@ -1932,8 +1938,8 @@
         <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
         <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
         <velocity.version>1.7</velocity.version>
-        <fasterxml.jackson.version>2.10.3</fasterxml.jackson.version>
-        <fasterxml.jackson.databind.version>2.10.3</fasterxml.jackson.databind.version>
+        <fasterxml.jackson.version>2.11.2</fasterxml.jackson.version>
+        <fasterxml.jackson.databind.version>2.11.2</fasterxml.jackson.databind.version>
         <fasterxml.jackson.core.version>2.9.8.wso2v1</fasterxml.jackson.core.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
         <carbon.broker.version>3.3.12</carbon.broker.version>

@@ -241,6 +241,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
             }
 
+            if (isWSAPI) {
+                AsyncApiParser asyncApiParser = new AsyncApiParser();
+                String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
+                apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition);
+            }
+
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
@@ -3579,6 +3585,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
 
+        //validate websocket url and change type of the API in APIDTO
+        if (RestApiPublisherUtils.isValidWSAPI(apiDTOFromProperties)){
+            apiDTOFromProperties.setType(APIDTO.TypeEnum.WS);
+        }
+
         //Only WS type APIs should be allowed
         if (!APIDTO.TypeEnum.WS.equals(apiDTOFromProperties.getType())){
             throw RestApiUtil.buildBadRequestException("The API's type should only be WebSocket when "+
@@ -3589,19 +3600,23 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(apiDTOFromProperties);
+            String definitionToAdd = validationResponse.getJsonContent();
+            apiProvider.addAPI(apiToAdd);
+            apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
 
-            boolean syncOperation = apiDTOFromProperties.getOperations().size() > 0;
-
-            APIDefinition apiDefinition = validationResponse.getParser();
-
-
+            APIDTO createdAPIDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
+            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdAPIDTO.getId());
+            return Response.created(createdApiUri).entity(createdAPIDTO).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving API location : " + apiDTOFromProperties.getProvider() + "-" +
+                    apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-
 
         return null;
     }
