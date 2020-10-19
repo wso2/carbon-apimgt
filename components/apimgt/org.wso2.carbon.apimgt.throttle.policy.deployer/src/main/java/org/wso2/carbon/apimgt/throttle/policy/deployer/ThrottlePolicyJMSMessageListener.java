@@ -22,12 +22,17 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.event.processor.stub.EventProcessorAdminService;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.event.processor.core.EventProcessorService;
+import org.wso2.carbon.event.processor.core.exception.ExecutionPlanConfigurationException;
+import org.wso2.carbon.event.processor.core.exception.ExecutionPlanDependencyValidationException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.jms.*;
 import java.util.Enumeration;
@@ -110,9 +115,23 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                         try {
                             String policyString = policyTemplateBuilder.getThrottlePolicyForSubscriptionLevel(subscriptionPolicy);
                             log.info(policyString);
-//                            EventProcessorAdminService eventProcessorAdminService = CarbonEvent
+                            String policyFile = subscriptionPolicy.getTenantDomain() + "_"
+                                    + PolicyConstants.POLICY_LEVEL_SUB + "_" + subscriptionPolicy.getName();
+                            PrivilegedCarbonContext.startTenantFlow();
+                            PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                    setTenantDomain(subscriptionPolicy.getTenantDomain(), true);
+
+                            EventProcessorService eventProcessorService =
+                                    ServiceReferenceHolder.getInstance().getEventProcessorService();
+                            eventProcessorService.editActiveExecutionPlan(policyString, policyFile);
                         } catch (APITemplateException e) {
                             e.printStackTrace();
+                        } catch (ExecutionPlanDependencyValidationException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionPlanConfigurationException e) {
+                            e.printStackTrace();
+                        } finally {
+                            PrivilegedCarbonContext.endTenantFlow();
                         }
                     } catch (ArtifactSynchronizerException e) {
                         e.printStackTrace();

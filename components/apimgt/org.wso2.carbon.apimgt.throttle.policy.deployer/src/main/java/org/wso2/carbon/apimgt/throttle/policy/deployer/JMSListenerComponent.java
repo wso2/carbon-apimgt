@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
+import org.wso2.carbon.event.processor.core.EventProcessorService;
 
 @Component(
         name = "org.wso2.apimgt.throttle.policy.deployer",
@@ -33,6 +34,12 @@ public class JMSListenerComponent {
             log.warn("API Manager Configuration not properly set.");
             return;
         }
+        EventProcessorService eventProcessorService =
+                ServiceReferenceHolder.getInstance().getEventProcessorService();
+        if (eventProcessorService == null) {
+            log.warn("EventProcessor Service not properly set.");
+            return;
+        }
         JMSListenerStartupShutdownListener jmsListenerStartupShutdownListener =
                 new JMSListenerStartupShutdownListener();
         registration = context.getBundleContext()
@@ -40,8 +47,6 @@ public class JMSListenerComponent {
         registration = context.getBundleContext()
                 .registerService(ServerShutdownHandler.class, jmsListenerStartupShutdownListener, null);
     }
-
-
 
     @Reference(
             name = "api.manager.config.service",
@@ -59,6 +64,24 @@ public class JMSListenerComponent {
 
         log.debug("Setting APIM Configuration Service");
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
+    }
+
+    @Reference(
+            name = "event.processor.service",
+            service = EventProcessorService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetEventProcessorService")
+    protected void setEventProcessorService(EventProcessorService eventProcessorService) {
+
+        log.debug("Setting EventProcessor Service");
+        ServiceReferenceHolder.getInstance().setEventProcessorService(eventProcessorService);
+    }
+
+    protected void unsetEventProcessorService(EventProcessorService eventProcessorService) {
+
+        log.debug("Unsetting EventProcessor Service");
+        ServiceReferenceHolder.getInstance().setEventProcessorService(null);
     }
 
     @Deactivate
