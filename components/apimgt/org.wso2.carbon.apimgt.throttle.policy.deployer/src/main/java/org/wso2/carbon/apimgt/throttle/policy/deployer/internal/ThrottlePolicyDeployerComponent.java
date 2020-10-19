@@ -29,7 +29,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.utils.JMSListenerStartupShutdownListener;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.utils.ThrottlePolicyStartupListener;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.event.processor.core.EventProcessorService;
@@ -37,9 +37,9 @@ import org.wso2.carbon.event.processor.core.EventProcessorService;
 @Component(
         name = "org.wso2.apimgt.throttle.policy.deployer",
         immediate = true)
-public class JMSListenerComponent {
+public class ThrottlePolicyDeployerComponent {
 
-    private static final Log log = LogFactory.getLog(JMSListenerComponent.class);
+    private static final Log log = LogFactory.getLog(ThrottlePolicyDeployerComponent.class);
 
     private ServiceRegistration registration;
 
@@ -58,12 +58,12 @@ public class JMSListenerComponent {
             log.warn("EventProcessor Service not properly set.");
             return;
         }
-        JMSListenerStartupShutdownListener jmsListenerStartupShutdownListener =
-                new JMSListenerStartupShutdownListener();
+        ThrottlePolicyStartupListener throttlePolicyStartupListener =
+                new ThrottlePolicyStartupListener();
         registration = context.getBundleContext()
-                .registerService(ServerStartupObserver.class, jmsListenerStartupShutdownListener, null);
+                .registerService(ServerStartupObserver.class, throttlePolicyStartupListener, null);
         registration = context.getBundleContext()
-                .registerService(ServerShutdownHandler.class, jmsListenerStartupShutdownListener, null);
+                .registerService(ServerShutdownHandler.class, throttlePolicyStartupListener, null);
     }
 
     @Reference(

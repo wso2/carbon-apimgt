@@ -32,9 +32,17 @@ import javax.ws.rs.core.Response;
 public class SubscriptionPoliciesApiServiceImpl implements SubscriptionPoliciesApiService {
 
     @Override
-    public Response subscriptionPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) {
+    public Response subscriptionPoliciesGet(String xWSO2Tenant, String policyName, Boolean allTenants,
+                                            MessageContext messageContext) {
 
+        allTenants = allTenants != null && allTenants;
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
+        if (allTenants) {
+            return Response.ok().entity(SubscriptionValidationDataUtil.
+                    fromSubscriptionPolicyToSubscriptionPolicyListDTO(subscriptionValidationDAO.
+                            getAllSubscriptionPolicies())).build();
+        }
+
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             if (StringUtils.isNotEmpty(policyName)) {

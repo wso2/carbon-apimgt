@@ -48,36 +48,47 @@ public class PolicyRetriever {
 
     public SubscriptionPolicy retrieveSubscriptionPolicy(String policyName, String tenantDomain)
             throws ThrottlePolicyDeployerException {
-        CloseableHttpResponse httpResponse;
+
+        String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES +
+                "?policyName=" + policyName;
+        SubscriptionPolicyList subscriptionPolicyList = getSubscriptionPolicies(path, tenantDomain);
+        if (subscriptionPolicyList.getList() != null && !subscriptionPolicyList.getList().isEmpty()) {
+            return subscriptionPolicyList.getList().get(0);
+        }
+        return null;
+    }
+
+    public SubscriptionPolicyList retrieveAllSubscriptionPolicies()
+            throws ThrottlePolicyDeployerException {
+
+        String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES +
+                "?allTenants=true";
+        return getSubscriptionPolicies(path, null);
+    }
+
+    public SubscriptionPolicyList getSubscriptionPolicies(String path, String tenantDomain)
+            throws ThrottlePolicyDeployerException {
 
         try {
-
-            String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES +
-                    "?policyName=" + policyName;
             String endpoint = baseURL + path;
-            httpResponse = invokeService(endpoint, tenantDomain);
+            CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain);
 
-            SubscriptionPolicy subscriptionPolicy = null;
             if (httpResponse.getEntity() != null) {
                 String responseString = EntityUtils.toString(httpResponse.getEntity(),
                         APIConstants.DigestAuthConstants.CHARSET);
-                if (responseString != null && !responseString.isEmpty()) {
-                    SubscriptionPolicyList list = new Gson().fromJson(responseString, SubscriptionPolicyList.class);
-                    if (list.getList() != null && !list.getList().isEmpty()) {
-                        subscriptionPolicy = list.getList().get(0);
-                    }
-                }
                 httpResponse.close();
+                if (responseString != null && !responseString.isEmpty()) {
+                    return new Gson().fromJson(responseString, SubscriptionPolicyList.class);
+                }
             } else {
                 throw new ThrottlePolicyDeployerException("HTTP response is empty");
             }
-            subscriptionPolicy.setTenantDomain(APIUtil.getTenantDomainFromTenantId(subscriptionPolicy.getTenantId()));
-            return subscriptionPolicy;
         } catch (IOException e) {
             String msg = "Error while executing the http client";
             log.error(msg, e);
             throw new ThrottlePolicyDeployerException(msg, e);
         }
+        return null;
     }
 
 

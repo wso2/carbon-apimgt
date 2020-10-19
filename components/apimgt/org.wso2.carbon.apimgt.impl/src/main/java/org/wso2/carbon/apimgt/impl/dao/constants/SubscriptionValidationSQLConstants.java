@@ -101,15 +101,19 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_ALL_SUBSCRIPTION_POLICIES_SQL =
             "SELECT " +
-                    "   APS.POLICY_ID," +
-                    "   APS.NAME," +
-                    "   APS.RATE_LIMIT_COUNT," +
-                    "   APS.RATE_LIMIT_TIME_UNIT," +
-                    "   APS.QUOTA_TYPE," +
-                    "   APS.STOP_ON_QUOTA_REACH," +
-                    "   APS.TENANT_ID," +
-                    "   APS.MAX_DEPTH," +
-                    "   APS.MAX_COMPLEXITY" +
+                    "   APS.POLICY_ID AS POLICY_ID, " +
+                    "   APS.NAME AS POLICY_NAME, " +
+                    "   APS.RATE_LIMIT_COUNT AS RATE_LIMIT_COUNT, " +
+                    "   APS.RATE_LIMIT_TIME_UNIT AS RATE_LIMIT_TIME_UNIT, " +
+                    "   APS.QUOTA_TYPE AS QUOTA_TYPE, " +
+                    "   APS.STOP_ON_QUOTA_REACH AS STOP_ON_QUOTA_REACH, " +
+                    "   APS.TENANT_ID AS TENANT_ID, " +
+                    "   APS.MAX_DEPTH AS MAX_DEPTH, " +
+                    "   APS.MAX_COMPLEXITY AS MAX_COMPLEXITY, " +
+                    "   APS.QUOTA AS QUOTA, " +
+                    "   APS.QUOTA_UNIT AS QUOTA_UNIT, " +
+                    "   APS.UNIT_TIME AS UNIT_TIME, " +
+                    "   APS.TIME_UNIT AS TIME_UNIT " +
                     " FROM " +
                     "   AM_POLICY_SUBSCRIPTION APS";
 

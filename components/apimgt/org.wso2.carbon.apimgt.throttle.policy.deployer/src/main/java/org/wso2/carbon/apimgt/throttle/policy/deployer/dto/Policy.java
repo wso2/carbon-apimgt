@@ -29,13 +29,14 @@ public class Policy {
         APPLICATION,
         API
     }
+
     private Integer id = null;
     private Integer tenantId = null;
     private String tenantDomain = null;
     private String name = null;
     private String quotaType = null;
     private QuotaPolicy defaultLimit = null;
-
+    private POLICY_TYPE type;
 
     public int getId() {
 
@@ -88,6 +89,14 @@ public class Policy {
 
     public void setDefaultLimit(QuotaPolicy defaultLimit) {
         this.defaultLimit = defaultLimit;
+    }
+
+    public POLICY_TYPE getType() {
+        return type;
+    }
+
+    public void setType(POLICY_TYPE type) {
+        this.type = type;
     }
 
     public String getTenantDomain() {

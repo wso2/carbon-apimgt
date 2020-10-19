@@ -63,7 +63,7 @@ public class ThrottlePolicyDeploymentManager {
      */
     public void deployPolicyToGlobalCEP(String policy) throws APIManagementException {
         try {
-            globalThrottleEngineClient.deployExecutionPlan(policy);
+//            globalThrottleEngineClient.deployExecutionPlan(policy);
         } catch (Exception e) {
             log.error("Error while deploying policy to global policy server." + e.getMessage());
         }
@@ -93,7 +93,7 @@ public class ThrottlePolicyDeploymentManager {
      */
     public void undeployPolicyFromGlobalCEP(String policyName) throws APIManagementException {
         try {
-            globalThrottleEngineClient.deleteExecutionPlan(policyName);
+//            globalThrottleEngineClient.deleteExecutionPlan(policyName);
         } catch (Exception e) {
             log.error("Error while undeploying policy from global policy server." + e.getMessage());
         }
@@ -107,9 +107,9 @@ public class ThrottlePolicyDeploymentManager {
      * @throws APIManagementException
      */
     public void undeployPolicyFromGatewayManager(String[] policyNames) throws APIManagementException {
-            for(String policyName : policyNames) {
-                globalThrottleEngineClient.deleteExecutionPlan(policyName);
-            }
+//            for(String policyName : policyNames) {
+//                globalThrottleEngineClient.deleteExecutionPlan(policyName);
+//            }
     }
 
     /**

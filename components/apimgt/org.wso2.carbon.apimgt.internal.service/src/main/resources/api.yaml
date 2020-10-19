@@ -267,6 +267,12 @@ paths:
             **Search condition**.
              Subscription policy name
           type: string
+        - name: allTenants
+          in: query
+          description: |
+            **Search condition**.
+              Request policies of all the tenants or not
+          type: boolean
       tags:
         - Subscription Validation
       responses:

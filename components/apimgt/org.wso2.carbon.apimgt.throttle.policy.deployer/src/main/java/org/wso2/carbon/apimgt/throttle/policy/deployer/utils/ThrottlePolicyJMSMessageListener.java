@@ -21,19 +21,12 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
-import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.PolicyRetriever;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.event.processor.core.EventProcessorService;
-import org.wso2.carbon.event.processor.core.exception.ExecutionPlanConfigurationException;
-import org.wso2.carbon.event.processor.core.exception.ExecutionPlanDependencyValidationException;
 
 import javax.jms.MapMessage;
 import javax.jms.Message;
@@ -103,61 +96,25 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                 || APIConstants.EventType.POLICY_DELETE.toString().equals(eventType)
         ) {
 
-            boolean createPolicy = APIConstants.EventType.POLICY_CREATE.toString().equals(eventType);
-            boolean updatePolicy = APIConstants.EventType.POLICY_UPDATE.toString().equals(eventType);
+            boolean updatePolicy = APIConstants.EventType.POLICY_CREATE.toString().equals(eventType)
+                    || APIConstants.EventType.POLICY_UPDATE.toString().equals(eventType);
             boolean deletePolicy = APIConstants.EventType.POLICY_DELETE.toString().equals(eventType);
 
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
 
             if (event.getPolicyType() == APIConstants.PolicyType.SUBSCRIPTION) {
                 SubscriptionPolicyEvent policyEvent = new Gson().fromJson(eventJson, SubscriptionPolicyEvent.class);
-                if (createPolicy || updatePolicy) {
+                if (updatePolicy) {
                     try {
-                        SubscriptionPolicy subscriptionPolicy = policyRetriever.retrieveSubscriptionPolicy(policyEvent.getPolicyName(),
-                                policyEvent.getTenantDomain());
-                        ThrottlePolicyTemplateBuilder policyTemplateBuilder = new ThrottlePolicyTemplateBuilder();
-                        String policyString = policyTemplateBuilder.getThrottlePolicyForSubscriptionLevel(subscriptionPolicy);
-                        String policyFile = subscriptionPolicy.getTenantDomain() + "_"
-                                + PolicyConstants.POLICY_LEVEL_SUB + "_" + subscriptionPolicy.getName();
-                        PrivilegedCarbonContext.startTenantFlow();
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                                setTenantDomain(subscriptionPolicy.getTenantDomain(), true);
-
-                        EventProcessorService eventProcessorService =
-                                ServiceReferenceHolder.getInstance().getEventProcessorService();
-                        if (createPolicy) {
-                            eventProcessorService.deployExecutionPlan(policyString);
-                        } else {
-                            eventProcessorService.editActiveExecutionPlan(policyString, policyFile);
-                        }
-
+                        SubscriptionPolicy subscriptionPolicy = policyRetriever.retrieveSubscriptionPolicy(
+                                policyEvent.getPolicyName(), policyEvent.getTenantDomain());
+                        PolicyUtil.deployPolicy(subscriptionPolicy);
                     } catch (ThrottlePolicyDeployerException e) {
                         log.error("Error in retrieving throttle policy metadata from the database", e);
-                    } catch (APITemplateException e) {
-                        log.error("Error in creating execution plan", e);
-                    } catch (ExecutionPlanConfigurationException | ExecutionPlanDependencyValidationException e) {
-                        log.error("Error in validating execution plan", e);
-                    } finally {
-                        PrivilegedCarbonContext.endTenantFlow();
                     }
                 } else if (deletePolicy) {
-
-                    try {
-                        String policyFile = policyEvent.getTenantDomain() + "_"
-                                + PolicyConstants.POLICY_LEVEL_SUB + "_" + policyEvent.getPolicyName();
-
-                        PrivilegedCarbonContext.startTenantFlow();
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                                setTenantDomain(policyEvent.getTenantDomain(), true);
-
-                        EventProcessorService eventProcessorService =
-                                ServiceReferenceHolder.getInstance().getEventProcessorService();
-                        eventProcessorService.undeployActiveExecutionPlan(policyFile);
-                    } catch (ExecutionPlanConfigurationException e) {
-                        log.error("Error in removing execution plan", e);
-                    } finally {
-                        PrivilegedCarbonContext.endTenantFlow();
-                    }
+                    PolicyUtil.undeployPolicy(policyEvent.getPolicyName(), policyEvent.getPolicyType(),
+                            policyEvent.getTenantDomain());
                 }
             }
         }
