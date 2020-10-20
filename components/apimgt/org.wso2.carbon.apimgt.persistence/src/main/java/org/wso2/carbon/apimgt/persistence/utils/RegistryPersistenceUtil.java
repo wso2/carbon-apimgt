@@ -215,7 +215,7 @@ public class RegistryPersistenceUtil {
                                                                             api.getCorsConfiguration()));
 
             //attaching micro-gateway labels to the API
-            attachLabelsToAPIArtifact(artifact, api, tenantDomain);
+//            attachLabelsToAPIArtifact(artifact, api, tenantDomain); commented until dao is implemented for registry
 
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = api.getApiCategories();

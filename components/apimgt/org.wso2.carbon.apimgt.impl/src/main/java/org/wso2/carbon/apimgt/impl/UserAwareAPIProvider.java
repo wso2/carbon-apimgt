@@ -76,9 +76,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void addAPI(API api) throws APIManagementException {
+    public API addAPI(API api) throws APIManagementException {
         checkCreatePermission();
-        super.addAPI(api);
+        return super.addAPI(api);
     }
 
     @Override

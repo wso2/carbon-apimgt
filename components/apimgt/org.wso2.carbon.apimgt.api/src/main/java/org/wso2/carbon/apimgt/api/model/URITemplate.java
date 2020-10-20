@@ -410,6 +410,25 @@ public class URITemplate implements Serializable{
         this.scopes = scopes;
     }
 
+    public Map<String, String> getMediationScriptMap() {
+        return mediationScripts;
+    }
+
+    public LinkedHashSet<String> getHttpVerbsList() {
+        return httpVerbs;
+    }
+
+    public List<String> getAuthTypesList() {
+        return authTypes;
+    }
+
+    public List<Scope> getScopesList() {
+        return scopes;
+    }
+
+    public Set<APIProductIdentifier> getUsedByProducts() {
+        return usedByProducts;
+    }
     public Set<APIProductIdentifier> retrieveUsedByProducts() {
         return usedByProducts;
     }

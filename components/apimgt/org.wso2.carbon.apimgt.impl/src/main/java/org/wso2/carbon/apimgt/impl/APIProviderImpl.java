@@ -780,7 +780,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add API
      */
     @Override
-    public void addAPI(API api) throws APIManagementException {
+    public API addAPI(API api) throws APIManagementException {
         validateApiInfo(api);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -826,7 +826,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //            handleException("Error occurred while adding default API LifeCycle.", e);
 //        }
         // <<<<<<<
-        createAPI(api);
+        API createdAPI = createAPI(api);
 
         if (log.isDebugEnabled()) {
             log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
@@ -874,6 +874,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //notify key manager with API addition
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
+        return createdAPI;
     }
 
     /**
@@ -3860,7 +3861,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API
      * @throws APIManagementException if failed to create API
      */
-    protected void createAPI(API api) throws APIManagementException {
+    protected API createAPI(API api) throws APIManagementException {
         /*        Moved this to constructor
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
@@ -3913,7 +3914,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //get all labels in the tenant
             List<Label> gatewayLabelList = APIUtil.getAllLabels(tenantDomain);
            // APIUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain);
-            apiPersistenceInstance.createAPI(api);
+            API createdApi = apiPersistenceInstance.createAPI(api);
 
             // If wsdl url only given
             if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
@@ -3954,6 +3955,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //                                                                                + " created";
 //                log.debug(logMessage);
 //            }
+            return createdApi;
         } catch (RegistryException e) {
             try {
                 registry.rollbackTransaction();
@@ -3973,6 +3975,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
             }
         }
+        return null;
     }
 
     /**

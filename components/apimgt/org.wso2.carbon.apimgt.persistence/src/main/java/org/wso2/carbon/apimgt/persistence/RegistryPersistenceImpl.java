@@ -736,7 +736,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 //    @Override public void createAPI(API api) throws APIManagementException {
 //    }
 
-    @Override public void createAPI(API api) throws APIManagementException {
+    @Override public API createAPI(API api) throws APIManagementException {
         //Add default API LC if it is not there
         try {
             if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
@@ -848,7 +848,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
             }
         }
-
+        //Need to call get api and return the created api
+        return null;
     }
 
     /**

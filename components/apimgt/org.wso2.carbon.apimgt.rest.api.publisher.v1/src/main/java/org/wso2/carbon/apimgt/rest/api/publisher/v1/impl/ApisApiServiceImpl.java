@@ -284,7 +284,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             //adding the api
-            apiProvider.addAPI(apiToAdd);
+            API createdAPI = apiProvider.addAPI(apiToAdd);
 
             if (!isWSAPI) {
                 APIDefinition oasParser;
@@ -298,10 +298,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
             }
 
-            APIIdentifier createdApiId = apiToAdd.getId();
+//            APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPI(createdApiId);
-            createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
+//            API createdApi = apiProvider.getAPI(createdApiId);
+            createdApiDTO = APIMappingUtil.fromAPItoDTO(createdAPI);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();

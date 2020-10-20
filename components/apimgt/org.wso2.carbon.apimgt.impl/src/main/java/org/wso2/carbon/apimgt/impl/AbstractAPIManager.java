@@ -88,6 +88,7 @@ import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.persistence.MongoDBPersistenceImpl;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -500,6 +501,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException { // apisApiIdGet
         boolean tenantFlowStarted = false;
+//        MongoDBPersistenceImpl.getInstance().getAPIbyId(uuid,"");
         try {
             Registry registry;
             if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
