@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.persistence.documents.APIProductIdentifierDocument;
 import org.wso2.carbon.apimgt.persistence.documents.CORSConfigurationDocument;
 import org.wso2.carbon.apimgt.persistence.documents.MongoDBAPIDocument;
+import org.wso2.carbon.apimgt.persistence.documents.OrganizationDocument;
 import org.wso2.carbon.apimgt.persistence.documents.TiersDocument;
 import org.wso2.carbon.apimgt.persistence.documents.URITemplateDocument;
 
@@ -73,10 +74,12 @@ public class MongoDBPersistenceUtil {
                 ClassModel<Scope> scope = ClassModel.builder(Scope.class).enableDiscriminator(true).build();
                 ClassModel<URITemplateDocument> uriTemplate = ClassModel.builder(URITemplateDocument.class)
                         .enableDiscriminator(true).build();
+                ClassModel<OrganizationDocument> organization = ClassModel.builder(OrganizationDocument.class)
+                        .enableDiscriminator(true).build();
                 CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder()
                         .register(tier, policy, mongoDBAPIDocument, Scope, corsConfiguration,
                                 label, deploymentEnv, apiEndpoint, apiCategory, apiProductIdentifier, scope,
-                                uriTemplate).build());
+                                uriTemplate, organization).build());
                 CodecRegistry codecRegistry = fromRegistries(MongoClientSettings
                         .getDefaultCodecRegistry(), pojoCodecRegistry);
 

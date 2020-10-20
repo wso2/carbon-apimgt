@@ -71,6 +71,7 @@ public class MongoDBAPIDocument {
     //dirty pattern to identify which parts to be updated
     private boolean apiHeaderChanged;
     private boolean apiResourcePatternsChanged;
+    private OrganizationDocument organization;
 
     private String status;
 
@@ -190,6 +191,14 @@ public class MongoDBAPIDocument {
 
     private boolean isLatest;
     private String versionType;
+
+    public OrganizationDocument getDocument() {
+        return organization;
+    }
+
+    public void setDocument(OrganizationDocument organization) {
+        this.organization = organization;
+    }
 
     public String getVersionType() {
         return versionType;

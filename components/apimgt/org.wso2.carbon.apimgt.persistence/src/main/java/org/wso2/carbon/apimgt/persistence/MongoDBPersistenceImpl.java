@@ -2,6 +2,9 @@ package org.wso2.carbon.apimgt.persistence;
 
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.FindOneAndReplaceOptions;
+import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.ReturnDocument;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,6 +16,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -85,20 +89,20 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void createAPI(API api) {
+    public API createAPI(API api) {
         MongoCollection<MongoDBAPIDocument> collection = getCollection();
         MongoDBAPIDocument mongoDBAPIDocument = null;
         try {
             mongoDBAPIDocument = fromAPIToMongoDoc(api);
-            collection.insertOne(mongoDBAPIDocument);
+            FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
+            options.returnDocument(ReturnDocument.AFTER);
+            options.upsert(true);
+            MongoDBAPIDocument createdDoc = collection.findOneAndReplace(null, mongoDBAPIDocument, options);
+            return fromMongoDocToAPI(createdDoc);
         } catch (APIManagementException e) {
             log.error("Error when creating api ", e);
+            return null;
         }
-    }
-
-    @Override
-    public void createAPI(API api, List<Label> gatewayLabelList) throws APIManagementException {
-
     }
 
     @Override
@@ -475,6 +479,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         mongoDBAPIDocument.setEnableSchemaValidation(api.isEnabledSchemaValidation());
         mongoDBAPIDocument.setEnableStore(api.isEnableStore());
         mongoDBAPIDocument.setTestKey(api.getTestKey());
+        mongoDBAPIDocument.setLastUpdated(new Date());
 
         //Validate if the API has an unsupported context before setting it in the artifact
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -623,6 +628,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         api.setEnableSchemaValidation(mongoDBAPIDocument.isEnableSchemaValidation());
         api.setEnableStore(mongoDBAPIDocument.isEnableStore());
         api.setTestKey(mongoDBAPIDocument.getTestKey());
+        api.setLastUpdated(mongoDBAPIDocument.getLastUpdated());
 
         api.setContextTemplate(mongoDBAPIDocument.getContextTemplate());
         api.setType(mongoDBAPIDocument.getType());
