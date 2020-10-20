@@ -55,5 +55,6 @@
         <module>org.wso2.carbon.apimgt.output.adapter.http</module>
         <module>org.wso2.carbon.apimgt.tokenmgt</module>
         <module>org.wso2.carbon.apimgt.notification</module>
+        <module>org.wso2.carbon.apimgt.cache.invalidation</module>
     </modules>
 </project>
