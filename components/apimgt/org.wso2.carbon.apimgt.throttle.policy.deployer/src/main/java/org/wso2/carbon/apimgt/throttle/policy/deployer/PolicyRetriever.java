@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
@@ -91,6 +93,50 @@ public class PolicyRetriever {
         return null;
     }
 
+    public ApplicationPolicy retrieveApplicationPolicy(String policyName, String tenantDomain)
+            throws ThrottlePolicyDeployerException {
+
+        String path = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES +
+                "?policyName=" + policyName;
+        ApplicationPolicyList applicationPolicyList = getApplicationPolicies(path, tenantDomain);
+        if (applicationPolicyList.getList() != null && !applicationPolicyList.getList().isEmpty()) {
+            return applicationPolicyList.getList().get(0);
+        }
+        return null;
+    }
+
+    public ApplicationPolicyList getApplicationPolicies(String path, String tenantDomain)
+            throws ThrottlePolicyDeployerException {
+
+        try {
+            String endpoint = baseURL + path;
+            CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain);
+
+            if (httpResponse.getEntity() != null) {
+                String responseString = EntityUtils.toString(httpResponse.getEntity(),
+                        APIConstants.DigestAuthConstants.CHARSET);
+                httpResponse.close();
+                if (responseString != null && !responseString.isEmpty()) {
+                    return new Gson().fromJson(responseString, ApplicationPolicyList.class);
+                }
+            } else {
+                throw new ThrottlePolicyDeployerException("HTTP response is empty");
+            }
+        } catch (IOException e) {
+            String msg = "Error while executing the http client";
+            log.error(msg, e);
+            throw new ThrottlePolicyDeployerException(msg, e);
+        }
+        return null;
+    }
+
+    public ApplicationPolicyList retrieveAllApplicationPolicies()
+            throws ThrottlePolicyDeployerException {
+
+        String path = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES +
+                "?allTenants=true";
+        return getApplicationPolicies(path, null);
+    }
 
     private CloseableHttpResponse invokeService(String endpoint, String tenantDomain)
             throws IOException, ThrottlePolicyDeployerException {

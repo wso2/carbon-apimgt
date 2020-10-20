@@ -297,6 +297,12 @@ paths:
             **Search condition**.
              Application policy name
           type: string
+        - name: allTenants
+          in: query
+          description: |
+            **Search condition**.
+              Request policies of all the tenants or not
+          type: boolean
       tags:
         - Subscription Validation
       responses:
@@ -983,6 +989,9 @@ definitions:
   ApplicationPolicy:
     allOf:
       - $ref: '#/definitions/Policy'
+    properties:
+      defaultLimit:
+        $ref: '#/definitions/ThrottleLimit'
   #-----------------------------------------------------
   # The Api Policy List resource
   #-----------------------------------------------------

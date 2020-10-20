@@ -605,6 +605,7 @@ public class SubscriptionValidationDAO {
                 applicationPolicyDTO.setName(resultSet.getString("NAME"));
                 applicationPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                 applicationPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                setCommonProperties(applicationPolicyDTO, resultSet);
                 applicationPolicies.add(applicationPolicyDTO);
             }
         }
@@ -758,6 +759,7 @@ public class SubscriptionValidationDAO {
                     applicationPolicy.setName(resultSet.getString("NAME"));
                     applicationPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                     applicationPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    setCommonProperties(applicationPolicy, resultSet);
 
                     return applicationPolicy;
                 }

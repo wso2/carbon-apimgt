@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -297,7 +298,7 @@ public class ThrottlePolicyTemplateBuilder {
             VelocityContext context = new VelocityContext();
             setConstantContext(context);
             context.put("policy", policy);
-            context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
+            context.put("quotaPolicy", policy.getDefaultLimit());
             template.merge(context, writer);
             if (log.isDebugEnabled()) {
                 log.debug("Policy : " + writer.toString());
@@ -307,7 +308,6 @@ public class ThrottlePolicyTemplateBuilder {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
         }
-        String str = writer.toString();
         return writer.toString();
     }
 

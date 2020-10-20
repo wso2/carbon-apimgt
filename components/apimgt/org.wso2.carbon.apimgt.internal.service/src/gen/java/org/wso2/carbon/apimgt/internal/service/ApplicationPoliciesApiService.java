@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApplicationPoliciesApiService {
-      public Response applicationPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) throws APIManagementException;
+      public Response applicationPoliciesGet(String xWSO2Tenant, String policyName, Boolean allTenants, MessageContext messageContext) throws APIManagementException;
 }

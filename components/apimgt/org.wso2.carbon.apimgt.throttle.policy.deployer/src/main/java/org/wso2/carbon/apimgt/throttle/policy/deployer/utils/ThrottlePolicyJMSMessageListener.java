@@ -22,9 +22,11 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.PolicyRetriever;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 
@@ -110,7 +112,21 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                                 policyEvent.getPolicyName(), policyEvent.getTenantDomain());
                         PolicyUtil.deployPolicy(subscriptionPolicy);
                     } catch (ThrottlePolicyDeployerException e) {
-                        log.error("Error in retrieving throttle policy metadata from the database", e);
+                        log.error("Error in retrieving subscription policy metadata from the database", e);
+                    }
+                } else if (deletePolicy) {
+                    PolicyUtil.undeployPolicy(policyEvent.getPolicyName(), policyEvent.getPolicyType(),
+                            policyEvent.getTenantDomain());
+                }
+            } else if (event.getPolicyType() == APIConstants.PolicyType.APPLICATION) {
+                ApplicationPolicyEvent policyEvent = new Gson().fromJson(eventJson, ApplicationPolicyEvent.class);
+                if (updatePolicy) {
+                    try {
+                        ApplicationPolicy applicationPolicy = policyRetriever.retrieveApplicationPolicy(
+                                policyEvent.getPolicyName(), policyEvent.getTenantDomain());
+                        PolicyUtil.deployPolicy(applicationPolicy);
+                    } catch (ThrottlePolicyDeployerException e) {
+                        log.error("Error in retrieving application policy metadata from the database", e);
                     }
                 } else if (deletePolicy) {
                     PolicyUtil.undeployPolicy(policyEvent.getPolicyName(), policyEvent.getPolicyType(),

@@ -23,9 +23,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.PolicyRetriever;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Policy;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.*;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -47,11 +45,15 @@ public class PolicyUtil {
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             policy.setTenantDomain(tenantDomain);
             String policyFile = null;
+            String policyString = null;
             if (Policy.POLICY_TYPE.SUBSCRIPTION.equals(policy.getType())) {
                 policyFile = tenantDomain + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" + policy.getName();
+                policyString = policyTemplateBuilder.getThrottlePolicyForSubscriptionLevel((SubscriptionPolicy) policy);
+            } else if (Policy.POLICY_TYPE.APPLICATION.equals(policy.getType())) {
+                policyFile = tenantDomain + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + policy.getName();
+                policyString = policyTemplateBuilder.getThrottlePolicyForAppLevel((ApplicationPolicy) policy);
             }
-            String policyString = policyTemplateBuilder.getThrottlePolicyForSubscriptionLevel((SubscriptionPolicy) policy);
-
+            
             String executionPlan = null;
             try {
                 executionPlan = eventProcessorService.getActiveExecutionPlan(policyFile);
@@ -76,6 +78,8 @@ public class PolicyUtil {
             String policyFile = null;
             if (APIConstants.PolicyType.SUBSCRIPTION.equals(policyType)) {
                 policyFile = tenantDomain + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
+            } else if (APIConstants.PolicyType.APPLICATION.equals(policyType)) {
+                policyFile = tenantDomain + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
             }
 
             PrivilegedCarbonContext.startTenantFlow();
@@ -98,6 +102,10 @@ public class PolicyUtil {
             SubscriptionPolicyList subscriptionPolicies = policyRetriever.retrieveAllSubscriptionPolicies();
             for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
                 deployPolicy(subscriptionPolicy);
+            }
+            ApplicationPolicyList applicationPolicies = policyRetriever.retrieveAllApplicationPolicies();
+            for (ApplicationPolicy applicationPolicy : applicationPolicies.getList()) {
+                deployPolicy(applicationPolicy);
             }
         } catch (ThrottlePolicyDeployerException e) {
             log.error("Error in retrieving subscription policies");

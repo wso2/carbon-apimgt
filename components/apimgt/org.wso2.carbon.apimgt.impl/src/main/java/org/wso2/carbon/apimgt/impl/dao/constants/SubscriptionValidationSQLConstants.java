@@ -122,7 +122,11 @@ public class SubscriptionValidationSQLConstants {
                     "   POLICY_ID," +
                     "   NAME," +
                     "   QUOTA_TYPE," +
-                    "   TENANT_ID " +
+                    "   TENANT_ID, " +
+                    "   QUOTA, " +
+                    "   QUOTA_UNIT, " +
+                    "   UNIT_TIME, " +
+                    "   TIME_UNIT " +
                     "FROM " +
                     "   AM_POLICY_APPLICATION";
 
@@ -294,7 +298,11 @@ public class SubscriptionValidationSQLConstants {
                     "   POLICY_ID," +
                     "   NAME," +
                     "   QUOTA_TYPE," +
-                    "   TENANT_ID " +
+                    "   TENANT_ID, " +
+                    "   QUOTA, " +
+                    "   QUOTA_UNIT, " +
+                    "   UNIT_TIME, " +
+                    "   TIME_UNIT " +
                     "FROM " +
                     "   AM_POLICY_APPLICATION" +
                     " WHERE " +
@@ -340,7 +348,11 @@ public class SubscriptionValidationSQLConstants {
                     "   POLICY_ID," +
                     "   NAME," +
                     "   QUOTA_TYPE," +
-                    "   TENANT_ID " +
+                    "   TENANT_ID, " +
+                    "   QUOTA, " +
+                    "   QUOTA_UNIT, " +
+                    "   UNIT_TIME, " +
+                    "   TIME_UNIT " +
                     "FROM " +
                     "   AM_POLICY_APPLICATION" +
                     " WHERE " +
