@@ -35,9 +35,6 @@ const styles = theme => ({
     },
     buttonGap: {
         marginLeft: 20,
-        '& span span': {
-            color: theme.palette.getContrastText(theme.palette.primary.main),
-        }
     },
     select: {
         width: 100,
