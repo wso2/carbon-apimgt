@@ -118,28 +118,31 @@ public class JWTGenerator extends AbstractJWTGenerator {
             String parsedClaims = "[\"" + StringUtils.join(audience , "\",\"") + "\"]";
             claims.put("aud", parsedClaims);
         }
-
+        // dialect is either empty or '/' do not append a backslash. otherwise append a backslash '/'
+        if (!"".equals(dialect) && !"/".equals(dialect)) {
+            dialect = dialect + "/";
+        } 
         claims.put("iss", API_GATEWAY_ID);
         claims.put("exp", String.valueOf(expireIn));
         claims.put("iat", String.valueOf(currentTime));
         claims.put("sub", usernameWithoutTenantDomain);
-        claims.put(dialect + "/subscriber", subscriber);
-        claims.put(dialect + "/applicationid", applicationId);
-        claims.put(dialect + "/applicationname", applicationName);
-        claims.put(dialect + "/applicationtier", applicationTier);
-        claims.put(dialect + "/apiname", apiName);
-        claims.put(dialect + "/apicontext", validationContext.getContext());
-        claims.put(dialect + "/version", validationContext.getVersion());
-        claims.put(dialect + "/tier", tier);
-        claims.put(dialect + "/keytype", keyType);
-        claims.put(dialect + "/usertype", userType);
-        claims.put(dialect + "/enduser", APIUtil.getUserNameWithTenantSuffix(endUserName));
-        claims.put(dialect + "/enduserTenantId", enduserTenantId);
-        claims.put(dialect + "/applicationUUId", uuid);
+        claims.put(dialect + "subscriber", subscriber);
+        claims.put(dialect + "applicationid", applicationId);
+        claims.put(dialect + "applicationname", applicationName);
+        claims.put(dialect + "applicationtier", applicationTier);
+        claims.put(dialect + "apiname", apiName);
+        claims.put(dialect + "apicontext", validationContext.getContext());
+        claims.put(dialect + "version", validationContext.getVersion());
+        claims.put(dialect + "tier", tier);
+        claims.put(dialect + "keytype", keyType);
+        claims.put(dialect + "usertype", userType);
+        claims.put(dialect + "enduser", APIUtil.getUserNameWithTenantSuffix(endUserName));
+        claims.put(dialect + "enduserTenantId", enduserTenantId);
+        claims.put(dialect + "applicationUUId", uuid);
         try {
             if (appAttributes != null && !appAttributes.isEmpty()) {
                 String stringAppAttributes = new ObjectMapper().writeValueAsString(appAttributes);
-                claims.put(dialect + "/applicationAttributes", stringAppAttributes);
+                claims.put(dialect + "applicationAttributes", stringAppAttributes);
             }
 
         } catch (JsonProcessingException e) {
