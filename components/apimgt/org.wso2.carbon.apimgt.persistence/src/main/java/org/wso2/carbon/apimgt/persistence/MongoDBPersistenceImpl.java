@@ -1,29 +1,27 @@
 package org.wso2.carbon.apimgt.persistence;
 
+import com.mongodb.MongoException;
+import com.mongodb.client.MongoCursor;
+import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.bson.Document;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIPersistence;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import netscape.javascript.JSObject;
-import org.bson.Document;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.bson.types.ObjectId;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -38,43 +36,38 @@ import org.wso2.carbon.apimgt.persistence.documents.MongoDBAPIDocument;
 import org.wso2.carbon.apimgt.persistence.documents.TiersDocument;
 import org.wso2.carbon.apimgt.persistence.documents.URITemplateDocument;
 import org.wso2.carbon.apimgt.persistence.utils.MongoDBPersistenceUtil;
-import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-import java.util.function.Consumer;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 
+//? Question can api be part of multiple organizations
 public class MongoDBPersistenceImpl implements APIPersistence {
 
     private static APIPersistence instance = null;
     private static final Log log = LogFactory.getLog(MongoDBPersistenceImpl.class);
 
     @Override
-    public API getAPI(String apiId) {
+    public API getAPIbyId(String id, String requestedTenantDomain) throws APIManagementException {
         MongoCollection<MongoDBAPIDocument> collection = getCollection();
-        MongoDBAPIDocument mongoDBAPIDocument =
-                collection.find(eq("_id", new ObjectId(apiId))).first();
-        if (mongoDBAPIDocument == null) {
-            String msg = "Failed to get API. " + apiId + " does not exist in mongodb database";
-            log.error(msg);
-            return null;
-        }
-        System.out.println(mongoDBAPIDocument.getApiSecurity());
         try {
+            MongoDBAPIDocument mongoDBAPIDocument =
+                    collection.find(eq("_id", new ObjectId(id))).first();
+            if (mongoDBAPIDocument == null) {
+                String msg = "Failed to get API. " + id + " does not exist in mongodb database";
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
             return fromMongoDocToAPI(mongoDBAPIDocument);
-        } catch (APIManagementException e) {
-            log.error("Error when converting API mongodb ", e);
+        } catch (MongoException e) {
+            throw new APIManagementException("Error when getting API from mongodb", e);
         }
-        return null;
     }
 
     @Override
@@ -88,6 +81,135 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         } catch (APIManagementException e) {
             log.error("Error when converting API mongodb ", e);
         }
+        return null;
+    }
+
+    @Override
+    public void createAPI(API api) {
+        MongoCollection<MongoDBAPIDocument> collection = getCollection();
+        MongoDBAPIDocument mongoDBAPIDocument = null;
+        try {
+            mongoDBAPIDocument = fromAPIToMongoDoc(api);
+            collection.insertOne(mongoDBAPIDocument);
+        } catch (APIManagementException e) {
+            log.error("Error when creating api ", e);
+        }
+    }
+
+    @Override
+    public void createAPI(API api, List<Label> gatewayLabelList) throws APIManagementException {
+
+    }
+
+    @Override
+    public void deleteAPI(String apiId) {
+        MongoCollection<MongoDBAPIDocument> collection = getCollection();
+        collection.deleteOne(eq("_id", new ObjectId(apiId)));
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start,
+                                                   int end, boolean limitAttributes) {
+        String q = "context:df";
+        int s = 0;
+        int e = 8;
+
+        MongoCollection<MongoDBAPIDocument> collection = getCollection();
+        MongoCursor<MongoDBAPIDocument> aggregate = collection.aggregate(getSearchAggregate(searchQuery)).cursor();
+        while (aggregate.hasNext()) {
+            MongoDBAPIDocument mongoDBAPIDocument = aggregate.next();
+            System.out.println(mongoDBAPIDocument.getName());
+        }
+
+//        AggregateIterable<MongoDBAPIDocument> result = collection.aggregate(Arrays.asList(
+//                eq("$search",
+//                        eq("wildcard",
+//                                and(
+//                                        eq("path", getSearchPath()),
+//                                        eq("query", "*dus*"),
+//                                        eq("allowAnalyzedField", true)
+//                                   ))),
+//                skip(end * (start - 1)),
+//                limit(end)));
+//        MongoCursor<MongoDBAPIDocument> cursor = result.cursor();
+//        while(cursor.hasNext()){
+//            MongoDBAPIDocument mongoDBAPIDocument = cursor.next();
+//            System.out.println(mongoDBAPIDocument.getName());
+//        }
+//        collection.aggregate(Arrays.asList(
+//                eq("$search",
+//                        eq("wildcard",
+//                                and(
+//                                        eq("path", Arrays.asList("something")),
+//                                        eq("query", "*ness*"),
+//                                        eq("allowAnalyzedField", true)
+//                                   ))),
+//                skip(1), limit(1)));
+
+        return null;
+    }
+
+    private String getSearchQuery(String query) {
+
+        if (!query.contains(":")) {
+            return "*" + query + "*";
+        }
+        String[] queryArray = query.split(":");
+        String searchCriteria = queryArray[0];
+        String searchQuery = queryArray[1];
+        return "*" + searchQuery + "*";
+    }
+
+    private List<Document> getSearchAggregate(String query) {
+        //sub-context and doc not added
+//        return Arrays.asList("name", "provider","version","context","status","description","tags","gatewayLabels",
+//                "apiCategories","additionalProperties");
+        String searchQuery = getSearchQuery(query);
+//        String queryWildCard = "*"+query+"*";
+        List<String> paths = new ArrayList<>();
+        paths.add("name");
+        paths.add("provider");
+        paths.add("version");
+        paths.add("context");
+        paths.add("status");
+        paths.add("description");
+        paths.add("tags");
+        paths.add("gatewayLabels");
+        paths.add("additionalProperties");
+
+        Document search = new Document();
+        Document wildCard = new Document();
+        Document wildCardBody = new Document();
+        wildCardBody.put("path", paths);
+        wildCardBody.put("query", searchQuery);
+        wildCardBody.put("allowAnalyzedField", true);
+        wildCard.put("wildcard", wildCardBody);
+        search.put("$search", wildCard);
+
+        List<Document> list = new ArrayList<>();
+        list.add(search);
+        return list;
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start,
+                                                   int end, boolean limitAttributes, boolean isPublisherListing) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery,
+                                                            int start, int end, boolean limitAttributes) {
+        return null;
+    }
+
+    @Override
+    public boolean isApiExists(APIIdentifier apiIdentifier) {
+        return false;
+    }
+
+    @Override
+    public String createWsdl(API api, InputStream wsdlContent, OMElement wsdlContentEle) {
         return null;
     }
 
@@ -113,38 +235,13 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
+    public String updateWsdlFromWsdlFile(String apiId, ResourceFile wsdlResourceFile) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public void addLifeCycle(API api) {
 
-    }
-
-    @Override
-    public void createAPI(API api) {
-        MongoCollection<MongoDBAPIDocument> collection = getCollection();
-        MongoDBAPIDocument mongoDBAPIDocument = null;
-        try {
-            mongoDBAPIDocument = fromAPIToMongoDoc(api);
-            collection.insertOne(mongoDBAPIDocument);
-        } catch (APIManagementException e) {
-            log.error("Error when creating api ", e);
-        }
-    }
-
-    @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start,
-                                                   int end, boolean limitAttributes) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start,
-                                                   int end, boolean limitAttributes, boolean isPublisherListing) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery,
-                                                            int start, int end, boolean limitAttributes) {
-        return null;
     }
 
     @Override
@@ -153,28 +250,22 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void saveGraphqlSchemaDefinition(API api, String schemaDefinition) {
+    public void saveGraphqlSchemaDefinition(String apiId, String schemaDefinition) {
 
     }
 
     @Override
-    public void saveGraphqlSchemaDefinition(String apiId, String visibleRoles, String schemaDefinition) {
-
-    }
-
-    @Override
-    public void deleteAPI(String apiId) {
-        MongoCollection<MongoDBAPIDocument> collection = getCollection();
-        collection.deleteOne(eq("_id", new ObjectId(apiId)));
-    }
-
-    @Override
-    public Documentation getDocumentation(String docId, Organization requestedOrg) {
+    public Map<String, Object> getDocumentContent(String apiId, String docId, Organization requestedOrg) {
         return null;
     }
 
     @Override
-    public Map<String, Object> getDocumentContent(String userName, Organization requestedOrg) {
+    public void addDocumentation(String apiId, Documentation documentation) {
+    }
+
+    @Override
+    public Documentation getDocumentation(String apiId, String docId, Organization requestedOrg)
+            throws APIManagementException {
         return null;
     }
 
@@ -194,8 +285,8 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void addDocumentation(API api, Documentation documentation) {
-
+    public boolean isDocumentationExists(String apiOrProductId, String docName) {
+        return false;
     }
 
     @Override
@@ -235,7 +326,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public boolean checkIfMediationPolicyExists(String mediationPolicyId) {
+    public boolean isMediationPolicyExists(String mediationPolicyId) {
         return false;
     }
 
@@ -297,11 +388,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public boolean isDocumentationExist(String apiOrProductId, String docName) {
-        return false;
-    }
-
-    @Override
     public ResourceFile getWSDL(String apiId) {
         return null;
     }
@@ -314,16 +400,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public int createNewAPIVersion(API api, String newVersion) {
         return 0;
-    }
-
-    @Override
-    public void saveGraphQLSchemaDefinition(API api, String schemaDefinition) {
-
-    }
-
-    @Override
-    public boolean isMediationPolicyExists(APIProvider apiProvider, String mediationPolicyUUID) {
-        return false;
     }
 
     @Override
@@ -344,11 +420,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public Documentation getProductDocumentation(String productId, String docId, Organization requestedOrg) {
         return null;
-    }
-
-    @Override
-    public boolean isApiExists(APIIdentifier apiIdentifier) {
-        return false;
     }
 
     private MongoCollection<MongoDBAPIDocument> getCollection() {
