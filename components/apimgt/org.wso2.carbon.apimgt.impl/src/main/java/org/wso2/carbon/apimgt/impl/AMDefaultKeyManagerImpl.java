@@ -333,14 +333,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         TokenInfo tokenResponse;
 
         try {
-            if (tokenRequest.getValidityPeriod() != 0) {
-                String definedValidityPeriod = Long.toString(tokenRequest.getValidityPeriod());
-                tokenResponse = authClient.generateWithValidityPeriod(tokenRequest.getClientId(),
-                        tokenRequest.getClientSecret(), GRANT_TYPE_VALUE, scopes, definedValidityPeriod);
-            } else {
-                tokenResponse = authClient.generate(tokenRequest.getClientId(),
-                        tokenRequest.getClientSecret(), GRANT_TYPE_VALUE, scopes);
-            }
+            tokenResponse = authClient.generate(tokenRequest.getClientId(), tokenRequest.getClientSecret(),
+                    GRANT_TYPE_VALUE, scopes);
         } catch (KeyManagerClientException e) {
             throw new APIManagementException("Error occurred while calling token endpoint!", e);
         }
