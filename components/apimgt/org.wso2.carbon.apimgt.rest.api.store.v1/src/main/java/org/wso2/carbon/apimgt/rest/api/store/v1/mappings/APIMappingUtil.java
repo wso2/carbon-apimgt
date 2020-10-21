@@ -811,7 +811,7 @@ public class APIMappingUtil {
                     }
 
                     if (api.isDefaultVersion()) {
-                        int index = endpointBuilder.indexOf(api.getId().getVersion());
+                        int index = endpointBuilder.lastIndexOf(api.getId().getVersion());
                         endpointBuilder.replace(index, endpointBuilder.length(), "");
                         if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
                             apiDefaultVersionURLsDTO.setHttp(endpointBuilder.toString());
