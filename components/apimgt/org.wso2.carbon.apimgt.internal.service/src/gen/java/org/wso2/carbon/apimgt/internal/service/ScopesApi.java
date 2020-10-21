@@ -44,9 +44,7 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of Scopes in Database.", response = ScopesListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response scopesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,      
-        @ApiParam(value = "**Search condition**.  Scope Key ")  @QueryParam("scopeKey") String scopeKey
-) throws APIManagementException{
+    public Response scopesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Scope Key ")  @QueryParam("scopeKey") String scopeKey) throws APIManagementException{
         return delegate.scopesGet(xWSO2Tenant, scopeKey, securityContext);
     }
 }

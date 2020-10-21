@@ -30,7 +30,6 @@ import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApi.*;
 
 
 public interface ApplicationsApiService {
@@ -53,6 +52,6 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdOauthKeysKeyMappingIdPut(String applicationId, String keyMappingId, ApplicationKeyDTO body, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost(String applicationId, String keyMappingId, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsGet(String groupId, String query, SortByEnum sortBy, SortOrderEnum sortOrder, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsPost(ApplicationDTO body, MessageContext messageContext) throws APIManagementException;
 }

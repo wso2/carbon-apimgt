@@ -50,49 +50,9 @@ ExportApiService delegate = new ExportApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. Error in exporting API. ", response = ErrorDTO.class) })
-    public Response exportApiGet(     @NotNull 
-        @ApiParam(value = "API Name ",required=true)  @QueryParam("name") String name
-,      @NotNull 
-        @ApiParam(value = "Version of the API ",required=true)  @QueryParam("version") String version
-,      
-        @ApiParam(value = "Provider name of the API ")  @QueryParam("providerName") String providerName
-,      
-        @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") FormatEnum format
-,      
-        @ApiParam(value = "Preserve API Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus
-) throws APIManagementException{
+    public Response exportApiGet( @NotNull @ApiParam(value = "API Name ",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "Version of the API ",required=true)  @QueryParam("version") String version,  @ApiParam(value = "Provider name of the API ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve API Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus) throws APIManagementException{
         return delegate.exportApiGet(name, version, providerName, format, preserveStatus, securityContext);
     }
-    public enum FormatEnum {
-
-        JSON("JSON"),
-        
-        YAML("YAML");
-        private String value;
-
-        FormatEnum (String value) {
-            this.value = value;
-        }
-
-        public String value() {
-            return this.value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        public static FormatEnum fromValue(String v) {
-            for (FormatEnum b : FormatEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-}
-    
 
     @GET
     @Path("/api-product")
@@ -108,49 +68,9 @@ ExportApiService delegate = new ExportApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. Error in exporting API Product. ", response = ErrorDTO.class) })
-    public Response exportApiProductGet(     @NotNull 
-        @ApiParam(value = "API Product Name ",required=true)  @QueryParam("name") String name
-,      @NotNull 
-        @ApiParam(value = "Version of the API Product ",required=true)  @QueryParam("version") String version
-,      
-        @ApiParam(value = "Provider name of the API Product ")  @QueryParam("providerName") String providerName
-,      
-        @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("fileFormat") FileFormatEnum fileFormat
-,      
-        @ApiParam(value = "Preserve API Product Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus
-) throws APIManagementException{
-        return delegate.exportApiProductGet(name, version, providerName, fileFormat, preserveStatus, securityContext);
+    public Response exportApiProductGet( @NotNull @ApiParam(value = "API Product Name ",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "Version of the API Product ",required=true)  @QueryParam("version") String version,  @ApiParam(value = "Provider name of the API Product ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve API Product Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus) throws APIManagementException{
+        return delegate.exportApiProductGet(name, version, providerName, format, preserveStatus, securityContext);
     }
-    public enum FileFormatEnum {
-
-        JSON("JSON"),
-        
-        YAML("YAML");
-        private String value;
-
-        FileFormatEnum (String value) {
-            this.value = value;
-        }
-
-        public String value() {
-            return this.value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        public static FileFormatEnum fromValue(String v) {
-            for (FileFormatEnum b : FileFormatEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-}
-    
 
     @GET
     @Path("/applications")
@@ -167,13 +87,7 @@ ExportApiService delegate = new ExportApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Application does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response exportApplicationsGet(     @NotNull 
-        @ApiParam(value = "Application Name ",required=true)  @QueryParam("appName") String appName
-,      @NotNull 
-        @ApiParam(value = "Owner of the Application ",required=true)  @QueryParam("appOwner") String appOwner
-,      
-        @ApiParam(value = "Export application keys ")  @QueryParam("withKeys") Boolean withKeys
-) throws APIManagementException{
+    public Response exportApplicationsGet( @NotNull @ApiParam(value = "Application Name ",required=true)  @QueryParam("appName") String appName,  @NotNull @ApiParam(value = "Owner of the Application ",required=true)  @QueryParam("appOwner") String appOwner,  @ApiParam(value = "Export application keys ")  @QueryParam("withKeys") Boolean withKeys) throws APIManagementException{
         return delegate.exportApplicationsGet(appName, appOwner, withKeys, securityContext);
     }
 }

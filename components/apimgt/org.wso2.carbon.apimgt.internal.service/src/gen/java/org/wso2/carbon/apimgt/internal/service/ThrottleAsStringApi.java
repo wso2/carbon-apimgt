@@ -43,9 +43,7 @@ ThrottleAsStringApiService delegate = new ThrottleAsStringApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "throttle events string", response = String.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response throttleAsStringGet(     
-        @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query
-) throws APIManagementException{
+    public Response throttleAsStringGet( @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query) throws APIManagementException{
         return delegate.throttleAsStringGet(query, securityContext);
     }
 }

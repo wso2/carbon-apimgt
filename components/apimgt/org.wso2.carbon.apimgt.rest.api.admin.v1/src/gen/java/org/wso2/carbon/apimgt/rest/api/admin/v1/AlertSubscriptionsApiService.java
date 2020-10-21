@@ -20,7 +20,6 @@ import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApi.*;
 
 
 public interface AlertSubscriptionsApiService {

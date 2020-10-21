@@ -2445,7 +2445,7 @@ paths:
             Provider name of the API Product
           required: false
           type: string
-        - name: fileFormat
+        - name: format
           in: query
           description: |
             Format of output documents. Can be YAML or JSON.

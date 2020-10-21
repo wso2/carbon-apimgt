@@ -54,17 +54,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Subscription list returned. ", response = SubscriptionListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response subscriptionsGet(     
-        @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ")  @QueryParam("apiId") String apiId
-,      
-        @ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ")  @QueryParam("applicationId") String applicationId
-,      
-        @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId
-, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,      
-        @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
-,      
-        @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
-, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+    public Response subscriptionsGet( @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ")  @QueryParam("apiId") String apiId,  @ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ")  @QueryParam("applicationId") String applicationId,  @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.subscriptionsGet(apiId, applicationId, groupId, xWSO2Tenant, offset, limit, ifNoneMatch, securityContext);
     }
 

@@ -95,13 +95,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return Response object containing resulted applications
      */
     @Override
-    public Response applicationsGet(String groupId, String query, ApplicationsApi.SortByEnum sortBy, ApplicationsApi.SortOrderEnum sortOrder,
+    public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder,
                                     Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String sortOrderString = sortOrder != null ? sortOrder.toString() : RestApiConstants.DEFAULT_SORT_ORDER;
-        String sortByString = sortBy != null ?
+        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DEFAULT_SORT_ORDER;
+        sortBy = sortBy != null ?
                 ApplicationMappingUtil.getApplicationSortByField(sortBy) :
                 APIConstants.APPLICATION_NAME;
         query = query == null ? "" : query;
@@ -118,8 +118,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Subscriber subscriber = new Subscriber(username);
             Application[] applications;
             applications = apiConsumer
-                    .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query,
-                            sortByString, sortOrderString);
+                    .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy,
+                            sortOrder);
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 

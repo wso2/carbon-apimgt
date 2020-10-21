@@ -49,7 +49,6 @@ import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi.*;
 
 
 public interface ApisApiService {
@@ -98,10 +97,10 @@ public interface ApisApiService {
       public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion, MessageContext messageContext) throws APIManagementException;
-      public Response apisExportGet(String apiId, String name, String version, String providerName, FormatEnum format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
+      public Response apisExportGet(String apiId, String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) throws APIManagementException;
       public Response apisImportGraphqlSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisPost(APIDTO body, OpenAPIVersionEnum openAPIVersion, MessageContext messageContext) throws APIManagementException;
+      public Response apisPost(APIDTO body, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response deploymentsGetStatus(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

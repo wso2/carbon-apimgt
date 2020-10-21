@@ -43,13 +43,7 @@ SynapseArtifactsApiService delegate = new SynapseArtifactsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "String of gatewayRuntimeArtifacts", response = String.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response synapseArtifactsGet(     
-        @ApiParam(value = "**Search condition**.   Api ID ")  @QueryParam("apiId") String apiId
-,      
-        @ApiParam(value = "**Search condition**.  label associated with the API ")  @QueryParam("gatewayLabel") String gatewayLabel
-,      
-        @ApiParam(value = "**Search condition**.  Publish/Remove ")  @QueryParam("gatewayInstruction") String gatewayInstruction
-) throws APIManagementException{
+    public Response synapseArtifactsGet( @ApiParam(value = "**Search condition**.   Api ID ")  @QueryParam("apiId") String apiId,  @ApiParam(value = "**Search condition**.  label associated with the API ")  @QueryParam("gatewayLabel") String gatewayLabel,  @ApiParam(value = "**Search condition**.  Publish/Remove ")  @QueryParam("gatewayInstruction") String gatewayInstruction) throws APIManagementException{
         return delegate.synapseArtifactsGet(apiId, gatewayLabel, gatewayInstruction, securityContext);
     }
 }

@@ -44,9 +44,7 @@ ApplicationPoliciesApiService delegate = new ApplicationPoliciesApiServiceImpl()
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of application policies in the database", response = ApplicationPolicyListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response applicationPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,      
-        @ApiParam(value = "**Search condition**.  Application policy name ")  @QueryParam("policyName") String policyName
-) throws APIManagementException{
+    public Response applicationPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Application policy name ")  @QueryParam("policyName") String policyName) throws APIManagementException{
         return delegate.applicationPoliciesGet(xWSO2Tenant, policyName, securityContext);
     }
 }

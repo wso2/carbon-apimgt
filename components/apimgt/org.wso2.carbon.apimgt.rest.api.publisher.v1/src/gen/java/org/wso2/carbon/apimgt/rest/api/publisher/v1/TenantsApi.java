@@ -65,43 +65,7 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Tenant names returned. ", response = TenantListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested application does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response getTenantsByState(     
-        @ApiParam(value = "The state represents the current state of the tenant  Supported states are [ active, inactive] ", allowableValues="active, inactive", defaultValue="active") @DefaultValue("active") @QueryParam("state") StateEnum state
-,      
-        @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
-,      
-        @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
-) throws APIManagementException{
+    public Response getTenantsByState( @ApiParam(value = "The state represents the current state of the tenant  Supported states are [ active, inactive] ", allowableValues="active, inactive", defaultValue="active") @DefaultValue("active") @QueryParam("state") String state,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
         return delegate.getTenantsByState(state, limit, offset, securityContext);
     }
-    public enum StateEnum {
-
-        ACTIVE("active"),
-        
-        INACTIVE("inactive");
-        private String value;
-
-        StateEnum (String value) {
-            this.value = value;
-        }
-
-        public String value() {
-            return this.value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        public static StateEnum fromValue(String v) {
-            for (StateEnum b : StateEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-}
-    
 }

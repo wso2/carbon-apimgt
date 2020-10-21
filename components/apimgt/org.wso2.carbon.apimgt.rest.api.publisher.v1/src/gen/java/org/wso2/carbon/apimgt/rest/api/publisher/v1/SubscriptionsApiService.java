@@ -20,11 +20,10 @@ import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApi.*;
 
 
 public interface SubscriptionsApiService {
-      public Response subscriptionsBlockSubscriptionPost(String subscriptionId, BlockStateEnum blockState, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, String query, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsSubscriptionIdSubscriberInfoGet(String subscriptionId, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext) throws APIManagementException;

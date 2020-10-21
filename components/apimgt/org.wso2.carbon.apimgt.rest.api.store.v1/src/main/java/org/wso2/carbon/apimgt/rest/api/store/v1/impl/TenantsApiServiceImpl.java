@@ -52,7 +52,7 @@ public class TenantsApiServiceImpl implements TenantsApiService {
      * @return List of tenant domains
      */
     @Override
-    public Response tenantsGet(TenantsApi.StateEnum state, Integer limit, Integer offset, MessageContext messageContext) {
+    public Response tenantsGet(String state, Integer limit, Integer offset, MessageContext messageContext) {
         try {
             List<TenantDTO> tenantDTOList = new ArrayList<>();
             Integer paginationLimit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -61,12 +61,12 @@ public class TenantsApiServiceImpl implements TenantsApiService {
             paginationDTO.setOffset(paginationOffset);
             paginationDTO.setLimit(paginationLimit);
 
-            if (!state.toString().equalsIgnoreCase(TENANT_STATE_ACTIVE) && !state.toString().equalsIgnoreCase(TENANT_STATE_INACTIVE)) {
+            if (!state.equalsIgnoreCase(TENANT_STATE_ACTIVE) && !state.equalsIgnoreCase(TENANT_STATE_INACTIVE)) {
                 RestApiUtil.handleBadRequest("Invalid tenant state", log);
             }
 
-            String status = TENANT_STATE_ACTIVE.equalsIgnoreCase(state.toString()) ? TENANT_STATE_ACTIVE : TENANT_STATE_INACTIVE;
-            Set<String> tenantDomains = APIUtil.getTenantDomainsByState(state.toString());
+            String status = TENANT_STATE_ACTIVE.equalsIgnoreCase(state) ? TENANT_STATE_ACTIVE : TENANT_STATE_INACTIVE;
+            Set<String> tenantDomains = APIUtil.getTenantDomainsByState(state);
             for (String domain : tenantDomains) {
                 TenantDTO tenantDTO = new TenantDTO();
                 tenantDTO.setDomain(domain);

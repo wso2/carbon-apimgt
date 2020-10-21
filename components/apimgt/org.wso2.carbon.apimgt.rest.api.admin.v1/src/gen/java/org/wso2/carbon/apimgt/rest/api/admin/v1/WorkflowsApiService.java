@@ -20,11 +20,10 @@ import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.WorkflowsApi.*;
 
 
 public interface WorkflowsApiService {
       public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response workflowsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, WorkflowTypeEnum workflowType, MessageContext messageContext) throws APIManagementException;
+      public Response workflowsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, String workflowType, MessageContext messageContext) throws APIManagementException;
       public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body, MessageContext messageContext) throws APIManagementException;
 }

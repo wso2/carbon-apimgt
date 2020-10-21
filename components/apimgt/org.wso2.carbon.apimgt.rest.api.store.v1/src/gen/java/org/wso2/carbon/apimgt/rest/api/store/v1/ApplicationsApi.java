@@ -217,9 +217,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdKeysKeyTypeGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,      
-        @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId
-) throws APIManagementException{
+    public Response applicationsApplicationIdKeysKeyTypeGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId) throws APIManagementException{
         return delegate.applicationsApplicationIdKeysKeyTypeGet(applicationId, keyType, groupId, securityContext);
     }
 
@@ -352,9 +350,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId,      
-        @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId
-) throws APIManagementException{
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId,  @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId) throws APIManagementException{
         return delegate.applicationsApplicationIdOauthKeysKeyMappingIdGet(applicationId, keyMappingId, groupId, securityContext);
     }
 
@@ -431,85 +427,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = ErrorDTO.class) })
-    public Response applicationsGet(     
-        @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId
-,      
-        @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query
-,      
-        @ApiParam(value = "", allowableValues="name, owner, throttlingTier, status")  @QueryParam("sortBy") SortByEnum sortBy
-,      
-        @ApiParam(value = "", allowableValues="asc, desc")  @QueryParam("sortOrder") SortOrderEnum sortOrder
-,      
-        @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
-,      
-        @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
-, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+    public Response applicationsGet( @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId,  @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query,  @ApiParam(value = "", allowableValues="name, owner, throttlingTier, status")  @QueryParam("sortBy") String sortBy,  @ApiParam(value = "", allowableValues="asc, desc")  @QueryParam("sortOrder") String sortOrder,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.applicationsGet(groupId, query, sortBy, sortOrder, limit, offset, ifNoneMatch, securityContext);
     }
-    public enum SortByEnum {
-
-        NAME("name"),
-        
-        OWNER("owner"),
-        
-        THROTTLINGTIER("throttlingTier"),
-        
-        STATUS("status");
-        private String value;
-
-        SortByEnum (String value) {
-            this.value = value;
-        }
-
-        public String value() {
-            return this.value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        public static SortByEnum fromValue(String v) {
-            for (SortByEnum b : SortByEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-}
-    
-    public enum SortOrderEnum {
-
-        ASC("asc"),
-        
-        DESC("desc");
-        private String value;
-
-        SortOrderEnum (String value) {
-            this.value = value;
-        }
-
-        public String value() {
-            return this.value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        public static SortOrderEnum fromValue(String v) {
-            for (SortOrderEnum b : SortOrderEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-}
-    
 
     @POST
     

@@ -73,57 +73,9 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested user does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = ErrorDTO.class) })
-    public Response workflowsGet(     
-        @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
-,      
-        @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
-, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch,      
-        @ApiParam(value = "We need to show the values of each workflow process separately .for that we use workflow type. Workflow type can be AM_APPLICATION_CREATION, AM_SUBSCRIPTION_CREATION,   AM_USER_SIGNUP, AM_APPLICATION_REGISTRATION_PRODUCTION, AM_APPLICATION_REGISTRATION_SANDBOX. ", allowableValues="AM_APPLICATION_CREATION, AM_SUBSCRIPTION_CREATION, AM_USER_SIGNUP, AM_APPLICATION_REGISTRATION_PRODUCTION, AM_APPLICATION_REGISTRATION_SANDBOX, AM_SUBSCRIPTION_DELETION, AM_APPLICATION_DELETION, AM_API_STATE")  @QueryParam("workflowType") WorkflowTypeEnum workflowType
-) throws APIManagementException{
+    public Response workflowsGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "We need to show the values of each workflow process separately .for that we use workflow type. Workflow type can be AM_APPLICATION_CREATION, AM_SUBSCRIPTION_CREATION,   AM_USER_SIGNUP, AM_APPLICATION_REGISTRATION_PRODUCTION, AM_APPLICATION_REGISTRATION_SANDBOX. ", allowableValues="AM_APPLICATION_CREATION, AM_SUBSCRIPTION_CREATION, AM_USER_SIGNUP, AM_APPLICATION_REGISTRATION_PRODUCTION, AM_APPLICATION_REGISTRATION_SANDBOX, AM_SUBSCRIPTION_DELETION, AM_APPLICATION_DELETION, AM_API_STATE")  @QueryParam("workflowType") String workflowType) throws APIManagementException{
         return delegate.workflowsGet(limit, offset, accept, ifNoneMatch, workflowType, securityContext);
     }
-    public enum WorkflowTypeEnum {
-
-        APPLICATION_CREATION("AM_APPLICATION_CREATION"),
-        
-        SUBSCRIPTION_CREATION("AM_SUBSCRIPTION_CREATION"),
-        
-        USER_SIGNUP("AM_USER_SIGNUP"),
-        
-        APPLICATION_REGISTRATION_PRODUCTION("AM_APPLICATION_REGISTRATION_PRODUCTION"),
-        
-        APPLICATION_REGISTRATION_SANDBOX("AM_APPLICATION_REGISTRATION_SANDBOX"),
-        
-        SUBSCRIPTION_DELETION("AM_SUBSCRIPTION_DELETION"),
-        
-        APPLICATION_DELETION("AM_APPLICATION_DELETION"),
-        
-        API_STATE("AM_API_STATE");
-        private String value;
-
-        WorkflowTypeEnum (String value) {
-            this.value = value;
-        }
-
-        public String value() {
-            return this.value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        public static WorkflowTypeEnum fromValue(String v) {
-            for (WorkflowTypeEnum b : WorkflowTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-}
-    
 
     @POST
     @Path("/update-workflow-status")
@@ -139,9 +91,7 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Workflow request information is returned. ", response = WorkflowDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Workflow for the given reference is not found. ", response = ErrorDTO.class) })
-    public Response workflowsUpdateWorkflowStatusPost(     @NotNull 
-        @ApiParam(value = "Workflow reference id ",required=true)  @QueryParam("workflowReferenceId") String workflowReferenceId
-, @ApiParam(value = "Workflow event that need to be updated " ,required=true) WorkflowDTO body) throws APIManagementException{
+    public Response workflowsUpdateWorkflowStatusPost( @NotNull @ApiParam(value = "Workflow reference id ",required=true)  @QueryParam("workflowReferenceId") String workflowReferenceId, @ApiParam(value = "Workflow event that need to be updated " ,required=true) WorkflowDTO body) throws APIManagementException{
         return delegate.workflowsUpdateWorkflowStatusPost(workflowReferenceId, body, securityContext);
     }
 }

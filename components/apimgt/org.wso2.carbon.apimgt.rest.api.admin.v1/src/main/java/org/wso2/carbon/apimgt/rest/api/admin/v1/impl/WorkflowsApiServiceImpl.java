@@ -87,8 +87,8 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      * @return
      */
     @Override
-    public Response workflowsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, WorkflowsApi
-            .WorkflowTypeEnum workflowType, MessageContext messageContext) throws APIManagementException {
+    public Response workflowsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, String workflowType,
+                                 MessageContext messageContext) throws APIManagementException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -97,23 +97,22 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             Workflow[] workflows;
             String status = "CREATED";
             APIAdmin apiAdmin = new APIAdminImpl();
-            String workflowTypeString = null;
             if(workflowType != null) {
                 if (workflowType.equals("APPLICATION_CREATION")) {
-                    workflowTypeString = "AM_APPLICATION_CREATION";
+                    workflowType = "AM_APPLICATION_CREATION";
                 } else if (workflowType.equals("SUBSCRIPTION_CREATION")) {
-                    workflowTypeString = "AM_SUBSCRIPTION_CREATION";
+                    workflowType = "AM_SUBSCRIPTION_CREATION";
                 } else if (workflowType.equals("USER_SIGNUP")) {
-                    workflowTypeString = "AM_USER_SIGNUP";
+                    workflowType = "AM_USER_SIGNUP";
                 } else if (workflowType.equals("APPLICATION_REGISTRATION_PRODUCTION")) {
-                    workflowTypeString = "AM_APPLICATION_REGISTRATION_PRODUCTION";
+                    workflowType = "AM_APPLICATION_REGISTRATION_PRODUCTION";
                 } else if (workflowType.equals("APPLICATION_REGISTRATION_SANDBOX")) {
-                    workflowTypeString = "AM_APPLICATION_REGISTRATION_SANDBOX";
+                    workflowType = "AM_APPLICATION_REGISTRATION_SANDBOX";
                 } else if (workflowType.equals("API_STATE")) {
-                    workflowTypeString = "AM_API_STATE";
+                    workflowType = "AM_API_STATE";
                 }
             }
-            workflows = apiAdmin.getworkflows(workflowTypeString, status, tenantDomain);
+            workflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
             workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflows, limit, offset);
             WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset,
                     workflows.length);

@@ -62,7 +62,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @param ifMatch If-Match header value
      * @return 200 response and the updated subscription if subscription block is successful
      */
-    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, SubscriptionsApi.BlockStateEnum blockState, String ifMatch,
+    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
                                                        MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -127,7 +127,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             }
 
             SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
-            subscribedAPI.setSubStatus(blockState.toString());
+            subscribedAPI.setSubStatus(blockState);
             apiProvider.updateSubscription(subscribedAPI);
 
             SubscribedAPI updatedSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
