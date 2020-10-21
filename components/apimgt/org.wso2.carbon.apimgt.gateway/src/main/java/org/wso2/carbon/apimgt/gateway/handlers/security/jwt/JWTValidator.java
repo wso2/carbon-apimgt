@@ -157,6 +157,7 @@ public class JWTValidator {
                 }
                 // Validate scopes
                 validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo);
+                synCtx.setProperty(APIMgtGatewayConstants.SCOPES, jwtValidationInfo.getScopes().toString());
 
                 if (apiKeyValidationInfoDTO.isAuthorized()) {
                     /*
