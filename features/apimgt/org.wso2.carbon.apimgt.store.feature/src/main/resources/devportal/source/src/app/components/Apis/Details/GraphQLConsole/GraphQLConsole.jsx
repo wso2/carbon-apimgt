@@ -30,6 +30,9 @@ import TryOutController from '../ApiConsole/TryOutController';
 import { ApiContext } from '../ApiContext';
 import Api from '../../../../data/api';
 import Progress from '../../../Shared/Progress';
+import Button from '@material-ui/core/Button';
+import { Icon as Icons } from '@iconify/react';
+import postmanIcon from '@iconify/icons-simple-icons/postman';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -56,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-
+var grapgQLSchema;
 export default function GraphQLConsole() {
     const classes = useStyles();
     const { api } = useContext(ApiContext);
@@ -77,6 +80,7 @@ export default function GraphQLConsole() {
     const [keys, setKeys] = useState([]);
     const [labels, setLabels] = useState();
     const user = AuthManager.getUser();
+
 
 
     useEffect(() => {
@@ -158,6 +162,36 @@ export default function GraphQLConsole() {
         }
     }
 
+    function grapgQLToPostman(grapgQLSchema,URLs) {
+
+        var fileDownload = require('js-file-download');
+        const converter = require('graphql-to-postman');
+
+        converter.convert({
+            type: 'string',
+            data: grapgQLSchema
+        }, {}, async function (error, result) {
+            if (error) {
+                console.log('Conversion failed')
+            } else {
+                result.output[0].data.variable[0].value = URLs.https;
+                const outputData = result.output[0].data;
+                console.log(result.output[0].data);
+                fileDownload(
+                    JSON.stringify(outputData),
+                    'postman collection',
+                );
+                console.log('Conversion success');
+            }
+        })
+        
+
+    }
+
+    function handleSchema(schema) {
+        grapgQLSchema = schema;
+    }
+
 
     if (api == null) {
         return <Progress />;
@@ -222,6 +256,7 @@ export default function GraphQLConsole() {
                     username={username}
                     password={password}
                     setSelectedKeyType={setSelectedKeyType}
+                    convertToPostman={grapgQLToPostman}
                     selectedKeyType={selectedKeyType}
                     setKeys={setKeys}
                     setURLs={setURLs}
@@ -233,7 +268,21 @@ export default function GraphQLConsole() {
                     api={api}
                 />
                 <Paper />
+                <Grid container>
+                    <Grid xs={11} item />
+                    <Grid xs={1} item>
+                        <Button size='small' onClick={() => grapgQLToPostman(grapgQLSchema,URLs)}>
+                            <Icons icon={postmanIcon} width={30} height={30} />
+                            <FormattedMessage
+                                id='Apis.Details.GraphQLConsole.GraphQLConsole.download.postman'
+                                defaultMessage='Postman collection'
+                            />
 
+                        </Button>
+
+                    </Grid>
+
+                </Grid>
             </Paper>
             <Paper className={classes.paper}>
                 <GraphQLUI
@@ -241,6 +290,7 @@ export default function GraphQLConsole() {
                     URLs={URLs}
                     securitySchemeType={securitySchemeType}
                     accessTokenProvider={accessTokenProvider}
+                    handleSchema={handleSchema}
                 />
             </Paper>
         </>
