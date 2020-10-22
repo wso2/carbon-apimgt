@@ -300,6 +300,7 @@ public class OAuthAuthenticator implements Authenticator {
                     AuthenticationContext authenticationContext = jwtValidator.authenticate(signedJWTInfo, synCtx);
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
                     log.debug("User is authorized using JWT token to access the resource.");
+                    synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
                     return new AuthenticationResponse(true, isMandatory, false, 0, null);
 
                 } catch (APISecurityException ex) {
