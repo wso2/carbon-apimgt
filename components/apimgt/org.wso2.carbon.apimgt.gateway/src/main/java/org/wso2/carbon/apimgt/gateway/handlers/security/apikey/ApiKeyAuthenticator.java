@@ -105,7 +105,7 @@ public class ApiKeyAuthenticator implements Authenticator {
 
     @Override
     public void init(SynapseEnvironment env) {
-        initParams();
+        // Nothing to do in init phase.
     }
 
     @Override
@@ -592,17 +592,10 @@ public class ApiKeyAuthenticator implements Authenticator {
         return java.util.Base64.getUrlDecoder().decode(payload.getBytes(StandardCharsets.UTF_8));
     }
 
-    protected void initParams () {
+    public String getContextHeader() {
         APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
-        String header = jwtConfigDto.getJwtHeader();
-        if (header != null) {
-            setContextHeader(header);
-        }
-    }
-
-    public String getContextHeader() {
-        return contextHeader;
+        return jwtConfigDto.getJwtHeader();
     }
 
     public void setContextHeader(String contextHeader) {

@@ -19,15 +19,22 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 import com.google.common.net.HttpHeaders;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 
 import java.util.HashMap;
 import java.util.Map;
 
-
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ServiceReferenceHolder.class)
 public class OAuthAuthenticatorTest {
 
 
@@ -38,7 +45,6 @@ public class OAuthAuthenticatorTest {
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
                 .thenReturn("true");
         Mockito.when(apiManagerConfiguration.getJwtConfigurationDto()).thenReturn(new JWTConfigurationDto());
-        oauthAuthenticator.initOAuthParams();
     }
 
 
@@ -48,8 +54,17 @@ public class OAuthAuthenticatorTest {
 
     @Test
     public void extractCustomerKeyFromAuthHeader() throws Exception {
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         OAuthAuthenticator oauthAuthenticator = new OauthAuthenticatorWrapper(apiManagerConfiguration);
+
         Map map = new HashMap();
         Assert.assertNull("Assertion failure due to not null", oauthAuthenticator.extractCustomerKeyFromAuthHeader
                 (map));

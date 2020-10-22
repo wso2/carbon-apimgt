@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { StarRate } from '@material-ui/icons';
+import StarRate from '@material-ui/icons/StarRate';
 import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
