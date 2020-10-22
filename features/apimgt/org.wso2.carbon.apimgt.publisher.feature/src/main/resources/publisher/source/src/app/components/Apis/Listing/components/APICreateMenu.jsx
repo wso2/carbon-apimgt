@@ -134,6 +134,25 @@ const APICreateMenu = (props) => {
                     />
                 </Link>
             </ListItem>
+            <Divider />
+            <ListItem>
+                <Link to='/apis/create/asyncApi' className={classes.links}>
+                    <ListItemText
+                        primary={(
+                            <FormattedMessage
+                                id='Apis.Listing.components.APICreateMenu.primary.asyncApi'
+                                defaultMessage='I Have an Existing WebSocket API'
+                            />
+                        )}
+                        secondary={(
+                            <FormattedMessage
+                                id='Apis.Listing.components.APICreateMenu.secondary.asyncApi'
+                                defaultMessage='Use an existing AsyncAPI 2.0 definition file or URL'
+                            />
+                        )}
+                    />
+                </Link>
+            </ListItem>
         </List>
     );
     return !AuthManager.isNotCreator() && <MenuButton {...props} menuList={createTypes} />;

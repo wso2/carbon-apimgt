@@ -4409,8 +4409,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     //continue with .json
                     JSONTokener jsonDataFile = new JSONTokener(fileInputStream);
                     schemaToBeValidated = new org.json.JSONObject(jsonDataFile).toString();
-                } else {
-                    //exception for other file types
                 }
                 validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated, returnContent);
             } catch (IOException e){

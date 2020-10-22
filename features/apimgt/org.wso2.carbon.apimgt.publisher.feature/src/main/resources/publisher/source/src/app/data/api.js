@@ -2659,6 +2659,84 @@ class API extends Resource {
             );
         });
     }
+
+    static validateAsyncAPIByFile(asyncAPIData){
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        let payload, promisedValidate;
+        payload = {
+            file: asyncAPIData,
+            'Content-Type': 'multipart/form-data',
+        };
+        promisedValidate = apiClient.then(client => {
+            return client.apis.Validation.validateAsyncAPISpecification(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        return promisedValidate;
+    }
+
+    static validateAsyncAPIByUrl(url, params = {returnContent: false}) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const payload = {
+            url: url,
+            'Content-Type': 'multipart/form-data',
+            ...params
+        };
+        return apiClient.then(client => {
+           return client.apis['Validation'].validateAsyncAPISpecification(
+               payload,
+               this._requestMetaData({
+                   'Content-Type': 'multipart/form-data',
+               }),
+           );
+        });
+    }
+
+    importAsyncAPIByFile(asyncAPIData, callback = null) {
+        let payload, promisedCreate;
+        promisedCreate = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                file: asyncAPIData,
+                additionalProperties: JSON.stringify(apiData),
+            };
+
+            const promisedResponse = client.apis['APIs'].importAsyncAPISpecification(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promisedCreate;
+    }
+
+    importAsyncAPIByUrl(asyncAPIUrl) {
+        let payload, promise_create;
+
+        promise_create = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                url: asyncAPIUrl,
+                additionalProperties: JSON.stringify(apiData),
+            };
+
+            const promisedResponse = client.apis['APIs'].importAsyncAPISpecification(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promise_create;
+    }
 }
 
 
