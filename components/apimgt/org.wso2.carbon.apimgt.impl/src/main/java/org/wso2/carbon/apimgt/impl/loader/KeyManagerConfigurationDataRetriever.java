@@ -82,6 +82,10 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                                 }
                                 retry = false;
                             } else {
+                                log.warn("Retrying to get Key Manager connection.");
+                                if (log.isDebugEnabled()) {
+                                    log.debug("http status code: " + httpResponse.getStatusLine().getStatusCode());
+                                }
                                 retry = true;
                                 retryCount++;
                             }
