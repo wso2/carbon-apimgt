@@ -35,12 +35,16 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.util.*;
 
 public class ThrottlePolicyTemplateBuilder {
@@ -74,17 +78,13 @@ public class ThrottlePolicyTemplateBuilder {
      * @return
      * @throws APITemplateException
      */
-    public Map<String, String> getThrottlePolicyForAPILevel(APIPolicy policy) throws APITemplateException {
+    public Map<String, String> getThrottlePolicyForAPILevel(ApiPolicy policy) throws APITemplateException {
 
         if (log.isDebugEnabled()) {
             log.debug("Generating policy for apiLevel :" + policy.toString());
         }
         Map<String, String> policyArray = new HashMap<String, String>();
         Set<String> conditionsSet = new HashSet<String>();
-
-        if (!(policy instanceof APIPolicy)) {
-            throw new APITemplateException("Invalid  policy level : Has to be 'api'");
-        }
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
@@ -100,21 +100,23 @@ public class ThrottlePolicyTemplateBuilder {
             StringWriter writer;
             VelocityContext context;
 
-            if (policy.getPipelines() != null) {
+            if (policy.getConditionGroups() != null) {
 
-                for (Pipeline pipeline : policy.getPipelines()) {
+                for (APIPolicyConditionGroup conditionGroup : policy.getConditionGroups()) {
+                    if (conditionGroup.getDefaultLimit() == null) {
+                        continue;
+                    }
                     context = new VelocityContext();
                     setConstantContext(context);
-                    context.put("pipelineItem", pipeline);
                     context.put("policy", policy);
 
-                    context.put("quotaPolicy", pipeline.getQuotaPolicy());
-                    context.put("pipeline", "condition_" + pipeline.getId());
+                    context.put("quotaPolicy", conditionGroup.getDefaultLimit());
+                    context.put("pipeline", "condition_" + conditionGroup.getConditionGroupId());
 
-                    String conditionString = getPolicyCondition(pipeline.getConditions());
+                    String conditionString = getPolicyCondition(conditionGroup.getCondition());
 
                     JSONArray conditions = new JSONArray();
-                    conditions.add(getPolicyConditionJson(pipeline.getConditions()));
+                    conditions.add(getPolicyConditionJson(conditionGroup.getCondition()));
                     conditionsSet.add(conditionString);
 
                     context.put("condition", " AND " + conditionString);
@@ -127,7 +129,7 @@ public class ThrottlePolicyTemplateBuilder {
                     }
 
                     String policyName = policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" +
-                            policy.getPolicyName() + "_condition_" + pipeline.getId();
+                            policy.getName() + "_condition_" + conditionGroup.getConditionGroupId();
                     policyArray.put(policyName, writer.toString());
                 }
             }
@@ -148,16 +150,12 @@ public class ThrottlePolicyTemplateBuilder {
      * @return
      * @throws APITemplateException
      */
-    public String getThrottlePolicyForAPILevelDefault(APIPolicy policy) throws APITemplateException {
+    public String getThrottlePolicyForAPILevelDefault(ApiPolicy policy) throws APITemplateException {
 
         if (log.isDebugEnabled()) {
             log.debug("Generating policy for apiLevel :" + policy.toString());
         }
         Set<String> conditionsSet = new HashSet<String>();
-
-        if (!(policy instanceof APIPolicy)) {
-            throw new APITemplateException("Invalid policy level : Has to be 'api'");
-        }
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
@@ -173,12 +171,12 @@ public class ThrottlePolicyTemplateBuilder {
             StringWriter writer;
             VelocityContext context;
 
-            List<Pipeline> pipelines = policy.getPipelines();
+            List<APIPolicyConditionGroup> conditionGroups = policy.getConditionGroups();
             JSONArray policyConditionJson = new JSONArray();
-            if (pipelines != null) {
-                for (Pipeline pipeline : pipelines) {
-                    policyConditionJson.add(getPolicyConditionJson(pipeline.getConditions()));
-                    String conditionString = getPolicyConditionForDefault(pipeline.getConditions());
+            if (conditionGroups != null) {
+                for (APIPolicyConditionGroup conditionGroup : conditionGroups) {
+                    policyConditionJson.add(getPolicyConditionJson(conditionGroup.getCondition()));
+                    String conditionString = getPolicyConditionForDefault(conditionGroup.getCondition());
                     if (!StringUtils.isEmpty(conditionString)) {
                         conditionsSet.add(conditionString);
                     }
@@ -189,11 +187,9 @@ public class ThrottlePolicyTemplateBuilder {
             context = new VelocityContext();
             setConstantContext(context);
             //default policy is defined as 'elseCondition'
-            context.put("pipeline", "elseCondition"); //// constant
-            context.put("pipelineItem", null);
             context.put("policy", policy);
 
-            context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
+            context.put("quotaPolicy", policy.getDefaultLimit());
             context.put("evaluatedConditions", new String(Base64.encodeBase64(policyConditionJson.toJSONString().getBytes())));
             String conditionSetString = getConditionForDefault(conditionsSet);
             if (!StringUtils.isEmpty(conditionSetString)) {
@@ -397,14 +393,17 @@ public class ThrottlePolicyTemplateBuilder {
      * @param conditions
      * @return
      */
-    private static String getPolicyCondition(List<Condition> conditions) {
+    private static String getPolicyCondition(Set<Condition> conditions) {
         String conditionString = null;
         int i = 0;
         for (Condition condition : conditions) {
+            org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
+                    PolicyMappingUtil.mapCondition(condition);
+
             if (i == 0) {
-                conditionString = condition.getCondition();
+                conditionString = mappedCondition.getCondition();
             } else {
-                conditionString = conditionString + " AND " + condition.getCondition();
+                conditionString = conditionString + " AND " + mappedCondition.getCondition();
             }
             i++;
         }
@@ -418,19 +417,21 @@ public class ThrottlePolicyTemplateBuilder {
      * @param conditions
      * @return
      */
-    private static JSONObject getPolicyConditionJson(List<Condition> conditions) {
+    private static JSONObject getPolicyConditionJson(Set<Condition> conditions) {
         JSONObject tempCondition = new JSONObject();
-        int i = 0;
         for (Condition condition : conditions) {
+
+            org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
+                    PolicyMappingUtil.mapCondition(condition);
             JSONObject conditionJson;
-            if (tempCondition.containsKey(condition.getType().toLowerCase())) {
-                conditionJson = (JSONObject) tempCondition.get(condition.getType().toLowerCase());
+            if (tempCondition.containsKey(mappedCondition.getType().toLowerCase())) {
+                conditionJson = (JSONObject) tempCondition.get(mappedCondition.getType().toLowerCase());
             } else {
                 conditionJson = new JSONObject();
             }
-            tempCondition.put(condition.getType().toLowerCase(), conditionJson);
-            if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
-                IPCondition ipCondition = (IPCondition) condition;
+            tempCondition.put(mappedCondition.getType().toLowerCase(), conditionJson);
+            if (PolicyConstants.IP_SPECIFIC_TYPE.equals(mappedCondition.getType())) {
+                IPCondition ipCondition = (IPCondition) mappedCondition;
                 if (IPCondition.isIPv6Address(ipCondition.getSpecificIP())) {
                     conditionJson.put("specificIp",
                             String.valueOf(APIUtil.ipToBigInteger(ipCondition.getSpecificIP())));
@@ -438,8 +439,8 @@ public class ThrottlePolicyTemplateBuilder {
                     conditionJson.put("specificIp", ipCondition.ipToLong(ipCondition.getSpecificIP()));
                 }
 
-            } else if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
-                IPCondition ipRangeCondition = (IPCondition) condition;
+            } else if (PolicyConstants.IP_RANGE_TYPE.equals(mappedCondition.getType())) {
+                IPCondition ipRangeCondition = (IPCondition) mappedCondition;
                 if (IPCondition.isIPv6Address(ipRangeCondition.getStartingIP())
                         && IPCondition.isIPv6Address(ipRangeCondition.getEndingIP())) {
                     conditionJson.put("startingIp",
@@ -451,8 +452,8 @@ public class ThrottlePolicyTemplateBuilder {
                     conditionJson.put("endingIp", ipRangeCondition.ipToLong(ipRangeCondition.getEndingIP()));
                 }
 
-            } else if (condition instanceof QueryParameterCondition) {
-                QueryParameterCondition queryParameterCondition = (QueryParameterCondition) condition;
+            } else if (mappedCondition instanceof QueryParameterCondition) {
+                QueryParameterCondition queryParameterCondition = (QueryParameterCondition) mappedCondition;
                 JSONObject values;
                 if (conditionJson.containsKey("values")) {
                     values = (JSONObject) conditionJson.get("values");
@@ -461,8 +462,8 @@ public class ThrottlePolicyTemplateBuilder {
                     conditionJson.put("values", values);
                 }
                 values.put(queryParameterCondition.getParameter(), queryParameterCondition.getValue());
-            } else if (condition instanceof HeaderCondition) {
-                HeaderCondition headerCondition = (HeaderCondition) condition;
+            } else if (mappedCondition instanceof HeaderCondition) {
+                HeaderCondition headerCondition = (HeaderCondition) mappedCondition;
                 JSONObject values;
                 if (conditionJson.containsKey("values")) {
                     values = (JSONObject) conditionJson.get("values");
@@ -471,8 +472,8 @@ public class ThrottlePolicyTemplateBuilder {
                     conditionJson.put("values", values);
                 }
                 values.put(headerCondition.getHeaderName(), headerCondition.getValue());
-            } else if (condition instanceof JWTClaimsCondition) {
-                JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
+            } else if (mappedCondition instanceof JWTClaimsCondition) {
+                JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) mappedCondition;
                 JSONObject values;
                 if (conditionJson.containsKey("values")) {
                     values = (JSONObject) conditionJson.get("values");
@@ -482,7 +483,7 @@ public class ThrottlePolicyTemplateBuilder {
                 }
                 values.put(jwtClaimsCondition.getClaimUrl(), jwtClaimsCondition.getAttribute());
             }
-            conditionJson.put("invert", condition.isInvertCondition());
+            conditionJson.put("invert", mappedCondition.isInvertCondition());
         }
         return tempCondition;
     }
@@ -493,11 +494,13 @@ public class ThrottlePolicyTemplateBuilder {
      * @param conditions
      * @return
      */
-    private static String getPolicyConditionForDefault(List<Condition> conditions) {
+    private static String getPolicyConditionForDefault(Set<Condition> conditions) {
         String conditionString = null;
         int i = 0;
         for (Condition condition : conditions) {
-            String conditionStringComplete = condition.getCondition();
+            org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
+                    PolicyMappingUtil.mapCondition(condition);
+            String conditionStringComplete = mappedCondition.getCondition();
             if (i == 0) {
                 conditionString = conditionStringComplete;
             } else {

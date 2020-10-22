@@ -15,14 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 
-package org.wso2.carbon.apimgt.api.model.subscription;
-
-import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -32,9 +28,9 @@ public class APIPolicyConditionGroup {
 
     private int policyId = -1;
     private String quotaType;
-    private QuotaPolicy quotaPolicy;
     private int conditionGroupId = -1;
-    private List<ConditionDTO> conditionDTOS;
+    private Set<Condition> condition;
+    private QuotaPolicy defaultLimit = null;
 
     public int getPolicyId() {
 
@@ -66,14 +62,22 @@ public class APIPolicyConditionGroup {
         this.quotaType = quotaType;
     }
 
-    public List<ConditionDTO> getConditionDTOS() {
+    public Set<Condition> getCondition() {
 
-        return conditionDTOS;
+        return condition;
     }
 
-    public void setConditionDTOS(List<ConditionDTO> conditionDTOS) {
+    public void setCondition(Set<Condition> condition) {
 
-        this.conditionDTOS = conditionDTOS;
+        this.condition = condition;
+    }
+
+    public QuotaPolicy getDefaultLimit() {
+        return defaultLimit;
+    }
+
+    public void setDefaultLimit(QuotaPolicy defaultLimit) {
+        this.defaultLimit = defaultLimit;
     }
 
     public boolean isContentAware() {
@@ -81,10 +85,10 @@ public class APIPolicyConditionGroup {
         if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaType)) {
             return true;
         }
-        if (conditionDTOS != null) {
-            conditionDTOS.stream().anyMatch(conditionDTO ->
-                            PolicyConstants.BANDWIDTH_TYPE.equals(quotaType)
-                                           );
+        if (condition != null) {
+            condition.stream().anyMatch(conditionDTO ->
+                    PolicyConstants.BANDWIDTH_TYPE.equals(quotaType)
+            );
             return false;
         }
         return false;
@@ -104,14 +108,6 @@ public class APIPolicyConditionGroup {
         return conditionGroup.policyId == policyId &&
                 conditionGroup.conditionGroupId == conditionGroupId;
 
-    }
-
-    public QuotaPolicy getQuotaPolicy() {
-        return quotaPolicy;
-    }
-
-    public void setQuotaPolicy(QuotaPolicy quotaPolicy) {
-        this.quotaPolicy = quotaPolicy;
     }
 
     @Override

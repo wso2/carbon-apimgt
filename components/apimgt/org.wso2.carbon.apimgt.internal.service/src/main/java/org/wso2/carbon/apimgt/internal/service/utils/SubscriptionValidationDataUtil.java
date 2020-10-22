@@ -218,6 +218,24 @@ public class SubscriptionValidationDataUtil {
         return defaultLimit;
     }
 
+    public static ThrottleLimitDTO getThrottleLimitDTO(APIPolicyConditionGroup apiPolicyConditionGroup) {
+
+        QuotaPolicy quotaPolicy = apiPolicyConditionGroup.getQuotaPolicy();
+        if (quotaPolicy != null) {
+            ThrottleLimitDTO defaultLimit = new ThrottleLimitDTO();
+            defaultLimit.setQuotaType(quotaPolicy.getType());
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
+                RequestCountLimit requestCountLimit = (RequestCountLimit) quotaPolicy.getLimit();
+                defaultLimit.setRequestCount(fromRequestCountLimitToDTO(requestCountLimit));
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
+                BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
+                defaultLimit.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
+            }
+            return defaultLimit;
+        }
+        return null;
+    }
+
     /**
      * Converts a Bandwidth Limit model object into a Bandwidth Limit DTO object
      *
@@ -282,6 +300,7 @@ public class SubscriptionValidationDataUtil {
                 policyDTO.setQuotaType(apiPolicyModel.getQuotaType());
                 policyDTO.setTenantId(apiPolicyModel.getTenantId());
                 policyDTO.setApplicableLevel(apiPolicyModel.getApplicableLevel());
+                policyDTO.setDefaultLimit(getThrottleLimitDTO(apiPolicyModel));
                 apiPolicyListDTO.getList().add(policyDTO);
 
                 List<APIPolicyConditionGroup> retrievedGroups = apiPolicyModel.getConditionGroups();
@@ -290,6 +309,7 @@ public class SubscriptionValidationDataUtil {
                     ApiPolicyConditionGroupDTO group = new ApiPolicyConditionGroupDTO();
                     group.setConditionGroupId(retGroup.getConditionGroupId());
                     group.setQuotaType(retGroup.getQuotaType());
+                    group.setDefaultLimit(getThrottleLimitDTO(retGroup));
                     group.setPolicyId(retGroup.getPolicyId());
 
                     List<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO> condition = 

@@ -43,8 +43,14 @@ import javax.ws.rs.core.SecurityContext;
 
 public class ApiPoliciesApiServiceImpl implements ApiPoliciesApiService {
 
-    public Response apiPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) {
+    public Response apiPoliciesGet(String xWSO2Tenant, String policyName, Boolean allTenants, MessageContext messageContext) {
+        allTenants = allTenants != null && allTenants;
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
+        if (allTenants) {
+            return Response.ok().entity(SubscriptionValidationDataUtil.
+                    fromApiPolicyToApiPolicyListDTO(subscriptionValidationDAO.
+                            getAllApiPolicies())).build();
+        }
 
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {

@@ -130,6 +130,31 @@ public class SubscriptionValidationSQLConstants {
                     "FROM " +
                     "   AM_POLICY_APPLICATION";
 
+
+    public static final String GET_ALL_API_POLICIES_SQL =
+            "SELECT" +
+                    "   POLICY.POLICY_ID," +
+                    "   POLICY.NAME," +
+                    "   POLICY.TENANT_ID," +
+                    "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   POLICY.DEFAULT_QUOTA," +
+                    "   POLICY.DEFAULT_QUOTA_UNIT," +
+                    "   POLICY.DEFAULT_UNIT_TIME," +
+                    "   POLICY.DEFAULT_TIME_UNIT," +
+                    "   POLICY.APPLICABLE_LEVEL," +
+                    "   COND.CONDITION_GROUP_ID," +
+                    "   COND.QUOTA_TYPE," +
+                    "   COND.QUOTA AS QUOTA," +
+                    "   COND.QUOTA_UNIT AS QUOTA_UNIT," +
+                    "   COND.UNIT_TIME AS UNIT_TIME," +
+                    "   COND.TIME_UNIT AS TIME_UNIT" +
+                    " FROM" +
+                    "   AM_API_THROTTLE_POLICY POLICY " +
+                    " LEFT JOIN " +
+                    "   AM_CONDITION_GROUP COND " +
+                    " ON " +
+                    "   POLICY.POLICY_ID = COND.POLICY_ID";
+
     public static final String GET_ALL_APIS_SQL =
             "SELECT " +
                     "      APIS.API_ID," +
@@ -314,9 +339,17 @@ public class SubscriptionValidationSQLConstants {
                     "   POLICY.NAME," +
                     "   POLICY.TENANT_ID," +
                     "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   POLICY.DEFAULT_QUOTA," +
+                    "   POLICY.DEFAULT_QUOTA_UNIT," +
+                    "   POLICY.DEFAULT_UNIT_TIME," +
+                    "   POLICY.DEFAULT_TIME_UNIT," +
                     "   POLICY.APPLICABLE_LEVEL," +
                     "   COND.CONDITION_GROUP_ID," +
-                    "   COND.QUOTA_TYPE" +
+                    "   COND.QUOTA_TYPE," +
+                    "   COND.QUOTA AS QUOTA," +
+                    "   COND.QUOTA_UNIT AS QUOTA_UNIT," +
+                    "   COND.UNIT_TIME AS UNIT_TIME," +
+                    "   COND.TIME_UNIT AS TIME_UNIT" +
                     " FROM" +
                     "   AM_API_THROTTLE_POLICY POLICY " +
                     " LEFT JOIN " +
@@ -331,8 +364,16 @@ public class SubscriptionValidationSQLConstants {
                     "   POLICY.NAME," +
                     "   POLICY.TENANT_ID," +
                     "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   POLICY.DEFAULT_QUOTA," +
+                    "   POLICY.DEFAULT_QUOTA_UNIT," +
+                    "   POLICY.DEFAULT_UNIT_TIME," +
+                    "   POLICY.DEFAULT_TIME_UNIT," +
                     "   COND.CONDITION_GROUP_ID," +
-                    "   COND.QUOTA_TYPE" +
+                    "   COND.QUOTA_TYPE," +
+                    "   COND.QUOTA AS QUOTA," +
+                    "   COND.QUOTA_UNIT AS QUOTA_UNIT," +
+                    "   COND.UNIT_TIME AS UNIT_TIME," +
+                    "   COND.TIME_UNIT AS TIME_UNIT" +
                     " FROM" +
                     "   AM_API_THROTTLE_POLICY POLICY " +
                     " LEFT JOIN " +
@@ -380,9 +421,17 @@ public class SubscriptionValidationSQLConstants {
                     "   POLICY.NAME," +
                     "   POLICY.TENANT_ID," +
                     "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   POLICY.DEFAULT_QUOTA AS DEFAULT_QUOTA," +
+                    "   POLICY.DEFAULT_QUOTA_UNIT AS DEFAULT_QUOTA_UNIT," +
+                    "   POLICY.DEFAULT_UNIT_TIME AS DEFAULT_UNIT_TIME," +
+                    "   POLICY.DEFAULT_TIME_UNIT AS DEFAULT_TIME_UNIT," +
                     "   POLICY.APPLICABLE_LEVEL," +
                     "   COND.CONDITION_GROUP_ID," +
-                    "   COND.QUOTA_TYPE" +
+                    "   COND.QUOTA_TYPE," +
+                    "   COND.QUOTA AS QUOTA," +
+                    "   COND.QUOTA_UNIT AS QUOTA_UNIT," +
+                    "   COND.UNIT_TIME AS UNIT_TIME," +
+                    "   COND.TIME_UNIT AS TIME_UNIT" +
                     " FROM" +
                     "   AM_API_THROTTLE_POLICY POLICY " +
                     " LEFT JOIN " +

@@ -6227,10 +6227,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String defaultPolicyName = policyFile + "_default";
                 executionFlows.put(defaultPolicyName, defaultPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
+                List<Integer> addedConditionGroupIds = new ArrayList<>();
+                for (Pipeline pipeline : apiPolicy.getPipelines()) {
+                    addedConditionGroupIds.add(pipeline.getId());
+                }
                 APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
                         apiPolicy.getTenantDomain(), apiPolicy.getPolicyId(), apiPolicy.getPolicyName(),
-                        apiPolicy.getDefaultQuotaPolicy().getType());
+                        apiPolicy.getDefaultQuotaPolicy().getType(), addedConditionGroupIds, null);
                 APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
@@ -6556,15 +6560,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 APIManagerConfiguration config = getAPIManagerConfiguration();
                 if (log.isDebugEnabled()) {
-                        log.debug("Calling invalidation cache for API Policy for tenant ");
-                    }
-                    String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
-                            + "/";
-                    invalidateResourceCache(policyContext, null, Collections.EMPTY_SET);
+                    log.debug("Calling invalidation cache for API Policy for tenant ");
+                }
+                String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
+                        + "/";
+                invalidateResourceCache(policyContext, null, Collections.EMPTY_SET);
+                List<Integer> addedConditionGroupIds = new ArrayList<>();
+                List<Integer> deletedConditionGroupIds = new ArrayList<>();
+                for (Pipeline pipeline : existingPolicy.getPipelines()) {
+                    deletedConditionGroupIds.add(pipeline.getId());
+                }
+                for (Pipeline pipeline : apiPolicy.getPipelines()) {
+                    addedConditionGroupIds.add(pipeline.getId());
+                }
                 APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
                         apiPolicy.getTenantDomain(), apiPolicy.getPolicyId(), apiPolicy.getPolicyName(),
-                        apiPolicy.getDefaultQuotaPolicy().getType());
+                        apiPolicy.getDefaultQuotaPolicy().getType(), addedConditionGroupIds, deletedConditionGroupIds);
                 APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
@@ -6698,9 +6710,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     policyFileNames.add(policyFile + "_condition_" + pipeline.getId());
                 }
             }
+            List<Integer> deletedConditionGroupIds = new ArrayList<>();
+            for (Pipeline pipeline : policy.getPipelines()) {
+                deletedConditionGroupIds.add(pipeline.getId());
+            }
             APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.POLICY_DELETE.name(), tenantId, policy.getTenantDomain(),
-                    policy.getPolicyId(), policy.getPolicyName(), policy.getDefaultQuotaPolicy().getType());
+                    policy.getPolicyId(), policy.getPolicyName(), policy.getDefaultQuotaPolicy().getType(),
+                    null, deletedConditionGroupIds);
             APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
 
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {

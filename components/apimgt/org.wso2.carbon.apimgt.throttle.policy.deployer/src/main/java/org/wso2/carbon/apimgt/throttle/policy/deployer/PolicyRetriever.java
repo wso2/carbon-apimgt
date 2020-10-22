@@ -34,6 +34,8 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 
 import java.io.IOException;
@@ -48,7 +50,7 @@ public class PolicyRetriever {
             APIConstants.INTERNAL_WEB_APP_EP;
 
 
-    public SubscriptionPolicy retrieveSubscriptionPolicy(String policyName, String tenantDomain)
+    public SubscriptionPolicy getSubscriptionPolicy(String policyName, String tenantDomain)
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES +
@@ -60,7 +62,7 @@ public class PolicyRetriever {
         return null;
     }
 
-    public SubscriptionPolicyList retrieveAllSubscriptionPolicies()
+    public SubscriptionPolicyList getAllSubscriptionPolicies()
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES +
@@ -93,7 +95,7 @@ public class PolicyRetriever {
         return null;
     }
 
-    public ApplicationPolicy retrieveApplicationPolicy(String policyName, String tenantDomain)
+    public ApplicationPolicy getApplicationPolicy(String policyName, String tenantDomain)
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES +
@@ -130,12 +132,55 @@ public class PolicyRetriever {
         return null;
     }
 
-    public ApplicationPolicyList retrieveAllApplicationPolicies()
+    public ApplicationPolicyList getAllApplicationPolicies()
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES +
                 "?allTenants=true";
         return getApplicationPolicies(path, null);
+    }
+
+    public ApiPolicy getApiPolicy(String policyName, String tenantDomain) throws ThrottlePolicyDeployerException {
+        String path = APIConstants.SubscriptionValidationResources.API_POLICIES +
+                "?policyName=" + policyName;
+        ApiPolicyList apiPolicyList = getApiPolicies(path, tenantDomain);
+        if (apiPolicyList.getList() != null && !apiPolicyList.getList().isEmpty()) {
+            return apiPolicyList.getList().get(0);
+        }
+        return null;
+    }
+
+    public ApiPolicyList getApiPolicies(String path, String tenantDomain)
+            throws ThrottlePolicyDeployerException {
+
+        try {
+            String endpoint = baseURL + path;
+            CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain);
+
+            if (httpResponse.getEntity() != null) {
+                String responseString = EntityUtils.toString(httpResponse.getEntity(),
+                        APIConstants.DigestAuthConstants.CHARSET);
+                httpResponse.close();
+                if (responseString != null && !responseString.isEmpty()) {
+                    return new Gson().fromJson(responseString, ApiPolicyList.class);
+                }
+            } else {
+                throw new ThrottlePolicyDeployerException("HTTP response is empty");
+            }
+        } catch (IOException e) {
+            String msg = "Error while executing the http client";
+            log.error(msg, e);
+            throw new ThrottlePolicyDeployerException(msg, e);
+        }
+        return null;
+    }
+
+    public ApiPolicyList getAllApiPolicies()
+            throws ThrottlePolicyDeployerException {
+
+        String path = APIConstants.SubscriptionValidationResources.API_POLICIES +
+                "?allTenants=true";
+        return getApiPolicies(path, null);
     }
 
     private CloseableHttpResponse invokeService(String endpoint, String tenantDomain)

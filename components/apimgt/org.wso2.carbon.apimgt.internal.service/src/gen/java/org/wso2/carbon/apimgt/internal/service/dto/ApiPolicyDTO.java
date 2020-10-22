@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.PolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -26,6 +27,7 @@ public class ApiPolicyDTO   {
     private String quotaType = null;
     private List<ApiPolicyConditionGroupDTO> conditionGroups = new ArrayList<>();
     private String applicableLevel = null;
+    private ThrottleLimitDTO defaultLimit = null;
 
   /**
    **/
@@ -129,6 +131,23 @@ public class ApiPolicyDTO   {
     this.applicableLevel = applicableLevel;
   }
 
+  /**
+   **/
+  public ApiPolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("defaultLimit")
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
+  }
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -144,12 +163,13 @@ public class ApiPolicyDTO   {
         Objects.equals(name, apiPolicy.name) &&
         Objects.equals(quotaType, apiPolicy.quotaType) &&
         Objects.equals(conditionGroups, apiPolicy.conditionGroups) &&
-        Objects.equals(applicableLevel, apiPolicy.applicableLevel);
+        Objects.equals(applicableLevel, apiPolicy.applicableLevel) &&
+        Objects.equals(defaultLimit, apiPolicy.defaultLimit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType, conditionGroups, applicableLevel);
+    return Objects.hash(id, tenantId, name, quotaType, conditionGroups, applicableLevel, defaultLimit);
   }
 
   @Override
@@ -163,6 +183,7 @@ public class ApiPolicyDTO   {
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    conditionGroups: ").append(toIndentedString(conditionGroups)).append("\n");
     sb.append("    applicableLevel: ").append(toIndentedString(applicableLevel)).append("\n");
+    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

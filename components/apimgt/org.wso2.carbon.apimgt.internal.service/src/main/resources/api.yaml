@@ -327,6 +327,12 @@ paths:
             **Search condition**.
              Api policy name
           type: string
+        - name: allTenants
+          in: query
+          description: |
+            **Search condition**.
+              Request policies of all the tenants or not
+          type: boolean
       tags:
         - Subscription Validation
       responses:
@@ -1023,6 +1029,8 @@ definitions:
               $ref: '#/definitions/ApiPolicyConditionGroup'
           applicableLevel:
             type: string
+          defaultLimit:
+            $ref: '#/definitions/ThrottleLimit'
 
   #-----------------------------------------------------
   # The API Policy Condition  Group resource
@@ -1039,6 +1047,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Condition'
+      defaultLimit:
+        $ref: '#/definitions/ThrottleLimit'
 
   #-----------------------------------------------------
   # The Throttle Policy Condition resource

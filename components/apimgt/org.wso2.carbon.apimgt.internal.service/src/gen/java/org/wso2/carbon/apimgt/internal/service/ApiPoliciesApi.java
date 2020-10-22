@@ -44,7 +44,7 @@ ApiPoliciesApiService delegate = new ApiPoliciesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of api policies in the database", response = ApiPolicyListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response apiPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Api policy name ")  @QueryParam("policyName") String policyName) throws APIManagementException{
-        return delegate.apiPoliciesGet(xWSO2Tenant, policyName, securityContext);
+    public Response apiPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Api policy name ")  @QueryParam("policyName") String policyName,  @ApiParam(value = "**Search condition**.   Request policies of all the tenants or not ")  @QueryParam("allTenants") Boolean allTenants) throws APIManagementException{
+        return delegate.apiPoliciesGet(xWSO2Tenant, policyName, allTenants, securityContext);
     }
 }
