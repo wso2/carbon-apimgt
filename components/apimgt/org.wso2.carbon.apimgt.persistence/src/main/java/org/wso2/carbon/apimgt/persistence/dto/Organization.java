@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.persistence.dto;
 
 public class Organization {
     String name; // tenant domain

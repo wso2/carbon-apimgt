@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.api.model.persistence;
+package org.wso2.carbon.apimgt.persistence.dto;
 
 /*
   Represents the API information stored in persistence layer, that is used for publisher operations

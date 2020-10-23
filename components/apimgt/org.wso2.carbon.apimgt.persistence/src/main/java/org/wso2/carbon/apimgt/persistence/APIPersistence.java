@@ -1,11 +1,11 @@
-package org.wso2.carbon.apimgt.api;
+package org.wso2.carbon.apimgt.persistence;
 
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.persistence.*;
-import org.wso2.carbon.apimgt.api.model.persistence.DevPortalAPISearchResult;
-import org.wso2.carbon.apimgt.api.model.persistence.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.api.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.dto.*;
+import org.wso2.carbon.apimgt.persistence.dto.Documentation;
+import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -34,21 +34,20 @@ public interface APIPersistence {
      * @param org          Organization the API is owned by
      * @param publisherAPI API to add
      * @param ctx          User context
-     * @return Added API
+     * @return ID of Added API
      * @throws APIPersistenceException
      */
-    PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI, UserContext ctx) throws APIPersistenceException;
+    String addAPI(Organization org, PublisherAPI publisherAPI, UserContext ctx) throws APIPersistenceException;
 
     /**
      * Update API in the persistence layer
      *
-     * @param org          Organization the API is owed by
+     * @param org          Organization the API is owned by
      * @param publisherAPI API to update
      * @param ctx          User context
-     * @return Updated API
      * @throws APIPersistenceException
      */
-    PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI, UserContext ctx) throws APIPersistenceException;
+    void updateAPI(Organization org, PublisherAPI publisherAPI, UserContext ctx) throws APIPersistenceException;
 
     /**
      * Get the API information stored in persistence layer, that is used for publisher operations
@@ -78,10 +77,9 @@ public interface APIPersistence {
      * @param org   Organization the API is owned by
      * @param apiId API ID
      * @param ctx   User context
-     * @return 'true' if API deletion is successful, else 'false'
      * @throws APIPersistenceException
      */
-    boolean deleteAPI(Organization org, String apiId, UserContext ctx) throws APIPersistenceException;
+    void deleteAPI(Organization org, String apiId, UserContext ctx) throws APIPersistenceException;
 
     /**
      * Search APIs to be displayed on Publisher API listing
@@ -217,9 +215,10 @@ public interface APIPersistence {
      * @param apiId         API ID
      * @param documentation Documentation
      * @param ctx           User context
+     * @return ID of the documentation added
      * @throws APIPersistenceException
      */
-    void addDocumentation(Organization org, String apiId, Documentation documentation, UserContext ctx)
+    String addDocumentation(Organization org, String apiId, Documentation documentation, UserContext ctx)
                                     throws APIPersistenceException;
 
     /**
@@ -241,14 +240,14 @@ public interface APIPersistence {
      * @param apiId API ID
      * @param docId Documentation ID
      * @param ctx   User context
-     * @return
+     * @return Documentation
      * @throws APIPersistenceException
      */
     Documentation getDocumentation(Organization org, String apiId, String docId, UserContext ctx)
                                     throws APIPersistenceException;
 
     /**
-     * Get the content of API documentation
+     * Get the content (Inline text/Markdown content text/ Resource file) of API documentation
      *
      * @param org   Organization the documentation is owned by
      * @param apiId API ID
@@ -257,20 +256,20 @@ public interface APIPersistence {
      * @return Documentation Content
      * @throws APIPersistenceException
      */
-    String getDocumentationContent(Organization org, String apiId, String docId, UserContext ctx)
+    DocumentContent getDocumentationContent(Organization org, String apiId, String docId, UserContext ctx)
                                     throws APIPersistenceException;
 
     /**
-     * Get all documentation of the given API
+     * Search documentation of the given API
      *
      * @param org   Organization the documentations are owned by
      * @param apiId API ID
      * @param ctx   User context
-     * @return Documentation listing of the API
+     * @return Documentation search result
      * @throws APIPersistenceException
      */
-    DocumentationGetResult getAllDocumentation(Organization org, String apiId, int start, int offset, UserContext ctx)
-                                    throws APIPersistenceException;
+    DocumentSearchResult searchDocumentation(Organization org, String apiId, int start, int offset, String searchQuery,
+                                    UserContext ctx) throws APIPersistenceException;
 
     /**
      * Delete API documentation
@@ -279,10 +278,9 @@ public interface APIPersistence {
      * @param apiId API ID
      * @param docId Documentation ID
      * @param ctx   User context
-     * @return 'true' if documentation deletion is successful, else 'false'
      * @throws APIPersistenceException
      */
-    boolean deleteDocumentation(Organization org, String apiId, String docId, UserContext ctx)
+    void deleteDocumentation(Organization org, String apiId, String docId, UserContext ctx)
                                     throws APIPersistenceException;
 
 
@@ -292,28 +290,26 @@ public interface APIPersistence {
     /**
      * Add mediation policy to the API
      *
-     * @param org         Organization the mediation policy is owned by
-     * @param apiId       API ID
-     * @param type        Type of mediation policy (i.e. In, Out, Fault)
-     * @param contentFile
-     * @param ctx         User context
+     * @param org   Organization the mediation policy is owned by
+     * @param apiId API ID
+     * @param ctx   User context
+     * @return Mediation policy Id
      * @throws APIPersistenceException
      */
-    void addMediationPolicy(Organization org, String apiId, String type, ResourceFile contentFile, UserContext ctx)
+    String addMediationPolicy(Organization org, String apiId, Mediation mediation, UserContext ctx)
                                     throws APIPersistenceException;
 
     /**
      * Update mediation policy of the API
      *
-     * @param org               Organization the mediation policy is owned by
-     * @param apiId             API ID
-     * @param mediationPolicyId Mediation policy ID
-     * @param contentFile       Mediation policy contentFile
-     * @param ctx               User context
+     * @param org       Organization the mediation policy is owned by
+     * @param apiId     API ID
+     * @param mediation Mediation policy
+     * @param ctx       User context
      * @throws APIPersistenceException
      */
-    void updateMediationPolicy(Organization org, String apiId, String mediationPolicyId, ResourceFile contentFile,
-                                    UserContext ctx) throws APIPersistenceException;
+    void updateMediationPolicy(Organization org, String apiId, Mediation mediation, UserContext ctx)
+                                    throws APIPersistenceException;
 
     /**
      * Get mediation policy of API
@@ -347,10 +343,9 @@ public interface APIPersistence {
      * @param apiId             API ID
      * @param mediationPolicyId Mediation policy ID
      * @param ctx               User context
-     * @return 'true' if deletion of the mediation policy is successful, else 'false'
      * @throws APIPersistenceException
      */
-    boolean deleteMediationPolicy(Organization org, String apiId, String mediationPolicyId, UserContext ctx)
+    void deleteMediationPolicy(Organization org, String apiId, String mediationPolicyId, UserContext ctx)
                                     throws APIPersistenceException;
 
 
@@ -360,13 +355,13 @@ public interface APIPersistence {
     /**
      * Save Thumbnail icon of the API. This includes both the initial creation and later update operations.
      *
-     * @param org             Organization the thumbnail icon is owned by
-     * @param apiId           API ID
-     * @param fileInputStream File input stream of the thumbnail icon
-     * @param ctx             User context
+     * @param org          Organization the thumbnail icon is owned by
+     * @param apiId        API ID
+     * @param resourceFile
+     * @param ctx          User context
      * @throws APIPersistenceException
      */
-    void saveAPIThumbnail(Organization org, String apiId, InputStream fileInputStream, UserContext ctx)
+    void saveAPIThumbnail(Organization org, String apiId, ResourceFile resourceFile, UserContext ctx)
                                     throws APIPersistenceException;
 
     /**
@@ -386,8 +381,7 @@ public interface APIPersistence {
      * @param org   Organization the thumbnail icon is owned by
      * @param apiId API ID
      * @param ctx   User context
-     * @return 'true' if the thumbnail icon deletion is successful, else 'false'
      * @throws APIPersistenceException
      */
-    boolean deleteAPIThumbnail(Organization org, String apiId, UserContext ctx) throws APIPersistenceException;
+    void deleteAPIThumbnail(Organization org, String apiId, UserContext ctx) throws APIPersistenceException;
 }
