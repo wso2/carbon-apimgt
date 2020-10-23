@@ -60,7 +60,7 @@ export default function GraphQLUI(props) {
         const apiID = api.id;
         const apiClient = new Api();
         const promiseGraphQL = apiClient.getGraphQLSchemaByAPIId(apiID);
-         promiseGraphQL
+        promiseGraphQL
             .then((res) => {
                 const graphqlSchemaObj = buildSchema(res.data);
                 setSchema(graphqlSchemaObj);

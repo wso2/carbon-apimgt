@@ -300,8 +300,8 @@ class ApiConsole extends React.Component {
             {}, (err, conversionResult) => {
                 if (!conversionResult.result) {
                     const collection = swaggerToPostman.convert(fr);
-                    if (!collection.result) {
-                        console.log('Could not convert', collection.reason);
+                    if (!collection) {
+                        console.log('Could not convert');
                     } else {
                         fileDownload(
                             JSON.stringify(collection),
