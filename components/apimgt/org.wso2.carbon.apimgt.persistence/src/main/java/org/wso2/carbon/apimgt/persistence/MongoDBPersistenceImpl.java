@@ -51,8 +51,8 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
-    @Override public void createAPI(API api) {
-
+    @Override public API createAPI(API api) {
+        return null;
     }
 
     @Override public Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start,
@@ -62,11 +62,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override public Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start,
                                     int end, boolean limitAttributes, boolean isPublisherListing) {
-        return null;
-    }
-
-    @Override public Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery,
-                                    int start, int end, boolean limitAttributes) {
         return null;
     }
 
@@ -203,9 +198,9 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return null;
     }
 
-    @Override public APIProduct getAPIProduct(String apiProductId) {
-        return null;
-    }
+//    @Override public APIProduct getAPIProduct(String apiProductId) {
+//        return null;
+//    }
 
     @Override public void deleteAPIProduct(String apiProductId) {
 

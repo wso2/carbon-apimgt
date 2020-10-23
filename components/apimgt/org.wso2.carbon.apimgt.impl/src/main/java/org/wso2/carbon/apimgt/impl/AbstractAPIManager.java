@@ -2116,122 +2116,138 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
+    public Map<String, Object> searchPaginatedAPIs(String query1, String requestedTenantDomain, int start, int end,
             boolean isLazyLoad, boolean isPublisherListing) throws APIManagementException {
-        Map<String, Object> result = new HashMap<String, Object>();
-        boolean isTenantFlowStarted = false;
-        String[] searchQueries = searchQuery.split("&");
-        StringBuilder filteredQuery = new StringBuilder();
-        String subQuery = null;
+        Organization requestedOrganization = new Organization(requestedTenantDomain);
+        Map<String, Object> result  = apiPersistenceInstance.searchPaginatedAPIs(query1, requestedOrganization, start,
+                                        end, isLazyLoad, isPublisherListing);
 
-        if (log.isDebugEnabled()) {
-            log.debug("Original search query received : " + searchQuery);
-        }
+//
+//        // >> Shifted from org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ApisApiServiceImpl.apisGet
+//        String searchQuery = APIUtil.constructApisGetQuery(query1);
+//
+//        //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
+//        if (searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
+//            searchQuery = searchQuery
+//                                            .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
+//        }
+//        // Shifted from ApisApi class <<<
+//
+//        Map<String, Object> result = new HashMap<String, Object>();
+//        boolean isTenantFlowStarted = false;
+//        String[] searchQueries = searchQuery.split("&");
+//        StringBuilder filteredQuery = new StringBuilder();
+//        String subQuery = null;
+//
+//        if (log.isDebugEnabled()) {
+//            log.debug("Original search query received : " + searchQuery);
+//        }
+//
+//        // Filtering the queries related with custom properties
+//        for (String query : searchQueries) {
+//            if (searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX) ||
+//                    searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+//                subQuery = query;
+//                break;
+//            }
+//            // If the query does not contains "=" then it is an errornous scenario.
+//            if (query.contains("=")) {
+//                String[] searchKeys = query.split("=");
+//
+//                if (searchKeys.length >= 2) {
+//                    if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
+//                        if (log.isDebugEnabled()) {
+//                            log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
+//                                    + " appending " + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");
+//                        }
+//                        searchKeys[0] = (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]);
+//                    }
+//
+//                    // Ideally query keys for label and  category searchs are as below
+//                    //      label -> labels_labelName
+//                    //      category -> apiCategories_categoryName
+//                    // Since these are not user friendly we allow to use prefixes label and api-category. And label and
+//                    // category search should only return results that exactly match.
+//                    if (searchKeys[0].equals(APIConstants.LABEL_SEARCH_TYPE_PREFIX)) {
+//                        searchKeys[0] = APIConstants.API_LABELS_GATEWAY_LABELS;
+//                        searchKeys[1] = searchKeys[1].replace("*", "");
+//                    } else if (searchKeys[0].equals(APIConstants.CATEGORY_SEARCH_TYPE_PREFIX)) {
+//                        searchKeys[0] = APIConstants.API_CATEGORIES_CATEGORY_NAME;
+//                        searchKeys[1] = searchKeys[1].replace("*", "");
+//                    }
+//
+//                    if (filteredQuery.length() == 0) {
+//                        filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
+//                    } else {
+//                        filteredQuery.append("&").append(searchKeys[0]).append("=").append(searchKeys[1]);
+//                    }
+//                }
+//            } else {
+//                filteredQuery.append(query);
+//            }
+//        }
+//        searchQuery = filteredQuery.toString();
+//        if (log.isDebugEnabled()) {
+//            log.debug("Final search query after the post processing for the custom properties : " + searchQuery);
+//        }
+//        try {
+//            boolean isTenantMode = (requestedTenantDomain != null);
+//            if (isTenantMode && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
+//                isTenantFlowStarted = true;
+//                startTenantFlow(requestedTenantDomain);
+//            } else {
+//                requestedTenantDomain = org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+//                isTenantFlowStarted = true;
+//                startTenantFlow(requestedTenantDomain);
+//
+//            }
+//
+//            Registry userRegistry;
+//            int tenantIDLocal = 0;
+//            String userNameLocal = this.username;
+//            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
+//                tenantIDLocal = getTenantManager()
+//                        .getTenantId(requestedTenantDomain);
+//                APIUtil.loadTenantRegistry(tenantIDLocal);
+//                userRegistry = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
+//                userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
+//                if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+//                    APIUtil.loadTenantConfigBlockingMode(requestedTenantDomain);
+//                }
+//            } else {
+//                userRegistry = this.registry;
+//                tenantIDLocal = tenantId;
+//            }
+//            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
+//
+//            if (subQuery != null && subQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+//                Map<Documentation, API> apiDocMap =
+//                        searchAPIDoc(userRegistry, tenantIDLocal, userNameLocal, subQuery.split("=")[1]);
+//                result.put("apis", apiDocMap);
+//                /*Pagination for Document search results is not supported yet, hence length is sent as end-start*/
+//                if (apiDocMap.isEmpty()) {
+//                    result.put("length", 0);
+//                } else {
+//                    result.put("length", end - start);
+//                }
+//            } else if (subQuery != null && subQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
+//                result = searchAPIsByURLPattern(userRegistry, subQuery.split("=")[1], start, end);
+//            } else if (searchQuery != null && searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+//                result = searchPaginatedAPIsByContent(userRegistry, tenantIDLocal, searchQuery, start, end,isLazyLoad);
+//            } else {
+//                result = searchPaginatedAPIs(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad,
+//                        isPublisherListing);
+//            }
+//
+//        } catch (Exception e) {
+//            String msg = "Failed to Search APIs";
+//            throw new APIManagementException(msg, e);
+//        } finally {
+//            if (isTenantFlowStarted) {
+//                endTenantFlow();
+//            }
+//        }
 
-        // Filtering the queries related with custom properties
-        for (String query : searchQueries) {
-            if (searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX) ||
-                    searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
-                subQuery = query;
-                break;
-            }
-            // If the query does not contains "=" then it is an errornous scenario.
-            if (query.contains("=")) {
-                String[] searchKeys = query.split("=");
-
-                if (searchKeys.length >= 2) {
-                    if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
-                        if (log.isDebugEnabled()) {
-                            log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
-                                    + " appending " + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");
-                        }
-                        searchKeys[0] = (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]);
-                    }
-
-                    // Ideally query keys for label and  category searchs are as below
-                    //      label -> labels_labelName
-                    //      category -> apiCategories_categoryName
-                    // Since these are not user friendly we allow to use prefixes label and api-category. And label and
-                    // category search should only return results that exactly match.
-                    if (searchKeys[0].equals(APIConstants.LABEL_SEARCH_TYPE_PREFIX)) {
-                        searchKeys[0] = APIConstants.API_LABELS_GATEWAY_LABELS;
-                        searchKeys[1] = searchKeys[1].replace("*", "");
-                    } else if (searchKeys[0].equals(APIConstants.CATEGORY_SEARCH_TYPE_PREFIX)) {
-                        searchKeys[0] = APIConstants.API_CATEGORIES_CATEGORY_NAME;
-                        searchKeys[1] = searchKeys[1].replace("*", "");
-                    }
-
-                    if (filteredQuery.length() == 0) {
-                        filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
-                    } else {
-                        filteredQuery.append("&").append(searchKeys[0]).append("=").append(searchKeys[1]);
-                    }
-                }
-            } else {
-                filteredQuery.append(query);
-            }
-        }
-        searchQuery = filteredQuery.toString();
-        if (log.isDebugEnabled()) {
-            log.debug("Final search query after the post processing for the custom properties : " + searchQuery);
-        }
-        try {
-            boolean isTenantMode = (requestedTenantDomain != null);
-            if (isTenantMode && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
-                isTenantFlowStarted = true;
-                startTenantFlow(requestedTenantDomain);
-            } else {
-                requestedTenantDomain = org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-                isTenantFlowStarted = true;
-                startTenantFlow(requestedTenantDomain);
-
-            }
-
-            Registry userRegistry;
-            int tenantIDLocal = 0;
-            String userNameLocal = this.username;
-            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
-                tenantIDLocal = getTenantManager()
-                        .getTenantId(requestedTenantDomain);
-                APIUtil.loadTenantRegistry(tenantIDLocal);
-                userRegistry = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
-                userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
-                if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                    APIUtil.loadTenantConfigBlockingMode(requestedTenantDomain);
-                }
-            } else {
-                userRegistry = this.registry;
-                tenantIDLocal = tenantId;
-            }
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
-
-            if (subQuery != null && subQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
-                Map<Documentation, API> apiDocMap =
-                        searchAPIDoc(userRegistry, tenantIDLocal, userNameLocal, subQuery.split("=")[1]);
-                result.put("apis", apiDocMap);
-                /*Pagination for Document search results is not supported yet, hence length is sent as end-start*/
-                if (apiDocMap.isEmpty()) {
-                    result.put("length", 0);
-                } else {
-                    result.put("length", end - start);
-                }
-            } else if (subQuery != null && subQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
-                result = searchAPIsByURLPattern(userRegistry, subQuery.split("=")[1], start, end);
-            } else if (searchQuery != null && searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = searchPaginatedAPIsByContent(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
-            } else {
-                result = searchPaginatedAPIs(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad,
-                        isPublisherListing);
-            }
-
-        } catch (Exception e) {
-            String msg = "Failed to Search APIs";
-            throw new APIManagementException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
         return result;
     }
 
@@ -2793,6 +2809,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiToScopeMapping;
     }
 
+    // Can remove this method from here since copied to org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl.searchPaginatedAPIsByContent
     /**
      * Search api resources by their content
      *

@@ -192,13 +192,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         query = query == null ? "" : query;
         expand = expand != null && expand;
         try {
-            String newSearchQuery = APIUtil.constructApisGetQuery(query);
-
-            //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
-            if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
-                newSearchQuery = newSearchQuery
-                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
-            }
+//            String newSearchQuery = APIUtil.constructApisGetQuery(query);
+//
+//            //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
+//            if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
+//                newSearchQuery = newSearchQuery
+//                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
+//            }
 
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
@@ -212,7 +212,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain, username);
             }*/
 
-            Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
+            Map<String, Object> result = apiProvider.searchPaginatedAPIs(query, tenantDomain,
                     offset, limit, false, !expand);
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
@@ -284,7 +284,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             //adding the api
-            apiProvider.addAPI(apiToAdd);
+            API addedApi = apiProvider.addAPI(apiToAdd);
 
             if (!isWSAPI) {
                 APIDefinition oasParser;
@@ -295,13 +295,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 SwaggerData swaggerData = new SwaggerData(apiToAdd);
                 String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
-                apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
+                apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition); // has reg usage
             }
 
-            APIIdentifier createdApiId = apiToAdd.getId();
+           // APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPI(createdApiId);
-            createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
+          //  API createdApi = apiProvider.getAPI(createdApiId);
+          //  createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
+            createdApiDTO = APIMappingUtil.fromAPItoDTO(addedApi);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
@@ -3598,6 +3599,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return the validation response DTO (for REST API) and the intermediate model as a Map
      * @throws APIManagementException if error occurred during validation of the WSDL
      */
+    // NO REG USAGE
     private Map validateWSDL(String url, InputStream fileInputStream, Attachment fileDetail) throws APIManagementException {
         handleInvalidParams(fileInputStream, fileDetail, url);
         WSDLValidationResponseDTO responseDTO;

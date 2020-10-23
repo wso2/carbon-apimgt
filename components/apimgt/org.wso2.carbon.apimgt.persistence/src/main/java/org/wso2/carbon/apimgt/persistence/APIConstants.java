@@ -206,4 +206,96 @@ public final class APIConstants {
      */
     public static final String CUSTOM_API_INDEXER_PROPERTY = "registry.customIndexer";
 
+    public static final String SEARCH_AND_TAG = "&";
+    public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
+    public static final String ENABLE_STORE_SEARCH_TYPE_KEY = "enableStore=(true OR null)";
+    public static final String LCSTATE_SEARCH_KEY = "lcState";
+    public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
+    public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
+    public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
+    public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
+    public static final String TAGS_EQ_SEARCH_TYPE_PREFIX = "tags=";
+    public static final String TAG_SEARCH_TYPE_PREFIX = "tag";
+    public static final String TAG_COLON_SEARCH_TYPE_PREFIX = "tag:";
+    public static final String NAME_TYPE_PREFIX = "name";
+    private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
+    private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
+    private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
+    public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
+    public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
+    public static final String LABEL_SEARCH_TYPE_PREFIX = "label";
+    public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
+    public static final String ENABLE_STORE = "enableStore";
+
+    // Reserved keywords for search.
+    public static final String[] API_SEARCH_PREFIXES = {DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
+                                    NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
+                                    VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
+                                    API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
+                                    CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase()};
+
+    public static final String STORE_CLIENT = "Store";
+
+    public static final String DOCUMENTATION_SEARCH_PATH_FIELD = "path";
+
+    public static final String DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD = "mediaType";
+
+    //association type between API and Documentation
+    public static final String DOCUMENTATION_ASSOCIATION = "document";
+
+    public static final String API_STORE = "APIStore.";
+    public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
+
+    public static final class Permissions {
+
+        public static final String API_CREATE = "/permission/admin/manage/api/create";
+        public static final String API_PUBLISH = "/permission/admin/manage/api/publish";
+        public static final String API_SUBSCRIBE = "/permission/admin/manage/api/subscribe";
+        public static final String API_WORKFLOWADMIN = "/permission/admin/manage/workflowadmin";
+        public static final String APIM_ADMIN = "/permission/admin/manage/apim_admin";
+        public static final String MANAGE_TIERS = "/permission/admin/manage/manage_tiers";
+
+        public static final String LOGIN = "/permission/admin/login";
+        public static final String CONFIGURE_GOVERNANCE = "/permission/admin/configure/governance";
+        public static final String RESOURCE_GOVERN = "/permission/admin/manage/resources/govern";
+
+        private Permissions() {
+
+        }
+    }
+
+    public static final String API_USER_ROLE_CACHE = "appPublisherUserRoleCache";
+
+    //API caching related constants
+    public static final String API_MANAGER_CACHE_MANAGER = "API_MANAGER_CACHE";
+
+    public static final String SKIP_ROLES_BY_REGEX = "skipRolesByRegex";
+    public static final String DOCUMENT_MEDIA_TYPE_KEY = "application/vnd.wso2-document\\+xml";
+
+    public static final String TYPE = "type";
+    public static final String TYPE_SEARCH_TYPE_KEY = "type=";
+
+    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP"};
+
+    public static class AuditLogConstants {
+        public static final String API_PRODUCT = "APIProduct";
+    }
+
+    public static final String DEFAULT_MODIFIED_ENDPOINT_PASSWORD = "*****"; //5 stars
+    public static final String REGISTRY_HIDDEN_ENDPOINT_PROPERTY = "registry.HiddenEpProperty";
+    public static final int API_RESPONSE_CACHE_TIMEOUT = 300;
+
+    public static final String API_PRODUCT = "APIProduct";
+
+    public static final String DEPRECATED = "DEPRECATED";
+    public static final String PROTOTYPED = "PROTOTYPED";
+
+
+    public static final String API_PUBLISHER_ADMIN_PERMISSION_CACHE = "apimAdminPermissionCache";
+    public static final String API_DATA_URL = "url";
+    public static final String API_DATA_PRODUCTION_ENDPOINTS = "production_endpoints";
+    public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
+    public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
+    public static final String API_KEY_TYPE_SANDBOX = "SANDBOX";
+
 }
