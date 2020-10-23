@@ -56,7 +56,7 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                     HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
                     HttpResponse httpResponse = null;
                     int retryCount = 0;
-                    boolean retry;
+                    boolean retry = false;
                     do {
                         try {
                             httpResponse = httpClient.execute(method);
