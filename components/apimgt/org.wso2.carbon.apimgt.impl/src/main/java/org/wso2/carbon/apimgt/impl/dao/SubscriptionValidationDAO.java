@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -263,6 +264,110 @@ public class SubscriptionValidationDAO {
         }
 
         return apiPolicies;
+    }
+
+    public List<GlobalPolicy> getAllGlobalPolicies() {
+        List<GlobalPolicy> globalPolicies = new ArrayList<>();
+        try (
+                Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps =
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_GLOBAL_POLICIES_SQL);
+                ResultSet resultSet = ps.executeQuery();
+        ) {
+            populateGlobalPolicyList(globalPolicies, resultSet);
+
+        } catch (SQLException e) {
+            log.error("Error in loading global policies : ", e);
+        }
+
+        return globalPolicies;
+    }
+
+    public List<GlobalPolicy> getAllGlobalPolicies(String tenantDomain) {
+
+        ArrayList<GlobalPolicy> globalPolicies = new ArrayList<>();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_GLOBAL_POLICIES_SQL)) {
+            int tenantId = 0;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                log.error("Error in loading Global Policies for tenantDomain : " + tenantDomain, e);
+            }
+            ps.setInt(1, tenantId);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                populateGlobalPolicyList(globalPolicies, resultSet);
+            }
+
+        } catch (SQLException e) {
+            log.error("Error in loading global policies for tenantId : " + tenantDomain, e);
+        }
+
+        return globalPolicies;
+    }
+
+    public GlobalPolicy getGlobalPolicyByNameForTenant(String policyName, String tenantDomain) {
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_GLOBAL_POLICY_SQL)) {
+            int tenantId = 0;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                log.error("Error in loading Global Policy for tenantDomain : " + tenantDomain, e);
+            }
+            ps.setString(1, policyName);
+            ps.setInt(2, tenantId);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    GlobalPolicy globalPolicyDTO = new GlobalPolicy();
+                    globalPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                    globalPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                    globalPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                    globalPolicyDTO.setKeyTemplate(resultSet.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+                    InputStream siddhiQueryBlob = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                    String siddhiQuery = null;
+                    if (siddhiQueryBlob != null) {
+                        siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                    }
+                    globalPolicyDTO.setSiddhiQuery(siddhiQuery);
+
+                    return globalPolicyDTO;
+                }
+            }
+
+        } catch (SQLException e) {
+            log.error("Error in loading global policies by policyId : " + policyName + " of " + policyName, e);
+        }
+
+        return null;
+    }
+
+
+    private void populateGlobalPolicyList(List<GlobalPolicy> globalPolicies, ResultSet resultSet) throws SQLException {
+
+        if (globalPolicies != null && resultSet != null) {
+            while (resultSet.next()) {
+                GlobalPolicy globalPolicyDTO = new GlobalPolicy();
+                globalPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                globalPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                globalPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                globalPolicyDTO.setKeyTemplate(resultSet.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+                InputStream siddhiQueryBlob = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                String siddhiQuery = null;
+                if (siddhiQueryBlob != null) {
+                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                }
+                globalPolicyDTO.setSiddhiQuery(siddhiQuery);
+                globalPolicies.add(globalPolicyDTO);
+            }
+        }
     }
 
     /*

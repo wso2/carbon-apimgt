@@ -435,6 +435,46 @@
         }
       }
     },
+    "/global-policies" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all Global throttling policies",
+        "description" : "This will provide access to global throttling policies in database.\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "policyName",
+          "in" : "query",
+          "description" : "**Search condition**.\n Global policy name\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "allTenants",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Request policies of all the tenants or not\n",
+          "required" : false,
+          "type" : "boolean"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of global policies in the database",
+            "schema" : {
+              "$ref" : "#/definitions/GlobalPolicyList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/application-key-mappings" : {
       "get" : {
         "tags" : [ "Subscription Validation" ],
@@ -1285,6 +1325,39 @@
           "type" : "boolean"
         }
       }
+    },
+    "GlobalPolicyList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Global Policies returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/GlobalPolicy"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "Global Policy List"
+    },
+    "GlobalPolicy" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/Policy"
+      }, {
+        "properties" : {
+          "siddhiQuery" : {
+            "type" : "string"
+          },
+          "keyTemplate" : {
+            "type" : "string"
+          }
+        }
+      } ]
     },
     "URLMapping" : {
       "properties" : {

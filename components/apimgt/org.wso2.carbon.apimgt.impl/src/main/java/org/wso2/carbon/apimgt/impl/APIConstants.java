@@ -1098,6 +1098,7 @@ public final class APIConstants {
         public static final String APPLICATION_KEY_MAPPINGS = "/application-key-mappings";
         public static final String APPLICATION_POLICIES = "/application-policies";
         public static final String API_POLICIES = "/api-policies";
+        public static final String GLOBAL_POLICIES = "/global-policies";
         public static final String SUBSCRIPTION_POLICIES = "/subscription-policies";
         public static final String SCOPES = "/scopes";
 
@@ -2437,7 +2438,8 @@ public final class APIConstants {
     public enum PolicyType {
         API,
         APPLICATION,
-        SUBSCRIPTION
+        SUBSCRIPTION,
+        GLOBAL
     }
 
     public static class NotificationEvent {

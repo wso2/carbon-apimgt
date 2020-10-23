@@ -27,7 +27,8 @@ public class Policy {
     public enum POLICY_TYPE {
         SUBSCRIPTION,
         APPLICATION,
-        API
+        API,
+        GLOBAL
     }
 
     private Integer id = null;

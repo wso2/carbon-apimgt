@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.PolicyRetriever;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.*;
@@ -82,6 +83,10 @@ public class PolicyUtil {
                         }
                     }
                 }
+            } else if (Policy.POLICY_TYPE.GLOBAL.equals(policy.getType())) {
+                policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policy.getName();
+                policyString = policyTemplateBuilder.getThrottlePolicyForGlobalLevel((GlobalPolicy) policy);
+                policiesToDeploy.put(policyFile, policyString);
             }
 
             for (String flowName : policiesToUndeploy) {
@@ -151,6 +156,10 @@ public class PolicyUtil {
             for (ApiPolicy apiPolicy : apiPolicies.getList()) {
                 deployPolicy(apiPolicy, null);
             }
+            GlobalPolicyList globalPolicies = policyRetriever.getAllGlobalPolicies();
+            for (GlobalPolicy globalPolicy : globalPolicies.getList()) {
+                deployPolicy(globalPolicy, null);
+            }
         } catch (ThrottlePolicyDeployerException e) {
             log.error("Error in retrieving subscription policies", e);
         } catch (ExecutionPlanConfigurationException e) {
@@ -163,7 +172,7 @@ public class PolicyUtil {
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" +
                 policyEvent.getPolicyName();
         policyFileNames.add(policyFile);
-        undeployPolicy(policyFileNames, policyEvent.getTenantDomain());
+        undeployPolicy(policyFileNames, policyEvent.getTenantId());
     }
 
     public static void undeployPolicy(ApplicationPolicyEvent policyEvent) {
@@ -171,7 +180,7 @@ public class PolicyUtil {
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" +
                 policyEvent.getPolicyName();
         policyFileNames.add(policyFile);
-        undeployPolicy(policyFileNames, policyEvent.getTenantDomain());
+        undeployPolicy(policyFileNames, policyEvent.getTenantId());
     }
 
     public static void undeployPolicy(APIPolicyEvent policyEvent) {
@@ -182,14 +191,22 @@ public class PolicyUtil {
         for (int conditionGroupId : policyEvent.getDeletedConditionGroupIds()) {
             policyFileNames.add(policyFile + "_condition_" + conditionGroupId);
         }
-        undeployPolicy(policyFileNames, policyEvent.getTenantDomain());
+        undeployPolicy(policyFileNames, policyEvent.getTenantId());
     }
 
-    private static void undeployPolicy(List<String> policyFileNames, String tenantDomain) {
+    public static void undeployPolicy(GlobalPolicyEvent policyEvent) {
+        List<String> policyFileNames = new ArrayList<>();
+        String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" +
+                policyEvent.getPolicyName();
+        policyFileNames.add(policyFile);
+        undeployPolicy(policyFileNames, policyEvent.getTenantId());
+    }
+
+    private static void undeployPolicy(List<String> policyFileNames, int tenantId) {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                    setTenantDomain(tenantDomain, true);
+                    setTenantId(tenantId, true);
 
             EventProcessorService eventProcessorService =
                     ServiceReferenceHolder.getInstance().getEventProcessorService();

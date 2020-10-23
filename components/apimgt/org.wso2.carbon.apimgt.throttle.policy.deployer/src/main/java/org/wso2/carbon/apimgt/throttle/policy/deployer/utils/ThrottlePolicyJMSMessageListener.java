@@ -26,9 +26,11 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.PolicyRetriever;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 
@@ -146,6 +148,20 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                         }
                     } catch (ThrottlePolicyDeployerException e) {
                         log.error("Error in retrieving API policy metadata from the database", e);
+                    }
+
+            } else if (event.getPolicyType() == APIConstants.PolicyType.GLOBAL) {
+                GlobalPolicyEvent policyEvent = new Gson().fromJson(eventJson, GlobalPolicyEvent.class);
+                    try {
+                        if (updatePolicy) {
+                            GlobalPolicy globalPolicy = policyRetriever.getGlobalPolicy(
+                                    policyEvent.getPolicyName(), policyEvent.getTenantDomain());
+                            PolicyUtil.deployPolicy(globalPolicy, policyEvent);
+                        } else if (deletePolicy) {
+                            PolicyUtil.undeployPolicy(policyEvent);
+                        }
+                    } catch (ThrottlePolicyDeployerException e) {
+                        log.error("Error in retrieving Global policy metadata from the database", e);
                     }
 
             }

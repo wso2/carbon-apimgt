@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -223,10 +224,6 @@ public class ThrottlePolicyTemplateBuilder {
         if (log.isDebugEnabled()) {
             log.debug("Generating policy for globalLevel :" + policy.toString());
         }
-
-        if (!(policy instanceof GlobalPolicy)) {
-            throw new APITemplateException("Invalid policy level : Has to be 'global'");
-        }
         try {
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
@@ -243,12 +240,6 @@ public class ThrottlePolicyTemplateBuilder {
             VelocityContext context = new VelocityContext();
             setConstantContext(context);
             context.put("policy", policy);
-           /* if (policy.getPipelines() != null && !policy.getPipelines().isEmpty()) {
-                String conditionString = getPolicyCondition(policy.getPipelines().get(0).getConditions());
-                context.put("condition", conditionString);
-            } else {
-                context.put("condition", "");
-            }*/
             if (log.isDebugEnabled()) {
                 log.debug("Policy : " + writer.toString());
             }

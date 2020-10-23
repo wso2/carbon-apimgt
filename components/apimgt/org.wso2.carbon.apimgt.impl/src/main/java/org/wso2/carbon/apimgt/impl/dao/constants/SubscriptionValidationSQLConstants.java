@@ -782,4 +782,38 @@ public class SubscriptionValidationSQLConstants {
                     "   API.API_ID = PROD.API_ID AND" +
                     "   API.API_ID = ?";
 
+    public static final String GET_ALL_GLOBAL_POLICIES_SQL =
+            " SELECT " +
+                    "   POLICY_ID," +
+                    "   NAME," +
+                    "   TENANT_ID," +
+                    "   KEY_TEMPLATE," +
+                    "   SIDDHI_QUERY" +
+                    " FROM " +
+                    "   AM_POLICY_GLOBAL";
+
+    public static final String GET_TENANT_GLOBAL_POLICIES_SQL =
+            " SELECT " +
+                    "   POLICY_ID," +
+                    "   NAME," +
+                    "   TENANT_ID," +
+                    "   KEY_TEMPLATE," +
+                    "   SIDDHI_QUERY" +
+                    " FROM " +
+                    "   AM_POLICY_GLOBAL" +
+                    " WHERE " +
+                    "   TENANT_ID = ? ";
+
+    public static final String GET_GLOBAL_POLICY_SQL =
+            " SELECT " +
+                    "   POLICY_ID," +
+                    "   NAME," +
+                    "   TENANT_ID," +
+                    "   KEY_TEMPLATE," +
+                    "   SIDDHI_QUERY" +
+                    " FROM " +
+                    "   AM_POLICY_GLOBAL" +
+                    " WHERE " +
+                    "   NAME = ? AND" +
+                    "   TENANT_ID = ? ";
 }

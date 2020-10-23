@@ -344,6 +344,36 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /global-policies:
+    get:
+      summary: Get all Global throttling policies
+      description: |
+        This will provide access to global throttling policies in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: policyName
+          in: query
+          description: |
+            **Search condition**.
+             Global policy name
+          type: string
+        - name: allTenants
+          in: query
+          description: |
+            **Search condition**.
+              Request policies of all the tenants or not
+          type: boolean
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: An array of global policies in the database
+          schema:
+            $ref: '#/definitions/GlobalPolicyList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /application-key-mappings:
     get:
       summary: Get all application key mappings
@@ -1063,6 +1093,36 @@ definitions:
         type: string
       isInverted:
         type: boolean
+  #-----------------------------------------------------
+  # The Global Policy List resource
+  #-----------------------------------------------------
+  GlobalPolicyList:
+    title: Global Policy List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Global Policies returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/GlobalPolicy'
+      pagination:
+        $ref: '#/definitions/Pagination'
+
+  #-----------------------------------------------------
+  # The Global Policy resource
+  #-----------------------------------------------------
+  GlobalPolicy:
+    allOf:
+      - $ref: '#/definitions/Policy'
+      - properties:
+          siddhiQuery:
+            type: string
+          keyTemplate:
+            type: string
+
   #-----------------------------------------------------
   # The URL Mapping resource
   #-----------------------------------------------------

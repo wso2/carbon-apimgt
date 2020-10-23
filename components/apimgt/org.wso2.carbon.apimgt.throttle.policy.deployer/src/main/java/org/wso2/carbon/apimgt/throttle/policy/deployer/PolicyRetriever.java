@@ -36,6 +36,8 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 
 import java.io.IOException;
@@ -181,6 +183,49 @@ public class PolicyRetriever {
         String path = APIConstants.SubscriptionValidationResources.API_POLICIES +
                 "?allTenants=true";
         return getApiPolicies(path, null);
+    }
+
+    public GlobalPolicyList getAllGlobalPolicies()
+            throws ThrottlePolicyDeployerException {
+
+        String path = APIConstants.SubscriptionValidationResources.GLOBAL_POLICIES +
+                "?allTenants=true";
+        return getGlobalPolicies(path, null);
+    }
+
+    public GlobalPolicy getGlobalPolicy(String policyName, String tenantDomain) throws ThrottlePolicyDeployerException {
+        String path = APIConstants.SubscriptionValidationResources.GLOBAL_POLICIES +
+                "?policyName=" + policyName;
+        GlobalPolicyList globalPolicyList = getGlobalPolicies(path, tenantDomain);
+        if (globalPolicyList.getList() != null && !globalPolicyList.getList().isEmpty()) {
+            return globalPolicyList.getList().get(0);
+        }
+        return null;
+    }
+
+    public GlobalPolicyList getGlobalPolicies(String path, String tenantDomain)
+            throws ThrottlePolicyDeployerException {
+
+        try {
+            String endpoint = baseURL + path;
+            CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain);
+
+            if (httpResponse.getEntity() != null) {
+                String responseString = EntityUtils.toString(httpResponse.getEntity(),
+                        APIConstants.DigestAuthConstants.CHARSET);
+                httpResponse.close();
+                if (responseString != null && !responseString.isEmpty()) {
+                    return new Gson().fromJson(responseString, GlobalPolicyList.class);
+                }
+            } else {
+                throw new ThrottlePolicyDeployerException("HTTP response is empty");
+            }
+        } catch (IOException e) {
+            String msg = "Error while executing the http client";
+            log.error(msg, e);
+            throw new ThrottlePolicyDeployerException(msg, e);
+        }
+        return null;
     }
 
     private CloseableHttpResponse invokeService(String endpoint, String tenantDomain)

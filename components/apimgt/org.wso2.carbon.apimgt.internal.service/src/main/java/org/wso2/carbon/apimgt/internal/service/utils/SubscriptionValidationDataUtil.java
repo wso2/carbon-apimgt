@@ -397,4 +397,25 @@ public class SubscriptionValidationDataUtil {
         }
         return scopeDTO;
     }
+
+    public static GlobalPolicyListDTO fromGlobalPolicyToGlobalPolicyListDTO(List<GlobalPolicy> globalPolicies) {
+        GlobalPolicyListDTO globalPolicyListDTO = new GlobalPolicyListDTO();
+        if (globalPolicies != null) {
+            for (GlobalPolicy globalPolicy : globalPolicies) {
+                GlobalPolicyDTO globalPolicyDTO = new GlobalPolicyDTO();
+                globalPolicyDTO.setId(globalPolicy.getId());
+                globalPolicyDTO.setName(globalPolicy.getName());
+                globalPolicyDTO.setTenantId(globalPolicy.getTenantId());
+                globalPolicyDTO.setSiddhiQuery(globalPolicy.getSiddhiQuery());
+                globalPolicyDTO.setKeyTemplate(globalPolicy.getKeyTemplate());
+
+                globalPolicyListDTO.getList().add(globalPolicyDTO);
+            }
+            globalPolicyListDTO.setCount(globalPolicies.size());
+
+        } else {
+            globalPolicyListDTO.setCount(0);
+        }
+        return globalPolicyListDTO;
+    }
 }
