@@ -1,7 +1,5 @@
 package org.wso2.carbon.apimgt.persistence;
 
-import org.wso2.carbon.apimgt.api.APIPersistence;
-
 public class PersistenceManager {
   //  String userName;
   //  Organization org;
