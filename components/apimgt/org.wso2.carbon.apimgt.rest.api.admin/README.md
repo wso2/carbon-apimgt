@@ -20,7 +20,7 @@ There are some corresponding branches in the repo for each WSO2 API Manager Vers
 |  APIM Version/API | Branch |
 | :------------ |:-------------
 | APIM 2.0.0 - Admin REST API      | apim-2.0.0
-| \> APIM 2.1.0 - Admin REST API      | master
+| \> APIM 2.1.0 and above - Admin REST API      | master
 
 
 2. Add this plug-in to the org.wso2.carbon.apimgt.rest.api.admin component’s pom.xml file.
