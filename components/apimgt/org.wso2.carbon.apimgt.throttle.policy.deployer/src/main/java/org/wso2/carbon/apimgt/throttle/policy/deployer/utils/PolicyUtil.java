@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.throttle.policy.deployer.utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
@@ -43,7 +44,7 @@ import java.util.HashMap;
 
 public class PolicyUtil {
     private static final Log log = LogFactory.getLog(PolicyUtil.class);
-    private static final String[] excludedPolicyNames = {"requestPreProcessorExecutionPlan"}; //TODO: Add a config for this
+    private static final String REQUEST_PRE_PROCESSOR_EXECUTION_PLAN = "requestPreProcessorExecutionPlan";
 
     public static void deployPolicy(Policy policy, PolicyEvent policyEvent) {
         EventProcessorService eventProcessorService =
@@ -130,13 +131,20 @@ public class PolicyUtil {
                     ServiceReferenceHolder.getInstance().getEventProcessorService();
             Map<String, ExecutionPlanConfiguration> executionPlanConfigurationMap =
                     eventProcessorService.getAllActiveExecutionConfigurations();
+            APIManagerConfiguration apiManagerConfiguration =
+                    ServiceReferenceHolder.getInstance().getAPIMConfiguration();
             for (Map.Entry<String, ExecutionPlanConfiguration> pair : executionPlanConfigurationMap.entrySet()) {
                 String policyPlanName = pair.getKey();
                 boolean excluded = false;
-                for (String excludedPolicyName : excludedPolicyNames) {
-                    if (excludedPolicyName.equalsIgnoreCase(policyPlanName)) {
-                        excluded = true;
-                        break;
+                if (REQUEST_PRE_PROCESSOR_EXECUTION_PLAN.equalsIgnoreCase(policyPlanName)) {
+                    excluded = true;
+                } else {
+                    for (String excludedPolicyName :
+                            apiManagerConfiguration.getThrottleProperties().getExcludedThrottlePolicies()) {
+                        if (excludedPolicyName.equalsIgnoreCase(policyPlanName)) {
+                            excluded = true;
+                            break;
+                        }
                     }
                 }
                 if (!excluded) {

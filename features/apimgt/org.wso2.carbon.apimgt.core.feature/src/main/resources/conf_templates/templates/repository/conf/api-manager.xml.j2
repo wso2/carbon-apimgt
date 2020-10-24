@@ -926,6 +926,9 @@
         <EnableHeaderConditions>{{apim.throttling.enable_header_based_throttling}}</EnableHeaderConditions>
         <EnableJWTClaimConditions>{{apim.throttling.enable_jwt_claim_based_throttling}}</EnableJWTClaimConditions>
         <EnableQueryParamConditions>{{apim.throttling.enable_query_param_based_throttling}}</EnableQueryParamConditions>
+        {% if apim.throttling.excluded_throttle_policies is defined %}
+        <ExcludedThrottlePolicies>{{apim.throttling.excluded_throttle_policies}}</ExcludedThrottlePolicies>
+        {% endif %}
     </ThrottlingConfigurations>
 
     <WorkflowConfigurations>
