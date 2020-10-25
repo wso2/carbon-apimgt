@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
 import feign.Feign;
 import feign.Response;
 import feign.auth.BasicAuthRequestInterceptor;
@@ -60,7 +61,6 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.ScopeClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TenantHeaderInterceptor;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.UserClient;
-import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.user.core.UserCoreConstants;
@@ -89,8 +89,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private DCRClient dcrClient;
     private IntrospectionClient introspectionClient;
     private AuthClient authClient;
-    private AuthClient revokeClient;
-    private AccessTokenGenerator accessTokenGenerator;
     private ScopeClient scopeClient;
     private UserClient userClient;
 
@@ -161,7 +159,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         ClientInfo clientInfo = new ClientInfo();
         JSONObject infoJson = new JSONObject(info.getJsonString());
-        String applicationOwner =  (String) info.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
+        String applicationOwner = (String) info.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
         if (infoJson.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
             // this is done as there are instances where the grant string begins with a comma character.
             String grantString = infoJson.getString(ApplicationConstants.OAUTH_CLIENT_GRANT);
@@ -198,6 +196,68 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 clientInfo.setPresetClientSecret(info.getClientSecret());
             }
         }
+        Object parameter = info.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+        Map<String, Object> additionalProperties = new HashMap<>();
+        if (parameter instanceof String) {
+            additionalProperties = new Gson().fromJson((String) parameter, Map.class);
+        }
+        if (additionalProperties.containsKey(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME)) {
+            Object expiryTimeObject =
+                    additionalProperties.get(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME);
+            if (expiryTimeObject instanceof String) {
+                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                    try {
+                        long expiry = Long.parseLong((String) expiryTimeObject);
+                        clientInfo.setApplicationAccessTokenLifeTime(expiry);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+        if (additionalProperties.containsKey(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME)) {
+            Object expiryTimeObject =
+                    additionalProperties.get(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME);
+            if (expiryTimeObject instanceof String) {
+                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                    try {
+                        long expiry = Long.parseLong((String) expiryTimeObject);
+                        clientInfo.setUserAccessTokenLifeTime(expiry);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+        if (additionalProperties.containsKey(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME)) {
+            Object expiryTimeObject =
+                    additionalProperties.get(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME);
+            if (expiryTimeObject instanceof String) {
+                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                    try {
+                        long expiry = Long.parseLong((String) expiryTimeObject);
+                        clientInfo.setRefreshTokenLifeTime(expiry);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+        if (additionalProperties.containsKey(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME)) {
+            Object expiryTimeObject =
+                    additionalProperties.get(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME);
+            if (expiryTimeObject instanceof String) {
+                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                    try {
+                        long expiry = Long.parseLong((String) expiryTimeObject);
+                        clientInfo.setIdTokenLifeTime(expiry);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+
         return clientInfo;
     }
 
@@ -467,6 +527,16 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT)).replace(",", " "));
         }
         oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_NAME, appResponse.getClientName());
+        Map<String,Object> additionalProperties = new HashMap<>();
+        additionalProperties.put(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME,
+                appResponse.getApplicationAccessTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME,
+                appResponse.getUserAccessTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME,
+                appResponse.getRefreshTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME,appResponse.getIdTokenLifeTime());
+
+        oAuthApplicationInfo.addParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES, additionalProperties);
         return oAuthApplicationInfo;
     }
 
