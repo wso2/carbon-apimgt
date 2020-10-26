@@ -27,7 +27,7 @@ import AuthManager from 'AppData/AuthManager';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import postmanIcon from '@iconify/icons-simple-icons/postman';
-import swaggerIcon from '@iconify/icons-simple-icons/swagger';
+import openapiinitiativeIcon from '@iconify/icons-simple-icons/openapiinitiative';
 import { Icon as Icons } from '@iconify/react';
 import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
@@ -35,11 +35,11 @@ import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
 import TryOutController from './TryOutController';
 import Application from '../../../../data/Application';
+import fileDownload from 'js-file-download';
+import openapiToPostman from 'openapi-to-postmanv2';
+import swaggerToPostman from 'swagger2-postman2-converter';
 
 
-const fileDownload = require('js-file-download');
-const openapiToPostman = require('openapi-to-postmanv2');
-const swaggerToPostman = require('swagger2-postman2-converter');
 /**
  * @inheritdoc
  * @param {*} theme theme
@@ -513,10 +513,10 @@ class ApiConsole extends React.Component {
                         <Grid xs={1} item>
                             <a href={downloadLink} download={fileName}>
                                 <Button size='small'>
-                                    <Icons icon={swaggerIcon} width={30} height={30} className={classes.buttonIcon} />
+                                    <Icons icon={openapiinitiativeIcon} width={30} height={30} className={classes.buttonIcon} />
                                     <FormattedMessage
                                         id='Apis.Details.APIConsole.APIConsole.download.swagger'
-                                        defaultMessage='Swagger ( /swagger.json )'
+                                        defaultMessage='OpenAPI'
                                     />
                                 </Button>
                             </a>
