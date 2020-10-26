@@ -112,11 +112,9 @@ class Header extends React.Component {
             <>
                 <AppBar className={classes.appBar} position='fixed'>
                     <Toolbar className={classes.toolbar}>
-                        <Hidden mdUp>
-                            <IconButton onClick={this.toggleGlobalNavBar}>
-                                <MenuIcon className={classes.menuIcon} />
-                            </IconButton>
-                        </Hidden>
+                        <IconButton onClick={this.toggleGlobalNavBar}>
+                            <MenuIcon className={classes.menuIcon} />
+                        </IconButton>
                         <Link to='/'>
                             <img
                                 src={Configurations.app.context + theme.custom.logo}
