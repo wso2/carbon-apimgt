@@ -29,15 +29,15 @@ import Button from '@material-ui/core/Button';
 import postmanIcon from '@iconify/icons-simple-icons/postman';
 import openapiinitiativeIcon from '@iconify/icons-simple-icons/openapiinitiative';
 import { Icon as Icons } from '@iconify/react';
+import fileDownload from 'js-file-download';
+import openapiToPostman from 'openapi-to-postmanv2';
+import swaggerToPostman from 'swagger2-postman2-converter';
 import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
 import TryOutController from './TryOutController';
 import Application from '../../../../data/Application';
-import fileDownload from 'js-file-download';
-import openapiToPostman from 'openapi-to-postmanv2';
-import swaggerToPostman from 'swagger2-postman2-converter';
 
 
 /**
