@@ -418,19 +418,19 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return null;
     }
 
-    @Override public Map<String, Object> searchPaginatedAPIs(String query1, Organization requestedOrg, int start,
+    @Override public Map<String, Object> searchPaginatedAPIs(String paginatedSearchQuery, Organization requestedOrg, int start,
                                     int end, boolean isLazyLoad, boolean isPublisherListing)
                                     throws APIManagementException {
 
         String requestedTenantDomain = requestedOrg.getName();
         // >> Shifted from org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ApisApiServiceImpl.apisGet
-        String searchQuery = RegistryPersistenceUtil.constructApisGetQuery(query1);
+        String searchQuery = RegistryPersistenceUtil.constructApisGetQuery(paginatedSearchQuery);
 
         //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
-        if (searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
-            searchQuery = searchQuery.replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=",
-                                            APIConstants.NAME_TYPE_PREFIX + "=");
-        }
+//        if (searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
+//            searchQuery = searchQuery.replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=",
+//                                            APIConstants.NAME_TYPE_PREFIX + "=");
+//        }
         // Shifted from ApisApi class <<<
 
         Map<String, Object> result = new HashMap<String, Object>();
@@ -556,6 +556,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return result;
 
         //return null;
+    }
+
+    @Override public Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery,
+                                    int start, int end, boolean limitAttributes) {
+        return null;
     }
 
     /**
@@ -931,7 +936,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String complexAttribute;
 //            if (documentIndexer != null && documentIndexer instanceof DocumentIndexer) {
             // DocumentIndexer needs to be implemented in Persistence module
-             if (false) {
+             if (true) {
 
                     //field check on document_indexed was added to prevent unindexed(by new DocumentIndexer) from coming up as search results
                 //on indexed documents this property is always set to true
@@ -1347,13 +1352,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return 0;
     }
 
-    @Override public APIProduct getAPIProductbyUUID(String uuid, Organization requestedOrg) {
-        return null;
-    }
-
-//    @Override public APIProduct getAPIProduct(String apiProductId) {
-//        return null;
-//    }
 
     @Override public void deleteAPIProduct(String apiProductId) {
 

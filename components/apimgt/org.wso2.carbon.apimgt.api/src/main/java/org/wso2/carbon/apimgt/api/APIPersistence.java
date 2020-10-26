@@ -78,7 +78,7 @@ public interface APIPersistence {
     =========================== */
 
    // void createAPI(API api) throws APIManagementException;
-    void createAPI(API api) throws APIManagementException;
+    API createAPI(API api) throws APIManagementException;
     /**
      * Create a new version of the api with the specified new version
      *
@@ -115,7 +115,7 @@ public interface APIPersistence {
     Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start, int end,
                                     boolean limitAttributes);
     Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start, int end,
-                                    boolean limitAttributes, boolean isPublisherListing);
+                                    boolean limitAttributes, boolean isPublisherListing) throws APIManagementException;
     Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery, int start, int end,
                                     boolean limitAttributes);
 
@@ -357,15 +357,6 @@ public interface APIPersistence {
      * @return                      API Product of the provided artifact id
      */
     //  requestedTenantDomain
-    APIProduct getAPIProductbyUUID(String uuid, Organization requestedOrg);
-
-    /**
-     * Get API Product by product identifier
-     *
-     * @param apiProductId    ID of API Product
-     * @return API product    identified by product identifier
-     */
-    APIProduct getAPIProduct(String apiProductId);
 
     /**
      * Delete the API Product
