@@ -361,7 +361,7 @@ public interface APIPersistence {
      * @param ctx          User context
      * @throws APIPersistenceException
      */
-    void saveAPIThumbnail(Organization org, String apiId, ResourceFile resourceFile, UserContext ctx)
+    void saveThumbnail(Organization org, String apiId, ResourceFile resourceFile, UserContext ctx)
                                     throws APIPersistenceException;
 
     /**
@@ -373,7 +373,7 @@ public interface APIPersistence {
      * @return Thumbnail icon resource file
      * @throws APIPersistenceException
      */
-    ResourceFile getAPIThumbnail(Organization org, String apiId, UserContext ctx) throws APIPersistenceException;
+    ResourceFile getThumbnail(Organization org, String apiId, UserContext ctx) throws APIPersistenceException;
 
     /**
      * Delete thumbnail icon of the API
@@ -383,5 +383,5 @@ public interface APIPersistence {
      * @param ctx   User context
      * @throws APIPersistenceException
      */
-    void deleteAPIThumbnail(Organization org, String apiId, UserContext ctx) throws APIPersistenceException;
+    void deleteThumbnail(Organization org, String apiId, UserContext ctx) throws APIPersistenceException;
 }
