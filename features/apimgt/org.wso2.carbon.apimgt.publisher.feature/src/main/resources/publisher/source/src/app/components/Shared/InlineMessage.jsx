@@ -12,7 +12,7 @@ const styles = (theme) => ({
         alignItems: 'center',
         paddingLeft: theme.spacing(2),
         borderRadius: theme.shape.borderRadius,
-        border: 'solid 1px ' + theme.palette.secondary.main,
+        border: 'solid 1px ' + theme.palette.primary.main,
         '& span.material-icons.info': {
             fontSize: 80,
             color: theme.palette.primary.main,

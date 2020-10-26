@@ -111,9 +111,9 @@ class APICardView extends React.Component {
         const api = new API();
 
         if (searchText && searchText !== '') {
-            return api.getAllAPIs({ query: searchText, limit: this.rowsPerPage, offset: page * rowsPerPage });
+            return api.getAllAPIs({ query: `${searchText}&status:published`, limit: this.rowsPerPage, offset: page * rowsPerPage });
         } else {
-            return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            return api.getAllAPIs({ query: 'status:published', limit: this.rowsPerPage, offset: page * rowsPerPage });
         }
     };
 
