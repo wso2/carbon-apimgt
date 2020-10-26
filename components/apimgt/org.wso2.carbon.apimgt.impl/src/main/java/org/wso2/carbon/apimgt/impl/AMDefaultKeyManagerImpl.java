@@ -202,63 +202,64 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (parameter instanceof String) {
             additionalProperties = new Gson().fromJson((String) parameter, Map.class);
         }
-        if (additionalProperties.containsKey(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME)) {
-            Object expiryTimeObject =
-                    additionalProperties.get(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME);
-            if (expiryTimeObject instanceof String) {
-                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
-                    try {
-                        long expiry = Long.parseLong((String) expiryTimeObject);
-                        clientInfo.setApplicationAccessTokenLifeTime(expiry);
-                    } catch (NumberFormatException e) {
-                        // No need to throw as its due to not a number sent.
+        if (additionalProperties != null) {
+            if (additionalProperties.containsKey(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME)) {
+                Object expiryTimeObject =
+                        additionalProperties.get(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME);
+                if (expiryTimeObject instanceof String) {
+                    if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                        try {
+                            long expiry = Long.parseLong((String) expiryTimeObject);
+                            clientInfo.setApplicationAccessTokenLifeTime(expiry);
+                        } catch (NumberFormatException e) {
+                            // No need to throw as its due to not a number sent.
+                        }
+                    }
+                }
+            }
+            if (additionalProperties.containsKey(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME)) {
+                Object expiryTimeObject =
+                        additionalProperties.get(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME);
+                if (expiryTimeObject instanceof String) {
+                    if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                        try {
+                            long expiry = Long.parseLong((String) expiryTimeObject);
+                            clientInfo.setUserAccessTokenLifeTime(expiry);
+                        } catch (NumberFormatException e) {
+                            // No need to throw as its due to not a number sent.
+                        }
+                    }
+                }
+            }
+            if (additionalProperties.containsKey(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME)) {
+                Object expiryTimeObject =
+                        additionalProperties.get(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME);
+                if (expiryTimeObject instanceof String) {
+                    if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                        try {
+                            long expiry = Long.parseLong((String) expiryTimeObject);
+                            clientInfo.setRefreshTokenLifeTime(expiry);
+                        } catch (NumberFormatException e) {
+                            // No need to throw as its due to not a number sent.
+                        }
+                    }
+                }
+            }
+            if (additionalProperties.containsKey(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME)) {
+                Object expiryTimeObject =
+                        additionalProperties.get(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME);
+                if (expiryTimeObject instanceof String) {
+                    if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                        try {
+                            long expiry = Long.parseLong((String) expiryTimeObject);
+                            clientInfo.setIdTokenLifeTime(expiry);
+                        } catch (NumberFormatException e) {
+                            // No need to throw as its due to not a number sent.
+                        }
                     }
                 }
             }
         }
-        if (additionalProperties.containsKey(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME)) {
-            Object expiryTimeObject =
-                    additionalProperties.get(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME);
-            if (expiryTimeObject instanceof String) {
-                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
-                    try {
-                        long expiry = Long.parseLong((String) expiryTimeObject);
-                        clientInfo.setUserAccessTokenLifeTime(expiry);
-                    } catch (NumberFormatException e) {
-                        // No need to throw as its due to not a number sent.
-                    }
-                }
-            }
-        }
-        if (additionalProperties.containsKey(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME)) {
-            Object expiryTimeObject =
-                    additionalProperties.get(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME);
-            if (expiryTimeObject instanceof String) {
-                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
-                    try {
-                        long expiry = Long.parseLong((String) expiryTimeObject);
-                        clientInfo.setRefreshTokenLifeTime(expiry);
-                    } catch (NumberFormatException e) {
-                        // No need to throw as its due to not a number sent.
-                    }
-                }
-            }
-        }
-        if (additionalProperties.containsKey(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME)) {
-            Object expiryTimeObject =
-                    additionalProperties.get(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME);
-            if (expiryTimeObject instanceof String) {
-                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
-                    try {
-                        long expiry = Long.parseLong((String) expiryTimeObject);
-                        clientInfo.setIdTokenLifeTime(expiry);
-                    } catch (NumberFormatException e) {
-                        // No need to throw as its due to not a number sent.
-                    }
-                }
-            }
-        }
-
         return clientInfo;
     }
 
@@ -546,14 +547,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT)).replace(",", " "));
         }
         oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_NAME, appResponse.getClientName());
-        Map<String,Object> additionalProperties = new HashMap<>();
+        Map<String, Object> additionalProperties = new HashMap<>();
         additionalProperties.put(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME,
                 appResponse.getApplicationAccessTokenLifeTime());
         additionalProperties.put(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME,
                 appResponse.getUserAccessTokenLifeTime());
         additionalProperties.put(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME,
                 appResponse.getRefreshTokenLifeTime());
-        additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME,appResponse.getIdTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME, appResponse.getIdTokenLifeTime());
 
         oAuthApplicationInfo.addParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES, additionalProperties);
         return oAuthApplicationInfo;
