@@ -31,8 +31,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.APIPolicyConditionGroup;
@@ -41,11 +40,11 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.StringWriter;
-import java.math.BigInteger;
 import java.util.*;
 
 public class ThrottlePolicyTemplateBuilder {
@@ -368,9 +367,9 @@ public class ThrottlePolicyTemplateBuilder {
         if (!"not-defined".equalsIgnoreCase(velocityLogPath)) {
             return velocityLogPath;
         } else {
-            APIManagerConfigurationService config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService();
-            String logPath = config.getAPIManagerConfiguration().getFirstProperty(APIConstants.VELOCITY_LOGGER);
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIMConfiguration();
+            String logPath = config.getFirstProperty(APIConstants.VELOCITY_LOGGER);
             if (logPath != null && !logPath.isEmpty()) {
                 velocityLogPath = logPath;
             }

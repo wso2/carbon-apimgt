@@ -29,7 +29,7 @@ import org.wso2.carbon.core.ServerStartupObserver;
 /**
  * This Class used to properly start and Close Throttle Policy JMS listeners
  */
-public class ThrottlePolicyStartupListener implements ServerStartupObserver, ServerShutdownHandler {
+public class ThrottlePolicyStartupListener implements ServerStartupObserver, ServerShutdownHandler, Runnable {
 
     private final Log log = LogFactory.getLog(ThrottlePolicyStartupListener.class);
     private JMSTransportHandler jmsTransportHandlerForEventHub;
@@ -53,11 +53,10 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
 
     @Override
     public void completedServerStartup() {
-
+        deployPoliciesInAsyncMode();
         jmsTransportHandlerForEventHub
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION,
                         new ThrottlePolicyJMSMessageListener());
-        PolicyUtil.deployAllPolicies();
     }
 
     @Override
@@ -67,5 +66,14 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
         }
+    }
+
+    @Override
+    public void run() {
+        PolicyUtil.deployAllPolicies();
+    }
+
+    private void deployPoliciesInAsyncMode() {
+        new Thread(this).start();
     }
 }

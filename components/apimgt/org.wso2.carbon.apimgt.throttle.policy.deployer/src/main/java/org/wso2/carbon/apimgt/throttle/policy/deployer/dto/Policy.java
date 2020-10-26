@@ -79,7 +79,7 @@ public class Policy {
         return name;
     }
 
-    public void setTierName(String name) {
+    public void setName(String name) {
 
         this.name = name;
     }
