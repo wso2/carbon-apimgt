@@ -2962,6 +2962,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
 
+        } else {
+            String extensionHandlerPosition = getExtensionHandlerPosition();
+            if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
+                vtb.addHandlerPriority(
+                        "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
+                        Collections.<String, String>emptyMap(), 0);
+            } else {
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
+                        Collections.<String, String>emptyMap());
+            }
+
         }
 
         return vtb;
