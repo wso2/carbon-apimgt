@@ -103,7 +103,7 @@ public class PolicyUtilTest {
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
                 .thenThrow(executionPlanConfigurationException);
 
-        ApiPolicy policy = getPolicyAPILevel();
+        ApiPolicy policy = TestUtil.getPolicyAPILevel();
         APIPolicyEvent policyEvent = new APIPolicyEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.POLICY_CREATE.name(), -1234, policy.getTenantDomain(),
                 policy.getId(), policy.getName(), policy.getDefaultLimit().getQuotaType(),
@@ -116,7 +116,7 @@ public class PolicyUtilTest {
     @Test
     public void testUpdatePolicy_APIType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
 
-        ApiPolicy policy = getPolicyAPILevel();
+        ApiPolicy policy = TestUtil.getPolicyAPILevel();
         List<Integer> deletedConditionGroupIds = new ArrayList<>();
         deletedConditionGroupIds.add(5);
         deletedConditionGroupIds.add(6);
@@ -150,7 +150,7 @@ public class PolicyUtilTest {
 
     @Test
     public void testDeletePolicy_APIType() throws ExecutionPlanConfigurationException {
-        ApiPolicy policy = getPolicyAPILevel();
+        ApiPolicy policy = TestUtil.getPolicyAPILevel();
         List<Integer> deletedConditionGroupIds = new ArrayList<>();
         deletedConditionGroupIds.add(5);
         deletedConditionGroupIds.add(6);
@@ -163,58 +163,6 @@ public class PolicyUtilTest {
                 .undeployActiveExecutionPlan(Mockito.anyString());
     }
 
-    private ApiPolicy getPolicyAPILevel() {
-        ApiPolicy apiPolicy = new ApiPolicy();
-        apiPolicy.setId(1);
-        apiPolicy.setTenantId(-1234);
-        apiPolicy.setTenantDomain("carbon.super");
-        apiPolicy.setName("policy1");
-        apiPolicy.setQuotaType("requestCount");
-
-        QuotaPolicy defaultLimit = new QuotaPolicy();
-        defaultLimit.setQuotaType("requestCount");
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setRequestCount(1);
-        requestCountLimit.setTimeUnit("min");
-        requestCountLimit.setUnitTime(1);
-        defaultLimit.setRequestCount(requestCountLimit);
-        apiPolicy.setDefaultLimit(defaultLimit);
-
-        apiPolicy.setApplicableLevel("apiLevel");
-
-        List<APIPolicyConditionGroup> conditionGroups = new ArrayList<>();
-        APIPolicyConditionGroup conditionGroup1 = new APIPolicyConditionGroup();
-        conditionGroup1.setPolicyId(1);
-        conditionGroup1.setQuotaType("requestCount");
-        conditionGroup1.setConditionGroupId(1);
-
-        Set<Condition> conditions = new HashSet<>();
-
-        Condition condition1 = new Condition();
-        condition1.setConditionType("IPSpecific");
-        condition1.setName("IPSpecific");
-        condition1.setValue("127.0.0.1");
-        condition1.setInverted(false);
-        conditions.add(condition1);
-
-        conditionGroup1.setCondition(conditions);
-
-        QuotaPolicy defaultLimitCondGroup1 = new QuotaPolicy();
-        defaultLimitCondGroup1.setQuotaType("requestCount");
-        RequestCountLimit requestCountLimitCondGroup1 = new RequestCountLimit();
-        requestCountLimitCondGroup1.setRequestCount(1);
-        requestCountLimitCondGroup1.setTimeUnit("min");
-        requestCountLimitCondGroup1.setUnitTime(1);
-        defaultLimitCondGroup1.setRequestCount(requestCountLimitCondGroup1);
-        conditionGroup1.setDefaultLimit(defaultLimitCondGroup1);
-
-        conditionGroups.add(conditionGroup1);
-
-        apiPolicy.setConditionGroups(conditionGroups);
-
-        return apiPolicy;
-    }
-
     @Test
     public void testAddPolicy_APPType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
         ExecutionPlanConfigurationException executionPlanConfigurationException =
@@ -222,7 +170,7 @@ public class PolicyUtilTest {
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
                 .thenThrow(executionPlanConfigurationException);
 
-        ApplicationPolicy policy = getPolicyAppLevel();
+        ApplicationPolicy policy = TestUtil.getPolicyAppLevel();
         ApplicationPolicyEvent policyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName(),
@@ -237,7 +185,7 @@ public class PolicyUtilTest {
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
                 .thenReturn("EXECUTION_PLAN");
 
-        ApplicationPolicy policy = getPolicyAppLevel();
+        ApplicationPolicy policy = TestUtil.getPolicyAppLevel();
         ApplicationPolicyEvent policyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName(),
@@ -249,7 +197,7 @@ public class PolicyUtilTest {
 
     @Test
     public void testDeletePolicy_AppType() throws ExecutionPlanConfigurationException {
-        ApplicationPolicy policy = getPolicyAppLevel();
+        ApplicationPolicy policy = TestUtil.getPolicyAppLevel();
         ApplicationPolicyEvent policyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName(),
@@ -259,26 +207,6 @@ public class PolicyUtilTest {
                 .undeployActiveExecutionPlan(Mockito.anyString());
     }
 
-    private ApplicationPolicy getPolicyAppLevel() {
-        ApplicationPolicy applicationPolicy = new ApplicationPolicy();
-        applicationPolicy.setId(1);
-        applicationPolicy.setTenantId(-1234);
-        applicationPolicy.setTenantDomain("carbon.super");
-        applicationPolicy.setName("policy1");
-        applicationPolicy.setQuotaType("requestCount");
-
-        QuotaPolicy defaultLimit = new QuotaPolicy();
-        defaultLimit.setQuotaType("requestCount");
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setRequestCount(1);
-        requestCountLimit.setTimeUnit("min");
-        requestCountLimit.setUnitTime(1);
-        defaultLimit.setRequestCount(requestCountLimit);
-        applicationPolicy.setDefaultLimit(defaultLimit);
-
-        return applicationPolicy;
-    }
-
     @Test
     public void testAddPolicy_SubType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
         ExecutionPlanConfigurationException executionPlanConfigurationException =
@@ -286,7 +214,7 @@ public class PolicyUtilTest {
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
                 .thenThrow(executionPlanConfigurationException);
 
-        SubscriptionPolicy policy = getPolicySubLevel();
+        SubscriptionPolicy policy = TestUtil.getPolicySubLevel();
         SubscriptionPolicyEvent policyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(),
@@ -304,7 +232,7 @@ public class PolicyUtilTest {
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
                 .thenReturn("EXECUTION_PLAN");
 
-        SubscriptionPolicy policy = getPolicySubLevel();
+        SubscriptionPolicy policy = TestUtil.getPolicySubLevel();
         SubscriptionPolicyEvent policyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(),
@@ -318,7 +246,7 @@ public class PolicyUtilTest {
 
     @Test
     public void testDeletePolicy_SubType() throws ExecutionPlanConfigurationException {
-        SubscriptionPolicy policy = getPolicySubLevel();
+        SubscriptionPolicy policy = TestUtil.getPolicySubLevel();
         SubscriptionPolicyEvent policyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(),
@@ -330,32 +258,6 @@ public class PolicyUtilTest {
                 .undeployActiveExecutionPlan(Mockito.anyString());
     }
 
-    private SubscriptionPolicy getPolicySubLevel() {
-        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
-        subscriptionPolicy.setId(1);
-        subscriptionPolicy.setTenantId(-1234);
-        subscriptionPolicy.setTenantDomain("carbon.super");
-        subscriptionPolicy.setName("policy1");
-        subscriptionPolicy.setQuotaType("requestCount");
-
-        QuotaPolicy defaultLimit = new QuotaPolicy();
-        defaultLimit.setQuotaType("requestCount");
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setRequestCount(1);
-        requestCountLimit.setTimeUnit("min");
-        requestCountLimit.setUnitTime(1);
-        defaultLimit.setRequestCount(requestCountLimit);
-        subscriptionPolicy.setDefaultLimit(defaultLimit);
-
-        subscriptionPolicy.setGraphQLMaxComplexity(0);
-        subscriptionPolicy.setGraphQLMaxDepth(0);
-        subscriptionPolicy.setRateLimitCount(0);
-        subscriptionPolicy.setRateLimitTimeUnit(null);
-        subscriptionPolicy.setStopOnQuotaReach(true);
-
-        return subscriptionPolicy;
-    }
-
     @Test
     public void testAddPolicy_GlobalType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
         ExecutionPlanConfigurationException executionPlanConfigurationException =
@@ -363,7 +265,7 @@ public class PolicyUtilTest {
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
                 .thenThrow(executionPlanConfigurationException);
 
-        GlobalPolicy policy = getPolicyGlobalLevel();
+        GlobalPolicy policy = TestUtil.getPolicyGlobalLevel();
         GlobalPolicyEvent policyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName());
@@ -377,7 +279,7 @@ public class PolicyUtilTest {
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
                 .thenReturn("EXECUTION_PLAN");
 
-        GlobalPolicy policy = getPolicyGlobalLevel();
+        GlobalPolicy policy = TestUtil.getPolicyGlobalLevel();
         GlobalPolicyEvent policyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName());
@@ -388,42 +290,13 @@ public class PolicyUtilTest {
 
     @Test
     public void testDeletePolicy_GlobalType() throws ExecutionPlanConfigurationException {
-        GlobalPolicy policy = getPolicyGlobalLevel();
+        GlobalPolicy policy = TestUtil.getPolicyGlobalLevel();
         GlobalPolicyEvent policyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName());
         PolicyUtil.undeployPolicy(policyEvent);
         Mockito.verify(eventProcessorService, Mockito.times(1))
                 .undeployActiveExecutionPlan(Mockito.anyString());
-    }
-
-    private GlobalPolicy getPolicyGlobalLevel() {
-        GlobalPolicy globalPolicy = new GlobalPolicy();
-        globalPolicy.setId(1);
-        globalPolicy.setTenantId(-1234);
-        globalPolicy.setTenantDomain("carbon.super");
-        globalPolicy.setName("policy1");
-        globalPolicy.setQuotaType("requestCount");
-
-        QuotaPolicy defaultLimit = new QuotaPolicy();
-        defaultLimit.setQuotaType("requestCount");
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setRequestCount(1);
-        requestCountLimit.setTimeUnit("min");
-        requestCountLimit.setUnitTime(1);
-        defaultLimit.setRequestCount(requestCountLimit);
-        globalPolicy.setDefaultLimit(defaultLimit);
-
-        globalPolicy.setSiddhiQuery("FROM   RequestStream SELECT   userId,   " +
-                "(userId == 'admin@carbon.super') AS isEligible,   " +
-                "str :concat('admin@carbon.super', '') as throttleKey INSERT INTO   " +
-                "EligibilityStream; FROM   EligibilityStream [isEligible==true] " +
-                "#throttler:timeBatch(1 min) SELECT throttleKey, (count(userId) >= 15) " +
-                "as isThrottled, expiryTimeStamp group by throttleKey INSERT ALL EVENTS " +
-                "into ResultStream;");
-        globalPolicy.setKeyTemplate("$userId:$apiContext:$apiVersion");
-
-        return globalPolicy;
     }
 
     @Test
@@ -441,28 +314,28 @@ public class PolicyUtilTest {
                 .thenReturn(executionPlanConfigurationMap);
 
         SubscriptionPolicyList subscriptionPolicyList = new SubscriptionPolicyList();
-        SubscriptionPolicy subscriptionPolicy = getPolicySubLevel();
+        SubscriptionPolicy subscriptionPolicy = TestUtil.getPolicySubLevel();
         List<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
         subscriptionPolicies.add(subscriptionPolicy);
         subscriptionPolicyList.setList(subscriptionPolicies);
         Mockito.when(policyRetriever.getAllSubscriptionPolicies()).thenReturn(subscriptionPolicyList);
 
         ApplicationPolicyList applicationPolicyList = new ApplicationPolicyList();
-        ApplicationPolicy applicationPolicy = getPolicyAppLevel();
+        ApplicationPolicy applicationPolicy = TestUtil.getPolicyAppLevel();
         List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
         applicationPolicies.add(applicationPolicy);
         applicationPolicyList.setList(applicationPolicies);
         Mockito.when(policyRetriever.getAllApplicationPolicies()).thenReturn(applicationPolicyList);
 
         ApiPolicyList apiPolicyList = new ApiPolicyList();
-        ApiPolicy apiPolicy = getPolicyAPILevel();
+        ApiPolicy apiPolicy = TestUtil.getPolicyAPILevel();
         List<ApiPolicy> apiPolicies = new ArrayList<>();
         apiPolicies.add(apiPolicy);
         apiPolicyList.setList(apiPolicies);
         Mockito.when(policyRetriever.getAllApiPolicies()).thenReturn(apiPolicyList);
 
         GlobalPolicyList globalPolicyList = new GlobalPolicyList();
-        GlobalPolicy globalPolicy = getPolicyGlobalLevel();
+        GlobalPolicy globalPolicy = TestUtil.getPolicyGlobalLevel();
         List<GlobalPolicy> globalPolicies = new ArrayList<>();
         globalPolicies.add(globalPolicy);
         globalPolicyList.setList(globalPolicies);
