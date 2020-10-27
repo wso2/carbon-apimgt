@@ -21,6 +21,7 @@ import {
 } from '@material-ui/core';
 
 import ScopesIcon from '@material-ui/icons/ListAlt';
+import NotificationImportantIcon from '@material-ui/icons/NotificationImportant';
 import PropTypes from 'prop-types';
 import { Link, withRouter } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
@@ -61,8 +62,12 @@ const styles = (theme) => ({
     scopeIconColor: {
         fill: theme.palette.getContrastText(theme.palette.background.leftMenu),
     },
+    alertIconColor: {
+        fill: theme.palette.getContrastText(theme.palette.background.leftMenu),
+    },
     divider: {
-        marginTop: theme.spacing(2),
+        marginTop: theme.spacing(1),
+        backgroundColor: 'black',
     },
     categoryHeader: {
         paddingTop: theme.spacing(1),
@@ -88,7 +93,7 @@ const styles = (theme) => ({
  */
 function GlobalNavLinks(props) {
     const [selected, setSelected] = useState('apis');
-    const [openAPIs, setOpenAPIs] = React.useState(false);
+    const [openAPIs, setOpenAPIs] = React.useState(true);
     const [openSettings, setOpenSettings] = React.useState(false);
     const handleAPIsClick = () => {
         setOpenAPIs(!openAPIs);
@@ -109,6 +114,8 @@ function GlobalNavLinks(props) {
             setSelected('api-products');
         } else if (/\/scopes$/g.test(pathname) || /\/scopes\//g.test(pathname)) {
             setSelected('scopes');
+        } else if (/\/settings$/g.test(pathname) || /\/settings\//g.test(pathname)) {
+            setSelected('alerts');
         }
     };
     useEffect(() => {
@@ -119,7 +126,7 @@ function GlobalNavLinks(props) {
         ditectCurrentMenu(location);
     });
     let strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
-    let iconWidth = 32;
+    let iconWidth = 24;
     if (smallView) {
         iconWidth = 16;
         strokeColor = theme.palette.getContrastText(theme.palette.background.appBar);
@@ -137,10 +144,16 @@ function GlobalNavLinks(props) {
                 {openAPIs ? <ExpandLess /> : <ExpandMore />}
             </ListItem>
             <Collapse in={openAPIs} timeout='auto' unmountOnExit>
-                <Link to='/apis' className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}>
+                <Link
+                    to='/apis'
+                    className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}
+                >
                     <ListItem button onClick={toggleGlobalNavBar}>
-                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                            <CustomIcon width={iconWidth} height={iconWidth} icon='api' strokeColor={strokeColor} className={classes.itemIcon} />
+                        <ListItemIcon
+                            classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}
+                            className={classes.itemIcon}
+                        >
+                            <CustomIcon width={iconWidth} height={iconWidth} icon='api' strokeColor={strokeColor} />
                         </ListItemIcon>
                         <ListItemText
                             classes={{
@@ -163,16 +176,21 @@ function GlobalNavLinks(props) {
                 && (
                     <Link
                         to='/api-products'
-                        className={classNames({ [classes.selected]: selected === 'api-products', [classes.links]: true })}
+                        className={classNames({
+                            [classes.selected]: selected === 'api-products',
+                            [classes.links]: true,
+                        })}
                     >
                         <ListItem button onClick={toggleGlobalNavBar}>
-                            <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                            <ListItemIcon
+                                classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}
+                                className={classes.itemIcon}
+                            >
                                 <CustomIcon
                                     width={iconWidth}
                                     height={iconWidth}
                                     icon='api-product'
                                     strokeColor={strokeColor}
-                                    className={classes.itemIcon}
                                 />
                             </ListItemIcon>
                             <ListItemText
@@ -198,7 +216,10 @@ function GlobalNavLinks(props) {
                     className={classNames({ [classes.selected]: selected === 'scopes', [classes.links]: true })}
                 >
                     <ListItem button onClick={toggleGlobalNavBar}>
-                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }} className={classes.itemIcon}>
+                        <ListItemIcon
+                            classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}
+                            className={classes.itemIcon}
+                        >
                             <ScopesIcon className={classes.scopeIconColor} />
                         </ListItemIcon>
                         <ListItemText
@@ -223,7 +244,10 @@ function GlobalNavLinks(props) {
                         primary: classes.categoryHeaderPrimary,
                     }}
                 >
-                    <FormattedMessage id='Base.Header.navbar.GlobalNavBar.Service.Catalog' defaultMessage='Service Catalog' />
+                    <FormattedMessage
+                        id='Base.Header.navbar.GlobalNavBar.Service.Catalog'
+                        defaultMessage='Service Catalog'
+                    />
                 </ListItemText>
             </ListItem>
             <Divider className={classes.divider} />
@@ -240,28 +264,37 @@ function GlobalNavLinks(props) {
             </ListItem>
             <Collapse in={openSettings} timeout='auto' unmountOnExit>
                 <Link
-                    to='/scopes'
-                    className={classNames({ [classes.selected]: selected === 'scopes', [classes.links]: true })}
+                    to='/settings'
+                    className={classNames({ [classes.selected]: selected === 'alerts', [classes.links]: true })}
                 >
                     <ListItem button onClick={toggleGlobalNavBar}>
-                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }} className={classes.itemIcon}>
-                            <ScopesIcon className={classes.scopeIconColor} />
+                        <ListItemIcon
+                            classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}
+                            className={classes.itemIcon}
+                        >
+                            <NotificationImportantIcon className={classes.alertIconColor} />
                         </ListItemIcon>
                         <ListItemText
                             classes={{
                                 primary: classNames({
-                                    [classes.selectedText]: selected === 'scopes',
-                                    [classes.listText]: selected !== 'scopes' && !smallView,
-                                    [classes.listTextSmall]: selected !== 'scopes' && smallView,
+                                    [classes.selectedText]: selected === 'alerts',
+                                    [classes.listText]: selected !== 'alerts' && !smallView,
+                                    [classes.listTextSmall]: selected !== 'alerts' && smallView,
                                 }),
                             }}
                             primary={
-                                <FormattedMessage id='Base.Header.navbar.GlobalNavBar.manage.alerts' defaultMessage='Manage Alerts' />
+                                (
+                                    <FormattedMessage
+                                        id='Base.Header.navbar.GlobalNavBar.manage.alerts'
+                                        defaultMessage='Manage Alerts'
+                                    />
+                                )
                             }
                         />
                     </ListItem>
                 </Link>
             </Collapse>
+            <Divider className={classes.divider} />
         </>
     );
 }

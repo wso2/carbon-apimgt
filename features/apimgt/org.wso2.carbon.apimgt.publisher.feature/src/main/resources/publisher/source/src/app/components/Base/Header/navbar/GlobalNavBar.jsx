@@ -78,12 +78,12 @@ const GlobalNavBar = (props) => {
                 >
                     <Hidden smDown>
                         <div className={classes.list}>
-                            <GlobalNavLinks smallView toggleGlobalNavBar={toggleGlobalNavBar} />
+                            <GlobalNavLinks smallView={false} toggleGlobalNavBar={toggleGlobalNavBar} />
                         </div>
                     </Hidden>
                     <Hidden mdUp>
                         <div className={classes.list}>
-                            <GlobalNavLinks smallView={false} toggleGlobalNavBar={toggleGlobalNavBar} />
+                            <GlobalNavLinks smallView toggleGlobalNavBar={toggleGlobalNavBar} />
                         </div>
                     </Hidden>
                 </div>

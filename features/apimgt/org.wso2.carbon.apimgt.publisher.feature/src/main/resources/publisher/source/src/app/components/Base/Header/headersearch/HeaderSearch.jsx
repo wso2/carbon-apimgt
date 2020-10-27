@@ -236,6 +236,7 @@ class HeaderSearch extends React.Component {
         }
         return (
             <>
+                <div className={classes.emptyContainer} />
                 <Autosuggest
                     theme={{
                         container: responsiveContainer,
@@ -358,7 +359,6 @@ class HeaderSearch extends React.Component {
                         <InfoIcon />
                     </IconButton>
                 </Tooltip>
-                <div className={classes.emptyContainer} />
             </>
         );
     }

@@ -23,8 +23,6 @@ import SearchIcon from '@material-ui/icons/SearchOutlined';
 import Hidden from '@material-ui/core/Hidden';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import SettingsButton from 'AppComponents/Base/Header/settings/SettingsButton';
 import Configurations from 'Config';
 import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
@@ -106,7 +104,7 @@ class Header extends React.Component {
     render() {
         const { openNavBar, smScreen } = this.state;
         const {
-            classes, avatar, settings, theme, menuItems,
+            classes, avatar, theme, menuItems,
         } = this.props;
         return (
             <>
@@ -123,7 +121,6 @@ class Header extends React.Component {
                             />
                         </Link>
                         <GlobalNavBar toggleGlobalNavBar={this.toggleGlobalNavBar} open={openNavBar} />
-                        <VerticalDivider height={32} />
                         <Hidden smDown>
                             <HeaderSearch />
                         </Hidden>
@@ -134,7 +131,6 @@ class Header extends React.Component {
                             {smScreen && <HeaderSearch toggleSmSearch={this.toggleSmSearch} smSearch={smScreen} />}
                         </Hidden>
                         {menuItems}
-                        {settings}
                         {avatar}
                     </Toolbar>
                 </AppBar>
@@ -144,7 +140,6 @@ class Header extends React.Component {
 }
 Header.defaultProps = {
     avatar: <Avatar />,
-    settings: <SettingsButton />,
     menuItems: [],
 };
 
@@ -155,7 +150,6 @@ Header.propTypes = {
         toolbar: PropTypes.string,
     }).isRequired,
     avatar: PropTypes.element,
-    settings: PropTypes.element,
     menuItems: PropTypes.arrayOf(PropTypes.element),
     theme: PropTypes.shape({
         custom: PropTypes.shape({
