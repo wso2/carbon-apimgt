@@ -74,6 +74,10 @@ const styles = (theme) => ({
     categoryHeaderPrimary: {
         color: theme.palette.common.white,
     },
+    itemIcon: {
+        minWidth: 'auto',
+        marginRight: theme.spacing(2),
+    },
 });
 
 /**
@@ -84,9 +88,13 @@ const styles = (theme) => ({
  */
 function GlobalNavLinks(props) {
     const [selected, setSelected] = useState('apis');
-    const [open, setOpen] = React.useState(false);
-    const handleClick = () => {
-        setOpen(!open);
+    const [openAPIs, setOpenAPIs] = React.useState(false);
+    const [openSettings, setOpenSettings] = React.useState(false);
+    const handleAPIsClick = () => {
+        setOpenAPIs(!openAPIs);
+    };
+    const handleSettingsClick = () => {
+        setOpenSettings(!openSettings);
     };
     const {
         classes, theme, smallView, history, toggleGlobalNavBar,
@@ -118,21 +126,21 @@ function GlobalNavLinks(props) {
     }
     return (
         <>
-            <ListItem className={classes.categoryHeader} button onClick={handleClick}>
+            <ListItem className={classes.categoryHeader} button onClick={handleAPIsClick}>
                 <ListItemText
                     classes={{
                         primary: classes.categoryHeaderPrimary,
                     }}
                 >
-                    APIs
+                    <FormattedMessage id='Base.Header.navbar.GlobalNavBar.APIs' defaultMessage='APIs' />
                 </ListItemText>
-                {open ? <ExpandLess /> : <ExpandMore />}
+                {openAPIs ? <ExpandLess /> : <ExpandMore />}
             </ListItem>
-            <Collapse in={open} timeout='auto' unmountOnExit>
+            <Collapse in={openAPIs} timeout='auto' unmountOnExit>
                 <Link to='/apis' className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}>
                     <ListItem button onClick={toggleGlobalNavBar}>
                         <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                            <CustomIcon width={iconWidth} height={iconWidth} icon='api' strokeColor={strokeColor} />
+                            <CustomIcon width={iconWidth} height={iconWidth} icon='api' strokeColor={strokeColor} className={classes.itemIcon} />
                         </ListItemIcon>
                         <ListItemText
                             classes={{
@@ -164,6 +172,7 @@ function GlobalNavLinks(props) {
                                     height={iconWidth}
                                     icon='api-product'
                                     strokeColor={strokeColor}
+                                    className={classes.itemIcon}
                                 />
                             </ListItemIcon>
                             <ListItemText
@@ -189,7 +198,7 @@ function GlobalNavLinks(props) {
                     className={classNames({ [classes.selected]: selected === 'scopes', [classes.links]: true })}
                 >
                     <ListItem button onClick={toggleGlobalNavBar}>
-                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }} className={classes.itemIcon}>
                             <ScopesIcon className={classes.scopeIconColor} />
                         </ListItemIcon>
                         <ListItemText
@@ -214,28 +223,28 @@ function GlobalNavLinks(props) {
                         primary: classes.categoryHeaderPrimary,
                     }}
                 >
-                    Service Catalog
+                    <FormattedMessage id='Base.Header.navbar.GlobalNavBar.Service.Catalog' defaultMessage='Service Catalog' />
                 </ListItemText>
             </ListItem>
             <Divider className={classes.divider} />
-            <ListItem className={classes.categoryHeader} button onClick={handleClick}>
+            <ListItem className={classes.categoryHeader} button onClick={handleSettingsClick}>
                 <ListItemText
                     classes={{
                         primary: classes.categoryHeaderPrimary,
                     }}
                 >
-                    Settings
+                    <FormattedMessage id='Base.Header.navbar.GlobalNavBar.Settings' defaultMessage='Settings' />
                 </ListItemText>
-                {open ? <ExpandLess /> : <ExpandMore />}
+                {openSettings ? <ExpandLess /> : <ExpandMore />}
 
             </ListItem>
-            <Collapse in={open} timeout='auto' unmountOnExit>
+            <Collapse in={openSettings} timeout='auto' unmountOnExit>
                 <Link
                     to='/scopes'
                     className={classNames({ [classes.selected]: selected === 'scopes', [classes.links]: true })}
                 >
                     <ListItem button onClick={toggleGlobalNavBar}>
-                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }} className={classes.itemIcon}>
                             <ScopesIcon className={classes.scopeIconColor} />
                         </ListItemIcon>
                         <ListItemText
@@ -247,7 +256,7 @@ function GlobalNavLinks(props) {
                                 }),
                             }}
                             primary={
-                                <FormattedMessage id='Base.Header.navbar.GlobalNavBar.scopes' defaultMessage='Scopes' />
+                                <FormattedMessage id='Base.Header.navbar.GlobalNavBar.manage.alerts' defaultMessage='Manage Alerts' />
                             }
                         />
                     </ListItem>
