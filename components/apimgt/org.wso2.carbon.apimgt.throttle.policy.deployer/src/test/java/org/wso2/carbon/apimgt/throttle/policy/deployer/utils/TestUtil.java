@@ -31,8 +31,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * An Utility class to generate dummy policies.
+ */
 public class TestUtil {
 
+    /**
+     * Generate a dummy API Policy object
+     *
+     * @return an API Policy
+     */
     public static ApiPolicy getPolicyAPILevel() {
         ApiPolicy apiPolicy = new ApiPolicy();
         apiPolicy.setId(1);
@@ -85,6 +93,11 @@ public class TestUtil {
         return apiPolicy;
     }
 
+    /**
+     * Generate a dummy Application Policy object
+     *
+     * @return an Application Policy
+     */
     public static ApplicationPolicy getPolicyAppLevel() {
         ApplicationPolicy applicationPolicy = new ApplicationPolicy();
         applicationPolicy.setId(1);
@@ -105,6 +118,11 @@ public class TestUtil {
         return applicationPolicy;
     }
 
+    /**
+     * Generate a dummy Subscription Policy object
+     *
+     * @return an Subscription Policy
+     */
     public static SubscriptionPolicy getPolicySubLevel() {
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
         subscriptionPolicy.setId(1);
@@ -131,6 +149,11 @@ public class TestUtil {
         return subscriptionPolicy;
     }
 
+    /**
+     * Generate a dummy Global Policy object
+     *
+     * @return an Global Policy
+     */
     public static GlobalPolicy getPolicyGlobalLevel() {
         GlobalPolicy globalPolicy = new GlobalPolicy();
         globalPolicy.setId(1);
@@ -159,5 +182,4 @@ public class TestUtil {
 
         return globalPolicy;
     }
-
 }

@@ -45,9 +45,4 @@ public class GlobalPolicy extends Policy {
         this.keyTemplate = keyTemplate;
     }
 
-    @Override
-    public String toString() {
-        return "GlobalPolicy [getId()=" + getId() + ", isContentAware()="
-                + isContentAware() + ", getTenantId()=" + getTenantId() + ", getName()=" + getName() + "]";
-    }
 }

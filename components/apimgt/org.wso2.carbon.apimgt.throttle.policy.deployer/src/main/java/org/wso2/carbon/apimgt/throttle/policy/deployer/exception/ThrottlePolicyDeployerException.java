@@ -17,6 +17,9 @@
  */
 package org.wso2.carbon.apimgt.throttle.policy.deployer.exception;
 
+/**
+ * Exception class to represent throttle policy deploying failure.
+ */
 public class ThrottlePolicyDeployerException extends Exception {
     public ThrottlePolicyDeployerException() {
     }

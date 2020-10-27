@@ -25,10 +25,4 @@ public class ApplicationPolicy extends Policy {
     public ApplicationPolicy() {
         setType(POLICY_TYPE.APPLICATION);
     }
-
-    @Override
-    public String toString() {
-        return "ApplicationPolicy [getId()=" + getId() + ", getQuotaType()=" + getQuotaType() + ", isContentAware()="
-                + isContentAware() + ", getTenantId()=" + getTenantId() + ", getName()=" + getName() + "]";
-    }
 }

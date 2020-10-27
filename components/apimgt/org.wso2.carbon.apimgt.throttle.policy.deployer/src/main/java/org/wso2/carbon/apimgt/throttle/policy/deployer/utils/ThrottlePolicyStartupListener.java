@@ -35,7 +35,6 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
     private JMSTransportHandler jmsTransportHandlerForEventHub;
 
     public ThrottlePolicyStartupListener() {
-
         EventHubConfigurationDto.EventHubReceiverConfiguration eventHubReceiverConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIMConfiguration().getEventHubConfigurationDto()
                         .getEventHubReceiverConfiguration();
@@ -43,12 +42,10 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
             this.jmsTransportHandlerForEventHub =
                     new JMSTransportHandler(eventHubReceiverConfiguration.getJmsConnectionParameters());
         }
-
     }
 
     @Override
     public void completingServerStartup() {
-
     }
 
     @Override
@@ -61,7 +58,6 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
 
     @Override
     public void invoke() {
-
         if (jmsTransportHandlerForEventHub != null) {
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();

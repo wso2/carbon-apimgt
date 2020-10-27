@@ -88,5 +88,4 @@ public class ThrottlingPolicyTemplateBuilderTest {
         String policyString = templateBuilder.getThrottlePolicyForSubscriptionLevel(policy);
         Assert.assertNotNull(policyString);
     }
-
 }

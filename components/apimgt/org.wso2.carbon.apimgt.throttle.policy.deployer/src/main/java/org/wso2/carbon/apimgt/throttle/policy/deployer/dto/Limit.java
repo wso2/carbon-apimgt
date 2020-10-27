@@ -17,6 +17,9 @@
  */
 package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 
+/**
+ * Top level entity for representing a limit.
+ */
 public class Limit {
 
     private String timeUnit;
@@ -37,10 +40,4 @@ public class Limit {
     public void setUnitTime(int unitTime) {
         this.unitTime = unitTime;
     }
-
-    @Override
-    public String toString() {
-        return "Limit [timeUnit=" + timeUnit + ", unitTime=" + unitTime + "]";
-    }
-    
 }

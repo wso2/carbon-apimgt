@@ -6594,10 +6594,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             //need to load whole policy object to get the pipelines
             APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
-
-            //add default policy file name
-            if (policy.isDeployed()) {
-            }
             List<Integer> deletedConditionGroupIds = new ArrayList<>();
             for (Pipeline pipeline : policy.getPipelines()) {
                 deletedConditionGroupIds.add(pipeline.getId());
@@ -6610,8 +6606,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
             ApplicationPolicy appPolicy = apiMgtDAO.getApplicationPolicy(policyName, tenantID);
-            if (appPolicy.isDeployed()) {
-            }
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
                     appPolicy.getTenantDomain(), appPolicy.getPolicyId(), appPolicy.getPolicyName(),
@@ -6619,8 +6613,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
             SubscriptionPolicy subscriptionPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantID);
-            if (subscriptionPolicy.isDeployed()) {
-            }
             //call the monetization extension point to delete plans if any
             deleteMonetizationPlan(subscriptionPolicy);
             SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
@@ -6633,8 +6625,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
-            if (globalPolicy.isDeployed()) {
-            }
             GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
                     globalPolicy.getTenantDomain(), globalPolicy.getPolicyId(), globalPolicy.getPolicyName());

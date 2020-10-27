@@ -580,8 +580,9 @@ public final class APIConstants {
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
 
-    public static String DELEM_COLON = ":";
-    public static String DELEM_COMMA = ",";
+    public static final String DELEM_COLON = ":";
+    public static final String DELEM_COMMA = ",";
+    public static final String DELEM_UNDERSCORE = "_";
 
     public static class TokenStatus {
 
@@ -1638,6 +1639,7 @@ public final class APIConstants {
     public static final String TEMPLATE_KEY_STATE = "keyTemplateState";
 
     public static final String THROTTLE_POLICY_DEFAULT = "_default";
+    public static final String THROTTLE_POLICY_CONDITION = "_condition_";
 
     //Advanced throttling related constants
     public static final String TIME_UNIT_SECOND = "sec";

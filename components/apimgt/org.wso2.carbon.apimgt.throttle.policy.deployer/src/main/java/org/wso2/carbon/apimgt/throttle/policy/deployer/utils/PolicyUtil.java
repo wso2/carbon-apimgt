@@ -43,52 +43,73 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
+/**
+ * An Utility class for policy deploy operations.
+ */
 public class PolicyUtil {
     private static final Log log = LogFactory.getLog(PolicyUtil.class);
     private static final String REQUEST_PRE_PROCESSOR_EXECUTION_PLAN = "requestPreProcessorExecutionPlan";
 
+    /**
+     * Deploy the given throttle policy in the Traffic Manager.
+     *
+     * @param policy      policy object
+     * @param policyEvent policy event object which was triggered
+     */
     public static void deployPolicy(Policy policy, PolicyEvent policyEvent) {
         EventProcessorService eventProcessorService =
                 ServiceReferenceHolder.getInstance().getEventProcessorService();
         ThrottlePolicyTemplateBuilder policyTemplateBuilder = new ThrottlePolicyTemplateBuilder();
+
         Map<String, String> policiesToDeploy = new HashMap<>();
         List<String> policiesToUndeploy = new ArrayList<>();
 
         try {
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(APIConstants.SUPER_TENANT_DOMAIN, true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(APIConstants.SUPER_TENANT_DOMAIN, true);
             String policyFile;
             String policyString;
             if (Policy.POLICY_TYPE.SUBSCRIPTION.equals(policy.getType())) {
-                policyFile = policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" + policy.getName();
+                // Add Subscription policy
+                policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
+                        policy.getTenantDomain(), PolicyConstants.POLICY_LEVEL_SUB, policy.getName());
                 policyString = policyTemplateBuilder.getThrottlePolicyForSubscriptionLevel((SubscriptionPolicy) policy);
                 policiesToDeploy.put(policyFile, policyString);
             } else if (Policy.POLICY_TYPE.APPLICATION.equals(policy.getType())) {
-                policyFile = policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + policy.getName();
+                // Add Application policy
+                policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
+                        policy.getTenantDomain(), PolicyConstants.POLICY_LEVEL_APP, policy.getName());
                 policyString = policyTemplateBuilder.getThrottlePolicyForAppLevel((ApplicationPolicy) policy);
                 policiesToDeploy.put(policyFile, policyString);
             } else if (Policy.POLICY_TYPE.API.equals(policy.getType())) {
+                // Add API policy
                 policiesToDeploy = policyTemplateBuilder.getThrottlePolicyForAPILevel((ApiPolicy) policy);
                 String defaultPolicy = policyTemplateBuilder.getThrottlePolicyForAPILevelDefault((ApiPolicy) policy);
-                policyFile = policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
-                        "_" + policy.getName();
-                String defaultPolicyName = policyFile + "_default";
+                policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
+                        policy.getTenantDomain(), PolicyConstants.POLICY_LEVEL_RESOURCE, policy.getName());
+                String defaultPolicyName = policyFile + APIConstants.THROTTLE_POLICY_DEFAULT;
                 policiesToDeploy.put(defaultPolicyName, defaultPolicy);
                 if (policyEvent != null) {
                     List<Integer> deletedConditionGroupIds =
                             ((APIPolicyEvent) policyEvent).getDeletedConditionGroupIds();
+                    // Undeploy removed condition groups
                     if (deletedConditionGroupIds != null) {
                         for (int conditionGroupId : deletedConditionGroupIds) {
-                            policiesToUndeploy.add(policyFile + "_condition_" + conditionGroupId);
+                            policiesToUndeploy
+                                    .add(policyFile + APIConstants.THROTTLE_POLICY_CONDITION + conditionGroupId);
                         }
                     }
                 }
             } else if (Policy.POLICY_TYPE.GLOBAL.equals(policy.getType())) {
-                policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policy.getName();
+                // Add Global policy
+                policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
+                        PolicyConstants.POLICY_LEVEL_GLOBAL, policy.getName());
                 policyString = policyTemplateBuilder.getThrottlePolicyForGlobalLevel((GlobalPolicy) policy);
                 policiesToDeploy.put(policyFile, policyString);
             }
 
+            // Undeploy removed policies
             for (String flowName : policiesToUndeploy) {
                 try {
                     String executionPlan = eventProcessorService.getActiveExecutionPlan(flowName);
@@ -107,9 +128,11 @@ public class PolicyUtil {
                 try {
                     executionPlan = eventProcessorService.getActiveExecutionPlan(policyPlanName);
                 } catch (ExecutionPlanConfigurationException e) {
+                    // Deploy new policies
                     eventProcessorService.deployExecutionPlan(flowString);
                 }
                 if (executionPlan != null) {
+                    // Update existing policies
                     eventProcessorService.editActiveExecutionPlan(flowString, policyPlanName);
                 }
             }
@@ -117,21 +140,25 @@ public class PolicyUtil {
         } catch (APITemplateException e) {
             log.error("Error in creating execution plan", e);
         } catch (ExecutionPlanConfigurationException | ExecutionPlanDependencyValidationException e) {
-            log.error("Error in validating execution plan", e);
+            log.error("Error in deploying execution plan", e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
+    /**
+     * Deploy all the throttle policies retrieved from the database in the Traffic Manager.
+     */
     public static void deployAllPolicies() {
         PolicyRetriever policyRetriever = new PolicyRetriever();
         try {
+            APIManagerConfiguration apiManagerConfiguration =
+                    ServiceReferenceHolder.getInstance().getAPIMConfiguration();
             EventProcessorService eventProcessorService =
                     ServiceReferenceHolder.getInstance().getEventProcessorService();
             Map<String, ExecutionPlanConfiguration> executionPlanConfigurationMap =
                     eventProcessorService.getAllActiveExecutionConfigurations();
-            APIManagerConfiguration apiManagerConfiguration =
-                    ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+            // Undeploy all the policies except the excluded ones provided
             for (Map.Entry<String, ExecutionPlanConfiguration> pair : executionPlanConfigurationMap.entrySet()) {
                 String policyPlanName = pair.getKey();
                 boolean excluded = false;
@@ -151,6 +178,7 @@ public class PolicyUtil {
                 }
             }
 
+            // Deploy all the policies retrieved from the database
             SubscriptionPolicyList subscriptionPolicies = policyRetriever.getAllSubscriptionPolicies();
             for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
                 deployPolicy(subscriptionPolicy, null);
@@ -168,12 +196,17 @@ public class PolicyUtil {
                 deployPolicy(globalPolicy, null);
             }
         } catch (ThrottlePolicyDeployerException e) {
-            log.error("Error in retrieving subscription policies", e);
+            log.error("Error in retrieving throttle policies", e);
         } catch (ExecutionPlanConfigurationException e) {
-            log.error("Error in removing existing policies", e);
+            log.error("Error in removing existing throttle policies", e);
         }
     }
 
+    /**
+     * Undeploy the subscription throttle policy passed through an event from the Traffic Manager.
+     *
+     * @param policyEvent subscription policy event object which was triggered
+     */
     public static void undeployPolicy(SubscriptionPolicyEvent policyEvent) {
         List<String> policyFileNames = new ArrayList<>();
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" +
@@ -182,6 +215,11 @@ public class PolicyUtil {
         undeployPolicy(policyFileNames);
     }
 
+    /**
+     * Undeploy the application throttle policy passed through an event from the Traffic Manager.
+     *
+     * @param policyEvent application policy event object which was triggered
+     */
     public static void undeployPolicy(ApplicationPolicyEvent policyEvent) {
         List<String> policyFileNames = new ArrayList<>();
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" +
@@ -190,6 +228,11 @@ public class PolicyUtil {
         undeployPolicy(policyFileNames);
     }
 
+    /**
+     * Undeploy the API throttle policy passed through an event from the Traffic Manager.
+     *
+     * @param policyEvent API policy event object which was triggered
+     */
     public static void undeployPolicy(APIPolicyEvent policyEvent) {
         List<String> policyFileNames = new ArrayList<>();
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" +
@@ -201,6 +244,11 @@ public class PolicyUtil {
         undeployPolicy(policyFileNames);
     }
 
+    /**
+     * Undeploy the global throttle policy passed through an event from the Traffic Manager.
+     *
+     * @param policyEvent global policy event object which was triggered
+     */
     public static void undeployPolicy(GlobalPolicyEvent policyEvent) {
         List<String> policyFileNames = new ArrayList<>();
         String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" +
@@ -209,6 +257,11 @@ public class PolicyUtil {
         undeployPolicy(policyFileNames);
     }
 
+    /**
+     * Undeploy the throttle policies passed as a list from the Traffic Manager.
+     *
+     * @param policyFileNames list of policy file names
+     */
     private static void undeployPolicy(List<String> policyFileNames) {
         try {
             PrivilegedCarbonContext.startTenantFlow();

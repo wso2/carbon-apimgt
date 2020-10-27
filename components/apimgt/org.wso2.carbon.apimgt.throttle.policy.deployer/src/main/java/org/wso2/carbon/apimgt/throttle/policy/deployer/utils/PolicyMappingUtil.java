@@ -23,9 +23,20 @@ import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 
+/**
+ * An Utility class for policy mapping operations.
+ */
 public class PolicyMappingUtil {
 
+    /**
+     * Map a org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition to a
+     * org.wso2.carbon.apimgt.api.model.policy.Condition
+     *
+     * @param conditionDTO org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition
+     * @return org.wso2.carbon.apimgt.api.model.policy.Condition object
+     */
     public static Condition mapCondition(
             org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition conditionDTO) {
 

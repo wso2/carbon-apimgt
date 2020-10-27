@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entity for keeping details of a set of Application Policies.
+ */
 public class ApplicationPolicyList {
 
     private Integer count = null;

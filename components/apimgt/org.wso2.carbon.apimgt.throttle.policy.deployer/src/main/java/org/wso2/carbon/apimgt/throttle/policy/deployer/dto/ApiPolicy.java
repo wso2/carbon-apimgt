@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entity for keeping API Policy
+ */
 public class ApiPolicy extends Policy {
 
     private List<APIPolicyConditionGroup> conditionGroups = new ArrayList<>();
@@ -35,14 +38,6 @@ public class ApiPolicy extends Policy {
 
     public void setConditionGroups(List<APIPolicyConditionGroup> conditionGroups) {
         this.conditionGroups = conditionGroups;
-    }
-    @Override
-    public boolean isContentAware() {
-        boolean isContentAware = super.isContentAware();
-        for (APIPolicyConditionGroup apiPolicyConditionGroup : conditionGroups) {
-            isContentAware = isContentAware || apiPolicyConditionGroup.isContentAware();
-        }
-        return isContentAware;
     }
 
     public String getApplicableLevel() {

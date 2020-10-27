@@ -43,167 +43,159 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyD
 import java.io.IOException;
 import java.net.URL;
 
+/**
+ * Used to retrieve policy metadata using internal REST APIs
+ */
 public class PolicyRetriever {
 
     private static final Log log = LogFactory.getLog(PolicyRetriever.class);
     protected EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfigurationService().getAPIManagerConfiguration().getEventHubConfigurationDto();
-    private String baseURL = eventHubConfigurationDto.getServiceUrl() +
+    private final String baseURL = eventHubConfigurationDto.getServiceUrl() +
             APIConstants.INTERNAL_WEB_APP_EP;
 
-
+    /**
+     * Get a subscription policy given the name.
+     *
+     * @param policyName   policy name
+     * @param tenantDomain tenant domain
+     * @return subscription policy
+     * @throws ThrottlePolicyDeployerException if failure occurs
+     */
     public SubscriptionPolicy getSubscriptionPolicy(String policyName, String tenantDomain)
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES +
                 "?policyName=" + policyName;
-        SubscriptionPolicyList subscriptionPolicyList = getSubscriptionPolicies(path, tenantDomain);
+        SubscriptionPolicyList subscriptionPolicyList = getPolicies(path, tenantDomain, SubscriptionPolicyList.class);
         if (subscriptionPolicyList.getList() != null && !subscriptionPolicyList.getList().isEmpty()) {
             return subscriptionPolicyList.getList().get(0);
         }
         return null;
     }
 
+    /**
+     * Get all the subscription policies.
+     *
+     * @return subscription policy list
+     * @throws ThrottlePolicyDeployerException if failure occurs
+     */
     public SubscriptionPolicyList getAllSubscriptionPolicies()
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES +
                 "?allTenants=true";
-        return getSubscriptionPolicies(path, null);
+        return getPolicies(path, null, SubscriptionPolicyList.class);
     }
 
-    public SubscriptionPolicyList getSubscriptionPolicies(String path, String tenantDomain)
-            throws ThrottlePolicyDeployerException {
-
-        try {
-            String endpoint = baseURL + path;
-            CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain);
-
-            if (httpResponse.getEntity() != null) {
-                String responseString = EntityUtils.toString(httpResponse.getEntity(),
-                        APIConstants.DigestAuthConstants.CHARSET);
-                httpResponse.close();
-                if (responseString != null && !responseString.isEmpty()) {
-                    return new Gson().fromJson(responseString, SubscriptionPolicyList.class);
-                }
-            } else {
-                throw new ThrottlePolicyDeployerException("HTTP response is empty");
-            }
-        } catch (IOException e) {
-            String msg = "Error while executing the http client";
-            log.error(msg, e);
-            throw new ThrottlePolicyDeployerException(msg, e);
-        }
-        return null;
-    }
-
+    /**
+     * Get a application policy given the name.
+     *
+     * @param policyName   policy name
+     * @param tenantDomain tenant domain
+     * @return application policy
+     * @throws ThrottlePolicyDeployerException if failure occurs
+     */
     public ApplicationPolicy getApplicationPolicy(String policyName, String tenantDomain)
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES +
                 "?policyName=" + policyName;
-        ApplicationPolicyList applicationPolicyList = getApplicationPolicies(path, tenantDomain);
+        ApplicationPolicyList applicationPolicyList = getPolicies(path, tenantDomain, ApplicationPolicyList.class);
         if (applicationPolicyList.getList() != null && !applicationPolicyList.getList().isEmpty()) {
             return applicationPolicyList.getList().get(0);
         }
         return null;
     }
 
-    public ApplicationPolicyList getApplicationPolicies(String path, String tenantDomain)
-            throws ThrottlePolicyDeployerException {
-
-        try {
-            String endpoint = baseURL + path;
-            CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain);
-
-            if (httpResponse.getEntity() != null) {
-                String responseString = EntityUtils.toString(httpResponse.getEntity(),
-                        APIConstants.DigestAuthConstants.CHARSET);
-                httpResponse.close();
-                if (responseString != null && !responseString.isEmpty()) {
-                    return new Gson().fromJson(responseString, ApplicationPolicyList.class);
-                }
-            } else {
-                throw new ThrottlePolicyDeployerException("HTTP response is empty");
-            }
-        } catch (IOException e) {
-            String msg = "Error while executing the http client";
-            log.error(msg, e);
-            throw new ThrottlePolicyDeployerException(msg, e);
-        }
-        return null;
-    }
-
+    /**
+     * Get all the application policies.
+     *
+     * @return application policy list
+     * @throws ThrottlePolicyDeployerException if failure occurs
+     */
     public ApplicationPolicyList getAllApplicationPolicies()
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES +
                 "?allTenants=true";
-        return getApplicationPolicies(path, null);
+        return getPolicies(path, null, ApplicationPolicyList.class);
     }
 
+    /**
+     * Get a API policy given the name.
+     *
+     * @param policyName   policy name
+     * @param tenantDomain tenant domain
+     * @return API policy
+     * @throws ThrottlePolicyDeployerException if failure occurs
+     */
     public ApiPolicy getApiPolicy(String policyName, String tenantDomain) throws ThrottlePolicyDeployerException {
         String path = APIConstants.SubscriptionValidationResources.API_POLICIES +
                 "?policyName=" + policyName;
-        ApiPolicyList apiPolicyList = getApiPolicies(path, tenantDomain);
+        ApiPolicyList apiPolicyList = getPolicies(path, tenantDomain, ApiPolicyList.class);
         if (apiPolicyList.getList() != null && !apiPolicyList.getList().isEmpty()) {
             return apiPolicyList.getList().get(0);
         }
         return null;
     }
 
-    public ApiPolicyList getApiPolicies(String path, String tenantDomain)
-            throws ThrottlePolicyDeployerException {
-
-        try {
-            String endpoint = baseURL + path;
-            CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain);
-
-            if (httpResponse.getEntity() != null) {
-                String responseString = EntityUtils.toString(httpResponse.getEntity(),
-                        APIConstants.DigestAuthConstants.CHARSET);
-                httpResponse.close();
-                if (responseString != null && !responseString.isEmpty()) {
-                    return new Gson().fromJson(responseString, ApiPolicyList.class);
-                }
-            } else {
-                throw new ThrottlePolicyDeployerException("HTTP response is empty");
-            }
-        } catch (IOException e) {
-            String msg = "Error while executing the http client";
-            log.error(msg, e);
-            throw new ThrottlePolicyDeployerException(msg, e);
-        }
-        return null;
-    }
-
+    /**
+     * Get all the API policies.
+     *
+     * @return API policy list
+     * @throws ThrottlePolicyDeployerException if failure occurs
+     */
     public ApiPolicyList getAllApiPolicies()
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.API_POLICIES +
                 "?allTenants=true";
-        return getApiPolicies(path, null);
+        return getPolicies(path, null, ApiPolicyList.class);
     }
 
+    /**
+     * Get all the global policies.
+     *
+     * @return global policy list
+     * @throws ThrottlePolicyDeployerException if failure occurs
+     */
     public GlobalPolicyList getAllGlobalPolicies()
             throws ThrottlePolicyDeployerException {
 
         String path = APIConstants.SubscriptionValidationResources.GLOBAL_POLICIES +
                 "?allTenants=true";
-        return getGlobalPolicies(path, null);
+        return getPolicies(path, null, GlobalPolicyList.class);
     }
 
+    /**
+     * Get a global policy given the name.
+     *
+     * @param policyName   policy name
+     * @param tenantDomain tenant domain
+     * @return global policy
+     * @throws ThrottlePolicyDeployerException if failure occurs
+     */
     public GlobalPolicy getGlobalPolicy(String policyName, String tenantDomain) throws ThrottlePolicyDeployerException {
         String path = APIConstants.SubscriptionValidationResources.GLOBAL_POLICIES +
                 "?policyName=" + policyName;
-        GlobalPolicyList globalPolicyList = getGlobalPolicies(path, tenantDomain);
+        GlobalPolicyList globalPolicyList = getPolicies(path, tenantDomain, GlobalPolicyList.class);
         if (globalPolicyList.getList() != null && !globalPolicyList.getList().isEmpty()) {
             return globalPolicyList.getList().get(0);
         }
         return null;
     }
 
-    public GlobalPolicyList getGlobalPolicies(String path, String tenantDomain)
+    /**
+     * Get policies given a query path, tenant domain and the policy class to be mapped
+     *
+     * @param path         REST API request path
+     * @param tenantDomain tenant domain
+     * @param policyClass  class of the policy list type e.g.- ApiPolicyList.class
+     * @return throttle policy list of given class type
+     * @throws ThrottlePolicyDeployerException if failure occurs
+     */
+    private <T> T getPolicies(String path, String tenantDomain, Class<T> policyClass)
             throws ThrottlePolicyDeployerException {
 
         try {
@@ -215,7 +207,7 @@ public class PolicyRetriever {
                         APIConstants.DigestAuthConstants.CHARSET);
                 httpResponse.close();
                 if (responseString != null && !responseString.isEmpty()) {
-                    return new Gson().fromJson(responseString, GlobalPolicyList.class);
+                    return new Gson().fromJson(responseString, policyClass);
                 }
             } else {
                 throw new ThrottlePolicyDeployerException("HTTP response is empty");
@@ -248,5 +240,4 @@ public class PolicyRetriever {
             throw new ThrottlePolicyDeployerException(e);
         }
     }
-
 }

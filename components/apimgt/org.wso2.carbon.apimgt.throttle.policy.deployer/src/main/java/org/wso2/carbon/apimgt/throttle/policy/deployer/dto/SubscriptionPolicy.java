@@ -77,12 +77,4 @@ public class SubscriptionPolicy extends Policy {
     public void setGraphQLMaxDepth(int graphQLMaxDepth) {
         this.graphQLMaxDepth = graphQLMaxDepth;
     }
-
-    @Override
-    public String toString() {
-        return "SubscriptionPolicy [rateLimitCount=" + rateLimitCount + ", rateLimitTimeUnit=" + rateLimitTimeUnit
-                + ", stopOnQuotaReach=" + stopOnQuotaReach + ", getId()=" + getId() + ", getQuotaType()="
-                + getQuotaType() + ", isContentAware()=" + isContentAware() + ", getTenantId()=" + getTenantId()
-                + ", getName()=" + getName() + "]";
-    }
 }

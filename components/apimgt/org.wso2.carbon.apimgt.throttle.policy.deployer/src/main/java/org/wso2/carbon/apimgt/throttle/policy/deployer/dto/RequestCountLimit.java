@@ -17,6 +17,9 @@
  */
 package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 
+/**
+ * Entity for keeping details of a Request Count Limit
+ */
 public class RequestCountLimit extends Limit {
 
     private int requestCount;

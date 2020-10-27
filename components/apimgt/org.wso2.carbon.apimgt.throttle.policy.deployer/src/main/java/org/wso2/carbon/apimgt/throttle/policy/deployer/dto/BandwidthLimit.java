@@ -17,6 +17,9 @@
  */
 package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 
+/**
+ * Entity for keeping details of a Bandwidth Limit
+ */
 public class BandwidthLimit extends Limit {
     private long dataAmount;
     private String dataUnit;

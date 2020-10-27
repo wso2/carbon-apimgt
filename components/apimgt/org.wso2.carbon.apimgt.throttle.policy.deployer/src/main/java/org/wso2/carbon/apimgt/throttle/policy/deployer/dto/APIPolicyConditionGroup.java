@@ -79,40 +79,4 @@ public class APIPolicyConditionGroup {
     public void setDefaultLimit(QuotaPolicy defaultLimit) {
         this.defaultLimit = defaultLimit;
     }
-
-    public boolean isContentAware() {
-
-        if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaType)) {
-            return true;
-        }
-        if (condition != null) {
-            condition.stream().anyMatch(conditionDTO ->
-                    PolicyConstants.BANDWIDTH_TYPE.equals(quotaType)
-            );
-            return false;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-
-        if (obj == this) {
-            return true;
-        }
-
-        if (obj == null || obj.getClass() != this.getClass()) {
-            return false;
-        }
-        APIPolicyConditionGroup conditionGroup = (APIPolicyConditionGroup) obj;
-        return conditionGroup.policyId == policyId &&
-                conditionGroup.conditionGroupId == conditionGroupId;
-
-    }
-
-    @Override
-    public int hashCode() {
-
-        return (policyId == -1 || conditionGroupId == -1) ? super.hashCode() : policyId * conditionGroupId;
-    }
 }

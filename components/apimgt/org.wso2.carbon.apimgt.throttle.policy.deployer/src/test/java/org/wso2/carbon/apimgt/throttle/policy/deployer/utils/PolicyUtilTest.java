@@ -42,10 +42,6 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicyList;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.QuotaPolicy;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.RequestCountLimit;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.APIPolicyConditionGroup;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -56,8 +52,6 @@ import org.wso2.carbon.event.processor.core.exception.ExecutionPlanDependencyVal
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;

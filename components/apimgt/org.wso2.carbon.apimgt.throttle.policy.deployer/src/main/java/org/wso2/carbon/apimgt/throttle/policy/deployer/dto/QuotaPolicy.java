@@ -17,7 +17,9 @@
  */
 package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 
-
+/**
+ * Entity for keeping details of a quota policy
+ */
 public class QuotaPolicy {
 
     private String quotaType;

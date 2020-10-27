@@ -17,6 +17,9 @@
  */
 package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 
+/**
+ * Entity for representing an API Policy Condition.
+ */
 public class Condition {
     private String conditionType;
     private String name;

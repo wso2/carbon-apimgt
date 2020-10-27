@@ -22,7 +22,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
 import java.util.Objects;
 
 /**
- * An Event Object which can holds the data related to Global Policy
+ * An Event Object which can hold the data related to Global Policy
  */
 public class GlobalPolicyEvent extends PolicyEvent {
     private int policyId;

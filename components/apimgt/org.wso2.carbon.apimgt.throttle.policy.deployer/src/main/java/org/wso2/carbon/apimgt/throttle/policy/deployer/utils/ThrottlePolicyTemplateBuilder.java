@@ -29,7 +29,11 @@ import org.apache.velocity.runtime.log.CommonsLogLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.model.policy.*;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
+import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
+import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
+import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
@@ -45,8 +49,15 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
+/**
+ * This Class used to generate execution plans using policy templates
+ */
 public class ThrottlePolicyTemplateBuilder {
 
     private static final Log log = LogFactory.getLog(ThrottlePolicyTemplateBuilder.class);
@@ -55,36 +66,24 @@ public class ThrottlePolicyTemplateBuilder {
     private static final String POLICY_VELOCITY_GLOBAL = "throttle_policy_template_global";
     private static final String POLICY_VELOCITY_APP = "throttle_policy_template_app";
     private static final String POLICY_VELOCITY_SUB = "throttle_policy_template_sub";
-    private String policyTemplateLocation = "repository" + File.separator + "resources" + File.separator
+    private final String policyTemplateLocation = "repository" + File.separator + "resources" + File.separator
             + "policy_templates" + File.separator;
     private static String velocityLogPath = "not-defined";
 
     /**
-     * Set the location of the policy templates. If not set, default location is used
+     * Generate policy for API level throttling
      *
-     * @param path
-     */
-    public void setPolicyTemplateLocation(String path) {
-        policyTemplateLocation = path;
-    }
-
-
-    /**
-     * Generate policy for api level throttling
-     *
-     * @param policy Policy with level 'api'. isAcrossAllUsers() method in policy is used to identify the level in
-     *               the api level. Policy can have multiple pipelines and a default condition which will be used as
-     *               else condition
-     * @return
-     * @throws APITemplateException
+     * @param policy Policy with level 'api'. Policy can have multiple pipelines and a default condition which will be
+     *               used as else condition
+     * @return a Map containing a set of policies for each condition group
+     * @throws APITemplateException if failed to generate policy
      */
     public Map<String, String> getThrottlePolicyForAPILevel(ApiPolicy policy) throws APITemplateException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for apiLevel :" + policy.toString());
+            log.debug("Generating policy for API Level :" + policy.toString());
         }
-        Map<String, String> policyArray = new HashMap<String, String>();
-        Set<String> conditionsSet = new HashSet<String>();
+        Map<String, String> policyArray = new HashMap<>();
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
@@ -109,16 +108,12 @@ public class ThrottlePolicyTemplateBuilder {
                     context = new VelocityContext();
                     setConstantContext(context);
                     context.put("policy", policy);
-
                     context.put("quotaPolicy", conditionGroup.getDefaultLimit());
                     context.put("pipeline", "condition_" + conditionGroup.getConditionGroupId());
 
                     String conditionString = getPolicyCondition(conditionGroup.getCondition());
-
                     JSONArray conditions = new JSONArray();
                     conditions.add(getPolicyConditionJson(conditionGroup.getCondition()));
-                    conditionsSet.add(conditionString);
-
                     context.put("condition", " AND " + conditionString);
                     context.put("evaluatedConditions", new String(Base64.encodeBase64(conditions.toJSONString()
                             .getBytes())));
@@ -128,8 +123,9 @@ public class ThrottlePolicyTemplateBuilder {
                         log.debug("Policy : " + writer.toString());
                     }
 
-                    String policyName = policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" +
-                            policy.getName() + "_condition_" + conditionGroup.getConditionGroupId();
+                    String policyName = policy.getTenantDomain() + APIConstants.DELEM_UNDERSCORE +
+                            PolicyConstants.POLICY_LEVEL_RESOURCE + APIConstants.DELEM_UNDERSCORE +
+                            policy.getName() + APIConstants.THROTTLE_POLICY_CONDITION + conditionGroup.getConditionGroupId();
                     policyArray.put(policyName, writer.toString());
                 }
             }
@@ -137,25 +133,23 @@ public class ThrottlePolicyTemplateBuilder {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
         }
-
         return policyArray;
     }
 
     /**
-     * Generate default policy for api level throttling
+     * Generate default policy for API level throttling
      *
-     * @param policy Policy with level 'api'. isAcrossAllUsers() method in policy is used to identify the level in
-     *               the api level. Policy can have multiple pipelines and a default condition which will be used as
-     *               else condition
-     * @return
-     * @throws APITemplateException
+     * @param policy Policy with level 'api'. Policy can have multiple pipelines and a default condition which will be
+     *               used as else condition
+     * @return the generated execution plan for the policy
+     * @throws APITemplateException if failed to generate policy
      */
     public String getThrottlePolicyForAPILevelDefault(ApiPolicy policy) throws APITemplateException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for apiLevel :" + policy.toString());
+            log.debug("Generating default policy for API Level :" + policy.toString());
         }
-        Set<String> conditionsSet = new HashSet<String>();
+        Set<String> conditionsSet = new HashSet<>();
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
@@ -186,12 +180,9 @@ public class ThrottlePolicyTemplateBuilder {
                 }
             }
 
-            // for default one
             context = new VelocityContext();
             setConstantContext(context);
-            //default policy is defined as 'elseCondition'
             context.put("policy", policy);
-
             context.put("quotaPolicy", policy.getDefaultLimit());
             context.put("evaluatedConditions", new String(Base64.encodeBase64(policyConditionJson.toJSONString().getBytes())));
             String conditionSetString = getConditionForDefault(conditionsSet);
@@ -213,18 +204,18 @@ public class ThrottlePolicyTemplateBuilder {
     }
 
     /**
-     * Generate policy for global level.
+     * Generate policy for global level
      *
      * @param policy policy with level 'global'. Multiple pipelines are not allowed. Can define more than one condition
      *               as set of conditions. all these conditions should be passed as a single pipeline
-     * @return
-     * @throws APITemplateException
+     * @return the generated execution plan for the policy
+     * @throws APITemplateException if failed to generate policy
      */
     public String getThrottlePolicyForGlobalLevel(GlobalPolicy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for globalLevel :" + policy.toString());
+            log.debug("Generating policy for global level :" + policy.toString());
         }
         try {
             VelocityEngine velocityengine = new VelocityEngine();
@@ -255,23 +246,20 @@ public class ThrottlePolicyTemplateBuilder {
     }
 
     /**
-     * Generate application level policy.
+     * Generate application level policy
      *
      * @param policy policy with level 'app'. Multiple pipelines are not allowed. Can define more than one condition
      *               as set of conditions. all these conditions should be passed as a single pipeline
-     * @return
-     * @throws APITemplateException
+     * @return the generated execution plan for the policy
+     * @throws APITemplateException if failed to generate policy
      */
     public String getThrottlePolicyForAppLevel(ApplicationPolicy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for appLevel :" + policy.toString());
+            log.debug("Generating policy for app level :" + policy.toString());
         }
 
-        if (!(policy instanceof ApplicationPolicy)) {
-            throw new APITemplateException("Invalid policy level : Has to be 'app'");
-        }
         try {
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
@@ -301,23 +289,20 @@ public class ThrottlePolicyTemplateBuilder {
     }
 
     /**
-     * Generate policy for subscription level.
+     * Generate policy for subscription level
      *
      * @param policy policy with level 'sub'. Multiple pipelines are not allowed. Can define more than one condition
      *               as set of conditions. all these conditions should be passed as a single pipeline
-     * @return
-     * @throws APITemplateException
+     * @return the generated execution plan for the policy
+     * @throws APITemplateException if failed to generate policy
      */
-    public String getThrottlePolicyForSubscriptionLevel(org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy policy) throws APITemplateException {
+    public String getThrottlePolicyForSubscriptionLevel(SubscriptionPolicy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for subscriptionLevel :" + policy.toString());
+            log.debug("Generating policy for subscription Level :" + policy.toString());
         }
 
-        if (!(policy instanceof SubscriptionPolicy)) {
-            throw new APITemplateException("Invalid policy level :  Has to be 'sub'");
-        }
         try {
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
@@ -328,13 +313,13 @@ public class ThrottlePolicyTemplateBuilder {
             }
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
-            Template t = velocityengine.getTemplate(getTemplatePathForSubscription());
+            Template template = velocityengine.getTemplate(getTemplatePathForSubscription());
 
             VelocityContext context = new VelocityContext();
             setConstantContext(context);
             context.put("policy", policy);
             context.put("quotaPolicy", policy.getDefaultLimit());
-            t.merge(context, writer);
+            template.merge(context, writer);
             if (log.isDebugEnabled()) {
                 log.debug("Policy : " + writer.toString());
             }
@@ -342,7 +327,6 @@ public class ThrottlePolicyTemplateBuilder {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
         }
-
         return writer.toString();
     }
 
@@ -367,48 +351,45 @@ public class ThrottlePolicyTemplateBuilder {
     }
 
     private static String getVelocityLogger() {
-        if (!"not-defined".equalsIgnoreCase(velocityLogPath)) {
-            return velocityLogPath;
-        } else {
+        if ("not-defined".equalsIgnoreCase(velocityLogPath)) {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
                     .getAPIMConfiguration();
             String logPath = config.getFirstProperty(APIConstants.VELOCITY_LOGGER);
             if (logPath != null && !logPath.isEmpty()) {
                 velocityLogPath = logPath;
             }
-            return velocityLogPath;
         }
+        return velocityLogPath;
     }
 
     /**
      * Produces final condition inside a pipeline
      *
-     * @param conditions
-     * @return
+     * @param conditions set of conditions
+     * @return combined condition string
      */
     private static String getPolicyCondition(Set<Condition> conditions) {
-        String conditionString = null;
+        StringBuilder conditionString = new StringBuilder();
         int i = 0;
         for (Condition condition : conditions) {
             org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
                     PolicyMappingUtil.mapCondition(condition);
-
             if (i == 0) {
-                conditionString = mappedCondition.getCondition();
+                conditionString.append(mappedCondition.getCondition());
             } else {
-                conditionString = conditionString + " AND " + mappedCondition.getCondition();
+                conditionString.append(" AND ").append(mappedCondition.getCondition());
             }
             i++;
         }
-        return conditionString;
+        return conditionString.toString();
     }
 
 
     /**
      * Produces final condition inside a pipeline
      *
-     * @param conditions
-     * @return
+     * @param conditions set of conditions
+     * @return conditions as a JSON
      */
     private static JSONObject getPolicyConditionJson(Set<Condition> conditions) {
         JSONObject tempCondition = new JSONObject();
@@ -484,55 +465,52 @@ public class ThrottlePolicyTemplateBuilder {
     /**
      * Produces final condition inside a pipeline for default policy with null string
      *
-     * @param conditions
-     * @return
+     * @param conditions set of conditions
+     * @return default policy condition string
      */
     private static String getPolicyConditionForDefault(Set<Condition> conditions) {
-        String conditionString = null;
+        StringBuilder conditionString = new StringBuilder();
         int i = 0;
         for (Condition condition : conditions) {
             org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
                     PolicyMappingUtil.mapCondition(condition);
             String conditionStringComplete = mappedCondition.getCondition();
             if (i == 0) {
-                conditionString = conditionStringComplete;
+                conditionString.append(conditionStringComplete);
             } else {
-                conditionString = conditionString + " AND " + conditionStringComplete;
+                conditionString.append(" AND ").append(conditionStringComplete);
             }
             i++;
         }
-        return conditionString;
+        return conditionString.toString();
     }
 
     /**
      * Generate the condition for the default query. This returns the condition to check thing that are not in
      * any of the other conditions
      *
-     * @param conditionsSet
-     * @return
+     * @param conditionsSet set of conditions
+     * @return condition for the default query
      */
     private static String getConditionForDefault(Set<String> conditionsSet) {
-        String conditionString = "";
+        StringBuilder conditionString = new StringBuilder();
         int i = 0;
         for (String condition : conditionsSet) {
             String conditionIsolated = PolicyConstants.OPEN_BRACKET + condition + PolicyConstants.CLOSE_BRACKET;
             if (i == 0) {
-                conditionString = conditionIsolated;
+                conditionString = new StringBuilder(conditionIsolated);
             } else {
-                conditionString = conditionString + " OR " + conditionIsolated;
+                conditionString.append(" OR ").append(conditionIsolated);
             }
             i++;
         }
-
-        if (!StringUtils.isEmpty(conditionString)) {
-            conditionString = PolicyConstants.INVERT_CONDITION + "(" + conditionString + ")";
+        if (!StringUtils.isEmpty(conditionString.toString())) {
+            conditionString = new StringBuilder(PolicyConstants.INVERT_CONDITION + "(" + conditionString + ")");
         }
-
-        return conditionString;
+        return conditionString.toString();
     }
 
     private static void setConstantContext(VelocityContext context) {
-
         context.put("ACROSS_ALL", PolicyConstants.ACROSS_ALL);
         context.put("PER_USER", PolicyConstants.PER_USER);
         context.put("POLICY_LEVEL_API", PolicyConstants.POLICY_LEVEL_API);
