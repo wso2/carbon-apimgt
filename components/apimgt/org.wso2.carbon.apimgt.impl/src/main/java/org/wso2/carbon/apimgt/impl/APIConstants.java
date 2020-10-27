@@ -2316,6 +2316,11 @@ public final class APIConstants {
         public static final String SANDBOX_TOKEN_ENDPOINT = "sandbox_token_endpoint";
         public static final String PRODUCTION_REVOKE_ENDPOINT = "production_revoke_endpoint";
         public static final String SANDBOX_REVOKE_ENDPOINT = "sandbox_revoke_endpoint";
+        public static final String APPLICATION_ACCESS_TOKEN_EXPIRY_TIME = "application_access_token_expiry_time";
+        public static final String USER_ACCESS_TOKEN_EXPIRY_TIME = "user_access_token_expiry_time";
+        public static final String REFRESH_TOKEN_EXPIRY_TIME = "refresh_token_expiry_time";
+        public static final String ID_TOKEN_EXPIRY_TIME = "id_token_expiry_time";
+        public static final String NOT_APPLICABLE_VALUE = "N/A";
 
         public static class KeyManagerEvent {
 
