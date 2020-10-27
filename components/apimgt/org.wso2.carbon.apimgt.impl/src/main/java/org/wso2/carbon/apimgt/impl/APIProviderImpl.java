@@ -2972,7 +2972,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.<String, String>emptyMap());
             }
-
         }
 
         return vtb;
