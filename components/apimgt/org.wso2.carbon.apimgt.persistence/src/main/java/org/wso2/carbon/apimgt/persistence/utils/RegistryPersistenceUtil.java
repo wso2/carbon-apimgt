@@ -1304,13 +1304,13 @@ public class RegistryPersistenceUtil {
     public static String constructApisGetQuery(String query) throws APIManagementException {
 
         String newSearchQuery = constructQueryWithProvidedCriterias(query.trim());
-        // below section is should only be called in apisGet
+        // below section should only be called in apisGet
 //        if (!query.contains(APIConstants.TYPE)) {
 //            String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + RegistryPersistenceUtil.getORBasedSearchCriteria
 //                                            (APIConstants.API_SUPPORTED_TYPE_LIST);
 //            newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
 //        }
-        if (!query.equals("")) {
+        if (query.isEmpty()) {
             String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + RegistryPersistenceUtil.getORBasedSearchCriteria
                                             (APIConstants.API_SUPPORTED_TYPE_LIST);
             newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
