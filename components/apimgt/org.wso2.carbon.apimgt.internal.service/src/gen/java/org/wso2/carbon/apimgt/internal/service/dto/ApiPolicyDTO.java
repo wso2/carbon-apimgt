@@ -23,6 +23,7 @@ public class ApiPolicyDTO   {
   
     private Integer id = null;
     private Integer tenantId = null;
+    private String tenantDomain = null;
     private String name = null;
     private String quotaType = null;
     private List<ApiPolicyConditionGroupDTO> conditionGroups = new ArrayList<>();
@@ -61,6 +62,23 @@ public class ApiPolicyDTO   {
   }
   public void setTenantId(Integer tenantId) {
     this.tenantId = tenantId;
+  }
+
+  /**
+   **/
+  public ApiPolicyDTO tenantDomain(String tenantDomain) {
+    this.tenantDomain = tenantDomain;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("tenantDomain")
+  public String getTenantDomain() {
+    return tenantDomain;
+  }
+  public void setTenantDomain(String tenantDomain) {
+    this.tenantDomain = tenantDomain;
   }
 
   /**
@@ -160,6 +178,7 @@ public class ApiPolicyDTO   {
     ApiPolicyDTO apiPolicy = (ApiPolicyDTO) o;
     return Objects.equals(id, apiPolicy.id) &&
         Objects.equals(tenantId, apiPolicy.tenantId) &&
+        Objects.equals(tenantDomain, apiPolicy.tenantDomain) &&
         Objects.equals(name, apiPolicy.name) &&
         Objects.equals(quotaType, apiPolicy.quotaType) &&
         Objects.equals(conditionGroups, apiPolicy.conditionGroups) &&
@@ -169,7 +188,7 @@ public class ApiPolicyDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType, conditionGroups, applicableLevel, defaultLimit);
+    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, conditionGroups, applicableLevel, defaultLimit);
   }
 
   @Override
@@ -179,6 +198,7 @@ public class ApiPolicyDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
+    sb.append("    tenantDomain: ").append(toIndentedString(tenantDomain)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    conditionGroups: ").append(toIndentedString(conditionGroups)).append("\n");

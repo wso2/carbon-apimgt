@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.throttle.policy.deployer.utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
@@ -55,17 +56,15 @@ public class PolicyUtil {
 
         try {
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(policy.getTenantId(), true);
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            policy.setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(APIConstants.SUPER_TENANT_DOMAIN, true);
             String policyFile;
             String policyString;
             if (Policy.POLICY_TYPE.SUBSCRIPTION.equals(policy.getType())) {
-                policyFile = tenantDomain + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" + policy.getName();
+                policyFile = policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" + policy.getName();
                 policyString = policyTemplateBuilder.getThrottlePolicyForSubscriptionLevel((SubscriptionPolicy) policy);
                 policiesToDeploy.put(policyFile, policyString);
             } else if (Policy.POLICY_TYPE.APPLICATION.equals(policy.getType())) {
-                policyFile = tenantDomain + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + policy.getName();
+                policyFile = policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + policy.getName();
                 policyString = policyTemplateBuilder.getThrottlePolicyForAppLevel((ApplicationPolicy) policy);
                 policiesToDeploy.put(policyFile, policyString);
             } else if (Policy.POLICY_TYPE.API.equals(policy.getType())) {
@@ -180,7 +179,7 @@ public class PolicyUtil {
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" +
                 policyEvent.getPolicyName();
         policyFileNames.add(policyFile);
-        undeployPolicy(policyFileNames, policyEvent.getTenantId());
+        undeployPolicy(policyFileNames);
     }
 
     public static void undeployPolicy(ApplicationPolicyEvent policyEvent) {
@@ -188,7 +187,7 @@ public class PolicyUtil {
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" +
                 policyEvent.getPolicyName();
         policyFileNames.add(policyFile);
-        undeployPolicy(policyFileNames, policyEvent.getTenantId());
+        undeployPolicy(policyFileNames);
     }
 
     public static void undeployPolicy(APIPolicyEvent policyEvent) {
@@ -199,7 +198,7 @@ public class PolicyUtil {
         for (int conditionGroupId : policyEvent.getDeletedConditionGroupIds()) {
             policyFileNames.add(policyFile + "_condition_" + conditionGroupId);
         }
-        undeployPolicy(policyFileNames, policyEvent.getTenantId());
+        undeployPolicy(policyFileNames);
     }
 
     public static void undeployPolicy(GlobalPolicyEvent policyEvent) {
@@ -207,14 +206,14 @@ public class PolicyUtil {
         String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" +
                 policyEvent.getPolicyName();
         policyFileNames.add(policyFile);
-        undeployPolicy(policyFileNames, policyEvent.getTenantId());
+        undeployPolicy(policyFileNames);
     }
 
-    private static void undeployPolicy(List<String> policyFileNames, int tenantId) {
+    private static void undeployPolicy(List<String> policyFileNames) {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                    setTenantId(tenantId, true);
+                    setTenantDomain(APIConstants.SUPER_TENANT_DOMAIN, true);
 
             EventProcessorService eventProcessorService =
                     ServiceReferenceHolder.getInstance().getEventProcessorService();

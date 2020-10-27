@@ -950,6 +950,8 @@ definitions:
         type: integer
       tenantId:
         type: integer
+      tenantDomain:
+        type: string
       name:
         type: string
       quotaType:

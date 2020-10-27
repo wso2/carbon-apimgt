@@ -18,6 +18,7 @@ public class GlobalPolicyDTO   {
   
     private Integer id = null;
     private Integer tenantId = null;
+    private String tenantDomain = null;
     private String name = null;
     private String quotaType = null;
     private String siddhiQuery = null;
@@ -55,6 +56,23 @@ public class GlobalPolicyDTO   {
   }
   public void setTenantId(Integer tenantId) {
     this.tenantId = tenantId;
+  }
+
+  /**
+   **/
+  public GlobalPolicyDTO tenantDomain(String tenantDomain) {
+    this.tenantDomain = tenantDomain;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("tenantDomain")
+  public String getTenantDomain() {
+    return tenantDomain;
+  }
+  public void setTenantDomain(String tenantDomain) {
+    this.tenantDomain = tenantDomain;
   }
 
   /**
@@ -137,6 +155,7 @@ public class GlobalPolicyDTO   {
     GlobalPolicyDTO globalPolicy = (GlobalPolicyDTO) o;
     return Objects.equals(id, globalPolicy.id) &&
         Objects.equals(tenantId, globalPolicy.tenantId) &&
+        Objects.equals(tenantDomain, globalPolicy.tenantDomain) &&
         Objects.equals(name, globalPolicy.name) &&
         Objects.equals(quotaType, globalPolicy.quotaType) &&
         Objects.equals(siddhiQuery, globalPolicy.siddhiQuery) &&
@@ -145,7 +164,7 @@ public class GlobalPolicyDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType, siddhiQuery, keyTemplate);
+    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, siddhiQuery, keyTemplate);
   }
 
   @Override
@@ -155,6 +174,7 @@ public class GlobalPolicyDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
+    sb.append("    tenantDomain: ").append(toIndentedString(tenantDomain)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    siddhiQuery: ").append(toIndentedString(siddhiQuery)).append("\n");

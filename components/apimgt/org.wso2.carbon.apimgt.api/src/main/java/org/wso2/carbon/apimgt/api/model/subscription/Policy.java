@@ -35,6 +35,7 @@ public class Policy implements CacheableEntity<String> {
     private String name = null;
     private String quotaType = null;
     private QuotaPolicy quotaPolicy;
+    private String tenantDomain;
 
     public int getId() {
 
@@ -98,5 +99,13 @@ public class Policy implements CacheableEntity<String> {
 
     public void setQuotaPolicy(QuotaPolicy quotaPolicy) {
         this.quotaPolicy = quotaPolicy;
+    }
+
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
     }
 }

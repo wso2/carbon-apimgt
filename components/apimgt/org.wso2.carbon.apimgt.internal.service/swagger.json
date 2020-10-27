@@ -1156,6 +1156,9 @@
         "tenantId" : {
           "type" : "integer"
         },
+        "tenantDomain" : {
+          "type" : "string"
+        },
         "name" : {
           "type" : "string"
         },

@@ -208,6 +208,8 @@ public class SubscriptionValidationDAO {
                 subscriptionPolicyDTO.setName(resultSet.getString("POLICY_NAME"));
                 subscriptionPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                 subscriptionPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(subscriptionPolicyDTO.getTenantId());
+                subscriptionPolicyDTO.setTenantDomain(tenantDomain);
 
                 subscriptionPolicyDTO.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
                 subscriptionPolicyDTO.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
@@ -330,6 +332,7 @@ public class SubscriptionValidationDAO {
                     globalPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                     globalPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                     globalPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                    globalPolicyDTO.setTenantDomain(tenantDomain);
                     globalPolicyDTO.setKeyTemplate(resultSet.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
                     InputStream siddhiQueryBlob = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
                     String siddhiQuery = null;
@@ -358,6 +361,8 @@ public class SubscriptionValidationDAO {
                 globalPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 globalPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 globalPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(globalPolicyDTO.getTenantId());
+                globalPolicyDTO.setTenantDomain(tenantDomain);
                 globalPolicyDTO.setKeyTemplate(resultSet.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
                 InputStream siddhiQueryBlob = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
                 String siddhiQuery = null;
@@ -710,6 +715,8 @@ public class SubscriptionValidationDAO {
                 applicationPolicyDTO.setName(resultSet.getString("NAME"));
                 applicationPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                 applicationPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(applicationPolicyDTO.getTenantId());
+                applicationPolicyDTO.setTenantDomain(tenantDomain);
                 setCommonProperties(applicationPolicyDTO, resultSet);
                 applicationPolicies.add(applicationPolicyDTO);
             }
@@ -760,6 +767,8 @@ public class SubscriptionValidationDAO {
                     apiPolicy.setName(resultSet.getString("NAME"));
                     apiPolicy.setQuotaType(resultSet.getString("DEFAULT_QUOTA_TYPE"));
                     apiPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    String tenantDomain = APIUtil.getTenantDomainFromTenantId(apiPolicy.getTenantId());
+                    apiPolicy.setTenantDomain(tenantDomain);
                     apiPolicy.setApplicableLevel(resultSet.getString("APPLICABLE_LEVEL"));
                     setCommonProperties(apiPolicy, resultSet);
                     apiPolicies.add(apiPolicy);
@@ -866,6 +875,7 @@ public class SubscriptionValidationDAO {
                     applicationPolicy.setName(resultSet.getString("NAME"));
                     applicationPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                     applicationPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    applicationPolicy.setTenantDomain(tenantDomain);
                     setCommonProperties(applicationPolicy, resultSet);
 
                     return applicationPolicy;
@@ -941,6 +951,7 @@ public class SubscriptionValidationDAO {
                         subscriptionPolicy.setName(resultSet.getString("POLICY_NAME"));
                         subscriptionPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                         subscriptionPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                        subscriptionPolicy.setTenantDomain(APIUtil.getTenantDomainFromTenantId(tenantId));
 
                         subscriptionPolicy.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
                         subscriptionPolicy.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));

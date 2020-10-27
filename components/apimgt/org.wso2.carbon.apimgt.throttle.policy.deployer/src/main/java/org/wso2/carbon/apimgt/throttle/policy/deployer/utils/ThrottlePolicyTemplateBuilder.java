@@ -175,6 +175,9 @@ public class ThrottlePolicyTemplateBuilder {
             JSONArray policyConditionJson = new JSONArray();
             if (conditionGroups != null) {
                 for (APIPolicyConditionGroup conditionGroup : conditionGroups) {
+                    if (conditionGroup.getDefaultLimit() == null) {
+                        continue;
+                    }
                     policyConditionJson.add(getPolicyConditionJson(conditionGroup.getCondition()));
                     String conditionString = getPolicyConditionForDefault(conditionGroup.getCondition());
                     if (!StringUtils.isEmpty(conditionString)) {

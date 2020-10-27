@@ -188,6 +188,7 @@ public class SubscriptionValidationDataUtil {
                 subscriptionPolicyDTO.setGraphQLMaxDepth(subscriptionPolicyModel.getGraphQLMaxDepth());
                 subscriptionPolicyDTO.setGraphQLMaxComplexity(subscriptionPolicyModel.getGraphQLMaxComplexity());
                 subscriptionPolicyDTO.setTenantId(subscriptionPolicyModel.getTenantId());
+                subscriptionPolicyDTO.setTenantDomain(subscriptionPolicyModel.getTenantDomain());
                 subscriptionPolicyDTO.setRateLimitCount(subscriptionPolicyModel.getRateLimitCount());
                 subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicyModel.isStopOnQuotaReach());
                 subscriptionPolicyDTO.setRateLimitTimeUnit(subscriptionPolicyModel.getRateLimitTimeUnit());
@@ -277,6 +278,7 @@ public class SubscriptionValidationDataUtil {
                 applicationPolicyDTO.setName(applicationPolicyModel.getName());
                 applicationPolicyDTO.setQuotaType(applicationPolicyModel.getQuotaType());
                 applicationPolicyDTO.setTenantId(applicationPolicyModel.getTenantId());
+                applicationPolicyDTO.setTenantDomain(applicationPolicyModel.getTenantDomain());
                 applicationPolicyDTO.setDefaultLimit(getThrottleLimitDTO(applicationPolicyModel));
 
                 applicationPolicyListDTO.getList().add(applicationPolicyDTO);
@@ -299,6 +301,7 @@ public class SubscriptionValidationDataUtil {
                 policyDTO.setName(apiPolicyModel.getName());
                 policyDTO.setQuotaType(apiPolicyModel.getQuotaType());
                 policyDTO.setTenantId(apiPolicyModel.getTenantId());
+                policyDTO.setTenantDomain(apiPolicyModel.getTenantDomain());
                 policyDTO.setApplicableLevel(apiPolicyModel.getApplicableLevel());
                 policyDTO.setDefaultLimit(getThrottleLimitDTO(apiPolicyModel));
                 apiPolicyListDTO.getList().add(policyDTO);
@@ -406,6 +409,7 @@ public class SubscriptionValidationDataUtil {
                 globalPolicyDTO.setId(globalPolicy.getId());
                 globalPolicyDTO.setName(globalPolicy.getName());
                 globalPolicyDTO.setTenantId(globalPolicy.getTenantId());
+                globalPolicyDTO.setTenantDomain(globalPolicy.getTenantDomain());
                 globalPolicyDTO.setSiddhiQuery(globalPolicy.getSiddhiQuery());
                 globalPolicyDTO.setKeyTemplate(globalPolicy.getKeyTemplate());
 

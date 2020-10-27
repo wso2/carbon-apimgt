@@ -20,6 +20,7 @@ public class ApplicationPolicyDTO   {
   
     private Integer id = null;
     private Integer tenantId = null;
+    private String tenantDomain = null;
     private String name = null;
     private String quotaType = null;
     private ThrottleLimitDTO defaultLimit = null;
@@ -56,6 +57,23 @@ public class ApplicationPolicyDTO   {
   }
   public void setTenantId(Integer tenantId) {
     this.tenantId = tenantId;
+  }
+
+  /**
+   **/
+  public ApplicationPolicyDTO tenantDomain(String tenantDomain) {
+    this.tenantDomain = tenantDomain;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("tenantDomain")
+  public String getTenantDomain() {
+    return tenantDomain;
+  }
+  public void setTenantDomain(String tenantDomain) {
+    this.tenantDomain = tenantDomain;
   }
 
   /**
@@ -121,6 +139,7 @@ public class ApplicationPolicyDTO   {
     ApplicationPolicyDTO applicationPolicy = (ApplicationPolicyDTO) o;
     return Objects.equals(id, applicationPolicy.id) &&
         Objects.equals(tenantId, applicationPolicy.tenantId) &&
+        Objects.equals(tenantDomain, applicationPolicy.tenantDomain) &&
         Objects.equals(name, applicationPolicy.name) &&
         Objects.equals(quotaType, applicationPolicy.quotaType) &&
         Objects.equals(defaultLimit, applicationPolicy.defaultLimit);
@@ -128,7 +147,7 @@ public class ApplicationPolicyDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType, defaultLimit);
+    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, defaultLimit);
   }
 
   @Override
@@ -138,6 +157,7 @@ public class ApplicationPolicyDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
+    sb.append("    tenantDomain: ").append(toIndentedString(tenantDomain)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
