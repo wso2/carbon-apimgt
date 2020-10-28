@@ -140,9 +140,12 @@ public class OAS3Parser extends APIDefinition {
                 boolean hasXmlPayload = false;
                 //for setting only one initializing if condition per response code
                 boolean respCodeInitialized = false;
-                for (Map.Entry<PathItem.HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
+                for (Map.Entry<PathItem.HttpMethod, Operation> httpMethodMap : operationMap.entrySet()) {
                     //add verb to apiResourceMediationPolicyObject
-                    apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
+                    if (op.equals(httpMethodMap.getValue())) {
+                        apiResourceMediationPolicyObject.setVerb(String.valueOf(httpMethodMap.getKey()));
+                        break;
+                    }
                 }
                 for (String responseEntry : op.getResponses().keySet()) {
                     if (!responseEntry.equals("default")) {
@@ -186,10 +189,10 @@ public class OAS3Parser extends APIDefinition {
                 if (op.getExtensions() != null && op.getExtensions().get
                         (APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
                     if (op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
-                        op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+                        op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
                     }
                 } else if (op.getExtensions() == null) {
-                    op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+                    op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
                 }
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
