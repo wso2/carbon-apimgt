@@ -834,6 +834,8 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.subscription.blocked.prod.only": "Subscription was blocked for production only.",
   "Apis.Details.Subscriptions.SubscriptionsTable.subscription.unblocked": "Subscription was unblocked.",
   "Apis.Details.Subscriptions.SubscriptionsTable.subscriptions.error": "Error while retrieving the subscriptions",
+  "Apis.Details.TestConsole.TestConsole.info.message": "API should be in prototype(testing) state. \n                                            Please demote to created state and click\n                                            on the initialize Test button \n                                            in the Test Console left menu item.",
+  "Apis.Details.TestConsole.TestConsole.info.title": "API should be in prototype(testing) state.",
   "Apis.Details.components.APIDetailsTopMenu.created.by": "Created by:",
   "Apis.Details.components.APIDetailsTopMenu.error": "Something went wrong while downloading the API.",
   "Apis.Details.components.APIDetailsTopMenu.last.updated.time": "Last updated:",
