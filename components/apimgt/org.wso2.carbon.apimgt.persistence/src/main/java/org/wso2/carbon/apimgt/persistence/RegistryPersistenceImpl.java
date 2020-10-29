@@ -405,35 +405,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
     }
 
-    @Override public API updateApi(API api) {
-        return null;
-    }
-
-    @Override public void updateWsdlFromUrl(String apiId, String wsdlUrl) {
-
-    }
-
-    @Override public void updateWsdlFromUrl(API api) {
-
-    }
-
-    @Override public void updateDocVisibility(String apiId, String visibility, String visibleRoles,
-                                    Documentation documentation) {
-
-    }
-
-    @Override public void updateWsdlFromWsdlFile(API api, ResourceFile wsdlResourceFile) {
-
-    }
-
-    @Override public void addLifeCycle(API api) {
-
-    }
-
-    @Override public Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start,
-                                    int end, boolean limitAttributes) {
-        return null;
-    }
 
     @Override public Map<String, Object> searchPaginatedAPIs(String paginatedSearchQuery, Organization requestedOrg, int start,
                                     int end, boolean isLazyLoad, boolean isPublisherListing)
@@ -573,11 +544,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return result;
 
         //return null;
-    }
-
-    @Override public Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery,
-                                    int start, int end, boolean limitAttributes) {
-        return null;
     }
 
     /**
@@ -855,11 +821,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return result;
     }
 
-//    @Override public Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery,
-//                                    int start, int end, boolean limitAttributes) {
-//        return null;
-//    }
-
     /**
      * Search api resources by their content
      *
@@ -1079,20 +1040,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return result;
     }
 
-
-    @Override public String getGraphqlSchema(String apiId) {
-        return null;
-    }
-
-    @Override public void saveGraphqlSchemaDefinition(String apiId, String schemaDefinition) {
-
-    }
-
-    @Override public void deleteAPI(String apiId) {
-
-    }
-
-    @Override public Documentation getDocumentation(String apiId, String docId, Organization requestedOrg)
+    @Override public Documentation getDocumentation(Organization requestedOrg, String apiId, String docId)
                                     throws APIManagementException {
         String requestedTenantDomain = requestedOrg.getName();
         Documentation documentation = null;
@@ -1260,130 +1208,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             postfixUrl = webContext + postfixUrl;
         }
         return postfixUrl;
-    }
-
-    @Override public void removeDocumentation(String apiOrProductId, String docId) {
-
-    }
-
-    @Override public void updateDocumentation(String apiId, Documentation documentation) {
-
-    }
-
-    @Override public List<Documentation> getAllDocumentation(String apiOrProductId) {
-        return null;
-    }
-
-    @Override public void addDocumentation(String apiId, Documentation documentation) {
-
-    }
-
-
-    @Override public API getLightweightAPIByUUID(String uuid, String requestedOrg) {
-        return null;
-    }
-
-    @Override public Map<String, Object> getAPILifeCycleData(String apiId) {
-        return null;
-    }
-
-    @Override public List<Mediation> getAllApiSpecificMediationPolicies(String apiId) {
-        return null;
-    }
-
-    @Override public Mediation getApiSpecificMediationPolicyFromUUID(String apiOrProductId,
-                                    String mediationPolicyUUID) {
-        return null;
-    }
-
-    @Override public Mediation getApiSpecificMediationPolicyFromUUID(String mediationPolicyUUID) {
-        return null;
-    }
-
-    @Override public void updateApiSpecificMediationPolicy(String apiOrProductId, String mediationPolicyId) {
-
-    }
-
-    @Override public void deleteApiSpecificMediationPolicy(String apiOrProductId, String mediationPolicyId) {
-
-    }
-
-    @Override public boolean isMediationPolicyExists(String mediationPolicyId) {
-        return false;
-    }
-
-    @Override public void addApiSpecificMediationPolicy(String apiOrProductId, String type, ResourceFile contentFile) {
-
-    }
-
-    @Override public void configureMonetizationInAPI(API api) {
-
-    }
-
-    @Override public void configureMonetizationInAPI(String apiId, JSONObject monetizationProperties,
-                                    boolean isMonetizationEnabled) {
-
-    }
-
-    @Override public boolean isSOAPToRESTApi(String apiOrProductId) {
-        return false;
-    }
-
-    @Override public String getRestToSoapConvertedSequence(String apiOrProductId, String seqType) {
-        return null;
-    }
-
-    @Override public String getResourcePolicyFromResourceId(String apiId, String resourceId) {
-        return null;
-    }
-
-    @Override public void updateResourcePolicyFromResourceId(String apiId, String resourceId, String content) {
-
-    }
-
-    @Override public String getOASDefinitionOfAPI(String apiOrProductId) {
-        return null;
-    }
-
-    @Override public void saveOASAPIDefinition(String apiId, String apiDefinitionJSON) {
-
-    }
-
-    @Override public ResourceFile getIcon(String apiId) {
-        return null;
-    }
-
-    @Override public void saveAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail) {
-
-    }
-
-    @Override public boolean isDocumentationExists(String apiOrProductId, String docName) {
-        return false;
-    }
-
-    @Override public void changeAPILifeCycle(String apiId, String status) {
-
-    }
-
-    @Override public int createNewAPIVersion(API api, String newVersion) {
-        return 0;
-    }
-
-
-    @Override public void deleteAPIProduct(String apiProductId) {
-
-    }
-
-    @Override public Documentation getProductDocumentation(String productId, String docId, Organization requestedOrg) {
-        return null;
-    }
-
-    @Override public Map<String, Object> getDocumentContent(String apiId, String docId, Organization requestedOrg) {
-        return null;
-    }
-
-    @Override public boolean isApiExists(APIIdentifier apiIdentifier) {
-        return false;
     }
 
 //    @Override public void createAPI(API api) throws APIManagementException {

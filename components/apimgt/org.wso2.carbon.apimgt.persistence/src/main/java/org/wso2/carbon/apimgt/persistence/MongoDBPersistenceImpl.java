@@ -1,15 +1,26 @@
 package org.wso2.carbon.apimgt.persistence;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.Documentation;
+import org.wso2.carbon.apimgt.persistence.dto.Mediation;
+import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 
-import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 public class MongoDBPersistenceImpl implements APIPersistence {
 
@@ -17,207 +28,134 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
-    @Override public API updateApi(API api) {
+    @Override public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
         return null;
     }
 
-    @Override public String createWsdl(API api, InputStream wsdlContent, OMElement wsdlContentEle) {
+    @Override public PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI)
+                                    throws APIPersistenceException {
         return null;
     }
 
-    @Override public void updateWsdlFromUrl(String apiId, String wsdlUrl) {
-
-    }
-
-    @Override public void updateWsdlFromUrl(API api) {
-
-    }
-
-    @Override public void updateDocVisibility(String apiId, String visibility, String visibleRoles,
-                                    Documentation documentation) {
-
-    }
-
-    @Override public void updateWsdlFromWsdlFile(API api, ResourceFile resourceFile) {
-
-    }
-
-    @Override public String updateWsdlFromWsdlFile(String apiId, ResourceFile wsdlResourceFile)
-                                    throws APIManagementException {
+    @Override public PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException {
         return null;
     }
 
-    @Override public void addLifeCycle(API api) {
-
-    }
-
-    @Override public API createAPI(API api) {
+    @Override public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
         return null;
     }
 
-    @Override public Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start,
-                                    int end, boolean limitAttributes) {
+    @Override public void deleteAPI(Organization org, String apiId) throws APIPersistenceException {
+
+    }
+
+    @Override public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start,
+                                    int offset, UserContext ctx) throws APIPersistenceException {
         return null;
     }
 
-    @Override public Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start,
-                                    int end, boolean limitAttributes, boolean isPublisherListing) {
+    @Override public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start,
+                                    int offset, UserContext ctx) throws APIPersistenceException {
         return null;
     }
 
-    @Override public Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery,
-                                    int start, int end, boolean limitAttributes) {
+    @Override public void changeAPILifeCycle(Organization org, String apiId, String status)
+                                    throws APIPersistenceException {
+
+    }
+
+    @Override public void saveWSDL(Organization org, String apiId, ResourceFile wsdlResourceFile)
+                                    throws WSDLPersistenceException {
+
+    }
+
+    @Override public ResourceFile getWSDL(Organization org, String apiId) throws WSDLPersistenceException {
         return null;
     }
 
-    @Override public String getGraphqlSchema(String apiId) {
+    @Override public void saveOASDefinition(Organization org, String apiId, String apiDefinition)
+                                    throws OASPersistenceException {
+
+    }
+
+    @Override public String getOASDefinition(Organization org, String apiId) throws OASPersistenceException {
         return null;
     }
 
-    @Override public void saveGraphqlSchemaDefinition(String apiId, String schemaDefinition) {
+    @Override public void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition)
+                                    throws GraphQLPersistenceException {
 
     }
 
-    @Override public void deleteAPI(String apiId) {
-
-    }
-
-    @Override public Documentation getDocumentation(String apiId, String docId, Organization requestedOrg)
-                                    throws APIManagementException {
+    @Override public String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException {
         return null;
     }
 
-    @Override public void updateDocumentation(String apiId, Documentation documentation) {
-
-    }
-
-    @Override public List<Documentation> getAllDocumentation(String apiOrProductId) {
+    @Override public Documentation addDocumentation(Organization org, String apiId, Documentation documentation)
+                                    throws DocumentationPersistenceException {
         return null;
     }
 
-    @Override public void addDocumentation(String apiId, Documentation documentation) {
-
-    }
-
-    @Override public API getLightweightAPIByUUID(String uuid, String requestedOrg) {
+    @Override public Documentation updateDocumentation(Organization org, String apiId, Documentation documentation)
+                                    throws DocumentationPersistenceException {
         return null;
     }
 
-    @Override public API getAPIbyId(String id, String requestedTenantDomain) throws APIManagementException {
+    @Override public Documentation getDocumentation(Organization org, String apiId, String docId)
+                                    throws DocumentationPersistenceException {
         return null;
     }
 
-    @Override public Map<String, Object> getAPILifeCycleData(String apiId) {
+    @Override public DocumentContent getDocumentationContent(Organization org, String apiId, String docId)
+                                    throws DocumentationPersistenceException {
         return null;
     }
 
-    @Override public List<Mediation> getAllApiSpecificMediationPolicies(String apiId) {
+    @Override public DocumentSearchResult searchDocumentation(Organization org, String apiId, int start, int offset,
+                                    String searchQuery, UserContext ctx) throws DocumentationPersistenceException {
         return null;
     }
 
-    @Override public Mediation getApiSpecificMediationPolicyFromUUID(String apiOrProductId,
-                                    String mediationPolicyUUID) {
+    @Override public void deleteDocumentation(Organization org, String apiId, String docId)
+                                    throws DocumentationPersistenceException {
+
+    }
+
+    @Override public Mediation addMediationPolicy(Organization org, String apiId, Mediation mediation)
+                                    throws MediationPolicyPersistenceException {
         return null;
     }
 
-    @Override public Mediation getApiSpecificMediationPolicyFromUUID(String mediationPolicyUUID) {
+    @Override public Mediation updateMediationPolicy(Organization org, String apiId, Mediation mediation)
+                                    throws MediationPolicyPersistenceException {
         return null;
     }
 
-    @Override public void updateApiSpecificMediationPolicy(String apiOrProductId, String mediationPolicyId) {
-
-    }
-
-    @Override public void deleteApiSpecificMediationPolicy(String apiOrProductId, String mediationPolicyId) {
-
-    }
-
-    @Override public boolean isMediationPolicyExists(String mediationPolicyId) {
-        return false;
-    }
-
-    @Override public void addApiSpecificMediationPolicy(String apiOrProductId, String type, ResourceFile contentFile) {
-
-    }
-
-    @Override public void configureMonetizationInAPI(API api) {
-
-    }
-
-    @Override public void configureMonetizationInAPI(String apiId, JSONObject monetizationProperties,
-                                    boolean isMonetizationEnabled) {
-
-    }
-
-    @Override public boolean isSOAPToRESTApi(String apiOrProductId) {
-        return false;
-    }
-
-    @Override public String getRestToSoapConvertedSequence(String apiOrProductId, String seqType) {
+    @Override public Mediation getMediationPolicy(Organization org, String apiId, String mediationPolicyId)
+                                    throws MediationPolicyPersistenceException {
         return null;
     }
 
-    @Override public String getResourcePolicyFromResourceId(String apiId, String resourceId) {
+    @Override public List<MediationInfo> getAllMediationPolicies(Organization org, String apiId)
+                                    throws MediationPolicyPersistenceException {
         return null;
     }
 
-    @Override public void updateResourcePolicyFromResourceId(String apiId, String resourceId, String content) {
+    @Override public void deleteMediationPolicy(Organization org, String apiId, String mediationPolicyId)
+                                    throws MediationPolicyPersistenceException {
 
     }
 
-    @Override public String getOASDefinitionOfAPI(String apiOrProductId) {
+    @Override public void saveThumbnail(Organization org, String apiId, ResourceFile resourceFile)
+                                    throws ThumbnailPersistenceException {
+
+    }
+
+    @Override public ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
         return null;
     }
 
-    @Override public void saveOASAPIDefinition(String apiId, String apiDefinitionJSON) {
+    @Override public void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
 
-    }
-
-    @Override public ResourceFile getIcon(String apiId) {
-
-        return null;
-    }
-
-    @Override
-    public void saveAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail) {
-
-    }
-
-    @Override public boolean isDocumentationExists(String apiOrProductId, String docName) {
-        return false;
-    }
-
-    @Override public ResourceFile getWSDL(String apiId) {
-        return null;
-    }
-
-    @Override public void changeAPILifeCycle(String apiId, String status) {
-
-    }
-
-    @Override public int createNewAPIVersion(API api, String newVersion) {
-        return 0;
-    }
-
-
-
-    @Override public void deleteAPIProduct(String apiProductId) {
-
-    }
-
-    @Override public Documentation getProductDocumentation(String productId, String docId, Organization requestedOrg) {
-        return null;
-    }
-
-    @Override public Map<String, Object> getDocumentContent(String apiId, String docId, Organization requestedOrg) {
-        return null;
-    }
-
-    @Override public void removeDocumentation(String apiOrProductId, String docId) {
-
-    }
-
-    @Override public boolean isApiExists(APIIdentifier apiIdentifier) {
-        return false;
     }
 }
