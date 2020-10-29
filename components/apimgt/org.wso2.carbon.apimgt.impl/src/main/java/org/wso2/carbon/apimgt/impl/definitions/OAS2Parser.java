@@ -187,10 +187,10 @@ public class OAS2Parser extends APIDefinition {
                 if (op.getVendorExtensions() != null && op.getVendorExtensions().get
                         (APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
                     if (op.getVendorExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
-                        op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+                        op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
                     }
                 } else if (op.getVendorExtensions() == null) {
-                    op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+                    op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
                 }
             }
             returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
