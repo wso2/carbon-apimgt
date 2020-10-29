@@ -65,6 +65,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return null;
     }
 
+    @Override public Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery,
+                                    int start, int end, boolean limitAttributes) {
+        return null;
+    }
+
     @Override public String getGraphqlSchema(String apiId) {
         return null;
     }
@@ -194,13 +199,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return 0;
     }
 
-    @Override public APIProduct getAPIProductbyUUID(String uuid, Organization requestedOrg) {
-        return null;
-    }
 
-//    @Override public APIProduct getAPIProduct(String apiProductId) {
-//        return null;
-//    }
 
     @Override public void deleteAPIProduct(String apiProductId) {
 

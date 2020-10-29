@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.persistence.dto;
 
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
