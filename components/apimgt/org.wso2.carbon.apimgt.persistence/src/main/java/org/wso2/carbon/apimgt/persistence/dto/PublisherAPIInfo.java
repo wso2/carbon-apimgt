@@ -6,26 +6,25 @@ package org.wso2.carbon.apimgt.persistence.dto;
  * persistence layer are included in this.
  */
 public class PublisherAPIInfo {
-    String name;
-    String version;
-    String context;
-    String provider;
-    String status;
+    private String id;
+    private String apiName;
+    private String version;
+    private String providerName;
+    private String context;
+    private String status;
+    private String type;
+    private String thumbnail; // thumbnail is not required for normal ApiGet
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public String getApiName() {
+        return apiName;
     }
 
     public String getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public String getProviderName() {
+        return providerName;
     }
 
     public String getContext() {
@@ -34,14 +33,6 @@ public class PublisherAPIInfo {
 
     public void setContext(String context) {
         this.context = context;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
     }
 
     public String getStatus() {

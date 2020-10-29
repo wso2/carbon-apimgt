@@ -9,8 +9,6 @@ import java.util.List;
 public class PublisherAPISearchResult {
     int returnedAPIsCount;
     int totalAPIsCount;
-    int start;
-    int offset;
     List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<>();
 
     public int getReturnedAPIsCount() {
@@ -27,22 +25,6 @@ public class PublisherAPISearchResult {
 
     public void setTotalAPIsCount(int totalAPIsCount) {
         this.totalAPIsCount = totalAPIsCount;
-    }
-
-    public int getStart() {
-        return start;
-    }
-
-    public void setStart(int start) {
-        this.start = start;
-    }
-
-    public int getOffset() {
-        return offset;
-    }
-
-    public void setOffset(int offset) {
-        this.offset = offset;
     }
 
     public List<PublisherAPIInfo> getPublisherAPIInfoList() {

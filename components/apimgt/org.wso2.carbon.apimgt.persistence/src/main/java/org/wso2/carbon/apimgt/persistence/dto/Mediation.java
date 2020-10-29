@@ -17,27 +17,15 @@
  */
 package org.wso2.carbon.apimgt.persistence.dto;
 
-public class Mediation {
+public class Mediation extends MediationInfo {
 
-    private String id;
-    private String name;
-    private String type;
     private String config;
 
-    public void setId(String id){
-        this.id =id;
+    public void setConfig(String config) {
+        this.config = config;
     }
-    public String getId(){return id;}
 
-    public void setName(String name){this.name=name;}
-
-    public String getName(){return name;}
-
-    public void setType(String mType){this.type=mType;}
-
-    public String getType(){return  type;}
-
-    public void setConfig(String mConfig){this.config=mConfig;}
-
-    public String getConfig(){return config;}
+    public String getConfig() {
+        return config;
+    }
 }

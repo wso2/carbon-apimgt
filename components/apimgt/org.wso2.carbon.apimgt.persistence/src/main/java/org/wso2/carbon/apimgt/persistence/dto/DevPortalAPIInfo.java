@@ -6,40 +6,15 @@ package org.wso2.carbon.apimgt.persistence.dto;
  * APIs in DevPortal which are stored in the persistence layer are included in this.
  */
 public class DevPortalAPIInfo {
-    private String name;
+    private String id;
+    private String apiName;
     private String version;
+    private String providerName;
     private String context;
-    private String provider;
+    private String type;
+    private String thumbnail;
+    private String businessOwner;
 
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getContext() {
-        return context;
-    }
-
-    public void setContext(String context) {
-        this.context = context;
-    }
+    //monetizationCategory which is returned to UI as 'monetizationLabel' is not required. it is derived from the
+    // attached tiers.
 }
