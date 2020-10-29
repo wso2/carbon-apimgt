@@ -35,6 +35,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.Pipe;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.everit.json.schema.Schema;
@@ -108,18 +109,16 @@ public class SchemaValidator extends AbstractHandler {
             if (logger.isDebugEnabled()) {
                 logger.debug("Content type of the request message: " + contentType);
             }
-            Pipe pipe = (Pipe)axis2MC.getProperty("pass-through.pipe");
-            if (pipe != null) {
-                String payloadContent;
-                if (getMessageContent(messageContext) != null) {
-                    payloadContent = getMessageContent(messageContext).toString();
-                } else {
-                    payloadContent = IOUtils.toString(pipe.getInputStream());
-                }
-                JsonUtil.getNewJsonPayload(axis2MC, payloadContent, true, true);
-            }
             if (!APIMgtGatewayConstants.APPLICATION_JSON.equals(contentType)) {
                 return true;
+            }
+            Pipe pipe = (Pipe)axis2MC.getProperty(PassThroughConstants.PASS_THROUGH_PIPE);
+            if (pipe != null) {
+                if (getMessageContent(messageContext) == null) {
+                    String payloadContent = IOUtils.toString(pipe.getInputStream());
+                    JsonUtil.getNewJsonPayload(axis2MC, payloadContent, true, true);
+                    messageContext.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
+                }
             }
             JsonElement payloadObject = getMessageContent(messageContext);
             if (!APIConstants.SupportedHTTPVerbs.GET.name().equals(requestMethod) &&
