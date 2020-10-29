@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+
 /**
  * Entity for keeping details of a Bandwidth Limit
  */
@@ -38,5 +40,14 @@ public class BandwidthLimit extends Limit {
 
     public void setDataUnit(String dataUnit) {
         this.dataUnit = dataUnit;
+    }
+
+    public long getStandardDataAmount() {
+        if(PolicyConstants.MB.equalsIgnoreCase(dataUnit)) {
+            return dataAmount * 1024 * 1024;
+        } else if (PolicyConstants.KB.equalsIgnoreCase(dataUnit)) {
+            return dataAmount * 1024;
+        }
+        return dataAmount;
     }
 }

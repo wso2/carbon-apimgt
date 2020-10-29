@@ -42,7 +42,6 @@ public class ServiceReferenceHolder {
     private ServiceReferenceHolder() {
     }
 
-
     public APIManagerConfiguration getAPIMConfiguration() {
         return apimConfiguration;
     }

@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface GlobalPoliciesApiService {
-      public Response globalPoliciesGet(String xWSO2Tenant, String policyName, Boolean allTenants, MessageContext messageContext) throws APIManagementException;
+      public Response globalPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) throws APIManagementException;
 }

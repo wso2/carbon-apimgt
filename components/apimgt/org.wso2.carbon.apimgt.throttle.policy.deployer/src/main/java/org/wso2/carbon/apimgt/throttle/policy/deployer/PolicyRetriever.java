@@ -83,9 +83,8 @@ public class PolicyRetriever {
     public SubscriptionPolicyList getAllSubscriptionPolicies()
             throws ThrottlePolicyDeployerException {
 
-        String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES +
-                "?allTenants=true";
-        return getPolicies(path, null, SubscriptionPolicyList.class);
+        String path = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES;
+        return getPolicies(path, "*", SubscriptionPolicyList.class);
     }
 
     /**
@@ -117,9 +116,8 @@ public class PolicyRetriever {
     public ApplicationPolicyList getAllApplicationPolicies()
             throws ThrottlePolicyDeployerException {
 
-        String path = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES +
-                "?allTenants=true";
-        return getPolicies(path, null, ApplicationPolicyList.class);
+        String path = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES;
+        return getPolicies(path, "*", ApplicationPolicyList.class);
     }
 
     /**
@@ -149,9 +147,8 @@ public class PolicyRetriever {
     public ApiPolicyList getAllApiPolicies()
             throws ThrottlePolicyDeployerException {
 
-        String path = APIConstants.SubscriptionValidationResources.API_POLICIES +
-                "?allTenants=true";
-        return getPolicies(path, null, ApiPolicyList.class);
+        String path = APIConstants.SubscriptionValidationResources.API_POLICIES;
+        return getPolicies(path, "*", ApiPolicyList.class);
     }
 
     /**
@@ -163,9 +160,8 @@ public class PolicyRetriever {
     public GlobalPolicyList getAllGlobalPolicies()
             throws ThrottlePolicyDeployerException {
 
-        String path = APIConstants.SubscriptionValidationResources.GLOBAL_POLICIES +
-                "?allTenants=true";
-        return getPolicies(path, null, GlobalPolicyList.class);
+        String path = APIConstants.SubscriptionValidationResources.GLOBAL_POLICIES;
+        return getPolicies(path, "*", GlobalPolicyList.class);
     }
 
     /**
@@ -198,14 +194,14 @@ public class PolicyRetriever {
     private <T> T getPolicies(String path, String tenantDomain, Class<T> policyClass)
             throws ThrottlePolicyDeployerException {
 
-        try {
-            String endpoint = baseURL + path;
-            CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain);
-
+        String endpoint = baseURL + path;
+        try (CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain)) {
             if (httpResponse.getEntity() != null) {
                 String responseString = EntityUtils.toString(httpResponse.getEntity(),
                         APIConstants.DigestAuthConstants.CHARSET);
-                httpResponse.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Response: " + responseString);
+                }
                 if (responseString != null && !responseString.isEmpty()) {
                     return new Gson().fromJson(responseString, policyClass);
                 }

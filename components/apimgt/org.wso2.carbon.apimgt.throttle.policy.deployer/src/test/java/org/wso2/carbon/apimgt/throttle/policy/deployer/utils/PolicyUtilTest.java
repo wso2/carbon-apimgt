@@ -148,6 +148,15 @@ public class PolicyUtilTest {
         List<Integer> deletedConditionGroupIds = new ArrayList<>();
         deletedConditionGroupIds.add(5);
         deletedConditionGroupIds.add(6);
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
+                "_" + policy.getName() + "_condition_5"))
+                .thenReturn("EXECUTION_PLAN");
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
+                "_" + policy.getName() + "_condition_6"))
+                .thenReturn("EXECUTION_PLAN");
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
+                "_" + policy.getName() + "_default"))
+                .thenReturn("EXECUTION_PLAN");
         APIPolicyEvent policyEvent = new APIPolicyEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.POLICY_DELETE.name(), -1234, policy.getTenantDomain(),
                 policy.getId(), policy.getName(), policy.getDefaultLimit().getQuotaType(),
@@ -196,6 +205,9 @@ public class PolicyUtilTest {
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName(),
                 policy.getDefaultLimit().getQuotaType());
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP +
+                "_" + policy.getName()))
+                .thenReturn("EXECUTION_PLAN");
         PolicyUtil.undeployPolicy(policyEvent);
         Mockito.verify(eventProcessorService, Mockito.times(1))
                 .undeployActiveExecutionPlan(Mockito.anyString());
@@ -247,6 +259,9 @@ public class PolicyUtilTest {
                 policy.getName(), policy.getDefaultLimit().getQuotaType(),
                 policy.getRateLimitCount(), policy.getRateLimitTimeUnit(), policy.isStopOnQuotaReach(),
                 policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity());
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB +
+                "_" + policy.getName()))
+                .thenReturn("EXECUTION_PLAN");
         PolicyUtil.undeployPolicy(policyEvent);
         Mockito.verify(eventProcessorService, Mockito.times(1))
                 .undeployActiveExecutionPlan(Mockito.anyString());
@@ -288,6 +303,9 @@ public class PolicyUtilTest {
         GlobalPolicyEvent policyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName());
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(PolicyConstants.POLICY_LEVEL_GLOBAL +
+                "_" + policy.getName()))
+                .thenReturn("EXECUTION_PLAN");
         PolicyUtil.undeployPolicy(policyEvent);
         Mockito.verify(eventProcessorService, Mockito.times(1))
                 .undeployActiveExecutionPlan(Mockito.anyString());

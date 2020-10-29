@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.derby.iapi.util.StringUtil;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.ApplicationPoliciesApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -33,19 +34,17 @@ import javax.ws.rs.core.Response;
 public class ApplicationPoliciesApiServiceImpl implements ApplicationPoliciesApiService {
 
     @Override
-    public Response applicationPoliciesGet(String xWSO2Tenant, String policyName, Boolean allTenants, MessageContext messageContext) {
+    public Response applicationPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) {
 
-        allTenants = allTenants != null && allTenants;
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
-        if (allTenants) {
-            return Response.ok().entity(SubscriptionValidationDataUtil.
-                    fromApplicationPolicyToApplicationPolicyListDTO(subscriptionValidationDAO.
-                            getAllApplicationPolicies())).build();
-        }
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
 
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
-            if (StringUtils.isNotEmpty(policyName)) {
+            if (APIConstants.CHAR_ASTERIX.equals(xWSO2Tenant)) {
+                return Response.ok().entity(SubscriptionValidationDataUtil.
+                        fromApplicationPolicyToApplicationPolicyListDTO(subscriptionValidationDAO.
+                                getAllApplicationPolicies())).build();
+            } else if (StringUtils.isNotEmpty(policyName)) {
                 List<ApplicationPolicy> model = new ArrayList<>();
                 ApplicationPolicy applicationPolicy = subscriptionValidationDAO.
                         getApplicationPolicyByNameForTenant(policyName, xWSO2Tenant);

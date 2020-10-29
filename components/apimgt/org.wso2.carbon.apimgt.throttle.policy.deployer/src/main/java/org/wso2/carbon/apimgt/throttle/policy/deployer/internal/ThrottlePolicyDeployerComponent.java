@@ -52,12 +52,6 @@ public class ThrottlePolicyDeployerComponent {
             log.warn("API Manager Configuration not properly set.");
             return;
         }
-        EventProcessorService eventProcessorService =
-                ServiceReferenceHolder.getInstance().getEventProcessorService();
-        if (eventProcessorService == null) {
-            log.warn("EventProcessor Service not properly set.");
-            return;
-        }
         ThrottlePolicyStartupListener throttlePolicyStartupListener =
                 new ThrottlePolicyStartupListener();
         registration = context.getBundleContext()

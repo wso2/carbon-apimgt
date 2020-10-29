@@ -29,7 +29,15 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.PolicyRetriever;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.*;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Policy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -48,7 +56,6 @@ import java.util.HashMap;
  */
 public class PolicyUtil {
     private static final Log log = LogFactory.getLog(PolicyUtil.class);
-    private static final String REQUEST_PRE_PROCESSOR_EXECUTION_PLAN = "requestPreProcessorExecutionPlan";
 
     /**
      * Deploy the given throttle policy in the Traffic Manager.
@@ -110,16 +117,7 @@ public class PolicyUtil {
             }
 
             // Undeploy removed policies
-            for (String flowName : policiesToUndeploy) {
-                try {
-                    String executionPlan = eventProcessorService.getActiveExecutionPlan(flowName);
-                    if (executionPlan != null) {
-                        eventProcessorService.undeployActiveExecutionPlan(flowName);
-                    }
-                } catch (ExecutionPlanConfigurationException e) {
-                    // Do nothing when execution plan not found
-                }
-            }
+            undeployPolicies(policiesToUndeploy);
 
             for (Map.Entry<String, String> pair : policiesToDeploy.entrySet()) {
                 String policyPlanName = pair.getKey();
@@ -150,34 +148,10 @@ public class PolicyUtil {
      * Deploy all the throttle policies retrieved from the database in the Traffic Manager.
      */
     public static void deployAllPolicies() {
+        // Undeploy all existing policies
+        undeployAllPolicies();
         PolicyRetriever policyRetriever = new PolicyRetriever();
         try {
-            APIManagerConfiguration apiManagerConfiguration =
-                    ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-            EventProcessorService eventProcessorService =
-                    ServiceReferenceHolder.getInstance().getEventProcessorService();
-            Map<String, ExecutionPlanConfiguration> executionPlanConfigurationMap =
-                    eventProcessorService.getAllActiveExecutionConfigurations();
-            // Undeploy all the policies except the excluded ones provided
-            for (Map.Entry<String, ExecutionPlanConfiguration> pair : executionPlanConfigurationMap.entrySet()) {
-                String policyPlanName = pair.getKey();
-                boolean excluded = false;
-                if (REQUEST_PRE_PROCESSOR_EXECUTION_PLAN.equalsIgnoreCase(policyPlanName)) {
-                    excluded = true;
-                } else {
-                    for (String excludedPolicyName :
-                            apiManagerConfiguration.getThrottleProperties().getExcludedThrottlePolicies()) {
-                        if (excludedPolicyName.equalsIgnoreCase(policyPlanName)) {
-                            excluded = true;
-                            break;
-                        }
-                    }
-                }
-                if (!excluded) {
-                    eventProcessorService.undeployActiveExecutionPlan(policyPlanName);
-                }
-            }
-
             // Deploy all the policies retrieved from the database
             SubscriptionPolicyList subscriptionPolicies = policyRetriever.getAllSubscriptionPolicies();
             for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
@@ -197,8 +171,42 @@ public class PolicyUtil {
             }
         } catch (ThrottlePolicyDeployerException e) {
             log.error("Error in retrieving throttle policies", e);
+        }
+    }
+
+    /**
+     * Undeploy all the throttle policies in the Traffic Manager except the excluded ones.
+     */
+    private static void undeployAllPolicies() {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        EventProcessorService eventProcessorService =
+                ServiceReferenceHolder.getInstance().getEventProcessorService();
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(APIConstants.SUPER_TENANT_DOMAIN, true);
+            Map<String, ExecutionPlanConfiguration> executionPlanConfigurationMap =
+                    eventProcessorService.getAllActiveExecutionConfigurations();
+            // Undeploy all the policies except the excluded ones provided
+            for (Map.Entry<String, ExecutionPlanConfiguration> pair : executionPlanConfigurationMap.entrySet()) {
+                String policyPlanName = pair.getKey();
+                boolean excluded = false;
+                for (String excludedPolicyName :
+                        apiManagerConfiguration.getThrottleProperties().getExcludedThrottlePolicies()) {
+                    if (excludedPolicyName.equalsIgnoreCase(policyPlanName)) {
+                        excluded = true;
+                        break;
+                    }
+                }
+                if (!excluded) {
+                    eventProcessorService.undeployActiveExecutionPlan(policyPlanName);
+                }
+            }
         } catch (ExecutionPlanConfigurationException e) {
             log.error("Error in removing existing throttle policies", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -212,7 +220,7 @@ public class PolicyUtil {
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" +
                 policyEvent.getPolicyName();
         policyFileNames.add(policyFile);
-        undeployPolicy(policyFileNames);
+        undeployPolicies(policyFileNames);
     }
 
     /**
@@ -225,7 +233,7 @@ public class PolicyUtil {
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" +
                 policyEvent.getPolicyName();
         policyFileNames.add(policyFile);
-        undeployPolicy(policyFileNames);
+        undeployPolicies(policyFileNames);
     }
 
     /**
@@ -241,7 +249,7 @@ public class PolicyUtil {
         for (int conditionGroupId : policyEvent.getDeletedConditionGroupIds()) {
             policyFileNames.add(policyFile + "_condition_" + conditionGroupId);
         }
-        undeployPolicy(policyFileNames);
+        undeployPolicies(policyFileNames);
     }
 
     /**
@@ -254,7 +262,7 @@ public class PolicyUtil {
         String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" +
                 policyEvent.getPolicyName();
         policyFileNames.add(policyFile);
-        undeployPolicy(policyFileNames);
+        undeployPolicies(policyFileNames);
     }
 
     /**
@@ -262,7 +270,7 @@ public class PolicyUtil {
      *
      * @param policyFileNames list of policy file names
      */
-    private static void undeployPolicy(List<String> policyFileNames) {
+    private static void undeployPolicies(List<String> policyFileNames) {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().
@@ -271,7 +279,15 @@ public class PolicyUtil {
             EventProcessorService eventProcessorService =
                     ServiceReferenceHolder.getInstance().getEventProcessorService();
             for (String policyFileName : policyFileNames) {
-                eventProcessorService.undeployActiveExecutionPlan(policyFileName);
+                String executionPlan = null;
+                try {
+                    executionPlan = eventProcessorService.getActiveExecutionPlan(policyFileName);
+                } catch (ExecutionPlanConfigurationException e) {
+                    // Do nothing when execution plan not found
+                }
+                if (executionPlan != null) {
+                    eventProcessorService.undeployActiveExecutionPlan(policyFileName);
+                }
             }
         } catch (ExecutionPlanConfigurationException e) {
             log.error("Error in removing execution plan", e);
@@ -279,5 +295,4 @@ public class PolicyUtil {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
-
 }

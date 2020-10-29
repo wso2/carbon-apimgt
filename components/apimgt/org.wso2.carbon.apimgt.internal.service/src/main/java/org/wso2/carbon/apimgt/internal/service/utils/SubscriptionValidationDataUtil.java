@@ -21,15 +21,47 @@ package org.wso2.carbon.apimgt.internal.service.utils;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.subscription.API;
+import org.wso2.carbon.apimgt.api.model.subscription.Policy;
+import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
+import org.wso2.carbon.apimgt.api.model.subscription.Application;
+import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
+import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
+import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.api.model.subscription.GlobalPolicy;
+import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ScopesListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.BandwidthLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.RequestCountLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyListDTO;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
-import org.wso2.carbon.apimgt.api.model.subscription.*;
-import org.wso2.carbon.apimgt.internal.service.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -204,7 +236,13 @@ public class SubscriptionValidationDataUtil {
         return subscriptionPolicyListDTO;
     }
 
-    public static ThrottleLimitDTO getThrottleLimitDTO(Policy policy) {
+    /**
+     * Converts a quota policy object of a policy into a Throttle Limit DTO object
+     *
+     * @param policy policy model object
+     * @return Throttle Limit DTO
+     */
+    private static ThrottleLimitDTO getThrottleLimitDTO(Policy policy) {
 
         QuotaPolicy quotaPolicy = policy.getQuotaPolicy();
         ThrottleLimitDTO defaultLimit = new ThrottleLimitDTO();
@@ -219,7 +257,13 @@ public class SubscriptionValidationDataUtil {
         return defaultLimit;
     }
 
-    public static ThrottleLimitDTO getThrottleLimitDTO(APIPolicyConditionGroup apiPolicyConditionGroup) {
+    /**
+     * Converts a quota policy object of a condition group into a Throttle Limit DTO object
+     *
+     * @param apiPolicyConditionGroup condition group model object
+     * @return Throttle Limit DTO
+     */
+    private static ThrottleLimitDTO getThrottleLimitDTO(APIPolicyConditionGroup apiPolicyConditionGroup) {
 
         QuotaPolicy quotaPolicy = apiPolicyConditionGroup.getQuotaPolicy();
         if (quotaPolicy != null) {
@@ -243,7 +287,7 @@ public class SubscriptionValidationDataUtil {
      * @param bandwidthLimit Bandwidth Limit model object
      * @return Bandwidth Limit DTO object derived from model
      */
-    public static BandwidthLimitDTO fromBandwidthLimitToDTO(BandwidthLimit bandwidthLimit) {
+    private static BandwidthLimitDTO fromBandwidthLimitToDTO(BandwidthLimit bandwidthLimit) {
 
         BandwidthLimitDTO dto = new BandwidthLimitDTO();
         dto.setTimeUnit(bandwidthLimit.getTimeUnit());
@@ -259,7 +303,7 @@ public class SubscriptionValidationDataUtil {
      * @param requestCountLimit Request Count Limit model object
      * @return Request Count DTO object derived from model
      */
-    public static RequestCountLimitDTO fromRequestCountLimitToDTO(RequestCountLimit requestCountLimit) {
+    private static RequestCountLimitDTO fromRequestCountLimitToDTO(RequestCountLimit requestCountLimit) {
 
         RequestCountLimitDTO dto = new RequestCountLimitDTO();
         dto.setTimeUnit(requestCountLimit.getTimeUnit());
@@ -401,6 +445,12 @@ public class SubscriptionValidationDataUtil {
         return scopeDTO;
     }
 
+    /**
+     * Converts a list of global policy objects into a global policy list DTO object
+     *
+     * @param globalPolicies list of global policy objects
+     * @return global policy list DTO
+     */
     public static GlobalPolicyListDTO fromGlobalPolicyToGlobalPolicyListDTO(List<GlobalPolicy> globalPolicies) {
         GlobalPolicyListDTO globalPolicyListDTO = new GlobalPolicyListDTO();
         if (globalPolicies != null) {
@@ -416,7 +466,6 @@ public class SubscriptionValidationDataUtil {
                 globalPolicyListDTO.getList().add(globalPolicyDTO);
             }
             globalPolicyListDTO.setCount(globalPolicies.size());
-
         } else {
             globalPolicyListDTO.setCount(0);
         }

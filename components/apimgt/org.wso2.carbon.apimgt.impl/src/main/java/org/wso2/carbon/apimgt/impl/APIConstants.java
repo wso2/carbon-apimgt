@@ -583,6 +583,7 @@ public final class APIConstants {
     public static final String DELEM_COLON = ":";
     public static final String DELEM_COMMA = ",";
     public static final String DELEM_UNDERSCORE = "_";
+    public static final String CHAR_ASTERIX = "*";
 
     public static class TokenStatus {
 

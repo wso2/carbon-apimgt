@@ -27,7 +27,7 @@ FROM EligibilityStream[isEligible==true]#throttler:timeBatch($quotaPolicy.getLim
 #if($quotaPolicy.getQuotaType() == $REQUEST_COUNT_TYPE)
 select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
 #else
-select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getDataAmount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
+select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getStandardDataAmount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
 #end
 INSERT ALL EVENTS into ResultStream;
 #end

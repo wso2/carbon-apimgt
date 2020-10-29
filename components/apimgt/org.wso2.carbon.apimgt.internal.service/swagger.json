@@ -332,12 +332,6 @@
           "description" : "**Search condition**.\n Subscription policy name\n",
           "required" : false,
           "type" : "string"
-        }, {
-          "name" : "allTenants",
-          "in" : "query",
-          "description" : "**Search condition**.\n  Request policies of all the tenants or not\n",
-          "required" : false,
-          "type" : "boolean"
         } ],
         "responses" : {
           "200" : {
@@ -372,12 +366,6 @@
           "description" : "**Search condition**.\n Application policy name\n",
           "required" : false,
           "type" : "string"
-        }, {
-          "name" : "allTenants",
-          "in" : "query",
-          "description" : "**Search condition**.\n  Request policies of all the tenants or not\n",
-          "required" : false,
-          "type" : "boolean"
         } ],
         "responses" : {
           "200" : {
@@ -412,12 +400,6 @@
           "description" : "**Search condition**.\n Api policy name\n",
           "required" : false,
           "type" : "string"
-        }, {
-          "name" : "allTenants",
-          "in" : "query",
-          "description" : "**Search condition**.\n  Request policies of all the tenants or not\n",
-          "required" : false,
-          "type" : "boolean"
         } ],
         "responses" : {
           "200" : {
@@ -452,12 +434,6 @@
           "description" : "**Search condition**.\n Global policy name\n",
           "required" : false,
           "type" : "string"
-        }, {
-          "name" : "allTenants",
-          "in" : "query",
-          "description" : "**Search condition**.\n  Request policies of all the tenants or not\n",
-          "required" : false,
-          "type" : "boolean"
         } ],
         "responses" : {
           "200" : {

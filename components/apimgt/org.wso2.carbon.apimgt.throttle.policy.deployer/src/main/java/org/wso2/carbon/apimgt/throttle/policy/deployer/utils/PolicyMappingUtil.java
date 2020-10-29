@@ -23,7 +23,6 @@ import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 
 /**
  * An Utility class for policy mapping operations.
@@ -61,8 +60,8 @@ public class PolicyMappingUtil {
             case PolicyConstants.JWT_CLAIMS_TYPE:
                 JWTClaimsCondition jwtClaimsCondition = new JWTClaimsCondition();
                 jwtClaimsCondition.setInvertCondition(conditionDTO.isInverted());
-                jwtClaimsCondition.setAttribute(conditionDTO.getName());
-                jwtClaimsCondition.setClaimUrl(conditionDTO.getValue());
+                jwtClaimsCondition.setClaimUrl(conditionDTO.getName());
+                jwtClaimsCondition.setAttribute(conditionDTO.getValue());
                 return jwtClaimsCondition;
             case PolicyConstants.QUERY_PARAMETER_TYPE:
                 QueryParameterCondition queryParameterCondition = new QueryParameterCondition();
