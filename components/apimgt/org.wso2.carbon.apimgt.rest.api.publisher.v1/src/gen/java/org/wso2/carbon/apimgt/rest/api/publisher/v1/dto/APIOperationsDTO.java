@@ -52,7 +52,7 @@ public class APIOperationsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "/order/{orderId}", value = "")
   @JsonProperty("target")
   public String getTarget() {
     return target;
@@ -69,7 +69,7 @@ public class APIOperationsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "POST", value = "")
   @JsonProperty("verb")
   public String getVerb() {
     return verb;
@@ -86,7 +86,7 @@ public class APIOperationsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "Application & Application User", value = "")
   @JsonProperty("authType")
   public String getAuthType() {
     return authType;
@@ -120,7 +120,7 @@ public class APIOperationsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("scopes")
   public List<String> getScopes() {
     return scopes;
@@ -137,7 +137,7 @@ public class APIOperationsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("usedProductIds")
   public List<String> getUsedProductIds() {
     return usedProductIds;
@@ -154,7 +154,7 @@ public class APIOperationsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "", value = "")
   @JsonProperty("amznResourceName")
   public String getAmznResourceName() {
     return amznResourceName;

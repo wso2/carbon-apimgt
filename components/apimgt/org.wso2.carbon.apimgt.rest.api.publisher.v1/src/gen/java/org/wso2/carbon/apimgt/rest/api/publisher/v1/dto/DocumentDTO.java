@@ -154,7 +154,7 @@ public enum VisibilityEnum {
   }
 
   
-  @ApiModelProperty(example = "CalculatorDoc", required = true, value = "")
+  @ApiModelProperty(example = "PizzaShackDoc", required = true, value = "")
   @JsonProperty("name")
   @NotNull
   public String getName() {
@@ -190,7 +190,7 @@ public enum VisibilityEnum {
   }
 
   
-  @ApiModelProperty(example = "Summary of Calculator Documentation", value = "")
+  @ApiModelProperty(example = "Summary of PizzaShackAPI Documentation", value = "")
   @JsonProperty("summary")
   public String getSummary() {
     return summary;
@@ -328,7 +328,7 @@ public enum VisibilityEnum {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("createdBy")
   public String getCreatedBy() {
     return createdBy;
@@ -362,7 +362,7 @@ public enum VisibilityEnum {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("lastUpdatedBy")
   public String getLastUpdatedBy() {
     return lastUpdatedBy;

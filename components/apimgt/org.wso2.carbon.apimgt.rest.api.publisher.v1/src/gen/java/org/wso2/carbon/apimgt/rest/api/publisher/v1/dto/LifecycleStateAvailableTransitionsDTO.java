@@ -26,7 +26,7 @@ public class LifecycleStateAvailableTransitionsDTO   {
   }
 
   
-  @ApiModelProperty(example = "Promote", value = "")
+  @ApiModelProperty(example = "Publish", value = "")
   @JsonProperty("event")
   public String getEvent() {
     return event;
@@ -43,7 +43,7 @@ public class LifecycleStateAvailableTransitionsDTO   {
   }
 
   
-  @ApiModelProperty(example = "Created", value = "")
+  @ApiModelProperty(example = "Published", value = "")
   @JsonProperty("targetState")
   public String getTargetState() {
     return targetState;
