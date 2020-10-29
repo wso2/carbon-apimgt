@@ -16,369 +16,357 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
-import org.apache.axiom.om.OMElement;
-import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.Mediation;
+import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.dto.Documentation;
+import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 
-import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * This Interface defines the interface methods related to API operations and functionalities which incorporate with
+ * the persistence layer
+ * <p>
+ * All the below methods has the 'Organization org' parameters as the first parameter. This implies the Organization
+ * which the subject artifact(s) is owned by. Organization represents an instance that might be in the context of new
+ * term 'Organization' or 'Tenant'. It has the attributes id, name, etc. so that it is
+ * identifiable.
+ */
 public interface APIPersistence {
 
-    /* ======= API update   =======
-       =========================== */
-    API updateApi(API api);
+    /* ======= API =======
+    =========================== */
 
+    /**
+     * Add API to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param publisherAPI API to add
+     * @return ID of Added API
+     * @throws APIPersistenceException
+     */
+    PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException;
+
+    /**
+     * Update API in the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param publisherAPI API to update
+     * @throws APIPersistenceException
+     */
+    PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException;
+
+    /**
+     * Get the API information stored in persistence layer, that is used for publisher operations
+     *
+     * @param org   Organization the API is owned by
+     * @param apiId API ID
+     * @return API information
+     * @throws APIPersistenceException
+     */
+    PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException;
+
+    /**
+     * Get the API information stored in persistence layer, that is used for DevPortal operations
+     *
+     * @param org   Organization the API is owned by
+     * @param apiId API ID
+     * @return
+     * @throws APIPersistenceException
+     */
+    DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException;
+
+    /**
+     * Delete API
+     *
+     * @param org   Organization the API is owned by
+     * @param apiId API ID
+     * @throws APIPersistenceException
+     */
+    void deleteAPI(Organization org, String apiId) throws APIPersistenceException;
+
+    /**
+     * Search APIs to be displayed on Publisher API listing
+     *
+     * @param org         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param start       starting index
+     * @param offset      offset to search
+     * @return Publisher API Search Result
+     * @throws APIPersistenceException
+     */
+    PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
+                                    UserContext ctx) throws APIPersistenceException;
+
+    /**
+     * Search APIs to be displayed on Dev Portal API listing
+     *
+     * @param org         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param start       starting index
+     * @param offset      search offset
+     * @return Dev Portal API Search Result
+     * @throws APIPersistenceException
+     */
+    DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
+                                    UserContext ctx) throws APIPersistenceException;
+
+    /**
+     * Change API Life Cycle
+     *
+     * @param org    Organization the API is owned by
+     * @param apiId  API ID
+     * @param status status to which the API is to be updated
+     * @throws APIPersistenceException
+     */
+    void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException;
 
     /* =========== WSDL ============
        =========================== */
 
-    String createWsdl(API api, InputStream wsdlContent, OMElement wsdlContentEle);
+    /**
+     * Save the passed WSDL schema definition of the API.  This includes initial creation operation and later
+     * update operations
+     *
+     * @param org              Organization the WSDL is owned by
+     * @param apiId            API ID
+     * @param wsdlResourceFile WSDL Resource File
+     * @throws WSDLPersistenceException
+     */
+    void saveWSDL(Organization org, String apiId, ResourceFile wsdlResourceFile) throws WSDLPersistenceException;
 
     /**
-     * Returns the wsdl content of the given API
+     * Get the WSDL schema definition
      *
-     * @param apiId Id of API
-     * @return wsdl content matching if exist, else null
+     * @param org   Organization the WSDL is owned by
+     * @param apiId API ID
+     * @return WSDL schema definition
+     * @throws WSDLPersistenceException
      */
-    ResourceFile getWSDL(String apiId);
+    ResourceFile getWSDL(Organization org, String apiId) throws WSDLPersistenceException;
 
-    void updateWsdlFromUrl(String apiId, String wsdlUrl);
 
-    void updateWsdlFromWsdlFile(API api, ResourceFile wsdlResourceFile);
+    /* ==== OAS API Schema Definition ====
+     ================================== */
 
     /**
+     * Save OAS Schema definition
      *
-     * @param apiId
-     * @param wsdlResourceFile
-     * @return registry path of wsdl file
-     * @throws APIManagementException
+     * @param org           Organization the OAS definnition is owned by
+     * @param apiId         API ID
+     * @param apiDefinition API OAS definition
+     * @throws OASPersistenceException
      */
-    String updateWsdlFromWsdlFile(String apiId, ResourceFile wsdlResourceFile)
-                                    throws APIManagementException;
-
-    void updateWsdlFromUrl(API api);
-
-
-
-    /* ===== API Life Cycle =====
-    ============================= */
-
-    void addLifeCycle(API api);
-
-    /*
-     * This method returns the current lifecycle state and all other possible lifecycle states of an API.
-     *
-     * @param apiId Id of API
-     * @return Map<String,Object> a map with lifecycle data
-     */
-    Map<String, Object> getAPILifeCycleData(String apiId);
-
-    void changeAPILifeCycle(String apiId, String status); // need to change for reg impl
+    void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException;
 
     /**
-     * Retrieves API Lifecycle state information
+     * Get OAS Schema definition of the API
      *
-     * @param //apiId API Id
-     * @return API Lifecycle state information
+     * @param org   Organization the OAS definition is owned by
+     * @param apiId API ID
+     * @return OAS Schema definition
+     * @throws OASPersistenceException
      */
-    // >> need  to re-define LifecycleStateDTO in apimgt.api module. (simply importing org.wso2.carbon.apimgt.rest
-    // .api.publisher.v1.dto.LifecycleStateDTO will cause  cyclic dependency issue)
-    // LifecycleStateDTO getLifecycleState(String apiId);
+    String getOASDefinition(Organization org, String apiId) throws OASPersistenceException;
 
 
-
-    /* ======= Create API =======
-    =========================== */
-
-   // void createAPI(API api) throws APIManagementException;
-    API createAPI(API api) throws APIManagementException;
-    /**
-     * Create a new version of the api with the specified new version
-     *
-     * @param api           API to create new version
-     * @param newVersion    New version
-     * @return              ID of the API created
-     */
-    int createNewAPIVersion(API api, String newVersion);
+    /* ==== GraphQL API Schema Definition ==========
+    ============================================= */
 
     /**
-     * Check whether an API with given identifiers (name, version, provider exists)
-     * @param apiIdentifier Identifier of API
-     * @return
+     * Save GraphQL schema definition. This includes initial creation operation and later update operations.
+     *
+     * @param org              Organization the GraphQL definition is owned by
+     * @param apiId            API ID
+     * @param schemaDefinition GraphQL definition of API
+     * @throws GraphQLPersistenceException
      */
-    boolean isApiExists(APIIdentifier apiIdentifier);
-
-
-    /* ======= get/search APIs ======== (search apis >> identify differences of these apis)
-    =================================== */
+    void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition)
+                                    throws GraphQLPersistenceException;
 
     /**
-     * Get minimal details of API by api artifact id
+     * Get GraphQL schema definition
      *
-     * @param uuid         API artifact id
-     * @param requestedOrg Name of the organization the API consists
-     * @return API of the provided artifact id
+     * @param org   Organization the GraphQL definition is owned by
+     * @param apiId API ID
+     * @return GraphQL schema definition
+     * @throws GraphQLPersistenceException
      */
-    API getLightweightAPIByUUID(String uuid, String requestedOrg);
-
-    API getAPIbyId(String id, String requestedTenantDomain) throws APIManagementException;
-
-    //API getAPI(String apiId);
-
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start, int end,
-                                    boolean limitAttributes);
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, Organization requestedOrg, int start, int end,
-                                    boolean limitAttributes, boolean isPublisherListing) throws APIManagementException;
-    Map<String, Object> searchPaginatedAPIsByContent(Organization requestedOrg, String searchQuery, int start, int end,
-                                    boolean limitAttributes);
-
-
-
-    /* ========== GraphQL ==========
-     =============================== */
-
-    String getGraphqlSchema(String apiId);
-
-    void saveGraphqlSchemaDefinition(String apiId, String schemaDefinition);
-
-    void deleteAPI(String apiId);
-
+    String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException;
 
 
     /* ======= Documentation  =======
     ================================ */
 
-    Documentation getDocumentation(String apiId, String docId, Organization requestedOrg) throws APIManagementException;
-
     /**
-     * Get an api product documentation by artifact Id
+     * Add documentation to API
      *
-     * @param docId                 artifact id of the document
-     * @param requestedOrg tenant domain of the registry where the artifact is located
-     * @return Document object which represents the artifact id
-     */
-    Documentation getProductDocumentation(String productId, String docId, Organization requestedOrg);
-
-    Map<String, Object> getDocumentContent(String apiId, String docId, Organization requestedOrg);
-
-    /**
-     * Removes a given documentation
-     *
-     * @param apiOrProductId    ID of API or APIProduct
-     * @param docId ID of the doc
-     */
-    void removeDocumentation(String apiOrProductId, String docId);
-
-    /**
-     * Updates a given documentation
-     *
-     * @param apiId         Id of API
+     * @param org           Organization the documentation is owned by
+     * @param apiId         API ID
      * @param documentation Documentation
+     * @return ID of the documentation added
+     * @throws DocumentationPersistenceException
      */
-    void updateDocumentation(String apiId, Documentation documentation);
+    Documentation addDocumentation(Organization org, String apiId, Documentation documentation)
+                                    throws DocumentationPersistenceException;
 
     /**
-     * Returns a list of documentation attached to a particular API/API Product
+     * Update API documentation
      *
-     * @param apiOrProductId        Id of API/API Product
-     * @return List<Documentation>  List of Documentation of the API or Product
+     * @param org           Organization the documentation is owned by
+     * @param apiId         API ID
+     * @param documentation Documentation to update
+     * @throws DocumentationPersistenceException
      */
-    List<Documentation> getAllDocumentation(String apiOrProductId);
+    Documentation updateDocumentation(Organization org, String apiId, Documentation documentation)
+                                    throws DocumentationPersistenceException;
 
     /**
-     * Add documentation to an API
+     * Get API Documentation
      *
-     * @param apiId           ID of API
-     * @param documentation Documentation
+     * @param org   Organization the documentation is owned by
+     * @param apiId API ID
+     * @param docId Documentation ID
+     * @return Documentation
+     * @throws DocumentationPersistenceException
      */
-    void addDocumentation(String apiId, Documentation documentation);
+    Documentation getDocumentation(Organization org, String apiId, String docId) throws DocumentationPersistenceException;
 
     /**
-     * Checks whether the given document already exists for the given api/product
+     * Get the content (Inline text/Markdown content text/ Resource file) of API documentation
      *
-     * @param apiOrProductId Id of API/Product
-     * @param docName    Name of the document
-     * @return true if document already exists for the given api/product
+     * @param org   Organization the documentation is owned by
+     * @param apiId API ID
+     * @param docId Documentation ID
+     * @return Documentation Content
+     * @throws DocumentationPersistenceException
      */
-    boolean isDocumentationExists(String apiOrProductId, String docName);
+    DocumentContent getDocumentationContent(Organization org, String apiId, String docId)
+                                    throws DocumentationPersistenceException;
 
-    void updateDocVisibility(String apiId, String visibility, String visibleRoles,
-                                    Documentation documentation); // can be called from within updateApi() function
+    /**
+     * Search documentation of the given API
+     *
+     * @param org   Organization the documentations are owned by
+     * @param apiId API ID
+     * @return Documentation search result
+     * @throws DocumentationPersistenceException
+     */
+    DocumentSearchResult searchDocumentation(Organization org, String apiId, int start, int offset, String searchQuery,
+                                    UserContext ctx) throws DocumentationPersistenceException;
+
+    /**
+     * Delete API documentation
+     *
+     * @param org   Organization the documentation is owned by
+     * @param apiId API ID
+     * @param docId Documentation ID
+     * @throws DocumentationPersistenceException
+     */
+    void deleteDocumentation(Organization org, String apiId, String docId) throws DocumentationPersistenceException;
 
 
     /* ======= Mediation Policy ========
      =================================== */
 
     /**
-     * Returns a list of API specific mediation policies
+     * Add mediation policy to the API
      *
-     * @param apiId  Id of API
-     * @return List of api specific mediation objects available
+     * @param org   Organization the mediation policy is owned by
+     * @param apiId API ID
+     * @return Mediation policy Id
+     * @throws MediationPolicyPersistenceException
      */
-    List<Mediation> getAllApiSpecificMediationPolicies(String apiId);
+    Mediation addMediationPolicy(Organization org, String apiId, Mediation mediation) throws
+                                    MediationPolicyPersistenceException;
 
     /**
-     * Returns Mediation policy specified by given identifiers
+     * Update mediation policy of the API
      *
-     * @param apiOrProductId          Id of API/API Product
-     * @param mediationPolicyUUID mediation policy identifier
-     * @return Mediation object contains details of the mediation policy or null
+     * @param org       Organization the mediation policy is owned by
+     * @param apiId     API ID
+     * @param mediation Mediation policy
+     * @throws MediationPolicyPersistenceException
      */
-    Mediation getApiSpecificMediationPolicyFromUUID(String apiOrProductId, String mediationPolicyUUID);
+    Mediation updateMediationPolicy(Organization org, String apiId, Mediation mediation) throws MediationPolicyPersistenceException;
 
     /**
-     * Returns Mediation policy specify by given mediationPolicyUUID
+     * Get mediation policy of API
      *
-     * @param mediationPolicyUUID mediation policy identifier
-     * @return Mediation object contains details of the mediation policy or null
+     * @param org               Organization the mediation policy is owned by
+     * @param apiId             API ID
+     * @param mediationPolicyId Mediation policy ID
+     * @return Mediation Policy of API
+     * @throws MediationPolicyPersistenceException
      */
-    Mediation getApiSpecificMediationPolicyFromUUID(String mediationPolicyUUID);
+    Mediation getMediationPolicy(Organization org, String apiId, String mediationPolicyId)
+                                    throws MediationPolicyPersistenceException;
 
     /**
-     * Delete existing API specific mediation policy
+     * Get a list of all the mediation policies of the API
      *
-     * @param apiOrProductId        API or Product ID
-     * @param mediationPolicyId mediation policy identifier
+     * @param org   Organization the mediation policies are owned by
+     * @param apiId API ID
+     * @return list of all the mediation policies of the API
+     * @throws MediationPolicyPersistenceException
      */
-    void updateApiSpecificMediationPolicy(String apiOrProductId, String mediationPolicyId);
+    List<MediationInfo> getAllMediationPolicies(Organization org, String apiId) throws MediationPolicyPersistenceException;
 
     /**
-     * Delete existing API specific mediation policy
+     * Delete a mediation policy of the API
      *
-     * @param apiOrProductId        API or Product ID
-     * @param mediationPolicyId mediation policy identifier
+     * @param org               Organization the mediation policy is owned by
+     * @param apiId             API ID
+     * @param mediationPolicyId Mediation policy ID
+     * @throws MediationPolicyPersistenceException
      */
-    void deleteApiSpecificMediationPolicy(String apiOrProductId, String mediationPolicyId);
-
-    /**
-     * Check the existence of the mediation policy
-     */
-    boolean isMediationPolicyExists(String mediationPolicyId);
-    // This method ca throw an exception if the given mediation policy does not exist
-    // i.e. throw new APIManagementException(ExceptionCodes.MEDIATION_POLICY_API_ALREADY_EXISTS);
-
-    /**
-     * @param apiOrProductId  API or Product ID
-     * @param type        Type of the mediation policy
-     * @param contentFile Mediation policy ResourceFile
-     */
-    void addApiSpecificMediationPolicy(String apiOrProductId, String type, ResourceFile contentFile);
+    void deleteMediationPolicy(Organization org, String apiId, String mediationPolicyId) throws MediationPolicyPersistenceException;
 
 
-
-    /* ===== Monetization ======
-    =========================== */
-
-    /**
-     * Configure monetization in the API
-     *
-     * @param api api to configure monetization
-     */
-   void configureMonetizationInAPI(API api);
-
-    /**
-     * Configure monetization in the API
-     *
-     * @param apiId                  API ID
-     * @param monetizationProperties Monetization related properties
-     * @param isMonetizationEnabled  Whether to eable or disable monetization
-     */
-   void configureMonetizationInAPI(String apiId, JSONObject monetizationProperties, boolean isMonetizationEnabled);
-
-
-
-    /* ===== SOAP to REST related =====
-    ================================== */
-
-    /**
-     * Checks the api is a soap to rest converted one or a soap pass through
-     *
-     * @param apiOrProductId Id of API/API Product
-     * @return true if the api is soap to rest converted one. false if the user have a pass through
-     */
-    boolean isSOAPToRESTApi(String apiOrProductId);
-
-    /**
-     * Get the resource policies(inflow/outflow).
-     *
-     * @param apiOrProductId API or Product ID
-     * @param seqType       Sequence type('in' or 'out')
-     * @return Converted sequence strings for a given operation
-     */
-    String getRestToSoapConvertedSequence(String apiOrProductId, String seqType);
-
-    String getResourcePolicyFromResourceId(String apiId, String resourceId);
-
-    void updateResourcePolicyFromResourceId(String apiId, String resourceId, String content);
-
-    
-    /* ======= API Definition =======
-    ================================= */
-
-
-    /*
-     * This method returns swagger definition json of a given api/api product
-     *
-     * @param apiOrProductId Id of API/API Product
-     * @return api/api product swagger definition json as json string
-     */
-    String getOASDefinitionOfAPI(String apiOrProductId);
-
-    /**
-     * This method saves api definition json
-     *
-     * @param apiId               ID of the API to be saved
-     * @param apiDefinitionJSON API definition as JSON string
-     */
-   void saveOASAPIDefinition(String apiId, String apiDefinitionJSON);
-
-    
-    /* ======= API Thumbnail Icon =======
+    /* ======= Thumbnail Icon =======
     ==================================== */
 
     /**
-     * Retrieves the icon image associated with a particular API as a stream.
+     * Save Thumbnail icon of the API. This includes both the initial creation and later update operations.
      *
-     * @param apiId ID representing the API
-     * @return an Icon containing image content and content type information
+     * @param org          Organization the thumbnail icon is owned by
+     * @param apiId        API ID
+     * @param resourceFile
+     * @throws ThumbnailPersistenceException
      */
-    ResourceFile getIcon(String apiId);
+    void saveThumbnail(Organization org, String apiId, ResourceFile resourceFile) throws ThumbnailPersistenceException;
 
     /**
-     * Update the thumbnail image icon of an API
-     * @param apiId             ID representing the API
-     * @param fileInputStream   File stream of the thumbnail icon
-     * @param fileDetail        Attachment file
-     */
-    void saveAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail);
-
-
-
-    /* Add interface methods for API/Product import export related methods in org.wso2.carbon.apimgt.impl
-    .importexport.utils.APIAndAPIProductCommonUtil
-     */
-
-
-    /* =========== Analyzing -ApiProductsApiServiceImpl- ============
-    ===============================================================*/
-
-    /**
-     * Get API Product by registry artifact id
+     * Get thumbnail icon of the API
      *
-     * @param uuid                  API Product uuid
-     * @param requestedOrg tenantDomain that the API Product exists
-     * @return                      API Product of the provided artifact id
+     * @param org   Organization the thumbnail icon is owned by
+     * @param apiId API ID
+     * @return Thumbnail icon resource file
+     * @throws ThumbnailPersistenceException
      */
-    //  requestedTenantDomain
+    ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException;
 
     /**
-     * Delete the API Product
-     * @param apiProductId        ID of API Product
+     * Delete thumbnail icon of the API
+     *
+     * @param org   Organization the thumbnail icon is owned by
+     * @param apiId API ID
+     * @throws ThumbnailPersistenceException
      */
-    void deleteAPIProduct(String apiProductId);
-
+    void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException;
 }
