@@ -201,8 +201,8 @@ export default function DefaultAPIForm(props) {
                 if (versionValidity === null) {
                     const apiVersion = api.context.includes('/') ? api.context + '/' + value : '/'
                     + api.context + '/' + value;
-                    APIValidation.apiParameter.validate('context:' + api.context
-                    + ' version:' + value).then((result) => {
+                    APIValidation.apiParameter.validate('context:' + api.context +
+                    '/' + value).then((result) => {
                         // version of APIProduct equals to 1.0.0
                         if (result.body.list.length > 0 && (
                             (result.body.list[0].version !== undefined
