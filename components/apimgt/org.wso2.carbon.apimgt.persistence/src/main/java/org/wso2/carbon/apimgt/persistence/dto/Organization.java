@@ -1,11 +1,11 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
 public class Organization {
-    String name; // tenant domain
-    int id;
+    String id;
+    String name; // tenant domain or organization name
     String type; // Tenant or Org
 
-    public Organization(String name, int id, String type) {
+    public Organization(String name, String id, String type) {
         this.name = name;
         this.id = id;
         this.type = type;
@@ -23,11 +23,11 @@ public class Organization {
         this.name = name;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

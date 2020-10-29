@@ -1,7 +1,7 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
-public class MediationPolicyInfo {
-    private String uuid;
+public class MediationInfo {
+    private String id;
     private String name;
     private String type;
 
@@ -21,11 +21,11 @@ public class MediationPolicyInfo {
         this.type = type;
     }
 
-    public String getUuid() {
-        return uuid;
+    public String getId() {
+        return id;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setId(String id) {
+        this.id = id;
     }
 }

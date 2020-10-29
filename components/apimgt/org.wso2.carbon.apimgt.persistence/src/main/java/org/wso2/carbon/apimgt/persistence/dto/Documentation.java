@@ -28,15 +28,13 @@ import java.util.Date;
  * @see DocumentationType
  */
 @SuppressWarnings("unused")
-public class Documentation implements Serializable {
+public class Documentation extends DocumentationInfo {
 
     private static final long serialVersionUID = 1L;
 
     private String id;
-    private DocumentationType type;
     private String name;
     private String summary;
-    private DocumentSourceType sourceType;
     private String sourceUrl;
     private DocumentVisibility visibility;
     private Date lastUpdated;
@@ -70,23 +68,7 @@ public class Documentation implements Serializable {
     }
 
     public Documentation(DocumentationType type, String name) {
-        this.type = type;
-        this.name = name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Documentation that = (Documentation) o;
-
-        return name.equals(that.name) && type == that.type;
-
-    }
-
-    public DocumentationType getType() {
-        return type;
+        super(type, name);
     }
 
     public String getName() {
@@ -110,38 +92,12 @@ public class Documentation implements Serializable {
         this.visibility = visibility;
     }
 
-
-    public DocumentSourceType getSourceType() {
-        return sourceType;
-    }
-
-    public void setSourceType(DocumentSourceType sourceType) {
-        this.sourceType = sourceType;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = type.hashCode();
-        result = 31 * result + name.hashCode();
-        return result;
-    }
-
     public Date getLastUpdated() {
         return lastUpdated;
     }
 
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
-    }
-
-    public enum DocumentSourceType {
-        INLINE("In line"), MARKDOWN("Markdown"), URL("URL"), FILE("File");
-
-        private String type;
-
-        private DocumentSourceType(String type) {
-            this.type = type;
-        }
     }
 
     public enum DocumentVisibility {

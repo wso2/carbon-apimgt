@@ -3,19 +3,20 @@ package org.wso2.carbon.apimgt.persistence.dto;
 import java.util.Map;
 
 public class UserContext {
-    String userame;
+    String username;
     Organization organization;
+    // domain name, role
 
     Map<String, Object> properties;
 
     public UserContext(String userame, Organization organization, Map<String, Object> properties) {
-        this.userame = userame;
+        this.username = userame;
         this.organization = organization;
         this.properties = properties;
     }
 
     public String getUserame() {
-        return userame;
+        return username;
     }
 
     public Organization getOrganization() {

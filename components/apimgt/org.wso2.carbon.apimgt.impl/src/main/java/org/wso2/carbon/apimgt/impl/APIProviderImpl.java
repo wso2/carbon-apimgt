@@ -3912,7 +3912,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //get all labels in the tenant
             List<Label> gatewayLabelList = APIUtil.getAllLabels(tenantDomain);
            // APIUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain);
-            API apiAddedToPersistence = apiPersistenceInstance.createAPI(api);
+            API apiAddedToPersistence = apiPersistenceInstance.addAPI(api);
 
             // If wsdl url only given
             if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
