@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class DocumentationInfo implements Serializable {
     private String id;
     private String name;
-    private DocumentSourceType sourceType;
+    private Documentation.DocumentSourceType sourceType;
     private DocumentationType type;
 
     public enum DocumentSourceType {
@@ -45,11 +45,11 @@ public class DocumentationInfo implements Serializable {
         this.id = id;
     }
 
-    public DocumentSourceType getSourceType() {
+    public DocumentationInfo.DocumentSourceType getSourceType() {
         return sourceType;
     }
 
-    public void setSourceType(DocumentSourceType sourceType) {
+    public void setSourceType(DocumentationInfo.DocumentSourceType sourceType) {
         this.sourceType = sourceType;
     }
 

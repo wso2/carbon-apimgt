@@ -5,6 +5,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
 
 import java.io.InputStream;
 import java.util.List;

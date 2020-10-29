@@ -31,6 +31,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.*;
 
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.utils.*;
@@ -1388,7 +1389,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 //    @Override public void createAPI(API api) throws APIManagementException {
 //    }
 
-    @Override public API createAPI(API api) throws APIManagementException {
+    @Override public String addAPI(API api) throws APIManagementException {
         //Add default API LC if it is not there
         try {
             if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
