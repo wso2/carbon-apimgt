@@ -1,5 +1,6 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -12,14 +13,19 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ * /
  */
+package org.wso2.carbon.apimgt.persistence.dto;
 
-package org.wso2.carbon.apimgt.persistence.internal;
+public class Mediation extends MediationInfo {
 
-import org.wso2.carbon.registry.core.service.RegistryService;
+    private String config;
 
-public class PersistenceMgtDataHolder {
-    public static void setRegistryService(RegistryService registryService) {
+    public void setConfig(String config) {
+        this.config = config;
+    }
 
+    public String getConfig() {
+        return config;
     }
 }
