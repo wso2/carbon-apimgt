@@ -846,6 +846,8 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.subscription.blocked.prod.only": "",
   "Apis.Details.Subscriptions.SubscriptionsTable.subscription.unblocked": "",
   "Apis.Details.Subscriptions.SubscriptionsTable.subscriptions.error": "",
+  "Apis.Details.TestConsole.TestConsole.info.message": "",
+  "Apis.Details.TestConsole.TestConsole.info.title": "",
   "Apis.Details.components.APIDetailsTopMenu.created.by": "",
   "Apis.Details.components.APIDetailsTopMenu.error": "",
   "Apis.Details.components.APIDetailsTopMenu.last.updated.time": "",
