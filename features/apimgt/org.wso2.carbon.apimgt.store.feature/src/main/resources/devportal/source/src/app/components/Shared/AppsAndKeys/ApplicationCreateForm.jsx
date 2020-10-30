@@ -23,6 +23,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import ChipInput from 'material-ui-chip-input';
+import ListItemText from "@material-ui/core/ListItemText";
 
 
 /**
@@ -193,12 +194,22 @@ const ApplicationCreate = (props) => {
                     alt: intl.formatMessage({
                         defaultMessage: 'Required',
                         id: 'Shared.AppsAndKeys.ApplicationCreateForm.required.alt',
-                    })
+                    }),
+                }}
+                SelectProps={{
+                    MenuProps: {
+                        anchorOrigin: {
+                            vertical: "bottom",
+                            horizontal: "left"
+                        },
+                        getContentAnchorEl: null
+                    }
                 }}
             >
-                {throttlingPolicyList.map((policy) => (
-                    <MenuItem key={policy} value={policy}>
-                        {policy}
+                {throttlingPolicyList.map(({ name, description }) => (
+                    <MenuItem key={name} value={name}>
+                        {applicationRequest.throttlingPolicy !== name ?
+                            <ListItemText primary={name} secondary={description} /> : name}
                     </MenuItem>
                 ))}
             </TextField>
@@ -299,7 +310,7 @@ ApplicationCreate.propTypes = {
     isApplicationSharingEnabled: PropTypes.bool.isRequired,
     handleAddChip: PropTypes.func.isRequired,
     handleDeleteChip: PropTypes.func.isRequired,
-    throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
+    throttlingPolicyList: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(ApplicationCreate));

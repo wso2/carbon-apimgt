@@ -72,7 +72,7 @@ class ApplicationFormHandler extends React.Component {
             },
             isNameValid: true,
             isDescriptionValid: true,
-            throttlingPolicyList: [],
+            throttlingPolicies: [],
             allAppAttributes: null,
             isApplicationSharingEnabled: true,
             applicationOwner: '',
@@ -124,7 +124,7 @@ class ApplicationFormHandler extends React.Component {
         Promise.all([promisedApplication, promiseTiers, promisedAttributes])
             .then((response) => {
                 const [application, tierResponse, allAttributes] = response;
-                const throttlingPolicyList = tierResponse.body.list.map((item) => item.name);
+                const throttlingPolicies = tierResponse.body.list;
                 const allAppAttributes = allAttributes.body.list;
                 const newRequest = { ...applicationRequest };
                 newRequest.applicationId = application.applicationId;
@@ -137,7 +137,7 @@ class ApplicationFormHandler extends React.Component {
                 this.setState({
                     isEdit: true,
                     applicationRequest: newRequest,
-                    throttlingPolicyList,
+                    throttlingPolicies,
                     allAppAttributes,
                     applicationOwner: response[0].owner,
                 });
@@ -166,17 +166,18 @@ class ApplicationFormHandler extends React.Component {
             .then((response) => {
                 const [tierResponse, allAttributes] = response;
                 const { applicationRequest } = this.state;
-                const throttlingPolicyList = tierResponse.body.list.map((item) => item.name);
+                const throttlingPolicies = tierResponse.body.list;
                 const newRequest = { ...applicationRequest };
-                if (throttlingPolicyList.length > 0) {
-                    [newRequest.throttlingPolicy] = throttlingPolicyList;
+                if (throttlingPolicies.length > 0) {
+                    const unlimitedPolicy = throttlingPolicies.find(policy => policy.unitTime === 0);
+                    newRequest.throttlingPolicy = unlimitedPolicy && unlimitedPolicy.name || throttlingPolicies[0].name;
                 }
                 const allAppAttributes = [];
                 allAttributes.body.list.map((item) => allAppAttributes.push(item));
                 if (allAttributes.length > 0) {
                     newRequest.attributes = allAppAttributes.filter((item) => !item.hidden);
                 }
-                this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
+                this.setState({ applicationRequest: newRequest, throttlingPolicies, allAppAttributes });
             })
             .catch((error) => {
                 console.log(error);
@@ -409,7 +410,7 @@ class ApplicationFormHandler extends React.Component {
      */
     render() {
         const {
-            throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled, isDescriptionValid,
+            throttlingPolicies, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled, isDescriptionValid,
             isEdit, applicationOwner,
         } = this.state;
         const { match: { params }, classes } = this.props;
@@ -476,7 +477,7 @@ class ApplicationFormHandler extends React.Component {
                         <Box py={4} mb={2} display='flex' justifyContent='center'>
                             <Grid item xs={10} md={9}>
                                 <ApplicationCreateForm
-                                    throttlingPolicyList={throttlingPolicyList}
+                                    throttlingPolicyList={throttlingPolicies}
                                     applicationRequest={applicationRequest}
                                     updateApplicationRequest={this.updateApplicationRequest}
                                     validateName={this.validateName}
