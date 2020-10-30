@@ -676,7 +676,7 @@
   "Apis.Details.Properties.Properties.cancel": "Cancel",
   "Apis.Details.Properties.Properties.editable.row.edit.mode.property.name": "Property Name",
   "Apis.Details.Properties.Properties.editable.row.property.name": "Property Name",
-  "Apis.Details.Properties.Properties.help": "Property name should be unique, should not contain spaces and cannot be any of the following reserved keywords : provider, version, context, status, description, subcontext, doc, lcState, name, tags.",
+  "Apis.Details.Properties.Properties.help": "Property name should be unique, should not contain spaces, cannot be more than 80 chars and cannot be any of the following reserved keywords : provider, version, context, status, description, subcontext, doc, lcState, name, tags.",
   "Apis.Details.Properties.Properties.help.main": "Usually, APIs have a pre-defined set of properties such as \n                        the name, version, context, etc. API Properties allows you to \n                         add specific custom properties to the API.",
   "Apis.Details.Properties.Properties.property.value": "Value",
   "Apis.Details.Properties.Properties.save": "Save",

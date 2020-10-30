@@ -170,7 +170,7 @@ class ProtectedApp extends Component {
      * Invoke checksession oidc endpoint.
      */
     checkSession() {
-        if (Settings.app.singleLogout && Settings.app.singleLogout.enabled) {
+        if (Settings.app.singleLogout && Settings.app.singleLogout.enabled && Settings.app.singleSignOn.enabled) {
             setInterval(() => {
                 const { clientId, sessionStateCookie } = this.state;
                 const msg = clientId + ' ' + sessionStateCookie;

@@ -19,9 +19,12 @@ const AppConfig = {
         },
         singleLogout: {
             enabled: true, // If enabled, user will be logged out from the App when logged out from the IDP (eg: SSO logout from a different App).
-            timeout: 4000 // Defines the timeout for the above periodical session status check
-        }
-    }
+            timeout: 4000, // Defines the timeout for the above periodical session status check
+        },
+        singleSignOn: {
+            enabled: true,
+        },
+    },
 };
 
 if (typeof module !== 'undefined') {

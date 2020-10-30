@@ -168,9 +168,11 @@ export default class Protected extends Component {
 
     /**
      * Invoke check session OIDC endpoint.
+     * If SSO or SLO is not enabled , OIDC check session iframe will not get loaded
      */
     checkSession() {
-        if (Configurations.app.singleLogout && Configurations.app.singleLogout.enabled) {
+        if (Configurations.app.singleLogout && Configurations.app.singleLogout.enabled
+            && Configurations.app.singleSignOn.enabled) {
             setInterval(() => {
                 // Check session will only trigger if user is available
                 const { clientId, sessionState } = AuthManager.getUser().getAppInfo();

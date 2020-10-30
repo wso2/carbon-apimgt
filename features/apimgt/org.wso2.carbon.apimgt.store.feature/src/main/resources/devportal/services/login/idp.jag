@@ -121,7 +121,9 @@
     var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
     if (request.getParameter("loginPrompt") === "false") {
         authRequestParams += "&prompt=none";
-    } 
+    } else if (!app.singleSignOn.enabled) {
+        authRequestParams += "&prompt=login";
+    }
     log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
     var cookie = {'name': 'CLIENT_ID', 'value': clientId, 'path': app.context + "/", "secure": true, "maxAge": -1};
 

@@ -120,12 +120,12 @@
             lock.release();
         }
     }
-
+    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
     if (request.getQueryString() == "not-Login") {
-        var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl+"&prompt=none";
-    } else {
-        var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
-    }  
+        authRequestParams += "&prompt=none";
+    } else if (!app.singleSignOn.enabled) {
+        authRequestParams += "&prompt=login";
+    }
 
     log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
     var cookie = {
