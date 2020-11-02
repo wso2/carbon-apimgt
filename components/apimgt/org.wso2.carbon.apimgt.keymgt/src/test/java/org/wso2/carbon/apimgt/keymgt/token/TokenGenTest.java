@@ -42,10 +42,6 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
-import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.FileInputStream;
@@ -58,9 +54,8 @@ import java.util.Map;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(value = {CarbonUtils.class, org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class,
-        AbstractJWTGenerator.class, APIUtil.class, KeyStoreManager.class, System.class, OAuth2Util.class,
-        IdentityUtil.class, OAuthServerConfiguration.class, SubscriptionDataHolder.class})
+@PrepareForTest( {AbstractJWTGenerator.class,APIUtil.class,KeyStoreManager.class,CarbonUtils.class,
+        SubscriptionDataHolder.class})
 public class TokenGenTest {
     private static final Log log = LogFactory.getLog(TokenGenTest.class);
 
@@ -88,16 +83,6 @@ public class TokenGenTest {
         application.setUUID(UUID.randomUUID().toString());
         application.addAttribute("abc","cde");
         Mockito.when(subscriptionDataStore.getApplicationById(1)).thenReturn(application);
-        OAuthServerConfiguration oauthServerConfigurationMock = Mockito
-                .mock(OAuthServerConfiguration.class);
-        PowerMockito.mockStatic(OAuthServerConfiguration.class);
-        PowerMockito.when(OAuthServerConfiguration.getInstance()).thenReturn(oauthServerConfigurationMock);
-        PowerMockito.mockStatic(OAuth2Util.class);
-        OAuth2Util oAuth2Util = Mockito.mock(OAuth2Util.class);
-        OAuthAppDO oAuthAppDO = Mockito.mock(OAuthAppDO.class);
-        String[] audiences = {"aud1", "aud2"};
-        PowerMockito.when(OAuth2Util.getAppInformationByClientId(Mockito.anyString())).thenReturn(oAuthAppDO);
-        PowerMockito.when(oAuthAppDO.getAudiences()).thenReturn(audiences);
     }
 
     @Test
