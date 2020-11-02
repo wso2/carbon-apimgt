@@ -39,9 +39,6 @@ const styles = (theme) => ({
     listText: {
         color: theme.palette.getContrastText(theme.palette.background.drawer),
     },
-    listTextSmall: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
-    },
     smallIcon: {
         marginRight: 5,
         minWidth: 'auto',
@@ -67,7 +64,7 @@ const styles = (theme) => ({
     },
     divider: {
         marginTop: theme.spacing(1),
-        backgroundColor: 'black',
+        backgroundColor: theme.palette.background.divider,
     },
     categoryHeader: {
         paddingTop: theme.spacing(1),
@@ -106,24 +103,24 @@ function GlobalNavLinks(props) {
     } = props;
 
     const publisherUser = !AuthManager.isNotPublisher();
-    const ditectCurrentMenu = (location) => {
+    const detectCurrentMenu = (location) => {
         const { pathname } = location;
-        if (/\/apis$/g.test(pathname) || /\/apis\//g.test(pathname)) {
+        if (/\/apis($|\/)/g.test(pathname)) {
             setSelected('apis');
-        } else if (/\/api-products$/g.test(pathname) || /\/api-products\//g.test(pathname)) {
+        } else if (/\/api-products($|\/)/g.test(pathname)) {
             setSelected('api-products');
-        } else if (/\/scopes$/g.test(pathname) || /\/scopes\//g.test(pathname)) {
+        } else if (/\/scopes($|\/)/g.test(pathname)) {
             setSelected('scopes');
-        } else if (/\/settings$/g.test(pathname) || /\/settings\//g.test(pathname)) {
+        } else if (/\/settings($|\/)/g.test(pathname)) {
             setSelected('alerts');
         }
     };
     useEffect(() => {
         const { location } = history;
-        ditectCurrentMenu(location);
+        detectCurrentMenu(location);
     }, []);
     history.listen((location) => {
-        ditectCurrentMenu(location);
+        detectCurrentMenu(location);
     });
     let strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     let iconWidth = 24;
@@ -159,8 +156,7 @@ function GlobalNavLinks(props) {
                             classes={{
                                 primary: classNames({
                                     [classes.selectedText]: selected === 'apis',
-                                    [classes.listText]: selected !== 'apis' && !smallView,
-                                    [classes.listTextSmall]: selected !== 'apis' && smallView,
+                                    [classes.listText]: selected !== 'apis',
                                 }),
                             }}
                             primary={(
@@ -197,8 +193,7 @@ function GlobalNavLinks(props) {
                                 classes={{
                                     primary: classNames({
                                         [classes.selectedText]: selected === 'api-products',
-                                        [classes.listText]: selected !== 'api-products' && !smallView,
-                                        [classes.listTextSmall]: selected !== 'api-products' && smallView,
+                                        [classes.listText]: selected !== 'api-products',
                                     }),
                                 }}
                                 primary={(
@@ -226,8 +221,7 @@ function GlobalNavLinks(props) {
                             classes={{
                                 primary: classNames({
                                     [classes.selectedText]: selected === 'scopes',
-                                    [classes.listText]: selected !== 'scopes' && !smallView,
-                                    [classes.listTextSmall]: selected !== 'scopes' && smallView,
+                                    [classes.listText]: selected !== 'scopes',
                                 }),
                             }}
                             primary={
@@ -278,8 +272,7 @@ function GlobalNavLinks(props) {
                             classes={{
                                 primary: classNames({
                                     [classes.selectedText]: selected === 'alerts',
-                                    [classes.listText]: selected !== 'alerts' && !smallView,
-                                    [classes.listTextSmall]: selected !== 'alerts' && smallView,
+                                    [classes.listText]: selected !== 'alerts',
                                 }),
                             }}
                             primary={

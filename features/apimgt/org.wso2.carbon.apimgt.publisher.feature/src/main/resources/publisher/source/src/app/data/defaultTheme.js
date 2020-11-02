@@ -91,6 +91,7 @@ export default {
             leftMenuActive: '#254061',
             drawer: '#1a1f2f',
             activeMenuItem: '#254061',
+            divider: '#000000',
         },
     },
     typography: {

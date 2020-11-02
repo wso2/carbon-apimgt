@@ -21,6 +21,7 @@ import { withStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/SearchOutlined';
 import Hidden from '@material-ui/core/Hidden';
+import Box from '@material-ui/core/Box';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Configurations from 'Config';
@@ -110,28 +111,35 @@ class Header extends React.Component {
             <>
                 <AppBar className={classes.appBar} position='fixed'>
                     <Toolbar className={classes.toolbar}>
-                        <IconButton onClick={this.toggleGlobalNavBar}>
-                            <MenuIcon className={classes.menuIcon} />
-                        </IconButton>
-                        <Link to='/'>
-                            <img
-                                src={Configurations.app.context + theme.custom.logo}
-                                alt={theme.custom.title}
-                                style={{ height: theme.custom.logoHeight, width: theme.custom.logoWidth }}
-                            />
-                        </Link>
-                        <GlobalNavBar toggleGlobalNavBar={this.toggleGlobalNavBar} open={openNavBar} />
-                        <Hidden smDown>
-                            <HeaderSearch />
-                        </Hidden>
-                        <Hidden mdUp>
-                            <IconButton onClick={this.toggleSmSearch} color='inherit'>
-                                <SearchIcon className={classes.menuIcon} />
-                            </IconButton>
-                            {smScreen && <HeaderSearch toggleSmSearch={this.toggleSmSearch} smSearch={smScreen} />}
-                        </Hidden>
-                        {menuItems}
-                        {avatar}
+                        <Box display='flex' justifyContent='space-between' flexDirection='row' width={1}>
+                            <Box display='flex'>
+                                <IconButton onClick={this.toggleGlobalNavBar}>
+                                    <MenuIcon className={classes.menuIcon} />
+                                </IconButton>
+                                <Link to='/'>
+                                    <img
+                                        src={Configurations.app.context + theme.custom.logo}
+                                        alt={theme.custom.title}
+                                        style={{ height: theme.custom.logoHeight, width: theme.custom.logoWidth }}
+                                    />
+                                </Link>
+                                <GlobalNavBar toggleGlobalNavBar={this.toggleGlobalNavBar} open={openNavBar} />
+                            </Box>
+                            <Box display='flex'>
+                                <Hidden smDown>
+                                    <HeaderSearch />
+                                </Hidden>
+                                <Hidden mdUp>
+                                    <IconButton onClick={this.toggleSmSearch} color='inherit'>
+                                        <SearchIcon className={classes.menuIcon} />
+                                    </IconButton>
+                                    {smScreen
+                                    && <HeaderSearch toggleSmSearch={this.toggleSmSearch} smSearch={smScreen} />}
+                                </Hidden>
+                                {menuItems}
+                                {avatar}
+                            </Box>
+                        </Box>
                     </Toolbar>
                 </AppBar>
             </>
