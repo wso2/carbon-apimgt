@@ -433,7 +433,7 @@ public class APIMappingUtil {
         API api;
         String username = RestApiUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-        api = apiConsumer.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        api = apiConsumer.getLightweightAPIByUUID(apiUUID);
         return api;
     }
 

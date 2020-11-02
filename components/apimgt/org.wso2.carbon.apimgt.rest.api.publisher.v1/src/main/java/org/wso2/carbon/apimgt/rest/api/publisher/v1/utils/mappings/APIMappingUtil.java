@@ -516,7 +516,7 @@ public class APIMappingUtil {
 
         API api;
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        api = apiProvider.getLightweightAPIByUUID(apiUUID);
         return api;
     }
 
@@ -2577,7 +2577,7 @@ public class APIMappingUtil {
         APIIdentifier apiIdentifier;
         APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
         if (RestApiUtil.isUUID(apiId)) {
-            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
+            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId).getId();
         } else {
             apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId)).getId();
         }
@@ -2633,7 +2633,7 @@ public class APIMappingUtil {
         API api;
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         if (RestApiUtil.isUUID(apiId)) {
-            api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
+            api = apiProvider.getAPIbyUUID(apiId);
         } else {
             APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
             //Checks whether the logged in user's tenant and the API's tenant is equal

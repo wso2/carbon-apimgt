@@ -416,7 +416,7 @@ public final class APIUtil {
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             //set uuid
-            api.setUUID(artifact.getId());
+            api.setUUID(getUUIDFromIdentifier(apiIdentifier));
             //setting api ID for scope retrieval
             api.getId().setApplicationId(Integer.toString(apiId));
             // set url
@@ -648,7 +648,7 @@ public final class APIUtil {
 
             api = new API(apiIdentifier);
             //set uuid
-            api.setUUID(artifact.getId());
+            api.setUUID(getUUIDFromIdentifier(apiIdentifier));
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             api = setResourceProperties(api, registry, artifactPath);
@@ -970,7 +970,7 @@ public final class APIUtil {
                 return null;
             }
             //set uuid
-            api.setUUID(artifact.getId());
+            api.setUUID(getUUIDFromIdentifier(apiIdentifier));
             api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setStatus(getLcStateFromArtifact(artifact));
@@ -1101,7 +1101,7 @@ public final class APIUtil {
                 return null;
             }
             //set uuid
-            api.setUUID(artifact.getId());
+            api.setUUID(getUUIDFromIdentifier(apiIdentifier));
             api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setStatus(getLcStateFromArtifact(artifact));
@@ -3417,7 +3417,8 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            api = new API(new APIIdentifier(providerName, apiName, apiVersion));
+            APIIdentifier identifier = new APIIdentifier(providerName, apiName, apiVersion);
+            api = new API(identifier);
             int apiId = ApiMgtDAO.getInstance().getAPIID(oldId, null);
             if (apiId == -1) {
                 return null;
@@ -3432,7 +3433,7 @@ public final class APIUtil {
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             //set uuid
-            api.setUUID(artifact.getId());
+            api.setUUID(getUUIDFromIdentifier(identifier));
             // set url
             api.setStatus(getLcStateFromArtifact(artifact));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
@@ -6096,9 +6097,9 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            api = new API(new APIIdentifier(providerName, apiName, apiVersion));
-            //set uuid
-            api.setUUID(artifact.getId());
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            api = new API(apiIdentifier);
+            api.setUUID(APIUtil.getUUIDFromIdentifier(apiIdentifier));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setStatus(getLcStateFromArtifact(artifact));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
@@ -9897,7 +9898,7 @@ public final class APIUtil {
             setResourceProperties(apiProduct, registry, artifactPath);
 
             //set uuid
-            apiProduct.setUuid(artifact.getId());
+            apiProduct.setUuid(getUUIDFromIdentifier(apiProductIdentifier));
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
@@ -11664,7 +11665,7 @@ public final class APIUtil {
             //set description
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             //set uuid
-            api.setUUID(artifact.getId());
+            api.setUUID(getUUIDFromIdentifier(apiIdentifier));
 
             // set url
             api.setStatus(getLcStateFromArtifact(artifact));
@@ -11753,6 +11754,36 @@ public final class APIUtil {
             return Boolean.parseBoolean(crossTenantSubscriptionProperty);
         }
         return false;
+    }
+
+    /**
+     * Get UUID by the API Identifier.
+     *
+     * @param identifier
+     * @return String uuid string
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static String getUUIDFromIdentifier(APIIdentifier identifier) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+    }
+
+    /**
+     * Get UUID by the API Identifier.
+     *
+     * @param identifier
+     * @return String uuid string
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static String getUUIDFromIdentifier(APIProductIdentifier identifier) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+    }
+
+    public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getAPIProductIdentifierFromUUID(uuid);
+    }
+
+    public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
     }
 }
 

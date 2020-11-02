@@ -1424,6 +1424,22 @@ public class APIMgtDAOTest {
         assertEquals(2,graphqlComplexityInfo.getList().size());
     }
 
+    @Test
+    public void testAddAndRetrieveAPIUUID() throws APIManagementException{
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApiByUUID",
+                "testAddAndGetApiByUUID", "1.0.0");
+        API api = new API(apiIdentifier);
+        api.setContext("/testAddAndGetApiByUUID");
+        api.setContextTemplate("/testAddAndGetApi/{version}");
+        //api.setUriTemplates(getUriTemplateSet());
+        //api.setScopes(getScopes());
+        api.setStatus(APIConstants.PUBLISHED);
+        int apiID = apiMgtDAO.addAPI(api, -1234);
+        String UUID = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
+        APIIdentifier retrievedIdentifier = apiMgtDAO.getAPIIdentifierFromUUID(UUID);
+        assertEquals(apiIdentifier, retrievedIdentifier);
+    }
+
     private GraphqlComplexityInfo getGraphqlComplexityInfoDetails() {
         GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();
 

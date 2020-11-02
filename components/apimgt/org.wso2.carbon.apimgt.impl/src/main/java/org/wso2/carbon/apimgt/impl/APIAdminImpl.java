@@ -177,8 +177,7 @@ public class APIAdminImpl implements APIAdmin {
             UserAwareAPIProvider userAwareAPIProvider = new UserAwareAPIProvider(user);
             for (API api : apiList) {
                 String uuid = api.getUUID();
-                API lightweightAPIByUUID = userAwareAPIProvider.getLightweightAPIByUUID(uuid, apiProvider.
-                        tenantDomain);
+                API lightweightAPIByUUID = userAwareAPIProvider.getLightweightAPIByUUID(uuid);
                 List<Label> attachedLabelsWithoutID = lightweightAPIByUUID.getGatewayLabels();
                 for (Label labelWithoutId : attachedLabelsWithoutID) {
                     if (labelName.equalsIgnoreCase(labelWithoutId.getName())) {

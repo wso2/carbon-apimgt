@@ -402,7 +402,10 @@ public class APIUtilTest {
                 thenReturn(expectedAPI.getId().getApiName());
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).
                 thenReturn(expectedAPI.getId().getVersion());
-        Mockito.when(artifact.getId()).thenReturn(expectedAPI.getUUID());
+        APIIdentifier apiIdentifier = new APIIdentifier(expectedAPI.getId().getProviderName(),
+                expectedAPI.getId().getApiName(), expectedAPI.getId().getVersion());
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getUUIDFromIdentifier(apiIdentifier)).thenReturn(expectedAPI.getUUID());
 
         API api = APIUtil.getAPIInformation(artifact, registry);
 

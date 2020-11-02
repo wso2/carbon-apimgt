@@ -171,7 +171,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiConsumer.getAPIbyUUID(apiId);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiIdentifier);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
@@ -203,7 +203,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiConsumer.getAPIbyUUID(apiId);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String schemaContent = apiConsumer.getGraphqlSchema(apiIdentifier);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
@@ -647,7 +647,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 );
             }
 
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId);
 
             // gets the first available environment if any of label, environment or cluster name is not provided
             if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)
@@ -921,7 +921,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getWSDLOfAPI(String apiId, String labelName, String environmentName, String ifNoneMatch,
                                  String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-        API api = apiConsumer.getLightweightAPIByUUID(apiId, xWSO2Tenant);
+        API api = apiConsumer.getLightweightAPIByUUID(apiId);
         APIIdentifier apiIdentifier = api.getId();
 
         List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);

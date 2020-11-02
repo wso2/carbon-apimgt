@@ -7810,7 +7810,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
                 api = super.getAPI(emailReplacedAPIIdentifier);
             } else {
-                api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
+                api = super.getAPIbyUUID(apiProductResource.getApiId());
                 // if API does not exist, getLightweightAPIByUUID() method throws exception.
             }
             if (api != null) {
@@ -8027,7 +8027,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
                 api = super.getAPI(emailReplacedAPIIdentifier);
             } else {
-                api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
+                api = super.getAPIbyUUID(apiProductResource.getApiId());
             }
 
             api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
