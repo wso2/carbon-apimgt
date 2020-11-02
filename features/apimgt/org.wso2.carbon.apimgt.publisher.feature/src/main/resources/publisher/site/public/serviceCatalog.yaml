@@ -1,862 +1,768 @@
-openapi: "3.0.0"
+---
+openapi: 3.0.0
 info:
-  title: "Service Catalog APIs"
-  description: "This specifies a **RESTful API** for Service Catalog.\n"
-  version: "1.0"
+  title: Service Catalog APIs
+  description: |
+    This specifies a **RESTful API** for Service Catalog.
+  version: 0.9
 servers:
-- url: "https://virtserver.swaggerhub.com/malinthaprasan/ServiceCatalog/1.0"
-  description: "SwaggerHub API Auto Mocking"
-- url: "https://apis.wso2.com/api/service-catalog/v1"
-- url: "http://apis.wso2.com/api/service-catalog/v1"
+- url: https://virtserver.swaggerhub.com/malinthaprasan/ServiceCatalog/1.0
+  description: SwaggerHub API Auto Mocking
+- url: https://apis.wso2.com/api/service-catalog/v1
+- url: http://apis.wso2.com/api/service-catalog/v1
 paths:
-  /service-catalogs:
+  /services:
     get:
       tags:
-      - "Service Catalog"
-      summary: "Retrieve all Service Catalogs\n"
-      description: "This operation provides you all the available Service Catalogs\
-        \ in the given tenant. \n"
-      operationId: "getServiceCatalogs"
-      responses:
-        "200":
-          description: "OK.\nA list of Service Catalogs is returned.\n"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ServiceCatalogList"
-      security:
-      - OAuth2Security:
-        - "service_catalog:view"
-  /service-catalogs/{catalogId}:
-    get:
-      tags:
-      - "Service Catalog"
-      summary: "Get details of a Service Catalog"
-      description: "Using this operation, you can retrieve complete details of a single\
-        \ Service Catalog using the CatalogId.\n"
-      operationId: "getServiceCatalogById"
+      - Services
+      summary: Retrieve/search services
+      description: |
+        Retrieve or search services in the service catalog of the user's organization or tenant.
+      operationId: searchServices
       parameters:
-      - name: "catalogId"
-        in: "path"
-        description: "uuid of the catalog"
-        required: true
-        style: "simple"
-        explode: false
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "OK.\nRequested Service Catalog is returned\n"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ServiceCatalog"
-        "400":
-          description: "Invalid Request"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: "Not Found.\nRequested Service Catalog does not exist.\n"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-      security:
-      - OAuth2Security:
-        - "service_catalog:view"
-    put:
-      tags:
-      - "Service Catalog"
-      summary: "Update an existing Service Catalog"
-      description: "This operation can be used to update an existing Service Catalog\n"
-      operationId: "updateServiceCatalog"
-      parameters:
-      - name: "catalogId"
-        in: "path"
-        description: "uuid of the catalog"
-        required: true
-        style: "simple"
-        explode: false
-        schema:
-          type: "string"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ServiceCatalog"
-        required: true
-      responses:
-        "200":
-          description: "OK.\nUpdated Service Catalog is returned\n"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ServiceCatalog"
-        "400":
-          description: "Invalid Request"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: "Not Found.\nRequested Service Catalog does not exist.\n"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-      security:
-      - OAuth2Security:
-        - "service_catalog:write"
-  /service-catalogs/{catalogId}/entries:
-    get:
-      tags:
-      - "Service Catalog Entries"
-      summary: "Get All entries in the registry"
-      operationId: "getAllEntriesInCatalog"
-      parameters:
-      - name: "catalogId"
-        in: "path"
-        description: "uuid of the catalog"
-        required: true
-        style: "simple"
-        explode: false
-        schema:
-          type: "string"
-      - name: "version"
-        in: "query"
-        description: "Version of the Catalog Entry"
+      - name: name
+        in: query
+        description: |
+          Filter services by the name of the service
         required: false
-        style: "form"
+        style: form
         explode: true
         schema:
-          type: "string"
-      - name: "serviceType"
-        in: "query"
-        description: "**Search condition**.\nFilter entries by serviceType\n"
+          type: string
+      - name: version
+        in: query
+        description: |
+          Filter services by version of the service
         required: false
-        style: "form"
+        style: form
         explode: true
         schema:
-          type: "string"
+          type: string
+      - name: definitionType
+        in: query
+        description: |
+          Filter services by definitionType
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
           enum:
-          - "REST"
-          - "SOAP"
-          - "GRAPHQL"
-          - "WS"
-          - "GRPC"
-          - "ASYNC_API"
-      - name: "definitionType"
-        in: "query"
-        description: "Filter catalog entries by definitionType\n"
+          - OAS
+          - WSDL1
+          - WSDL2
+          - GRAPHQL_SDL
+          - ASYNC_API
+      - name: displayName
+        in: query
+        description: |
+          Filter services by the display name
         required: false
-        style: "form"
+        style: form
         explode: true
         schema:
-          type: "string"
+          type: string
+      - name: sortBy
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
           enum:
-          - "OAS"
-          - "WSDL1"
-          - "WSDL2"
-          - "GRAPHQL_SDL"
-      - name: "name"
-        in: "query"
-        description: "Filter catalog entries by the name of the Entry\n"
+          - name
+          - definitionType
+      - name: sortOrder
+        in: query
         required: false
-        style: "form"
+        style: form
         explode: true
         schema:
-          type: "string"
-      - name: "displayName"
-        in: "query"
-        description: "Filter catalog entries by the display name of the Entry\n"
-        required: false
-        style: "form"
-        explode: true
-        schema:
-          type: "string"
-      - name: "sortBy"
-        in: "query"
-        required: false
-        style: "form"
-        explode: true
-        schema:
-          type: "string"
+          type: string
           enum:
-          - "name"
-          - "definitionType"
-          - "serviceType"
-      - name: "sortOrder"
-        in: "query"
+          - asc
+          - desc
+      - name: limit
+        in: query
+        description: |
+          Maximum limit of items to return.
         required: false
-        style: "form"
+        style: form
         explode: true
         schema:
-          type: "string"
-          enum:
-          - "asc"
-          - "desc"
-      - name: "limit"
-        in: "query"
-        description: "Maximum limit of items to return.\n"
-        required: false
-        style: "form"
-        explode: true
-        schema:
-          type: "integer"
+          type: integer
           default: 25
-      - name: "offset"
-        in: "query"
-        description: "Starting point within the complete list of items qualified.\n"
+      - name: offset
+        in: query
+        description: |
+          Starting point within the complete list of items qualified.
         required: false
-        style: "form"
+        style: form
         explode: true
         schema:
-          type: "integer"
+          type: integer
           default: 0
       responses:
         "200":
-          description: "Paginated array of entries in Registry is returned.\n"
+          description: |
+            Paginated matched list of services returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CatalogEntryList"
+                $ref: '#/components/schemas/ServiceList'
         "400":
-          description: "Invalid Request\n"
+          description: |
+            Bad Request. Due to an invalid search parameter
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: "Not Found.\nRequested Service Catalog does not exist.\n"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
       security:
       - OAuth2Security:
-        - "service_catalog:entry_view"
+        - service_catalog:entry_view
     post:
       tags:
-      - "Service Catalog Entries"
-      summary: "Create a new Service Catalog Entry"
-      description: "This operation can be used to create a new Service Catalog Entry\
-        \ specifying the details of the Entry in the\npayload.\n"
-      operationId: "createCatalogEntry"
-      parameters:
-      - name: "catalogId"
-        in: "path"
-        description: "uuid of the catalog"
-        required: true
-        style: "simple"
-        explode: false
-        schema:
-          type: "string"
+      - Services
+      summary: Create a new service
+      description: "Create a new service and add it to the service catalog of the user's organization (or tenant) \nby specifying the details of the service along with its definition. \n"
+      operationId: createService
       requestBody:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CatalogEntrySchema"
+              $ref: '#/components/schemas/CreateServiceRequest'
       responses:
         "201":
-          description: "Created.\nSuccessful response with the newly created Service\
-            \ Catalog Entry as entity in the body.\n"
+          description: |
+            Created.
+            Successful response with the newly created service entry as the response payload
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CatalogEntry"
-        "405":
-          description: "Bad Request.\nInvalid request or validation error.\n"
+                $ref: '#/components/schemas/Service'
+        "400":
+          description: |
+            Bad Request.
+            Invalid request or validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         "415":
-          description: "Unsupported Media Type.\nThe entity of the request was in\
-            \ a not supported format.\n"
+          description: |
+            Unsupported Media Type.
+            The entity of the request was in a not supported format.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
       security:
       - OAuth2Security:
-        - "service_catalog:entry_write"
-  /service-catalogs/{catalogId}/entries/{entryId}:
+        - service_catalog:entry_write
+  /services/{serviceId}:
     get:
       tags:
-      - "Service Catalog Entries"
-      summary: "Retrieve a specific Entry in a Catalog"
-      description: "Using this operation, you can retrieve a specific entry in a single\
-        \ Catalog using the EntryId and CatalogId.\n"
-      operationId: "getCatalogEntryByUuid"
+      - Services
+      summary: Get details of a service
+      description: |
+        Get details of a service using the id of the service.
+      operationId: getServiceById
       parameters:
-      - name: "catalogId"
-        in: "path"
-        description: "uuid of the catalog"
+      - name: serviceId
+        in: path
+        description: uuid of the catalog entry
         required: true
-        style: "simple"
+        style: simple
         explode: false
         schema:
-          type: "string"
-      - name: "entryId"
-        in: "path"
-        description: "uuid of the catalog entry"
-        required: true
-        style: "simple"
-        explode: false
-        schema:
-          type: "string"
+          type: string
       responses:
         "200":
-          description: "Requested Entry in Catalog is returned.\n"
+          description: |
+            Requested service in the service catalog is returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CatalogEntry"
+                $ref: '#/components/schemas/Service'
         "400":
-          description: "Invalid Request\n"
+          description: |
+            Invalid Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         "404":
-          description: "Not Found.\nRequested Service Catalog or Entry does not exist.\n"
+          description: |
+            Not Found.
+            Requested service does not exist in the service catalog.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
       security:
       - OAuth2Security:
-        - "service_catalog:entry_view"
+        - service_catalog:entry_view
     put:
       tags:
-      - "Service Catalog Entries"
-      summary: "Update an existing Entry in a Service Catalog"
-      description: "This operation can be used to update an existing Entry in Service\
-        \ Catalog with the details of the Entry in the\n payload.\n"
-      operationId: "updateCatalogEntry"
+      - Services
+      summary: Update a service
+      description: |
+        Update a service's details and definition
+      operationId: updateService
       parameters:
-      - name: "catalogId"
-        in: "path"
-        description: "uuid of the catalog"
+      - name: serviceId
+        in: path
+        description: uuid of the catalog entry
         required: true
-        style: "simple"
+        style: simple
         explode: false
         schema:
-          type: "string"
-      - name: "entryId"
-        in: "path"
-        description: "uuid of the catalog entry"
-        required: true
-        style: "simple"
-        explode: false
-        schema:
-          type: "string"
+          type: string
       requestBody:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CatalogEntrySchema"
+              $ref: '#/components/schemas/CreateServiceRequest'
       responses:
         "200":
-          description: "Updated.\nSuccessful response with the newly updated Catalog\
-            \ Entry as entity in the body.\n"
+          description: |
+            Updated.
+            Successful response with the newly updated service as entity in the body.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CatalogEntry"
+                $ref: '#/components/schemas/Service'
         "400":
-          description: "Invalid Request\n"
+          description: |
+            Invalid Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         "404":
-          description: "Not Found.\nRequested Service Catalog or Entry does not exist.\n"
+          description: |
+            Not Found.
+            Requested Service does not exist.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
       security:
       - OAuth2Security:
-        - "service_catalog:entry_write"
+        - service_catalog:entry_write
     delete:
       tags:
-      - "Service Catalog Entries"
-      summary: "Delete an Entry in a Service Catalog"
-      description: "This operation can be used to delete an existing Entry in Catalog\
-        \ by specifying the catalogId and entryId.\n"
-      operationId: "deleteCatalogEntry"
+      - Services
+      summary: Delete a service
+      description: |
+        Delete a service by providing the service id
+      operationId: deleteService
       parameters:
-      - name: "catalogId"
-        in: "path"
-        description: "uuid of the catalog"
+      - name: serviceId
+        in: path
+        description: uuid of the catalog entry
         required: true
-        style: "simple"
+        style: simple
         explode: false
         schema:
-          type: "string"
-      - name: "entryId"
-        in: "path"
-        description: "uuid of the catalog entry"
-        required: true
-        style: "simple"
-        explode: false
-        schema:
-          type: "string"
+          type: string
       responses:
         "204":
-          description: "Successfully deleted the catalog entry.\n"
+          description: |
+            Successfully deleted the catalog entry.
         "400":
-          description: "Invalid Request\n"
+          description: |
+            Invalid Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         "404":
-          description: "Not Found.\nRequested Service Catalog or Entry does not exist.\n"
+          description: |
+            Not Found.
+            Requested Service does not exist.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
       security:
       - OAuth2Security:
-        - "service_catalog:entry_write"
-  /service-catalogs/{catalogId}/entries/{entryId}/definition:
+        - service_catalog:entry_write
+  /services/{serviceId}/definition:
     get:
       tags:
-      - "Service Catalog Entries"
-      summary: "Retrieve the definition file of a specific Entry in a Catalog"
-      description: "Using this operation, you can retrieve the definition file of\
-        \ a specific entry in a Catalog using the EntryId\nand CatalogId.\n"
-      operationId: "getCatalogEntryDefinition"
+      - Services
+      summary: Retrieve a service definition
+      description: |
+        Retrieve the definition of a service identified by the service id.
+      operationId: getServiceDefinition
       parameters:
-      - name: "catalogId"
-        in: "path"
-        description: "uuid of the catalog"
+      - name: serviceId
+        in: path
+        description: uuid of the catalog entry
         required: true
-        style: "simple"
+        style: simple
         explode: false
         schema:
-          type: "string"
-      - name: "entryId"
-        in: "path"
-        description: "uuid of the catalog entry"
-        required: true
-        style: "simple"
-        explode: false
-        schema:
-          type: "string"
+          type: string
       responses:
         "200":
-          description: "Updated.\nSuccessful response with the definition file as\
-            \ entity in the body.\n"
+          description: |
+            Successful response with the definition file as entity in the body.
           content:
-            application/octet-stream:
+            application/json:
               schema:
-                type: "string"
-                format: "binary"
+                type: string
+            application/yaml:
+              schema:
+                type: string
         "400":
-          description: "Invalid Request\n"
+          description: |
+            Invalid Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         "404":
-          description: "Not Found.\nRequested Service Catalog or Entry does not exist.\n"
+          description: |
+            Not Found.
+            Requested Service does not exist.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
       security:
       - OAuth2Security:
-        - "service_catalog:entry_view"
-  /service-catalogs/{catalogId}/export-entry:
-    get:
-      tags:
-      - "Service Catalog Entries"
-      summary: "Export a given service catalog entry"
-      description: "Using this operation, you can export a given entry in a Catalog\
-        \ using the entryId or name/version combination.\n"
-      operationId: "exportCatalogEntry"
-      parameters:
-      - name: "catalogId"
-        in: "path"
-        description: "uuid of the catalog"
-        required: true
-        style: "simple"
-        explode: false
-        schema:
-          type: "string"
-      - name: "entryId"
-        in: "path"
-        description: "uuid of the catalog entry"
-        required: true
-        style: "simple"
-        explode: false
-        schema:
-          type: "string"
-      - name: "name"
-        in: "query"
-        description: "The name of the Entry to export\n"
-        required: false
-        style: "form"
-        explode: true
-        schema:
-          type: "string"
-      - name: "version"
-        in: "query"
-        description: "Version of the Entry"
-        required: false
-        style: "form"
-        explode: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "Updated.\nSuccessful response with the exported service catalog\
-            \ entry as a zip file. This will contain both meta-data and the definition..\n"
-          content:
-            application/octet-stream:
-              schema:
-                type: "string"
-                format: "binary"
-        "400":
-          description: "Invalid Request\n"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: "Not Found.\nRequested Service Catalog or Entry does not exist.\n"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-      security:
-      - OAuth2Security:
-        - "service_catalog:entry_view"
-  /service-catalogs/{catalogId}/import-entry:
+        - service_catalog:entry_view
+  /services/import:
     post:
       tags:
-      - "Service Catalog Entries"
-      summary: "Import a specific service catalog entry"
-      description: "Using this operation, you can import a zipped service catalog\
-        \ entry\n"
-      operationId: "importCatalogEntry"
+      - Services
+      summary: Import a service
+      description: |
+        Import  a service by providing an archived service
+      operationId: importService
       parameters:
-      - name: "catalogId"
-        in: "path"
-        description: "uuid of the catalog"
+      - name: serviceId
+        in: path
+        description: uuid of the catalog entry
         required: true
-        style: "simple"
+        style: simple
         explode: false
         schema:
-          type: "string"
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: "#/components/schemas/CatalogEntryImport"
+          type: string
+      - name: If-Match
+        in: header
+        description: ETag of the service resource to update
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: overwrite
+        in: query
+        description: |
+          Whether to overwrite if there is any existing service with the same name and version.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
       responses:
         "200":
-          description: "Updated.\nSuccessful response with the definition file as\
-            \ entity in the body.\n"
+          description: |
+            Successful response with the imported service metadata.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
           content:
-            application/octet-stream:
+            application/json:
               schema:
-                type: "string"
-                format: "binary"
+                $ref: '#/components/schemas/Service'
         "400":
-          description: "Invalid Request\n"
+          description: |
+            Invalid Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: "Not Found.\nRequested Service Catalog or Entry does not exist.\n"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
       security:
       - OAuth2Security:
-        - "service_catalog:entry_write"
+        - service_catalog:entry_create
+  /services/export:
+    get:
+      tags:
+      - Services
+      summary: Export a service
+      description: |
+        Export a service as an archived zip file.
+      operationId: exportService
+      parameters:
+      - name: name
+        in: query
+        description: |
+          Name of the service to export
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: version
+        in: query
+        description: |
+          Version of the service to export
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |
+            Successful response as the exported service as a zipped archive.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: |
+            Not Found.
+            Requested Service does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - OAuth2Security:
+        - service_catalog:entry_view
+    head:
+      tags:
+      - Services
+      summary: Check service existence
+      description: |
+        Check service existence by name and version.
+        Upon successful response, this will also return the current state of the service as ETag header.
+      operationId: checkServiceExistence
+      parameters:
+      - name: name
+        in: query
+        description: |
+          Name of the service to export
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: version
+        in: query
+        description: |
+          Version of the service to export
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |
+            Successful response with the available service's current state as the ETag header.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+        "404":
+          description: |
+            Not Found.
+            Requested Service does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - OAuth2Security:
+        - service_catalog:entry_view
   /settings:
     get:
       tags:
-      - "Settings"
-      summary: "Retrieve Service Catalog settings"
-      description: "Retrieve Service Catalog settings\n"
-      operationId: "getSettings"
+      - Settings
+      summary: Retrieve service catalog API settings
+      description: |
+        Retrieve Service Catalog API settings
+      operationId: getSettings
       responses:
         "200":
-          description: "OK.\nSettings returned\n"
+          description: |
+            OK.
+            Settings returned
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Settings"
+                $ref: '#/components/schemas/Settings'
         "404":
-          description: "Not Found.\nRequested Settings does not exist.\n"
+          description: |
+            Not Found.
+            Requested Settings does not exist.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
-    ServiceCatalog:
-      title: "Service Catalog object"
-      type: "object"
-      properties:
-        name:
-          type: "string"
-          readOnly: true
-          example: "default"
-        id:
-          type: "string"
-          readOnly: true
-          example: "01234567-0123-0123-0123-012345678901"
-        type:
-          type: "string"
-          readOnly: true
-          example: "wso2"
-          enum:
-          - "wso2"
-        owner:
-          type: "string"
-          readOnly: true
-          example: "admin"
-        displayName:
-          type: "string"
-          example: "Dev Service Catalog"
-        description:
-          type: "string"
-          example: "A sample description about the Service Catalog"
-    ServiceCatalogList:
-      title: "Service Catalog List"
-      type: "object"
-      properties:
-        count:
-          type: "integer"
-          description: "Number of Service Catalogs returned.\n"
-          example: 1
-        list:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/ServiceCatalog"
-    CatalogEntryList:
-      title: "Paginated Service Catalog Entry Array"
-      type: "object"
+    ServiceList:
+      title: Paginated Service Catalog Entry Array
+      type: object
       properties:
         limit:
-          type: "integer"
+          type: integer
         offset:
-          type: "integer"
+          type: integer
         total:
-          type: "integer"
+          type: integer
         list:
-          title: "Service Catalog Entry Array"
-          type: "array"
+          title: Service Catalog Entry Array
+          type: array
           items:
-            $ref: "#/components/schemas/CatalogEntry"
+            $ref: '#/components/schemas/Service'
         pagination:
-          $ref: "#/components/schemas/Pagination"
-    CatalogEntry:
-      title: "The Service Catalog Entry object"
+          $ref: '#/components/schemas/Pagination'
+    Service:
+      title: The Service Catalog Entry object
       required:
-      - "entryName"
-      - "serviceType"
-      - "version"
-      type: "object"
+      - entryName
+      - serviceType
+      - version
+      type: object
       properties:
         id:
-          type: "string"
+          type: string
           readOnly: true
-          example: "01234567-0123-0123-0123-012345678901"
-        entryName:
-          pattern: "^[^\\*]+$"
-          type: "string"
-          example: "Pizzashack-Endpoint"
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          pattern: ^[^\*]+$
+          type: string
+          example: Pizzashack-Endpoint
         displayName:
-          pattern: "^[^\\*]+$"
-          type: "string"
-          example: "Pizzashack-Endpoint"
+          pattern: ^[^\*]+$
+          type: string
+          example: Pizzashack-Endpoint
         description:
-          type: "string"
-          example: "A Catalog Entry that exposes a REST endpoint"
+          type: string
+          example: A Catalog Entry that exposes a REST endpoint
         version:
-          type: "string"
-          example: "v1"
+          type: string
+          example: v1
         serviceUrl:
-          type: "string"
-          example: "http://localhost/pizzashack"
-        serviceType:
-          type: "string"
-          description: "Type of the backend connecting to"
-          example: "REST"
-          enum:
-          - "REST"
-          - "SOAP"
-          - "GRAPHQL"
-          - "WS"
-          - "GRPC"
-          - "ASYNC_API"
+          type: string
+          example: http://localhost/pizzashack
         definitionType:
-          type: "string"
-          description: "The type of the provided API definition"
-          example: "OAS3"
+          type: string
+          description: The type of the provided API definition
+          example: OAS3
           enum:
-          - "OAS2"
-          - "OAS3"
-          - "WSDL1"
-          - "WSDL2"
-          - "GRAPHQL_SDL"
+          - OAS2
+          - OAS3
+          - WSDL1
+          - WSDL2
+          - GRAPHQL_SDL
+          - ASYNC_API
         securityType:
-          type: "string"
-          description: "The security type of the endpoint"
-          example: "BASIC"
+          type: string
+          description: The security type of the endpoint
+          example: BASIC
           enum:
-          - "BASIC"
-          - "DIGEST"
-          - "OAUTH2"
-          - "NONE"
+          - BASIC
+          - DIGEST
+          - OAUTH2
+          - NONE
         mutualSSLEnabled:
-          type: "boolean"
-          description: "Whether Mutual SSL is enabled for the endpoint"
+          type: boolean
+          description: Whether Mutual SSL is enabled for the endpoint
           default: false
-    CatalogEntrySchema:
-      title: "The Service Catalog Entry Schema object"
+        usage:
+          type: integer
+          description: Number of usages of the service in APIs
+          readOnly: true
+          example: 1
+        createdTime:
+          type: string
+          readOnly: true
+          example: 2020-02-20T13:57:16.229
+        lastUpdatedTime:
+          type: string
+          readOnly: true
+          example: 2020-02-20T13:57:16.229
+        etag:
+          type: string
+          description: md5 value representing current state of the service and the definition
+          readOnly: true
+          example: 32c890312cfadc94a7c1153f65a4f100
+    CreateServiceRequest:
+      title: The Service Catalog Entry Schema object
       required:
-      - "catalogEntry"
-      type: "object"
+      - catalogEntry
+      - definitionFile
+      type: object
       properties:
         catalogEntry:
-          $ref: "#/components/schemas/CatalogEntry"
+          $ref: '#/components/schemas/Service'
         definitionFile:
-          type: "string"
-          format: "binary"
-    CatalogEntryImport:
-      title: "The Service Catalog Entry zip file to import"
-      type: "object"
-      properties:
-        file:
-          type: "string"
-          format: "binary"
+          type: string
+          format: binary
     Settings:
-      title: "SettingsDTO"
+      title: SettingsDTO
       properties:
         scopes:
-          type: "array"
+          type: array
           items:
-            type: "string"
+            type: string
     Error:
-      title: "Error object returned with 4XX HTTP Status"
+      title: Error object returned with 4XX HTTP Status
       required:
-      - "code"
-      - "message"
-      type: "object"
+      - code
+      - message
+      type: object
       properties:
         code:
-          type: "integer"
-          format: "int64"
+          type: integer
+          format: int64
         message:
-          type: "string"
-          description: "Error message."
+          type: string
+          description: Error message.
         description:
-          type: "string"
-          description: "A detail description about the error message.\n"
+          type: string
+          description: |
+            A detail description about the error message.
         moreInfo:
-          type: "string"
-          description: "Preferably an url with more details about the error.\n"
+          type: string
+          description: |
+            Preferably an url with more details about the error.
         error:
-          type: "array"
-          description: "If there are more than one error list them out.\nFor example,\
-            \ list out validation errors by each field.\n"
+          type: array
+          description: |
+            If there are more than one error list them out.
+            For example, list out validation errors by each field.
           items:
-            $ref: "#/components/schemas/ErrorListItem"
+            $ref: '#/components/schemas/ErrorListItem'
     ErrorListItem:
-      title: "Description of individual errors that may have occurred during a request."
+      title: Description of individual errors that may have occurred during a request.
       required:
-      - "code"
-      - "message"
-      type: "object"
+      - code
+      - message
+      type: object
       properties:
         code:
-          type: "string"
+          type: string
         message:
-          type: "string"
-          description: "Description about individual errors occurred\n"
+          type: string
+          description: |
+            Description about individual errors occurred
         description:
-          type: "string"
-          description: "A detail description about the error message.\n"
+          type: string
+          description: |
+            A detail description about the error message.
     Pagination:
-      title: "Pagination"
+      title: Pagination
       properties:
         offset:
-          type: "integer"
+          type: integer
           example: 0
         limit:
-          type: "integer"
+          type: integer
           example: 1
         total:
-          type: "integer"
+          type: integer
           example: 10
         next:
-          type: "string"
-          description: "Link to the next subset of resources qualified.\nEmpty if\
-            \ no more resources are to be returned.\n"
+          type: string
+          description: |
+            Link to the next subset of resources qualified.
+            Empty if no more resources are to be returned.
         previous:
-          type: "string"
-          description: "Link to the previous subset of resources qualified.\nEmpty\
-            \ if current subset is the first subset returned.\n"
+          type: string
+          description: |
+            Link to the previous subset of resources qualified.
+            Empty if current subset is the first subset returned.
   parameters:
-    catalogId:
-      name: "catalogId"
-      in: "path"
-      description: "uuid of the catalog"
+    serviceId:
+      name: serviceId
+      in: path
+      description: uuid of the catalog entry
       required: true
-      style: "simple"
+      style: simple
       explode: false
       schema:
-        type: "string"
-    entryId:
-      name: "entryId"
-      in: "path"
-      description: "uuid of the catalog entry"
-      required: true
-      style: "simple"
-      explode: false
-      schema:
-        type: "string"
-    limit:
-      name: "limit"
-      in: "query"
-      description: "Maximum limit of items to return.\n"
+        type: string
+    ifMatch:
+      name: If-Match
+      in: header
+      description: ETag of the service resource to update
       required: false
-      style: "form"
+      style: simple
+      explode: false
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      description: |
+        Maximum limit of items to return.
+      required: false
+      style: form
       explode: true
       schema:
-        type: "integer"
+        type: integer
         default: 25
     offset:
-      name: "offset"
-      in: "query"
-      description: "Starting point within the complete list of items qualified.\n"
+      name: offset
+      in: query
+      description: |
+        Starting point within the complete list of items qualified.
       required: false
-      style: "form"
+      style: form
       explode: true
       schema:
-        type: "integer"
+        type: integer
         default: 0
+    servicesSortBy:
+      name: sortBy
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+        enum:
+        - name
+        - definitionType
+    sortOrder:
+      name: sortOrder
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+        enum:
+        - asc
+        - desc
+  headers:
+    ETag:
+      description: A hash-like string value which represents the current state of a resource
+      style: simple
+      explode: false
+      schema:
+        type: string
   securitySchemes:
     OAuth2Security:
-      type: "oauth2"
+      type: oauth2
       flows:
         implicit:
-          authorizationUrl: "https://example.com/oauth/authorize"
+          authorizationUrl: https://example.com/oauth/authorize
           scopes:
-            service_catalog:view: "view service catalog"
-            service_catalog:write: "update service catalog"
-            service_catalog:entry_view: "view service catalog entry"
-            service_catalog:entry_write: "write service catalog entry"
+            service_catalog:view: view service catalog
+            service_catalog:write: update service catalog
+            service_catalog:entry_view: view service catalog entry
+            service_catalog:entry_write: write service catalog entry
