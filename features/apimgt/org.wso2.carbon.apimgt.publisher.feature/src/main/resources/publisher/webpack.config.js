@@ -26,7 +26,6 @@ const config = {
     entry: {
         index: './source/index.jsx',
         swaggerWorkerInit: './source/src/app/webWorkers/swaggerWorkerInit.js',
-        serviceCatalogWorkerInit: './source/src/app/webWorkers/serviceCatalogWorkerInit.js',
     },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
