@@ -4340,6 +4340,13 @@ definitions:
         description: |
           API Key Managers
         type: object
+      createdTime:
+        type: string
+        example: '2020-10-31T13:57:16.229'
+      lastUpdatedTime:
+        type: string
+        example: '2020-10-31T13:57:16.229'
+
 
   #-----------------------------------------------------
   # The Label resource

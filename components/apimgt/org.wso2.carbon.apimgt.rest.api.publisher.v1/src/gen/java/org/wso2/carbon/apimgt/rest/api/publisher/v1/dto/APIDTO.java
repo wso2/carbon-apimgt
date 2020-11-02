@@ -1002,7 +1002,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
   @JsonProperty("createdTime")
   public String getCreatedTime() {
     return createdTime;
@@ -1019,7 +1019,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
   @JsonProperty("lastUpdatedTime")
   public String getLastUpdatedTime() {
     return lastUpdatedTime;
