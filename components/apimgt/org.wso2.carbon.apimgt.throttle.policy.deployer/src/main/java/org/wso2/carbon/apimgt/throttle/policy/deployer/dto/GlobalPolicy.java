@@ -26,7 +26,7 @@ public class GlobalPolicy extends Policy {
     private String keyTemplate;
 
     public GlobalPolicy() {
-        setType(POLICY_TYPE.GLOBAL);
+        setType(PolicyType.GLOBAL);
     }
 
     public String getSiddhiQuery() {

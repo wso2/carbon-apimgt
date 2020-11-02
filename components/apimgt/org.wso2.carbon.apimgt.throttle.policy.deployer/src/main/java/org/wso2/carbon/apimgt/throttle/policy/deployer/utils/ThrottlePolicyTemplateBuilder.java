@@ -25,36 +25,39 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.VelocityException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.CommonsLogLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
-import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
+import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
 import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.APIPolicyConditionGroup;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This Class used to generate execution plans using policy templates
@@ -117,7 +120,7 @@ public class ThrottlePolicyTemplateBuilder {
                     conditions.add(getPolicyConditionJson(conditionGroup.getCondition()));
                     context.put("condition", " AND " + conditionString);
                     context.put("evaluatedConditions", new String(Base64.encodeBase64(conditions.toJSONString()
-                            .getBytes())));
+                            .getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
                     writer = new StringWriter();
                     template.merge(context, writer);
                     if (log.isDebugEnabled()) {
@@ -126,11 +129,12 @@ public class ThrottlePolicyTemplateBuilder {
 
                     String policyName = policy.getTenantDomain() + APIConstants.DELEM_UNDERSCORE +
                             PolicyConstants.POLICY_LEVEL_RESOURCE + APIConstants.DELEM_UNDERSCORE +
-                            policy.getName() + APIConstants.THROTTLE_POLICY_CONDITION + conditionGroup.getConditionGroupId();
+                            policy.getName() + APIConstants.THROTTLE_POLICY_CONDITION +
+                            conditionGroup.getConditionGroupId();
                     policyArray.put(policyName, writer.toString());
                 }
             }
-        } catch (Exception e) {
+        } catch (VelocityException e) {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
         }
@@ -185,7 +189,9 @@ public class ThrottlePolicyTemplateBuilder {
             setConstantContext(context);
             context.put("policy", policy);
             context.put("quotaPolicy", policy.getDefaultLimit());
-            context.put("evaluatedConditions", new String(Base64.encodeBase64(policyConditionJson.toJSONString().getBytes())));
+            context.put("evaluatedConditions",
+                    new String(Base64.encodeBase64(policyConditionJson.toJSONString()
+                            .getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
             String conditionSetString = getConditionForDefault(conditionsSet);
             if (!StringUtils.isEmpty(conditionSetString)) {
                 context.put("condition", " AND " + conditionSetString);
@@ -198,7 +204,7 @@ public class ThrottlePolicyTemplateBuilder {
                 log.debug("Policy : " + writer.toString());
             }
             return writer.toString();
-        } catch (Exception e) {
+        } catch (VelocityException e) {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
         }
@@ -238,7 +244,7 @@ public class ThrottlePolicyTemplateBuilder {
                 log.debug("Policy : " + writer.toString());
             }
             template.merge(context, writer);
-        } catch (Exception e) {
+        } catch (VelocityException e) {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
         }
@@ -282,7 +288,7 @@ public class ThrottlePolicyTemplateBuilder {
                 log.debug("Policy : " + writer.toString());
             }
 
-        } catch (Exception e) {
+        } catch (VelocityException e) {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
         }
@@ -324,7 +330,7 @@ public class ThrottlePolicyTemplateBuilder {
             if (log.isDebugEnabled()) {
                 log.debug("Policy : " + writer.toString());
             }
-        } catch (Exception e) {
+        } catch (VelocityException e) {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
         }
@@ -399,12 +405,12 @@ public class ThrottlePolicyTemplateBuilder {
             org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
                     PolicyMappingUtil.mapCondition(condition);
             JSONObject conditionJson;
-            if (tempCondition.containsKey(mappedCondition.getType().toLowerCase())) {
-                conditionJson = (JSONObject) tempCondition.get(mappedCondition.getType().toLowerCase());
+            if (tempCondition.containsKey(mappedCondition.getType().toLowerCase(Locale.ENGLISH))) {
+                conditionJson = (JSONObject) tempCondition.get(mappedCondition.getType().toLowerCase(Locale.ENGLISH));
             } else {
                 conditionJson = new JSONObject();
             }
-            tempCondition.put(mappedCondition.getType().toLowerCase(), conditionJson);
+            tempCondition.put(mappedCondition.getType().toLowerCase(Locale.ENGLISH), conditionJson);
             if (PolicyConstants.IP_SPECIFIC_TYPE.equals(mappedCondition.getType())) {
                 IPCondition ipCondition = (IPCondition) mappedCondition;
                 if (IPCondition.isIPv6Address(ipCondition.getSpecificIP())) {

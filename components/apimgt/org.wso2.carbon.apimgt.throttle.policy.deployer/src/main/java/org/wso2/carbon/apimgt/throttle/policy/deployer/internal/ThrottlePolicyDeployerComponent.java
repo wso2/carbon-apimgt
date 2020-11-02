@@ -34,6 +34,9 @@ import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.event.processor.core.EventProcessorService;
 
+/**
+ * Throttle policy deployer component.
+ */
 @Component(
         name = "org.wso2.apimgt.throttle.policy.deployer",
         immediate = true)

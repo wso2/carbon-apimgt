@@ -24,20 +24,20 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.PolicyRetriever;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Policy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyList;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicyList;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicyList;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -46,10 +46,10 @@ import org.wso2.carbon.event.processor.core.ExecutionPlanConfiguration;
 import org.wso2.carbon.event.processor.core.exception.ExecutionPlanConfigurationException;
 import org.wso2.carbon.event.processor.core.exception.ExecutionPlanDependencyValidationException;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An Utility class for policy deploy operations.
@@ -77,19 +77,19 @@ public class PolicyUtil {
                     .setTenantDomain(APIConstants.SUPER_TENANT_DOMAIN, true);
             String policyFile;
             String policyString;
-            if (Policy.POLICY_TYPE.SUBSCRIPTION.equals(policy.getType())) {
+            if (Policy.PolicyType.SUBSCRIPTION.equals(policy.getType()) && policy instanceof SubscriptionPolicy) {
                 // Add Subscription policy
                 policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
                         policy.getTenantDomain(), PolicyConstants.POLICY_LEVEL_SUB, policy.getName());
                 policyString = policyTemplateBuilder.getThrottlePolicyForSubscriptionLevel((SubscriptionPolicy) policy);
                 policiesToDeploy.put(policyFile, policyString);
-            } else if (Policy.POLICY_TYPE.APPLICATION.equals(policy.getType())) {
+            } else if (Policy.PolicyType.APPLICATION.equals(policy.getType()) && policy instanceof ApplicationPolicy) {
                 // Add Application policy
                 policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
                         policy.getTenantDomain(), PolicyConstants.POLICY_LEVEL_APP, policy.getName());
                 policyString = policyTemplateBuilder.getThrottlePolicyForAppLevel((ApplicationPolicy) policy);
                 policiesToDeploy.put(policyFile, policyString);
-            } else if (Policy.POLICY_TYPE.API.equals(policy.getType())) {
+            } else if (Policy.PolicyType.API.equals(policy.getType()) && policy instanceof ApiPolicy) {
                 // Add API policy
                 policiesToDeploy = policyTemplateBuilder.getThrottlePolicyForAPILevel((ApiPolicy) policy);
                 String defaultPolicy = policyTemplateBuilder.getThrottlePolicyForAPILevelDefault((ApiPolicy) policy);
@@ -97,7 +97,7 @@ public class PolicyUtil {
                         policy.getTenantDomain(), PolicyConstants.POLICY_LEVEL_RESOURCE, policy.getName());
                 String defaultPolicyName = policyFile + APIConstants.THROTTLE_POLICY_DEFAULT;
                 policiesToDeploy.put(defaultPolicyName, defaultPolicy);
-                if (policyEvent != null) {
+                if (policyEvent instanceof APIPolicyEvent) {
                     List<Integer> deletedConditionGroupIds =
                             ((APIPolicyEvent) policyEvent).getDeletedConditionGroupIds();
                     // Undeploy removed condition groups
@@ -108,11 +108,12 @@ public class PolicyUtil {
                         }
                     }
                 }
-            } else if (Policy.POLICY_TYPE.GLOBAL.equals(policy.getType())) {
+            } else if (Policy.PolicyType.GLOBAL.equals(policy.getType()) && policy instanceof GlobalPolicy) {
                 // Add Global policy
+                GlobalPolicy globalPolicy = (GlobalPolicy) policy;
                 policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
                         PolicyConstants.POLICY_LEVEL_GLOBAL, policy.getName());
-                policyString = policyTemplateBuilder.getThrottlePolicyForGlobalLevel((GlobalPolicy) policy);
+                policyString = policyTemplateBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
                 policiesToDeploy.put(policyFile, policyString);
             }
 

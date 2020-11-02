@@ -38,10 +38,10 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicyList;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicyList;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicyList;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -50,10 +50,10 @@ import org.wso2.carbon.event.processor.core.ExecutionPlanConfiguration;
 import org.wso2.carbon.event.processor.core.exception.ExecutionPlanConfigurationException;
 import org.wso2.carbon.event.processor.core.exception.ExecutionPlanDependencyValidationException;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
@@ -91,7 +91,8 @@ public class PolicyUtilTest {
     }
 
     @Test
-    public void testAddPolicy_APIType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
+    public void testAddPolicy_APIType() throws ExecutionPlanConfigurationException,
+            ExecutionPlanDependencyValidationException {
         ExecutionPlanConfigurationException executionPlanConfigurationException =
                 Mockito.mock(ExecutionPlanConfigurationException.class);
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
@@ -108,7 +109,8 @@ public class PolicyUtilTest {
     }
 
     @Test
-    public void testUpdatePolicy_APIType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
+    public void testUpdatePolicy_APIType() throws ExecutionPlanConfigurationException,
+            ExecutionPlanDependencyValidationException {
 
         ApiPolicy policy = TestUtil.getPolicyAPILevel();
         List<Integer> deletedConditionGroupIds = new ArrayList<>();
@@ -121,15 +123,19 @@ public class PolicyUtilTest {
 
         ExecutionPlanConfigurationException executionPlanConfigurationException =
                 Mockito.mock(ExecutionPlanConfigurationException.class);
-        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
+                PolicyConstants.POLICY_LEVEL_RESOURCE +
                 "_" + policy.getName() + "_condition_1")).thenThrow(executionPlanConfigurationException);
-        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
+                PolicyConstants.POLICY_LEVEL_RESOURCE +
                 "_" + policy.getName() + "_condition_5"))
                 .thenReturn("EXECUTION_PLAN");
-        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
+                PolicyConstants.POLICY_LEVEL_RESOURCE +
                 "_" + policy.getName() + "_condition_6"))
                 .thenReturn("EXECUTION_PLAN");
-        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
+                PolicyConstants.POLICY_LEVEL_RESOURCE +
                 "_" + policy.getName() + "_default"))
                 .thenReturn("EXECUTION_PLAN");
 
@@ -148,13 +154,16 @@ public class PolicyUtilTest {
         List<Integer> deletedConditionGroupIds = new ArrayList<>();
         deletedConditionGroupIds.add(5);
         deletedConditionGroupIds.add(6);
-        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
+                PolicyConstants.POLICY_LEVEL_RESOURCE +
                 "_" + policy.getName() + "_condition_5"))
                 .thenReturn("EXECUTION_PLAN");
-        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
+                PolicyConstants.POLICY_LEVEL_RESOURCE +
                 "_" + policy.getName() + "_condition_6"))
                 .thenReturn("EXECUTION_PLAN");
-        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE +
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
+                PolicyConstants.POLICY_LEVEL_RESOURCE +
                 "_" + policy.getName() + "_default"))
                 .thenReturn("EXECUTION_PLAN");
         APIPolicyEvent policyEvent = new APIPolicyEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -167,7 +176,8 @@ public class PolicyUtilTest {
     }
 
     @Test
-    public void testAddPolicy_APPType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
+    public void testAddPolicy_APPType() throws ExecutionPlanConfigurationException,
+            ExecutionPlanDependencyValidationException {
         ExecutionPlanConfigurationException executionPlanConfigurationException =
                 Mockito.mock(ExecutionPlanConfigurationException.class);
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
@@ -184,7 +194,8 @@ public class PolicyUtilTest {
     }
 
     @Test
-    public void testUpdatePolicy_APPType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
+    public void testUpdatePolicy_APPType() throws ExecutionPlanConfigurationException,
+            ExecutionPlanDependencyValidationException {
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
                 .thenReturn("EXECUTION_PLAN");
 
@@ -205,7 +216,8 @@ public class PolicyUtilTest {
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName(),
                 policy.getDefaultLimit().getQuotaType());
-        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP +
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
+                PolicyConstants.POLICY_LEVEL_APP +
                 "_" + policy.getName()))
                 .thenReturn("EXECUTION_PLAN");
         PolicyUtil.undeployPolicy(policyEvent);
@@ -214,7 +226,8 @@ public class PolicyUtilTest {
     }
 
     @Test
-    public void testAddPolicy_SubType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
+    public void testAddPolicy_SubType() throws ExecutionPlanConfigurationException,
+            ExecutionPlanDependencyValidationException {
         ExecutionPlanConfigurationException executionPlanConfigurationException =
                 Mockito.mock(ExecutionPlanConfigurationException.class);
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
@@ -234,7 +247,8 @@ public class PolicyUtilTest {
     }
 
     @Test
-    public void testUpdatePolicy_SubType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
+    public void testUpdatePolicy_SubType() throws ExecutionPlanConfigurationException,
+            ExecutionPlanDependencyValidationException {
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
                 .thenReturn("EXECUTION_PLAN");
 
@@ -259,7 +273,8 @@ public class PolicyUtilTest {
                 policy.getName(), policy.getDefaultLimit().getQuotaType(),
                 policy.getRateLimitCount(), policy.getRateLimitTimeUnit(), policy.isStopOnQuotaReach(),
                 policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity());
-        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB +
+        Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
+                PolicyConstants.POLICY_LEVEL_SUB +
                 "_" + policy.getName()))
                 .thenReturn("EXECUTION_PLAN");
         PolicyUtil.undeployPolicy(policyEvent);
@@ -268,7 +283,8 @@ public class PolicyUtilTest {
     }
 
     @Test
-    public void testAddPolicy_GlobalType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
+    public void testAddPolicy_GlobalType() throws ExecutionPlanConfigurationException,
+            ExecutionPlanDependencyValidationException {
         ExecutionPlanConfigurationException executionPlanConfigurationException =
                 Mockito.mock(ExecutionPlanConfigurationException.class);
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
@@ -284,7 +300,8 @@ public class PolicyUtilTest {
     }
 
     @Test
-    public void testUpdatePolicy_GlobalType() throws ExecutionPlanConfigurationException, ExecutionPlanDependencyValidationException {
+    public void testUpdatePolicy_GlobalType() throws ExecutionPlanConfigurationException,
+            ExecutionPlanDependencyValidationException {
         Mockito.when(eventProcessorService.getActiveExecutionPlan(Mockito.anyString()))
                 .thenReturn("EXECUTION_PLAN");
 
@@ -312,7 +329,8 @@ public class PolicyUtilTest {
     }
 
     @Test
-    public void testDeployAllPolicies() throws ExecutionPlanConfigurationException, ThrottlePolicyDeployerException, ExecutionPlanDependencyValidationException {
+    public void testDeployAllPolicies() throws ExecutionPlanConfigurationException, ThrottlePolicyDeployerException,
+            ExecutionPlanDependencyValidationException {
 
         ExecutionPlanConfigurationException executionPlanConfigurationException =
                 Mockito.mock(ExecutionPlanConfigurationException.class);

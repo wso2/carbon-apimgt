@@ -24,9 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.PolicyRetriever;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
@@ -34,17 +34,19 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Topic;
-import javax.jms.JMSException;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.Topic;
 
 /**
  * Throttle policy JMS event listener class
@@ -54,7 +56,7 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
     private static final Log log = LogFactory.getLog(ThrottlePolicyJMSMessageListener.class);
 
     private final PolicyRetriever policyRetriever = new PolicyRetriever();
-    private final ScheduledExecutorService policyRetrievalScheduler = Executors.newScheduledThreadPool( 10,
+    private final ScheduledExecutorService policyRetrievalScheduler = Executors.newScheduledThreadPool(10,
             new PolicyRetrieverThreadFactory());
 
     public void onMessage(Message message) {
@@ -103,7 +105,7 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
     private void handleNotificationMessage(String eventType, String encodedEvent) {
 
         byte[] eventDecoded = Base64.decodeBase64(encodedEvent);
-        String eventJson = new String(eventDecoded);
+        String eventJson = new String(eventDecoded, StandardCharsets.UTF_8);
 
         if (APIConstants.EventType.POLICY_CREATE.toString().equals(eventType)
                 || APIConstants.EventType.POLICY_UPDATE.toString().equals(eventType)
@@ -115,7 +117,7 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
             boolean deletePolicy = APIConstants.EventType.POLICY_DELETE.toString().equals(eventType);
             Runnable task = null;
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
-            if (event.getPolicyType() == APIConstants.PolicyType.SUBSCRIPTION) { //TODO: add delay based on config, new thread
+            if (event.getPolicyType() == APIConstants.PolicyType.SUBSCRIPTION) {
                 // handle subscription policies
                 SubscriptionPolicyEvent policyEvent = new Gson().fromJson(eventJson, SubscriptionPolicyEvent.class);
                 task = new Runnable() {

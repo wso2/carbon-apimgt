@@ -15,14 +15,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.apimgt.throttle.policy.deployer.utils;
 
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
-import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
 import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
+import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
 import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
-import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 
 /**
  * An Utility class for policy mapping operations.

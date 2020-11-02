@@ -23,6 +23,6 @@ package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 public class ApplicationPolicy extends Policy {
 
     public ApplicationPolicy() {
-        setType(POLICY_TYPE.APPLICATION);
+        setType(PolicyType.APPLICATION);
     }
 }

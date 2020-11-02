@@ -29,7 +29,7 @@ public class SubscriptionPolicy extends Policy {
     private Integer graphQLMaxDepth = null;
 
     public SubscriptionPolicy() {
-        setType(POLICY_TYPE.SUBSCRIPTION);
+        setType(PolicyType.SUBSCRIPTION);
     }
 
     public int getRateLimitCount() {

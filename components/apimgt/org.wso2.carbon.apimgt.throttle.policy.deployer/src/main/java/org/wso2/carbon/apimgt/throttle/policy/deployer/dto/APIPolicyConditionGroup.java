@@ -17,8 +17,6 @@
  */
 package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-
 import java.util.Set;
 
 /**

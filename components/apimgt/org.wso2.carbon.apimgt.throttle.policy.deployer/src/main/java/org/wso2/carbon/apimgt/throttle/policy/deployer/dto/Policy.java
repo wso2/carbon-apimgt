@@ -24,7 +24,10 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
  */
 public class Policy {
 
-    public enum POLICY_TYPE {
+    /**
+     * Enum of policy types
+     */
+    public enum PolicyType {
         SUBSCRIPTION,
         APPLICATION,
         API,
@@ -37,7 +40,7 @@ public class Policy {
     private String name = null;
     private String quotaType = null;
     private QuotaPolicy defaultLimit = null;
-    private POLICY_TYPE type;
+    private PolicyType type;
 
     public int getId() {
 
@@ -92,11 +95,11 @@ public class Policy {
         this.defaultLimit = defaultLimit;
     }
 
-    public POLICY_TYPE getType() {
+    public PolicyType getType() {
         return type;
     }
 
-    public void setType(POLICY_TYPE type) {
+    public void setType(PolicyType type) {
         this.type = type;
     }
 

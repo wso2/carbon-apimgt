@@ -43,7 +43,7 @@ public class BandwidthLimit extends Limit {
     }
 
     public long getStandardDataAmount() {
-        if(PolicyConstants.MB.equalsIgnoreCase(dataUnit)) {
+        if (PolicyConstants.MB.equalsIgnoreCase(dataUnit)) {
             return dataAmount * 1024 * 1024;
         } else if (PolicyConstants.KB.equalsIgnoreCase(dataUnit)) {
             return dataAmount * 1024;

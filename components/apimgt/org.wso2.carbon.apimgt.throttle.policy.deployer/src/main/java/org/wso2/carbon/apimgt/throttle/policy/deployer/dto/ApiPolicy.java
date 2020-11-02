@@ -33,7 +33,7 @@ public class ApiPolicy extends Policy {
     }
 
     public ApiPolicy() {
-        setType(POLICY_TYPE.API);
+        setType(PolicyType.API);
     }
 
     public void setConditionGroups(List<APIPolicyConditionGroup> conditionGroups) {

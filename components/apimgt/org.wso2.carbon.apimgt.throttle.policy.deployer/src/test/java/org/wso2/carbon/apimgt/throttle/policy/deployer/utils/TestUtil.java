@@ -17,14 +17,14 @@
  */
 package org.wso2.carbon.apimgt.throttle.policy.deployer.utils;
 
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.QuotaPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.RequestCountLimit;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.APIPolicyConditionGroup;
-import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 
 import java.util.ArrayList;
 import java.util.HashSet;
