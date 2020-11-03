@@ -328,15 +328,24 @@ public class API implements Serializable {
     private boolean isLatest;
 
     //TODO: missing - total user count, up time statistics,tier
-
+    @Deprecated
     public String getUUID() {
         return uuid;
     }
-
+    
+    @Deprecated
     public void setUUID(String uuid) {
         this.uuid = uuid;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    } 
+    
     public String getProductionMaxTps() {
         return productionMaxTps;
     }
@@ -490,8 +499,13 @@ public class API implements Serializable {
     public Set<String> getTags() {
         return Collections.unmodifiableSet(tags);
     }
-
+    
+    @Deprecated
     public void addTags(Set<String> tags) {
+        this.tags.addAll(tags);
+    }
+    
+    public void setTags(Set<String> tags) {
         this.tags.addAll(tags);
     }
 
