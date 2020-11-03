@@ -17,6 +17,8 @@
  */
 
 import APIClient from './APIClient';
+import ServiceCatalogClient from './ServiceCatalogClient';
+import Utils from './Utils';
 
 /**
  * Class representing a Factory of APIClients
@@ -43,7 +45,7 @@ class APIClientFactory {
      * @param {Object} environment
      * @returns {APIClient} APIClient object for the environment
      */
-    getAPIClient(environment) {
+    getAPIClient(environment, clientType) {
         const {
             label,
         } = environment;
@@ -51,14 +53,22 @@ class APIClientFactory {
             throw new Error('Environment label is undefined, Please provide'
                 + 'a valid environment object with keys (host,label & loginTokenPath)');
         }
-        let apiClient = this._APIClientMap.get(environment.label);
-
+        let apiClient;
+        if (clientType === Utils.CONST.API_CLIENT) {
+            apiClient = this._APIClientMap.get(environment.label + Utils.CONST.API_CLIENT);
+        } else if (clientType === Utils.CONST.SERVICE_CATALOG_CLIENT) {
+            apiClient = this._APIClientMap.get(environment.label + Utils.CONST.SERVICE_CATALOG_CLIENT);
+        }
         if (apiClient) {
             return apiClient;
         }
-
-        apiClient = new APIClient(environment);
-        this._APIClientMap.set(environment.label, apiClient);
+        if (clientType === Utils.CONST.API_CLIENT) {
+            apiClient = new APIClient(environment);
+            this._APIClientMap.set(environment.label + Utils.CONST.API_CLIENT, apiClient);
+        } else if (clientType === Utils.CONST.SERVICE_CATALOG_CLIENT) {
+            apiClient = new ServiceCatalogClient(environment);
+            this._APIClientMap.set(environment.label + Utils.CONST.SERVICE_CATALOG_CLIENT, apiClient);
+        }
         return apiClient;
     }
 

@@ -16,16 +16,16 @@
 
 /* eslint-disable */
 import cloneDeep from 'lodash.clonedeep';
-import ServiceCatalogClientFactory from './ServiceCatalogClientFactory';
 import Utils from './Utils';
-import Resource from './Resource';
+import APIClientFactory from './APIClientFactory';
 
 /**
   * An abstract representation of a Service Catalog
   */
-class ServiceCatalog extends Resource {
+class ServiceCatalog {
     constructor(kwargs) {
-        super();
+        this.client = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(),
+            Utils.CONST.SERVICE_CATALOG_CLIENT).client;
         const properties = kwargs;
         Utils.deepFreeze(properties);
         this._data = properties;
@@ -37,13 +37,13 @@ class ServiceCatalog extends Resource {
     }
 
     /**
-     *
      * @param data
      * @returns {object} Metadata for API request
-     * @private
      */
-    _requestMetaData() {
-        Resource._requestMetaData();
+    static _requestMetaData(data = {}) {
+        return {
+            requestContentType: data['Content-Type'] || 'application/json',
+        };
     }
 
     /**
@@ -78,36 +78,13 @@ class ServiceCatalog extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else Service Entry invoke promise.
      */
-    static get() {
-        const serviceCatalog = new ServiceCatalogClientFactory().getServiceCatalogClient(Utils.getCurrentEnvironment())
+    static getSettings() {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
-        return serviceCatalog.then((client) => {
-            return client.apis['API Category (Collection)'].get_api_categories(
-                {
-                    serviceId: id,
-                },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
-     * Get details of a given Service Entry
-     * @param id {string} UUID of the Service Entry.
-     * @param callback {function} A callback function to invoke after receiving successful response.
-     * @returns {promise} With given callback attached to the success chain else Service Entry invoke promise.
-     */
-    static get(id) {
-        const serviceCatalog = new ServiceCatalogClientFactory().getServiceCatalogClient(Utils.getCurrentEnvironment())
-            .client;
-        return serviceCatalog.then((client) => {
-            return client.apis['API Category (Collection)'].get_api_categories(
-                {
-                    serviceId: id,
-                },
-                this._requestMetaData(),
-            );
-        });
+            const promisedServiceCatalogSettings = serviceCatalog.then(client => {
+                return client.apis['Settings'].getSettings();
+            });
+            return promisedServiceCatalogSettings.then(response => response.body);
     }
 }
 

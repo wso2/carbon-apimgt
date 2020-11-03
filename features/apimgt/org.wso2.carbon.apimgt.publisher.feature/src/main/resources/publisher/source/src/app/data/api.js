@@ -137,7 +137,7 @@ class API extends Resource {
     }
 
     static validateOpenAPIByFile(openAPIData) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         let payload, promisedValidate;
         payload = {
             file: openAPIData,
@@ -155,7 +155,7 @@ class API extends Resource {
     }
 
     static validateOpenAPIByUrl(url, params = { returnContent: false }) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const payload = {
             url: url,
             'Content-Type': 'multipart/form-data',
@@ -536,7 +536,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getAllScopes(offset = null, limit = null, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promise_scopes = apiClient.then(client => {
             return client.apis['Scopes'].getSharedScopes(
                 { limit, offset},
@@ -685,7 +685,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSharedScopeUsages(scopeId, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promise_scopes = apiClient.then(client => {
             return client.apis['Scopes'].getSharedScopeUsages(
                 { scopeId },
@@ -1367,7 +1367,7 @@ class API extends Resource {
     }
 
     static validateGraphQLFile(file) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promised_validationResponse = apiClient.then(client => {
             return client.apis['Validation'].post_apis_validate_graphql_schema(
                 {
@@ -1821,7 +1821,7 @@ class API extends Resource {
             });
             params.query = query;
         }
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPIs = apiClient.then(client => {
             return client.apis['APIs'].get_apis(params, Resource._requestMetaData());
         });
@@ -1848,7 +1848,7 @@ class API extends Resource {
             }
             params.query = query;
         }
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['API Products'].get_api_products(params, Resource._requestMetaData());
         });
@@ -1861,7 +1861,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getAPIById(id, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.get_apis__apiId_({ apiId: id }, this._requestMetaData());
         });
@@ -1882,7 +1882,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.get_apis__apiId__swagger({ apiId, environmentName }, this._requestMetaData());
         });
@@ -1904,7 +1904,7 @@ class API extends Resource {
         if (applicationId) {
             payload[applicationId] = applicationId;
         }
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedGet = apiClient.then((client) => {
             return client.apis.Subscriptions.get_subscriptions(payload, this._requestMetaData());
         });
@@ -1923,7 +1923,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSwaggerByAPIIdAndLabel(apiId, labelName, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.get_apis__apiId__swagger({ apiId, labelName }, this._requestMetaData());
         });
@@ -1942,7 +1942,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.get_apis__apiId__swagger({ apiId, environmentName }, this._requestMetaData());
         });
@@ -1960,7 +1960,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSwaggerByAPIId(apiId, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.get_apis__apiId__swagger({ apiId }, this._requestMetaData());
         });
@@ -1978,7 +1978,7 @@ class API extends Resource {
      * @param callback {function} Callback function which needs to be executed in the success call
      */
     static updateLcState(id, state, checkedItems, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const payload = {
             action: state,
             apiId: id,
@@ -2002,7 +2002,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static get(id, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPI = apiClient.then(client => {
             return client.apis['APIs'].get_apis__apiId_(
                 {
@@ -2025,7 +2025,7 @@ class API extends Resource {
      */
     static update(updatedProperties, callback = null) {
         console.log('API factory');
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const updatedAPI = updatedProperties;
         console.log('updated api' + JSON.stringify(updatedAPI));
         const promisedUpdate = apiClient.then(client => {
@@ -2048,7 +2048,7 @@ class API extends Resource {
      * Get settings of an API
      */
     static getSettings() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedSettings = apiClient.then(client => {
             return client.apis['Settings'].get_settings();
         });
@@ -2064,7 +2064,7 @@ class API extends Resource {
      * @memberof API
      */
     static search(params) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Unified Search'].get_search(params, Resource._requestMetaData());
         });
@@ -2077,7 +2077,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static get(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPI = apiClient.then(client => {
             return client.apis['APIs'].get_apis__apiId_(
                 {
@@ -2098,7 +2098,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getProduct(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPI = apiClient.then(client => {
             return client.apis['API Products'].get_api_products__apiProductId_(
                 {
@@ -2121,7 +2121,7 @@ class API extends Resource {
      * @memberof API
      */
     static delete(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['APIs'].delete_apis__apiId_(
                 {
@@ -2141,7 +2141,7 @@ class API extends Resource {
      * @memberof API
      */
     static deleteProduct(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['API Products'].delete_api_products__apiProductId_(
                 {
@@ -2160,7 +2160,7 @@ class API extends Resource {
      *
      */
     static policies(policyLevel) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Throttling Policies'].getAllThrottlingPolicies(
                 {
@@ -2175,7 +2175,7 @@ class API extends Resource {
      * Get all the endpoint certificates.
      * */
     static getEndpointCertificates() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Endpoint Certificates'].get_endpoint_certificates();
         });
@@ -2189,7 +2189,7 @@ class API extends Resource {
      * @param {string} alias The certificate alias.
      * */
     static addCertificate(certificateFile, endpoint, alias) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
                 return client.apis['Endpoint Certificates'].post_endpoint_certificates({
@@ -2213,7 +2213,7 @@ class API extends Resource {
      * @param {string} alias The certificate alias.
      * */
     static addClientCertificate(apiId, certificateFile, tier, alias) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
                 return client.apis['Client Certificates'].post_apis__apiId__client_certificates({
@@ -2235,7 +2235,7 @@ class API extends Resource {
      * @param apiId api id of the api to which the certificate is added
      */
     static getAllClientCertificates(apiId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
                 return client.apis['Client Certificates'].get_apis__apiId__client_certificates(
@@ -2256,7 +2256,7 @@ class API extends Resource {
      * @param apiId api id of the api of which the certificate is retrieved.
      * */
     static getClientCertificateStatus(alias, apiId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Client Certificates'].get_apis__apiId__client_certificates__alias_({
                 alias,
@@ -2272,7 +2272,7 @@ class API extends Resource {
      * @param apiId api id of the api of which the certificate is deleted.
      * */
     static deleteClientCertificate(alias, apiId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Client Certificates'].delete_apis__apiId__client_certificates__alias_({
                 alias,
@@ -2287,7 +2287,7 @@ class API extends Resource {
      * @param {string} alias The alias of the certificate which the information required.
      * */
     static getCertificateStatus(alias) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Endpoint Certificates'].get_endpoint_certificates__alias_({
                 alias: alias,
@@ -2301,7 +2301,7 @@ class API extends Resource {
      * @param {string} alias The alias of the certificate
      * */
     static deleteEndpointCertificate(alias) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Endpoint Certificates'].delete_endpoint_certificates__alias_({
                 alias,
@@ -2316,7 +2316,7 @@ class API extends Resource {
      *
      */
     static getMediationPolicies(apiId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policies'].apisApiIdMediationPoliciesGet(
                 {
@@ -2334,7 +2334,7 @@ class API extends Resource {
      *
      */
     static addMediationPolicy(policyFile, apiId, type) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policies'].apisApiIdMediationPoliciesPost(
                 {
@@ -2357,7 +2357,7 @@ class API extends Resource {
      *
      */
     static getMediationPolicy(seqId, apiId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdGet(
                 {
@@ -2377,7 +2377,7 @@ class API extends Resource {
      *
      */
     static deleteMediationPolicy(seqId, apiId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdDelete(
                 {
@@ -2397,7 +2397,7 @@ class API extends Resource {
      *
      */
     static updateMediationPolicyContent(seqId, apiId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdContentPut(
                 {
@@ -2420,7 +2420,7 @@ class API extends Resource {
      *
      */
     static getMediationPolicyContent(mediationPolicyId, apiId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdContentGet(
                 {
@@ -2440,7 +2440,7 @@ class API extends Resource {
      *
      */
     static getGlobalMediationPolicies() {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['Global Mediation Policies'].getAllGlobalMediationPolicies({}, this._requestMetaData());
         });
@@ -2454,7 +2454,7 @@ class API extends Resource {
      *
      */
     static getGlobalMediationPolicyContent(mediationPolicyId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['Global Mediation Policy'].getGlobalMediationPolicyContent(
                 {
@@ -2471,7 +2471,7 @@ class API extends Resource {
      * @returns {Promise}
      */
     static getAllExternalStores() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['External Stores'].getAllExternalStores(this._requestMetaData());
         });
@@ -2484,7 +2484,7 @@ class API extends Resource {
      * @returns {Promise}
      */
     static getPublishedExternalStores(apiId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['External Stores'].getAllPublishedExternalStoresByAPI(
                 { apiId: apiId },
@@ -2500,7 +2500,7 @@ class API extends Resource {
      * @param {Array} externalStoreIds
      */
     static publishAPIToExternalStores(apiId, externalStoreIds) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['External Stores'].publishAPIToExternalStores(
                 {
@@ -2518,7 +2518,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static getSupportedAlertTypes() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alerts'].getPublisherAlertTypes(this._requestMetaData());
         });
@@ -2530,7 +2530,7 @@ class API extends Resource {
      * @returns {Promise}
      * */
     static getSubscribedAlertTypesByUser() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Subscriptions'].getSubscribedAlertTypes(this._requestMetaData());
         });
@@ -2542,7 +2542,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static subscribeAlerts(alerts) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Subscriptions'].subscribeToAlerts({ body: alerts }, this._requestMetaData());
         });
@@ -2554,7 +2554,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static unsubscribeAlerts() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Subscriptions'].unsubscribeAllAlerts(this._requestMetaData());
         });
@@ -2567,7 +2567,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static getAlertConfigurations(alertType) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Configuration'].getAllAlertConfigs(
                 {
@@ -2587,7 +2587,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static putAlertConfiguration(alertType, alertConfig, configId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Configuration'].addAlertConfig(
                 {
@@ -2608,7 +2608,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static deleteAlertConfiguration(alertType, configId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Configuration'].deleteAlertConfig(
                 {
@@ -2627,7 +2627,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getAmznResourceNames(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['AWS Lambda (Individual)'].get_apis__apiId__amznResourceNames(
                 {
@@ -2644,7 +2644,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static apiCategories() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis["API Category (Collection)"].get_api_categories(
                 this._requestMetaData(),
@@ -2652,7 +2652,7 @@ class API extends Resource {
         });
     }
     static keyManagers() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis["Key Managers (Collection)"].get_key_managers(
                 this._requestMetaData(),

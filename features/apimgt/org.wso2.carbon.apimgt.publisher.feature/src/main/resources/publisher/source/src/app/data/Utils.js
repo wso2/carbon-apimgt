@@ -354,6 +354,8 @@ Utils.CONST = {
     SERVICE_CATALOG_SWAGGER_YAML: '../../../../../publisher/site/public/serviceCatalog.yaml',
     SWAGGER_YAML: '/api/am/publisher/v1/swagger.yaml',
     PROTOCOL: 'https://',
+    API_CLIENT: 'apiClient',
+    SERVICE_CATALOG_CLIENT: 'serviceCatalogClient',
 };
 
 /**

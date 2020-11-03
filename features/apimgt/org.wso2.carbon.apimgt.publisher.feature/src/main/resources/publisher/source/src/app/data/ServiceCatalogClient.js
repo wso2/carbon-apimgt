@@ -36,33 +36,13 @@ class ServiceCatalogClient {
      */
     constructor(environment, args = {}) {
         this.environment = environment || Utils.getCurrentEnvironment();
+        const argsv = Object.assign(args, {
+            url: Utils.getServiceCatalogSwaggerURL(),
+            requestInterceptor: this._getRequestInterceptor(),
+            responseInterceptor: this._getResponseInterceptor(),
+        });
         SwaggerClient.http.withCredentials = true;
-        const promisedResolve = new Promise((resolve) => {
-            /**
-             * If `__swaggerSpec` contains the parsed swagger spec , We resolve the promise with that value
-             * else use worker message event handler to get the parsed spec from worker
-             * `__swaggerWorker` is the worker object initialized by
-             * `/source/src/app/webWorkers/serviceCatalogWorkerInit.js`
-             */
-            /* eslint-disable no-underscore-dangle */
-            if (window.__swaggerSpec) {
-                resolve(window.__swaggerSpec);
-            } else {
-                window.__swaggerWorker.addEventListener('message', ({ data }) => {
-                    resolve(data);
-                });
-            }
-        });
-        ServiceCatalogClient.spec = promisedResolve;
-        this._client = promisedResolve.then((resolved) => {
-            const argsv = Object.assign(args, {
-                spec: this._fixSpec(resolved.spec),
-                requestInterceptor: this._getRequestInterceptor(),
-                responseInterceptor: this._getResponseInterceptor(),
-            });
-            SwaggerClient.http.withCredentials = true;
-            return new SwaggerClient(argsv);
-        });
+        this._client = new SwaggerClient(argsv);
         this._client.catch(AuthManager.unauthorizedErrorHandler);
         this.mutex = new Mutex();
     }

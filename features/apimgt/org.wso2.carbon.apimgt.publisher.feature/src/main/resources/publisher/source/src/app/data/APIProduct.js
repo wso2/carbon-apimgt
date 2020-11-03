@@ -201,7 +201,7 @@ class APIProduct extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static get(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPIProduct = apiClient
             .then(client => {
                 return client.apis['API Products'].get_api_products__apiProductId_(
@@ -233,7 +233,7 @@ class APIProduct extends Resource {
             }
             params.query = query;
         }
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedProducts = apiClient
             .then(client => {
                 return client.apis['API Products'].get_api_products(params, Resource._requestMetaData());
@@ -322,7 +322,7 @@ class APIProduct extends Resource {
      * @param {String} id API Product UUID
      */
     static delete(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient
             .then(client => {
                 return client.apis['API Products'].delete_api_products__apiProductId_(
