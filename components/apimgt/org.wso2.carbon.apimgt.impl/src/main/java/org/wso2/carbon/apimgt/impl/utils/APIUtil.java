@@ -11280,7 +11280,6 @@ public final class APIUtil {
     }
 
     public static String getTokenEndpointsByType(String type) {
-
         APIManagerConfiguration config =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         Map<String, Environment> environments = config.getApiGatewayEnvironments();
@@ -11333,6 +11332,12 @@ public final class APIUtil {
         }
         if (map.containsKey(APIConstants.GATEWAY_ENV_TYPE_HYBRID)) {
             return map.get(APIConstants.GATEWAY_ENV_TYPE_HYBRID);
+        }
+        if (map.containsKey(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION)) {
+            return map.get(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION);
+        }
+        if (map.containsKey(APIConstants.GATEWAY_ENV_TYPE_SANDBOX)) {
+            return map.get(APIConstants.GATEWAY_ENV_TYPE_SANDBOX);
         }
         return map.get(type);
     }
