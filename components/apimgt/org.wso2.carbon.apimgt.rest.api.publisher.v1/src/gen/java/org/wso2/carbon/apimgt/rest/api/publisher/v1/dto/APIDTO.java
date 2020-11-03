@@ -24,6 +24,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -50,215 +51,210 @@ public class APIDTO   {
     @Scope(name = "apim:api_publish", description="", value ="")
     private Boolean enableStore = null;
 
-@XmlType(name="TypeEnum")
-@XmlEnum(String.class)
-public enum TypeEnum {
+    @XmlType(name="TypeEnum")
+    @XmlEnum(String.class)
+    public enum TypeEnum {
+        HTTP("HTTP"),
+        WS("WS"),
+        SOAPTOREST("SOAPTOREST"),
+        SOAP("SOAP"),
+        GRAPHQL("GRAPHQL");
+        private String value;
 
-    @XmlEnumValue("HTTP") HTTP(String.valueOf("HTTP")), @XmlEnumValue("WS") WS(String.valueOf("WS")), @XmlEnumValue("SOAPTOREST") SOAPTOREST(String.valueOf("SOAPTOREST")), @XmlEnumValue("SOAP") SOAP(String.valueOf("SOAP")), @XmlEnumValue("GRAPHQL") GRAPHQL(String.valueOf("GRAPHQL"));
-
-
-    private String value;
-
-    TypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TypeEnum fromValue(String v) {
-        for (TypeEnum b : TypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        TypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TypeEnum fromValue(String v) {
+            for (TypeEnum b : TypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private TypeEnum type = TypeEnum.HTTP;
-    private List<String> transport = new ArrayList<>();
+    private List<String> transport = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> tags = new ArrayList<>();
+    private List<String> tags = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> policies = new ArrayList<>();
+    private List<String> policies = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
-    private List<String> securityScheme = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<String>();
     private APIMaxTpsDTO maxTps = null;
 
-@XmlType(name="VisibilityEnum")
-@XmlEnum(String.class)
-public enum VisibilityEnum {
+    @XmlType(name="VisibilityEnum")
+    @XmlEnum(String.class)
+    public enum VisibilityEnum {
+        PUBLIC("PUBLIC"),
+        PRIVATE("PRIVATE"),
+        RESTRICTED("RESTRICTED");
+        private String value;
 
-    @XmlEnumValue("PUBLIC") PUBLIC(String.valueOf("PUBLIC")), @XmlEnumValue("PRIVATE") PRIVATE(String.valueOf("PRIVATE")), @XmlEnumValue("RESTRICTED") RESTRICTED(String.valueOf("RESTRICTED"));
-
-
-    private String value;
-
-    VisibilityEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static VisibilityEnum fromValue(String v) {
-        for (VisibilityEnum b : VisibilityEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        VisibilityEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static VisibilityEnum fromValue(String v) {
+            for (VisibilityEnum b : VisibilityEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     @Scope(name = "apim:api_publish", description="", value ="")
     private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> visibleRoles = new ArrayList<>();
-    private List<String> visibleTenants = new ArrayList<>();
+    private List<String> visibleRoles = new ArrayList<String>();
+    private List<String> visibleTenants = new ArrayList<String>();
     private APIEndpointSecurityDTO endpointSecurity = null;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> gatewayEnvironments = new ArrayList<>();
+    private List<String> gatewayEnvironments = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<DeploymentEnvironmentsDTO> deploymentEnvironments = new ArrayList<>();
-    private List<String> labels = new ArrayList<>();
-    private List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
+    private List<DeploymentEnvironmentsDTO> deploymentEnvironments = new ArrayList<DeploymentEnvironmentsDTO>();
+    private List<String> labels = new ArrayList<String>();
+    private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
 
-@XmlType(name="SubscriptionAvailabilityEnum")
-@XmlEnum(String.class)
-public enum SubscriptionAvailabilityEnum {
+    @XmlType(name="SubscriptionAvailabilityEnum")
+    @XmlEnum(String.class)
+    public enum SubscriptionAvailabilityEnum {
+        CURRENT_TENANT("CURRENT_TENANT"),
+        ALL_TENANTS("ALL_TENANTS"),
+        SPECIFIC_TENANTS("SPECIFIC_TENANTS");
+        private String value;
 
-    @XmlEnumValue("CURRENT_TENANT") CURRENT_TENANT(String.valueOf("CURRENT_TENANT")), @XmlEnumValue("ALL_TENANTS") ALL_TENANTS(String.valueOf("ALL_TENANTS")), @XmlEnumValue("SPECIFIC_TENANTS") SPECIFIC_TENANTS(String.valueOf("SPECIFIC_TENANTS"));
-
-
-    private String value;
-
-    SubscriptionAvailabilityEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static SubscriptionAvailabilityEnum fromValue(String v) {
-        for (SubscriptionAvailabilityEnum b : SubscriptionAvailabilityEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        SubscriptionAvailabilityEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static SubscriptionAvailabilityEnum fromValue(String v) {
+            for (SubscriptionAvailabilityEnum b : SubscriptionAvailabilityEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     @Scope(name = "apim:api_publish", description="", value ="")
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.CURRENT_TENANT;
-    private List<String> subscriptionAvailableTenants = new ArrayList<>();
+    private List<String> subscriptionAvailableTenants = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private Map<String, String> additionalProperties = new HashMap<>();
+    private Map<String, String> additionalProperties = new HashMap<String, String>();
     private APIMonetizationInfoDTO monetization = null;
 
-@XmlType(name="AccessControlEnum")
-@XmlEnum(String.class)
-public enum AccessControlEnum {
+    @XmlType(name="AccessControlEnum")
+    @XmlEnum(String.class)
+    public enum AccessControlEnum {
+        NONE("NONE"),
+        RESTRICTED("RESTRICTED");
+        private String value;
 
-    @XmlEnumValue("NONE") NONE(String.valueOf("NONE")), @XmlEnumValue("RESTRICTED") RESTRICTED(String.valueOf("RESTRICTED"));
-
-
-    private String value;
-
-    AccessControlEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static AccessControlEnum fromValue(String v) {
-        for (AccessControlEnum b : AccessControlEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        AccessControlEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static AccessControlEnum fromValue(String v) {
+            for (AccessControlEnum b : AccessControlEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
-    private List<String> accessControlRoles = new ArrayList<>();
+    private List<String> accessControlRoles = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
     private Object businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
-    private String createdTime = null;
+    private java.util.Date createdTime = null;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private String lastUpdatedTime = null;
+    private java.util.Date lastUpdatedTime = null;
     private Object endpointConfig = null;
 
-@XmlType(name="EndpointImplementationTypeEnum")
-@XmlEnum(String.class)
-public enum EndpointImplementationTypeEnum {
+    @XmlType(name="EndpointImplementationTypeEnum")
+    @XmlEnum(String.class)
+    public enum EndpointImplementationTypeEnum {
+        INLINE("INLINE"),
+        ENDPOINT("ENDPOINT");
+        private String value;
 
-    @XmlEnumValue("INLINE") INLINE(String.valueOf("INLINE")), @XmlEnumValue("ENDPOINT") ENDPOINT(String.valueOf("ENDPOINT"));
-
-
-    private String value;
-
-    EndpointImplementationTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static EndpointImplementationTypeEnum fromValue(String v) {
-        for (EndpointImplementationTypeEnum b : EndpointImplementationTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        EndpointImplementationTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static EndpointImplementationTypeEnum fromValue(String v) {
+            for (EndpointImplementationTypeEnum b : EndpointImplementationTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
-    private List<APIScopeDTO> scopes = new ArrayList<>();
-    private List<APIOperationsDTO> operations = new ArrayList<>();
+    private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
+    private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> categories = new ArrayList<>();
+    private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
 
   /**
@@ -290,7 +286,7 @@ public enum EndpointImplementationTypeEnum {
   @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=50)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -307,7 +303,7 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(example = "This is a simple API for Pizza Shack online pizza delivery store.", value = "")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=32766)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
@@ -325,7 +321,7 @@ public enum EndpointImplementationTypeEnum {
   @ApiModelProperty(example = "pizza", required = true, value = "")
   @JsonProperty("context")
   @NotNull
-  public String getContext() {
+ @Size(min=1,max=82)  public String getContext() {
     return context;
   }
   public void setContext(String context) {
@@ -343,7 +339,7 @@ public enum EndpointImplementationTypeEnum {
   @ApiModelProperty(example = "1.0.0", required = true, value = "")
   @JsonProperty("version")
   @NotNull
-  public String getVersion() {
+ @Size(min=1,max=30)  public String getVersion() {
     return version;
   }
   public void setVersion(String version) {
@@ -361,7 +357,7 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(example = "admin", value = "If the provider value is not given user invoking the api will be used as the provider. ")
   @JsonProperty("provider")
-  public String getProvider() {
+ @Size(max=50)  public String getProvider() {
     return provider;
   }
   public void setProvider(String provider) {
@@ -996,7 +992,7 @@ public enum EndpointImplementationTypeEnum {
 
   /**
    **/
-  public APIDTO createdTime(String createdTime) {
+  public APIDTO createdTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -1004,16 +1000,16 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
   @JsonProperty("createdTime")
-  public String getCreatedTime() {
+  public java.util.Date getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(String createdTime) {
+  public void setCreatedTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
   }
 
   /**
    **/
-  public APIDTO lastUpdatedTime(String lastUpdatedTime) {
+  public APIDTO lastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -1021,10 +1017,10 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
   @JsonProperty("lastUpdatedTime")
-  public String getLastUpdatedTime() {
+  public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;
   }
-  public void setLastUpdatedTime(String lastUpdatedTime) {
+  public void setLastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 

@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -19,7 +20,7 @@ public class LifecycleStateCheckItemsDTO   {
   
     private String name = null;
     private Boolean value = null;
-    private List<String> requiredStates = new ArrayList<>();
+    private List<String> requiredStates = new ArrayList<String>();
 
   /**
    **/

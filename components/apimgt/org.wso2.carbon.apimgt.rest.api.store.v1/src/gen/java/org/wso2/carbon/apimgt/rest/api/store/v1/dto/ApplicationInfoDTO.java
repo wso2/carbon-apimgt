@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -22,7 +23,7 @@ public class ApplicationInfoDTO   {
     private String throttlingPolicy = null;
     private String description = null;
     private String status = "";
-    private List<String> groups = new ArrayList<>();
+    private List<String> groups = new ArrayList<String>();
     private Integer subscriptionCount = null;
     private Object attributes = null;
     private String owner = null;

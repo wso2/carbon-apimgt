@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -18,115 +19,117 @@ public class DocumentDTO   {
     private String documentId = null;
     private String name = null;
 
-@XmlType(name="TypeEnum")
-@XmlEnum(String.class)
-public enum TypeEnum {
+    @XmlType(name="TypeEnum")
+    @XmlEnum(String.class)
+    public enum TypeEnum {
+        HOWTO("HOWTO"),
+        SAMPLES("SAMPLES"),
+        PUBLIC_FORUM("PUBLIC_FORUM"),
+        SUPPORT_FORUM("SUPPORT_FORUM"),
+        API_MESSAGE_FORMAT("API_MESSAGE_FORMAT"),
+        SWAGGER_DOC("SWAGGER_DOC"),
+        OTHER("OTHER");
+        private String value;
 
-    @XmlEnumValue("HOWTO") HOWTO(String.valueOf("HOWTO")), @XmlEnumValue("SAMPLES") SAMPLES(String.valueOf("SAMPLES")), @XmlEnumValue("PUBLIC_FORUM") PUBLIC_FORUM(String.valueOf("PUBLIC_FORUM")), @XmlEnumValue("SUPPORT_FORUM") SUPPORT_FORUM(String.valueOf("SUPPORT_FORUM")), @XmlEnumValue("API_MESSAGE_FORMAT") API_MESSAGE_FORMAT(String.valueOf("API_MESSAGE_FORMAT")), @XmlEnumValue("SWAGGER_DOC") SWAGGER_DOC(String.valueOf("SWAGGER_DOC")), @XmlEnumValue("OTHER") OTHER(String.valueOf("OTHER"));
-
-
-    private String value;
-
-    TypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TypeEnum fromValue(String v) {
-        for (TypeEnum b : TypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        TypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TypeEnum fromValue(String v) {
+            for (TypeEnum b : TypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private TypeEnum type = null;
     private String summary = null;
 
-@XmlType(name="SourceTypeEnum")
-@XmlEnum(String.class)
-public enum SourceTypeEnum {
+    @XmlType(name="SourceTypeEnum")
+    @XmlEnum(String.class)
+    public enum SourceTypeEnum {
+        INLINE("INLINE"),
+        MARKDOWN("MARKDOWN"),
+        URL("URL"),
+        FILE("FILE");
+        private String value;
 
-    @XmlEnumValue("INLINE") INLINE(String.valueOf("INLINE")), @XmlEnumValue("MARKDOWN") MARKDOWN(String.valueOf("MARKDOWN")), @XmlEnumValue("URL") URL(String.valueOf("URL")), @XmlEnumValue("FILE") FILE(String.valueOf("FILE"));
-
-
-    private String value;
-
-    SourceTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static SourceTypeEnum fromValue(String v) {
-        for (SourceTypeEnum b : SourceTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        SourceTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static SourceTypeEnum fromValue(String v) {
+            for (SourceTypeEnum b : SourceTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private SourceTypeEnum sourceType = null;
     private String sourceUrl = null;
     private String fileName = null;
     private String inlineContent = null;
     private String otherTypeName = null;
 
-@XmlType(name="VisibilityEnum")
-@XmlEnum(String.class)
-public enum VisibilityEnum {
+    @XmlType(name="VisibilityEnum")
+    @XmlEnum(String.class)
+    public enum VisibilityEnum {
+        OWNER_ONLY("OWNER_ONLY"),
+        PRIVATE("PRIVATE"),
+        API_LEVEL("API_LEVEL");
+        private String value;
 
-    @XmlEnumValue("OWNER_ONLY") OWNER_ONLY(String.valueOf("OWNER_ONLY")), @XmlEnumValue("PRIVATE") PRIVATE(String.valueOf("PRIVATE")), @XmlEnumValue("API_LEVEL") API_LEVEL(String.valueOf("API_LEVEL"));
-
-
-    private String value;
-
-    VisibilityEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static VisibilityEnum fromValue(String v) {
-        for (VisibilityEnum b : VisibilityEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        VisibilityEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static VisibilityEnum fromValue(String v) {
+            for (VisibilityEnum b : VisibilityEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private VisibilityEnum visibility = null;
-    private String createdTime = null;
+    private java.util.Date createdTime = null;
     private String createdBy = null;
-    private String lastUpdatedTime = null;
+    private java.util.Date lastUpdatedTime = null;
     private String lastUpdatedBy = null;
 
   /**
@@ -157,7 +160,7 @@ public enum VisibilityEnum {
   @ApiModelProperty(example = "PizzaShackDoc", required = true, value = "")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=60)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -192,7 +195,7 @@ public enum VisibilityEnum {
   
   @ApiModelProperty(example = "Summary of PizzaShackAPI Documentation", value = "")
   @JsonProperty("summary")
-  public String getSummary() {
+ @Size(min=1,max=32766)  public String getSummary() {
     return summary;
   }
   public void setSummary(String summary) {
@@ -305,7 +308,7 @@ public enum VisibilityEnum {
 
   /**
    **/
-  public DocumentDTO createdTime(String createdTime) {
+  public DocumentDTO createdTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -313,10 +316,10 @@ public enum VisibilityEnum {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("createdTime")
-  public String getCreatedTime() {
+  public java.util.Date getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(String createdTime) {
+  public void setCreatedTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
   }
 
@@ -339,7 +342,7 @@ public enum VisibilityEnum {
 
   /**
    **/
-  public DocumentDTO lastUpdatedTime(String lastUpdatedTime) {
+  public DocumentDTO lastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -347,10 +350,10 @@ public enum VisibilityEnum {
   
   @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("lastUpdatedTime")
-  public String getLastUpdatedTime() {
+  public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;
   }
-  public void setLastUpdatedTime(String lastUpdatedTime) {
+  public void setLastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 

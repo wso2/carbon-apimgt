@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
@@ -3902,7 +3903,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
-            String ifMatch, MessageContext messageContext) {
+                                            String ifMatch, MessageContext messageContext) {
         //pre-processing
         String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
@@ -3929,7 +3930,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //todo: check if API's tiers are properly set before Publishing
-            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action);
+            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action.toString());
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId);
@@ -4017,7 +4018,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         ExportApiUtil exportApiUtil = new ExportApiUtil();
         if (apiId == null) {
 
-            return exportApiUtil.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API);
+            return exportApiUtil.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus,
+                    RestApiConstants.RESOURCE_API);
         } else {
             try {
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();

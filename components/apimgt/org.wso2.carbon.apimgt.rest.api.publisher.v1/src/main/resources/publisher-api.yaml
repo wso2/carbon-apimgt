@@ -295,9 +295,8 @@ paths:
           name: openAPIVersion
           description: Open api version
           type: string
-          enum:
-            - V2
-            - V3
+          enum: [v2, v3]
+          default: v3
       tags:
         - APIs
       responses:
@@ -1100,6 +1099,7 @@ paths:
           type: string
           in: query
           required: true
+          maxLength: 30
         - name: defaultVersion
           description: Specifies whether new API should be added as default version.
           type: boolean
@@ -4011,6 +4011,8 @@ paths:
           description: Alias for the certificate
           required: true
           type: string
+          maxLength: 30
+          minLength: 1
         - in: path
           name: apiId
           description: apiId to which the certificate should be applied.
@@ -4073,6 +4075,8 @@ paths:
           description: Alias for the certificate
           required: true
           type: string
+          maxLength: 30
+          minLength: 1
         - in: formData
           name : tier
           description: The tier of the certificate
@@ -4277,6 +4281,7 @@ paths:
           required: false
           type: string
           description: Alias for the certificate
+          maxLength: 30
         - in: query
           name: endpoint
           required: false
@@ -4329,6 +4334,8 @@ paths:
           description: Alias for the certificate
           required: true
           type: string
+          maxLength: 30
+          minLength: 1
         - in: formData
           name: endpoint
           description: Endpoint to which the certificate should be applied.
@@ -4386,6 +4393,8 @@ paths:
           description: Alias for the certificate
           required: true
           type: string
+          minLength: 1
+          maxLength: 30
       tags:
         - Endpoint Certificates
       responses:
@@ -6990,20 +6999,28 @@ definitions:
       name:
         type: string
         example: PizzaShackAPI
+        minLength: 1
+        maxLength: 50
       description:
         type: string
         example: This is a simple API for Pizza Shack online pizza delivery store.
+        maxLength: 32766
       context:
         type: string
         example: pizza
+        minLength: 1
+        maxLength: 82
       version:
         type: string
         example: 1.0.0
+        minLength: 1
+        maxLength: 30
       provider:
         description: |
           If the provider value is not given user invoking the api will be used as the provider.
         type: string
         example: admin
+        maxLength: 50
       lifeCycleStatus:  # NEED TO RENAME AS lifeCycleState
         type: string
         example: CREATED
@@ -7213,9 +7230,11 @@ definitions:
       createdTime:
         type: string
         example: '2017-02-20T13:57:16.229'
+        format: date-time
       lastUpdatedTime:
         type: string
         example: '2017-02-20T13:57:16.229'
+        format: date-time
         x-otherScopes:
           - apim:api_publish
       endpointConfig:
@@ -7481,9 +7500,13 @@ definitions:
         type: string
         description: Name of the API Product
         example: PizzaShackAPIProduct
+        minLength: 1
+        maxLength: 50
       context:
         type: string
         example: pizzaproduct
+        minLength: 1
+        maxLength: 60
       description:
         type: string
         description: A brief description about the API
@@ -7492,6 +7515,7 @@ definitions:
         description: |
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
+        maxLength: 50
         example: admin
       hasThumbnail:
         type: boolean
@@ -7566,6 +7590,9 @@ definitions:
       apiType:
         type: string
         description: The API type to be used. Accepted values are API, APIProduct
+        enum:
+          - API
+          - APIProduct
         example: APIProduct
       transport:
         description: |
@@ -7632,9 +7659,11 @@ definitions:
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        format: date-time
       lastUpdatedTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        format: date-time
       apis:
         description: |
           APIs and resources in the API Product.
@@ -7753,12 +7782,14 @@ definitions:
       businessOwner:
         type: string
         example: businessowner
+        maxLength: 120
       businessOwnerEmail:
         type: string
         example: businessowner@wso2.com
       technicalOwner:
         type: string
         example: technicalowner
+        maxLength: 120
       technicalOwnerEmail:
         type: string
         example: technicalowner@wso2.com
@@ -7880,6 +7911,8 @@ definitions:
       name:
         type: string
         example: PizzaShackDoc
+        minLength: 1
+        maxLength: 60
       type:
         type: string
         enum:
@@ -7894,6 +7927,8 @@ definitions:
       summary:
         type: string
         example: "Summary of PizzaShackAPI Documentation"
+        minLength: 1
+        maxLength: 32766
       sourceType:
         type: string
         enum:
@@ -7928,6 +7963,7 @@ definitions:
         type: string
         example: 2017-02-20T13:57:16.229
         readOnly: true
+        format: date-time
       createdBy:
         type: string
         example: admin
@@ -7935,6 +7971,7 @@ definitions:
         type: string
         example: 2017-02-20T13:57:16.229
         readOnly: true
+        format: date-time
       lastUpdatedBy:
         type: string
         example: admin
@@ -8446,12 +8483,14 @@ definitions:
       businessOwner:
         type: string
         example: businessowner
+        maxLength: 120
       businessOwnerEmail:
         type: string
         example: businessowner@wso2.com
       technicalOwner:
         type: string
         example: technicalowner
+        maxLength: 120
       technicalOwnerEmail:
         type: string
         example: technicalowner@wso2.com
@@ -8595,16 +8634,20 @@ definitions:
         description: |
           name of Scope
         example: apim:api_view
+        minLength: 1
+        maxLength: 255
       displayName:
         type: string
         description: |
           display name of Scope
         example: api_view
+        maxLength: 255
       description:
         type: string
         description: |
           description of Scope
         example: 'This Scope can used to view Apis'
+        maxLength: 512
       bindings:
         description: |
           role bindings list of the Scope

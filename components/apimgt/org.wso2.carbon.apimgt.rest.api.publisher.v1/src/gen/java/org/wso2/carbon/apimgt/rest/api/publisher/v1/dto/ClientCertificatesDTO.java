@@ -18,13 +18,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 @ApiModel(description = "Representation of a list of client certificates")
 
 public class ClientCertificatesDTO   {
   
     private Integer count = null;
-    private List<ClientCertMetadataDTO> certificates = new ArrayList<>();
+    private List<ClientCertMetadataDTO> certificates = new ArrayList<ClientCertMetadataDTO>();
     private PaginationDTO pagination = null;
 
   /**

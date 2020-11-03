@@ -23,6 +23,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -39,25 +40,25 @@ public class APIDTO   {
     private String lifeCycleStatus = null;
     private Boolean isDefaultVersion = null;
     private String type = null;
-    private List<String> transport = new ArrayList<>();
-    private List<APIOperationsDTO> operations = new ArrayList<>();
+    private List<String> transport = new ArrayList<String>();
+    private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private String authorizationHeader = null;
-    private List<String> securityScheme = new ArrayList<>();
-    private List<String> tags = new ArrayList<>();
-    private List<APITiersDTO> tiers = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<String>();
+    private List<String> tags = new ArrayList<String>();
+    private List<APITiersDTO> tiers = new ArrayList<APITiersDTO>();
     private Boolean hasThumbnail = false;
-    private Map<String, String> additionalProperties = new HashMap<>();
+    private Map<String, String> additionalProperties = new HashMap<String, String>();
     private APIMonetizationInfoDTO monetization = null;
-    private List<APIIngressURLsDTO> ingressURLs = new ArrayList<>();
-    private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<>();
+    private List<APIIngressURLsDTO> ingressURLs = new ArrayList<APIIngressURLsDTO>();
+    private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<APIEndpointURLsDTO>();
     private APIBusinessInformationDTO businessInformation = null;
-    private List<LabelDTO> labels = new ArrayList<>();
-    private List<String> environmentList = new ArrayList<>();
-    private List<ScopeInfoDTO> scopes = new ArrayList<>();
+    private List<LabelDTO> labels = new ArrayList<LabelDTO>();
+    private List<String> environmentList = new ArrayList<String>();
+    private List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
     private String avgRating = null;
     private AdvertiseInfoDTO advertiseInfo = null;
     private Boolean isSubscriptionAvailable = null;
-    private List<String> categories = new ArrayList<>();
+    private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;

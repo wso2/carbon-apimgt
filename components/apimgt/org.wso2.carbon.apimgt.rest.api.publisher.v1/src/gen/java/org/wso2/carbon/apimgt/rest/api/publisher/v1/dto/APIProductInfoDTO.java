@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -24,40 +25,38 @@ public class APIProductInfoDTO   {
     private String provider = null;
     private Boolean hasThumbnail = null;
 
-@XmlType(name="StateEnum")
-@XmlEnum(String.class)
-public enum StateEnum {
+    @XmlType(name="StateEnum")
+    @XmlEnum(String.class)
+    public enum StateEnum {
+        CREATED("CREATED"),
+        PUBLISHED("PUBLISHED");
+        private String value;
 
-    @XmlEnumValue("CREATED") CREATED(String.valueOf("CREATED")), @XmlEnumValue("PUBLISHED") PUBLISHED(String.valueOf("PUBLISHED"));
-
-
-    private String value;
-
-    StateEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static StateEnum fromValue(String v) {
-        for (StateEnum b : StateEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        StateEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StateEnum fromValue(String v) {
+            for (StateEnum b : StateEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private StateEnum state = null;
-    private List<String> securityScheme = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<String>();
 
   /**
    * UUID of the api product 

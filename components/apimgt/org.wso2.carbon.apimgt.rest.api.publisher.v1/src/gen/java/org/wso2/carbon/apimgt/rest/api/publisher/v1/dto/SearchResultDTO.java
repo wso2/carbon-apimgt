@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -20,38 +21,37 @@ public class SearchResultDTO   {
     private String id = null;
     private String name = null;
 
-@XmlType(name="TypeEnum")
-@XmlEnum(String.class)
-public enum TypeEnum {
+    @XmlType(name="TypeEnum")
+    @XmlEnum(String.class)
+    public enum TypeEnum {
+        DOC("DOC"),
+        API("API"),
+        APIPRODUCT("APIProduct");
+        private String value;
 
-    @XmlEnumValue("DOC") DOC(String.valueOf("DOC")), @XmlEnumValue("API") API(String.valueOf("API")), @XmlEnumValue("APIProduct") APIPRODUCT(String.valueOf("APIProduct"));
-
-
-    private String value;
-
-    TypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TypeEnum fromValue(String v) {
-        for (TypeEnum b : TypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        TypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TypeEnum fromValue(String v) {
+            for (TypeEnum b : TypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private TypeEnum type = null;
     private String transportType = null;
 

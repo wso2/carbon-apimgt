@@ -13,12 +13,13 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class MockResponsePayloadListDTO   {
   
-    private List<MockResponsePayloadInfoDTO> list = new ArrayList<>();
+    private List<MockResponsePayloadInfoDTO> list = new ArrayList<MockResponsePayloadInfoDTO>();
 
   /**
    **/

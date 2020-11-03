@@ -13,13 +13,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class AlertConfigDTO   {
   
     private String configurationId = null;
-    private Map<String, String> _configuration = new HashMap<>();
+    private Map<String, String> _configuration = new HashMap<String, String>();
 
   /**
    * The alert config subscription id.

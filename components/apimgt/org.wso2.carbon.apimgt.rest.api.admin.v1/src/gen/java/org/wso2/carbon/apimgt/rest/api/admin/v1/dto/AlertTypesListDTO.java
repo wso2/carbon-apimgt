@@ -13,13 +13,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class AlertTypesListDTO   {
   
     private Integer count = null;
-    private List<AlertTypeDTO> alerts = new ArrayList<>();
+    private List<AlertTypeDTO> alerts = new ArrayList<AlertTypeDTO>();
 
   /**
    * The number of alerts

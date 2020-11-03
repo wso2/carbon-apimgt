@@ -14,13 +14,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class ResourcePathListDTO   {
   
     private Integer count = null;
-    private List<ResourcePathDTO> list = new ArrayList<>();
+    private List<ResourcePathDTO> list = new ArrayList<ResourcePathDTO>();
     private PaginationDTO pagination = null;
 
   /**

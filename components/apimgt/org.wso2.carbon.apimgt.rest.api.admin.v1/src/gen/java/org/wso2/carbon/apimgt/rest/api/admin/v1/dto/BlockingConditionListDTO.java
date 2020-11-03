@@ -13,13 +13,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class BlockingConditionListDTO   {
   
     private Integer count = null;
-    private List<BlockingConditionDTO> list = new ArrayList<>();
+    private List<BlockingConditionDTO> list = new ArrayList<BlockingConditionDTO>();
 
   /**
    * Number of Blocking Conditions returned. 

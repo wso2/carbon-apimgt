@@ -14,13 +14,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class SubscriptionListDTO   {
   
     private Integer count = null;
-    private List<SubscriptionDTO> list = new ArrayList<>();
+    private List<SubscriptionDTO> list = new ArrayList<SubscriptionDTO>();
     private PaginationDTO pagination = null;
 
   /**

@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -21,7 +22,7 @@ public class ApplicationListDTO   {
     private Integer count = null;
     private String next = null;
     private String previous = null;
-    private List<ApplicationInfoDTO> list = new ArrayList<>();
+    private List<ApplicationInfoDTO> list = new ArrayList<ApplicationInfoDTO>();
 
   /**
    * Number of applications returned. 

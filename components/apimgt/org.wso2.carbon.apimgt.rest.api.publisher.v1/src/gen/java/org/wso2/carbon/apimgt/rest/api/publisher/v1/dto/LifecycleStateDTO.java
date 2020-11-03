@@ -14,14 +14,15 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class LifecycleStateDTO   {
   
     private String state = null;
-    private List<LifecycleStateCheckItemsDTO> checkItems = new ArrayList<>();
-    private List<LifecycleStateAvailableTransitionsDTO> availableTransitions = new ArrayList<>();
+    private List<LifecycleStateCheckItemsDTO> checkItems = new ArrayList<LifecycleStateCheckItemsDTO>();
+    private List<LifecycleStateAvailableTransitionsDTO> availableTransitions = new ArrayList<LifecycleStateAvailableTransitionsDTO>();
 
   /**
    **/

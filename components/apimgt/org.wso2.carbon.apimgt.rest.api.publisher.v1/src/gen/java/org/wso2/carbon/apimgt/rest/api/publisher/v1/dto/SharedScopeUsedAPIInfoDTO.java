@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -22,7 +23,7 @@ public class SharedScopeUsedAPIInfoDTO   {
     private String context = null;
     private String version = null;
     private String provider = null;
-    private List<SharedScopeUsedAPIResourceInfoDTO> usedResourceList = new ArrayList<>();
+    private List<SharedScopeUsedAPIResourceInfoDTO> usedResourceList = new ArrayList<SharedScopeUsedAPIResourceInfoDTO>();
 
   /**
    **/

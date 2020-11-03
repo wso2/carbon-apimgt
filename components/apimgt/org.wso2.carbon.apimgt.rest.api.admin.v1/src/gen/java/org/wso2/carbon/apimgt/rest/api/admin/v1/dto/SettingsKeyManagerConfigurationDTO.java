@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -22,7 +23,7 @@ public class SettingsKeyManagerConfigurationDTO   {
     private String displayName = null;
     private String defaultConsumerKeyClaim = null;
     private String defaultScopesClaim = null;
-    private List<KeyManagerConfigurationDTO> configurations = new ArrayList<>();
+    private List<KeyManagerConfigurationDTO> configurations = new ArrayList<KeyManagerConfigurationDTO>();
 
   /**
    **/
