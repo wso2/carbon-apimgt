@@ -481,9 +481,9 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Get API by registry artifact id
+     * Get API by the UUID
      *
-     * @param uuid                  Registry artifact id
+     * @param uuid UUID of the API
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
