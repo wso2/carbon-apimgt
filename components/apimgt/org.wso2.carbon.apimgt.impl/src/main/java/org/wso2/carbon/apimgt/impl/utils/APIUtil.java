@@ -11778,10 +11778,24 @@ public final class APIUtil {
         return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
     }
 
+    /**
+     * Get the API Product Identifier from UUID.
+     *
+     * @param uuid UUID of the API
+     * @return API Product Identifier
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
     public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIProductIdentifierFromUUID(uuid);
     }
 
+    /**
+     * Get the API Identifier from UUID.
+     *
+     * @param uuid UUID of the API
+     * @return API Identifier
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
     public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
     }
