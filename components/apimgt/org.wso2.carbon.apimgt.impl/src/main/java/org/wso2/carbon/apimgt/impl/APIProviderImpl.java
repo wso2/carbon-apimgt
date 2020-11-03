@@ -5482,6 +5482,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         checkResourceThrottlingTiersInURITemplates(uriTemplates);
     }
 
+    @Override
+    public void validateAPIThrottlingTier(API api, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating apiLevelPolicy defined in the api");
+        }
+        Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+        if (tierMap != null) {
+            String apiLevelPolicy = api.getApiLevelPolicy();
+            if (apiLevelPolicy != null && !tierMap.containsKey(apiLevelPolicy)) {
+                String message = "Invalid API level throttling tier " + apiLevelPolicy + " found in api definition";
+                throw new APIManagementException(message);
+            }
+        }
+    }
+
     private void checkResourceThrottlingTiersInURITemplates(Set<URITemplate> uriTemplates)
             throws APIManagementException {
         Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);

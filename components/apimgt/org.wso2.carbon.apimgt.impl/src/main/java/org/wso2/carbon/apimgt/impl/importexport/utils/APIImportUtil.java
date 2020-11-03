@@ -255,8 +255,13 @@ public final class APIImportUtil {
                 }
             }
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
-                apiProvider.validateResourceThrottlingTiers(APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive),
-                        currentTenantDomain);
+                // Either only API level throttling policy or resource level throttling policies can be defined at once
+                if (importedApi.getApiLevelPolicy() != null) {
+                    apiProvider.validateAPIThrottlingTier(importedApi, currentTenantDomain);
+                } else {
+                    apiProvider.validateResourceThrottlingTiers(APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive),
+                            currentTenantDomain);
+                }
             }
 
             if (Boolean.FALSE.equals(overwrite)) {
