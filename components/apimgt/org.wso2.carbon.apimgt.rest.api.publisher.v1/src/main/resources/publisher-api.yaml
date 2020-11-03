@@ -7658,11 +7658,11 @@ definitions:
         $ref: '#/definitions/APICorsConfiguration'
       createdTime:
         type: string
-        example: 2017-02-20T13:57:16.229
+        example: '2017-02-20T13:57:16.229'
         format: date-time
       lastUpdatedTime:
         type: string
-        example: 2017-02-20T13:57:16.229
+        example: '2017-02-20T13:57:16.229'
         format: date-time
       apis:
         description: |

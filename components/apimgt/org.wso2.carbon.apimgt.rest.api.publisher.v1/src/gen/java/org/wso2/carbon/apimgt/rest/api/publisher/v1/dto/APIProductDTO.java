@@ -773,7 +773,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
   @JsonProperty("createdTime")
   public java.util.Date getCreatedTime() {
     return createdTime;
@@ -790,7 +790,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
   @JsonProperty("lastUpdatedTime")
   public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;
