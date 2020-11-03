@@ -40,7 +40,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "Store URL")
+  @ApiModelProperty(example = "https://localhost:9443/devportal", value = "Store URL")
   @JsonProperty("storeUrl")
   public String getStoreUrl() {
     return storeUrl;
@@ -74,7 +74,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[\"apim:api_create\",\"apim:api_publish\"]", value = "")
   @JsonProperty("scopes")
   public List<String> getScopes() {
     return scopes;
@@ -91,7 +91,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("monetizationAttributes")
   public List<MonetizationAttributeDTO> getMonetizationAttributes() {
     return monetizationAttributes;

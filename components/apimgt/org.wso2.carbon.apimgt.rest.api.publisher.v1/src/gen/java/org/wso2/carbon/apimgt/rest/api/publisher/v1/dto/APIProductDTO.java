@@ -247,7 +247,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPIProduct", required = true, value = "Name of the API Product")
+  @ApiModelProperty(example = "PizzaShackAPIProduct", required = true, value = "Name of the API Product")
   @JsonProperty("name")
   @NotNull
  @Size(min=1,max=50)  public String getName() {
@@ -265,7 +265,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPI", value = "")
+  @ApiModelProperty(example = "pizzaproduct", value = "")
   @JsonProperty("context")
  @Size(min=1,max=60)  public String getContext() {
     return context;
@@ -283,7 +283,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "A calculator API Product that supports basic operations", value = "A brief description about the API")
+  @ApiModelProperty(example = "This is a simple API for Pizza Shack online pizza delivery store", value = "A brief description about the API")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -318,7 +318,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "true", value = "")
+  @ApiModelProperty(example = "false", value = "")
   @JsonProperty("hasThumbnail")
   public Boolean isHasThumbnail() {
     return hasThumbnail;
@@ -474,7 +474,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("visibleTenants")
   public List<String> getVisibleTenants() {
     return visibleTenants;
@@ -510,7 +510,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"admin\"]", value = "The user roles that are able to view/modify as API Product publisher or creator.")
+  @ApiModelProperty(example = "[]", value = "The user roles that are able to view/modify as API Product publisher or creator.")
   @JsonProperty("accessControlRoles")
   public List<String> getAccessControlRoles() {
     return accessControlRoles;
@@ -538,7 +538,7 @@ return null;
   }
 
   /**
-   * The api type to be used. Accepted values are API, API PRODUCT
+   * The API type to be used. Accepted values are API, APIProduct
    **/
   public APIProductDTO apiType(ApiTypeEnum apiType) {
     this.apiType = apiType;
@@ -546,7 +546,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "APIProduct", value = "The api type to be used. Accepted values are API, API PRODUCT")
+  @ApiModelProperty(example = "APIProduct", value = "The API type to be used. Accepted values are API, APIProduct")
   @JsonProperty("apiType")
   public ApiTypeEnum getApiType() {
     return apiType;
@@ -581,7 +581,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"substract\",\"add\"]", value = "")
+  @ApiModelProperty(example = "[\"pizza\",\"food\"]", value = "")
   @JsonProperty("tags")
   public List<String> getTags() {
     return tags;
@@ -634,7 +634,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
+  @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
   @JsonProperty("authorizationHeader")
   public String getAuthorizationHeader() {
     return authorizationHeader;
@@ -652,7 +652,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @ApiModelProperty(example = "[\"oauth2\"]", value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
     return securityScheme;
@@ -687,7 +687,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"tenant1\",\"tenant2\"]", value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("subscriptionAvailableTenants")
   public List<String> getSubscriptionAvailableTenants() {
     return subscriptionAvailableTenants;
@@ -808,7 +808,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "APIs and resources in the API Product. ")
+  @ApiModelProperty(example = "[{\"name\":\"PizzaShackAPI\",\"apiId\":\"01234567-0123-0123-0123-012345678901\",\"version\":\"1.0\",\"operations\":[{\"target\":\"/order/{orderId}\",\"verb\":\"POST\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"},{\"target\":\"/menu\",\"verb\":\"GET\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"}]}]", value = "APIs and resources in the API Product. ")
   @JsonProperty("apis")
   public List<ProductAPIDTO> getApis() {
     return apis;
@@ -825,7 +825,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("scopes")
   public List<APIScopeDTO> getScopes() {
     return scopes;
@@ -843,7 +843,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "API categories ")
+  @ApiModelProperty(example = "[]", value = "API categories ")
   @JsonProperty("categories")
   public List<String> getCategories() {
     return categories;

@@ -157,7 +157,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "CalculatorDoc", required = true, value = "")
+  @ApiModelProperty(example = "PizzaShackDoc", required = true, value = "")
   @JsonProperty("name")
   @NotNull
  @Size(min=1,max=60)  public String getName() {
@@ -193,7 +193,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "Summary of Calculator Documentation", value = "")
+  @ApiModelProperty(example = "Summary of PizzaShackAPI Documentation", value = "")
   @JsonProperty("summary")
  @Size(min=1,max=32766)  public String getSummary() {
     return summary;
@@ -331,7 +331,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("createdBy")
   public String getCreatedBy() {
     return createdBy;
@@ -365,7 +365,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("lastUpdatedBy")
   public String getLastUpdatedBy() {
     return lastUpdatedBy;

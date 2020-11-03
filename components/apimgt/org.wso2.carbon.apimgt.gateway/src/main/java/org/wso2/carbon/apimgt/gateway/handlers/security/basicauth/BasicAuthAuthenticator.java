@@ -27,6 +27,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.util.Base64;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.List;
@@ -75,7 +77,6 @@ public class BasicAuthAuthenticator implements Authenticator {
      * @param basicAuthCredentialValidator the BasicAuthCredentialValidator instance to be set
      */
     public void setBasicAuthCredentialValidator(BasicAuthCredentialValidator basicAuthCredentialValidator) {
-        this.basicAuthCredentialValidator = basicAuthCredentialValidator;
     }
 
     /**
@@ -84,11 +85,6 @@ public class BasicAuthAuthenticator implements Authenticator {
      * @param env Current SynapseEnvironment instance
      */
     public void init(SynapseEnvironment env) {
-        try {
-            this.basicAuthCredentialValidator = new BasicAuthCredentialValidator();
-        } catch (APISecurityException e) {
-            log.error(e);
-        }
     }
 
     /**
@@ -235,6 +231,9 @@ public class BasicAuthAuthenticator implements Authenticator {
 
         BasicAuthValidationInfoDTO basicAuthValidationInfoObj;
         try {
+            if (basicAuthCredentialValidator == null) {
+                basicAuthCredentialValidator = new BasicAuthCredentialValidator();
+            }
             basicAuthValidationInfoObj = basicAuthCredentialValidator.validate(username, password);
         } catch (APISecurityException ex) {
             return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
@@ -340,11 +339,11 @@ public class BasicAuthAuthenticator implements Authenticator {
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (headers != null) {
-            String authHeader = (String) headers.get(securityHeader);
+            String authHeader = (String) headers.get(getSecurityHeader());
             if (authHeader == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Basic Authentication: Expected authorization header with the name '"
-                            .concat(securityHeader).concat("' was not found."));
+                            .concat(getSecurityHeader()).concat("' was not found."));
                 }
                 return null;
             } else {
@@ -362,9 +361,9 @@ public class BasicAuthAuthenticator implements Authenticator {
                     String remainingAuthHeader = String.join(authHeaderSplitter, remainingAuthHeaders);
                     //Remove basic authorization header segment sent and pass others to the backend
                     if (StringUtils.isNotBlank(remainingAuthHeader)) {
-                        headers.put(securityHeader, remainingAuthHeader);
+                        headers.put(getSecurityHeader(), remainingAuthHeader);
                     } else {
-                        headers.remove(securityHeader);
+                        headers.remove(getSecurityHeader());
                     }
                     return basicAuthHeader;
                 }
@@ -401,6 +400,21 @@ public class BasicAuthAuthenticator implements Authenticator {
      */
     public void setRequestOrigin(String requestOrigin) {
         this.requestOrigin = requestOrigin;
+    }
+
+    public String getSecurityHeader() {
+        if (this.securityHeader == null) {
+            try {
+                securityHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+            } catch (APIManagementException e) {
+                log.error("Error while reading authorization header from APIM configurations", e);
+            }
+        }
+        return securityHeader;
+    }
+
+    public void setSecurityHeader(String securityHeader) {
+        this.securityHeader = securityHeader;
     }
 
     private String getEndUserName(String username) {

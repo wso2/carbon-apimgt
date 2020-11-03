@@ -30,7 +30,7 @@ public class LabelDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "marketing_store", required = true, value = "")
   @JsonProperty("name")
   @NotNull
   public String getName() {
@@ -48,7 +48,7 @@ public class LabelDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "Public microgateway for marketing", value = "")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -65,7 +65,7 @@ public class LabelDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "\"https://localhost:9095\"", value = "")
   @JsonProperty("access_urls")
   public List<String> getAccessUrls() {
     return accessUrls;

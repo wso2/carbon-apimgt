@@ -66,7 +66,7 @@ public class ResourcePolicyInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPI", value = "A string that represents the resource path of the api for the related resource policy")
+  @ApiModelProperty(example = "checkPhoneNumber", value = "A string that represents the resource path of the api for the related resource policy")
   @JsonProperty("resourcePath")
   public String getResourcePath() {
     return resourcePath;

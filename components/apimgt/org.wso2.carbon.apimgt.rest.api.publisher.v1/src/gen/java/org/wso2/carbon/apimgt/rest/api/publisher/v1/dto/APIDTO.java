@@ -283,7 +283,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPI", required = true, value = "")
+  @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "")
   @JsonProperty("name")
   @NotNull
  @Size(min=1,max=50)  public String getName() {
@@ -301,7 +301,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "A calculator API that supports basic operations", value = "")
+  @ApiModelProperty(example = "This is a simple API for Pizza Shack online pizza delivery store.", value = "")
   @JsonProperty("description")
  @Size(max=32766)  public String getDescription() {
     return description;
@@ -318,7 +318,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPI", required = true, value = "")
+  @ApiModelProperty(example = "pizza", required = true, value = "")
   @JsonProperty("context")
   @NotNull
  @Size(min=1,max=82)  public String getContext() {
@@ -491,7 +491,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "true", value = "")
+  @ApiModelProperty(example = "false", value = "")
   @JsonProperty("hasThumbnail")
   public Boolean isHasThumbnail() {
     return hasThumbnail;
@@ -595,7 +595,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"substract\",\"add\"]", value = "")
+  @ApiModelProperty(example = "[\"pizza\",\"food\"]", value = "")
   @JsonProperty("tags")
   public List<String> getTags() {
     return tags;
@@ -648,7 +648,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
+  @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
   @JsonProperty("authorizationHeader")
   public String getAuthorizationHeader() {
     return authorizationHeader;
@@ -666,7 +666,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @ApiModelProperty(example = "[\"oauth2\"]", value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
     return securityScheme;
@@ -736,7 +736,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("visibleTenants")
   public List<String> getVisibleTenants() {
     return visibleTenants;
@@ -807,7 +807,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API. ")
+  @ApiModelProperty(example = "[]", value = "Labels of micro-gateway environments attached to the API. ")
   @JsonProperty("labels")
   public List<String> getLabels() {
     return labels;
@@ -824,7 +824,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "\"\\\"mediationPolicies\\\": [ {\\\"name\\\": \\\"json_to_xml_in_message\\\",\\\"type\\\": \\\"in\\\"}, {\\\"name\\\": \\\"xml_to_json_out_message\\\",\\\"type\\\": \\\"out\\\"}, {\\\"name\\\": \\\"json_fault\\\",\\\"type\\\": \\\"fault\\\"} ],\"", value = "")
+  @ApiModelProperty(example = "[{\"name\":\"json_to_xml_in_message\",\"type\":\"in\"},{\"name\":\"xml_to_json_out_message\",\"type\":\"out\"},{\"name\":\"json_fault\",\"type\":\"fault\"}]", value = "")
   @JsonProperty("mediationPolicies")
   public List<MediationPolicyDTO> getMediationPolicies() {
     return mediationPolicies;
@@ -859,7 +859,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"tenant1\",\"tenant2\"]", value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("subscriptionAvailableTenants")
   public List<String> getSubscriptionAvailableTenants() {
     return subscriptionAvailableTenants;
@@ -930,7 +930,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"admin\"]", value = "The user roles that are able to view/modify as API publisher or creator.")
+  @ApiModelProperty(example = "[]", value = "The user roles that are able to view/modify as API publisher or creator.")
   @JsonProperty("accessControlRoles")
   public List<String> getAccessControlRoles() {
     return accessControlRoles;
@@ -998,7 +998,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
   @JsonProperty("createdTime")
   public java.util.Date getCreatedTime() {
     return createdTime;
@@ -1015,7 +1015,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
   @JsonProperty("lastUpdatedTime")
   public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;
@@ -1084,7 +1084,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[{\"target\":\"/order/{orderId}\",\"verb\":\"POST\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"},{\"target\":\"/menu\",\"verb\":\"GET\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"}]", value = "")
   @JsonProperty("operations")
   public List<APIOperationsDTO> getOperations() {
     return operations;

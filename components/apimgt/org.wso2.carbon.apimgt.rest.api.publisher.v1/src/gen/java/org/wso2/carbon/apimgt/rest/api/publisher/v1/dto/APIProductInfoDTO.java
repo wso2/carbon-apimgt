@@ -85,7 +85,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPIProduct", value = "Name of the API Product")
+  @ApiModelProperty(example = "PizzaShackAPIProduct", value = "Name of the API Product")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -102,7 +102,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPI", value = "")
+  @ApiModelProperty(example = "pizzaproduct", value = "")
   @JsonProperty("context")
   public String getContext() {
     return context;
@@ -120,7 +120,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "A calculator API Product that supports basic operations", value = "A brief description about the API")
+  @ApiModelProperty(example = "This is a simple API for Pizza Shack online pizza delivery store", value = "A brief description about the API")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -191,7 +191,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @ApiModelProperty(example = "[\"oauth2\"]", value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
     return securityScheme;

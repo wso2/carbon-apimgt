@@ -32,7 +32,7 @@ public class ProductAPIDTO   {
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPI", value = "")
+  @ApiModelProperty(example = "PizzaShackAPI", value = "")
   @JsonProperty("name")
   public String getName() {
     return name;

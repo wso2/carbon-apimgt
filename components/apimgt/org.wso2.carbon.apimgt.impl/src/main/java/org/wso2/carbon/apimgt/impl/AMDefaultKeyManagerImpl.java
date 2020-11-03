@@ -73,7 +73,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -316,14 +315,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         TokenInfo tokenResponse;
 
         try {
-            if (tokenRequest.getValidityPeriod() != 0) {
-                String definedValidityPeriod = Long.toString(tokenRequest.getValidityPeriod());
-                tokenResponse = authClient.generateWithValidityPeriod(tokenRequest.getClientId(),
-                        tokenRequest.getClientSecret(), GRANT_TYPE_VALUE, scopes, definedValidityPeriod);
-            } else {
-                tokenResponse = authClient.generate(tokenRequest.getClientId(),
-                        tokenRequest.getClientSecret(), GRANT_TYPE_VALUE, scopes);
-            }
+            tokenResponse = authClient.generate(tokenRequest.getClientId(), tokenRequest.getClientSecret(),
+                    GRANT_TYPE_VALUE, scopes);
         } catch (KeyManagerClientException e) {
             throw new APIManagementException("Error occurred while calling token endpoint!", e);
         }
@@ -370,8 +363,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
             tokenInfo.setTokenValid(true);
             if (introspectInfo.getIat() > 0 && introspectInfo.getExpiry() > 0) {
-                long validityPeriod = introspectInfo.getExpiry() - introspectInfo.getIat();
-                tokenInfo.setValidityPeriod(validityPeriod * 1000L);
+                if (introspectInfo.getExpiry() != Long.MAX_VALUE) {
+                    long validityPeriod = introspectInfo.getExpiry() - introspectInfo.getIat();
+                    tokenInfo.setValidityPeriod(validityPeriod * 1000L);
+                } else {
+                    tokenInfo.setValidityPeriod(Long.MAX_VALUE);
+                }
                 tokenInfo.setIssuedTime(introspectInfo.getIat() * 1000L);
             }
             if (StringUtils.isNotEmpty(introspectInfo.getScope())) {

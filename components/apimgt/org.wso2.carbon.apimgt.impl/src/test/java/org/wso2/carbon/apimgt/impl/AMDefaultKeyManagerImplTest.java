@@ -31,16 +31,20 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
+import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
+import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +54,8 @@ public class AMDefaultKeyManagerImplTest {
 
     @Mock
     protected DCRClient dcrClient;
+    @Mock
+    protected IntrospectionClient introspectionClient;
     @InjectMocks
     AMDefaultKeyManagerImplWrapper keyManager = new AMDefaultKeyManagerImplWrapper();
 
@@ -107,6 +113,19 @@ public class AMDefaultKeyManagerImplTest {
         oauthRequest.setOAuthApplicationInfo(oauthApplication);
 
         keyManager.createApplication(oauthRequest);
+    }
+    @Test
+    public void testTokenUnlimitedExpirationTime() throws KeyManagerClientException, APIManagementException {
+        String accessToken = "155ddde3-68db-35b1-82dc-1247616b2da9";
+        IntrospectInfo response = new IntrospectInfo();
+        response.setActive(true);
+        response.setExpiry(Long.MAX_VALUE);
+        response.setIat(new Date().getTime());
+
+        Mockito.when(introspectionClient.introspect(accessToken)).thenReturn(response);
+        AccessTokenInfo info = keyManager.getTokenMetaData(accessToken);
+        Assert.assertEquals(Long.MAX_VALUE, info.getValidityPeriod());
+        
     }
 //
 //    @Test

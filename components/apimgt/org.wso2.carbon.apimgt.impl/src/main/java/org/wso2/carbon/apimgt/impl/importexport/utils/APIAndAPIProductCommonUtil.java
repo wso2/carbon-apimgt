@@ -157,6 +157,7 @@ public class APIAndAPIProductCommonUtil {
                 String sourceType = doc.getSourceType().name();
                 String resourcePath = null;
                 String localFileName = null;
+                docDirectoryPath = File.separator + APIImportExportConstants.DOCUMENT_DIRECTORY;
                 if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                     localFileName = doc.getFilePath().substring(
                             doc.getFilePath().lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);

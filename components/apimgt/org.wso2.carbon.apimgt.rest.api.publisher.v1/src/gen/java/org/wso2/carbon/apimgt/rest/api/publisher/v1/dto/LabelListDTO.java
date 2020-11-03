@@ -33,7 +33,7 @@ public class LabelListDTO   {
   }
 
   
-  @ApiModelProperty(value = "Number of Labels returned. ")
+  @ApiModelProperty(example = "1", value = "Number of Labels returned. ")
   @JsonProperty("count")
   public Integer getCount() {
     return count;

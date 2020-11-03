@@ -60,7 +60,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "basic", value = "Accepts one of the following, basic or digest.")
+  @ApiModelProperty(example = "BASIC", value = "Accepts one of the following, basic or digest.")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;

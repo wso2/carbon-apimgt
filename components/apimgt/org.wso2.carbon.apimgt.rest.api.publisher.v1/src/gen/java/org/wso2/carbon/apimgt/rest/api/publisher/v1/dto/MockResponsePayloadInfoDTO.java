@@ -29,7 +29,7 @@ public class MockResponsePayloadInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "path of the resource")
+  @ApiModelProperty(example = "/menu", value = "path of the resource")
   @JsonProperty("path")
   public String getPath() {
     return path;
@@ -47,7 +47,7 @@ public class MockResponsePayloadInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "new modified code")
+  @ApiModelProperty(example = "var accept = \"\\\"\"+mc.getProperty('AcceptHeader')+\"\\\"\"; var responseCode = mc.getProperty('query.param.responseCode'); var responseCodeStr = \"\\\"\"+responseCode+\"\\\"\"; var responses = [];  if (!responses[200]) {  responses [200] = []; } responses[200][\"application/json\"] =  [ {   \"price\" : \"string\",   \"description\" : \"string\",   \"name\" : \"string\",   \"image\" : \"string\" } ]  /_*if (!responses[304]) {   responses[304] = []; } responses[304][\"application/(json or xml)\"] = {}/<>*_/  if (!responses[406]) {  responses [406] = []; } responses[406][\"application/json\"] =  {   \"message\" : \"string\",   \"error\" : [ {     \"message\" : \"string\",     \"code\" : 0   } ],   \"description\" : \"string\",   \"code\" : 0,   \"moreInfo\" : \"string\" }  responses[501] = []; responses[501][\"application/json\"] = { \"code\" : 501, \"description\" : \"Not Implemented\"} responses[501][\"application/xml\"] = <response><code>501</code><description>Not Implemented</description></response>;  if (!responses[responseCode]) {  responseCode = 501; }  if (responseCode == null) {  responseCode = 200;  responseCodeStr = \"200\"; }  if (accept == null || !responses[responseCode][accept]) {  accept = \"application/json\"; }  if (accept === \"application/json\") {  mc.setProperty('CONTENT_TYPE', 'application/json');  mc.setProperty('HTTP_SC', responseCodeStr);  mc.setPayloadJSON(responses[responseCode][\"application/json\"]); } else if (accept === \"application/xml\") {  mc.setProperty('CONTENT_TYPE', 'application/xml');  mc.setProperty('HTTP_SC', responseCodeStr);  mc.setPayloadXML(responses[responseCode][\"application/xml\"]); }", value = "new modified code")
   @JsonProperty("content")
   public String getContent() {
     return content;
@@ -64,7 +64,7 @@ public class MockResponsePayloadInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "POST", value = "")
   @JsonProperty("verb")
   public String getVerb() {
     return verb;

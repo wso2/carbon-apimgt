@@ -27,6 +27,7 @@ import com.google.gson.JsonParser;
 import com.jayway.jsonpath.JsonPath;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +35,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.apache.synapse.transport.passthru.Pipe;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -106,17 +109,23 @@ public class SchemaValidator extends AbstractHandler {
             if (logger.isDebugEnabled()) {
                 logger.debug("Content type of the request message: " + contentType);
             }
-            RelayUtils.buildMessage(axis2MC);
-            logger.debug("Successfully built the request message");
             if (!APIMgtGatewayConstants.APPLICATION_JSON.equals(contentType)) {
                 return true;
+            }
+            Pipe pipe = (Pipe)axis2MC.getProperty(PassThroughConstants.PASS_THROUGH_PIPE);
+            if (pipe != null) {
+                if (getMessageContent(messageContext) == null) {
+                    String payloadContent = IOUtils.toString(pipe.getInputStream());
+                    JsonUtil.getNewJsonPayload(axis2MC, payloadContent, true, true);
+                    messageContext.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
+                }
             }
             JsonElement payloadObject = getMessageContent(messageContext);
             if (!APIConstants.SupportedHTTPVerbs.GET.name().equals(requestMethod) &&
                     payloadObject != null && !APIMgtGatewayConstants.EMPTY_ARRAY.equals(payloadObject)) {
                 validateRequest(messageContext);
             }
-        } catch (IOException | XMLStreamException e) {
+        } catch (IOException e) {
             logger.error("Error occurred while building the API request", e);
             return false;
         } catch (APIManagementException e) {
@@ -267,7 +276,13 @@ public class SchemaValidator extends AbstractHandler {
      */
     private JsonElement getMessageContent(MessageContext messageContext) {
         JsonElement payloadObject = null;
-        if (messageContext.getEnvelope().getBody() != null) {
+        org.apache.axis2.context.MessageContext axis2Context = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        if (JsonUtil.hasAJsonPayload(axis2Context)) {
+            String jsonString = JsonUtil.jsonPayloadToString(axis2Context);
+            JsonParser jsonParser = new JsonParser();
+            payloadObject = jsonParser.parse(jsonString);
+        } else if (messageContext.getEnvelope().getBody() != null) {
             Object objFirstElement = messageContext.getEnvelope().getBody().getFirstElement();
             if (objFirstElement != null) {
                 OMElement xmlResponse = messageContext.getEnvelope().getBody().getFirstElement();
