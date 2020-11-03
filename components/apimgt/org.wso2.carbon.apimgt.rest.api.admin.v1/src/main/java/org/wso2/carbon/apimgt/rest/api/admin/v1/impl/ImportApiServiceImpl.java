@@ -116,6 +116,9 @@ public class ImportApiServiceImpl implements ImportApiService {
             } else if (RestApiUtil.isDueToMetaInfoIsCorrupted(e)) {
                 RestApiUtil.handleMetaInformationFailureError("Error while reading API meta information from path.",
                         e, log);
+            } else if (RestApiUtil.isDueToProvidedThrottlingPolicyIsMissing(e)) {
+                RestApiUtil.handleResourceNotFoundError("Error while adding the throttling policy. " +
+                                "Provided throttling policy cannot be found.", e, log);
             }
             RestApiUtil.handleInternalServerError("Error while importing API", e, log);
         }

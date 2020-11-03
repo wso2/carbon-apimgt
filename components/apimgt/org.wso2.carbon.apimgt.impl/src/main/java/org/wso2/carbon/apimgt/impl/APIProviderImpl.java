@@ -5468,9 +5468,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Validating x-throttling tiers defined in swagger api definition resource");
         }
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        checkResourceThrottlingTiersInURITemplates(uriTemplates);
+    }
+
+    @Override
+    public void validateResourceThrottlingTiers(String swaggerContent, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating x-throttling tiers defined in swagger api definition resource");
+        }
+        APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
+        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
+        checkResourceThrottlingTiersInURITemplates(uriTemplates);
+    }
+
+    private void checkResourceThrottlingTiersInURITemplates(Set<URITemplate> uriTemplates)
+            throws APIManagementException {
         Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
         if (tierMap != null) {
-            Set<URITemplate> uriTemplates = api.getUriTemplates();
             for (URITemplate template : uriTemplates) {
                 if (template.getThrottlingTier() != null && !tierMap.containsKey(template.getThrottlingTier())) {
                     String message = "Invalid x-throttling tier " + template.getThrottlingTier() +

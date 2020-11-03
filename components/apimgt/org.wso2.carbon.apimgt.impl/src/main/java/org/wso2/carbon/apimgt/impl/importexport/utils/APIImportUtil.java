@@ -254,6 +254,11 @@ public final class APIImportUtil {
                     importedApi.removeAvailableTiers(unsupportedTiersList);
                 }
             }
+            if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
+                apiProvider.validateResourceThrottlingTiers(APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive),
+                        currentTenantDomain);
+            }
+
             if (Boolean.FALSE.equals(overwrite)) {
                 //Add API in CREATED state
                 apiProvider.addAPI(importedApi);
@@ -355,7 +360,7 @@ public final class APIImportUtil {
                 errorMessage += importedApi.getId().getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION
                         + ": " + importedApi.getId().getVersion();
             }
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIImportExportException(errorMessage + " " + e.getMessage(), e);
         }
     }
 
