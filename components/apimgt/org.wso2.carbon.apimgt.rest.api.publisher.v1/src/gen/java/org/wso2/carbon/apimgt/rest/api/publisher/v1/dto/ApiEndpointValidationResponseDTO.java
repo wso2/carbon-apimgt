@@ -28,7 +28,7 @@ public class ApiEndpointValidationResponseDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "HTTP status code")
+  @ApiModelProperty(example = "200", required = true, value = "HTTP status code")
   @JsonProperty("statusCode")
   @NotNull
   public Integer getStatusCode() {
@@ -47,7 +47,7 @@ public class ApiEndpointValidationResponseDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "string")
+  @ApiModelProperty(example = "OK", required = true, value = "string")
   @JsonProperty("statusMessage")
   @NotNull
   public String getStatusMessage() {
