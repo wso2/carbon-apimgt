@@ -2,10 +2,13 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
@@ -211,7 +214,7 @@ return null;
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private Object businessInformation = null;
+    private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
     private java.util.Date createdTime = null;
@@ -941,7 +944,7 @@ return null;
 
   /**
    **/
-  public APIDTO businessInformation(Object businessInformation) {
+  public APIDTO businessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
     return this;
   }
@@ -949,10 +952,10 @@ return null;
   
   @ApiModelProperty(value = "")
   @JsonProperty("businessInformation")
-  public Object getBusinessInformation() {
+  public APIBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
   }
-  public void setBusinessInformation(Object businessInformation) {
+  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
   }
 
@@ -998,7 +1001,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
   public java.util.Date getCreatedTime() {
     return createdTime;
@@ -1015,7 +1018,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedTime")
   public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;

@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -65,7 +67,7 @@ public class LabelDTO   {
   }
 
   
-  @ApiModelProperty(example = "\"https://localhost:9095\"", value = "")
+  @ApiModelProperty(example = "https://localhost:9095", value = "")
   @JsonProperty("access_urls")
   public List<String> getAccessUrls() {
     return accessUrls;

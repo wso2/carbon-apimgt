@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -46,7 +48,7 @@ public class APIExternalStoreDTO   {
   }
 
   
-  @ApiModelProperty(example = "2019-09-09T13:57:16.229+0000", value = "The recent timestamp which a given API is updated in the external store. ")
+  @ApiModelProperty(example = "2019-09-09T13:57:16.229", value = "The recent timestamp which a given API is updated in the external store. ")
   @JsonProperty("lastUpdatedTime")
   public String getLastUpdatedTime() {
     return lastUpdatedTime;

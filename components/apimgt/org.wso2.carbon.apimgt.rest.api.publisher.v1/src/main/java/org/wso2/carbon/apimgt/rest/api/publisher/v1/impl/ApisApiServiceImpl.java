@@ -1621,8 +1621,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdClientCertificatesPost(InputStream certificateInputStream,
-                                                    Attachment certificateDetail, String alias, String apiId, String tier, MessageContext messageContext) {
+        public Response apisApiIdClientCertificatesPost(String apiId, InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
@@ -1836,8 +1835,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated document as DTO
      */
     @Override
-    public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
-                                                            InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
+    public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId, String ifMatch,
+                InputStream inputStream, Attachment fileDetail, String inlineContent,
                                                             MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -2477,8 +2476,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
 
     @Override
-    public Response apisApiIdMediationPoliciesMediationPolicyIdContentPut(String type, String apiId, String mediationPolicyId,
-                                                                   InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdMediationPoliciesMediationPolicyIdContentPut(String apiId, String mediationPolicyId,
+                                String type, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
+                                                          String inlineContent, MessageContext messageContext) {
 
         InputStream contentStream = null;
         APIIdentifier apiIdentifier;
@@ -2606,8 +2606,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated mediation DTO as response
      */
     @Override
-    public Response apisApiIdMediationPoliciesPost(String type, String apiId, InputStream fileInputStream,
-            Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext)
+    public Response apisApiIdMediationPoliciesPost(String apiId, String type, String ifMatch, InputStream
+            fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext)
             throws APIManagementException {
 
         String fileName = "";
@@ -3097,8 +3097,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
-            Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdSwaggerPut(String apiId, String ifMatch, String apiDefinition, String url,
+                                InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
         try {
             String updatedSwagger;
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -3455,8 +3455,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Definition validation response
      */
     @Override
-    public Response validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-          Boolean returnContent, MessageContext messageContext) {
+    public Response validateOpenAPIDefinition(Boolean returnContent, String url, InputStream fileInputStream,
+                                              Attachment fileDetail, MessageContext messageContext) {
 
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
@@ -3880,8 +3880,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred while trying to retrieve the WSDL
      */
     @Override
-    public Response updateWSDLOfAPI(String apiId, InputStream fileInputStream, Attachment fileDetail, String url,
-           String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
+                                    String url, MessageContext messageContext) throws APIManagementException {
 
         validateWSDLAndReset(fileInputStream, fileDetail, url);
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -4050,9 +4050,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response with GraphQL API
      */
     @Override
-    public Response apisImportGraphqlSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
-                                                String additionalProperties, String ifMatch,
-                                                MessageContext messageContext) {
+    public Response apisImportGraphqlSchemaPost(String ifMatch, String type, InputStream fileInputStream,
+                                Attachment fileDetail, String additionalProperties, MessageContext messageContext) {
         APIDTO additionalPropertiesAPI = null;
         String schema = "";
 

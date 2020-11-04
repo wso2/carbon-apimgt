@@ -20,5 +20,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface RolesApiService {
-      public Response validateSystemRole(String roleId, MessageContext messageContext) throws APIManagementException;
+      public Response validateSystemRole(String roleId
+, MessageContext messageContext) throws APIManagementException;
 }

@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -773,7 +775,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
   public java.util.Date getCreatedTime() {
     return createdTime;
@@ -790,7 +792,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedTime")
   public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;

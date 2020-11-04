@@ -22,6 +22,13 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ThrottlingPoliciesApiService {
-      public Response getAllThrottlingPolicies(String policyLevel, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response getThrottlingPolicyByName(String policyName, String policyLevel, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAllThrottlingPolicies(String policyLevel
+, Integer limit
+, Integer offset
+, String ifNoneMatch
+, MessageContext messageContext) throws APIManagementException;
+      public Response getThrottlingPolicyByName(String policyName
+, String policyLevel
+, String ifNoneMatch
+, MessageContext messageContext) throws APIManagementException;
 }

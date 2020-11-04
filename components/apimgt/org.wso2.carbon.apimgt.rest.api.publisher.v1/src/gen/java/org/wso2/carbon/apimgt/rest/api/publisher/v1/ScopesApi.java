@@ -27,8 +27,8 @@ import javax.validation.constraints.*;
 @Path("/scopes")
 
 @Api(description = "the scopes API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class ScopesApi  {
@@ -51,13 +51,13 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created Scope object as an entity in the body. ", response = ScopeDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response addSharedScope(@ApiParam(value = "Scope object that needs to be added " ,required=true) ScopeDTO body) throws APIManagementException{
+    public Response addSharedScope(@ApiParam(value = "Scope object that needs to be added" ,required=true) ScopeDTO body) throws APIManagementException{
         return delegate.addSharedScope(body, securityContext);
     }
 
     @DELETE
     @Path("/{scopeId}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Shared Scope", notes = "This operation can be used to delete a Shared Scope proving the Id of the scope. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -73,7 +73,7 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
 
     @GET
     @Path("/{scopeId}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a Shared Scope by Scope Id", notes = "This operation can be used to retrieve details of a Shared Scope by a given scope Id. ", response = ScopeDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -89,7 +89,7 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
 
     @GET
     @Path("/{scopeId}/usage")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get usages of a Shared Scope by Scope Id", notes = "This operation can be used to retrieve usages of a Shared Scope by a given scope Id. ", response = SharedScopeUsageDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -105,7 +105,7 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get All Available Shared Scopes", notes = "This operation can be used to get all the available Shared Scopes. ", response = ScopeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -132,18 +132,18 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Successful response with updated Scope object ", response = ScopeDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response updateSharedScope(@ApiParam(value = "Scope Id consisting the UUID of the shared scope ",required=true) @PathParam("scopeId") String scopeId, @ApiParam(value = "Scope object that needs to be updated " ,required=true) ScopeDTO body) throws APIManagementException{
+    public Response updateSharedScope(@ApiParam(value = "Scope Id consisting the UUID of the shared scope ",required=true) @PathParam("scopeId") String scopeId, @ApiParam(value = "Scope object that needs to be updated" ,required=true) ScopeDTO body) throws APIManagementException{
         return delegate.updateSharedScope(scopeId, body, securityContext);
     }
 
     @HEAD
     @Path("/{scopeId}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Check Given Scope Name already Exists", notes = "Using this operation, user can check a given scope name exists or not. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "Scopes" })
     @ApiResponses(value = { 

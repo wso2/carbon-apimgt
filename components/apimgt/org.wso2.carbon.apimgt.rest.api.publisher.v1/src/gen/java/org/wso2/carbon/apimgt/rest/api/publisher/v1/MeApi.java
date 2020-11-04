@@ -24,8 +24,8 @@ import javax.validation.constraints.*;
 @Path("/me")
 
 @Api(description = "the me API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class MeApi  {
@@ -37,7 +37,7 @@ MeApiService delegate = new MeApiServiceImpl();
 
     @HEAD
     @Path("/roles/{roleId}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Validate Whether the Logged-in User has the Given Role", notes = "Using this operation, logged-in user can check whether he has given role. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

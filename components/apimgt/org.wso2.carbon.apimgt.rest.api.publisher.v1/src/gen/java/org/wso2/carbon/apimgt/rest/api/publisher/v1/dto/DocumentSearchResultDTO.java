@@ -2,6 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentSearchResultAllOfDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
 import javax.validation.constraints.*;
 
@@ -188,7 +191,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("sourceUrl")
   public String getSourceUrl() {
     return sourceUrl;
@@ -205,7 +208,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("otherTypeName")
   public String getOtherTypeName() {
     return otherTypeName;

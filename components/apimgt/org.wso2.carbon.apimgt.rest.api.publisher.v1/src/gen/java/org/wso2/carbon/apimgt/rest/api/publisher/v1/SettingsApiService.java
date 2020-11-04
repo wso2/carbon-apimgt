@@ -22,6 +22,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SettingsApiService {
-      public Response settingsGatewayEnvironmentsGet(String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response settingsGatewayEnvironmentsGet(String apiId
+, MessageContext messageContext) throws APIManagementException;
       public Response settingsGet(MessageContext messageContext) throws APIManagementException;
 }
