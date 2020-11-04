@@ -9999,12 +9999,12 @@ public final class APIUtil {
                     }
                 }
                 String artifactId = productResource.getUUID();
-                resource.setApiId(artifactId);
+                resource.setApiId(getUUIDFromIdentifier(resource.getApiIdentifier()));
 
                 GenericArtifactManager artifactManager = getArtifactManager(registry,
                         APIConstants.API_KEY);
 
-                GenericArtifact apiArtifact = artifactManager.getGenericArtifact(resource.getApiId());
+                GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
                 API api = getAPI(apiArtifact, registry);
 
                 resource.setEndpointConfig(api.getEndpointConfig());

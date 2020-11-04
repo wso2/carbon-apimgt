@@ -6329,13 +6329,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         boolean transactionCommitted = false;
         try {
-            registry.beginTransaction();
-            String apiArtifactId = registry.get(APIUtil.getAPIProductPath(apiProduct.getId())).getId();
+            String productArtifactId = registry.get(APIUtil.getAPIProductPath(apiProduct.getId())).getUUID();
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(productArtifactId);
             if (artifactManager == null) {
-                handleException("Artifact manager is null when updating monetization data for API ID " + apiProduct.getId());
+                String errorMessage =
+                        "Artifact manager is null when updating API Product with artifact ID " + apiProduct.getId();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
             }
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiProduct.getUuid());
             //set monetization status (i.e - enabled or disabled)
             artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS,
                     Boolean.toString(apiProduct.getMonetizationStatus()));
