@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -492,6 +493,9 @@ public class APIExportUtil {
         CommonUtil.createDirectory(archivePath + File.separator + APIImportExportConstants.META_INFO_DIRECTORY);
         //Remove unnecessary data from exported Api
         cleanApiDataToExport(apiToReturn);
+        // Get only the subscription tier names of the API, rather than retrieving the whole object array
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiToReturn);
+        Set<String> availableSubscriptionTierNames = APIAndAPIProductCommonUtil.getAvailableTierNamesOfApi(apiTypeWrapper);
 
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -547,6 +551,12 @@ public class APIExportUtil {
             }
 
             String apiInJson = gson.toJson(apiToReturn);
+            JSONParser jsonParser = new JSONParser();
+            org.json.simple.JSONObject apiJsonObject = (org.json.simple.JSONObject) jsonParser.parse(apiInJson);
+            apiJsonObject.remove(APIConstants.SUBSCRIPTION_TIERS);
+            apiJsonObject.put(APIConstants.SUBSCRIPTION_TIERS, availableSubscriptionTierNames);
+            apiInJson = gson.toJson(apiJsonObject);
+
             switch (exportFormat) {
                 case JSON:
                     CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_API_FILE_LOCATION, apiInJson);
@@ -565,6 +575,9 @@ public class APIExportUtil {
             String errorMessage = "Error while retrieving saving as YAML for API: " + apiToReturn.getId().getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiToReturn.getId().getVersion();
             throw new APIImportExportException(errorMessage, e);
+        } catch (ParseException e) {
+            String msg = "ParseException thrown when parsing API config";
+            throw new APIManagementException(msg, e);
         }
     }
 

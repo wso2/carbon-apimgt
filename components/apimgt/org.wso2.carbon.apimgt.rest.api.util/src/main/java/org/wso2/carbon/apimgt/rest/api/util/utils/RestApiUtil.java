@@ -629,7 +629,8 @@ public class RestApiUtil {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public static boolean isDueToProvidedThrottlingPolicyMissing(Throwable e) {
         return detailedMessageMatches(e, "Invalid x-throttling tier") ||
-                detailedMessageMatches(e, "Invalid API level throttling tier");
+                detailedMessageMatches(e, "Invalid API level throttling tier") ||
+                detailedMessageMatches(e, "Invalid subscription throttling tier");
     }
 
     /**

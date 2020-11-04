@@ -5469,7 +5469,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("Validating x-throttling tiers defined in swagger api definition resource");
         }
         Set<URITemplate> uriTemplates = api.getUriTemplates();
-        checkResourceThrottlingTiersInURITemplates(uriTemplates);
+        checkResourceThrottlingTiersInURITemplates(uriTemplates, tenantDomain);
     }
 
     @Override
@@ -5479,7 +5479,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
         Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
-        checkResourceThrottlingTiersInURITemplates(uriTemplates);
+        checkResourceThrottlingTiersInURITemplates(uriTemplates, tenantDomain);
     }
 
     @Override
@@ -5497,7 +5497,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void checkResourceThrottlingTiersInURITemplates(Set<URITemplate> uriTemplates)
+    private void checkResourceThrottlingTiersInURITemplates(Set<URITemplate> uriTemplates, String tenantDomain)
             throws APIManagementException {
         Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
         if (tierMap != null) {
