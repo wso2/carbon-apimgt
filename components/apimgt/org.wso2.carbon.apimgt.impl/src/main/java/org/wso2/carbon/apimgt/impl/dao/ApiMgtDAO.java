@@ -8021,6 +8021,31 @@ public class ApiMgtDAO {
         return uuid;
     }
 
+    /**
+     * Get API TYPE by the uuid.
+     *
+     * @param uuid UUID of API
+     * @return String API Type
+     * @throws APIManagementException if an error occurs
+     */
+    public String getAPITypeFromUUID(String uuid) throws APIManagementException {
+
+        String apiType = null;
+        String sql = SQLConstants.GET_API_TYPE_BY_UUID;
+        try(Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, uuid);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    apiType = resultSet.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the API TYPE for UUID " + uuid, e);
+        }
+        return apiType;
+    }
+
     public List<String> getAllAvailableContexts() {
         List<String> contexts = new ArrayList<String>();
         Connection connection = null;
