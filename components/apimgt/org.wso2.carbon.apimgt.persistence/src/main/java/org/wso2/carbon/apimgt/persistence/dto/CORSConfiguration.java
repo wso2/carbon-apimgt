@@ -70,4 +70,12 @@ public class CORSConfiguration {
     public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
         this.accessControlAllowMethods = accessControlAllowMethods;
     }
+    
+    @Override
+    public String toString() {
+        return "CORSConfiguration [corsConfigurationEnabled=" + corsConfigurationEnabled
+                + ", accessControlAllowOrigins=" + accessControlAllowOrigins + ", accessControlAllowCredentials="
+                + accessControlAllowCredentials + ", accessControlAllowHeaders=" + accessControlAllowHeaders
+                + ", accessControlAllowMethods=" + accessControlAllowMethods + "]";
+    }
 }

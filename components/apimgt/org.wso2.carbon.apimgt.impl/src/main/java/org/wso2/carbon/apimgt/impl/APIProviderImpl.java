@@ -151,6 +151,10 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -217,6 +221,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
+import static org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_STATE;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -9068,6 +9073,61 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             for (String scope : scopes) {
                 deleteScope(scope, tenantId);
             }
+        }
+    }
+    
+    @Override
+    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+
+        try {
+            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(new Organization(requestedTenantDomain),
+                    uuid);
+            if (log.isDebugEnabled()) {
+                log.debug("Persisted API: " + publisherAPI.toString());
+            }
+
+            API api = APIMapper.INSTANCE.toApi(publisherAPI);
+
+            /////////////////// Do processing on the data object//////////
+            // environment
+            String environmentString = null;
+            if (api.getEnvironments() != null) {
+                environmentString = String.join(",", api.getEnvironments());
+            }
+            api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+            // workflow status
+            APIIdentifier apiId = api.getId();
+            WorkflowDTO workflow = APIUtil.getAPIWorkflowStatus(apiId, WF_TYPE_AM_API_STATE);
+            if (workflow != null) {
+                WorkflowStatus status = workflow.getStatus();
+                api.setWorkflowStatus(status.toString());
+            }
+            // TODO try to use a single query to get info from db
+            // Ratings
+            int internalId = ApiMgtDAO.getInstance().getAPIID(apiId, null);
+            api.setRating(APIUtil.getAverageRating(internalId));
+            // api level tier
+            String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(internalId);
+            api.setApiLevelPolicy(apiLevelTier);
+
+            // available tier
+            String tiers = null;
+            Set<Tier> tiersSet = api.getAvailableTiers();
+            Set<String> tierNameSet = new HashSet<String>();
+            for (Tier t : tiersSet) {
+                tierNameSet.add(t.getName());
+            }
+            if (api.getAvailableTiers() != null) {
+                tiers = String.join("\\|\\|", tierNameSet);
+            }
+            Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+            Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
+            api.addAvailableTiers(availableTier);
+
+            return api;
+        } catch (APIPersistenceException e) {
+            String msg = "Failed to get API";
+            throw new APIManagementException(msg, e);
         }
     }
 }

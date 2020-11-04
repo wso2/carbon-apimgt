@@ -40,8 +40,8 @@ public class PersistenceManager {
             }
         }*/
 
-
-        return apiPersistenceInstance;
+        return new RegistryPersistenceImplNew(userName);
+        //return apiPersistenceInstance;
     }
 
 //    public static APIPersistence getInstance(String username) throws APIManagementException {

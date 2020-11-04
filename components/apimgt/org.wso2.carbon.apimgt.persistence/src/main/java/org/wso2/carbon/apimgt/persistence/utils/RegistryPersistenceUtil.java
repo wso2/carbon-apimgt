@@ -17,11 +17,16 @@
 package org.wso2.carbon.apimgt.persistence.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -73,6 +78,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -545,6 +551,72 @@ public class RegistryPersistenceUtil {
         }
 
     }
+    
+    public static void loadTenantAPIPolicy(String tenant, int tenantID) throws APIManagementException {
+
+        String tierBasePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                                        + File.separator + "default-tiers" + File.separator;
+
+        String apiTierFilePath = tierBasePath + APIConstants.DEFAULT_API_TIER_FILE_NAME;
+        String appTierFilePath = tierBasePath + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
+        String resTierFilePath = tierBasePath + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
+
+        loadTenantAPIPolicy(tenantID, APIConstants.API_TIER_LOCATION, apiTierFilePath);
+        loadTenantAPIPolicy(tenantID, APIConstants.APP_TIER_LOCATION, appTierFilePath);
+        loadTenantAPIPolicy(tenantID, APIConstants.RES_TIER_LOCATION, resTierFilePath);
+    }
+    /**
+     * Load the throttling policy  to the registry for tenants
+     *
+     * @param tenantID
+     * @param location
+     * @param fileName
+     * @throws APIManagementException
+     */
+    private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
+                                    throws APIManagementException {
+
+        InputStream inputStream = null;
+
+        try {
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+
+            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
+
+            if (govRegistry.resourceExists(location)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Tier policies already uploaded to the tenant's registry space");
+                }
+                return;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Adding API tier policies to the tenant's registry");
+            }
+            File defaultTiers = new File(fileName);
+            if (!defaultTiers.exists()) {
+                log.info("Default tier policies not found in : " + fileName);
+                return;
+            }
+            inputStream = FileUtils.openInputStream(defaultTiers);
+            byte[] data = IOUtils.toByteArray(inputStream);
+            Resource resource = govRegistry.newResource();
+            resource.setContent(data);
+            govRegistry.put(location, resource);
+
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while saving policy information to the registry", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading policy file content", e);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.error("Error when closing input stream", e);
+                }
+            }
+        }
+    }
 
     /**
      * This method will return mounted path of the path if the path
@@ -580,239 +652,234 @@ public class RegistryPersistenceUtil {
      */
     public static API getAPIForPublishing(GovernanceArtifact artifact, Registry registry)
                                     throws APIManagementException {
+        API api;
+        try {
+            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
 
-        //        API api;
-        //        try {
-        //            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-        //            String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
-        //            String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-        //            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-        //            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
-        //
-        //            if (apiId == -1) {
-        //                return null;
-        //            }
-        //
-        //            api = new API(apiIdentifier);
-        //            //set uuid
-        //            api.setUUID(artifact.getId());
-        //            // set rating
-        //            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-        //            api = setResourceProperties(api, registry, artifactPath);
-        //            api.setRating(getAverageRating(apiId));
-        //            //set description
-        //            api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
-        //            //set last access time
-        //            api.setLastUpdated(registry.get(artifactPath).getLastModified());
-        //            // set url
-        //            api.setStatus(getLcStateFromArtifact(artifact));
-        //            api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-        //            api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
-        //            api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
-        //            api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
-        //            api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
-        //            api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
-        //            api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
-        //            api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
-        //            api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
-        //            api.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
-        //            api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(
-        //                                            APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
-        //            api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
-        //                                            APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
-        //            api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-        //            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
-        //                                            .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
-        //                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
-        //            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
-        //                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
-        //            }
-        //            api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
-        //            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
-        //            api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
-        //            api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
-        //            api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
-        //            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
-        //            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
-        //            api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
-        //            api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
-        //
-        //            int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
-        //            try {
-        //                String strCacheTimeout = artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT);
-        //                if (strCacheTimeout != null && !strCacheTimeout.isEmpty()) {
-        //                    cacheTimeout = Integer.parseInt(strCacheTimeout);
-        //                }
-        //            } catch (NumberFormatException e) {
-        //                if (log.isWarnEnabled()) {
-        //                    log.warn("Error while retrieving cache timeout from the registry for " + apiIdentifier);
-        //                }
-        //                // ignore the exception and use default cache timeout value
-        //            }
-        //
-        //            api.setCacheTimeout(cacheTimeout);
-        //
-        //            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
-        //
-        //            api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
-        //            api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
-        //            api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
-        //            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
-        //            api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
-        //            api.setSubscriptionAvailableTenants(artifact.getAttribute(
-        //                                            APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
-        //
-        //            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
-        //            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-        //                                            .getTenantId(tenantDomainName);
-        //
-        //            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-        //                                            .getAPIManagerConfiguration();
-        //
-        //            String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
-        //            api.setApiLevelPolicy(apiLevelTier);
-        //
-        //            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-        //            Map<String, Tier> definedTiers = getTiers(tenantId);
-        //            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName);
-        //            api.addAvailableTiers(availableTier);
-        //
-        //            // This contains the resolved context
-        //            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
-        //            // We set the context template here
-        //            api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
-        //            api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
-        //            api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
-        //                                            APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
-        //            api.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
-        //            api.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
-        //
-        //            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
-        //            api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
-        //
-        //            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
-        //
-        //            // AWS Lambda: get paths
-        //            OASParserUtil oasParserUtil = new OASParserUtil();
-        //            String resourceConfigsString = oasParserUtil.getAPIDefinition(apiIdentifier, registry);
-        //            JSONParser jsonParser = new JSONParser();
-        //            JSONObject paths = null;
-        //            if (resourceConfigsString != null) {
-        //                JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
-        //                paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
-        //            }
-        //
-        //            for (URITemplate uriTemplate : uriTemplates) {
-        //                String uTemplate = uriTemplate.getUriTemplate();
-        //                String method = uriTemplate.getHTTPVerb();
-        //                List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
-        //                List<Scope> newTemplateScopes = new ArrayList<>();
-        //                if (!oldTemplateScopes.isEmpty()) {
-        //                    for (Scope templateScope : oldTemplateScopes) {
-        //                        Scope scope = scopeToKeyMapping.get(templateScope.getKey());
-        //                        newTemplateScopes.add(scope);
-        //                    }
-        //                }
-        //                uriTemplate.addAllScopes(newTemplateScopes);
-        //                uriTemplate.setResourceURI(api.getUrl());
-        //                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-        //                // AWS Lambda: set arn & timeout to URI template
-        //                if (paths != null) {
-        //                    JSONObject path = (JSONObject) paths.get(uTemplate);
-        //                    if (path != null) {
-        //                        JSONObject operation = (JSONObject) path.get(method.toLowerCase());
-        //                        if (operation != null) {
-        //                            if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
-        //                                uriTemplate.setAmznResourceName((String)
-        //                                                                operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
-        //                            }
-        //                            if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
-        //                                uriTemplate.setAmznResourceTimeout(((Long)
-        //                                                                operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //
-        //            if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
-        //                for (URITemplate template : uriTemplates) {
-        //                    template.setMediationScript(template.getAggregatedMediationScript());
-        //                }
-        //            }
-        //
-        //            api.setUriTemplates(uriTemplates);
-        //            api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
-        //                                            APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
-        //            Set<String> tags = new HashSet<String>();
-        //            org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-        //            for (Tag tag1 : tag) {
-        //                tags.add(tag1.getTagName());
-        //            }
-        //            api.addTags(tags);
-        //            api.setLastUpdated(registry.get(artifactPath).getLastModified());
-        //            api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
-        //            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
-        //            String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
-        //            api.setEnvironments(extractEnvironmentsForAPI(environments));
-        //            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
-        //            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
-        //            api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
-        //            //set data and status related to monetization
-        //            api.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
-        //                                            (APIConstants.Monetization.API_MONETIZATION_STATUS)));
-        //            String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
-        //
-        //            //set selected clusters which API needs to be deployed
-        //            String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
-        //            Set<DeploymentEnvironments> deploymentEnvironments = extractDeploymentsForAPI(deployments);
-        //            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
-        //                api.setDeploymentEnvironments(deploymentEnvironments);
-        //            }
-        //
-        //            if (StringUtils.isNotBlank(monetizationInfo)) {
-        //                JSONParser parser = new JSONParser();
-        //                JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
-        //                api.setMonetizationProperties(jsonObj);
-        //            }
-        //            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
-        //            api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
-        //            //get endpoint config string from artifact, parse it as a json and set the environment list configured with
-        //            //non empty URLs to API object
-        //            String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
-        //            if (StringUtils.isNotEmpty(keyManagers)) {
-        //                api.setKeyManagers(new Gson().fromJson(keyManagers, List.class));
-        //            } else {
-        //                api.setKeyManagers(Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
-        //            }
-        //            try {
-        //                api.setEnvironmentList(extractEnvironmentListForAPI(
-        //                                                artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
-        //            } catch (ParseException e) {
-        //                String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
-        //                log.error(msg, e);
-        //                throw new APIManagementException(msg, e);
-        //            } catch (ClassCastException e) {
-        //                String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
-        //                log.error(msg, e);
-        //                throw new APIManagementException(msg, e);
-        //            }
-        //
-        //        } catch (GovernanceException e) {
-        //            String msg = "Failed to get API for artifact ";
-        //            throw new APIManagementException(msg, e);
-        //        } catch (RegistryException e) {
-        //            String msg = "Failed to get LastAccess time or Rating";
-        //            throw new APIManagementException(msg, e);
-        //        } catch (UserStoreException e) {
-        //            String msg = "Failed to get User Realm of API Provider";
-        //            throw new APIManagementException(msg, e);
-        //        } catch (ParseException e) {
-        //            String msg = "Failed to get parse monetization information.";
-        //            throw new APIManagementException(msg, e);
-        //        }
-        //        return api;
+            api = new API(apiIdentifier);
+            //set uuid
+            api.setUUID(artifact.getId());
+            // set rating
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            api = setResourceProperties(api, registry, artifactPath);
+            //set description
+            api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+            //set last access time
+            api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            // set url
+            api.setStatus(getLcStateFromArtifact(artifact));
+            api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+            api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
+            api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
+            api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+            api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+            api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+            api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
+            api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
+            api.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
+            api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
+            api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
+            api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
+                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
+                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
+            }
+            api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
+            api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
+            api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
+            api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
+            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+            api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
+            api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
+
+            int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
+            try {
+                String strCacheTimeout = artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT);
+                if (strCacheTimeout != null && !strCacheTimeout.isEmpty()) {
+                    cacheTimeout = Integer.parseInt(strCacheTimeout);
+                }
+            } catch (NumberFormatException e) {
+                if (log.isWarnEnabled()) {
+                    log.warn("Error while retrieving cache timeout from the registry for " + apiIdentifier);
+                }
+                // ignore the exception and use default cache timeout value
+            }
+
+            api.setCacheTimeout(cacheTimeout);
+
+            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
+
+            api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+            api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
+            api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+            api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+            api.setSubscriptionAvailableTenants(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+
+            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomainName);
+
+            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+            Set<Tier> availableTiers = new HashSet<Tier>();
+            if(tiers != null) {
+                String[] tiersArray = tiers.split("\\|\\|");
+                for(String tierName : tiersArray) {
+                    availableTiers.add(new Tier(tierName));
+                }
+            }
+            api.addAvailableTiers(availableTiers );
+            ////// TODO set this tiers in the obj/////////////////////////////////
+
+            // This contains the resolved context
+            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            // We set the context template here
+            api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
+            api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
+            api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
+            api.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
+            api.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
+
+            api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+            Set<String> tags = new HashSet<String>();
+            Tag[] tag = registry.getTags(artifactPath);
+            for (Tag tag1 : tag) {
+                tags.add(tag1.getTagName());
+            }
+            api.addTags(tags);
+            api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
+            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+
+            api.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+            //set data and status related to monetization
+            api.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
+                    (APIConstants.Monetization.API_MONETIZATION_STATUS)));
+            String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
+
+            //set selected clusters which API needs to be deployed
+            String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
+            
+            Set<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> deploymentEnvironments = extractDeploymentsForAPI(deployments);
+            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
+                api.setDeploymentEnvironments(deploymentEnvironments);
+            }
+
+            if (StringUtils.isNotBlank(monetizationInfo)) {
+                JSONParser parser = new JSONParser();
+                JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
+                api.setMonetizationProperties(jsonObj);
+            }
+            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
+            api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
+            //get endpoint config string from artifact, parse it as a json and set the environment list configured with
+            //non empty URLs to API object
+            String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
+            if (StringUtils.isNotEmpty(keyManagers)) {
+                api.setKeyManagers(new Gson().fromJson(keyManagers, List.class));
+            } else {
+                api.setKeyManagers(Arrays.asList(APIConstants.API_LEVEL_ALL_KEY_MANAGERS));
+            }
+            try {
+                api.setEnvironmentList(extractEnvironmentListForAPI(
+                        artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
+            } catch (ParseException e) {
+                String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (ClassCastException e) {
+                String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+
+        } catch (GovernanceException e) {
+            String msg = "Failed to get API for artifact ";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get LastAccess time or Rating";
+            throw new APIManagementException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "Failed to get User Realm of API Provider";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Failed to get parse monetization information.";
+            throw new APIManagementException(msg, e);
+        }
+        return api;
+    }
+
+    private static Set<String> getEnvironments(String environments) {
+        if(environments != null) {
+            String[] publishEnvironmentArray = environments.split(",");
+            return new HashSet<String>(Arrays.asList(publishEnvironmentArray));
+        }
         return null;
+    }
+
+    /**
+     * To set the resource properties to the API.
+     *
+     * @param api          API that need to set the resource properties.
+     * @param registry     Registry to get the resource from.
+     * @param artifactPath Path of the API artifact.
+     * @return Updated API.
+     * @throws RegistryException Registry Exception.
+     */
+    private static API setResourceProperties(API api, Registry registry, String artifactPath) throws RegistryException {
+
+        Resource apiResource = registry.get(artifactPath);
+        Properties properties = apiResource.getProperties();
+        if (properties != null) {
+            Enumeration propertyNames = properties.propertyNames();
+            while (propertyNames.hasMoreElements()) {
+                String propertyName = (String) propertyNames.nextElement();
+                if (log.isDebugEnabled()) {
+                    log.debug("API '" + api.getId().toString() + "' " + "has the property " + propertyName);
+                }
+                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                    api.addProperty(propertyName.substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
+                            apiResource.getProperty(propertyName));
+                }
+            }
+        }
+        api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
+
+        String accessControlRoles = null;
+
+        String displayPublisherRoles = apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
+        if (displayPublisherRoles == null) {
+
+            String publisherRoles = apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+
+            if (publisherRoles != null) {
+                accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(
+                        apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
+                        null : apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            }
+        } else {
+            accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(displayPublisherRoles) ?
+                    null : displayPublisherRoles;
+        }
+
+        api.setAccessControlRoles(accessControlRoles);
+        return api;
     }
 
     protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry, String keyType)
@@ -2187,5 +2254,111 @@ public class RegistryPersistenceUtil {
 
         return new Gson().fromJson(jsonString, CORSConfiguration.class);
 
+    }
+
+    public static org.wso2.carbon.apimgt.api.model.CORSConfiguration getCorsConfigurationFromArtifact(
+            GovernanceArtifact artifact) throws GovernanceException {
+
+        org.wso2.carbon.apimgt.api.model.CORSConfiguration corsConfiguration = new Gson().fromJson(
+                artifact.getAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION),
+                org.wso2.carbon.apimgt.api.model.CORSConfiguration.class);
+        return corsConfiguration;
+    }
+    
+    /**
+     * This method used to set selected deployment environment values to governance artifact of API .
+     *
+     * @param deployments DeploymentEnvironments attributes value
+     */
+    public static Set<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> extractDeploymentsForAPI(String deployments) {
+
+        HashSet<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> deploymentEnvironmentsSet = new HashSet<>();
+        if (deployments != null && !"null".equals(deployments)) {
+            Type deploymentEnvironmentsSetType = new TypeToken<HashSet<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments>>() {
+            }.getType();
+            deploymentEnvironmentsSet = new Gson().fromJson(deployments, deploymentEnvironmentsSetType);
+            return deploymentEnvironmentsSet;
+        }
+        return deploymentEnvironmentsSet;
+    }
+    
+    public static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
+            throws GovernanceException, APIManagementException {
+
+        String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
+        List<Label> gatewayLabelListForAPI = new ArrayList<>();
+
+        if (labelArray != null && labelArray.length > 0) {
+            //String tenantDomain = MultitenantUtils.getTenantDomain
+            //        (replaceEmailDomainBack(apiProviderName));
+            //List<Label> allLabelList = APIUtil.getAllLabels(tenantDomain);
+            for (String labelName : labelArray) {
+                Label label = new Label();
+                //set the name
+                label.setName(labelName);
+                //set the description and access URLs
+                /*for (Label currentLabel : allLabelList) {
+                    if (labelName.equalsIgnoreCase(currentLabel.getName())) {
+                        label.setDescription(currentLabel.getDescription());
+                        label.setAccessUrls(currentLabel.getAccessUrls());
+                    }
+                }*/
+                gatewayLabelListForAPI.add(label);
+            }
+        }
+        return gatewayLabelListForAPI;
+    }
+    
+    /**
+     * This method used to extract environment list configured with non empty URLs.
+     *
+     * @param endpointConfigs (Eg: {"production_endpoints":{"url":"http://www.test.com/v1/xxx","config":null,
+     *                        "template_not_supported":false},"endpoint_type":"http"})
+     * @return Set<String>
+     */
+    public static Set<String> extractEnvironmentListForAPI(String endpointConfigs)
+            throws ParseException, ClassCastException {
+
+        Set<String> environmentList = new HashSet<String>();
+        if (StringUtils.isNotBlank(endpointConfigs) && !"null".equals(endpointConfigs)) {
+            JSONParser parser = new JSONParser();
+            JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfigs);
+            if (endpointConfigJson.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) &&
+                    isEndpointURLNonEmpty(endpointConfigJson.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS))) {
+                environmentList.add(APIConstants.API_KEY_TYPE_PRODUCTION);
+            }
+            if (endpointConfigJson.containsKey(APIConstants.API_DATA_SANDBOX_ENDPOINTS) &&
+                    isEndpointURLNonEmpty(endpointConfigJson.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS))) {
+                environmentList.add(APIConstants.API_KEY_TYPE_SANDBOX);
+            }
+        }
+        return environmentList;
+    }
+    /**
+     * This method used to check whether the endpoints JSON object has a non empty URL.
+     *
+     * @param endpoints (Eg: {"url":"http://www.test.com/v1/xxx","config":null,"template_not_supported":false})
+     * @return boolean
+     */
+    public static boolean isEndpointURLNonEmpty(Object endpoints) {
+
+        if (endpoints instanceof JSONObject) {
+            JSONObject endpointJson = (JSONObject) endpoints;
+            if (endpointJson.containsKey(APIConstants.API_DATA_URL) &&
+                    endpointJson.get(APIConstants.API_DATA_URL) != null) {
+                String url = (endpointJson.get(APIConstants.API_DATA_URL)).toString();
+                if (StringUtils.isNotBlank(url)) {
+                    return true;
+                }
+            }
+        } else if (endpoints instanceof JSONArray) {
+            JSONArray endpointsJson = (JSONArray) endpoints;
+            for (int i = 0; i < endpointsJson.size(); i++) {
+                if (isEndpointURLNonEmpty(endpointsJson.get(i))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

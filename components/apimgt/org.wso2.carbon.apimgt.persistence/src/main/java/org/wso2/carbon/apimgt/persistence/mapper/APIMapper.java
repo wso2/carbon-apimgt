@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.persistence.mapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,13 +37,13 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 public interface APIMapper {
     APIMapper INSTANCE = Mappers.getMapper(APIMapper.class);
 
-    @Mapping(source = "apiOwner", target = "id.providerName")
+    @Mapping(source = "providerName", target = "id.providerName")
     @Mapping(source = "apiName", target = "id.apiName")
     @Mapping(source = "version", target = "id.version")
     @Mapping(source = "id", target = "uuid")  
     API toApi(PublisherAPI api);
     
-    @Mapping(source = "id.providerName", target = "apiOwner")
+    @Mapping(source = "id.providerName", target = "providerName")
     @Mapping(source = "id.apiName", target = "apiName")
     @Mapping(source = "id.version", target = "version")
     @Mapping(source = "uuid", target = "id")
@@ -115,6 +116,20 @@ public interface APIMapper {
      */
     default JSONObject mapJson(JSONObject json) {
         return json;
+    }
+    
+    default Date mapStringToDate(String dateString) {
+        if (dateString != null) {
+            return new Date(Long.parseLong(dateString));
+        }
+        return null;
+    }
+
+    default String mapDateToString(Date date) {
+        if (date != null) {
+            return Long.toString(date.getTime());
+        }
+        return null;
     }
 }
 

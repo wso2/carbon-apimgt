@@ -77,6 +77,12 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.PersistenceManager;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -158,6 +164,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected static final GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
     // Property to indicate whether access control restriction feature is enabled.
     protected boolean isAccessControlRestrictionEnabled = false;
+    APIPersistence apiPersistenceInstance;
 
     private LRUCache<String, GenericArtifactManager> genericArtifactCache = new LRUCache<String, GenericArtifactManager>(
             5);
@@ -215,6 +222,7 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Error while getting user registry for user:" + username;
             throw new APIManagementException(msg, e);
         }
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(username);
 
     }
 
