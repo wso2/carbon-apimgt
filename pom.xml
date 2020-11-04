@@ -712,7 +712,11 @@
                 <artifactId>org.wso2.carbon.apimgt.throttling.siddhi.extension</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.cache.invalidation</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
