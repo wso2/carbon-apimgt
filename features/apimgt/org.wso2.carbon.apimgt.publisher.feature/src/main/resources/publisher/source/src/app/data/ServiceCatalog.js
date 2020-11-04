@@ -73,10 +73,8 @@ class ServiceCatalog {
     }
 
     /**
-     * Get details of a given Service Entry
-     * @param id {string} UUID of the Service Entry.
-     * @param callback {function} A callback function to invoke after receiving successful response.
-     * @returns {promise} With given callback attached to the success chain else Service Entry invoke promise.
+     * Get Settings
+     * @returns {promise} Settings promise.
      */
     static getSettings() {
         const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
@@ -86,6 +84,172 @@ class ServiceCatalog {
             });
             return promisedServiceCatalogSettings.then(response => response.body);
     }
+
+    /**
+     * Get details of Services
+     * @returns {promise} Service Entry promise.
+     */
+    static searchServices() {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+            const promisedServices = serviceCatalog.then(client => {
+                return client.apis['Services'].searchServices();
+            });
+            return promisedServices.then(response => response.body);
+    }
+
+    /**
+     * Check Existence of a Service
+     * @param id {string} UUID of the service.
+     * @returns {promise} Promise.
+     */
+    static checkServiceExistence(id) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+            const promisedService = serviceCatalog.then(client => {
+                return client.apis['Services'].checkServiceExistence(
+                    {
+                        serviceId: id,
+                    },
+                    this._requestMetaData()
+                );
+            });
+            return promisedService.then(response => response.body);
+    }
+
+    /**
+     * Create a Service
+     * @param body {Object} Service body.
+     * @returns {promise} Promise.
+     */
+    static createService(body) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+            const promisedService = serviceCatalog.then(client => {
+                return client.apis['Services'].createService(
+                    body,
+                    this._requestMetaData()
+                );
+            });
+            return promisedService.then(response => response.body);
+    }
+
+    /**
+     * Delete a Service
+     * @param id {string} UUID of the service.
+     * @returns {promise} Promise.
+     */
+    static deleteService(id) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+            const promisedService = serviceCatalog.then(client => {
+                return client.apis['Services'].deleteService(
+                    {
+                        serviceId: id,
+                    },
+                    this._requestMetaData()
+                );
+            });
+            return promisedService.then(response => response.body);
+    }
+
+    /**
+     * Export a Service
+     * @param id {string} UUID of the service.
+     * @returns {promise} Service Entry promise.
+     */
+    static exportService(id) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+            const promisedServices = serviceCatalog.then(client => {
+                return client.apis['Services'].exportService(
+                    {
+                        serviceId: id,
+                    },
+                    this._requestMetaData()
+                );
+            });
+            return promisedServices.then(response => response.body);
+    }
+
+    /**
+     * Import a Service
+     * @param id {string} UUID of the service.
+     * @returns {promise} Service Entry promise.
+     */
+    static importService(id) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+            const promisedServices = serviceCatalog.then(client => {
+                return client.apis['Services'].importService(
+                    {
+                        serviceId: id,
+                    },
+                    this._requestMetaData()
+                );
+            });
+            return promisedServices.then(response => response.body);
+    }
+
+    /**
+     * Get a service by ID
+     * @param id {string} UUID of the service.
+     * @returns {promise} Service Entry promise.
+     */
+    static getServiceById(id) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+            const promisedServices = serviceCatalog.then(client => {
+                return client.apis['Services'].getServiceById(
+                    {
+                        serviceId: id,
+                    },
+                    this._requestMetaData()
+                );
+            });
+            return promisedServices.then(response => response.body);
+    }
+
+    /**
+     * Get the definition of a service
+     * @param id {string} UUID of the service.
+     * @returns {promise} Service Entry promise.
+     */
+    static getServiceDefinition(id) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+            const promisedServices = serviceCatalog.then(client => {
+                return client.apis['Services'].getServiceDefinition(
+                    {
+                        serviceId: id,
+                    },
+                    this._requestMetaData()
+                );
+            });
+            return promisedServices.then(response => response.body);
+    }
+
+    /**
+     * Update a Service
+     * @param body {Object} Service body.
+     * @returns {promise} Promise.
+     */
+    static updateService(id, body) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+            const promisedService = serviceCatalog.then(client => {
+                return client.apis['Services'].updateService(
+                    {
+                        serviceId: id,
+                        body
+                    },
+                    this._requestMetaData()
+                );
+            });
+            return promisedService.then(response => response.body);
+    }
+
+    
 }
 
 export default ServiceCatalog;
