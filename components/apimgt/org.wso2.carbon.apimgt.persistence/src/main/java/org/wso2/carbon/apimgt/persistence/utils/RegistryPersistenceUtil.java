@@ -2361,4 +2361,64 @@ public class RegistryPersistenceUtil {
         }
         return false;
     }
+    
+
+    /**
+     * This method returns api definition json for given api
+     *
+     * @param apiIdentifier api identifier
+     * @param registry      user registry
+     * @return api definition json as json string
+     * @throws APIManagementException
+     */
+    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry) throws APIManagementException {
+        String resourcePath = "";
+
+        if (apiIdentifier instanceof APIIdentifier) {
+            resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
+                    apiIdentifier.getProviderName());
+        } else if (apiIdentifier instanceof APIProductIdentifier) {
+            resourcePath =
+                    RegistryPersistenceUtil.getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+        }
+
+        JSONParser parser = new JSONParser();
+        String apiDocContent = null;
+        try {
+            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
+                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
+                apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                parser.parse(apiDocContent);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at "
+                            + resourcePath);
+                }
+            }
+        } catch (RegistryException e) {
+
+            String msg = "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
+                    + apiIdentifier.getVersion();
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
+                    + apiIdentifier.getVersion() + " in " + resourcePath;
+            throw new APIManagementException(msg, e);
+        }
+        return apiDocContent;
+    }
+
+    public static String getOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
+
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR;
+    }
+    
+    public static String getAPIProductOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
+
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
+    }
 }

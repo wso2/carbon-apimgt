@@ -154,6 +154,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
@@ -201,6 +202,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -9078,14 +9080,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     
     @Override
     public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-
+            Organization org = new Organization(requestedTenantDomain);
         try {
-            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(new Organization(requestedTenantDomain),
-                    uuid);
-            if (log.isDebugEnabled()) {
-                log.debug("Persisted API: " + publisherAPI.toString());
-            }
-
+            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
+            
             API api = APIMapper.INSTANCE.toApi(publisherAPI);
 
             /////////////////// Do processing on the data object//////////
@@ -9123,11 +9121,72 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
             Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
             api.addAvailableTiers(availableTier);
+            
+            //Scopes 
+            Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
+            api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
+            
+            //templates
+            String id = APIType.API + "-" + apiId.getProviderName() + "-" + apiId.getName() + "-" + apiId.getVersion();
+            String resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, id);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject paths = null;
+            if (resourceConfigsString != null) {
+                JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
+                paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
+            }
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
+            for (URITemplate uriTemplate : uriTemplates) {
+                String uTemplate = uriTemplate.getUriTemplate();
+                String method = uriTemplate.getHTTPVerb();
+                List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
+                List<Scope> newTemplateScopes = new ArrayList<>();
+                if (!oldTemplateScopes.isEmpty()) {
+                    for (Scope templateScope : oldTemplateScopes) {
+                        Scope scope = scopeToKeyMapping.get(templateScope.getKey());
+                        newTemplateScopes.add(scope);
+                    }
+                }
+                uriTemplate.addAllScopes(newTemplateScopes);
+                uriTemplate.setResourceURI(api.getUrl());
+                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
+                // AWS Lambda: set arn & timeout to URI template
+                if (paths != null) {
+                    JSONObject path = (JSONObject) paths.get(uTemplate);
+                    if (path != null) {
+                        JSONObject operation = (JSONObject) path.get(method.toLowerCase());
+                        if (operation != null) {
+                            if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                                uriTemplate.setAmznResourceName((String)
+                                        operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                            }
+                            if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+                                uriTemplate.setAmznResourceTimeout(((Long)
+                                        operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
+                for (URITemplate template : uriTemplates) {
+                    template.setMediationScript(template.getAggregatedMediationScript());
+                }
+            }
+            api.setUriTemplates(uriTemplates);
+            //CORS . if null is returned, set default config from the configuration
+            if(api.getCorsConfiguration() == null) {
+                api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
+            }
 
             return api;
         } catch (APIPersistenceException e) {
-            String msg = "Failed to get API";
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException("Failed to get API", e);
+        } catch (OASPersistenceException e) {
+            throw new APIManagementException("Error while retrieving the OAS definition", e);
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while parsing the OAS definition", e);
         }
     }
 }

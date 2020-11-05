@@ -23,6 +23,9 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
@@ -173,8 +176,8 @@ public class RegistryPersistenceImplNew implements APIPersistence {
      *      api.setRating ---
      *      api.setApiLevelPolicy --
      *       api.addAvailableTiers --
-     *       api.setScopes
-     *       api.setUriTemplates
+     *       api.setScopes --
+     *       api.setUriTemplates --
      *       api.setEnvironments == read from config---
      *       api.setCorsConfiguration = if null get from configs
      *       api.setGatewayLabels == label name is set. other stuff seems not needed. if needed set them
@@ -211,6 +214,9 @@ public class RegistryPersistenceImplNew implements APIPersistence {
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
                 //TODO directly map to PublisherAPI from the registry
                 PublisherAPI pubApi = APIMapper.INSTANCE.toPublisherApi(api) ; 
+                if (log.isDebugEnabled()) {
+                    log.debug("API for id " + apiId + " : " + pubApi.toString());
+                }
                 return pubApi;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + apiId + " does not exist";
@@ -285,10 +291,58 @@ public class RegistryPersistenceImplNew implements APIPersistence {
 
     @Override
     public String getOASDefinition(Organization org, String apiId) throws OASPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        String apiTenantDomain = org.getName();
+        String definition = null;
+        boolean tenantFlowStarted = false;
+        try {
+            Registry registryType;
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                if (apiTenantDomain != null) {
+                    RegistryPersistenceUtil.startTenantFlow(apiTenantDomain);
+                    tenantFlowStarted = true;
+                }
+                int tenantId = getTenantManager().getTenantId(
+                        apiTenantDomain);
+                registryType = getRegistryService().getGovernanceUserRegistry(
+                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+            } else {
+                registryType = registry;
+            }
+            String[] idArray = apiId.split("-");
+            Identifier id;
+            if("API".equals(idArray[0])) {
+                id = new APIIdentifier(idArray[1], idArray[2], idArray[3]);
+            } else {
+                id = new APIProductIdentifier(idArray[1], idArray[2], idArray[3]);
+            }
+            definition = RegistryPersistenceUtil.getAPIDefinition(id, registryType);
+            if (log.isDebugEnabled()) {
+                log.debug("Definition for " + apiId + " : " +  definition);
+            }
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get swagger documentation of API : " + apiId;
+            throw new OASPersistenceException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get swagger documentation of API : " + apiId;
+            throw new OASPersistenceException(msg, e);
+        } catch (APIManagementException e) {
+            String msg = "Failed to get swagger documentation of API : " + apiId;
+            throw new OASPersistenceException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+        }
+        return definition;
     }
 
+    private boolean isTenantDomainNotMatching(String tenantDomain) {
+        if (this.tenantDomain != null) {
+            return !(this.tenantDomain.equals(tenantDomain));
+        }
+        return true;
+    }
     @Override
     public void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition)
             throws GraphQLPersistenceException {

@@ -82,7 +82,9 @@ import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -1219,36 +1221,19 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
         String apiTenantDomain = getTenantDomain(apiId);
-        String swaggerDoc = null;
-        boolean tenantFlowStarted = false;
-        try {
-            Registry registryType;
-            //Tenant store anonymous mode if current tenant and the required tenant is not matching
-            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
-                if (apiTenantDomain != null) {
-                    startTenantFlow(apiTenantDomain);
-                    tenantFlowStarted = true;
-                }
-                int tenantId = getTenantManager().getTenantId(
-                        apiTenantDomain);
-                registryType = getRegistryService().getGovernanceUserRegistry(
-                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                registryType = registry;
-            }
-            swaggerDoc = OASParserUtil.getAPIDefinition(apiId, registryType);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get swagger documentation of API : " + apiId;
-            throw new APIManagementException(msg, e);
-        } catch (RegistryException e) {
-            String msg = "Failed to get swagger documentation of API : " + apiId;
-            throw new APIManagementException(msg, e);
-        } finally {
-            if (tenantFlowStarted) {
-                endTenantFlow();
-            }
+        String definition = null;
+        String id = null;
+        if (apiId instanceof APIIdentifier) {
+            id = APIType.API + "-" + apiId.getProviderName() + "-" + apiId.getName() + "-" + apiId.getVersion();
+        } else if (apiId instanceof APIProductIdentifier) {
+            id = APIType.API_PRODUCT + "-" + apiId.getProviderName() + "-" + apiId.getName() + "-" + apiId.getVersion();
         }
-        return swaggerDoc;
+        try {
+            definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), id);
+        } catch (OASPersistenceException e) {
+            throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
+        }
+        return definition;
     }
 
     public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile) throws APIManagementException {

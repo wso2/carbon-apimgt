@@ -314,5 +314,6 @@ public final class APIConstants {
     public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String API_KEY_TYPE_SANDBOX = "SANDBOX";
     public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
+    public static final String API_OAS_DEFINITION_RESOURCE_NAME = "swagger.json";
 
 }
