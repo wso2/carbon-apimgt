@@ -1781,7 +1781,7 @@ public final class APIConstants {
         public static final String ENABLE_HEADER_CONDITIONS = "EnableHeaderConditions";
         public static final String ENABLE_JWT_CLAIM_CONDITIONS = "EnableJWTClaimConditions";
         public static final String ENABLE_QUERY_PARAM_CONDITIONS = "EnableQueryParamConditions";
-        public static final String EXCLUDE_THROTTLE_POLICIES = "ExcludedThrottlePolicies";
+        public static final String SKIP_REDEPLOYING_POLICIES = "SkipRedeployingPolicies";
         public static final String ENABLED = "Enabled";
         public static final String IS_THROTTLED = "isThrottled";
         public static final String THROTTLE_KEY = "throttleKey";

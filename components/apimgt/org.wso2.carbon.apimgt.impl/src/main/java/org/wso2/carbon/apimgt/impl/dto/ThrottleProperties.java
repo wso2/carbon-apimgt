@@ -34,7 +34,7 @@ public class ThrottleProperties {
     private boolean enableHeaderConditions = false;
     private boolean enableJwtConditions = false;
     private boolean enableQueryParamConditions =false;
-    private String[] excludedThrottlePolicies = new String[]{};
+    private String[] skipRedeployingPolicies = new String[]{};
     private Map<String, Long> defaultThrottleTierLimits = new HashMap<String, Long>();
     private TrafficManager trafficManager;
     public boolean isEnabledSubscriptionLevelSpikeArrest() {
@@ -595,12 +595,12 @@ public class ThrottleProperties {
         }
     }
 
-    public String[] getExcludedThrottlePolicies() {
-        return excludedThrottlePolicies;
+    public String[] getSkipRedeployingPolicies() {
+        return skipRedeployingPolicies;
     }
 
-    public void setExcludedThrottlePolicies(String[] excludedThrottlePolicies) {
-        this.excludedThrottlePolicies = excludedThrottlePolicies;
+    public void setSkipRedeployingPolicies(String[] skipRedeployingPolicies) {
+        this.skipRedeployingPolicies = skipRedeployingPolicies;
     }
 }
 

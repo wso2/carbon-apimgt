@@ -189,18 +189,18 @@ public class PolicyUtil {
                     .setTenantDomain(APIConstants.SUPER_TENANT_DOMAIN, true);
             Map<String, ExecutionPlanConfiguration> executionPlanConfigurationMap =
                     eventProcessorService.getAllActiveExecutionConfigurations();
-            // Undeploy all the policies except the excluded ones provided
+            // Undeploy all the policies except the skip ones provided
             for (Map.Entry<String, ExecutionPlanConfiguration> pair : executionPlanConfigurationMap.entrySet()) {
                 String policyPlanName = pair.getKey();
-                boolean excluded = false;
-                for (String excludedPolicyName :
-                        apiManagerConfiguration.getThrottleProperties().getExcludedThrottlePolicies()) {
-                    if (excludedPolicyName.equalsIgnoreCase(policyPlanName)) {
-                        excluded = true;
+                boolean skiped = false;
+                for (String skipPolicyName :
+                        apiManagerConfiguration.getThrottleProperties().getSkipRedeployingPolicies()) {
+                    if (skipPolicyName.equalsIgnoreCase(policyPlanName)) {
+                        skiped = true;
                         break;
                     }
                 }
-                if (!excluded) {
+                if (!skiped) {
                     eventProcessorService.undeployActiveExecutionPlan(policyPlanName);
                 }
             }

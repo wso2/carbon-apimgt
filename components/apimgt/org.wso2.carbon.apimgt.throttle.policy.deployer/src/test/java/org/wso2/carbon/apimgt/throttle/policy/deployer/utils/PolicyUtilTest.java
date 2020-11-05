@@ -78,8 +78,8 @@ public class PolicyUtilTest {
 
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
-        String[] excludedThrottlePolicies = {"excludePolicy1"};
-        Mockito.when(throttleProperties.getExcludedThrottlePolicies()).thenReturn(excludedThrottlePolicies);
+        String[] skipThrottlePolicies = {"skipPolicy1"};
+        Mockito.when(throttleProperties.getSkipRedeployingPolicies()).thenReturn(skipThrottlePolicies);
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.VELOCITY_LOGGER)).thenReturn(null);
         Mockito.when(serviceReferenceHolder.getAPIMConfiguration()).thenReturn(apiManagerConfiguration);
