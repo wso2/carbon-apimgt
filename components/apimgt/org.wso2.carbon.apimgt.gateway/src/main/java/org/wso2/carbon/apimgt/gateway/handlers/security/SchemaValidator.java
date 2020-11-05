@@ -109,16 +109,6 @@ public class SchemaValidator extends AbstractHandler {
             if (logger.isDebugEnabled()) {
                 logger.debug("Content type of the request message: " + contentType);
             }
-            Pipe pipe = (Pipe)axis2MC.getProperty("pass-through.pipe");
-            if (pipe != null) {
-                String payloadContent;
-                if (getMessageContent(messageContext) != null) {
-                    payloadContent = getMessageContent(messageContext).toString();
-                } else {
-                    payloadContent = IOUtils.toString(pipe.getInputStream());
-                }
-                JsonUtil.getNewJsonPayload(axis2MC, payloadContent, true, true);
-            }
             if (!APIMgtGatewayConstants.APPLICATION_JSON.equals(contentType)) {
                 return true;
             }
