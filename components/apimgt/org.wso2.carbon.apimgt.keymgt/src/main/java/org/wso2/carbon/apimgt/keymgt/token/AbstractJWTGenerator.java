@@ -299,17 +299,19 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 String apimKeyCacheExpiry = config.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
 
                 if (apimKeyCacheExpiry != null) {
-                    ttl = Long.parseLong(apimKeyCacheExpiry);
+                    //added one minute buffer to the expiry time to avoid inconsistencies happen during cache expiry
+                    //task time
+                    ttl = Long.parseLong(apimKeyCacheExpiry) + Long.valueOf(60);
                 } else {
-                    ttl = Long.valueOf(900);
+                    ttl = Long.valueOf(960);
                 }
             } else {
                 String ttlValue = config.getFirstProperty(APIConstants.JWT_EXPIRY_TIME);
                 if (ttlValue != null) {
-                    ttl = Long.parseLong(ttlValue);
+                    ttl = Long.parseLong(ttlValue) + Long.valueOf(60);
                 } else {
                     //15 * 60 (convert 15 minutes to seconds)
-                    ttl = Long.valueOf(900);
+                    ttl = Long.valueOf(960);
                 }
             }
             return ttl;
