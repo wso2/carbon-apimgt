@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -28,7 +29,7 @@ public class ApiEndpointValidationResponseDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "HTTP status code")
+  @ApiModelProperty(example = "200", required = true, value = "HTTP status code")
   @JsonProperty("statusCode")
   @NotNull
   public Integer getStatusCode() {
@@ -47,7 +48,7 @@ public class ApiEndpointValidationResponseDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "string")
+  @ApiModelProperty(example = "OK", required = true, value = "string")
   @JsonProperty("statusMessage")
   @NotNull
   public String getStatusMessage() {

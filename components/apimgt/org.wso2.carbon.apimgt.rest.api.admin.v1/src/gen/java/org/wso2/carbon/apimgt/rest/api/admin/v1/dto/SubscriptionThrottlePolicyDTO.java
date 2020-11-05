@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -29,7 +30,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     private MonetizationInfoDTO monetization = null;
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
-    private List<CustomAttributeDTO> customAttributes = new ArrayList<>();
+    private List<CustomAttributeDTO> customAttributes = new ArrayList<CustomAttributeDTO>();
     private Boolean stopOnQuotaReach = false;
     private String billingPlan = null;
     private SubscriptionThrottlePolicyPermissionDTO permissions = null;

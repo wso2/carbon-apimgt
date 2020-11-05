@@ -1229,6 +1229,7 @@ paths:
             - name
             - owner
             - throttlingTier
+            - status
         - name: sortOrder
           in: query
           type: string
@@ -2731,7 +2732,7 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
-#-----------------------------------------------------
+    #-----------------------------------------------------
     # Delete a certain subscription
     #-----------------------------------------------------
     delete:
@@ -4340,6 +4341,13 @@ definitions:
         description: |
           API Key Managers
         type: object
+      createdTime:
+        type: string
+        example: '2020-10-31T13:57:16.229'
+      lastUpdatedTime:
+        type: string
+        example: '2020-10-31T13:57:16.229'
+
 
   #-----------------------------------------------------
   # The Label resource
@@ -4409,12 +4417,16 @@ definitions:
       name:
         type: string
         example: CalculatorApp
+        maxLength: 70
+        minLength: 1
       throttlingPolicy:
         type: string
         example: Unlimited
+        minLength: 1
       description:
         type: string
         example: Sample calculator application
+        maxLength: 512
       tokenType:
         type: string
         enum:
@@ -4780,6 +4792,7 @@ definitions:
         type: string
       ratedBy:
         type: string
+        maxLength: 50
       rating:
         type: integer
 
@@ -4824,9 +4837,11 @@ definitions:
         type: string
       content:
         type: string
+        maxLength: 512
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        format: date-time
       createdBy:
         type: string
 

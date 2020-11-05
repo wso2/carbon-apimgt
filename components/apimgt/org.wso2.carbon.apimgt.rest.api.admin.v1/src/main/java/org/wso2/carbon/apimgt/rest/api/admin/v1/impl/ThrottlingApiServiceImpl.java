@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO.ConditionTypeEnum;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.ApplicationThrottlePolicyMappingUtil;
@@ -973,25 +974,25 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //Add the block condition. It will throw BlockConditionAlreadyExistsException if the condition already
             //  exists in the system
             String uuid = null;
-            if (APIConstants.BLOCKING_CONDITIONS_API.equals(body.getConditionType()) ||
-                    APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(body.getConditionType()) ||
-                    APIConstants.BLOCKING_CONDITIONS_USER.equals(body.getConditionType())) {
-                uuid = apiProvider.addBlockCondition(body.getConditionType(), (String) body.getConditionValue(),
-                        body.isConditionStatus());
-            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType()) ||
-                    APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())) {
+            if (ConditionTypeEnum.API.equals(body.getConditionType()) ||
+                    ConditionTypeEnum.APPLICATION.equals(body.getConditionType()) ||
+                    ConditionTypeEnum.USER.equals(body.getConditionType())) {
+                uuid = apiProvider.addBlockCondition(body.getConditionType().toString(),
+                        (String) body.getConditionValue(), body.isConditionStatus());
+            } else if (ConditionTypeEnum.IP.equals(body.getConditionType()) ||
+                    ConditionTypeEnum.IPRANGE.equals(body.getConditionType())) {
                 if (body.getConditionValue() instanceof Map) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.putAll((Map) body.getConditionValue());
-                    if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType())) {
+                    if (ConditionTypeEnum.IP.equals(body.getConditionType())) {
                         RestApiAdminUtils.validateIPAddress(jsonObject.get("fixedIp").toString());
                     }
-                    if (APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())) {
+                    if (ConditionTypeEnum.IPRANGE.equals(body.getConditionType())) {
                         RestApiAdminUtils.validateIPAddress(jsonObject.get("startingIp").toString());
                         RestApiAdminUtils.validateIPAddress(jsonObject.get("endingIp").toString());
                     }
-                    uuid = apiProvider.addBlockCondition(body.getConditionType(), jsonObject.toJSONString(),
-                            body.isConditionStatus());
+                    uuid = apiProvider.addBlockCondition(body.getConditionType().toString(),
+                            jsonObject.toJSONString(), body.isConditionStatus());
                 }
             }
 

@@ -64,7 +64,8 @@ public class ExportApiServiceImpl implements ExportApiService {
     public Response exportApiGet(String name, String version, String providerName, String format,
                                  Boolean preserveStatus, MessageContext messageContext) {
         ExportApiUtil exportApi = new ExportApiUtil();
-        return exportApi.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API);
+        return exportApi.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus,
+                RestApiConstants.RESOURCE_API);
     }
 
     /**
@@ -83,7 +84,8 @@ public class ExportApiServiceImpl implements ExportApiService {
     public Response exportApiProductGet(String name, String version, String providerName, String format,
                                         Boolean preserveStatus, MessageContext messageContext) {
         ExportApiUtil exportApi = new ExportApiUtil();
-        return exportApi.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API_PRODUCT);
+        return exportApi.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus,
+                RestApiConstants.RESOURCE_API_PRODUCT);
     }
 
     /**

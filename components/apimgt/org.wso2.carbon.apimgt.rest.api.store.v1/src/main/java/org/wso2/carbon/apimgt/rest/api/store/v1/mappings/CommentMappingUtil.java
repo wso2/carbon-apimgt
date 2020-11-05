@@ -44,7 +44,7 @@ public class CommentMappingUtil {
         commentDTO.setId(comment.getId());
         commentDTO.setContent(comment.getText());
         commentDTO.setCreatedBy(comment.getUser());
-        commentDTO.setCreatedTime(comment.getCreatedTime().toString());
+        commentDTO.setCreatedTime(comment.getCreatedTime());
         return commentDTO;
     }
 

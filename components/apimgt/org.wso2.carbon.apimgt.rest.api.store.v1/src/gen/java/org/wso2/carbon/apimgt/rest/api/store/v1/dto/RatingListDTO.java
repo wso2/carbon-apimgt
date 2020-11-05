@@ -14,6 +14,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -22,7 +23,7 @@ public class RatingListDTO   {
     private String avgRating = null;
     private Integer userRating = null;
     private Integer count = null;
-    private List<RatingDTO> list = new ArrayList<>();
+    private List<RatingDTO> list = new ArrayList<RatingDTO>();
     private PaginationDTO pagination = null;
 
   /**

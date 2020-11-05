@@ -10,78 +10,82 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class WorkflowInfoDTO   {
   
 
-@XmlType(name="WorkflowTypeEnum")
-@XmlEnum(String.class)
-public enum WorkflowTypeEnum {
+    @XmlType(name="WorkflowTypeEnum")
+    @XmlEnum(String.class)
+    public enum WorkflowTypeEnum {
+        APPLICATION_CREATION("APPLICATION_CREATION"),
+        SUBSCRIPTION_CREATION("SUBSCRIPTION_CREATION"),
+        USER_SIGNUP("USER_SIGNUP"),
+        APPLICATION_REGISTRATION_PRODUCTION("APPLICATION_REGISTRATION_PRODUCTION"),
+        APPLICATION_REGISTRATION_SANDBOX("APPLICATION_REGISTRATION_SANDBOX"),
+        APPLICATION_DELETION("APPLICATION_DELETION"),
+        API_STATE("API_STATE"),
+        SUBSCRIPTION_DELETION("SUBSCRIPTION_DELETION"),
+        SUBSCRIPTION_UPDATE("SUBSCRIPTION_UPDATE");
+        private String value;
 
-    @XmlEnumValue("APPLICATION_CREATION") APPLICATION_CREATION(String.valueOf("APPLICATION_CREATION")), @XmlEnumValue("SUBSCRIPTION_CREATION") SUBSCRIPTION_CREATION(String.valueOf("SUBSCRIPTION_CREATION")), @XmlEnumValue("USER_SIGNUP") USER_SIGNUP(String.valueOf("USER_SIGNUP")), @XmlEnumValue("APPLICATION_REGISTRATION_PRODUCTION") APPLICATION_REGISTRATION_PRODUCTION(String.valueOf("APPLICATION_REGISTRATION_PRODUCTION")), @XmlEnumValue("APPLICATION_REGISTRATION_SANDBOX") APPLICATION_REGISTRATION_SANDBOX(String.valueOf("APPLICATION_REGISTRATION_SANDBOX")), @XmlEnumValue("APPLICATION_DELETION") APPLICATION_DELETION(String.valueOf("APPLICATION_DELETION")), @XmlEnumValue("API_STATE") API_STATE(String.valueOf("API_STATE")), @XmlEnumValue("SUBSCRIPTION_DELETION") SUBSCRIPTION_DELETION(String.valueOf("SUBSCRIPTION_DELETION")), @XmlEnumValue("SUBSCRIPTION_UPDATE") SUBSCRIPTION_UPDATE(String.valueOf("SUBSCRIPTION_UPDATE"));
-
-
-    private String value;
-
-    WorkflowTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static WorkflowTypeEnum fromValue(String v) {
-        for (WorkflowTypeEnum b : WorkflowTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        WorkflowTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static WorkflowTypeEnum fromValue(String v) {
+            for (WorkflowTypeEnum b : WorkflowTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private WorkflowTypeEnum workflowType = null;
 
-@XmlType(name="WorkflowStatusEnum")
-@XmlEnum(String.class)
-public enum WorkflowStatusEnum {
+    @XmlType(name="WorkflowStatusEnum")
+    @XmlEnum(String.class)
+    public enum WorkflowStatusEnum {
+        APPROVED("APPROVED"),
+        CREATED("CREATED");
+        private String value;
 
-    @XmlEnumValue("APPROVED") APPROVED(String.valueOf("APPROVED")), @XmlEnumValue("CREATED") CREATED(String.valueOf("CREATED"));
-
-
-    private String value;
-
-    WorkflowStatusEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static WorkflowStatusEnum fromValue(String v) {
-        for (WorkflowStatusEnum b : WorkflowStatusEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        WorkflowStatusEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static WorkflowStatusEnum fromValue(String v) {
+            for (WorkflowStatusEnum b : WorkflowStatusEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private WorkflowStatusEnum workflowStatus = null;
     private String createdTime = null;
     private String updatedTime = null;

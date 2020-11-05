@@ -12,13 +12,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class ApplicationTokenDTO   {
   
     private String accessToken = null;
-    private List<String> tokenScopes = new ArrayList<>();
+    private List<String> tokenScopes = new ArrayList<String>();
     private Long validityTime = null;
 
   /**

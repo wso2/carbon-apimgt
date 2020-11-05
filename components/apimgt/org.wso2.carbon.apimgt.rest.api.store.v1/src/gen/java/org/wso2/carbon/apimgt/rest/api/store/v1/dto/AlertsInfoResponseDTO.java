@@ -14,14 +14,15 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class AlertsInfoResponseDTO   {
   
-    private List<AlertDTO> alerts = new ArrayList<>();
-    private List<String> emailList = new ArrayList<>();
-    private List<AlertConfigDTO> failedConfigurations = new ArrayList<>();
+    private List<AlertDTO> alerts = new ArrayList<AlertDTO>();
+    private List<String> emailList = new ArrayList<String>();
+    private List<AlertConfigDTO> failedConfigurations = new ArrayList<AlertConfigDTO>();
 
   /**
    **/

@@ -39,7 +39,7 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all Key Managers", notes = "Get all Key managers ", response = KeyManagerListDTO.class, authorizations = {
+    @ApiOperation(value = "Get All Key Managers", notes = "Get all Key managers ", response = KeyManagerListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })

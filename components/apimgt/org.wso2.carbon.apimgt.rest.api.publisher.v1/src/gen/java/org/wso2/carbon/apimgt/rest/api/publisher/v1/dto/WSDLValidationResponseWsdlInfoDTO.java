@@ -17,13 +17,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 @ApiModel(description = "Summary of the WSDL including the basic information")
 
 public class WSDLValidationResponseWsdlInfoDTO   {
   
     private String version = null;
-    private List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpoints = new ArrayList<>();
+    private List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpoints = new ArrayList<WSDLValidationResponseWsdlInfoEndpointsDTO>();
 
   /**
    * WSDL version 

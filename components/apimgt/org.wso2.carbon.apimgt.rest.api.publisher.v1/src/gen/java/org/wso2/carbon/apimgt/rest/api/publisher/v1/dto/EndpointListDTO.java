@@ -13,13 +13,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class EndpointListDTO   {
   
     private Integer count = null;
-    private List<EndpointDTO> list = new ArrayList<>();
+    private List<EndpointDTO> list = new ArrayList<EndpointDTO>();
 
   /**
    * Number of Endpoints returned. 

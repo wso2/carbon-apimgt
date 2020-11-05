@@ -12,13 +12,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class GraphQLSchemaTypeDTO   {
   
     private String type = null;
-    private List<String> fieldList = new ArrayList<>();
+    private List<String> fieldList = new ArrayList<String>();
 
   /**
    * Type found within the GraphQL Schema 

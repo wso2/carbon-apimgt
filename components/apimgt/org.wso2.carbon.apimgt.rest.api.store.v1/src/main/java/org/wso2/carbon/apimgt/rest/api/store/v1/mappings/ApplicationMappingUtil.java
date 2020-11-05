@@ -192,7 +192,6 @@ public class ApplicationMappingUtil {
         } else if (RestApiConstants.SORT_BY_STATUS.equals(sortBy)) {
             updatedSortBy = APIConstants.APPLICATION_STATUS;
         }
-
         return updatedSortBy;
     }
 

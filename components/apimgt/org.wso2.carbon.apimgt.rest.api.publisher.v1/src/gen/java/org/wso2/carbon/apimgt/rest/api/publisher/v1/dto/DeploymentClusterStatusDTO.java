@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -20,7 +21,7 @@ public class DeploymentClusterStatusDTO   {
   
     private String clusterName = null;
     private Integer podsRunning = null;
-    private List<PodStatusDTO> healthStatus = new ArrayList<>();
+    private List<PodStatusDTO> healthStatus = new ArrayList<PodStatusDTO>();
 
   /**
    **/
