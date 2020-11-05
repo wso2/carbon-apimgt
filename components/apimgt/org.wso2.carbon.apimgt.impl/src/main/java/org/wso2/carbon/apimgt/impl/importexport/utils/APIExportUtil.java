@@ -495,7 +495,7 @@ public class APIExportUtil {
         cleanApiDataToExport(apiToReturn);
         // Get only the subscription tier names of the API, rather than retrieving the whole object array
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiToReturn);
-        Set<String> availableSubscriptionTierNames = APIAndAPIProductCommonUtil.getAvailableTierNamesOfApi(apiTypeWrapper);
+        Set<String> availableSubscriptionTierNames = APIAndAPIProductCommonUtil.getAvailableTierNames(apiTypeWrapper);
 
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();

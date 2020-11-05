@@ -823,6 +823,15 @@ public interface APIProvider extends APIManager {
     void validateAPIThrottlingTier(API api, String tenantDomain) throws APIManagementException;
 
     /**
+     * This method validates the existence of all the API level throttling tiers of API
+     *
+     * @param apiProduct   api product
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException
+     */
+    void validateProductThrottlingTier(APIProduct apiProduct, String tenantDomain) throws APIManagementException;
+
+    /**
      * This method is used to configure monetization for a given API
      *
      * @param api API to be updated with monetization

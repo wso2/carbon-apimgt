@@ -192,6 +192,9 @@ public class ImportApiServiceImpl implements ImportApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError("Requested " + RestApiConstants.RESOURCE_API_PRODUCT
                         + " not found", e, log);
+            } else if (RestApiUtil.isDueToProvidedThrottlingPolicyMissing(e)) {
+                RestApiUtil.handleResourceNotFoundError("Error while adding the throttling policy. " +
+                        "Provided throttling policy cannot be found.", e, log);
             }
             RestApiUtil.handleInternalServerError("Error while importing API Product", e, log);
         }

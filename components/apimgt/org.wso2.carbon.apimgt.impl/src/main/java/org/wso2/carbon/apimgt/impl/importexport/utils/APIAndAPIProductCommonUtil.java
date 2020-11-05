@@ -19,7 +19,13 @@
 package org.wso2.carbon.apimgt.impl.importexport.utils;
 
 import com.google.common.collect.Sets;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.io.FileUtils;
@@ -37,7 +43,11 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -644,9 +654,9 @@ public class APIAndAPIProductCommonUtil {
      * @param apiTypeWrapper API or API Product to be exported
      * @throws APIImportExportException
      */
-    public static Set<String> getAvailableTierNamesOfApi(ApiTypeWrapper apiTypeWrapper) {
+    public static Set<String> getAvailableTierNames(ApiTypeWrapper apiTypeWrapper) {
         Set<String> tiers = new LinkedHashSet<String>();
-        Set<Tier> tiersFromApi = new LinkedHashSet<Tier>();
+        Set<Tier> tiersFromApi;
         if (!apiTypeWrapper.isAPIProduct()) {
             tiersFromApi = apiTypeWrapper.getApi().getAvailableTiers();
         } else {
@@ -705,7 +715,6 @@ public class APIAndAPIProductCommonUtil {
             apiJsonContent.remove(APIConstants.SUBSCRIPTION_TIERS);
             // Add the new tier array to the apiJsonContent
             apiJsonContent.add(APIConstants.SUBSCRIPTION_TIERS, subscriptionTiers);
-            System.out.println(apiJsonContent);
         }
     }
 }
