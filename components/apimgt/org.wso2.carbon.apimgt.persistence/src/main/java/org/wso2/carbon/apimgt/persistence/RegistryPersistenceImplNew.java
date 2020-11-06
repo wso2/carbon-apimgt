@@ -15,8 +15,21 @@
  */
 package org.wso2.carbon.apimgt.persistence;
 
-import java.util.List;
+import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -26,6 +39,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
@@ -52,7 +66,10 @@ import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
@@ -159,8 +176,118 @@ public class RegistryPersistenceImplNew implements APIPersistence {
     
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        
+        //Add default API LC if it is not there
+        try {
+            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
+                                            registryService.getConfigSystemRegistry(tenantId))) {
+                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
+                                                + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
+                File file = new File(defaultLifecyclePath);
+                String content = null;
+                if (file != null && file.exists()) {
+                    content = FileUtils.readFileToString(file);
+                }
+                if (content != null) {
+                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
+                                                    CommonUtil.getRootSystemRegistry(tenantId));
+                }
+            }
+        } catch (RegistryException e) {
+            throw new APIPersistenceException("Error occurred while adding default APILifeCycle.", e);
+        } catch (IOException e) {
+            throw new APIPersistenceException("Error occurred while loading APILifeCycle.xml.", e);
+        } catch (XMLStreamException e) {
+            throw new APIPersistenceException("Error occurred while adding default API LifeCycle.", e);
+        }
+        API api = APIMapper.INSTANCE.toApi(publisherAPI);
+        if (apiGenericArtifactManager == null) {
+            String errorMessage = "Failed to retrieve artifact manager when creating API " + api.getId().getApiName();
+            log.error(errorMessage);
+            throw new APIPersistenceException(errorMessage);
+        }
+        boolean transactionCommitted = false;
+        try {
+            
+            registry.beginTransaction();
+            GenericArtifact genericArtifact =
+                    apiGenericArtifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
+            if (genericArtifact == null) {
+                String errorMessage = "Generic artifact is null when creating API " + api.getId().getApiName();
+                log.error(errorMessage);
+                throw new APIPersistenceException(errorMessage);
+            }
+            GenericArtifact artifact = RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api);
+            apiGenericArtifactManager.addGenericArtifact(artifact);
+            //Attach the API lifecycle
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            String providerPath = RegistryPersistenceUtil.getAPIProviderPath(api.getId());
+            //provider ------provides----> API
+            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
+            Set<String> tagSet = api.getTags();
+            if (tagSet != null) {
+                for (String tag : tagSet) {
+                    registry.applyTag(artifactPath, tag);
+                }
+            }
+            
+            List<Label> candidateLabelsList = api.getGatewayLabels();
+            if (candidateLabelsList != null) {
+                for (Label label : candidateLabelsList) {
+                    artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, label.getName());
+                }
+            }
+
+            String apiStatus = api.getStatus();
+            saveAPIStatus(artifactPath, apiStatus);
+
+            String visibleRolesList = api.getVisibleRoles();
+            String[] visibleRoles = new String[0];
+            if (visibleRolesList != null) {
+                visibleRoles = visibleRolesList.split(",");
+            }
+
+            String publisherAccessControlRoles = api.getAccessControlRoles();
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+                                            api.getAdditionalProperties());
+            RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                                            visibleRoles, artifactPath, registry);
+
+            registry.commitTransaction();
+            api.setUuid(artifact.getId());
+            transactionCommitted = true;
+
+            if (log.isDebugEnabled()) {
+                log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
+                        + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
+            }
+            
+            PublisherAPI returnAPI = APIMapper.INSTANCE.toPublisherApi(api);
+            if (log.isDebugEnabled()) {
+                log.debug("Created API :" + returnAPI.toString());
+            }
+            return returnAPI;
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error here would mask the original exception
+                log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
+            }
+            throw new APIPersistenceException("Error while performing registry transaction operation", e);
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while creating API", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                throw new APIPersistenceException(
+                        "Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
+            }
+        }
     }
 
     @Override
@@ -450,6 +577,83 @@ public class RegistryPersistenceImplNew implements APIPersistence {
     public void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
         // TODO Auto-generated method stub
         
+    }
+    
+    /**
+     * Persist API Status into a property of API Registry resource
+     *
+     * @param artifactId API artifact ID
+     * @param apiStatus  Current status of the API
+     * @throws APIManagementException on error
+     */
+    private void saveAPIStatus(String artifactId, String apiStatus) throws APIManagementException {
+        try {
+            Resource resource = registry.get(artifactId);
+            if (resource != null) {
+                String propValue = resource.getProperty(APIConstants.API_STATUS);
+                if (propValue == null) {
+                    resource.addProperty(APIConstants.API_STATUS, apiStatus);
+                } else {
+                    resource.setProperty(APIConstants.API_STATUS, apiStatus);
+                }
+                registry.put(artifactId, resource);
+            }
+        } catch (RegistryException e) {
+            handleException("Error while adding API", e);
+        }
+    }
+    /**
+     * To add API/Product roles restrictions and add additional properties.
+     *
+     * @param artifactPath                Path of the API/Product artifact.
+     * @param publisherAccessControlRoles Role specified for the publisher access control.
+     * @param publisherAccessControl      Publisher Access Control restriction.
+     * @param additionalProperties        Additional properties that is related with an API/Product.
+     * @throws RegistryException Registry Exception.
+     */
+    private void updateRegistryResources(String artifactPath, String publisherAccessControlRoles,
+                                    String publisherAccessControl, Map<String, String> additionalProperties)
+                                    throws RegistryException {
+        publisherAccessControlRoles = (publisherAccessControlRoles == null || publisherAccessControlRoles.trim()
+                                        .isEmpty()) ? APIConstants.NULL_USER_ROLE_LIST : publisherAccessControlRoles;
+        if (publisherAccessControlRoles.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)) {
+            publisherAccessControl = APIConstants.NO_ACCESS_CONTROL;
+        }
+        if (!registry.resourceExists(artifactPath)) {
+            return;
+        }
+
+        Resource apiResource = registry.get(artifactPath);
+        if (apiResource != null) {
+            if (additionalProperties != null) {
+                // Removing all the properties, before updating new properties.
+                Properties properties = apiResource.getProperties();
+                if (properties != null) {
+                    Enumeration propertyNames = properties.propertyNames();
+                    while (propertyNames.hasMoreElements()) {
+                        String propertyName = (String) propertyNames.nextElement();
+                        if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                            apiResource.removeProperty(propertyName);
+                        }
+                    }
+                }
+            }
+            // We are changing to lowercase, as registry search only supports lower-case characters.
+            apiResource.setProperty(APIConstants.PUBLISHER_ROLES, publisherAccessControlRoles.toLowerCase());
+
+            // This property will be only used for display proposes in the Publisher UI so that the original case of
+            // the roles that were specified can be maintained.
+            apiResource.setProperty(APIConstants.DISPLAY_PUBLISHER_ROLES, publisherAccessControlRoles);
+            apiResource.setProperty(APIConstants.ACCESS_CONTROL, publisherAccessControl);
+            apiResource.removeProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY);
+            if (additionalProperties != null && additionalProperties.size() != 0) {
+                for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+                    apiResource.setProperty((APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + entry.getKey()),
+                                                    entry.getValue());
+                }
+            }
+            registry.put(artifactPath, apiResource);
+        }
     }
 
 }

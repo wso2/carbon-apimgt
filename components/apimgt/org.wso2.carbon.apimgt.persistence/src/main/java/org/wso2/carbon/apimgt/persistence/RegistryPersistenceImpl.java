@@ -1290,7 +1290,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error(errorMessage);
                 throw new APIManagementException(errorMessage);
             }
-            GenericArtifact artifact = RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api);
+            GenericArtifact artifact = null;//RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api); //commented by cka
             apiGenericArtifactManager.addGenericArtifact(artifact);
             //Attach the API lifecycle
             artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);

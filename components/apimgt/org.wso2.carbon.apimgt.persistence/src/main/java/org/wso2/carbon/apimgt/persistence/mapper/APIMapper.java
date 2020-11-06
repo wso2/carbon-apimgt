@@ -27,12 +27,15 @@ import java.util.Set;
 import org.json.simple.JSONObject;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 
+//@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 @Mapper
 public interface APIMapper {
     APIMapper INSTANCE = Mappers.getMapper(APIMapper.class);
@@ -41,12 +44,20 @@ public interface APIMapper {
     @Mapping(source = "apiName", target = "id.apiName")
     @Mapping(source = "version", target = "id.version")
     @Mapping(source = "id", target = "uuid")  
+    @Mapping(source = "thumbnail", target = "thumbnailUrl")
+    @Mapping(source = "availableTierNames", target = "availableTiers")
+    @Mapping(source = "visibleOrganizations", target = "visibleTenants")
+    @Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
     API toApi(PublisherAPI api);
     
     @Mapping(source = "id.providerName", target = "providerName")
     @Mapping(source = "id.apiName", target = "apiName")
     @Mapping(source = "id.version", target = "version")
+    @Mapping(source = "thumbnailUrl", target = "thumbnail")
+    @Mapping(source = "availableTiers", target = "availableTierNames")
     @Mapping(source = "uuid", target = "id")
+    @Mapping(source = "visibleTenants", target = "visibleOrganizations")
+    @Mapping(source = "subscriptionAvailableTenants", target = "subscriptionAvailableOrgs")
     PublisherAPI toPublisherApi(API api);
 
     default List<Label> mapLabelToList(Set<String> labelSet) {
@@ -77,7 +88,7 @@ public interface APIMapper {
         if (accessControlRoles != null) {
             return String.join(",", accessControlRoles);
         } else {
-            return "";
+            return null;
         }
     }
 
@@ -85,7 +96,7 @@ public interface APIMapper {
         if(accessControlRoles != null) {
             return  new HashSet<>(Arrays.asList(accessControlRoles.split(",")));
         } else {
-            return new HashSet<String>();
+            return null;
         }
     }
     
@@ -131,5 +142,26 @@ public interface APIMapper {
         }
         return null;
     }
-}
+    
+    default Set<Tier> mapStringToSet(Set<String> tierSet) {
+        
+        HashSet<Tier> mappedTiers = new HashSet<Tier>();
+        if (tierSet != null) {
+            for (String tierName : tierSet) {
+                mappedTiers.add(new Tier(tierName));
+            }
+        }
+        return mappedTiers;
+    }
 
+    default Set<String> mapTierToSet(Set<Tier> tierSet) {
+        
+        HashSet<String> mappedTiers = new HashSet<String>();
+        if (tierSet != null) {
+            for (Tier tier : tierSet) {
+                mappedTiers.add(tier.getName());
+            }
+        }
+        return mappedTiers;
+    }
+}
