@@ -109,7 +109,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "The unique identifier of the API.")
+  @ApiModelProperty(example = "2962f3bb-8330-438e-baee-0ee1d6434ba4", value = "The unique identifier of the API.")
   @JsonProperty("apiId")
   public String getApiId() {
     return apiId;
@@ -213,7 +213,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "A url and other parameters the subscriber can be redirected.")
+  @ApiModelProperty(example = "", value = "A url and other parameters the subscriber can be redirected.")
   @JsonProperty("redirectionParams")
   public String getRedirectionParams() {
     return redirectionParams;

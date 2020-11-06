@@ -138,7 +138,7 @@ return null;
   }
 
   /**
-   * Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. 
+   * Type of the access token generated for this application.  **OAUTH:** A UUID based access token **JWT:** A self-contained, signed JWT based access token which is issued by default. 
    **/
   public ApplicationDTO tokenType(TokenTypeEnum tokenType) {
     this.tokenType = tokenType;
@@ -146,7 +146,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "JWT", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. ")
+  @ApiModelProperty(example = "JWT", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token **JWT:** A self-contained, signed JWT based access token which is issued by default. ")
   @JsonProperty("tokenType")
   public TokenTypeEnum getTokenType() {
     return tokenType;
@@ -180,7 +180,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "\"\"", value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("groups")
   public List<String> getGroups() {
     return groups;
@@ -231,7 +231,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "\"External Reference ID, Billing Tier\"", value = "")
+  @ApiModelProperty(example = "{}", value = "")
   @JsonProperty("attributes")
   public Map<String, String> getAttributes() {
     return attributes;
@@ -283,7 +283,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "false", value = "")
   @JsonProperty("hashEnabled")
   public Boolean isHashEnabled() {
     return hashEnabled;

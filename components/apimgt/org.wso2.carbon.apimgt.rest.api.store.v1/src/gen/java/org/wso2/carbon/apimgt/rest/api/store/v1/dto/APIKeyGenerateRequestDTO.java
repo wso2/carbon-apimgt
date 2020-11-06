@@ -28,7 +28,7 @@ public class APIKeyGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Token validity period")
+  @ApiModelProperty(example = "3600", value = "Token validity period")
   @JsonProperty("validityPeriod")
   public Integer getValidityPeriod() {
     return validityPeriod;

@@ -35,7 +35,7 @@ public class RatingListDTO   {
   }
 
   
-  @ApiModelProperty(value = "Average Rating of the API ")
+  @ApiModelProperty(example = "4", value = "Average Rating of the API ")
   @JsonProperty("avgRating")
   public String getAvgRating() {
     return avgRating;
@@ -53,7 +53,7 @@ public class RatingListDTO   {
   }
 
   
-  @ApiModelProperty(value = "Rating given by the user ")
+  @ApiModelProperty(example = "4", value = "Rating given by the user ")
   @JsonProperty("userRating")
   public Integer getUserRating() {
     return userRating;

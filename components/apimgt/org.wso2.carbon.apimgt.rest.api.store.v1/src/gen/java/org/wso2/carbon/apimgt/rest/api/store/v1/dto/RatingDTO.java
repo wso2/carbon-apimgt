@@ -29,7 +29,7 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "32acfa7a-77f8-4fe0-bb7f-a902f36546d0", value = "")
   @JsonProperty("ratingId")
   public String getRatingId() {
     return ratingId;
@@ -46,7 +46,7 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "e93fb282-b456-48fc-8981-003fb89086ae", value = "")
   @JsonProperty("apiId")
   public String getApiId() {
     return apiId;
@@ -63,7 +63,7 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("ratedBy")
  @Size(max=50)  public String getRatedBy() {
     return ratedBy;
@@ -80,7 +80,7 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "4", required = true, value = "")
   @JsonProperty("rating")
   @NotNull
   public Integer getRating() {

@@ -71,7 +71,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Key Manager Mapping UUID")
+  @ApiModelProperty(example = "92ab520c-8847-427a-a921-3ed19b15aad7", value = "Key Manager Mapping UUID")
   @JsonProperty("keyMappingId")
   public String getKeyMappingId() {
     return keyMappingId;
@@ -89,7 +89,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Key Manager Name")
+  @ApiModelProperty(example = "Resident Key Manager", value = "Key Manager Name")
   @JsonProperty("keyManager")
   public String getKeyManager() {
     return keyManager;
