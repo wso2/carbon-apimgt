@@ -5500,13 +5500,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void validateProductThrottlingTier(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
         if (log.isDebugEnabled()) {
-            log.debug("Validating apiLevelPolicy defined in the API Product");
+            log.debug("Validating productLevelPolicy defined in the API Product");
         }
         Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
         if (tierMap != null) {
             String apiLevelPolicy = apiProduct.getProductLevelPolicy();
             if (apiLevelPolicy != null && !tierMap.containsKey(apiLevelPolicy)) {
-                String message = "Invalid API level throttling tier " + apiLevelPolicy + " found in api definition";
+                String message = "Invalid Product level throttling tier " + apiLevelPolicy + " found in api definition";
                 throw new APIManagementException(message);
             }
         }

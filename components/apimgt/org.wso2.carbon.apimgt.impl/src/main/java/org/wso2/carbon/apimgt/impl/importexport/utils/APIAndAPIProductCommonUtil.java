@@ -705,7 +705,7 @@ public class APIAndAPIProductCommonUtil {
                     // If any of the tiers from the API does not have a valid match from the tiers available in the
                     // instance, an error will be thrown
                     if (!tierFound) {
-                        String message = "Invalid subscription throttling tier:" + subscriptionTierName.getAsString() +
+                        String message = "Invalid Subscription level throttling tier:" + subscriptionTierName.getAsString() +
                                 " provided.";
                         throw new APIManagementException(message);
                     }

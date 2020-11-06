@@ -274,6 +274,7 @@ public class ImportApiServiceImpl implements ImportApiService {
                 return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
             }
             importExportManager.validateOwner(ownerId, applicationDetails.getGroupId());
+            importExportManager.validateApplicationThrottlingPolicy(applicationDetails);
 
             // check whether we needs to update application or add it
             if (APIUtil.isApplicationExist(ownerId, applicationDetails.getName(), applicationDetails.getGroupId()) && update != null && update) {
@@ -318,6 +319,10 @@ public class ImportApiServiceImpl implements ImportApiService {
         } catch (APIMgtResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Error while importing Application", e, log);
         } catch (APIManagementException | URISyntaxException | UserStoreException e) {
+            if (RestApiUtil.isDueToProvidedThrottlingPolicyMissing(e)) {
+                RestApiUtil.handleResourceNotFoundError("Error while adding the throttling policy. " +
+                        "Provided throttling policy cannot be found.", e, log);
+            }
             RestApiUtil.handleInternalServerError("Error while importing Application", e, log);
         } catch (UnsupportedEncodingException e) {
             String errorMessage = "Error while Decoding apiId";

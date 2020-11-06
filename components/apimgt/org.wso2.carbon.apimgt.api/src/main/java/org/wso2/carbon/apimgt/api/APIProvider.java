@@ -814,7 +814,7 @@ public interface APIProvider extends APIManager {
     void validateResourceThrottlingTiers(String swaggerContent, String tenantDomain) throws APIManagementException;
 
     /**
-     * This method validates the existence of all the API level throttling tiers of API
+     * This method validates the existence of the API level throttling tier of API
      *
      * @param api           api
      * @param tenantDomain  tenant domain
@@ -823,7 +823,7 @@ public interface APIProvider extends APIManager {
     void validateAPIThrottlingTier(API api, String tenantDomain) throws APIManagementException;
 
     /**
-     * This method validates the existence of all the API level throttling tiers of API
+     * This method validates the existence of the API level throttling tier of API
      *
      * @param apiProduct   api product
      * @param tenantDomain tenant domain

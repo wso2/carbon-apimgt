@@ -630,7 +630,9 @@ public class RestApiUtil {
     public static boolean isDueToProvidedThrottlingPolicyMissing(Throwable e) {
         return detailedMessageMatches(e, "Invalid x-throttling tier") ||
                 detailedMessageMatches(e, "Invalid API level throttling tier") ||
-                detailedMessageMatches(e, "Invalid subscription throttling tier");
+                detailedMessageMatches(e, "Invalid Product level throttling tier") ||
+                detailedMessageMatches(e, "Invalid Subscription level throttling tier") ||
+                detailedMessageMatches(e, "Invalid Application level throttling tier") ;
     }
 
     /**
