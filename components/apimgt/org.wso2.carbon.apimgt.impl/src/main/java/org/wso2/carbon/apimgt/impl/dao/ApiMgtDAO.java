@@ -7899,7 +7899,7 @@ public class ApiMgtDAO {
                    String provider = resultSet.getString(1);
                    String name = resultSet.getString(2);
                    String version = resultSet.getString(3);
-                   identifier = new APIIdentifier(provider, name, version);
+                   identifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
                 }
             }
         } catch (SQLException e) {
@@ -7927,7 +7927,7 @@ public class ApiMgtDAO {
                     String provider = resultSet.getString(1);
                     String name = resultSet.getString(2);
                     String version = resultSet.getString(3);
-                    identifier = new APIProductIdentifier(provider, name, version);
+                    identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
                 }
             }
         } catch (SQLException e) {

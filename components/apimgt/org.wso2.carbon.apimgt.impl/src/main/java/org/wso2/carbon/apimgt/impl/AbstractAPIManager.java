@@ -439,6 +439,11 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
 
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
+            WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(identifier, WF_TYPE_AM_API_STATE);
+            if (workflowDTO != null) {
+                WorkflowStatus status = workflowDTO.getStatus();
+                api.setWorkflowStatus(status.toString());
+            }
             APIUtil.updateAPIProductDependencies(api, registry);
 
             //check for API visibility
@@ -489,6 +494,10 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public API getAPIbyUUID(String uuid) throws APIManagementException {
         APIIdentifier identifier = APIUtil.getAPIIdentifierFromUUID(uuid);
+        if(identifier == null) {
+            String msg = "Failed to get API for the UUID " + uuid + " as it does not exist in DB";
+            throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, uuid));
+        }
         API api = getAPI(identifier);
         return api;
     }
@@ -503,12 +512,81 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
             throws APIManagementException {
+        boolean tenantFlowStarted = false;
+        try {
+            Registry registry;
+            if (requestedTenantDomain != null) {
+                int id = getTenantManager().getTenantId(requestedTenantDomain);
+                startTenantFlow(requestedTenantDomain);
+                tenantFlowStarted = true;
+                if (APIConstants.WSO2_ANONYMOUS_USER.equals(this.username)) {
+                    registry = getRegistryService().getGovernanceUserRegistry(this.username, id);
+                } else if (this.tenantDomain != null && !this.tenantDomain.equals(requestedTenantDomain)) {
+                    registry = getRegistryService().getGovernanceSystemRegistry(id);
+                } else {
+                    registry = this.registry;
+                }
+            } else {
+                registry = this.registry;
+            }
 
-        String apiType = apiMgtDAO.getAPITypeFromUUID(uuid);
-        if (APIConstants.API_PRODUCT.equals(apiType)) {
-            return new ApiTypeWrapper(getAPIProductbyUUID(uuid, requestedTenantDomain));
-        } else {
-            return new ApiTypeWrapper(getAPIbyUUID(uuid));
+            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
+                    APIConstants.API_KEY);
+            APIIdentifier identifier = apiMgtDAO.getAPIIdentifierFromUUID(uuid);
+            if(identifier == null) {
+                String msg = "Failed to get API for the UUID " + uuid + " as it does not exist in DB";
+                throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, uuid));
+            }
+            String apiPath = APIUtil.getAPIPath(identifier);
+            Resource apiResource = registry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + apiPath);
+            }
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+            if (apiArtifact != null) {
+               String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+                if (APIConstants.API_PRODUCT.equals(type)) {
+                    APIProduct apiProduct = getApiProduct(registry, apiArtifact);
+                    String productTenantDomain = getTenantDomain(apiProduct.getId());
+                    if (APIConstants.API_GLOBAL_VISIBILITY.equals(apiProduct.getVisibility())) {
+                        return new ApiTypeWrapper(apiProduct);
+                    }
+
+                    if (this.tenantDomain == null || !this.tenantDomain.equals(productTenantDomain)) {
+                        throw new APIManagementException(
+                                "User " + username + " does not have permission to view API Product : " + apiProduct
+                                        .getId().getName());
+                    }
+
+                    return new ApiTypeWrapper(apiProduct);
+
+                } else {
+                    API api = getApiForPublishing(registry, apiArtifact);
+                    String apiTenantDomain = getTenantDomain(api.getId());
+                    if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) {
+                        return new ApiTypeWrapper(api);
+                    }
+
+                    if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
+                        throw new APIManagementException(
+                                "User " + username + " does not have permission to view API : " + api.getId()
+                                        .getApiName());
+                    }
+
+                    return new ApiTypeWrapper(api);
+                }
+            } else {
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get API";
+            throw new APIManagementException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
         }
     }
 
@@ -525,6 +603,10 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public API getLightweightAPIByUUID(String uuid) throws APIManagementException {
         APIIdentifier identifier = APIUtil.getAPIIdentifierFromUUID(uuid);
+        if(identifier == null) {
+            String msg = "Failed to get API for the UUID " + uuid + " as it does not exist in DB";
+            throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, uuid));
+        }
         API api = getLightweightAPI(identifier);
         return api;
     }
