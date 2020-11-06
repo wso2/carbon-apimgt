@@ -102,6 +102,12 @@ public class APIProductImportUtil {
             JsonElement configElement = new JsonParser().parse(jsonContent);
             JsonObject configObject = configElement.getAsJsonObject();
 
+            // Initially, when importing the API Product, it only contains the subscription tier names without the
+            // details. So, by matching with the names, correct subscription tiers with the details should be added
+            // to the API Product before doing further processing.
+            APIAndAPIProductCommonUtil.setSubscriptionTiers(configObject, apiProvider);
+            configElement = configObject;
+
             // Locate the "providerName" within the "id" and set it as the current user
             JsonObject apiProductId = configObject.getAsJsonObject(APIImportExportConstants.ID_ELEMENT);
 
@@ -200,22 +206,11 @@ public class APIProductImportUtil {
                 }
             }
 
-            Set<Tier> allowedTiers;
-            Set<Tier> unsupportedTiersList;
-            allowedTiers = apiProvider.getTiers();
-
-            if (!(allowedTiers.isEmpty())) {
-                unsupportedTiersList = Sets.difference(importedApiProduct.getAvailableTiers(), allowedTiers);
-
-                // If at least one unsupported tier is found, it should be removed before adding API Product
-                if (!(unsupportedTiersList.isEmpty())) {
-                    // Process is continued with a warning and only supported tiers are added to the importer API Product
-                    unsupportedTiersList.forEach(unsupportedTier ->
-                            log.warn("Tier name : " + unsupportedTier.getName() + " is not supported."));
-                    // Remove the unsupported tiers before adding the API Product
-                    importedApiProduct.removeAvailableTiers(unsupportedTiersList);
-                }
+            // Only Product level throttling available for API Products (No resource level throttling)
+            if (importedApiProduct.getProductLevelPolicy() != null) {
+                apiProvider.validateProductThrottlingTier(importedApiProduct, currentTenantDomain);
             }
+
             if (Boolean.FALSE.equals(overwriteAPIProduct)) {
                 // Add API Product in PUBLISHED state
                 Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.addAPIProductWithoutPublishingToGateway(importedApiProduct);
@@ -261,7 +256,7 @@ public class APIProductImportUtil {
                 errorMessage += importedApiProduct.getId().getName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION
                         + ": " + importedApiProduct.getId().getVersion();
             }
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIImportExportException(errorMessage + " " + e.getMessage(), e);
         }
     }
 
@@ -297,6 +292,11 @@ public class APIProductImportUtil {
                 }
                 JsonElement configElement = new JsonParser().parse(jsonContent);
                 JsonObject configObject = configElement.getAsJsonObject();
+
+                // Initially, when importing the API, it only contains the subscription tier names without the
+                // details. So, by matching with the names, correct subscription tiers with the details should be added
+                // to the API before doing further processing.
+                APIAndAPIProductCommonUtil.setSubscriptionTiers(configObject, apiProvider);
 
                 // Locate the "providerName", "apiName" and "apiVersion" within the "id"
                 JsonObject apiId = configObject.getAsJsonObject(APIImportExportConstants.ID_ELEMENT);
@@ -401,6 +401,14 @@ public class APIProductImportUtil {
                     throw new IOException("Cannot find API definition. api.json or api.yaml should present");
                 }
                 JsonElement configElement = new JsonParser().parse(jsonContent);
+                JsonObject configObject = configElement.getAsJsonObject();
+
+                // Initially, when importing the API, it only contains the subscription tier names without the
+                // details. So, by matching with the names, correct subscription tiers with the details should be added
+                // to the API before doing further processing.
+                APIAndAPIProductCommonUtil.setSubscriptionTiers(configElement.getAsJsonObject(), apiProvider);
+                configElement = configObject;
+
                 api = new Gson().fromJson(configElement, API.class);
 
                 swaggerContent = APIAndAPIProductCommonUtil.loadSwaggerFile(apiDirectoryPath);

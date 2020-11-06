@@ -5468,9 +5468,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Validating x-throttling tiers defined in swagger api definition resource");
         }
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        checkResourceThrottlingTiersInURITemplates(uriTemplates, tenantDomain);
+    }
+
+    @Override
+    public void validateResourceThrottlingTiers(String swaggerContent, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating x-throttling tiers defined in swagger api definition resource");
+        }
+        APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
+        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
+        checkResourceThrottlingTiersInURITemplates(uriTemplates, tenantDomain);
+    }
+
+    @Override
+    public void validateAPIThrottlingTier(API api, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating apiLevelPolicy defined in the API");
+        }
         Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
         if (tierMap != null) {
-            Set<URITemplate> uriTemplates = api.getUriTemplates();
+            String apiLevelPolicy = api.getApiLevelPolicy();
+            if (apiLevelPolicy != null && !tierMap.containsKey(apiLevelPolicy)) {
+                String message = "Invalid API level throttling tier " + apiLevelPolicy + " found in api definition";
+                throw new APIManagementException(message);
+            }
+        }
+    }
+
+    @Override
+    public void validateProductThrottlingTier(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating productLevelPolicy defined in the API Product");
+        }
+        Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+        if (tierMap != null) {
+            String apiLevelPolicy = apiProduct.getProductLevelPolicy();
+            if (apiLevelPolicy != null && !tierMap.containsKey(apiLevelPolicy)) {
+                String message = "Invalid Product level throttling tier " + apiLevelPolicy + " found in api definition";
+                throw new APIManagementException(message);
+            }
+        }
+    }
+
+    private void checkResourceThrottlingTiersInURITemplates(Set<URITemplate> uriTemplates, String tenantDomain)
+            throws APIManagementException {
+        Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+        if (tierMap != null) {
             for (URITemplate template : uriTemplates) {
                 if (template.getThrottlingTier() != null && !tierMap.containsKey(template.getThrottlingTier())) {
                     String message = "Invalid x-throttling tier " + template.getThrottlingTier() +

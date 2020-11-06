@@ -1643,6 +1643,8 @@ public final class APIConstants {
     public static final String TIME_UNIT_HOUR = "hour";
     public static final String TIME_UNIT_DAY = "day";
 
+    public static final String SUBSCRIPTION_TIERS = "availableTiers";
+
     public static final String DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN = "50PerMin";
     public static final String DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN = "20PerMin";
     public static final String DEFAULT_APP_POLICY_TEN_REQ_PER_MIN = "10PerMin";
