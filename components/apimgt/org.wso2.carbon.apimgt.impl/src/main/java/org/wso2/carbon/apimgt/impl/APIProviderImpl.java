@@ -804,6 +804,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void addAPI(API api) throws APIManagementException {
+        
+        boolean test = false;
+        if(test) {
+            addAPInew(api);
+            return;
+        }
+               
         validateApiInfo(api);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -882,6 +889,83 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //notify key manager with API addition
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
+    }
+    
+    public void addAPInew(API api) throws APIManagementException{
+        validateApiInfo(api);
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        validateResourceThrottlingTiers(api, tenantDomain);
+        validateKeyManagers(api);
+        
+        if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
+            String errorMessage = "Empty password is given for endpointSecurity when creating API "
+                    + api.getId().getApiName();
+            throw new APIManagementException(errorMessage);
+        }
+        //Validate Transports
+        validateAndSetTransports(api);
+        validateAndSetAPISecurity(api);
+        
+        //add labels
+        validateAndSetLables(api);
+                
+        /**
+         * TODO set wsdl ///////////////////////////////////////
+         */
+
+        try {
+            apiPersistenceInstance.addAPI(new Organization(tenantDomain), APIMapper.INSTANCE.toPublisherApi(api));
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while persisting API ", e);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
+                    + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
+        }
+
+        int tenantId;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            throw new APIManagementException(
+                    "Error in retrieving Tenant Information while adding api :" + api.getId().getApiName(), e);
+        }
+        addAPI(api, tenantId);
+
+        JSONObject apiLogObject = new JSONObject();
+        apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+        apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+        apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.CREATED, this.username);
+
+        if (log.isDebugEnabled()) {
+            log.debug("API details successfully added to the API Manager Database. API Name: " + api.getId()
+                    .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
+                    .getContext());
+        }
+
+        if (APIUtil.isAPIManagementEnabled()) {
+            Cache contextCache = APIUtil.getAPIContextCache();
+            Boolean apiContext = null;
+
+            Object cachedObject = contextCache.get(api.getContext());
+            if (cachedObject != null) {
+                apiContext = Boolean.valueOf(cachedObject.toString());
+            }
+            if (apiContext == null) {
+                contextCache.put(api.getContext(), Boolean.TRUE);
+            }
+        }
+
+        //notify key manager with API addition
+        registerOrUpdateResourceInKeyManager(api, tenantDomain);
+
     }
 
     /**
@@ -2747,6 +2831,52 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("APIProduct " + apiProduct.getId() + " has following enabled protocols : " + apiSecurity);
         }
         apiProduct.setApiSecurity(apiSecurity);
+    }
+    
+    /**
+     * To validate the lables options and set it.
+     *
+     * @param api Relevant API that need to be validated.
+     */
+    private void validateAndSetLables(API api) throws APIManagementException {
+        // get all labels in the tenant
+        List<Label> gatewayLabelList;
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        gatewayLabelList = APIUtil.getAllLabels(tenantDomain);
+        List<Label> filteredLabels = new ArrayList<Label>();
+        // validation is performed here to cover all actions related to API artifact updates
+        if (!gatewayLabelList.isEmpty()) {
+            // put available gateway labels to a list for validation purpose
+            List<String> availableGatewayLabelListNames = new ArrayList<>();
+            for (Label x : gatewayLabelList) {
+                availableGatewayLabelListNames.add(x.getName());
+            }
+
+            // if there are labels attached to the API object, add them to the artifact
+            if (api.getGatewayLabels() != null) {
+                // validate and add each label to the artifact
+                List<Label> candidateLabelsList = api.getGatewayLabels();
+                for (Label label : candidateLabelsList) {
+                    String candidateLabel = label.getName();
+                    // validation step, add the label only if it exists in the available gateway labels
+                    if (availableGatewayLabelListNames.contains(candidateLabel)) {
+                        Label l = new Label();
+                        l.setName(candidateLabel);
+                        filteredLabels.add(l);
+                    } else {
+                        log.warn("Label name : " + candidateLabel + " does not exist in the tenant : " + tenantDomain
+                                + ", hence skipping it.");
+                    }
+                }
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No predefined labels in the tenant : " + tenantDomain + " . Skipped adding all labels");
+            }
+        }
+        api.setGatewayLabels(filteredLabels);
+
     }
 
     private void checkIfValidTransport(String transport) throws APIManagementException {
@@ -9127,7 +9257,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
             
             //templates
-            String id = APIType.API + "-" + apiId.getProviderName() + "-" + apiId.getName() + "-" + apiId.getVersion();
+            String id = APIUtil.getconvertedId(api.getId());
             String resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, id);
             JSONParser jsonParser = new JSONParser();
             JSONObject paths = null;

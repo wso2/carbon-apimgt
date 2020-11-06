@@ -134,6 +134,7 @@ import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
@@ -11754,6 +11755,16 @@ public final class APIUtil {
             return Boolean.parseBoolean(crossTenantSubscriptionProperty);
         }
         return false;
+    }
+
+    public static String getconvertedId(Identifier apiId) {
+        String id = null;
+        if (apiId instanceof APIIdentifier) {
+            id = APIType.API + ":" + apiId.getProviderName() + ":" + apiId.getName() + ":" + apiId.getVersion();
+        } else if (apiId instanceof APIProductIdentifier) {
+            id = APIType.API_PRODUCT + ":" + apiId.getProviderName() + ":" + apiId.getName() + ":" + apiId.getVersion();
+        }
+        return id;
     }
 }
 

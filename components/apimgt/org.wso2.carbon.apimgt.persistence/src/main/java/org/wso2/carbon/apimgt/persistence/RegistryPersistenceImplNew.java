@@ -436,7 +436,7 @@ public class RegistryPersistenceImplNew implements APIPersistence {
             } else {
                 registryType = registry;
             }
-            String[] idArray = apiId.split("-");
+            String[] idArray = apiId.split(":");
             Identifier id;
             if("API".equals(idArray[0])) {
                 id = new APIIdentifier(idArray[1], idArray[2], idArray[3]);

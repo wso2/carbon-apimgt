@@ -1222,12 +1222,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
         String apiTenantDomain = getTenantDomain(apiId);
         String definition = null;
-        String id = null;
-        if (apiId instanceof APIIdentifier) {
-            id = APIType.API + "-" + apiId.getProviderName() + "-" + apiId.getName() + "-" + apiId.getVersion();
-        } else if (apiId instanceof APIProductIdentifier) {
-            id = APIType.API_PRODUCT + "-" + apiId.getProviderName() + "-" + apiId.getName() + "-" + apiId.getVersion();
-        }
+        String id = APIUtil.getconvertedId(apiId);
         try {
             definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), id);
         } catch (OASPersistenceException e) {
