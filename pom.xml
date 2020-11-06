@@ -1894,7 +1894,7 @@
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml3.version>3.3.1</opensaml3.version>
-        <openapi.generator.version>4.3.1.wso2v1</openapi.generator.version>
+        <openapi.generator.version>4.3.1.wso2v2</openapi.generator.version>
         <caffeine.version>2.8.1</caffeine.version>
         <cal10n.version>0.8.1</cal10n.version>
 
