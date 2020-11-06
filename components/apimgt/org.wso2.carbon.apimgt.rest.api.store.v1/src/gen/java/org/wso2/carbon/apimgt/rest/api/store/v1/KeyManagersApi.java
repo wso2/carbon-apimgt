@@ -39,14 +39,14 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all Key Managers", notes = "Get all Key managers ", response = KeyManagerListDTO.class, authorizations = {
+    @ApiOperation(value = "Get All Key Managers", notes = "Get all Key managers ", response = KeyManagerListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Key Managers (Collection)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Categories returned ", response = KeyManagerListDTO.class) })
-    public Response keyManagersGet(@ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+    public Response keyManagersGet(@ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.keyManagersGet(xWSO2Tenant, securityContext);
     }
 }

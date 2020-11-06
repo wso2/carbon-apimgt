@@ -29,7 +29,7 @@ public class CommentDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "943d3002-000c-42d3-a1b9-d6559f8a4d49", value = "")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -46,7 +46,7 @@ public class CommentDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "This is a comment", required = true, value = "")
   @JsonProperty("content")
   @NotNull
  @Size(max=512)  public String getContent() {
@@ -81,7 +81,7 @@ public class CommentDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("createdBy")
   public String getCreatedBy() {
     return createdBy;

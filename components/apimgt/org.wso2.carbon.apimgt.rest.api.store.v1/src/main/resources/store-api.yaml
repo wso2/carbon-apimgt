@@ -19,12 +19,89 @@ swagger: '2.0'
 ######################################################
 info:
   version: "v1.1"
-  title: "WSO2 API Manager - Store"
+  title: "WSO2 API Manager - Developer Portal"
   description: |
-    This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
+    This document specifies a **RESTful API** for WSO2 **API Manager** - **Developer Portal**.
+    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.7.206/components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/src/main/resources/store-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
 
-    It is written with [swagger 2](http://swagger.io/).
+    # Authentication
+    Our REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking
+    the API, you need to obtain an access token with the required scopes. This guide will walk you through the steps
+    that you will need to follow to obtain an access token.
+    First you need to obtain the consumer key/secret key pair by calling the dynamic client registration (DCR) endpoint. You can add your preferred grant types
+    in the payload. A Sample payload is shown below.
+    ```
+      {
+      "callbackUrl":"www.google.lk",
+      "clientName":"rest_api_devportal",
+      "owner":"admin",
+      "grantType":"client_credentials password refresh_token",
+      "saasApp":true
+      }
+    ```
+    Create a file (payload.json) with the above sample payload, and use the cURL shown below to invoke the DCR endpoint. Authorization header of this should contain the
+    base64 encoded admin username and password.
+    **Format of the request**
+    ```
+      curl -X POST -H "Authorization: Basic Base64(admin_username:admin_password)" -H "Content-Type: application/json"
+      \ -d @payload.json https://<host>:<servlet_port>/client-registration/v0.17/register
+    ```
+    **Sample request**
+    ```
+      curl -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json"
+      \ -d @payload.json https://localhost:9443/client-registration/v0.17/register
+    ```
+    Following is a sample response after invoking the above curl.
+    ```
+    {
+    "clientId": "fOCi4vNJ59PpHucC2CAYfYuADdMa",
+    "clientName": "rest_api_store",
+    "callBackURL": "www.google.lk",
+    "clientSecret": "a4FwHlq0iCIKVs2MPIIDnepZnYMa",
+    "isSaasApplication": true,
+    "appOwner": "admin",
+    "jsonString": "{\"grant_types\":\"client_credentials password refresh_token\",\"redirect_uris\":\"www.google.lk\",\"client_name\":\"rest_api_devportal\"}",
+    "jsonAppAttribute": "{}",
+    "tokenType": null
+    }
+    ```
+    Next you must use the above client id and secret to obtain the access token.
+    We will be using the password grant type for this, you can use any grant type you desire.
+    You also need to add the proper **scope** when getting the access token. All possible scopes for devportal REST API can be viewed in **OAuth2 Security** section
+    of this document and scope for each resource is given in **authorization** section of resource documentation.
+    Following is the format of the request if you are using the password grant type.
+    ```
+    curl -k -d "grant_type=password&username=<admin_username>&password=<admin_password>&scope=<scopes separated by space>"
+    \ -H "Authorization: Basic base64(cliet_id:client_secret)"
+    \ https://<host>:<gateway_port>/token
+    ```
+    **Sample request**
+    ```
+    curl https://localhost:8243/token -k \
+    -H "Authorization: Basic Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h" \
+    -d "grant_type=password&username=admin&password=admin&scope=apim:subscribe apim:api_key"
+    ```
+    Shown below is a sample response to the above request.
+    ```
+    {
+    "access_token": "e79bda48-3406-3178-acce-f6e4dbdcbb12",
+    "refresh_token": "a757795d-e69f-38b8-bd85-9aded677a97c",
+    "scope": "apim:subscribe apim:api_key",
+    "token_type": "Bearer",
+    "expires_in": 3600
+    }
+    ```
+    Now you have a valid access token, which you can use to invoke an API.
+    Navigate through the API descriptions to find the required API, obtain an access token as described above and invoke the API with the authentication header.
+    If you use a different authentication mechanism, this process may change.
 
+    # Try out in Postman
+    If you want to try-out the embedded postman collection with "Run in Postman" option, please follow the guidelines listed below.
+    * All of the OAuth2 secured endpoints have been configured with an Authorization Bearer header with a parameterized access token. Before invoking any REST API resource make sure you run the `Register DCR Application` and `Generate Access Token` requests to fetch an access token with all required scopes.
+    * Make sure you have an API Manager instance up and running.
+    * Update the `basepath` parameter to match the hostname and port of the APIM instance.
+
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/5bc0161b8aa7e701d7bf)
   contact:
     name: "WSO2"
     url: "http://wso2.com/products/api-manager/"
@@ -94,13 +171,12 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-curl: "curl https://localhost:9443/api/am/store/v1/apis"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1/apis"
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/apis
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This API provide Account Status Validation.\",\n         \"status\": \"PUBLISHED\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account/1.0.0\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"status\": \"PUBLISHED\",\n         \"name\": \"api1\",\n         \"context\": \"/api1/1.0.0\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"2.0.0\",\n         \"description\": \"Verify a phone number\",\n         \"status\": \"PUBLISHED\",\n         \"name\": \"PhoneVerification\",\n         \"context\": \"/phoneverify/2.0.0\",\n         \"id\": \"c43a325c-260b-4302-81cb-768eafaa3aed\"\n      }\n   ],\n   \"count\": 3,\n   \"next\": \"\"\n}"
       x-examples:
         $ref: docs/examples/apis/apis.yaml#/get
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis"
       summary: |
         Retrieve/Search APIs
       description: |
@@ -108,7 +184,7 @@ paths:
 
         Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
 
-        This operation supports retriving APIs of other tenants. The required tenant domain need to be specified as a header `X-WSO2-Tenant`. If not specified super tenant's APIs will be retrieved. If you used an Authorization header, the user's tenant associated with the access token will be used.
+        This operation supports retrieving APIs of other tenants. The required tenant domain need to be specified as a header `X-WSO2-Tenant`. If not specified super tenant's APIs will be retrieved. If you used an Authorization header, the user's tenant associated with the access token will be used.
 
         **NOTE:**
         * By default, this operation retrieves Published APIs. In order to retrieve Prototyped APIs, you need to use **query** parameter and specify **status:PROTOTYPED**.
@@ -149,11 +225,7 @@ paths:
           schema:
             $ref: '#/definitions/APIList'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "Individual API" resource APIs
@@ -166,17 +238,16 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-curl: "curl https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed"
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"thumbnailUrl\": null,\r\n   \"throttlingPolicies\": [\"Unlimited\"],\r\n   \"businessInformation\":    {\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"businessOwner\": \"Jane Roe\",\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\"\r\n   },\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"},\\\"Content-Type\\\":{\\\"description\\\":\\\"The content type of the body.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.\\\"}}}},\\\"/order/{orderId}\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Get details of an Order\\\",\\\"parameters\\\":[{\\\"description\\\":\\\"Order Id\\\",\\\"name\\\":\\\"orderId\\\",\\\"format\\\":\\\"string\\\",\\\"type\\\":\\\"string\\\",\\\"required\\\":true,\\\"in\\\":\\\"path\\\"}],\\\"responses\\\":{\\\"200\\\":{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"headers\\\":{},\\\"description\\\":\\\"OK Requested Order will be returned\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"endpointURLs\": [   {\r\n      \"environmentName\": \"Production and Sandbox\",\r\n      \"environmentType\": \"hybrid\",\r\n      \"environmentURLs\":       {\r\n         \"http\": \"http://localhost:8280//pizzashack/1.0.0\",\r\n         \"https\": \"https://localhost:8243//pizzashack/1.0.0\"\r\n      }\r\n   }],\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"version\": \"1.0.0\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"provider\": \"admin\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"context\": \"/pizzashack/1.0.0\",\r\n   \"id\": \"8848faaa-7fd1-478a-baa2-48a4ebb92c98\",\r\n   \"status\": \"PUBLISHED\"\r\n}  "
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed"
       summary: |
-        Get details of an API
+        Get Details of an API
       description: |
         Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
 
-        `X-WSO2-Tenant` header can be used to retrive an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+        `X-WSO2-Tenant` header can be used to retrieve an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
 
         **NOTE:**
         * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles. \n
@@ -198,7 +269,7 @@ paths:
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time.
+                Date and time the resource has been modified the last time.
                 Used by caches, or in conditional requests.
               type: string
           schema:
@@ -208,18 +279,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-
+          $ref: '#/responses/NotAcceptable'
 
   /apis/{apiId}/swagger:
     #-----------------------------------------------------
@@ -228,17 +290,16 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger
-      x-wso2-curl: "curl https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"2.0.0\"\n   }\n}\n"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger"
       summary: |
-        Get swagger definition
+        Get Swagger Definition
       description: |
         You can use this operation to retrieve the swagger definition of an API.
 
-         `X-WSO2-Tenant` header can be used to retrive the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+         `X-WSO2-Tenant` header can be used to retrieve the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
 
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
@@ -255,7 +316,7 @@ paths:
         200:
           schema:
             type: string
-            example: ""
+            example: '{ "swagger" : "2.0", "info" : { "version" : "1.0", "title" : "PhoneVerification" }, "host" : "localhost:8243", "basePath" : "/phoneverify/1.0", "schemes" : [ "https", "http" ], "security" : [ { "default" : [ ] } ], "paths" : { "/*" : { "post" : { "consumes" : [ "text/xml", "application/soap+xml" ], "parameters" : [ { "in" : "body", "name" : "SOAP Request", "description" : "SOAP request.", "required" : true, "schema" : { "type" : "string" } }, { "name" : "SOAPAction", "in" : "header", "description" : "SOAPAction header for soap 1.1", "required" : false, "type" : "string" } ], "responses" : { "200" : { "description" : "OK" } }, "security" : [ { "default" : [ ] } ], "x-auth-type" : "Application & Application User", "x-throttling-tier" : "Unlimited" } } }, "securityDefinitions" : { "default" : { "type" : "oauth2", "authorizationUrl" : "https://localhost:8243/authorize", "flow" : "implicit" } } }'
           description: |
             OK.
             Requested swagger document of the API is returned
@@ -274,17 +335,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   /apis/{apiId}/graphql-schema:
     #-----------------------------------------------------
@@ -293,17 +346,16 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/graphql-schema
-      x-wso2-curl: "curl https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/graphql-schema"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"2.0.0\"\n   }\n}\n"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/graphql-schema"
       summary: |
-        Get graphQL definition
+        Get GraphQL Definition
       description: |
         You can use this operation to retrieve the swagger definition of an API.
 
-         `X-WSO2-Tenant` header can be used to retrive the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+         `X-WSO2-Tenant` header can be used to retrieve the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
 
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
@@ -333,17 +385,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   /apis/{apiId}/sdks/{language}:
     #-----------------------------------------------------
@@ -355,15 +399,14 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-      x-wso2-curl: "curl -X GET -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/store/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/sdks/java > Swagger Petstore_java_1.0.0.zip"
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/sdks/java
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-disposition : attachment; filename=\"Swagger Petstore_java_1.0.0.zip\"\nContent-type : application/zip"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/sdks/java" > Swagger Petstore_java_1.0.0.zip
       summary: |
         Generate a SDK for an API
       description: |
-        This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language.
+        This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Developer Portal, for a requested development language.
       parameters:
         - in : path
           name: apiId
@@ -389,23 +432,12 @@ paths:
             type: string
             format: byte
         400:
-          description: |
-            Bad Request.
-            Requested SDK Language is not supported.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         500:
-          description:  |
-            Internal Server Error.
-            Error while generating SDK.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/InternalServerError'
+
   ################################################################
   # The WSDL resource of "Individual API" resource APIs
   ################################################################
@@ -424,6 +456,10 @@ paths:
         - application/zip
       x-examples:
         $ref: docs/examples/apis/wsdl/apiId_wsdl_get.yaml
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/wsdl"
       summary: Get API WSDL definition
       description: |
         This operation can be used to retrieve the swagger definition of an API.
@@ -432,7 +468,7 @@ paths:
         - $ref: '#/parameters/labelName'
         - $ref: '#/parameters/environmentName'
         - $ref: '#/parameters/If-None-Match'
-        - $ref : '#/parameters/requestedTenant'
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - APIs
       responses:
@@ -455,17 +491,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "Document Collection" resource APIs
@@ -478,13 +506,12 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents
-      x-wso2-curl: "curl https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"sourceType\": \"INLINE\",\n         \"sourceUrl\": null,\n         \"otherTypeName\": null,\n         \"documentId\": \"850a4f34-db2c-4d23-9d85-3f95fbfb082c\",\n         \"summary\": \"This is a sample documentation for v1.0\",\n         \"name\": \"PhoneVerification API Documentation\",\n         \"type\": \"HOWTO\"\n      },\n            {\n         \"sourceType\": \"URL\",\n         \"sourceUrl\": \"http://wiki.cdyne.com/index.php/Phone_Verification\",\n         \"otherTypeName\": null,\n         \"documentId\": \"98e18be8-5861-43c7-ba26-8cbbccd3a76f\",\n         \"summary\": \"This is the URL for online documentation\",\n         \"name\": \"Online Documentation\",\n         \"type\": \"SAMPLES\"\n      },\n            {\n         \"sourceType\": \"FILE\",\n         \"sourceUrl\": null,\n         \"otherTypeName\": null,\n         \"documentId\": \"b66451ff-c6c2-4f6a-b91d-3821dc119b04\",\n         \"summary\": \"This is a sample documentation pdf\",\n         \"name\": \"Introduction to PhoneVerification API PDF\",\n         \"type\": \"HOWTO\"\n      }\n   ],\n   \"count\": 3,\n   \"next\": \"\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents"
       summary: |
-        Get a list of documents of an API
+        Get a List of Documents of an API
       description: |
         This operation can be used to retrive a list of documents belonging to an API by providing the id of the API.
 
@@ -517,17 +544,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "Individual Document" resource APIs
@@ -540,13 +559,12 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c
-      x-wso2-curl: "curl \"https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c\""
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"850a4f34-db2c-4d23-9d85-3f95fbfb082c\",\n   \"summary\": \"This is a sample documentation for v1.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c"
       summary: |
-        Get a document of an API
+        Get a Document of an API
       description: |
         This operation can be used to retrieve a particular document's metadata associated with an API.
 
@@ -560,7 +578,7 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Documents
+        - API Documents
       responses:
         200:
           description: |
@@ -579,18 +597,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested Document does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-
+          $ref: '#/responses/NotAcceptable'
 
   ################################################################
   # The content resource of "Individual Document" resource APIs
@@ -604,13 +613,12 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content
-      x-wso2-curl: "curl \"https://localhost:9443/api/am/store/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content\" > sample.pdf"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" \"https://localhost:9443/api/am/store/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content\" > sample.pdf"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Disposition: attachment; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\nContent-Length: 7802\n\n%PDF-1.4\n%äüöß\n2 0 obj\n<</Length 3 0 R/Filter/FlateDecode>>\nstream\n..\n>>\nstartxref\n7279\n%%EOF"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content"
       summary: |
-        Get the content of an API document
+        Get the Content of an API Document
       description: |
         This operation can be used to retrive the content of an API's document.
 
@@ -664,17 +672,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested Document does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ################################################################
   # The thumbnail resource of "Individual API" resource APIs
@@ -687,12 +687,11 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail
-      x-wso2-curl: "curl https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail > image.jpg"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail > image.jpg"
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n[image content]"
-      summary: Get thumbnail image
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail"
+      summary: Get Thumbnail Image
       description: |
         This operation can be used to download a thumbnail image of an API.
 
@@ -731,17 +730,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested Document does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "Ratings Collection" resource APIs
@@ -753,7 +744,11 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      summary: Retrieve API ratings
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings"
+      summary: Retrieve API Ratings
       description: |
         This operation can be used to retrieve the list of ratings of an API.
 
@@ -775,11 +770,7 @@ paths:
           schema:
             $ref: '#/definitions/RatingList'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "Individual User API Rating" resource APIs
@@ -792,7 +783,11 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-      summary: Retrieve API rating of user
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
+      summary: Retrieve API Rating of User
       description: |
         This operation can be used to get the user rating of an API.
 
@@ -828,17 +823,9 @@ paths:
             Not Modified.
             Empty body because the client already has the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested rating does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
     #-----------------------------------------------------
     # Add or update rating
@@ -847,7 +834,11 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-      summary: Add or update logged in user's rating for an API
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -X PUT -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
+      summary: Add or Update Logged in User's Rating for an API
       description: |
         This operation can be used to add or update an API rating.
 
@@ -879,17 +870,9 @@ paths:
                 Entity Tag of the response resource. Used by caches, or in conditional request.
               type: string
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         415:
-          description: |
-            Unsupported media type.
-            The entity of the request was not in a supported format.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/UnsupportedMediaType'
 
     #-----------------------------------------------------
     # Delete user rating
@@ -899,7 +882,11 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-      summary: Delete user API rating
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
+      summary: Delete User API Rating
       description: |
         This operation can be used to delete logged in user API rating.
 
@@ -926,9 +913,13 @@ paths:
     # Retrieve a list of all comments of a certain API
     #-----------------------------------------------------
     get:
-      summary: Retrieve API comments
+      summary: Retrieve API Comments
       security:
         - OAuth2Security: []
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
       description: |
         Get a list of Comments that are already added to APIs
       operationId: getAllCommentsOfAPI
@@ -949,25 +940,22 @@ paths:
           schema:
             $ref: '#/definitions/CommentList'
         401:
-          description: |
-            Unauthorized.
-            The user is not authorized to view the comments.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/Unauthorized'
         406:
-          description: |
-            Not Acceptable. The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
     #-----------------------------------------------------
     # Add a new Comment
     #-----------------------------------------------------
     post:
-      summary: Add an API comment
+      summary: Add an API Comment
       security:
         - OAuth2Security:
             - apim:subscribe
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
       operationId: addCommentToAPI
       parameters:
         - $ref: '#/parameters/apiId'
@@ -1000,25 +988,11 @@ paths:
                 Entity Tag of the response resource. Used by caches, or in conditional request.
               type: string
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         401:
-          description: |
-            Unauthorized.
-            The user is not authorized to add the comment.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/Unauthorized'
         415:
-          description: |
-            Unsupported media type.
-            The entity of the request was in a not supported format.
-          schema:
-            $ref: '#/definitions/Error'
-
-
+          $ref: '#/responses/UnsupportedMediaType'
 
   #########################################################
   # "Individual API comment" resource APIs
@@ -1029,9 +1003,13 @@ paths:
     # Retrieve an individual Comment for a certain API
     #-----------------------------------------------------------------------
     get:
-      summary: Get details of an API comment
+      summary: Get Details of an API Comment
       security:
         - OAuth2Security: []
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
       description: |
         Get the individual comment given by a username for a certain API.
       operationId: getCommentOfAPI
@@ -1067,32 +1045,24 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         401:
-          description: |
-            Unauthorized.
-            The user is not authorized to view the comment.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/Unauthorized'
         404:
-          description: |
-            Not Found.
-            Requested comment does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
     #-----------------------------------------------------
     # Delete a particular Comment
     #-----------------------------------------------------
     delete:
-      summary: Delete an API comment
+      summary: Delete an API Comment
       security:
         - OAuth2Security:
             - apim:subscribe
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
       description: |
         Remove a Comment
       operationId: deleteComment
@@ -1110,17 +1080,9 @@ paths:
             OK.
             Resource successfully deleted.
         401:
-          description: |
-            Unauthorized.
-            The user is not authorized to delete the comment.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/Unauthorized'
         404:
-          description: |
-            Not Found.
-            Resource to be deleted does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
   ######################################################
   # The "API Throttling Policy" resource APIs
@@ -1133,13 +1095,12 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-curl: "curl \"https://localhost:9443/api/am/store/v1//apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1/apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n[{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"stopOnQuotaReach\": true,\n   \"policyLevel\": \"api\",\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}]"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies"
       summary: |
-        Get details of the subscription throttling policies of an API
+        Get Details of the Subscription Throttling Policies of an API
       description: |
         This operation can be used to retrieve details of the subscription throttling policy of an API by specifying the API Id.
 
@@ -1173,17 +1134,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested Throttling Policy does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "Application Collection" resource APIs
@@ -1199,13 +1152,12 @@ paths:
             - apim:subscribe
             - apim:app_manage
             - apim:app_import_export
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/applications
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1/applications\""
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"groupId\": \"\",\n         \"subscriber\": \"admin\",\n         \"throttlingTier\": \"Unlimited\",\n         \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"description\": \"\",\n         \"status\": \"APPROVED\",\n         \"name\": \"app1\"\n      },\n            {\n         \"groupId\": \"\",\n         \"subscriber\": \"admin\",\n         \"throttlingPolicy\": \"Unlimited\",\n         \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n         \"description\": null,\n         \"status\": \"APPROVED\",\n         \"name\": \"DefaultApplication\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/applications"
       summary: |
-        Retrieve/Search applications
+        Retrieve/Search Applications
       description: |
         This operation can be used to retrieve list of applications that is belonged to the user associated with the provided access token.
       parameters:
@@ -1227,8 +1179,7 @@ paths:
           type: string
           enum:
             - name
-            - owner
-            - throttlingTier
+            - throttlingPolicy
             - status
         - name: sortOrder
           in: query
@@ -1260,17 +1211,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
     #-----------------------------------------------------
     # Create a new application
@@ -1280,11 +1223,12 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/store/v1/applications\""
-      x-wso2-request: "POST https://localhost:9443/api/am/store/v1/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingPolicy\": \"Unlimited\",\n    \"description\": \"sample app description\",\n    \"name\": \"sampleapp\",\n    \"callbackUrl\": \"http://my.server.com/callback\"\n \"groupId\": \"org1\"\n}"
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v1/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"subscriber\": \"admin\",\n   \"throttlingPolicy\": \"Unlimited\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications"
       summary: |
-        Create a new application
+        Create a New Application
       description: |
         This operation can be used to create a new application specifying the details of the application in the payload.
       parameters:
@@ -1326,23 +1270,11 @@ paths:
                 Location of the newly created Application.
               type: string
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         409:
-          description: |
-            Conflict.
-            Application already exists.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/Conflict'
         415:
-          description: |
-            Unsupported media type.
-            The entity of the request was in a not supported format.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/UnsupportedMediaType'
 
   ######################################################
   # The "Individual Application" resource APIs
@@ -1357,13 +1289,12 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": \"\",\n   \"callbackUrl\": null,\n   \"subscriber\": \"admin\",\n   \"throttlingPolicy\": \"Unlimited\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"description\": null,\n   \"status\": \"APPROVED\",\n   \"name\": \"DefaultApplication\",\n   \"keys\": [   {\n      \"consumerKey\": \"AVoREWiB16kY_GTIzscl40GYYZQa\",\n      \"consumerSecret\": \"KXQxmS8W3xDvvJH4AfR6xrhKIeIa\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\",\n      \"supportedGrantTypes\": null,\n      \"token\":       {\n         \"validityTime\": 3600,\n         \"accessToken\": \"3887da6d111f0429c6dff47a46e87209\",\n         \"tokenScopes\":          [\n            \"am_application_scope\",\n            \"default\"\n         ]\n      }\n   }]\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015"
       summary: |
-        Get details of an application
+        Get Details of an Application
       description: |
         This operation can be used to retrieve details of an individual application specifying the application id in the URI.
       parameters:
@@ -1393,17 +1324,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested application does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
     #-----------------------------------------------------
     # Update a certain application
@@ -1413,11 +1336,12 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/store/v1/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\""
-      x-wso2-request: "PUT https://localhost:9443/api/am/store/v1/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n   \"callbackUrl\": \"\",\n   \"throttlingPolicy\": \"Bronze\",\n   \"description\": \"sample app description updated\",\n   \"name\": \"sampleapp\",\n    \"groupId\": \"org1\"\n}"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"\",\n   \"subscriber\": \"admin\",\n   \"throttlingPolicy\": \"Bronze\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description updated\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015"
       summary: |
-        Update an application
+        Update an Application
       description: |
         This operation can be used to update an application. Upon succesfull you will retrieve the updated application as the response.
       parameters:
@@ -1454,23 +1378,11 @@ paths:
                 Used by caches, or in conditional requests.
               type: string
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/PreconditionFailed'
 
     #-----------------------------------------------------
     # Delete a certain application
@@ -1481,13 +1393,12 @@ paths:
             - apim:subscribe
             - apim:app_manage
             - apim:app_import_export
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://localhost:9443/api/am/store/v1/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4\""
-      x-wso2-request: |
-        DELETE https://localhost:9443/api/am/store/v1/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X DELETE "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015"
       summary: |
-        Remove an application
+        Remove an Application
       description: |
         This operation can be used to remove an application specifying its id.
       parameters:
@@ -1512,17 +1423,9 @@ paths:
                 Location of the existing Application.
               type: string
         404:
-          description: |
-            Not Found.
-            Resource to be deleted does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/PreconditionFailed'
 
   #######################################################
   # The "Generate Keys" Processing Function resource API
@@ -1533,11 +1436,15 @@ paths:
     # Generate keys for an application
     #-----------------------------------------------------
     post:
-      summary: Generate application keys
+      summary: Generate Application Keys
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/generate-keys"
       description: |
         Generate keys (Consumer key/secret) for application
       parameters:
@@ -1559,24 +1466,11 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKey'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
+          $ref: '#/responses/PreconditionFailed'
 
   ##############################################################
   # The "Map Application Keys" Processing Function resource API
@@ -1587,11 +1481,15 @@ paths:
     # Mapping keys for an application
     #-----------------------------------------------------
     post:
-      summary: Map application keys
+      summary: Map Application Keys
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/map-keys"
       description: |
         Map keys (Consumer key/secret) to an application
       parameters:
@@ -1613,24 +1511,11 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKey'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Application Keys" resource APIs
@@ -1641,11 +1526,16 @@ paths:
     # Get all keys of an application
     #-----------------------------------------------------
     get:
-      summary: Retrieve all application keys
+      deprecated: true
+      summary: Retrieve All Application Keys
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys"
       description: |
         Retrieve keys (Consumer key/secret) of application
       parameters:
@@ -1660,24 +1550,11 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKeyList'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Application Keys of One Type" resource APIs
@@ -1688,17 +1565,17 @@ paths:
     # Get a key of an application by key type
     #-----------------------------------------------------
     get:
+      deprecated: true
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n {\n      \"consumerKey\": \"QwEtRHd4NJkcFuRUfAT5af8XEEoa\",\n      \"consumerSecret\": \"7Fairfeu321ENjOR9w2xgJl3i70a\",\n       \"supportedGrantTypes\": [\n        \"refresh_token\",\n        \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n        \"password\",\n        \"client_credentials\",\n        \"iwa:ntlm\"\n      ],\n      \"callbackUrl\": \"http://sample/com/callback\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"SANDBOX\"}\n"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION"
       summary: |
-        Get key details of a given type
+        Get Key Details of a Given Type
       description: |
         This operation can be used to retrieve key details of an individual application specifying the key type in the URI.
       parameters:
@@ -1715,49 +1592,27 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKey'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/PreconditionFailed'
 
     #--------------------------------------------------------------------
     # Update grant types and callback url of an application
     #--------------------------------------------------------------------
     put:
+      deprecated: true
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/store/v1/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524/keys/SANDBOX\""
-      x-wso2-request: |
-        PUT https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/SANDBOX
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-        {
-           "supportedGrantTypes": [
-             "refresh_token",
-             "urn:ietf:params:oauth:grant-type:saml2-bearer",
-             "password",
-             "client_credentials",
-             "iwa:ntlm"
-           ],
-           "callbackUrl": "http://sample/com/callback"
-         }
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n {\n      \"consumerKey\": \"QwEtRHd4NJkcFuRUfAT5af8XEEoa\",\n      \"consumerSecret\": \"7Fairfeu321ENjOR9w2xgJl3i70a\",\n       \"supportedGrantTypes\": [\n        \"refresh_token\",\n        \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n        \"password\",\n        \"client_credentials\",\n        \"iwa:ntlm\"\n      ],\n      \"callbackUrl\": \"http://sample/com/callback\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\"}\n"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION"
       summary: |
-        Update grant types and callback url of an application
+        Update Grant Types and Callback Url of an Application
       description: |
         This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response.
       parameters:
@@ -1780,24 +1635,11 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKey'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
+          $ref: '#/responses/PreconditionFailed'
 
   ############################################################
   # The "Regenerate Secret" Processing Function resource API
@@ -1808,15 +1650,17 @@ paths:
     # Re generate consumer secret for an application
     #-----------------------------------------------------
     post:
+      deprecated: true
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json  \"https://localhost:9443/api/am/store/v1/applications/regenerate-consumersecret\""
-      x-wso2-request: "POST https://localhost:9443/api/am/store/v1/applications/regenerate-consumersecret\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n  \"consumerKey\": \"AVoREWiB16kY_GTIzscl40GYYZQa\"\n}"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"consumerSecret\": \"8V7DDKtKGtuG_9GDjaOJ5sijdX0a\",\n   \"consumerKey\": \"LOFL8He72MSGVil4SS_bsh9O8MQa\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION/regenerate-secret"
       summary: |
-        Re-generate consumer secret
+        Re-Generate Consumer Secret
       description: |
         This operation can be used to re generate consumer secret for an application for the give key type
       parameters:
@@ -1847,25 +1691,11 @@ paths:
                 Used by caches, or in conditional requests (Will be supported in future).‚
               type: string
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met (Will be supported in future).
-          schema:
-            $ref: '#/definitions/Error'
-
-
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Cleanup" Processing Function resource API
@@ -1876,11 +1706,16 @@ paths:
     # clean up keys after failed key generation of an application
     #-----------------------------------------------------
     post:
+      deprecated: true
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      summary: Clean up application keys
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION/clean-up"
+      summary: Clean-Up Application Keys
       description: |
         Clean up keys after failed key generation of an application
       parameters:
@@ -1895,26 +1730,11 @@ paths:
             OK.
             Clean up is performed
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-
-
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Generate Token" Processing Function resource API
@@ -1925,11 +1745,16 @@ paths:
     # Generate a token for an application
     #-----------------------------------------------------
     post:
+      deprecated: true
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      summary: Generate application token
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/keys/PRODUCTION/generate-token"
+      summary: Generate Application Token
       description: |
         Generate an access token for application by client_credentials grant type
       parameters:
@@ -1953,24 +1778,11 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationToken'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Application Keys" resource APIs
@@ -1981,11 +1793,15 @@ paths:
     # Get all keys of an application
     #-----------------------------------------------------
     get:
-      summary: Retrieve all application keys
+      summary: Retrieve All Application Keys
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys"
       description: |
         Retrieve keys (Consumer key/secret) of application
       parameters:
@@ -2000,24 +1816,11 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKeyList'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Application Keys of One Type" resource APIs
@@ -2032,13 +1835,12 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n {\n      \"consumerKey\": \"QwEtRHd4NJkcFuRUfAT5af8XEEoa\",\n      \"consumerSecret\": \"7Fairfeu321ENjOR9w2xgJl3i70a\",\n       \"supportedGrantTypes\": [\n        \"refresh_token\",\n        \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n        \"password\",\n        \"client_credentials\",\n        \"iwa:ntlm\"\n      ],\n      \"callbackUrl\": \"http://sample/com/callback\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"SANDBOX\"}\n"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"
       summary: |
-        Get key details of a given type
+        Get Key Details of a Given Type
       description: |
         This operation can be used to retrieve key details of an individual application specifying the key type in the URI.
       parameters:
@@ -2055,23 +1857,11 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKey'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/PreconditionFailed'
 
     #--------------------------------------------------------------------
     # Update grant types and callback url of an application
@@ -2081,23 +1871,12 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/store/v1/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524/keys/SANDBOX\""
-      x-wso2-request: |
-        PUT https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/SANDBOX
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-        {
-           "supportedGrantTypes": [
-             "refresh_token",
-             "urn:ietf:params:oauth:grant-type:saml2-bearer",
-             "password",
-             "client_credentials",
-             "iwa:ntlm"
-           ],
-           "callbackUrl": "http://sample/com/callback"
-         }
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n {\n      \"consumerKey\": \"QwEtRHd4NJkcFuRUfAT5af8XEEoa\",\n      \"consumerSecret\": \"7Fairfeu321ENjOR9w2xgJl3i70a\",\n       \"supportedGrantTypes\": [\n        \"refresh_token\",\n        \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n        \"password\",\n        \"client_credentials\",\n        \"iwa:ntlm\"\n      ],\n      \"callbackUrl\": \"http://sample/com/callback\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\"}\n"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"
       summary: |
-        Update grant types and callback url of an application
+        Update Grant Types and Callback URL of an Application
       description: |
         This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response.
       parameters:
@@ -2120,24 +1899,11 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKey'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
+          $ref: '#/responses/PreconditionFailed'
 
   ############################################################
   # The "Regenerate Secret" Processing Function resource API
@@ -2152,11 +1918,12 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json  \"https://localhost:9443/api/am/store/v1/applications/regenerate-consumersecret\""
-      x-wso2-request: "POST https://localhost:9443/api/am/store/v1/applications/regenerate-consumersecret\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n  \"consumerKey\": \"AVoREWiB16kY_GTIzscl40GYYZQa\"\n}"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"consumerSecret\": \"8V7DDKtKGtuG_9GDjaOJ5sijdX0a\",\n   \"consumerKey\": \"LOFL8He72MSGVil4SS_bsh9O8MQa\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/store/v1//applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/regenerate-secret"
       summary: |
-        Re-generate consumer secret
+        Re-Generate Consumer Secret
       description: |
         This operation can be used to re generate consumer secret for an application for the give key type
       parameters:
@@ -2187,25 +1954,11 @@ paths:
                 Used by caches, or in conditional requests (Will be supported in future).‚
               type: string
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met (Will be supported in future).
-          schema:
-            $ref: '#/definitions/Error'
-
-
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Cleanup" Processing Function resource API
@@ -2220,7 +1973,11 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      summary: Clean up application keys
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/clean-up"
+      summary: Clean-Up Application Keys
       description: |
         Clean up keys after failed key generation of an application
       parameters:
@@ -2235,26 +1992,11 @@ paths:
             OK.
             Clean up is performed
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-
-
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Generate Token" Processing Function resource API
@@ -2269,7 +2011,11 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:app_manage
-      summary: Generate application token
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/{keyMappingId}/generate-token"
+      summary: Generate Application Token
       description: |
         Generate an access token for application by client_credentials grant type
       parameters:
@@ -2293,25 +2039,11 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationToken'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Generate API Key" Processing Function resource API
@@ -2327,6 +2059,10 @@ paths:
             - apim:subscribe
             - apim:app_manage
             - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/generate"
       summary: Generate API Key
       description: |
         Generate a self contained API Key for the application
@@ -2350,23 +2086,11 @@ paths:
           schema:
             $ref: '#/definitions/APIKey'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Generate API Key" Processing Function resource API
@@ -2382,6 +2106,10 @@ paths:
             - apim:subscribe
             - apim:app_manage
             - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/revoke"
       summary: Revoke API Key
       description: |
         Revoke a self contained API Key for the application
@@ -2403,17 +2131,9 @@ paths:
             OK.
             apikey revoked successfully.
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The "Subscription Collection" resource APIs
@@ -2428,13 +2148,12 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:sub_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"throttlingPolicy\": \"Bronze\",\n         \"subscriptionId\": \"03b8ef2b-5ae5-41f5-968e-52fa7fbd5d33\",\n         \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n         \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n         \"status\": \"UNBLOCKED\"\n      },\n            {\n         \"throttlingPolicy\": \"Bronze\",\n         \"subscriptionId\": \"5ed42650-9f5e-4dd4-94f3-3f09f1b17354\",\n         \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n         \"applicationId\": \"846118a5-3b25-4c22-a983-2d0278936f09\",\n         \"status\": \"UNBLOCKED\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/subscriptions?apiId=02e658e7-71c7-4b1d-a623-be145b789340"
       summary: |
-        Get all subscriptions
+        Get All Subscriptions
       description: |
         This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
 
@@ -2474,10 +2193,7 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         406:
-          description: |
-            Not Acceptable. The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
     #-----------------------------------------------------
     # Create a new subscription
@@ -2487,11 +2203,12 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:sub_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST  -d @data.json \"https://localhost:9443/api/am/store/v1/subscriptions\""
-      x-wso2-request: "POST https://localhost:9443/api/am/store/v1/subscriptions\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingPolicy\": \"Gold\",\n    \"apiIdentifier\": \"c43a325c-260b-4302-81cb-768eafaa3aed\",\n    \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\"\n}"
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\nContent-Type: application/json\n\n{\n   \"throttlingPolicy\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/subscriptions"
       summary: |
-        Add a new subscription
+        Add a New Subscription
       description: |
         This operation can be used to add a new subscription providing the id of the API and the application.
       parameters:
@@ -2534,11 +2251,7 @@ paths:
                 Location of the newly created subscription.
               type: string
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         415:
           description: |
             Unsupported media type.
@@ -2557,11 +2270,12 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:sub_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST  -d @data.json \"https://localhost:9443/api/am/store/v1/subscriptions/multiple\""
-      x-wso2-request: "POST https://localhost:9443/api/am/store/v1/subscriptions/multiple\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingPolicy\": \"Gold\",\n    \"apiIdentifier\": \"c43a325c-260b-4302-81cb-768eafaa3aed\",\n    \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\"\n}"
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\nContent-Type: application/json\n\n{\n   \"throttlingPolicy\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/subscriptions/multiple"
       summary: |
-        Add new subscriptions
+        Add New Subscriptions
       description: |
         This operation can be used to add a new subscriptions providing the ids of the APIs and the applications.
       parameters:
@@ -2596,11 +2310,7 @@ paths:
                 Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         415:
           description: |
             Unsupported media type.
@@ -2619,13 +2329,12 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:sub_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"throttlingPolicy\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"
       summary: |
-        Get details of a subscription
+        Get Details of a Subscription
       description: |
         This operation can be used to get details of a single subscription.
       parameters:
@@ -2652,25 +2361,22 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         '404':
-          description: |
-            Not Found.
-            Requested Subscription does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
     #-----------------------------------------------------
-# Update existing subscription
-#-----------------------------------------------------
+    # Update existing subscription
+    #-----------------------------------------------------
     put:
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:sub_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT  -d @data.json \"https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\""
-      x-wso2-request: "PUT https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingPolicy\": \"Gold\",\n  \"requestedThrottlingPolicy\": \"Unlimited\",\n    \"apiId\": \"c43a325c-260b-4302-81cb-768eafaa3aed\",\n    \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\"\n    \"status\": \"UNBLOCKED\"\n}"
-      x-wso2-response: "HTTP/1.1 200 Ok\nLocation: https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\nContent-Type: application/json\n\n{\n   \"throttlingPolicy\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/store/v1/subscriptions/80369180-7d90-4ee8-99a1-19fa68512aa5"
       summary: |
-        Update existing subscription
+        Update Existing Subscription
       description: |
         This operation can be used to update a subscription providing the subscription id, api id, application Id, status and updated throttling policy tier.
       parameters:
@@ -2718,11 +2424,7 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
           description: |
             Not Found.
@@ -2740,12 +2442,16 @@ paths:
         - OAuth2Security:
             - apim:subscribe
             - apim:sub_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X DELETE "https://localhost:9443/api/am/store/v1/subscriptions/80369180-7d90-4ee8-99a1-19fa68512aa5"
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\""
       x-wso2-request: |
         DELETE https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: |
-        Remove a subscription
+        Remove a Subscription
       description: |
         This operation can be used to remove a subscription.
       parameters:
@@ -2770,33 +2476,24 @@ paths:
                 Location of the existing subscription.
               type: string
         404:
-          description: |
-            Not Found.
-            Resource to be deleted does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/PreconditionFailed'
 
   ######################################################
   # The get usage billing resource APIs
   ######################################################
   '/subscriptions/{subscriptionId}/usage':
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/store/v1/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage"
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/store/v1/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"object\": \"invoice\",\n   \"account_country\": \"US\",\n   \"account_name\": \"test.com\",\n   \"amount_due\": \"0\",\n   \"amount_paid\": \"0\"\n  \"amount_remaining\": \"0\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9/usage"
       security:
         - OAuth2Security:
             - apim:subscribe
             - apim:sub_manage
-      summary: Get details of a pending invoice for a monetized subscription with metered billing.
+      summary: Get Details of a Pending Invoice for a Monetized Subscription with Metered Billing.
       description: |
         This operation can be used to get details of a pending invoice for a monetized subscription with metered billing.
       parameters:
@@ -2825,11 +2522,7 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         '404':
-          description: |
-            Not Found.
-            Requested Subscription does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
   ######################################################
   # The "Throttling Policy Collection" resource APIs
@@ -2840,9 +2533,13 @@ paths:
     # Retrieve the list of all available throttling Policies for given level
     #-----------------------------------------------------
     get:
-      summary: Get all available throttling policies
+      summary: Get All Available Throttling Policies
       security:
         - OAuth2Security: []
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/throttling-policies/application"
       description: |
         Get available Throttling Policies
       parameters:
@@ -2873,11 +2570,7 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "Individual Throttling Policy" resource APIs
@@ -2890,13 +2583,12 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-curl: "curl \"https://localhost:9443/api/am/store/v1/throttling-policies/api/Bronze\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/throttling-policies/api/Bronze
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1/throttling-policies/api/Bronze"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"stopOnQuotaReach\": true,\n   \"policyLevel\": \"api\",\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/throttling-policies/application/10PerMin"
       summary: |
-        Get details of a throttling policy
+        Get Details of a Throttling Policy
       description: |
         This operation can be used to retrieve details of a single throttling policy by specifying the policy level and policy name.
 
@@ -2931,17 +2623,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found.
-            Requested Throttling Policy does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "Tag Collection" resource API
@@ -2954,13 +2638,12 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-curl: "curl \"https://localhost:9443/api/am/store/v1/tags\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/tags
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1/tags"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"weight\": 1,\n         \"name\": \"mobile\"\n      },\n            {\n         \"weight\": 1,\n         \"name\": \"multimedia\"\n      },\n            {\n         \"weight\": 1,\n         \"name\": \"phone\"\n      }\n   ],\n   \"count\": 3,\n   \"next\": \"\"\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/tags"
       summary: |
-        Get all tags
+        Get All Tags
       description: |
         This operation can be used to retrieve a list of tags that are already added to APIs.
 
@@ -2993,15 +2676,9 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
-          description: |
-            Not Found. Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable. The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "Content Search Results" resource APIs
@@ -3016,13 +2693,12 @@ paths:
         - OAuth2Security: []
       produces:
         - application/json
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/store/v0.13/search?query=sample"
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v0.13/search
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/search?query=PizzaShackAPI"
       summary: |
-        Retrieve/Search APIs and API Documents by content
+        Retrieve/Search APIs and API Documents by Content
       description: |
         This operation provides you a list of available APIs and API Documents qualifying the given keyword match.
 
@@ -3061,11 +2737,7 @@ paths:
             Not Modified.
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "SDK Generation Languages" list resource APIs
@@ -3080,15 +2752,14 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-      x-wso2-curl:  "curl -X GET -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/store/v1/sdk-gen/languages"
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/sdk-gen/languages
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response:  "HTTP/1.1 200 OK\nContent-Type : application/json"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/sdk-gen/languages"
       summary:  |
-        Get a list of supported SDK languages
+        Get a List of Supported SDK Languages
       description:  |
-        This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Store
+        This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Developer Portal
       tags:
         - SDKs
       responses:
@@ -3097,20 +2768,12 @@ paths:
             OK.
             List of supported languages for generating SDKs.
         404:
-          description:  |
-            Not Found.
-            The list of languages is not found.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         500:
-          description:  |
-            Internal Server Error.
-            Error while retrieving the list.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/InternalServerError'
 
   ######################################################
-  # The Store settings List
+  # The Developer Portal settings List
   ######################################################
   /settings:
     #-----------------------------------------------------
@@ -3121,8 +2784,12 @@ paths:
       security:
         - OAuth2Security:
             - apim:store_settings
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/settings"
       description: |
-        Retreive store settings
+        Retreive Store Settings
       tags:
         - Settings
       parameters:
@@ -3135,11 +2802,7 @@ paths:
           schema:
             $ref: '#/definitions/Settings'
         404:
-          description: |
-            Not Found.
-            Requested Settings does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
   ######################################################
   # The "Application Attributes" resource APIs
@@ -3153,13 +2816,12 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1/applications/attributes\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1/settings/attributes
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n[\n {\n \"Description\": \"Sample description of the attribute\",\n \"Required\": true,\n \"Attribute\": \"External Reference Id\",\n \"Hidden\": false\n},\n {\n \"Description\": \"Sample description of the attribute\",\n \"Required\": true,\n \"Attribute\": \"Billing Id\",\n \"Hidden\": true,\n \"Default\": \"xxxx\"\n}\n]"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/settings/application-attributes"
       summary: |
-        Get all application attributes from configuration
+        Get All Application Attributes from Configuration
       description: |
         This operation can be used to retrieve the application attributes from configuration. It will not return hidden attributes.
       parameters:
@@ -3179,17 +2841,9 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationAttributeList'
         404:
-          description: |
-            Not Found.
-            Requested application does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The tenant resource APIs
@@ -3201,10 +2855,14 @@ paths:
     get:
       security:
         - OAuth2Security: []
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/tenants"
       x-examples:
         $ref: docs/examples/tenants/tenants.yaml
       summary: |
-        Get get tenants by state
+        Get Tenants by State
       description: |
         This operation is to get tenants by state
       parameters:
@@ -3224,7 +2882,7 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
       tags:
-        - tenants
+        - Tenants
       responses:
         200:
           description: |
@@ -3238,17 +2896,9 @@ paths:
           schema:
             $ref: '#/definitions/TenantList'
         404:
-          description: |
-            Not Found.
-            Requested application does not exist.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotAcceptable'
 
   ######################################################
   # The "Recommendations" resource API
@@ -3261,8 +2911,12 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/recommendations"
       summary:
-        Give API recommendations for a user
+        Give API Recommendations for a User
       description:
         This API can be used to get recommended APIs for a user who logs into the API store
       tags:
@@ -3280,13 +2934,10 @@ paths:
           schema:
             $ref: '#/definitions/Recommendations'
         404:
-          description: |
-            Recommendations not Found.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
   ####################################################
-  # Store Alerts management REST API
+  # Developer Portal Alerts management REST API
   ####################################################
   '/alert-types':
     #--------------------------------------------------
@@ -3296,11 +2947,15 @@ paths:
       security:
         - OAuth2Security:
             - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/alert-types"
       x-examples:
         $ref: docs/examples/alerts/alerts.yaml#/get
       operationId: getStoreAlertTypes
       summary: |
-        Get the list of API Store alert types.
+        Get the List of API Developer Portal Alert Types.
       description: |
         This operation is used to get the list of supportd alert types for the 'subscriber' agent.
       tags:
@@ -3318,11 +2973,7 @@ paths:
           schema:
             $ref: '#/definitions/AlertTypesList'
         500:
-          description: |
-            Internal Server Error.
-            An internal server error occurred while retrieving the alert types.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/InternalServerError'
 
   '/alert-subscriptions':
     #--------------------------------------------------
@@ -3332,10 +2983,14 @@ paths:
       security:
         - OAuth2Security:
             - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/alert-subscriptions"
       x-examples:
         $ref: docs/examples/alerts/alerts_subscriptions.yaml#/get
       summary: |
-        Get the list of API Store alert types subscribed by the user.
+        Get the List of API Developer Portal Alert Types Subscribed by the User.
       operationId: getSubscribedAlertTypes
       description: |
         This operation is used to get the list of subscribed alert types by the user.
@@ -3354,11 +3009,7 @@ paths:
           schema:
             $ref: '#/definitions/AlertsInfo'
         500:
-          description: |
-            Internal Server Error
-            An error occurred while retrieving subscribed alert types by user.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/InternalServerError'
 
     #--------------------------------------------------
     # Subscribe to the selected alert types by the user.
@@ -3367,13 +3018,17 @@ paths:
       security:
         - OAuth2Security:
             - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/alert-subscriptions"
       x-examples:
         $ref: docs/examples/alerts/alerts_subscriptions.yaml#/put
       summary: |
-        Subscribe to the selected alert types by the user.
+        Subscribe to the Selected Alert Types by the User.
       operationId: subscribeToAlerts
       description: |
-        This operation is used to get the list of subscribed alert types by the user.
+        This operation is used to subscribe to the selected alert types by the user.
       parameters:
         - in: body
           name: body
@@ -3401,11 +3056,7 @@ paths:
             Bad Request.
             Invalid Request or request validation failure.
         500:
-          description: |
-            Internal Server Error
-            An internal server error occurred while subscribing to alerts.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/InternalServerError'
     #--------------------------------------------------
     # Unsubscribe the user from all the alerts types
     #--------------------------------------------------
@@ -3413,10 +3064,14 @@ paths:
       security:
         - OAuth2Security:
             - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/alert-subscriptions"
       x-examples:
         $ref: docs/examples/alerts/alerts_subscriptions.yaml#/delete
       summary: |
-        Unsubscribe user from all the alert types.
+        Unsubscribe User from All the Alert Types.
       operationId: unsubscribeAllAlerts
       description: |
         This operation is used to unsubscribe the respective user from all the alert types.
@@ -3433,10 +3088,7 @@ paths:
                 The content type of the body.
               type: string
         500:
-          description: |
-            Internal Server Error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/InternalServerError'
 
   ##################################################
   # Alert configuration api
@@ -3449,10 +3101,14 @@ paths:
       security:
         - OAuth2Security:
             - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/alerts/AbnormalRequestsPerMin/configurations"
       x-examples:
         $ref: docs/examples/alerts/alerts_config.yaml#/get
       summary: |
-        Get all AbnormalRequestsPerMin alert configurations
+        Get All AbnormalRequestsPerMin Alert Configurations
       operationId: getAllAlertConfigs
       description: |
         This operation is used to get all configurations of the AbnormalRequestsPerMin alert type.
@@ -3473,11 +3129,7 @@ paths:
           schema:
             $ref: '#/definitions/AlertConfigList'
         500:
-          description: |
-            Internal Server Error
-            An error occurred while retrieving subscribed alert types by user.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/InternalServerError'
 
   '/alerts/{alertType}/configurations/{configurationId}':
     #----------------------------------------------
@@ -3487,10 +3139,14 @@ paths:
       security:
         - OAuth2Security:
             - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/alerts/AbnormalRequestsPerMin/configurations/UGV0c3RvcmUjMS4wI0FwcDE"
       x-examples:
         $ref: docs/examples/alerts/alerts_config.yaml#/put
       summary: |
-        Add AbnormalRequestsPerMin alert configurations.
+        Add AbnormalRequestsPerMin Alert Configurations.
       operationId: addAlertConfig
       description: |
         This operation is used to add configuration for the AbnormalRequestsPerMin alert type.
@@ -3520,17 +3176,9 @@ paths:
           schema:
             $ref: '#/definitions/AlertConfig'
         400:
-          description: |
-            Bad Request
-            The request parameters validation failed.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         500:
-          description: |
-            Internal Server Error
-            An error occurred while retrieving subscribed alert types by user.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/InternalServerError'
 
     #----------------------------------------------
     # Delete alert configuration
@@ -3539,10 +3187,14 @@ paths:
       security:
         - OAuth2Security:
             - apim:sub_alert_manage
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/alerts/AbnormalRequestsPerMin/configurations/UGV0c3RvcmUjMS4wI0FwcDE"
       x-examples:
         $ref: docs/examples/alerts/alerts_config.yaml#/delete
       summary: |
-        Delete the selected configuration from AbnormalRequestsPerMin alert type.
+        Delete the Selected Configuration from AbnormalRequestsPerMin Alert Type.
       operationId: deleteAlertConfig
       description: |
         This operation is used to delete configuration from the AbnormalRequestsPerMin alert type.
@@ -3557,23 +3209,11 @@ paths:
             OK.
             The alert config is deleted successfully.
         400:
-          description: |
-            Bad Request
-            The request parameters validation failed.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            The provided alert configuration is not found.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
         500:
-          description: |
-            Internal Server Error
-            An error occurred while retrieving subscribed alert types by user.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/InternalServerError'
 
   ######################################################
   # The "Category" resource API
@@ -3586,11 +3226,11 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1.1/api-categories
-      x-wso2-curl: "curl -k \"https://localhost:9443/api/am/store/v1.1/api-categories\""
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
-      summary: Get all API categories
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/api-categories"
+      summary: Get All API Categories
       description: |
         Get all API categories
       parameters:
@@ -3604,6 +3244,7 @@ paths:
             Categories returned
           schema:
             $ref: '#/definitions/APICategoryList'
+
   ######################################################
   # The "KEY MANAGER" resource API
   ######################################################
@@ -3616,7 +3257,11 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-      summary: Get all Key Managers
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/store/v1/key-managers"
+      summary: Get All Key Managers
       description: |
         Get all Key managers
       parameters:
@@ -3640,9 +3285,13 @@ paths:
     # Retrieve Complexity Info of a given API
     #-----------------------------------------------------
     get:
-      summary: Get the complexity related details of an API
+      summary: Get the Complexity Related Details of an API
       security:
         - OAuth2Security: []
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/graphql-policies/complexity"
       description: |
         This operation can be used to retrieve complexity related details belonging to an API by providing the API id.
       parameters:
@@ -3668,9 +3317,13 @@ paths:
     # Retrieve all types and fields of a GraphQL Schema
     #-----------------------------------------------------
     get:
-      summary: Retrieve types and fields of a GraphQL Schema
+      summary: Retrieve Types and Fields of a GraphQL Schema
       security:
         - OAuth2Security: []
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/graphql-policies/complexity/types"
       description: |
         This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id.
       parameters:
@@ -3708,19 +3361,14 @@ paths:
         - OAuth2Security:
             - apim:subscribe
       operationId: changeUserPassword
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d -d @data.json \"https://localhost:9443/api/am/store/v1/me/change-password\""
-      x-wso2-request: |
-        POST https://localhost:9443/api/am/store/v1/me/change-password
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-        {
-          "currentPassword": "12345",
-          "newPassword": "54321"
-        }
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-code-samples:
+        - lang: Curl
+          source: |-
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/me/change-password"
       summary:
-        Change the password of the user
+        Change the Password of the user
       description: |
-        Using this operation, logged-in user can change his/her password.
+        Using this operation, logged-in user can change their password.
       parameters:
         - in: body
           name: body
@@ -3737,11 +3385,7 @@ paths:
             OK.
             User password changed successfully
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -3755,7 +3399,7 @@ parameters:
     in: header
     description: |
       For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-        retirieved from.
+        retrieved from.
     required: false
     type: string
 
@@ -3879,7 +3523,7 @@ parameters:
     name: policyId
     in: path
     description: |
-      Policy Id represented as a UUID
+      The name of the policy
     required: true
     type: string
 
@@ -4013,6 +3657,115 @@ parameters:
     required: true
     description: |
       The alert configuration id.
+      Base64 encoded value of 'apiName#apiVersion#applicationName'.
+
+######################################################
+# The response schemas used by the API resources
+######################################################
+responses:
+  # Bad Request Error Response Schema
+  BadRequest:
+    description: Bad Request. Invalid request or validation error.
+    schema:
+      $ref: '#/definitions/Error'
+    examples:
+      application/json:
+        code: 400
+        message: "Bad Request"
+        description: "Invalid request or validation error"
+        moreInfo: ""
+        error: []
+
+  # Unauthorized Error Response Schema
+  Unauthorized:
+    description: Unauthorized. The user is not authorized.
+    schema:
+      $ref: '#/definitions/Error'
+    examples:
+      application/json:
+        code: 401
+        message: "Unauthorized"
+        description: "The user is not authorized"
+        moreInfo: ""
+        error: []
+
+  # Not Found Error Response Schema
+  NotFound:
+    description: Not Found. The specified resource does not exist.
+    schema:
+      $ref: '#/definitions/Error'
+    examples:
+      application/json:
+        code: 404
+        message: "Not Found"
+        description: "The specified resource does not exist"
+        moreInfo: ""
+        error: []
+
+  # Not Acceptable Error Response Schema
+  NotAcceptable:
+    description: Not Acceptable. The requested media type is not supported.
+    schema:
+      $ref: '#/definitions/Error'
+    examples:
+      application/json:
+        code: 406
+        message: "Not Acceptable"
+        description: "The requested media type is not supported"
+        moreInfo: ""
+        error: []
+
+  # Conflict Error Response Schema
+  Conflict:
+    description: Conflict. Specified resource already exists.
+    schema:
+      $ref: '#/definitions/Error'
+    examples:
+      application/json:
+        code: 409
+        message: "Conflict"
+        description: "Specified resource already exists"
+        moreInfo: ""
+        error: []
+
+  # Precondition Failed Error Response Schema
+  PreconditionFailed:
+    description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
+    schema:
+      $ref: '#/definitions/Error'
+    examples:
+      application/json:
+        code: 412
+        message: "Precondition Failed"
+        description: "The request has not been performed because one of the preconditions is not met"
+        moreInfo: ""
+        error: []
+
+  # Unsupported Media Type Error Response Schema
+  UnsupportedMediaType:
+    description: Unsupported Media Type. The entity of the request was not in a supported format.
+    schema:
+      $ref: '#/definitions/Error'
+    examples:
+      application/json:
+        code: 415
+        message: "Unsupported media type"
+        description: "The entity of the request was not in a supported format"
+        moreInfo: ""
+        error: []
+
+  # Internal Server Error Response Schema
+  InternalServerError:
+    description: Internal Server Error.
+    schema:
+      $ref: '#/definitions/Error'
+    examples:
+      application/json:
+        code: 500
+        message: "Internal Server Error"
+        description: "The server encountered an internal error. Please contact administrator."
+        moreInfo: ""
+        error: []
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -4067,6 +3820,7 @@ definitions:
   #-----------------------------------------------------
   APIInfo:
     title: API Info object with basic API details.
+    readOnly: true
     properties:
       id:
         type: string
@@ -4189,11 +3943,13 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/APIOperations'
+        example: []
       authorizationHeader:
         type: string
         description: |
           Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
           in tenant or system level will be used.
+        example: "Authorization"
       securityScheme:
         type: array
         description: |
@@ -4201,6 +3957,7 @@ definitions:
           it is not set OAuth2 will be set as the security for the current API.
         items:
           type: string
+        example: ["oauth2", "oauth_basic_auth_api_key_mandatory"]
       tags:
         type: array
         description: Search keywords related to the API
@@ -4414,6 +4171,7 @@ definitions:
       applicationId:
         type: string
         example: 01234567-0123-0123-0123-012345678901
+        readOnly: true
       name:
         type: string
         example: CalculatorApp
@@ -4435,31 +4193,34 @@ definitions:
         description: |
           Type of the access token generated for this application.
 
-          **OAUTH:** A UUID based access token which is issued by default.
-          **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.
+          **OAUTH:** A UUID based access token
+          **JWT:** A self-contained, signed JWT based access token which is issued by default.
         default: JWT
         example: JWT
       status:
         type: string
         example: APPROVED
         default: ""
+        readOnly: true
       groups:
         type: array
         items:
           type: string
-        example: ""
+        example: []
       subscriptionCount:
         type: integer
+        readOnly: true
       keys:
         type: array
         items:
           $ref: '#/definitions/ApplicationKey'
         example: []
+        readOnly: true
       attributes:
         type: object
         additionalProperties:
           type: string
-        example: External Reference ID, Billing Tier
+        example: {}
       subscriptionScopes:
         type: array
         items:
@@ -4470,14 +4231,18 @@ definitions:
           Application created user
         type: string
         example: admin
+        readOnly: true
       hashEnabled:
         type: boolean
+        example: false
+        readOnly: true
 
   #-----------------------------------------------------
   # The Application Info resource
   #-----------------------------------------------------
   ApplicationInfo:
     title: Application info object with basic application details
+    readOnly: true
     properties:
       applicationId:
         type: string
@@ -4709,6 +4474,7 @@ definitions:
         type: string
         description: The UUID of the subscription
         example: faae5fcc-cbae-40c4-bf43-89931630d313
+        readOnly: true
       applicationId:
         type: string
         description: The UUID of the application
@@ -4716,6 +4482,7 @@ definitions:
       apiId:
         type: string
         description: The unique identifier of the API.
+        example: 2962f3bb-8330-438e-baee-0ee1d6434ba4
       apiInfo:
         $ref: '#/definitions/APIInfo'
       applicationInfo:
@@ -4737,9 +4504,10 @@ definitions:
           - TIER_UPDATE_PENDING
         example: UNBLOCKED
       redirectionParams:
+        readOnly: true
         type: string
         description: A url and other parameters the subscriber can be redirected.
-
+        example: ""
 
   #-----------------------------------------------------
   # The Tag resource
@@ -4788,13 +4556,20 @@ definitions:
     properties:
       ratingId:
         type: string
+        readOnly: true
+        example: "32acfa7a-77f8-4fe0-bb7f-a902f36546d0"
       apiId:
         type: string
+        readOnly: true
+        example: "e93fb282-b456-48fc-8981-003fb89086ae"
       ratedBy:
         type: string
+        readOnly: true
+        example: "admin"
         maxLength: 50
       rating:
         type: integer
+        example: 4
 
   #-----------------------------------------------------
   # The Rating List resource
@@ -4806,10 +4581,12 @@ definitions:
         type: string
         description: |
           Average Rating of the API
+        example: 4
       userRating:
         type: integer
         description: |
           Rating given by the user
+        example: 4
       count:
         type: integer
         description: |
@@ -4835,16 +4612,21 @@ definitions:
     properties:
       id:
         type: string
+        readOnly: true
+        example: "943d3002-000c-42d3-a1b9-d6559f8a4d49"
       content:
         type: string
         maxLength: 512
+        example: "This is a comment"
       createdTime:
         type: string
+        readOnly: true
         example: 2017-02-20T13:57:16.229
         format: date-time
       createdBy:
         type: string
-
+        readOnly: true
+        example: "admin"
 
   #-----------------------------------------------------
   # The Comments List resource
@@ -4929,7 +4711,7 @@ definitions:
         items:
           type: string
         description: Valid comma seperated scopes for the access token
-        example: default,read_api,write_api
+        example: ["default", "read_api", "write_api"]
       validityTime:
         type: integer
         format: int64
@@ -4960,16 +4742,21 @@ definitions:
       keyMappingId:
         type: string
         description: Key Manager Mapping UUID
+        readOnly: true
+        example: 92ab520c-8847-427a-a921-3ed19b15aad7
       keyManager:
         type: string
         description: Key Manager Name
+        example: "Resident Key Manager"
       consumerKey:
         type: string
         description: Consumer key of the application
+        readOnly: true
         example: vYDoc9s7IgAFdkSyNDaswBX7ejoa
       consumerSecret:
         type: string
         description: Consumer secret of the application
+        readOnly: true
         example: TIDlOFkpzB7WjufO3OJUhy1fsvAa
       supportedGrantTypes:
         type: array
@@ -5050,14 +4837,17 @@ definitions:
       keyManager:
         type: string
         description: key Manager to Generate Keys
+        example: "Resident Key Manager"
       grantTypesToBeSupported:
         type: array
         items:
           type: string
         description: Grant types that should be supported by the application
+        example: ["password", "client_credentials"]
       callbackUrl:
         type: string
         description: Callback URL
+        example: "http://sample.com/callback/url"
       scopes:
         type: array
         items:
@@ -5070,15 +4860,17 @@ definitions:
       clientId:
         type: string
         description: Client ID for generating access token.
-        example: ""
+        readOnly: true
+        example: "sZzoeSCI_vL2cjSXZQmsmV8JEyga"
       clientSecret:
         type: string
         description: Client secret for generating access token. This is given together with the client Id.
-        example: ""
+        readOnly: true
+        example: "nrs3YAP4htxnz_DqpvGhf9Um04oa"
       additionalProperties:
         type: object
         description: Additional properties needed.
-        example: ""
+        example: {}
 
   #-----------------------------------------------------
   # The Application Key Mapping Request schema
@@ -5092,12 +4884,15 @@ definitions:
       consumerKey:
         type: string
         description: Consumer key of the application
+        example: "oYhwZu4P2ThDmiDprBk6c0YfjR8a"
       consumerSecret:
         type: string
         description: Consumer secret of the application
+        example: "ondWGtFTCOVM4sfPyOfZ7fel610a"
       keyManager:
         type: string
         description: Key Manager Name
+        example: "Resident Key Manager"
       keyType:
         type: string
         enum:
@@ -5113,18 +4908,22 @@ definitions:
       consumerSecret:
         type: string
         description: Consumer secret of the application
+        example: cV5pvyisxug5b5QZInq9cGZrMOMa
       validityPeriod:
         type: integer
         format: int64
         description: Token validity period
+        example: 3600
       scopes:
         type: array
         items:
           type: string
         description: Allowed scopes (space seperated) for the access token
+        example: ["apim:subscribe"]
       revokeToken:
         type: string
         description: Token to be revoked, if any
+        example: ""
       additionalProperties:
         type: object
         description: Additional parameters if Authorization server needs any
@@ -5139,6 +4938,7 @@ definitions:
         type: integer
         format: int32
         description: Token validity period
+        example: 3600
       additionalProperties:
         type: object
         description: Additional parameters if Authorization server needs any
@@ -5152,6 +4952,7 @@ definitions:
       apikey:
         type: string
         description: API Key to revoke
+        example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
 
   #-----------------------------------------------------
   # Scope Info resource
@@ -5452,11 +5253,13 @@ definitions:
         description: |
           Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
+          example: ""
       previous:
         type: string
         description: |
           Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
+          example: ""
 
   #-----------------------------------------------------
   # The settings resource
@@ -5503,9 +5306,11 @@ definitions:
       userStorePasswordPattern:
         type: string
         description: The 'PasswordJavaRegEx' cofigured in the UserStoreManager
+        example: ""
       passwordPolicyPattern:
         type: string
         description:  The regex configured in the Password Policy property 'passwordPolicy.pattern'
+        example: ""
       passwordPolicyMinLength:
         type: integer
         description: If Password Policy Feature is enabled, the property 'passwordPolicy.min.length' is returned as the
@@ -5641,7 +5446,7 @@ definitions:
       id:
         type: integer
         description: The alert Id
-        example: 1
+        example: 3
       name:
         type: string
         description: The name of the alert.
@@ -5684,6 +5489,7 @@ definitions:
         type: array
         items:
           type: string
+        example: ["abc@gmail.com"]
 
   #-----------------------------------------------
   # The Alert Info Response resource definition.
@@ -5699,6 +5505,7 @@ definitions:
         type: array
         items:
           type: string
+        example: ["abc@gmail.com"]
       failedConfigurations:
         type: array
         items:
@@ -5737,7 +5544,7 @@ definitions:
           apiName: 'PizzaShackAPI'
           apiVersion: '1.0.0'
           applicationName: 'DefaultApplication'
-          requestConunt: '12'
+          requestCount: '12'
 
   #-----------------------------------------------
   # The Alert Config Info resource definition.
@@ -5752,7 +5559,7 @@ definitions:
       apiName: 'PizzaShackAPI'
       apiVersion: '1.0.0'
       applicationName: 'DefaultApplication'
-      requestConunt: '12'
+      requestCount: '12'
 
   #-----------------------------------------------------
   # The Category resource
@@ -5835,18 +5642,18 @@ definitions:
         example: "01234567-0123-0123-0123-012345678901"
       name:
         type: string
-        example: "WSO2 IS"
+        example: "Resident Key Manager"
       type:
         type: string
-        example: "IS"
+        example: "default"
       displayName:
         type: string
         description: |
           display name of Keymanager
-        example: Keymanager1
+        example: "Resident Key Manager"
       description:
         type: string
-        example: "This is a key manager for Developers"
+        example: "This is Resident Key Manager"
       enabled:
         type: boolean
         example: true
@@ -5857,10 +5664,13 @@ definitions:
           example: "client_credentials"
       tokenEndpoint:
         type: string
+        example: "https://localhost:9443/oauth2/token"
       revokeEndpoint:
         type: string
+        example: "https://localhost:9443/oauth2/revoke"
       userInfoEndpoint:
         type: string
+        example: ""
       enableTokenGeneration:
         type: boolean
         example: true
