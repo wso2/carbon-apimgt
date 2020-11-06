@@ -15,6 +15,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 
 
 public class SubscriptionDTO   {
@@ -86,6 +88,7 @@ return null;
 
   
   @ApiModelProperty(required = true, value = "")
+      @Valid
   @JsonProperty("applicationInfo")
   @NotNull
   public ApplicationInfoDTO getApplicationInfo() {

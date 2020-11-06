@@ -91,7 +91,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: v1.1
 servers:
-- url: https://apis.wso2.com/api/am/publisher/v1
+- url: https://localhost:9443/api/am/publisher/v1
 - url: http://apis.wso2.com/api/am/publisher/v1
 security:
 - OAuth2Security:
@@ -10240,9 +10240,7 @@ components:
           items:
             type: string
         businessInformation:
-          type: object
-          allOf:
-          - $ref: '#/components/schemas/APIBusinessInformation'
+          $ref: '#/components/schemas/APIBusinessInformation'
           x-otherScopes:
           - apim:api_publish
         corsConfiguration:
@@ -11380,6 +11378,7 @@ components:
         businessOwnerEmail:
           type: string
           example: businessowner@wso2.com
+          pattern: '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$'
         technicalOwner:
           maxLength: 120
           type: string

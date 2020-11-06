@@ -18,6 +18,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 
 
 public class LifecycleStateDTO   {
@@ -52,6 +54,7 @@ public class LifecycleStateDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("checkItems")
   public List<LifecycleStateCheckItemsDTO> getCheckItems() {
     return checkItems;
@@ -69,6 +72,7 @@ public class LifecycleStateDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("availableTransitions")
   public List<LifecycleStateAvailableTransitionsDTO> getAvailableTransitions() {
     return availableTransitions;

@@ -21,6 +21,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 @ApiModel(description = "Representation of a list of client certificates")
 
 public class ClientCertificatesDTO   {
@@ -55,6 +57,7 @@ public class ClientCertificatesDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("certificates")
   public List<ClientCertMetadataDTO> getCertificates() {
     return certificates;
@@ -72,6 +75,7 @@ public class ClientCertificatesDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("pagination")
   public PaginationDTO getPagination() {
     return pagination;

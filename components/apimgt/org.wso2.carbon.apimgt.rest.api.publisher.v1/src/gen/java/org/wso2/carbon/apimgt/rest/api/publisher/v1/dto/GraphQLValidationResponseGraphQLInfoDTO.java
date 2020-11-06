@@ -21,6 +21,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 @ApiModel(description = "Summary of the GraphQL including the basic information")
 
 public class GraphQLValidationResponseGraphQLInfoDTO   {
@@ -37,6 +39,7 @@ public class GraphQLValidationResponseGraphQLInfoDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("operations")
   public List<APIOperationsDTO> getOperations() {
     return operations;
@@ -54,6 +57,7 @@ public class GraphQLValidationResponseGraphQLInfoDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("graphQLSchema")
   public GraphQLSchemaDTO getGraphQLSchema() {
     return graphQLSchema;

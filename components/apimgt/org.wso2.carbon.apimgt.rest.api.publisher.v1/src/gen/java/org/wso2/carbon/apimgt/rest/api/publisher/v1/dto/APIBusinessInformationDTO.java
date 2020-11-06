@@ -14,6 +14,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 
 
 public class APIBusinessInformationDTO   {
@@ -50,7 +52,7 @@ public class APIBusinessInformationDTO   {
   
   @ApiModelProperty(example = "businessowner@wso2.com", value = "")
   @JsonProperty("businessOwnerEmail")
-  public String getBusinessOwnerEmail() {
+ @Pattern(regexp="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$")  public String getBusinessOwnerEmail() {
     return businessOwnerEmail;
   }
   public void setBusinessOwnerEmail(String businessOwnerEmail) {

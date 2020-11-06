@@ -20,6 +20,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 @ApiModel(description = "Summary of the WSDL including the basic information")
 
 public class WSDLValidationResponseWsdlInfoDTO   {
@@ -55,6 +57,7 @@ public class WSDLValidationResponseWsdlInfoDTO   {
 
   
   @ApiModelProperty(value = "A list of endpoints the service exposes ")
+      @Valid
   @JsonProperty("endpoints")
   public List<WSDLValidationResponseWsdlInfoEndpointsDTO> getEndpoints() {
     return endpoints;

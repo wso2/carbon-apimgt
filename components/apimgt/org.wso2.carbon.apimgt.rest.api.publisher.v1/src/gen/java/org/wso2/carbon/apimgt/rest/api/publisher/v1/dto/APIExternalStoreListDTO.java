@@ -17,6 +17,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 
 
 public class APIExternalStoreListDTO   {
@@ -51,6 +53,7 @@ public class APIExternalStoreListDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("list")
   public List<APIExternalStoreDTO> getList() {
     return list;

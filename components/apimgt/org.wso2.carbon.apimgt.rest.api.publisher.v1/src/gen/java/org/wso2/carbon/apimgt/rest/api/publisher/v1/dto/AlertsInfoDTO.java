@@ -17,6 +17,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 
 
 public class AlertsInfoDTO   {
@@ -33,6 +35,7 @@ public class AlertsInfoDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("alerts")
   public List<AlertDTO> getAlerts() {
     return alerts;

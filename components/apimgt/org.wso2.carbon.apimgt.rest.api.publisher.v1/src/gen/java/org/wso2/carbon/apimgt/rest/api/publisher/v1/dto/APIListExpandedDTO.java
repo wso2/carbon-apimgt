@@ -18,6 +18,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 
 
 public class APIListExpandedDTO   {
@@ -53,6 +55,7 @@ public class APIListExpandedDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("list")
   public List<APIDTO> getList() {
     return list;
@@ -70,6 +73,7 @@ public class APIListExpandedDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("pagination")
   public PaginationDTO getPagination() {
     return pagination;

@@ -18,6 +18,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 
 
 public class WSDLValidationResponseDTO   {
@@ -55,6 +57,7 @@ public class WSDLValidationResponseDTO   {
 
   
   @ApiModelProperty(value = "If there are more than one error list them out. For example, list out validation errors by each field. ")
+      @Valid
   @JsonProperty("errors")
   public List<ErrorListItemDTO> getErrors() {
     return errors;
@@ -72,6 +75,7 @@ public class WSDLValidationResponseDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("wsdlInfo")
   public WSDLValidationResponseWsdlInfoDTO getWsdlInfo() {
     return wsdlInfo;

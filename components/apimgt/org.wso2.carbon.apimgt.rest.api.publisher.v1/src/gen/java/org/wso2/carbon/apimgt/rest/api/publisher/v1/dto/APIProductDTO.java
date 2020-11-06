@@ -23,6 +23,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 
 
 public class APIProductDTO   {
@@ -725,6 +727,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("monetization")
   public APIMonetizationInfoDTO getMonetization() {
     return monetization;
@@ -742,6 +745,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("businessInformation")
   public APIProductBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
@@ -759,6 +763,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("corsConfiguration")
   public APICorsConfigurationDTO getCorsConfiguration() {
     return corsConfiguration;
@@ -811,6 +816,7 @@ return null;
 
   
   @ApiModelProperty(example = "[{\"name\":\"PizzaShackAPI\",\"apiId\":\"01234567-0123-0123-0123-012345678901\",\"version\":\"1.0\",\"operations\":[{\"target\":\"/order/{orderId}\",\"verb\":\"POST\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"},{\"target\":\"/menu\",\"verb\":\"GET\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"}]}]", value = "APIs and resources in the API Product. ")
+      @Valid
   @JsonProperty("apis")
   public List<ProductAPIDTO> getApis() {
     return apis;
@@ -828,6 +834,7 @@ return null;
 
   
   @ApiModelProperty(example = "[]", value = "")
+      @Valid
   @JsonProperty("scopes")
   public List<APIScopeDTO> getScopes() {
     return scopes;

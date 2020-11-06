@@ -451,26 +451,38 @@ public class OAS3Parser extends APIDefinition {
         OAuthFlows oAuthFlows;
         OAuthFlow oAuthFlow;
         Scopes scopes;
-        if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null
-                && (securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null
-                && (oAuthFlows = securityScheme.getFlows()) != null
-                && (oAuthFlow = oAuthFlows.getImplicit()) != null
-                && (scopes = oAuthFlow.getScopes()) != null) {
+        if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes())
+                != null) {
             Set<Scope> scopeSet = new HashSet<>();
-            for (Map.Entry<String, String> entry : scopes.entrySet()) {
-                Scope scope = new Scope();
-                scope.setKey(entry.getKey());
-                scope.setName(entry.getKey());
-                scope.setDescription(entry.getValue());
-                Map<String, String> scopeBindings;
-                if (oAuthFlow.getExtensions() != null && (scopeBindings =
-                        (Map<String, String>) oAuthFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
-                        != null) {
-                    if (scopeBindings.get(scope.getKey()) != null) {
-                        scope.setRoles(scopeBindings.get(scope.getKey()));
+            if  ((securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null &&
+                    (oAuthFlows = securityScheme.getFlows()) != null && (oAuthFlow = oAuthFlows.getImplicit()) != null
+                    && (scopes = oAuthFlow.getScopes()) != null) {
+                for (Map.Entry<String, String> entry : scopes.entrySet()) {
+                    Scope scope = new Scope();
+                    scope.setKey(entry.getKey());
+                    scope.setName(entry.getKey());
+                    scope.setDescription(entry.getValue());
+                    Map<String, String> scopeBindings;
+                    if (oAuthFlow.getExtensions() != null && (scopeBindings =
+                            (Map<String, String>) oAuthFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
+                            != null) {
+                        if (scopeBindings.get(scope.getKey()) != null) {
+                            scope.setRoles(scopeBindings.get(scope.getKey()));
+                        }
                     }
+                    scopeSet.add(scope);
                 }
-                scopeSet.add(scope);
+            } else if ((securityScheme = securitySchemes.get("OAuth2Security")) != null &&
+                    (oAuthFlows = securityScheme.getFlows()) != null && (oAuthFlow = oAuthFlows.getPassword()) != null
+                    && (scopes = oAuthFlow.getScopes()) != null) {
+                for (Map.Entry<String, String> entry : scopes.entrySet()) {
+                    Scope scope = new Scope();
+                    scope.setKey(entry.getKey());
+                    scope.setName(entry.getKey());
+                    scope.setDescription(entry.getValue());
+                    Map<String, String> scopeBindings;
+                    scopeSet.add(scope);
+                }
             }
             return OASParserUtil.sortScopes(scopeSet);
         } else {

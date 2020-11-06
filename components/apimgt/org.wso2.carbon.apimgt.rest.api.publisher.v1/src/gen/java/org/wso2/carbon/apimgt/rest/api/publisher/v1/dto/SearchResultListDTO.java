@@ -17,6 +17,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 
 
 public class SearchResultListDTO   {
@@ -69,6 +71,7 @@ public class SearchResultListDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("pagination")
   public PaginationDTO getPagination() {
     return pagination;
