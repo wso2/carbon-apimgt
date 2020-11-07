@@ -2737,6 +2737,46 @@ class API extends Resource {
         });
         return promise_create;
     }
+
+    /**
+     * Get the swagger of an API
+     * @param id {String} UUID of the API in which the AsyncAPI definition is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise
+     */
+    getAsyncAPIDefinition(id = this.id, callback = null) {
+        const promise_get = this.client.then(client => {
+            return client.apis['APIs'].get_apis__apiId__asyncapi(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promise_get;
+    }
+
+    /**
+     * Update an api via PUT HTTP method, Need to gie the updated API object as the arguement.
+     * @param api {Object} Updated API object(JSON) which needs to be updated
+     */
+    updateAsyncAPIDefinition(asyncAPI) {
+        const promised_update = this.client.then(client => {
+            const payload = {
+                apiId: this.id,
+                apiDefinition: JSON.stringify(asyncAPI),
+                'Content-Type': 'multipart/form-data'
+            };
+            return client.apis['APIs'].put_apis__apiId__asyncapi(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+        });
+        return promised_update;
+    }
+
 }
 
 

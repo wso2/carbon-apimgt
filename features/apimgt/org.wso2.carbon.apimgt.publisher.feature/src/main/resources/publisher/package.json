@@ -20,6 +20,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@hapi/hapi": "^18.4.1",
+        "@kyma-project/asyncapi-react": "^0.14.2",
         "@material-ui/core": "^v4.11.0",
         "@material-ui/icons": "^v4.9.1",
         "async-mutex": "^0.1.3",

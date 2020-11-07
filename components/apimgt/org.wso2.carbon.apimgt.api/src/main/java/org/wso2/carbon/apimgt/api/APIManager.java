@@ -812,4 +812,14 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @return AsyncAPI string
+     * @throws APIManagementException
+     */
+    String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException;
+
 }

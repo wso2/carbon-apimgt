@@ -67,6 +67,7 @@ export default function ProvideAsyncAPI(props) {
     // If valid value is `null`,that means valid, else an error object will be there
     const [isValid, setValidity] = useState({});
     const [isValidating, setIsValidating] = useState(false);
+    const [validationErrors, setValidationErrors] = useState([]);
 
     /**
      *
@@ -84,14 +85,16 @@ export default function ProvideAsyncAPI(props) {
         API.validateAsyncAPIByFile(file)
             .then((response) => {
                 const {
-                    body: { isValid: isValidFile, info },
+                    body: { isValid: isValidFile, info, errors },
                 } = response;
                 if (isValidFile) {
                     validFile = file;
                     inputsDispatcher({ action: 'preSetAPI', value: info });
                     setValidity({ ...isValid, file: null });
                 } else {
-                    setValidity({ ...isValid, file: { message: 'AsyncAPI content validation failed!' } });
+                    // eslint-disable-next-line max-len
+                    setValidity({ ...isValid, file: { message: 'AsyncAPI content validation failed! ' } });
+                    setValidationErrors(errors);
                 }
             })
             .catch((error) => {
@@ -118,7 +121,9 @@ export default function ProvideAsyncAPI(props) {
             setIsValidating(true);
             API.validateAsyncAPIByUrl(apiInputs.inputValue, { returnContent: true }).then((response) => {
                 const {
-                    body: { isValid: isValidURL, info, content },
+                    body: {
+                        isValid: isValidURL, info, content, errors,
+                    },
                 } = response;
                 if (isValidURL) {
                     info.content = content;
@@ -126,6 +131,7 @@ export default function ProvideAsyncAPI(props) {
                     setValidity({ ...isValid, url: null });
                 } else {
                     setValidity({ ...isValid, url: { message: 'AsyncAPI content validation failed!' } });
+                    setValidationErrors(errors);
                 }
                 onValidate(isValidURL);
                 setIsValidating(false);
@@ -206,7 +212,7 @@ export default function ProvideAsyncAPI(props) {
                             <FormControlLabel
                                 value={ProvideAsyncAPI.INPUT_TYPES.FILE}
                                 control={<Radio color='primary' />}
-                                label='AsyncAPI File/Archive'
+                                label='AsyncAPI File'
                             />
                         </RadioGroup>
                     </FormControl>
@@ -221,6 +227,7 @@ export default function ProvideAsyncAPI(props) {
                             paperProps={{ elevation: 1 }}
                             type='error'
                             message={isValid.file.message}
+                            errors={validationErrors}
                         />
                     </Grid>
                 )}
@@ -264,8 +271,9 @@ export default function ProvideAsyncAPI(props) {
                                         : ([
                                             <FormattedMessage
                                                 id='Apis.Create.AsyncAPI.Steps.ProvideAsyncAPI.Input.file.dropzone'
-                                                defaultMessage={'Drag & Drop Async API File/Archive '
+                                                defaultMessage={'Drag & Drop AsyncAPI File '
                                                 + 'here {break} or {break} Browse files'}
+
                                                 values={{ break: <br /> }}
                                             />,
                                             <Button

@@ -618,6 +618,146 @@ paths:
             $ref: '#/definitions/Error'
 
   ################################################################
+  # AsyncAPI specification management for 'Individual APIs'
+  ################################################################
+
+  /apis/{apiId}/asyncapi:
+    #-----------------------------------------------------
+    #Retrieve the API's AsyncAPI definition
+    #-----------------------------------------------------
+    get:
+      summary: Get AsyncAPI definition
+      description: |
+        This operation can be used to retrieve the AsyncAPI definition of an API.
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/If-None-Match'
+      tags:
+        - APIs
+      responses:
+        200:
+          schema:
+            type: string
+            example: ""
+          description: |
+            OK.
+            Requested AsyncAPI definition of the API is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Willl= be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has beed modified the last time.
+                Used by caches, or in conditional request (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Update the API's AsyncAPI definition
+    #-----------------------------------------------------
+    put:
+      consumes:
+        - multipart/form-data
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      summary: Update AsyncAPI definition
+      description: |
+        This operation can be used to update the AsyncAPI definition of an existing API. AsyncAPI definition to be updated is passed as a form data parameter 'apiDefinition'.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: formData
+          name: apiDefinition
+          description: AsyncAPI definition of the API
+          type: string
+        - in: formData
+          name: url
+          description: AsyncAPI definition URL of the API
+          type: string
+        - in: formData
+          name: file
+          description: AsyncAPI definition as a file
+          type: file
+          required: false
+        - $ref: '#/parameters/If-Match'
+      tags:
+        - APIs
+      responses:
+        200:
+          schema:
+            type: string
+            example: ""
+          description: |
+            OK.
+            Successful response with updated AsyncAPI definition
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Mpdified:
+              description: |
+                Date and time the resource has beed modified the last time.
+                Use =d by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: "#/definitions/Error"
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+  ################################################################
   # Generates Mock/Sample Payloads from Examples in API Definition
   ################################################################
 

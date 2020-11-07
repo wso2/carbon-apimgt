@@ -280,7 +280,7 @@ function APICreateDefault(props) {
                     <FormattedMessage
                         id='Apis.Create.Default.APICreateDefault.webSocket.sub.heading'
                         defaultMessage={
-                            'Create a WebSocket API by providing a Name, a Context,'
+                            'Create a WebSocket API by providing a Name, a Channel  ,'
                             + ' and Business Plans (optional).'
                         }
                     />

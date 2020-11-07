@@ -1008,6 +1008,93 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Retrieves the AsyncAPI document of an API
+     *
+     * @param apiId             API identifier
+     * @param ifNoneMatch       If-None-Match header value
+     * @return AsyncAPI document of the API
+     */
+    @Override
+    public Response apisApiIdAsyncapiGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            String asyncAPIString = apiProvider.getAsyncAPIDefinition(apiIdentifier);
+            //API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            return Response.ok().entity(asyncAPIString).header("Content-Disposition",
+                    "attachment; fileNme=\"" + "asyncapi.json" + "\"").build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant acessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.
+                        handleAuthorizationFailure("Authorization failre while retrieving AsyncAPI of API : " + apiId,
+                                e, log);
+            } else {
+                String errorMessage = "Error while retrieving AsyncAPI for API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Updates the AsyncAPI definition opf an existing API
+     *
+     * @param apiId             API identifier
+     * @param apiDefinition     AsyncAPI definition
+     * @param url               AsyncAPI definition URL
+     * @param fileInputStream   AsyncAPI definition input file content
+     * @param fileDetail        file meta information as attachment
+     * @param ifMatch           If-match header value
+     * @return updated AsyncAPI document of the API
+     */
+    @Override
+    public Response apisApiIdAsyncapiPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
+             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+        try {
+            String updatedAsyncAPIDefinition;
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            //Handle URL and file based definition imports
+            if (url != null || fileInputStream != null){
+                //Validate and retrieve the AsyncAPI definition
+                Map validationResponseMap = validateAsyncAPISpecification(url, fileInputStream,
+                        fileDetail, true);
+                APIDefinitionValidationResponse validationResponse =
+                        (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+                if (!validationResponse.isValid()) {
+                    RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
+                }
+                updatedAsyncAPIDefinition = updateAsyncAPIDefinition(apiId, validationResponse);
+            } else {
+                updatedAsyncAPIDefinition = updateAsyncAPIDefinition(apiId, apiDefinition);
+            }
+            return Response.ok().entity(updatedAsyncAPIDefinition).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating AsyncAPI definition of API: " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while updating the AsyncAPI definition of the API: " + apiId + " - "
+                        + e.getMessage();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
      * Method to retrieve Security Audit Report
      * @param apiId API ID of the API
      * @param accept Accept header string
@@ -4765,5 +4852,47 @@ public class ApisApiServiceImpl implements ApisApiService {
             method.releaseConnection();
         }
         return apiEndpointValidationResponseDTO;
+    }
+
+    /**
+     * update AsyncAPI definition of the given API. The AsyncAPI will be validated before updating.
+     *
+     * @param apiId API Id
+     * @param apiDefinition AsyncAPI definition
+     * @return updated AsyncAPI definition
+     * @throws APIManagementException when error occurred updating AsyncAPI
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
+     */
+    private String updateAsyncAPIDefinition(String apiId, String apiDefinition)
+        throws APIManagementException, FaultGatewaysException {
+        APIDefinitionValidationResponse response = AsyncApiParserUtil
+                .validateAsyncAPISpecification(apiDefinition, true);
+        if (!response.isValid()) {
+            RestApiUtil.handleBadRequest(response.getErrorItems(), log);
+        }
+        return updateAsyncAPIDefinition(apiId, response);
+    }
+
+    /**
+     * update AsyncPI definition of the given api
+     *
+     * @param apiId API Id
+     * @param response response of the AsyncAPI definition validation call
+     * @return updated AsyncAPI definition
+     * @throws APIManagementException when error occurred updating AsyncAPI definition
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
+     */
+    private String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response)
+            throws APIManagementException, FaultGatewaysException {
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        //this will fall if user does not have access to the API or the API does not exist
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        String apiDefinition = response.getJsonContent();
+        //updating APi with the new AsyncAPI definition
+        apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
+        apiProvider.updateAPI(existingAPI);
+        //retrieves the updated AsyncAPI definition
+        return apiProvider.getAsyncAPIDefinition(existingAPI.getId());
     }
 }

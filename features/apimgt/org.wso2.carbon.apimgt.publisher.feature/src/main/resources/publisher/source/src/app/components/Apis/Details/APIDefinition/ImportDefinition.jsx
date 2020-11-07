@@ -32,6 +32,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ProvideWSDL from 'AppComponents/Apis/Create/WSDL/Steps/ProvideWSDL';
+import ProvideAsyncAPI from 'AppComponents/Apis/Create/AsyncAPI/Steps/ProvideAsyncAPI';
 import ProvideOpenAPI from '../../Create/OpenAPI/Steps/ProvideOpenAPI';
 import ProvideGraphQL from '../../Create/GraphQL/Steps/ProvideGraphQL';
 
@@ -61,13 +62,17 @@ export default function ImportDefinition(props) {
     const intl = useIntl();
     const isGraphQL = api.isGraphql();
     const isSOAP = api.isSOAP();
+    const isWebSocket = api.isWebSocket();
+    const [asyncAPIDefinitionImport, setAsyncAPIDefinitionImport] = useState(false);
 
     const handleAPIDefinitionImportOpen = () => {
-        setOpenAPIDefinitionImport(true);
+        // eslint-disable-next-line no-unused-expressions
+        isWebSocket ? setAsyncAPIDefinitionImport(true) : setOpenAPIDefinitionImport(true);
     };
 
     const handleAPIDefinitionImportCancel = () => {
-        setOpenAPIDefinitionImport(false);
+        // eslint-disable-next-line no-unused-expressions
+        isWebSocket ? setAsyncAPIDefinitionImport(false) : setOpenAPIDefinitionImport(false);
     };
 
     function apiInputsReducer(currentState, inputAction) {
@@ -107,7 +112,7 @@ export default function ImportDefinition(props) {
         const isFileInput = inputType === 'file';
         if (isFileInput) {
             const reader = new FileReader();
-            const contentType = inputValue.type.includes('yaml') ? 'yaml ' : 'json';
+            const contentType = inputValue.type.includes('yaml') ? 'yaml' : 'json';
             reader.onloadend = (event) => {
                 setSchemaDefinition(event.currentTarget.result, contentType);
             };
@@ -123,6 +128,51 @@ export default function ImportDefinition(props) {
                     defaultMessage: 'API Definition Updated Successfully',
                 }));
                 setOpenAPIDefinitionImport(false);
+                if (!isFileInput) {
+                    // Test to starting the content with'{' character ignoring white spaces
+                    const isJSONRegex = RegExp(/^\s*{/); // TODO: not a solid test need to support from REST API ~tmkb
+                    const contentType = isJSONRegex.test(content) ? 'json' : 'yaml';
+                    setSchemaDefinition(content, contentType);
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
+                    defaultMessage: 'Error while updating the API Definition',
+                }));
+            }).finally(() => setIsImporting(false));
+    }
+
+    /**
+     * Updates AsyncAPI definition
+     */
+    function updateAsyncAPIDefinition() {
+        setIsImporting(true);
+        const {
+            inputValue, inputType, content,
+        } = apiInputs;
+        const isFileInput = inputType === 'file';
+        if (isFileInput) {
+            const reader = new FileReader();
+            // eslint-disable-next-line no-nested-ternary
+            const contentType = inputValue.type.includes('yaml') ? 'yaml'
+                : inputValue.type.includes('yml') ? 'yml' : 'json';
+            reader.onloadend = (event) => {
+                setSchemaDefinition(event.currentTarget.result, contentType);
+            };
+            reader.readAsText(inputValue);
+        }
+        const newAPI = new API();
+        const promisedResponse = isFileInput ? newAPI.updateAPIDefinitionByFile(api.id, inputValue)
+            : newAPI.updateAPIDefinitionByUrl(api.Id, inputValue);
+        promisedResponse
+            .then(() => {
+                Alert.success(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',
+                    defaultMessage: 'API Definition Updated Successfully',
+                }));
+                setAsyncAPIDefinitionImport(false);
                 if (!isFileInput) {
                     // Test to starting the content with'{' character ignoring white spaces
                     const isJSONRegex = RegExp(/^\s*{/); // TODO: not a solid test need to support from REST API ~tmkb
@@ -231,6 +281,8 @@ export default function ImportDefinition(props) {
             updateGraphQLSchema();
         } else if (isSOAP) {
             updateWSDL();
+        } else if (isWebSocket) {
+            updateAsyncAPIDefinition();
         } else {
             updateOASDefinition();
         }
@@ -303,6 +355,27 @@ export default function ImportDefinition(props) {
             />
         );
     }
+    if (isWebSocket) {
+        dialogTitle = (
+            <FormattedMessage
+                id='Apis.Details.APIDefinition.APIDefinition.import.definition.asyncApi'
+                defaultMessage='Import AsyncAPI Definition'
+            />
+        );
+        dialogContent = (
+            <ProvideAsyncAPI
+                onValidate={handleOnValidate}
+                apiInputs={apiInputs}
+                inputDispatcher={inputsDispatcher}
+            />
+        );
+        btnText = (
+            <FormattedMessage
+                id='Apis.Details.APIDefinition.import.asyncAPI'
+                defaultMessage='Import AsyncAPI'
+            />
+        );
+    }
 
     return (
         <>
@@ -315,7 +388,10 @@ export default function ImportDefinition(props) {
                 <CloudUploadRounded className={classes.buttonIcon} />
                 {btnText}
             </Button>
-            <Dialog onBackdropClick={setOpenAPIDefinitionImport} open={openAPIDefinitionImport}>
+            <Dialog
+                onBackdropClick={isWebSocket ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
+                open={isWebSocket ? asyncAPIDefinitionImport : openAPIDefinitionImport}
+            >
                 <DialogTitle>
                     <Typography className={classes.importDefinitionDialogHeader}>
                         {dialogTitle}
