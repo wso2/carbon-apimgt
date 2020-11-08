@@ -1969,28 +1969,19 @@ public class RegistryPersistenceUtil {
      * @param tenantID tenant ID of API Provider
      * @return List<APICategory> list of categories
      */
-    private static List<APICategory> getAPICategoriesFromAPIGovernanceArtifact(GovernanceArtifact artifact, int tenantID)
-                                    throws GovernanceException, APIManagementException {
+    private static List<APICategory> getAPICategoriesFromAPIGovernanceArtifact(GovernanceArtifact artifact,
+            int tenantID) throws GovernanceException, APIManagementException {
 
         String[] categoriesOfAPI = artifact.getAttributes(APIConstants.API_CATEGORIES_CATEGORY_NAME);
 
         List<APICategory> categoryList = new ArrayList<>();
 
         if (ArrayUtils.isNotEmpty(categoriesOfAPI)) {
-            //category array retrieved from artifact has only the category name, therefore we need to fetch categories
-            //and fill out missing attributes before attaching the list to the api
-            String tenantDomain = getTenantDomainFromTenantId(tenantID);
-//            List<APICategory> allCategories = getAllAPICategoriesOfTenant(tenantDomain);
-
-            //todo-category: optimize this loop with breaks
-//            for (String categoryName : categoriesOfAPI) {
-//                for (APICategory category : allCategories) {
-//                    if (categoryName.equals(category.getName())) {
-//                        categoryList.add(category);
-//                        break;
-//                    }
-//                }
-//            }
+            for (String categoryName : categoriesOfAPI) {
+                APICategory category = new APICategory();
+                category.setName(categoryName);
+                categoryList.add(category);
+            }
         }
         return categoryList;
     }

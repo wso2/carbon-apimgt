@@ -32,6 +32,7 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9309,7 +9310,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if(api.getCorsConfiguration() == null) {
                 api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
             }
+            
+            // set category
+            List<APICategory> categories = api.getApiCategories();
+            if (categories != null) {
+                List<String> categoriesOfAPI = new ArrayList<String>();
+                for(APICategory apiCategory: categories) {
+                    categoriesOfAPI.add(apiCategory.getName());
+                }
+                List<APICategory> categoryList = new ArrayList<>();
 
+                if (!categoriesOfAPI.isEmpty()) {
+                    // category array retrieved from artifact has only the category name, therefore we need to fetch
+                    // categories
+                    // and fill out missing attributes before attaching the list to the api
+                    List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(requestedTenantDomain);
+
+                    // todo-category: optimize this loop with breaks
+                    for (String categoryName : categoriesOfAPI) {
+                        for (APICategory category : allCategories) {
+                            if (categoryName.equals(category.getName())) {
+                                categoryList.add(category);
+                                break;
+                            }
+                        }
+                    }
+                }
+                api.setApiCategories(categoryList);
+            }
+           
             return api;
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Failed to get API", e);
