@@ -554,11 +554,16 @@ public class API implements Serializable {
     }
 
     public Date getLastUpdated() {
-        return new Date(lastUpdated.getTime());
+        if (lastUpdated != null) {
+            return new Date(lastUpdated.getTime());
+        }
+        return null;
     }
 
     public void setLastUpdated(Date lastUpdated) {
-        this.lastUpdated = new Date(lastUpdated.getTime());
+        if (lastUpdated != null) {
+            this.lastUpdated = new Date(lastUpdated.getTime());
+        }
     }
 
     public Set<Tier> getAvailableTiers() {

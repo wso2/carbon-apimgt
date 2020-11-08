@@ -302,7 +302,7 @@ public class RegistryPersistenceUtil {
         //get all labels in the tenant
         List<Label> gatewayLabelList = RegistryPersistenceUtil.getAllLabels(tenantDomain);
         //validation is performed here to cover all actions related to API artifact updates
-        if (!gatewayLabelList.isEmpty()) {
+        if (gatewayLabelList != null && !gatewayLabelList.isEmpty()) {
             //put available gateway labels to a list for validation purpose
             List<String> availableGatewayLabelListNames = new ArrayList<>();
             for (Label x : gatewayLabelList) {

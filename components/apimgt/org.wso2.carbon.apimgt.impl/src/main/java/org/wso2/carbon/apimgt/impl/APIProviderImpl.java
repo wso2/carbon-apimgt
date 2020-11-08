@@ -797,18 +797,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    /**
-     * Adds a new API to the Store
-     *
-     * @param api API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add API
-     */
-    @Override
-    public void addAPI(API api) throws APIManagementException {
+    public void addAPIOld(API api) throws APIManagementException {
         
-        boolean test = false;
+        boolean test = true;
         if(test) {
-            addAPInew(api);
+            addAPI(api);
             return;
         }
                
@@ -892,7 +885,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
     }
     
-    public void addAPInew(API api) throws APIManagementException{
+    /**
+     * Adds a new API to the Store
+     *
+     * @param api API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add API
+     */
+    @Override
+    public void addAPI(API api) throws APIManagementException {
         validateApiInfo(api);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -910,10 +910,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         
         //add labels
         validateAndSetLables(api);
-                
-        /**
-         * TODO set wsdl ///////////////////////////////////////
-         */
 
         try {
             apiPersistenceInstance.addAPI(new Organization(tenantDomain), APIMapper.INSTANCE.toPublisherApi(api));
@@ -926,6 +922,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
         }
 
+        // TODO Implement this using persistence layer methods /////////
+        if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {
+            updateWsdlFromUrl(api);
+        }
+
+        if (api.getWsdlResource() != null) {
+            updateWsdlFromResourceFile(api);
+        }
+        ///////////////////////////////////////////////////////////////
         int tenantId;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -4088,6 +4093,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
+
 
     /**
      * Update WSDLUri in the API Registry artifact
