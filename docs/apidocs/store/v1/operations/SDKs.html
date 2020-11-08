@@ -6,7 +6,7 @@
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1/apis/{apiId}/sdks/{language}</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language.
+            <p class="marked">This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Developer Portal, for a requested development language.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -107,7 +107,7 @@
                         </td>
                         <td>
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
+  retrieved from.
 </p>
                         </td>
                         <td>
@@ -148,7 +148,7 @@
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Requested SDK Language is not supported. </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -157,7 +157,7 @@
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not found. Requested API does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -166,7 +166,7 @@
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">500</p></td>
-                        <td class="parameter"><p class="marked">Internal Server Error. Error while generating SDK. </p></td>
+                        <td class="parameter"><p class="marked">Internal Server Error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -176,11 +176,11 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="sdkGenLanguagesGet"></a>Get a list of supported SDK languages
+            <h4 class="operation-heading"><a name="sdkGenLanguagesGet"></a>Get a List of Supported SDK Languages
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1/sdk-gen/languages</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Store
+            <p class="marked">This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Developer Portal
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -237,7 +237,7 @@
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. The list of languages is not found. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -246,7 +246,7 @@
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">500</p></td>
-                        <td class="parameter"><p class="marked">Internal Server Error. Error while retrieving the list. </p></td>
+                        <td class="parameter"><p class="marked">Internal Server Error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

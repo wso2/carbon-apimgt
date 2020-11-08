@@ -47,7 +47,7 @@ public class AlertsInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[\"abc@gmail.com\"]", value = "")
   @JsonProperty("emailList")
   public List<String> getEmailList() {
     return emailList;

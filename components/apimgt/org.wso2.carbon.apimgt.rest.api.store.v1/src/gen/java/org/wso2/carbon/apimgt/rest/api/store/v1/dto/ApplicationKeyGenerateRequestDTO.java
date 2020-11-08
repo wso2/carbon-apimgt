@@ -86,7 +86,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "key Manager to Generate Keys")
+  @ApiModelProperty(example = "Resident Key Manager", value = "key Manager to Generate Keys")
   @JsonProperty("keyManager")
   public String getKeyManager() {
     return keyManager;
@@ -104,7 +104,7 @@ return null;
   }
 
   
-  @ApiModelProperty(required = true, value = "Grant types that should be supported by the application")
+  @ApiModelProperty(example = "[\"password\",\"client_credentials\"]", required = true, value = "Grant types that should be supported by the application")
   @JsonProperty("grantTypesToBeSupported")
   @NotNull
   public List<String> getGrantTypesToBeSupported() {
@@ -123,7 +123,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Callback URL")
+  @ApiModelProperty(example = "http://sample.com/callback/url", value = "Callback URL")
   @JsonProperty("callbackUrl")
   public String getCallbackUrl() {
     return callbackUrl;
@@ -176,7 +176,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "", value = "Client ID for generating access token.")
+  @ApiModelProperty(example = "sZzoeSCI_vL2cjSXZQmsmV8JEyga", value = "Client ID for generating access token.")
   @JsonProperty("clientId")
   public String getClientId() {
     return clientId;
@@ -194,7 +194,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "", value = "Client secret for generating access token. This is given together with the client Id.")
+  @ApiModelProperty(example = "nrs3YAP4htxnz_DqpvGhf9Um04oa", value = "Client secret for generating access token. This is given together with the client Id.")
   @JsonProperty("clientSecret")
   public String getClientSecret() {
     return clientSecret;
@@ -212,7 +212,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "\"\"", value = "Additional properties needed.")
+  @ApiModelProperty(example = "{}", value = "Additional properties needed.")
   @JsonProperty("additionalProperties")
   public Object getAdditionalProperties() {
     return additionalProperties;

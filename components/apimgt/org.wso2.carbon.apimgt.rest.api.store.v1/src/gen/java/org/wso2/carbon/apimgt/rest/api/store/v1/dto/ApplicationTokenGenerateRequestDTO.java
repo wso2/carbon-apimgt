@@ -33,7 +33,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Consumer secret of the application")
+  @ApiModelProperty(example = "cV5pvyisxug5b5QZInq9cGZrMOMa", value = "Consumer secret of the application")
   @JsonProperty("consumerSecret")
   public String getConsumerSecret() {
     return consumerSecret;
@@ -51,7 +51,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Token validity period")
+  @ApiModelProperty(example = "3600", value = "Token validity period")
   @JsonProperty("validityPeriod")
   public Long getValidityPeriod() {
     return validityPeriod;
@@ -69,7 +69,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Allowed scopes (space seperated) for the access token")
+  @ApiModelProperty(example = "[\"apim:subscribe\"]", value = "Allowed scopes (space seperated) for the access token")
   @JsonProperty("scopes")
   public List<String> getScopes() {
     return scopes;
@@ -87,7 +87,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Token to be revoked, if any")
+  @ApiModelProperty(example = "", value = "Token to be revoked, if any")
   @JsonProperty("revokeToken")
   public String getRevokeToken() {
     return revokeToken;

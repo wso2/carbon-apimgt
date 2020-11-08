@@ -290,7 +290,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("operations")
   public List<APIOperationsDTO> getOperations() {
     return operations;
@@ -308,7 +308,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
+  @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
   @JsonProperty("authorizationHeader")
   public String getAuthorizationHeader() {
     return authorizationHeader;
@@ -326,7 +326,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @ApiModelProperty(example = "[\"oauth2\",\"oauth_basic_auth_api_key_mandatory\"]", value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
     return securityScheme;
