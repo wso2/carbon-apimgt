@@ -170,7 +170,6 @@ public class CacheInvalidationServiceImpl implements CacheInvalidationService {
         try {
             isSuperTenantFlowStarted = startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             gatewayCache = CacheProvider.getGatewayTokenCache();
-            Cache invalidGatewayCache = CacheProvider.getInvalidTokenCache();
             for (String accessToken : accessTokens) {
                 Object cacheEntry = gatewayCache.get(accessToken);
                 if (cacheEntry != null) {
@@ -233,14 +232,12 @@ public class CacheInvalidationServiceImpl implements CacheInvalidationService {
                 }
 
                 Cache tenantGatewayCache = CacheProvider.getGatewayTokenCache();
-                Cache invalidtTenantGatewayCache = CacheProvider.getInvalidTokenCache();
 
                 //Remove all cached tokens from the tenant's cache
                 //Note: Best solution would have been to use the removeAll method of the cache. But it currently throws
                 //an NPE if at least one key in the list doesn't exist in the cache.
                 for (String accessToken : tenantMap.get(tenantDomain)) {
                     tenantGatewayCache.remove(accessToken);
-                    invalidtTenantGatewayCache.put(accessToken, tenantDomain);
                 }
 
                 if (log.isDebugEnabled()) {
