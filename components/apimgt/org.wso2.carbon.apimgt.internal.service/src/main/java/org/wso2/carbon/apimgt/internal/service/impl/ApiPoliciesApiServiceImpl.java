@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.*;
 import org.wso2.carbon.apimgt.internal.service.dto.*;
@@ -48,7 +49,11 @@ public class ApiPoliciesApiServiceImpl implements ApiPoliciesApiService {
 
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
-            if (StringUtils.isNotEmpty(policyName)) {
+            if (APIConstants.CHAR_ASTERIX.equals(xWSO2Tenant)) {
+                return Response.ok().entity(SubscriptionValidationDataUtil.
+                        fromApiPolicyToApiPolicyListDTO(subscriptionValidationDAO.
+                                getAllApiPolicies())).build();
+            } else if (StringUtils.isNotEmpty(policyName)) {
                 List<APIPolicy> model = new ArrayList<>();
                 APIPolicy apiPolicy = subscriptionValidationDAO.
                         getApiPolicyByNameForTenant(policyName, xWSO2Tenant);

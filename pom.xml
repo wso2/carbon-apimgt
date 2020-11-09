@@ -718,6 +718,12 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.throttle.policy.deployer</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
@@ -1311,6 +1317,11 @@
                 <groupId>org.wso2.carbon.event-processing</groupId>
                 <artifactId>org.wso2.carbon.event.processor.stub</artifactId>
                 <version>${event.processor.stub.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.event-processing</groupId>
+                <artifactId>org.wso2.carbon.event.processor.core</artifactId>
+                <version>${event.processor.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.io.swagger</groupId>
@@ -1919,6 +1930,7 @@
         <pdfbox.version>1.8.16</pdfbox.version>
 
         <event.processor.stub.version>2.2.14</event.processor.stub.version>
+        <event.processor.core.version>2.2.14</event.processor.core.version>
         <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v1</swagger.inflector.oas3.version>

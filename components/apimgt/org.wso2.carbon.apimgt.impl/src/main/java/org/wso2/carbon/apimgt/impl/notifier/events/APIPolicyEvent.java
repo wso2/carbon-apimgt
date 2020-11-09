@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
@@ -30,9 +31,12 @@ public class APIPolicyEvent extends PolicyEvent {
     private int policyId;
     private String policyName;
     private String quotaType;
+    private List<Integer> addedConditionGroupIds;
+    private List<Integer> deletedConditionGroupIds;
 
     public APIPolicyEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, int policyId,
-                          String policyName, String quotaType) {
+                          String policyName, String quotaType, List<Integer> addedConditionGroupIds,
+                          List<Integer> deletedConditionGroupIds) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -42,6 +46,8 @@ public class APIPolicyEvent extends PolicyEvent {
         this.quotaType = quotaType;
         this.tenantDomain = tenantDomain;
         this.policyType = PolicyType.API;
+        this.addedConditionGroupIds = addedConditionGroupIds;
+        this.deletedConditionGroupIds = deletedConditionGroupIds;
     }
 
     @Override
@@ -54,7 +60,9 @@ public class APIPolicyEvent extends PolicyEvent {
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
                 ", tenantId=" + tenantId + '\'' +
-                ", tenantDomain=" + tenantDomain +
+                ", tenantDomain=" + tenantDomain + '\'' +
+                ", addedConditionGroupIds=" + addedConditionGroupIds + '\'' +
+                ", deletedConditionGroupIds=" + deletedConditionGroupIds + '\'' +
                 '}';
     }
 
@@ -95,5 +103,21 @@ public class APIPolicyEvent extends PolicyEvent {
 
     public void setQuotaType(String quotaType) {
         this.quotaType = quotaType;
-    }    
+    }
+
+    public List<Integer> getAddedConditionGroupIds() {
+        return addedConditionGroupIds;
+    }
+
+    public void setAddedConditionGroupIds(List<Integer> addedConditionGroupIds) {
+        this.addedConditionGroupIds = addedConditionGroupIds;
+    }
+
+    public List<Integer> getDeletedConditionGroupIds() {
+        return deletedConditionGroupIds;
+    }
+
+    public void setDeletedConditionGroupIds(List<Integer> deletedConditionGroupIds) {
+        this.deletedConditionGroupIds = deletedConditionGroupIds;
+    }
 }

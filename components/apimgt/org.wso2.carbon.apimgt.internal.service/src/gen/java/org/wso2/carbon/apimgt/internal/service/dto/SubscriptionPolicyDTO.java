@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.wso2.carbon.apimgt.internal.service.dto.GraphQLQueryDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.PolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -20,6 +21,7 @@ public class SubscriptionPolicyDTO   {
   
     private Integer id = null;
     private Integer tenantId = null;
+    private String tenantDomain = null;
     private String name = null;
     private String quotaType = null;
     private Integer graphQLMaxComplexity = null;
@@ -27,6 +29,7 @@ public class SubscriptionPolicyDTO   {
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
     private Boolean stopOnQuotaReach = null;
+    private ThrottleLimitDTO defaultLimit = null;
 
   /**
    **/
@@ -60,6 +63,23 @@ public class SubscriptionPolicyDTO   {
   }
   public void setTenantId(Integer tenantId) {
     this.tenantId = tenantId;
+  }
+
+  /**
+   **/
+  public SubscriptionPolicyDTO tenantDomain(String tenantDomain) {
+    this.tenantDomain = tenantDomain;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("tenantDomain")
+  public String getTenantDomain() {
+    return tenantDomain;
+  }
+  public void setTenantDomain(String tenantDomain) {
+    this.tenantDomain = tenantDomain;
   }
 
   /**
@@ -183,6 +203,23 @@ public class SubscriptionPolicyDTO   {
     this.stopOnQuotaReach = stopOnQuotaReach;
   }
 
+  /**
+   **/
+  public SubscriptionPolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("defaultLimit")
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
+  }
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -195,18 +232,20 @@ public class SubscriptionPolicyDTO   {
     SubscriptionPolicyDTO subscriptionPolicy = (SubscriptionPolicyDTO) o;
     return Objects.equals(id, subscriptionPolicy.id) &&
         Objects.equals(tenantId, subscriptionPolicy.tenantId) &&
+        Objects.equals(tenantDomain, subscriptionPolicy.tenantDomain) &&
         Objects.equals(name, subscriptionPolicy.name) &&
         Objects.equals(quotaType, subscriptionPolicy.quotaType) &&
         Objects.equals(graphQLMaxComplexity, subscriptionPolicy.graphQLMaxComplexity) &&
         Objects.equals(graphQLMaxDepth, subscriptionPolicy.graphQLMaxDepth) &&
         Objects.equals(rateLimitCount, subscriptionPolicy.rateLimitCount) &&
         Objects.equals(rateLimitTimeUnit, subscriptionPolicy.rateLimitTimeUnit) &&
-        Objects.equals(stopOnQuotaReach, subscriptionPolicy.stopOnQuotaReach);
+        Objects.equals(stopOnQuotaReach, subscriptionPolicy.stopOnQuotaReach) &&
+        Objects.equals(defaultLimit, subscriptionPolicy.defaultLimit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType, graphQLMaxComplexity, graphQLMaxDepth, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach);
+    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, graphQLMaxComplexity, graphQLMaxDepth, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, defaultLimit);
   }
 
   @Override
@@ -216,6 +255,7 @@ public class SubscriptionPolicyDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
+    sb.append("    tenantDomain: ").append(toIndentedString(tenantDomain)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    graphQLMaxComplexity: ").append(toIndentedString(graphQLMaxComplexity)).append("\n");
@@ -223,6 +263,7 @@ public class SubscriptionPolicyDTO   {
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
     sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");
     sb.append("    stopOnQuotaReach: ").append(toIndentedString(stopOnQuotaReach)).append("\n");
+    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("}");
     return sb.toString();
   }
