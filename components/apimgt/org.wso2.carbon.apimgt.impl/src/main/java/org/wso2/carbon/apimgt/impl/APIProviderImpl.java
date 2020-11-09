@@ -799,12 +799,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public void addAPIOld(API api) throws APIManagementException {
         
-        boolean test = true;
-        if(test) {
-            addAPI(api);
-            return;
-        }
-               
         validateApiInfo(api);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -9253,7 +9247,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 tierNameSet.add(t.getName());
             }
             if (api.getAvailableTiers() != null) {
-                tiers = String.join("\\|\\|", tierNameSet);
+                tiers = String.join("||", tierNameSet);
             }
             Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
             Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
