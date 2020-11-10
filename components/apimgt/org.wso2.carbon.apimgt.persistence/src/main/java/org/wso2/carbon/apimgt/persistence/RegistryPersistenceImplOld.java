@@ -99,8 +99,8 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleExc
 import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.attachLabelsToAPIArtifact;
 import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.updateWSDLUriInAPIArtifact;
 
-public class RegistryPersistenceImpl implements APIPersistence {
-    private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
+public class RegistryPersistenceImplOld implements APIPersistence {
+    private static final Log log = LogFactory.getLog(RegistryPersistenceImplOld.class);
     private static APIPersistence instance;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected Registry registry;
@@ -111,7 +111,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     private RegistryService registryService;
     private GenericArtifactManager apiGenericArtifactManager;
 
-    public RegistryPersistenceImpl(String username) {
+    public RegistryPersistenceImplOld(String username) {
         //super(username);
         this.registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         try {

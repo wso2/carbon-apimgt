@@ -25,9 +25,9 @@ public class PersistenceManager {
         //condition to check the configured Persistence type
         // if (Persistence type is Registry)
         if (apiPersistenceInstance == null) {
-            synchronized (RegistryPersistenceImpl.class) {
+            synchronized (RegistryPersistenceImplOld.class) {
                 if (apiPersistenceInstance == null) {
-                    apiPersistenceInstance = new RegistryPersistenceImpl(userName);
+                    apiPersistenceInstance = new RegistryPersistenceImplOld(userName);
                 }
             }
         }
@@ -40,7 +40,7 @@ public class PersistenceManager {
             }
         }*/
 
-        return new RegistryPersistenceImplNew(userName);
+        return new RegistryPersistenceImpl(userName);
         //return apiPersistenceInstance;
     }
 

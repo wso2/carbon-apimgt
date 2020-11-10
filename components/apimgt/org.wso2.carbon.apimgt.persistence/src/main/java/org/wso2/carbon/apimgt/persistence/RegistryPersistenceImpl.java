@@ -80,9 +80,9 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-public class RegistryPersistenceImplNew implements APIPersistence {
+public class RegistryPersistenceImpl implements APIPersistence {
 
-    private static final Log log = LogFactory.getLog(RegistryPersistenceImplNew.class);
+    private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
     private static APIPersistence instance;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected Registry registry;
@@ -93,7 +93,7 @@ public class RegistryPersistenceImplNew implements APIPersistence {
     private RegistryService registryService;
     private GenericArtifactManager apiGenericArtifactManager;
     
-    public RegistryPersistenceImplNew(String username) {
+    public RegistryPersistenceImpl(String username) {
         this.registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         this.username = username;
         try {
