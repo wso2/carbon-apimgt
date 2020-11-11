@@ -11616,18 +11616,18 @@ public final class APIUtil {
         }
 
         //append original role to the role mapping list
-        Set<Map.Entry<String, JsonElement>> roleMappingentries = newRoleMappingJson.entrySet();
-        for (Map.Entry<String, JsonElement> entry: roleMappingentries) {
+        Set<Map.Entry<String, JsonElement>> roleMappingEntries = newRoleMappingJson.entrySet();
+        for (Map.Entry<String, JsonElement> entry: roleMappingEntries) {
             List<String> currentRoles = Arrays.asList(String.valueOf(entry.getValue()).split(","));
-            boolean isOriginalRoleIsAlreadyInroles = false;
+            boolean isOriginalRoleAlreadyInroles = false;
             for (String role: currentRoles) {
                 if (role.equals(entry.getKey())) {
-                    isOriginalRoleIsAlreadyInroles = true;
+                    isOriginalRoleAlreadyInroles = true;
                     break;
                 }
             }
 
-            if (!isOriginalRoleIsAlreadyInroles) {
+            if (!isOriginalRoleAlreadyInroles) {
                 String newRoles = entry.getKey() + "," + entry.getValue();
                 newRoleMappingJson.replace(entry.getKey(), entry.getValue(), newRoles);
             }
