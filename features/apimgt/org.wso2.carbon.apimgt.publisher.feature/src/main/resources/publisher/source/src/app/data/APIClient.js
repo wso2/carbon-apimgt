@@ -40,7 +40,10 @@ class APIClient {
         SwaggerClient.http.withCredentials = true;
         if (!APIClient.spec) {
             SwaggerClient.http.withCredentials = true;
-            APIClient.spec = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
+            APIClient.spec = SwaggerClient.resolve({
+                url: Utils.getSwaggerURL(),
+                requestInterceptor: (request) => { request.headers.Accept = 'text/yaml'; },
+            });
         }
         this._client = APIClient.spec.then((resolved) => {
             const argsv = Object.assign(args, {
@@ -50,9 +53,8 @@ class APIClient {
             });
             SwaggerClient.http.withCredentials = true;
             return new SwaggerClient(argsv);
-        }).catch((error) => {
-            AuthManager.unauthorizedErrorHandler;
-        })
+        });
+        this._client.catch(AuthManager.unauthorizedErrorHandler);
         this.mutex = new Mutex();
     }
 
