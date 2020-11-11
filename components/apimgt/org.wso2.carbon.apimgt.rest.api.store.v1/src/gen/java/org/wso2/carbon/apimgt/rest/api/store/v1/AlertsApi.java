@@ -27,8 +27,8 @@ import javax.validation.constraints.*;
 @Path("/alerts")
 
 @Api(description = "the alerts API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class AlertsApi  {
@@ -57,7 +57,7 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
 
     @DELETE
     @Path("/{alertType}/configurations/{configurationId}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete the Selected Configuration from AbnormalRequestsPerMin Alert Type. ", notes = "This operation is used to delete configuration from the AbnormalRequestsPerMin alert type. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -75,7 +75,7 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
 
     @GET
     @Path("/{alertType}/configurations")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get All AbnormalRequestsPerMin Alert Configurations ", notes = "This operation is used to get all configurations of the AbnormalRequestsPerMin alert type. ", response = AlertConfigListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

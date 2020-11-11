@@ -22,6 +22,8 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SettingsApiService {
-      public Response settingsApplicationAttributesGet(String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response settingsGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response settingsApplicationAttributesGet(String ifNoneMatch
+, MessageContext messageContext) throws APIManagementException;
+      public Response settingsGet(String xWSO2Tenant
+, MessageContext messageContext) throws APIManagementException;
 }

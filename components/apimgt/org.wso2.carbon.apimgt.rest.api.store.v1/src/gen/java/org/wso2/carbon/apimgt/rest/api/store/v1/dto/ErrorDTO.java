@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorListItemDTO;
@@ -14,6 +16,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -108,6 +112,7 @@ public class ErrorDTO   {
 
   
   @ApiModelProperty(value = "If there are more than one error list them out. For example, list out validation errors by each field. ")
+      @Valid
   @JsonProperty("error")
   public List<ErrorListItemDTO> getError() {
     return error;

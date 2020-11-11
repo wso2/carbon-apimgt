@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentSearchResultAllOfDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
 import javax.validation.constraints.*;
 
 
@@ -20,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class DocumentSearchResultDTO extends SearchResultDTO  {
+public class DocumentSearchResultAllOfDTO   {
   
 
     @XmlType(name="DocTypeEnum")
@@ -136,7 +134,7 @@ return null;
 
   /**
    **/
-  public DocumentSearchResultDTO docType(DocTypeEnum docType) {
+  public DocumentSearchResultAllOfDTO docType(DocTypeEnum docType) {
     this.docType = docType;
     return this;
   }
@@ -153,7 +151,7 @@ return null;
 
   /**
    **/
-  public DocumentSearchResultDTO summary(String summary) {
+  public DocumentSearchResultAllOfDTO summary(String summary) {
     this.summary = summary;
     return this;
   }
@@ -170,7 +168,7 @@ return null;
 
   /**
    **/
-  public DocumentSearchResultDTO sourceType(SourceTypeEnum sourceType) {
+  public DocumentSearchResultAllOfDTO sourceType(SourceTypeEnum sourceType) {
     this.sourceType = sourceType;
     return this;
   }
@@ -187,7 +185,7 @@ return null;
 
   /**
    **/
-  public DocumentSearchResultDTO sourceUrl(String sourceUrl) {
+  public DocumentSearchResultAllOfDTO sourceUrl(String sourceUrl) {
     this.sourceUrl = sourceUrl;
     return this;
   }
@@ -204,7 +202,7 @@ return null;
 
   /**
    **/
-  public DocumentSearchResultDTO otherTypeName(String otherTypeName) {
+  public DocumentSearchResultAllOfDTO otherTypeName(String otherTypeName) {
     this.otherTypeName = otherTypeName;
     return this;
   }
@@ -221,7 +219,7 @@ return null;
 
   /**
    **/
-  public DocumentSearchResultDTO visibility(VisibilityEnum visibility) {
+  public DocumentSearchResultAllOfDTO visibility(VisibilityEnum visibility) {
     this.visibility = visibility;
     return this;
   }
@@ -239,7 +237,7 @@ return null;
   /**
    * The name of the associated API
    **/
-  public DocumentSearchResultDTO apiName(String apiName) {
+  public DocumentSearchResultAllOfDTO apiName(String apiName) {
     this.apiName = apiName;
     return this;
   }
@@ -257,7 +255,7 @@ return null;
   /**
    * The version of the associated API
    **/
-  public DocumentSearchResultDTO apiVersion(String apiVersion) {
+  public DocumentSearchResultAllOfDTO apiVersion(String apiVersion) {
     this.apiVersion = apiVersion;
     return this;
   }
@@ -274,7 +272,7 @@ return null;
 
   /**
    **/
-  public DocumentSearchResultDTO apiProvider(String apiProvider) {
+  public DocumentSearchResultAllOfDTO apiProvider(String apiProvider) {
     this.apiProvider = apiProvider;
     return this;
   }
@@ -291,7 +289,7 @@ return null;
 
   /**
    **/
-  public DocumentSearchResultDTO apiUUID(String apiUUID) {
+  public DocumentSearchResultAllOfDTO apiUUID(String apiUUID) {
     this.apiUUID = apiUUID;
     return this;
   }
@@ -315,17 +313,17 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    DocumentSearchResultDTO documentSearchResult = (DocumentSearchResultDTO) o;
-    return Objects.equals(docType, documentSearchResult.docType) &&
-        Objects.equals(summary, documentSearchResult.summary) &&
-        Objects.equals(sourceType, documentSearchResult.sourceType) &&
-        Objects.equals(sourceUrl, documentSearchResult.sourceUrl) &&
-        Objects.equals(otherTypeName, documentSearchResult.otherTypeName) &&
-        Objects.equals(visibility, documentSearchResult.visibility) &&
-        Objects.equals(apiName, documentSearchResult.apiName) &&
-        Objects.equals(apiVersion, documentSearchResult.apiVersion) &&
-        Objects.equals(apiProvider, documentSearchResult.apiProvider) &&
-        Objects.equals(apiUUID, documentSearchResult.apiUUID);
+    DocumentSearchResultAllOfDTO documentSearchResultAllOf = (DocumentSearchResultAllOfDTO) o;
+    return Objects.equals(docType, documentSearchResultAllOf.docType) &&
+        Objects.equals(summary, documentSearchResultAllOf.summary) &&
+        Objects.equals(sourceType, documentSearchResultAllOf.sourceType) &&
+        Objects.equals(sourceUrl, documentSearchResultAllOf.sourceUrl) &&
+        Objects.equals(otherTypeName, documentSearchResultAllOf.otherTypeName) &&
+        Objects.equals(visibility, documentSearchResultAllOf.visibility) &&
+        Objects.equals(apiName, documentSearchResultAllOf.apiName) &&
+        Objects.equals(apiVersion, documentSearchResultAllOf.apiVersion) &&
+        Objects.equals(apiProvider, documentSearchResultAllOf.apiProvider) &&
+        Objects.equals(apiUUID, documentSearchResultAllOf.apiUUID);
   }
 
   @Override
@@ -336,8 +334,8 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class DocumentSearchResultDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("class DocumentSearchResultAllOfDTO {\n");
+    
     sb.append("    docType: ").append(toIndentedString(docType)).append("\n");
     sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
     sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");

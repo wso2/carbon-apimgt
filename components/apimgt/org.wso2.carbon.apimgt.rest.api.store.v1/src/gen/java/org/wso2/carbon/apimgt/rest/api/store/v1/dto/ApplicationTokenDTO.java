@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -13,6 +15,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -31,7 +35,7 @@ public class ApplicationTokenDTO   {
   }
 
   
-  @ApiModelProperty(example = "1.2345678901234568E30", value = "Access token")
+  @ApiModelProperty(example = "1.2345678901234568E+30", value = "Access token")
   @JsonProperty("accessToken")
   public String getAccessToken() {
     return accessToken;

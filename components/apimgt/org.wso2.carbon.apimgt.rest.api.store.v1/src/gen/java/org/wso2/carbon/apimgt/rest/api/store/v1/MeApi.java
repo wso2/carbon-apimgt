@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/me")
 
 @Api(description = "the me API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class MeApi  {

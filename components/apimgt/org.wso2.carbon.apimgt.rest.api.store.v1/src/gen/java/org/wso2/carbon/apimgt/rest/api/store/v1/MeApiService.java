@@ -21,5 +21,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface MeApiService {
-      public Response changeUserPassword(CurrentAndNewPasswordsDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response changeUserPassword(CurrentAndNewPasswordsDTO body
+, MessageContext messageContext) throws APIManagementException;
 }

@@ -26,8 +26,8 @@ import javax.validation.constraints.*;
 @Path("/alert-subscriptions")
 
 @Api(description = "the alert-subscriptions API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class AlertSubscriptionsApi  {
@@ -39,7 +39,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the List of API Developer Portal Alert Types Subscribed by the User. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -72,7 +72,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
 
     @DELETE
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Unsubscribe User from All the Alert Types. ", notes = "This operation is used to unsubscribe the respective user from all the alert types. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

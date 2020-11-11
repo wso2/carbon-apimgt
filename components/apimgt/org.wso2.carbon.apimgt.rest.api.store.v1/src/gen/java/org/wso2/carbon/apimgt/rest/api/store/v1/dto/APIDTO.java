@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -291,6 +295,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(example = "[]", value = "")
+      @Valid
   @JsonProperty("operations")
   public List<APIOperationsDTO> getOperations() {
     return operations;
@@ -363,6 +368,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(value = "The subscription tiers selected for the particular API")
+      @Valid
   @JsonProperty("tiers")
   public List<APITiersDTO> getTiers() {
     return tiers;
@@ -415,6 +421,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("monetization")
   public APIMonetizationInfoDTO getMonetization() {
     return monetization;
@@ -432,6 +439,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("ingressURLs")
   public List<APIIngressURLsDTO> getIngressURLs() {
     return ingressURLs;
@@ -449,6 +457,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("endpointURLs")
   public List<APIEndpointURLsDTO> getEndpointURLs() {
     return endpointURLs;
@@ -466,6 +475,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("businessInformation")
   public APIBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
@@ -484,6 +494,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API. ")
+      @Valid
   @JsonProperty("labels")
   public List<LabelDTO> getLabels() {
     return labels;
@@ -519,6 +530,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("scopes")
   public List<ScopeInfoDTO> getScopes() {
     return scopes;
@@ -546,7 +558,6 @@ public class APIDTO   {
   }
 
   /**
-   * The advertise info of the API
    **/
   public APIDTO advertiseInfo(AdvertiseInfoDTO advertiseInfo) {
     this.advertiseInfo = advertiseInfo;
@@ -554,7 +565,8 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(value = "The advertise info of the API")
+  @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("advertiseInfo")
   public AdvertiseInfoDTO getAdvertiseInfo() {
     return advertiseInfo;
@@ -608,6 +620,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(value = "API Key Managers ")
+      @Valid
   @JsonProperty("keyManagers")
   public Object getKeyManagers() {
     return keyManagers;

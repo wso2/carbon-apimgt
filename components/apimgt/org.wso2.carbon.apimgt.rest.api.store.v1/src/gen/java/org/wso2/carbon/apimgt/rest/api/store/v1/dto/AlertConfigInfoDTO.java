@@ -16,6 +16,8 @@ import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import javax.validation.Valid;
+
 @ApiModel(description = "The config parameters.")
 
 public class AlertConfigInfoDTO extends HashMap<String, String>  {
