@@ -62,8 +62,11 @@ import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -393,7 +396,32 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException {
-        // TODO Auto-generated method stub
+        GenericArtifactManager artifactManager = null;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            //PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(org.getName(), true);
+            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
+            if (GovernanceUtils.findGovernanceArtifactConfiguration(APIConstants.API_KEY, registry) != null) {
+                artifactManager = new GenericArtifactManager(registry, APIConstants.API_KEY);
+                GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+                String action = RegistryLCManager.getInstance().getTransitionAction(apiArtifact.getLifecycleState(),
+                        status);
+                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
+            } else {
+                log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + APIConstants.API_KEY +
+                        ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
+                        ", Tenant domain set in PrivilegedCarbonContext: " +
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+            }
+
+        } catch (GovernanceException e) {
+            throw new APIPersistenceException("Error while changing the lifecycle. ", e);
+        } catch (RegistryException e) {
+            throw new APIPersistenceException("Error while accessing the registry. ", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
         
     }
 

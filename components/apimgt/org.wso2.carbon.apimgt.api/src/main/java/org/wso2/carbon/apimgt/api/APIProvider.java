@@ -832,6 +832,17 @@ public interface APIProvider extends APIManager {
              throws APIManagementException, FaultGatewaysException;
 
     /**
+     * This method is to change registry lifecycle states for an API artifact
+     *
+     * @param  uuid uuid of the API
+     * @param  action  Action which need to execute from registry lifecycle
+     * @param  checklist checklist items
+     * @return APIStateChangeResponse API workflow state and WorkflowResponse
+     * */
+    APIStateChangeResponse changeLifeCycleStatus(String uuid, String action, Map<String, Boolean> checklist)
+             throws APIManagementException, FaultGatewaysException;
+    
+    /**
     * This method is to set checklist item values for a particular life-cycle state of an API
     *
     * @param  apiIdentifier apiIdentifier
