@@ -28,7 +28,7 @@ public class PublishStatusDTO   {
   }
 
   
-  @ApiModelProperty(value = "Status of the usage publish request")
+  @ApiModelProperty(example = "successfull", value = "Status of the usage publish request")
   @JsonProperty("status")
   public String getStatus() {
     return status;
@@ -46,7 +46,7 @@ public class PublishStatusDTO   {
   }
 
   
-  @ApiModelProperty(value = "detailed message of the status")
+  @ApiModelProperty(example = "Records published successfully", value = "detailed message of the status")
   @JsonProperty("message")
   public String getMessage() {
     return message;

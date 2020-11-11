@@ -133,7 +133,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(value = "Burst control time unit")
+  @ApiModelProperty(example = "min", value = "Burst control time unit")
   @JsonProperty("rateLimitTimeUnit")
   public String getRateLimitTimeUnit() {
     return rateLimitTimeUnit;
@@ -151,7 +151,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "{}", value = "Custom attributes added to the Subscription Throttling Policy ")
+  @ApiModelProperty(example = "[]", value = "Custom attributes added to the Subscription Throttling Policy ")
   @JsonProperty("customAttributes")
   public List<CustomAttributeDTO> getCustomAttributes() {
     return customAttributes;
@@ -187,7 +187,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. ")
+  @ApiModelProperty(example = "FREE", value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. ")
   @JsonProperty("billingPlan")
   public String getBillingPlan() {
     return billingPlan;

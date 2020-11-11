@@ -46,7 +46,7 @@ public class AlertTypeDTO   {
   }
 
   
-  @ApiModelProperty(example = "AbnormalRequestTime", value = "The name of the alert.")
+  @ApiModelProperty(example = "AbnormalResponseTime", value = "The name of the alert.")
   @JsonProperty("name")
   public String getName() {
     return name;

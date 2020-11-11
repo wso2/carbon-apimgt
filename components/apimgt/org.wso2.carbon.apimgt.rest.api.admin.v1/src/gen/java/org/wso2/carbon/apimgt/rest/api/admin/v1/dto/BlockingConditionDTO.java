@@ -105,7 +105,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "\"{\\\"fixedIp\\\":\\\"192.168.1.1\\\":\\\"invert\\\":false}\"", required = true, value = "Value of the blocking condition")
+  @ApiModelProperty(example = "{\"fixedIp\":\"192.168.1.1\",\"invert\":false}", required = true, value = "Value of the blocking condition")
   @JsonProperty("conditionValue")
   @NotNull
   public Object getConditionValue() {
