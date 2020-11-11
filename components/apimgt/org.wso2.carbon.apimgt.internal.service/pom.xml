@@ -177,7 +177,7 @@
                             </configOptions>
                             <output>.</output>
                             <templateDirectory>
-                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates
+                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/swagger-templates
                             </templateDirectory>
                             <skipOverwrite>true</skipOverwrite>
                             <modelNameSuffix>DTO</modelNameSuffix>
