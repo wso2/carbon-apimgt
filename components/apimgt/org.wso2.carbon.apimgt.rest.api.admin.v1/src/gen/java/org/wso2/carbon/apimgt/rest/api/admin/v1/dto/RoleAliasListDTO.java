@@ -31,7 +31,7 @@ public class RoleAliasListDTO   {
   }
 
   
-  @ApiModelProperty(example = "3", value = "The number of role aliases")
+  @ApiModelProperty(example = "1", value = "The number of role aliases")
   @JsonProperty("count")
   public Integer getCount() {
     return count;

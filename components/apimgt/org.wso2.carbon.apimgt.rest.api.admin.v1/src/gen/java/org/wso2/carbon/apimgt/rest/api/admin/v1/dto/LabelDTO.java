@@ -31,7 +31,7 @@ public class LabelDTO   {
   }
 
   
-  @ApiModelProperty(example = "This is not mandatory.Auto generate by code", value = "")
+  @ApiModelProperty(example = "ece92bdc-e1e6-325c-b6f4-656208a041e9", value = "")
   @JsonProperty("id")
   public String getId() {
     return id;
