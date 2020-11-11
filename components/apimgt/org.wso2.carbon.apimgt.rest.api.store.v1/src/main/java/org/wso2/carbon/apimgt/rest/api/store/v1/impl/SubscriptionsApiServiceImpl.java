@@ -260,7 +260,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return newly added subscription as a SubscriptionDTO if successful
      */
     @Override
-    public Response subscriptionsSubscriptionIdPut(SubscriptionDTO body, String subscriptionId, String xWSO2Tenant, MessageContext messageContext) {
+    public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String xWSO2Tenant,
+                                                   MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer;

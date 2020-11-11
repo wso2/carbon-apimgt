@@ -195,8 +195,8 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-codegen-maven-plugin</artifactId>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
@@ -214,26 +214,13 @@
                                 <useBeanValidation>true</useBeanValidation>
                                 <performBeanValidation>true</performBeanValidation>
                             </configOptions>
+                            <generateAliasAsModel>true</generateAliasAsModel>
                             <output>.</output>
                             <templateDirectory>
                                 ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates
                             </templateDirectory>
                             <skipOverwrite>true</skipOverwrite>
                             <modelNameSuffix>DTO</modelNameSuffix>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-apidocs</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>
-                            <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
-                            <templateDirectory>
-                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
-                            </templateDirectory>
-                            <output>${project.build.directory}/apidocs</output>
                         </configuration>
                     </execution>
                 </executions>

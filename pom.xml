@@ -1972,7 +1972,7 @@
         <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
         <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
         <swagger3-codegen-maven-plugin.version>3.0.19</swagger3-codegen-maven-plugin.version>
-        <swagger3.core.version>2.1.2</swagger3.core.version>
+        <swagger3.core.version>2.1.5</swagger3.core.version>
         <javax.enterprise.version>2.0</javax.enterprise.version>
         <jaeger.client.version>0.32.0.wso2v4</jaeger.client.version>
         <zipkin.sender.okhttp3.version>2.12.1</zipkin.sender.okhttp3.version>

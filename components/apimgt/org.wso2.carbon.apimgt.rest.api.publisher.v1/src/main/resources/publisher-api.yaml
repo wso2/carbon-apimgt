@@ -5721,6 +5721,7 @@ paths:
           enum:
           - api
           - subcription
+        style: simple
       - name: If-None-Match
         in: header
         description: |
