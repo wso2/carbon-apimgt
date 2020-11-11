@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -17,22 +17,63 @@
  */
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { FormattedMessage, injectIntl } from 'react-intl';
 import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
+import Icon from '@material-ui/core/Icon';
+import Typography from '@material-ui/core/Typography';
+import MUIDataTable from 'mui-datatables';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import queryString from 'query-string';
+import { Progress } from 'AppComponents/Shared';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import Alert from 'AppComponents/Shared/Alert';
+import ServiceCatalog from 'AppData/ServiceCatalog';
+import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
+import Grid from '@material-ui/core/Grid';
 import Help from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
-import Configurations from 'Config';
 
 const styles = (theme) => ({
-    root: {
-        marginTop: theme.spacing(4),
-        marginLeft: theme.spacing(3),
-        marginRight: theme.spacing(3),
-        width: '100%',
+    contentInside: {
+        padding: theme.spacing(3),
+        paddingTop: theme.spacing(2),
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
+        '& > div[class^="MuiPaper-root-"]': {
+            boxShadow: 'none',
+            backgroundColor: 'transparent',
+        },
+    },
+    serviceNameLink: {
+        display: 'flex',
+        alignItems: 'center',
+        '& span': {
+            marginLeft: theme.spacing(),
+        },
+        '& span.material-icons': {
+            marginLeft: 0,
+            color: '#444',
+            marginRight: theme.spacing(),
+            fontSize: 18,
+        },
+    },
+    buttonStyle: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
+        marginRight: theme.spacing(2),
+    },
+    textStyle: {
+        fontSize: 11,
+    },
+    content: {
+        display: 'flex',
+        flex: 1,
+        flexDirection: 'column',
+        paddingBottom: theme.spacing(3),
     },
     helpDiv: {
         marginTop: theme.spacing(0.5),
@@ -41,152 +82,385 @@ const styles = (theme) => ({
         fontSize: 20,
     },
     horizontalDivider: {
-        marginTop: theme.spacing(4),
+        marginTop: theme.spacing(3),
         borderTop: '0px',
         width: '100%',
     },
-    preview: {
-        height: theme.spacing(18),
-        marginBottom: theme.spacing(5),
-        marginTop: theme.spacing(10),
-    },
-    spacing: {
-        paddingTop: theme.spacing(5),
-        paddingBottom: theme.spacing(5),
-        paddingLeft: theme.spacing(10),
-        paddingRight: theme.spacing(10),
-    },
-    buttonStyle: {
-        color: theme.custom.buttonText,
-        borderColor: theme.custom.buttonBorder,
+    tableStyle: {
+        marginTop: theme.spacing(4),
     },
 });
 
 /**
- * Service Catalog On boarding
+ * Listing for service catalog entries
  *
- * @param {*} props
- * @returns
+ * @class Listing
+ * @extends {React.Component}
  */
-function Listing(props) {
-    const {
-        classes,
-    } = props;
+class Listing extends React.Component {
+    /**
+     * @inheritdoc
+     * @param {*} props properties
+     * @memberof Listing
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            serviceList: null,
+            notFound: true,
+            loading: true,
+        };
+        this.page = 0;
+        this.count = 100;
+        this.rowsPerPage = localStorage.getItem('serviceCatalog.rowsPerPage') || 10;
+        this.updateData = this.updateData.bind(this);
+    }
 
-    return (
-        <div className={classes.root}>
-            <Grid container direction='row' spacing={10}>
-                <Grid item md={11}>
-                    <Typography className={classes.heading} variant='h4'>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.heading'
-                            defaultMessage='Service Catalog'
-                        />
-                    </Typography>
-                </Grid>
-                <Grid item md={1}>
-                    <Tooltip
-                        placement='right'
-                        title={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Listing.help.tooltip'
-                                defaultMessage='The Service Catalog enables API-first Integration'
-                            />
-                        )}
-                    >
-                        <div className={classes.helpDiv}>
-                            <Help className={classes.helpIcon} />
+    componentDidMount() {
+        this.getData();
+    }
+
+    componentDidUpdate(prevProps) {
+        const { query } = this.props;
+        if (query !== prevProps.query) {
+            this.getData();
+        }
+    }
+
+    componentWillUnmount() {
+        // The following is resetting the styles for the mui-datatables
+        const { theme } = this.props;
+        const themeAdditions = {
+            overrides: {
+                MUIDataTable: {
+                    tableRoot: {
+                        display: 'table',
+                        '& tbody': {
+                            display: 'table-row-group',
+                        },
+                        '& thead': {
+                            display: 'table-header-group',
+                        },
+                    },
+                },
+            },
+        };
+        Object.assign(theme, themeAdditions);
+    }
+
+    // Get Services
+    getData = () => {
+        const { intl } = this.props;
+        this.xhrRequest().then((data) => {
+            const { body } = data;
+            const { list, pagination } = body;
+            const { total } = pagination;
+            // When there is a count stored in the localstorage and it's greater than 0
+            // We check if the response in the rest api calls have 0 items.
+            // We remove the local storage and redo the api call
+            if (this.count > 0 && total === 0) {
+                this.page = 0;
+                this.getData();
+            }
+            this.count = total;
+            this.setState({ serviceList: list, notFound: false });
+        }).catch(() => {
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'Error While Loading Services',
+                id: 'ServiceCatalog.Listing.Listing.error.loading',
+            }));
+        }).finally(() => {
+            this.setState({ loading: false });
+        });
+    };
+
+    changePage = (page) => {
+        this.page = page;
+        const { intl } = this.props;
+        this.setState({ loading: true });
+        this.xhrRequest().then((data) => {
+            const { body } = data;
+            const { list } = body;
+            this.setState({
+                serviceList: list,
+                notFound: false,
+            });
+        }).catch(() => {
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'Error While Loading Services',
+                id: 'ServiceCatalog.Listing.Listing.on.change.error.loading',
+            }));
+        })
+            .finally(() => {
+                this.setState({ loading: false });
+            });
+    };
+
+    xhrRequest = () => {
+        const { page, rowsPerPage } = this;
+        const { query } = this.props;
+        if (query) {
+            const composeQuery = queryString.parse(query);
+            composeQuery.limit = this.rowsPerPage;
+            composeQuery.offset = page * rowsPerPage;
+            return ServiceCatalog.searchServices(composeQuery);
+        }
+        return ServiceCatalog.searchServices({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+    };
+
+    /**
+     *
+     * Update Services list if a Service gets deleted
+     * @memberof Listing
+     */
+    updateData() {
+        const { page, rowsPerPage, count } = this;
+        if (count - 1 === rowsPerPage * page && page !== 0) {
+            this.page = page - 1;
+        }
+        this.getData();
+    }
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof Listing
+     */
+    render() {
+        const {
+            intl, classes, query,
+        } = this.props;
+        const { loading } = this.state;
+        const columns = [
+            {
+                name: 'id',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                },
+            },
+            {
+                name: 'name',
+                label: intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Listing.name',
+                    defaultMessage: 'Service',
+                }),
+                options: {
+                    customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
+                        if (tableMeta.rowData) {
+                            const artifact = tableViewObj.state.serviceList[tableMeta.rowIndex];
+                            const serviceName = tableMeta.rowData[1];
+                            const serviceId = tableMeta.rowData[0];
+                            if (artifact) {
+                                return (
+                                    <Link
+                                        to={'/service-catalog/' + serviceId + '/overview'}
+                                        className={classes.serviceNameLink}
+                                    >
+                                        <CustomIcon width={16} height={16} icon='service' strokeColor='#444444' />
+                                        <span>{serviceName}</span>
+                                    </Link>
+                                );
+                            }
+                        }
+                        return <span />;
+                    },
+                    sort: false,
+                    filter: false,
+                },
+            },
+            {
+                name: 'serviceUrl',
+                label: intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Listing.service.url',
+                    defaultMessage: 'Service URL',
+                }),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'definitionType',
+                label: intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Listing.service.type',
+                    defaultMessage: 'Service Type',
+                }),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'definitionType',
+                label: intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Listing.schema.type',
+                    defaultMessage: 'Schema Type',
+                }),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'version',
+                label: intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Listing.version',
+                    defaultMessage: 'Version',
+                }),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'usage',
+                label: intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Listing.usage',
+                    defaultMessage: 'No. Of APIs',
+                }),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                options: {
+                    customBodyRender: (value, tableMeta) => {
+                        if (tableMeta.rowData) {
+                            return (
+                                <Box display='flex' flexDirection='row'>
+                                    <Link>
+                                        <Button color='primary' variant='outlined' className={classes.buttonStyle}>
+                                            <Typography className={classes.textStyle}>
+                                                <FormattedMessage
+                                                    id='ServiceCatalog.Listing.Listing.create.api'
+                                                    defaultMessage='Create API'
+                                                />
+                                            </Typography>
+                                        </Button>
+                                    </Link>
+                                    <Button>
+                                        <Icon>edit</Icon>
+                                    </Button>
+                                    <Button>
+                                        <Icon>delete_forever</Icon>
+                                    </Button>
+                                </Box>
+                            );
+                        }
+                        return false;
+                    },
+                    sort: false,
+                    name: 'actions',
+                    label: '',
+                },
+            },
+        ];
+        const { page, count, rowsPerPage } = this;
+        const {
+            serviceList, notFound,
+        } = this.state;
+        const options = {
+            filterType: 'dropdown',
+            rowsPerPageOptions: [5, 10, 25, 50, 100],
+            responsive: 'stacked',
+            serverSide: true,
+            search: true,
+            count,
+            page,
+            onTableChange: (action, tableState) => {
+                switch (action) {
+                    case 'changePage':
+                        this.changePage(tableState.page);
+                        break;
+                    default:
+                        break;
+                }
+            },
+            selectableRows: 'none',
+            rowsPerPage,
+            onChangeRowsPerPage: (numberOfRows) => {
+                this.rowsPerPage = numberOfRows;
+                if (page * numberOfRows > count) {
+                    this.page = 0;
+                } else if (count - 1 === rowsPerPage * page && page !== 0) {
+                    this.page = page - 1;
+                }
+                localStorage.setItem('serviceCatalog.rowsPerPage', numberOfRows);
+                this.getData();
+            },
+        };
+        options.customRowRender = null;
+        options.title = true;
+        options.filter = false;
+        options.print = true;
+        options.download = true;
+        options.viewColumns = false;
+        if (page === 0 && this.count <= rowsPerPage && rowsPerPage === 10) {
+            options.pagination = false;
+        } else {
+            options.pagination = true;
+        }
+        if (loading || !serviceList) {
+            return <Progress per={90} message='Loading Services ...' />;
+        }
+        if (notFound) {
+            return <ResourceNotFound />;
+        }
+        if (serviceList.length === 0 && !query) {
+            return (
+                <Onboarding />
+            );
+        }
+
+        return (
+            <>
+                <div className={classes.content}>
+                    <div className={classes.contentInside}>
+                        <Grid container direction='row' spacing={10}>
+                            <Grid item md={11}>
+                                <Typography className={classes.heading} variant='h4'>
+                                    <FormattedMessage
+                                        id='ServiceCatalog.Listing.Listing.heading'
+                                        defaultMessage='Service Catalog'
+                                    />
+                                </Typography>
+                            </Grid>
+                            <Grid item md={1}>
+                                <Tooltip
+                                    placement='right'
+                                    title={(
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Listing.help.tooltip'
+                                            defaultMessage='The Service Catalog enables API-first Integration'
+                                        />
+                                    )}
+                                >
+                                    <div className={classes.helpDiv}>
+                                        <Help className={classes.helpIcon} />
+                                    </div>
+                                </Tooltip>
+                            </Grid>
+                        </Grid>
+                        <hr className={classes.horizontalDivider} />
+                        <div className={classes.tableStyle}>
+                            <MUIDataTable title='' data={serviceList} columns={columns} options={options} />
                         </div>
-                    </Tooltip>
-                </Grid>
-            </Grid>
-            <hr className={classes.horizontalDivider} />
-            <Grid container direction='row'>
-                <Grid item md={2} />
-                <Grid item md={4}>
-                    <div align='center'>
-                        <img
-                            className={classes.preview}
-                            src={Configurations.app.context + '/site/public/images/wso2-intg-service-icon.svg'}
-                            alt='Get Started'
-                        />
                     </div>
-                    <Typography className={classes.heading} variant='h4' align='center'>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.Heading1'
-                            defaultMessage='Learn to write your first'
-                        />
-                    </Typography>
-                    <Typography align='center'>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.Heading1.subHeading'
-                            defaultMessage='Integration Service'
-                        />
-                    </Typography>
-                    <Typography align='center' className={classes.spacing}>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.description1'
-                            defaultMessage={'From creating and publishing an API to securing, rate-limiting, addresses'
-                            + ' all aspects of API Management.'}
-                        />
-                    </Typography>
-                    <div align='center'>
-                        <Button className={classes.buttonStyle} variant='outlined'>
-                            <Typography className={classes.heading} variant='h6'>
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Listing.get.started'
-                                    defaultMessage='Get Started'
-                                />
-                            </Typography>
-                        </Button>
-                    </div>
-                </Grid>
-                <Grid item md={4}>
-                    <div align='center'>
-                        <img
-                            className={classes.preview}
-                            src={Configurations.app.context + '/site/public/images/wso2-intg-service-sample-icon.svg'}
-                            alt='Add Sample Service'
-                        />
-                    </div>
-                    <Typography className={classes.heading} variant='h4' align='center'>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.Heading2'
-                            defaultMessage='Add a sample'
-                        />
-                    </Typography>
-                    <Typography align='center'>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.Heading2.subHeading'
-                            defaultMessage='Integration Service'
-                        />
-                    </Typography>
-                    <Typography align='center' className={classes.spacing}>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.description2'
-                            defaultMessage={'From creating and publishing an API to securing, rate-limiting, addresses'
-                            + ' all aspects of API Management.'}
-                        />
-                    </Typography>
-                    <div align='center'>
-                        <Button className={classes.buttonStyle} variant='outlined'>
-                            <Typography className={classes.heading} variant='h6'>
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Listing.add.sample.service'
-                                    defaultMessage='Add Sample Service'
-                                />
-                            </Typography>
-                        </Button>
-                    </div>
-                </Grid>
-                <Grid item md={2} />
-            </Grid>
-        </div>
-    );
+                </div>
+            </>
+        );
+    }
 }
+
+export default injectIntl(withStyles(styles, { withTheme: true })(Listing));
 
 Listing.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func.isRequired }).isRequired,
+    theme: PropTypes.shape({
+        custom: PropTypes.string,
+    }).isRequired,
+    query: PropTypes.string,
 };
 
-export default injectIntl(withStyles(styles, { withTheme: true })(Listing));
+Listing.defaultProps = {
+    query: '',
+};
