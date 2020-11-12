@@ -91,7 +91,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: v1.1
 servers:
-- url: https://localhost:9443/api/am/publisher/v1
+- url: https://apis.wso2.com/api/am/publisher/v1
 - url: http://apis.wso2.com/api/am/publisher/v1
 security:
 - OAuth2Security:
