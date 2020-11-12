@@ -11622,7 +11622,7 @@ public final class APIUtil {
             boolean isOriginalRoleAlreadyInroles = false;
             for (String role: currentRoles) {
                 if (role.equals(entry.getKey())) {
-                    isOriginalRoleAlreadyInroles = true;
+                    isOriginalRoleAlreadyInRoles = true;
                     break;
                 }
             }
@@ -11775,4 +11775,3 @@ public final class APIUtil {
         return false;
     }
 }
-
