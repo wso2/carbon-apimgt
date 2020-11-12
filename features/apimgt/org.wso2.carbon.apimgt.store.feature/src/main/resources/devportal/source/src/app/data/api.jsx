@@ -306,9 +306,9 @@ export default class API extends Resource {
      */
     createApplication(application) {
         return this.client.then((client) => {
-            const payload = { body: application };
+            const payload = { requestBody: application };
             const args = { 'Content-Type': 'application/json' };
-            return client.apis.Applications.post_applications(payload, args);
+            return client.apis.Applications.post_applications({}, payload, args);
         });
     }
 
@@ -320,8 +320,11 @@ export default class API extends Resource {
      */
     updateApplication(application, callback = null) {
         const promiseGet = this.client.then((client) => {
-            const payload = { applicationId: application.applicationId, body: application };
-            return client.apis.Applications.put_applications__applicationId_(payload, this._requestMetaData());
+            const payload = { applicationId: application.applicationId };
+            return client.apis.Applications.put_applications__applicationId_(
+                payload,
+                { requestBody: application },
+                this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -337,8 +340,12 @@ export default class API extends Resource {
      */
     addComment(apiId, comment) {
         return this.client.then((client) => {
-            const payload = { apiId, body: comment };
-            return client.apis.Comments.addCommentToAPI(payload, this._requestMetaData());
+            const payload = { apiId };
+            return client.apis.Comments.addCommentToAPI(
+                payload,
+                { requestBody: comment },
+                this._requestMetaData()
+            );
         });
     }
 
@@ -422,7 +429,8 @@ export default class API extends Resource {
     addRating(apiId, ratingInfo) {
         const promise = this.client.then((client) => {
             return client.apis.Ratings.put_apis__apiId__user_rating(
-                { apiId, body: ratingInfo },
+                { apiId },
+                { requestBody: ratingInfo },
                 this._requestMetaData(),
             );
         }).catch((error) => {
@@ -441,9 +449,10 @@ export default class API extends Resource {
      */
     generateKeys(applicationId, requestContent, callback = null) {
         const promiseGet = this.client.then((client) => {
-            const payload = { applicationId, body: requestContent };
+            const payload = { applicationId };
             return client.apis.Applications.post_applications__applicationId__generate_keys(
                 payload,
+                { requestBody: requestContent },
                 this._requestMetaData(),
             );
         });
@@ -502,13 +511,15 @@ export default class API extends Resource {
         const promiseGet = this.client.then((client) => {
             const payload = {
                 applicationId, keyType,
-                body: {
-                    validityPeriod: validityPeriod,
-                    additionalProperties: restrictions
-                }
             };
             return client.apis['API Keys'].post_applications__applicationId__api_keys__keyType__generate(
                 payload,
+                {
+                    requestBody: {
+                        validityPeriod: validityPeriod,
+                        additionalProperties: restrictions
+                    }
+                },
                 this._requestMetaData(),
             );
         });
@@ -552,8 +563,8 @@ export default class API extends Resource {
                 apiId, applicationId, throttlingPolicy: policy,
             };
 
-            const payload = { body: subscriptionData };
-            return client.apis.Subscriptions.post_subscriptions(payload, { 'Content-Type': 'application/json' });
+            const payload = { requestBody: subscriptionData };
+            return client.apis.Subscriptions.post_subscriptions({}, payload, { 'Content-Type': 'application/json' });
         });
         if (callback) {
             return promiseCreateSubscription.then(callback);
@@ -738,7 +749,11 @@ export default class API extends Resource {
      * */
     subscribeAlerts(alerts) {
         return this.client.then((client) => {
-            return client.apis['Alert Subscriptions'].subscribeToAlerts({ body: alerts }, this._requestMetaData());
+            return client.apis['Alert Subscriptions'].subscribeToAlerts(
+                {},
+                { requestBody: alerts },
+                this._requestMetaData()
+            );
         });
     }
 
@@ -783,8 +798,10 @@ export default class API extends Resource {
             return client.apis['Alert Configuration'].addAlertConfig(
                 {
                     alertType,
-                    body: alertConfig,
                     configurationId: configId,
+                },
+                {
+                    requestBody: alertConfig
                 },
                 this._requestMetaData(),
             );
@@ -870,7 +887,7 @@ export default class API extends Resource {
     changePassword(currentPwd, newPwd, callback = null) {
         const promiseChangePassword = this.client.then((client) => {
             const payload = { currentPassword: currentPwd, newPassword: newPwd };
-            return client.apis.Users.changeUserPassword({ body: payload }, this._requestMetaData());
+            return client.apis.Users.changeUserPassword({}, { requestBody: payload }, this._requestMetaData());
         });
         if (callback) {
             return promiseChangePassword.then(callback);
