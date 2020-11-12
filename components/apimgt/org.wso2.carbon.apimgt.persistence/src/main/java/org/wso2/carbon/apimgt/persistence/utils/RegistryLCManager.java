@@ -17,94 +17,149 @@
  */
 package org.wso2.carbon.apimgt.persistence.utils;
 
-import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.xerces.util.SecurityManager;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.xml.sax.SAXException;
 
 public class RegistryLCManager {
 
-    private static RegistryLCManager regLCManager;
-    private Map<String, List<State>> lcMap = new HashMap<String, List<State>>();
+    private static Log log = LogFactory.getLog(RegistryLCManager.class);
+    private static final int ENTITY_EXPANSION_LIMIT = 0;
     private Map<String, String> stateTransitionMap = new HashMap<String, String>();
+    private HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<String, LifeCycleTransition>();
 
-    private RegistryLCManager() {
-        //TODO parse this using lifecycle.xml
-        List<State> createdList = new ArrayList<RegistryLCManager.State>();
-        createdList.add(new State("Published", "Publish"));
-        createdList.add(new State("Prototyped", "Deploy as a Prototype"));
-        lcMap.put("Created", createdList);
+    public RegistryLCManager(int tenantId)
+            throws RegistryException, XMLStreamException, ParserConfigurationException, SAXException, IOException {
+        UserRegistry registry;
 
-        List<State> prototypedList = new ArrayList<RegistryLCManager.State>();
-        prototypedList.add(new State("Published", "Publish"));
-        prototypedList.add(new State("Prototyped", "Deploy as a Prototype"));
-        prototypedList.add(new State("Created", "Demote to Created"));
-        lcMap.put("Prototyped", prototypedList);
+            registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+            String data = CommonUtil.getLifecycleConfiguration("APILifeCycle", registry);
+            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+            Document doc = builder.parse(inputStream);
+            Element root = doc.getDocumentElement();
 
-        List<State> publishedList = new ArrayList<RegistryLCManager.State>();
-        publishedList.add(new State("Published", "Publish"));
-        publishedList.add(new State("Prototyped", "Deploy as a Prototype"));
-        publishedList.add(new State("Created", "Demote to Created"));
-        publishedList.add(new State("Deprecated", "Deprecate"));
-        publishedList.add(new State("Blocked", "Block"));
-        lcMap.put("Published", publishedList);
-
-        List<State> blockedList = new ArrayList<RegistryLCManager.State>();
-        blockedList.add(new State("Deprecated", "Deprecate"));
-        blockedList.add(new State("Published", "Re-Publish"));
-        lcMap.put("Blocked", blockedList);
-
-        List<State> deprecatedList = new ArrayList<RegistryLCManager.State>();
-        deprecatedList.add(new State("Retired", "Retire"));
-        lcMap.put("Deprecated", deprecatedList);
+            // Get all nodes with state
+            NodeList states = root.getElementsByTagName("state");
+            int nStates = states.getLength();
+            for (int i = 0; i < nStates; i++) {
+                Node node = states.item(i);
+                Node id = node.getAttributes().getNamedItem("id");
+                if (id != null && !id.getNodeValue().isEmpty()) {
+                    LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
+                    NodeList transitions = node.getChildNodes();
+                    int nTransitions = transitions.getLength();
+                    for (int j = 0; j < nTransitions; j++) {
+                        Node transition = transitions.item(j);
+                        // Add transitions
+                        if ("transition".equals(transition.getNodeName())) {
+                            Node target = transition.getAttributes().getNamedItem("target");
+                            Node action = transition.getAttributes().getNamedItem("event");
+                            if (target != null && action != null) {
+                                lifeCycleTransition.addTransition(target.getNodeValue().toUpperCase(),
+                                        action.getNodeValue());
+                                stateTransitionMap.put(action.getNodeValue(), target.getNodeValue().toUpperCase());
+                            }
+                        }
+                    }
+                    stateHashMap.put(id.getNodeValue().toUpperCase(), lifeCycleTransition);
+                }
+            }
         
-        // transitions action -> state
-        stateTransitionMap.put("Publish", "Published");
-        stateTransitionMap.put("Deploy as a Prototype", "Prototyped");
-        stateTransitionMap.put("Demote to Created", "Created");
-        stateTransitionMap.put("Block", "Blocked");
-        stateTransitionMap.put("Deprecate", "Deprecated");
-        stateTransitionMap.put("Re-Publish", "Published");
-        stateTransitionMap.put("Retire", "Retired");
-    }
-
-    public static RegistryLCManager getInstance() {
-        if (regLCManager == null) {
-            regLCManager = new RegistryLCManager();
-        }
-        return regLCManager;
     }
 
     public String getTransitionAction(String currentState, String targetState) {
-        if (lcMap.containsKey(currentState)) {
-            List<State> stateList = lcMap.get(currentState);
-            for (State state : stateList) {
-                if (targetState.equalsIgnoreCase(state.getState())) {
-                    return state.getTransition();
-                }
-            }
+        if (stateHashMap.containsKey(currentState)) {
+            LifeCycleTransition transition = stateHashMap.get(currentState);
+            return transition.getAction(targetState);
         }
         return null;
     }
-    public String getStateForTransition(String action){
+
+    public String getStateForTransition(String action) {
         return stateTransitionMap.get(action);
     }
 
-    class State {
-        private final String state;
-        private final String event;
+    class LifeCycleTransition {
+        private HashMap<String, String> transitions;
 
-        public State(String state, String event) {
-            this.state = state;
-            this.event = event;
+        /**
+         * Initialize class
+         */
+        public LifeCycleTransition() {
+            this.transitions = new HashMap<>();
         }
 
-        public String getState() {
-            return state;
+        /**
+         * Returns action required to transit to state.
+         *
+         * @param state State to get action
+         * @return lifecycle action associated or null if not found
+         */
+        public String getAction(String state) {
+            if (!transitions.containsKey(state)) {
+                return null;
+            }
+            return transitions.get(state);
         }
 
-        public String getTransition() {
-            return event;
+        /**
+         * Adds a transition.
+         *
+         * @param targetStatus target status
+         * @param action action associated with target
+         */
+        public void addTransition(String targetStatus, String action) {
+            transitions.put(targetStatus, action);
         }
+    }
+
+    /**
+     * Returns a secured DocumentBuilderFactory instance
+     *
+     * @return DocumentBuilderFactory
+     */
+    public static DocumentBuilderFactory getSecuredDocumentBuilder() {
+
+        org.apache.xerces.impl.Constants Constants = null;
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        dbf.setXIncludeAware(false);
+        dbf.setExpandEntityReferences(false);
+        try {
+            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
+            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
+            dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
+        } catch (ParserConfigurationException e) {
+            log.error("Failed to load XML Processor Feature " + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE + " or "
+                    + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE + " or " + Constants.LOAD_EXTERNAL_DTD_FEATURE);
+        }
+
+        SecurityManager securityManager = new SecurityManager();
+        securityManager.setEntityExpansionLimit(ENTITY_EXPANSION_LIMIT);
+        dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
+
+        return dbf;
     }
 }

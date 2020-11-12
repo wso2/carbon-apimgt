@@ -152,6 +152,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
@@ -6562,7 +6563,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //RegistryLCManager.getInstance().getStateForTransition(action);
                     //apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     //targetStatus = apiArtifact.getLifecycleState();
-                    targetStatus = RegistryLCManager.getInstance().getStateForTransition(action);
+                    targetStatus = LCManagerFactory.getLCManager(tenantId).getStateForTransition(action);
                     apiPersistenceInstance.changeAPILifeCycle(new Organization(tenantDomain), uuid, targetStatus);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
                     if (!currentStatus.equalsIgnoreCase(targetStatus)) {

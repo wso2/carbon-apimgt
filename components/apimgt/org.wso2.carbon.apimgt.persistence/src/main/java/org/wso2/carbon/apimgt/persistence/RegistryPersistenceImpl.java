@@ -405,8 +405,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (GovernanceUtils.findGovernanceArtifactConfiguration(APIConstants.API_KEY, registry) != null) {
                 artifactManager = new GenericArtifactManager(registry, APIConstants.API_KEY);
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
-                String action = RegistryLCManager.getInstance().getTransitionAction(apiArtifact.getLifecycleState(),
-                        status);
+                String action = LCManagerFactory.getLCManager(tenantId)
+                        .getTransitionAction(apiArtifact.getLifecycleState().toUpperCase(), status.toUpperCase());
                 apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
             } else {
                 log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + APIConstants.API_KEY +
