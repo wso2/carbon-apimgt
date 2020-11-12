@@ -33,84 +33,25 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApplicationsApiService {
-      public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId
-, String keyType
-, String ifMatch
-, APIKeyGenerateRequestDTO body
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId
-, String keyType
-, String ifMatch
-, APIKeyRevokeRequestDTO body
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdDelete(String applicationId
-, String ifMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdGenerateKeysPost(String applicationId
-, ApplicationKeyGenerateRequestDTO body
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdGet(String applicationId
-, String ifNoneMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdKeysGet(String applicationId
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdKeysKeyTypeCleanUpPost(String applicationId
-, String keyType
-, String ifMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId
-, String keyType
-, ApplicationTokenGenerateRequestDTO body
-, String ifMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId
-, String keyType
-, String groupId
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdKeysKeyTypePut(String applicationId
-, String keyType
-, ApplicationKeyDTO body
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(String applicationId
-, String keyType
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdMapKeysPost(String applicationId
-, ApplicationKeyMappingRequestDTO body
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdOauthKeysGet(String applicationId
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost(String applicationId
-, String keyMappingId
-, String ifMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost(String applicationId
-, String keyMappingId
-, ApplicationTokenGenerateRequestDTO body
-, String ifMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(String applicationId
-, String keyMappingId
-, String groupId
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdOauthKeysKeyMappingIdPut(String applicationId
-, String keyMappingId
-, ApplicationKeyDTO body
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost(String applicationId
-, String keyMappingId
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdPut(String applicationId
-, ApplicationDTO body
-, String ifMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsGet(String groupId
-, String query
-, String sortBy
-, String sortOrder
-, Integer limit
-, Integer offset
-, String ifNoneMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsPost(ApplicationDTO body
-, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType, String ifMatch, APIKeyGenerateRequestDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, String ifMatch, APIKeyRevokeRequestDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdKeysGet(String applicationId, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdKeysKeyTypeCleanUpPost(String applicationId, String keyType, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId, String keyType, ApplicationTokenGenerateRequestDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType, String groupId, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType, ApplicationKeyDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(String applicationId, String keyType, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdOauthKeysGet(String applicationId, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost(String applicationId, String keyMappingId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost(String applicationId, String keyMappingId, ApplicationTokenGenerateRequestDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(String applicationId, String keyMappingId, String groupId, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdOauthKeysKeyMappingIdPut(String applicationId, String keyMappingId, ApplicationKeyDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost(String applicationId, String keyMappingId, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsPost(ApplicationDTO body, MessageContext messageContext) throws APIManagementException;
 }

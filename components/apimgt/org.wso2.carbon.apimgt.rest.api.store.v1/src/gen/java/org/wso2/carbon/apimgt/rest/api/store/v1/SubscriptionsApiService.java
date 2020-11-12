@@ -25,30 +25,11 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SubscriptionsApiService {
-      public Response subscriptionsGet(String apiId
-, String applicationId
-, String groupId
-, String xWSO2Tenant
-, Integer offset
-, Integer limit
-, String ifNoneMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response subscriptionsMultiplePost(List<SubscriptionDTO> body
-, String xWSO2Tenant
-, MessageContext messageContext) throws APIManagementException;
-      public Response subscriptionsPost(SubscriptionDTO body
-, String xWSO2Tenant
-, MessageContext messageContext) throws APIManagementException;
-      public Response subscriptionsSubscriptionIdDelete(String subscriptionId
-, String ifMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response subscriptionsSubscriptionIdGet(String subscriptionId
-, String ifNoneMatch
-, MessageContext messageContext) throws APIManagementException;
-      public Response subscriptionsSubscriptionIdPut(String subscriptionId
-, SubscriptionDTO body
-, String xWSO2Tenant
-, MessageContext messageContext) throws APIManagementException;
-      public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId
-, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsGet(String apiId, String applicationId, String groupId, String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsPost(SubscriptionDTO body, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext) throws APIManagementException;
 }

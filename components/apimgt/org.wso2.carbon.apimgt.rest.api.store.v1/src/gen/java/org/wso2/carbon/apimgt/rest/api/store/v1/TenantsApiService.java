@@ -21,8 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface TenantsApiService {
-      public Response tenantsGet(String state
-, Integer limit
-, Integer offset
-, MessageContext messageContext) throws APIManagementException;
+      public Response tenantsGet(String state, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
 }

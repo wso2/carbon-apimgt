@@ -21,9 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface TagsApiService {
-      public Response tagsGet(Integer limit
-, Integer offset
-, String xWSO2Tenant
-, String ifNoneMatch
-, MessageContext messageContext) throws APIManagementException;
+      public Response tagsGet(Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
 }

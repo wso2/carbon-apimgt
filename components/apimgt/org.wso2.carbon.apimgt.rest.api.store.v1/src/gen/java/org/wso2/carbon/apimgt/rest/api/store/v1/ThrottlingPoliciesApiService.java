@@ -22,15 +22,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ThrottlingPoliciesApiService {
-      public Response throttlingPoliciesPolicyLevelGet(String policyLevel
-, Integer limit
-, Integer offset
-, String ifNoneMatch
-, String xWSO2Tenant
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesPolicyLevelPolicyIdGet(String policyId
-, String policyLevel
-, String xWSO2Tenant
-, String ifNoneMatch
-, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesPolicyLevelGet(String policyLevel, Integer limit, Integer offset, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesPolicyLevelPolicyIdGet(String policyId, String policyLevel, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
 }

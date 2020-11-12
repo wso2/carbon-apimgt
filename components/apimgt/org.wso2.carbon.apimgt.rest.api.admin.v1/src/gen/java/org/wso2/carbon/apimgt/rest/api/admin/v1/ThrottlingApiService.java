@@ -31,109 +31,29 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ThrottlingApiService {
-      public Response throttlingBlacklistConditionIdDelete(String conditionId
-, String ifMatch
-, String ifUnmodifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingBlacklistConditionIdGet(String conditionId
-, String ifNoneMatch
-, String ifModifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingBlacklistConditionIdPatch(String conditionId
-, String contentType
-, BlockingConditionStatusDTO body
-, String ifMatch
-, String ifUnmodifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingBlacklistGet(String accept
-, String ifNoneMatch
-, String ifModifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingBlacklistPost(String contentType
-, BlockingConditionDTO body
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesAdvancedGet(String accept
-, String ifNoneMatch
-, String ifModifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId
-, String ifMatch
-, String ifUnmodifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesAdvancedPolicyIdGet(String policyId
-, String ifNoneMatch
-, String ifModifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesAdvancedPolicyIdPut(String policyId
-, String contentType
-, AdvancedThrottlePolicyDTO body
-, String ifMatch
-, String ifUnmodifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesAdvancedPost(String contentType
-, AdvancedThrottlePolicyDTO body
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesApplicationGet(String accept
-, String ifNoneMatch
-, String ifModifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesApplicationPolicyIdDelete(String policyId
-, String ifMatch
-, String ifUnmodifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesApplicationPolicyIdGet(String policyId
-, String ifNoneMatch
-, String ifModifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesApplicationPolicyIdPut(String policyId
-, String contentType
-, ApplicationThrottlePolicyDTO body
-, String ifMatch
-, String ifUnmodifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesApplicationPost(String contentType
-, ApplicationThrottlePolicyDTO body
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesCustomGet(String accept
-, String ifNoneMatch
-, String ifModifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesCustomPost(String contentType
-, CustomRuleDTO body
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesCustomRuleIdDelete(String ruleId
-, String ifMatch
-, String ifUnmodifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesCustomRuleIdGet(String ruleId
-, String ifNoneMatch
-, String ifModifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesCustomRuleIdPut(String ruleId
-, String contentType
-, CustomRuleDTO body
-, String ifMatch
-, String ifUnmodifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesSubscriptionGet(String accept
-, String ifNoneMatch
-, String ifModifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesSubscriptionPolicyIdDelete(String policyId
-, String ifMatch
-, String ifUnmodifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesSubscriptionPolicyIdGet(String policyId
-, String ifNoneMatch
-, String ifModifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId
-, String contentType
-, SubscriptionThrottlePolicyDTO body
-, String ifMatch
-, String ifUnmodifiedSince
-, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesSubscriptionPost(String contentType
-, SubscriptionThrottlePolicyDTO body
-, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingBlacklistConditionIdDelete(String conditionId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingBlacklistConditionIdGet(String conditionId, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingBlacklistConditionIdPatch(String conditionId, String contentType, BlockingConditionStatusDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingBlacklistGet(String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingBlacklistPost(String contentType, BlockingConditionDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesAdvancedGet(String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesAdvancedPolicyIdGet(String policyId, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesAdvancedPolicyIdPut(String policyId, String contentType, AdvancedThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesAdvancedPost(String contentType, AdvancedThrottlePolicyDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesApplicationGet(String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesApplicationPolicyIdDelete(String policyId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesApplicationPolicyIdGet(String policyId, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesApplicationPolicyIdPut(String policyId, String contentType, ApplicationThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesApplicationPost(String contentType, ApplicationThrottlePolicyDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesCustomGet(String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesCustomPost(String contentType, CustomRuleDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesCustomRuleIdDelete(String ruleId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesCustomRuleIdGet(String ruleId, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesCustomRuleIdPut(String ruleId, String contentType, CustomRuleDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesSubscriptionGet(String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesSubscriptionPolicyIdDelete(String policyId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesSubscriptionPolicyIdGet(String policyId, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, String contentType, SubscriptionThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingPoliciesSubscriptionPost(String contentType, SubscriptionThrottlePolicyDTO body, MessageContext messageContext) throws APIManagementException;
 }

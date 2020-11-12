@@ -20,6 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface MeApiService {
-      public Response validateUserRole(String roleId
-, MessageContext messageContext) throws APIManagementException;
+      public Response validateUserRole(String roleId, MessageContext messageContext) throws APIManagementException;
 }

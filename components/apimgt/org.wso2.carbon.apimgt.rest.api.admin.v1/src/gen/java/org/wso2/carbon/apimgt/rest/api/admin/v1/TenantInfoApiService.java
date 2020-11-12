@@ -21,6 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface TenantInfoApiService {
-      public Response getTenantInfoByUsername(String username
-, MessageContext messageContext) throws APIManagementException;
+      public Response getTenantInfoByUsername(String username, MessageContext messageContext) throws APIManagementException;
 }
