@@ -10011,6 +10011,7 @@ components:
         name:
           maxLength: 50
           minLength: 1
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+]*$)'
           type: string
           example: PizzaShackAPI
         description:
@@ -10026,6 +10027,7 @@ components:
           maxLength: 30
           minLength: 1
           type: string
+          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$]+$'
           example: 1.0.0
         provider:
           maxLength: 50
