@@ -199,7 +199,14 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         }
 
         String resourceList = validationContext.getMatchingResource();
-        List<String> resourceArray = new ArrayList<>(Arrays.asList(resourceList.split(",")));
+        List<String> resourceArray;
+        if ((validationContext.getHttpVerb().equals(APIConstants.GRAPHQL_QUERY))
+                || (validationContext.getHttpVerb().equals(APIConstants.GRAPHQL_MUTATION))
+                || (validationContext.getHttpVerb().equals(APIConstants.GRAPHQL_SUBSCRIPTION))) {
+            resourceArray = new ArrayList<>(Arrays.asList(resourceList.split(",")));
+        } else {
+            resourceArray = new ArrayList<>(Arrays.asList(resourceList));
+        }
         SubscriptionDataStore tenantSubscriptionStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         API api = tenantSubscriptionStore.getApiByContextAndVersion(validationContext.getContext(),
