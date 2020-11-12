@@ -314,9 +314,10 @@ public interface APIProvider extends APIManager {
      * Adds a new API to the Store
      *
      * @param api API
+     * @return added api
      * @throws APIManagementException if failed to add API
      */
-    void addAPI(API api) throws APIManagementException;
+    API addAPI(API api) throws APIManagementException;
 
     public boolean isAPIUpdateValid(API api) throws APIManagementException;
 
