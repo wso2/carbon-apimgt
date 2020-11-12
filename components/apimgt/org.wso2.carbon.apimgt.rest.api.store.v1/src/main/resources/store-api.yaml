@@ -5788,6 +5788,7 @@ components:
           maxLength: 70
           minLength: 1
           type: string
+          pattern: '^[a-zA-Z0-9 ._-]*$'
           example: CalculatorApp
         throttlingPolicy:
           minLength: 1
