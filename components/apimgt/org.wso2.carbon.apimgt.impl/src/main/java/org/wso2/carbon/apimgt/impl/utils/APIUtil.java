@@ -11627,7 +11627,7 @@ public final class APIUtil {
                 }
             }
 
-            if (!isOriginalRoleAlreadyInroles) {
+            if (!isOriginalRoleAlreadyInRoles) {
                 String newRoles = entry.getKey() + "," + entry.getValue();
                 newRoleMappingJson.replace(entry.getKey(), entry.getValue(), newRoles);
             }
