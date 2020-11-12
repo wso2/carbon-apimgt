@@ -103,6 +103,7 @@
   "Apis.Details.Environments.download.swagger.error": "Error downloading the Swagger",
   "Apis.Details.Environments.download.wsdl": "WSDL",
   "Apis.Details.Environments.download.wsdl.error": "Error downloading the Swagger",
+  "Apis.Details.GraphQLConsole.GraphQLConsole.download.postman": "Postman collection",
   "Apis.Details.GraphQLConsole.GraphQLConsole.title": "Try Out",
   "Apis.Details.GraphQLConsole.GraphQLUI.URLs": "Gateway URLs",
   "Apis.Details.GraphQLConsole.QueryComplexityView.title": "Custom Complexity Values",
