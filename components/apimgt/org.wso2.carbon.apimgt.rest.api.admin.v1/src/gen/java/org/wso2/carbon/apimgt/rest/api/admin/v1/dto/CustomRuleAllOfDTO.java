@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleAllOfDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
 import javax.validation.constraints.*;
 
 
@@ -20,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class CustomRuleDTO extends ThrottlePolicyDTO  {
+public class CustomRuleAllOfDTO   {
   
     private String siddhiQuery = null;
     private String keyTemplate = null;
@@ -28,7 +26,7 @@ public class CustomRuleDTO extends ThrottlePolicyDTO  {
   /**
    * Siddhi query which represents the custom throttling policy
    **/
-  public CustomRuleDTO siddhiQuery(String siddhiQuery) {
+  public CustomRuleAllOfDTO siddhiQuery(String siddhiQuery) {
     this.siddhiQuery = siddhiQuery;
     return this;
   }
@@ -47,7 +45,7 @@ public class CustomRuleDTO extends ThrottlePolicyDTO  {
   /**
    * The specific combination of attributes that are checked in the policy.
    **/
-  public CustomRuleDTO keyTemplate(String keyTemplate) {
+  public CustomRuleAllOfDTO keyTemplate(String keyTemplate) {
     this.keyTemplate = keyTemplate;
     return this;
   }
@@ -72,9 +70,9 @@ public class CustomRuleDTO extends ThrottlePolicyDTO  {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CustomRuleDTO customRule = (CustomRuleDTO) o;
-    return Objects.equals(siddhiQuery, customRule.siddhiQuery) &&
-        Objects.equals(keyTemplate, customRule.keyTemplate);
+    CustomRuleAllOfDTO customRuleAllOf = (CustomRuleAllOfDTO) o;
+    return Objects.equals(siddhiQuery, customRuleAllOf.siddhiQuery) &&
+        Objects.equals(keyTemplate, customRuleAllOf.keyTemplate);
   }
 
   @Override
@@ -85,8 +83,8 @@ public class CustomRuleDTO extends ThrottlePolicyDTO  {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CustomRuleDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("class CustomRuleAllOfDTO {\n");
+    
     sb.append("    siddhiQuery: ").append(toIndentedString(siddhiQuery)).append("\n");
     sb.append("    keyTemplate: ").append(toIndentedString(keyTemplate)).append("\n");
     sb.append("}");

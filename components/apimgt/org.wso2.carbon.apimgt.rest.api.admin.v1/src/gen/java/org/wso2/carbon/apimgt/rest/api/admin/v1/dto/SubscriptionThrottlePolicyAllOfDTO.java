@@ -7,12 +7,9 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GraphQLQueryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyAllOfDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
 import javax.validation.constraints.*;
 
 
@@ -27,10 +24,8 @@ import javax.validation.Valid;
 
 
 
-public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
+public class SubscriptionThrottlePolicyAllOfDTO   {
   
-    private Integer graphQLMaxComplexity = null;
-    private Integer graphQLMaxDepth = null;
     private ThrottleLimitDTO defaultLimit = null;
     private MonetizationInfoDTO monetization = null;
     private Integer rateLimitCount = null;
@@ -41,44 +36,8 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     private SubscriptionThrottlePolicyPermissionDTO permissions = null;
 
   /**
-   * Maximum Complexity of the GraphQL query
    **/
-  public SubscriptionThrottlePolicyDTO graphQLMaxComplexity(Integer graphQLMaxComplexity) {
-    this.graphQLMaxComplexity = graphQLMaxComplexity;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "400", value = "Maximum Complexity of the GraphQL query")
-  @JsonProperty("graphQLMaxComplexity")
-  public Integer getGraphQLMaxComplexity() {
-    return graphQLMaxComplexity;
-  }
-  public void setGraphQLMaxComplexity(Integer graphQLMaxComplexity) {
-    this.graphQLMaxComplexity = graphQLMaxComplexity;
-  }
-
-  /**
-   * Maximum Depth of the GraphQL query
-   **/
-  public SubscriptionThrottlePolicyDTO graphQLMaxDepth(Integer graphQLMaxDepth) {
-    this.graphQLMaxDepth = graphQLMaxDepth;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "10", value = "Maximum Depth of the GraphQL query")
-  @JsonProperty("graphQLMaxDepth")
-  public Integer getGraphQLMaxDepth() {
-    return graphQLMaxDepth;
-  }
-  public void setGraphQLMaxDepth(Integer graphQLMaxDepth) {
-    this.graphQLMaxDepth = graphQLMaxDepth;
-  }
-
-  /**
-   **/
-  public SubscriptionThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+  public SubscriptionThrottlePolicyAllOfDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
     return this;
   }
@@ -97,7 +56,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
 
   /**
    **/
-  public SubscriptionThrottlePolicyDTO monetization(MonetizationInfoDTO monetization) {
+  public SubscriptionThrottlePolicyAllOfDTO monetization(MonetizationInfoDTO monetization) {
     this.monetization = monetization;
     return this;
   }
@@ -116,7 +75,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   /**
    * Burst control request count
    **/
-  public SubscriptionThrottlePolicyDTO rateLimitCount(Integer rateLimitCount) {
+  public SubscriptionThrottlePolicyAllOfDTO rateLimitCount(Integer rateLimitCount) {
     this.rateLimitCount = rateLimitCount;
     return this;
   }
@@ -134,7 +93,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   /**
    * Burst control time unit
    **/
-  public SubscriptionThrottlePolicyDTO rateLimitTimeUnit(String rateLimitTimeUnit) {
+  public SubscriptionThrottlePolicyAllOfDTO rateLimitTimeUnit(String rateLimitTimeUnit) {
     this.rateLimitTimeUnit = rateLimitTimeUnit;
     return this;
   }
@@ -152,7 +111,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   /**
    * Custom attributes added to the Subscription Throttling Policy 
    **/
-  public SubscriptionThrottlePolicyDTO customAttributes(List<CustomAttributeDTO> customAttributes) {
+  public SubscriptionThrottlePolicyAllOfDTO customAttributes(List<CustomAttributeDTO> customAttributes) {
     this.customAttributes = customAttributes;
     return this;
   }
@@ -171,7 +130,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   /**
    * This indicates the action to be taken when a user goes beyond the allocated quota. If checked, the user&#39;s requests will be dropped. If unchecked, the requests will be allowed to pass through. 
    **/
-  public SubscriptionThrottlePolicyDTO stopOnQuotaReach(Boolean stopOnQuotaReach) {
+  public SubscriptionThrottlePolicyAllOfDTO stopOnQuotaReach(Boolean stopOnQuotaReach) {
     this.stopOnQuotaReach = stopOnQuotaReach;
     return this;
   }
@@ -189,7 +148,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   /**
    * define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. 
    **/
-  public SubscriptionThrottlePolicyDTO billingPlan(String billingPlan) {
+  public SubscriptionThrottlePolicyAllOfDTO billingPlan(String billingPlan) {
     this.billingPlan = billingPlan;
     return this;
   }
@@ -206,7 +165,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
 
   /**
    **/
-  public SubscriptionThrottlePolicyDTO permissions(SubscriptionThrottlePolicyPermissionDTO permissions) {
+  public SubscriptionThrottlePolicyAllOfDTO permissions(SubscriptionThrottlePolicyPermissionDTO permissions) {
     this.permissions = permissions;
     return this;
   }
@@ -231,31 +190,27 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SubscriptionThrottlePolicyDTO subscriptionThrottlePolicy = (SubscriptionThrottlePolicyDTO) o;
-    return Objects.equals(graphQLMaxComplexity, subscriptionThrottlePolicy.graphQLMaxComplexity) &&
-        Objects.equals(graphQLMaxDepth, subscriptionThrottlePolicy.graphQLMaxDepth) &&
-        Objects.equals(defaultLimit, subscriptionThrottlePolicy.defaultLimit) &&
-        Objects.equals(monetization, subscriptionThrottlePolicy.monetization) &&
-        Objects.equals(rateLimitCount, subscriptionThrottlePolicy.rateLimitCount) &&
-        Objects.equals(rateLimitTimeUnit, subscriptionThrottlePolicy.rateLimitTimeUnit) &&
-        Objects.equals(customAttributes, subscriptionThrottlePolicy.customAttributes) &&
-        Objects.equals(stopOnQuotaReach, subscriptionThrottlePolicy.stopOnQuotaReach) &&
-        Objects.equals(billingPlan, subscriptionThrottlePolicy.billingPlan) &&
-        Objects.equals(permissions, subscriptionThrottlePolicy.permissions);
+    SubscriptionThrottlePolicyAllOfDTO subscriptionThrottlePolicyAllOf = (SubscriptionThrottlePolicyAllOfDTO) o;
+    return Objects.equals(defaultLimit, subscriptionThrottlePolicyAllOf.defaultLimit) &&
+        Objects.equals(monetization, subscriptionThrottlePolicyAllOf.monetization) &&
+        Objects.equals(rateLimitCount, subscriptionThrottlePolicyAllOf.rateLimitCount) &&
+        Objects.equals(rateLimitTimeUnit, subscriptionThrottlePolicyAllOf.rateLimitTimeUnit) &&
+        Objects.equals(customAttributes, subscriptionThrottlePolicyAllOf.customAttributes) &&
+        Objects.equals(stopOnQuotaReach, subscriptionThrottlePolicyAllOf.stopOnQuotaReach) &&
+        Objects.equals(billingPlan, subscriptionThrottlePolicyAllOf.billingPlan) &&
+        Objects.equals(permissions, subscriptionThrottlePolicyAllOf.permissions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(graphQLMaxComplexity, graphQLMaxDepth, defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, customAttributes, stopOnQuotaReach, billingPlan, permissions);
+    return Objects.hash(defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, customAttributes, stopOnQuotaReach, billingPlan, permissions);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SubscriptionThrottlePolicyDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
-    sb.append("    graphQLMaxComplexity: ").append(toIndentedString(graphQLMaxComplexity)).append("\n");
-    sb.append("    graphQLMaxDepth: ").append(toIndentedString(graphQLMaxDepth)).append("\n");
+    sb.append("class SubscriptionThrottlePolicyAllOfDTO {\n");
+    
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");

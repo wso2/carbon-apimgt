@@ -21,5 +21,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface CustomUrlsApiService {
-      public Response getCustomUrlInfoByTenantDomain(String tenantDomain, MessageContext messageContext) throws APIManagementException;
+      public Response getCustomUrlInfoByTenantDomain(String tenantDomain
+, MessageContext messageContext) throws APIManagementException;
 }

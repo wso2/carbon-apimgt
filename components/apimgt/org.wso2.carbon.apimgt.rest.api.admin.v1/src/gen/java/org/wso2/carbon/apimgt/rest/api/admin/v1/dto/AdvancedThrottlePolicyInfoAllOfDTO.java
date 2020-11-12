@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,45 +19,26 @@ import javax.validation.Valid;
 
 
 
-public class APIInfoListDTO   {
+public class AdvancedThrottlePolicyInfoAllOfDTO   {
   
-    private Integer count = null;
-    private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
-
-  /**
-   * Number of API Info objects returned. 
-   **/
-  public APIInfoListDTO count(Integer count) {
-    this.count = count;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "1", value = "Number of API Info objects returned. ")
-  @JsonProperty("count")
-  public Integer getCount() {
-    return count;
-  }
-  public void setCount(Integer count) {
-    this.count = count;
-  }
+    private ThrottleLimitDTO defaultLimit = null;
 
   /**
    **/
-  public APIInfoListDTO list(List<APIInfoDTO> list) {
-    this.list = list;
+  public AdvancedThrottlePolicyInfoAllOfDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("list")
-  public List<APIInfoDTO> getList() {
-    return list;
+  @JsonProperty("defaultLimit")
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
   }
-  public void setList(List<APIInfoDTO> list) {
-    this.list = list;
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
   }
 
 
@@ -71,23 +50,21 @@ public class APIInfoListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIInfoListDTO apIInfoList = (APIInfoListDTO) o;
-    return Objects.equals(count, apIInfoList.count) &&
-        Objects.equals(list, apIInfoList.list);
+    AdvancedThrottlePolicyInfoAllOfDTO advancedThrottlePolicyInfoAllOf = (AdvancedThrottlePolicyInfoAllOfDTO) o;
+    return Objects.equals(defaultLimit, advancedThrottlePolicyInfoAllOf.defaultLimit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, list);
+    return Objects.hash(defaultLimit);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIInfoListDTO {\n");
+    sb.append("class AdvancedThrottlePolicyInfoAllOfDTO {\n");
     
-    sb.append("    count: ").append(toIndentedString(count)).append("\n");
-    sb.append("    list: ").append(toIndentedString(list)).append("\n");
+    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyAllOfDTO;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConditionalGroupDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,13 +22,14 @@ import javax.validation.Valid;
 
 
 
-public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO  {
+public class AdvancedThrottlePolicyAllOfDTO   {
   
     private ThrottleLimitDTO defaultLimit = null;
+    private List<ConditionalGroupDTO> conditionalGroups = new ArrayList<ConditionalGroupDTO>();
 
   /**
    **/
-  public ApplicationThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+  public AdvancedThrottlePolicyAllOfDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
     return this;
   }
@@ -44,6 +46,25 @@ public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO  {
     this.defaultLimit = defaultLimit;
   }
 
+  /**
+   * Group of conditions which allow adding different parameter conditions to the throttling limit. 
+   **/
+  public AdvancedThrottlePolicyAllOfDTO conditionalGroups(List<ConditionalGroupDTO> conditionalGroups) {
+    this.conditionalGroups = conditionalGroups;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Group of conditions which allow adding different parameter conditions to the throttling limit. ")
+      @Valid
+  @JsonProperty("conditionalGroups")
+  public List<ConditionalGroupDTO> getConditionalGroups() {
+    return conditionalGroups;
+  }
+  public void setConditionalGroups(List<ConditionalGroupDTO> conditionalGroups) {
+    this.conditionalGroups = conditionalGroups;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -53,21 +74,23 @@ public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO  {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ApplicationThrottlePolicyDTO applicationThrottlePolicy = (ApplicationThrottlePolicyDTO) o;
-    return Objects.equals(defaultLimit, applicationThrottlePolicy.defaultLimit);
+    AdvancedThrottlePolicyAllOfDTO advancedThrottlePolicyAllOf = (AdvancedThrottlePolicyAllOfDTO) o;
+    return Objects.equals(defaultLimit, advancedThrottlePolicyAllOf.defaultLimit) &&
+        Objects.equals(conditionalGroups, advancedThrottlePolicyAllOf.conditionalGroups);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(defaultLimit);
+    return Objects.hash(defaultLimit, conditionalGroups);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApplicationThrottlePolicyDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("class AdvancedThrottlePolicyAllOfDTO {\n");
+    
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
+    sb.append("    conditionalGroups: ").append(toIndentedString(conditionalGroups)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -98,8 +98,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Created policy along with the location of it with Location header
      */
     @Override
-    public Response throttlingPoliciesAdvancedPost(AdvancedThrottlePolicyDTO body, String contentType,
-                                                   MessageContext messageContext) throws APIManagementException {
+    public Response throttlingPoliciesAdvancedPost(String contentType, AdvancedThrottlePolicyDTO body,
+                                               MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
@@ -180,9 +180,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesAdvancedPolicyIdPut(String policyId, AdvancedThrottlePolicyDTO body,
-                                                          String contentType, String ifMatch,
-                                                          String ifUnmodifiedSince, MessageContext messageContext) {
+    public Response throttlingPoliciesAdvancedPolicyIdPut(String policyId, String contentType,
+              AdvancedThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
@@ -290,7 +289,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Newly created Application Throttle Policy with the location with the Location header
      */
     @Override
-    public Response throttlingPoliciesApplicationPost(ApplicationThrottlePolicyDTO body, String contentType,
+    public Response throttlingPoliciesApplicationPost(String contentType, ApplicationThrottlePolicyDTO body,
                                                       MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
@@ -375,9 +374,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesApplicationPolicyIdPut(String policyId, ApplicationThrottlePolicyDTO body,
-                                                             String contentType, String ifMatch,
-                                                             String ifUnmodifiedSince, MessageContext messageContext) {
+    public Response throttlingPoliciesApplicationPolicyIdPut(String policyId, String contentType,
+         ApplicationThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
@@ -486,8 +484,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Created policy along with the location of it with Location header
      */
     @Override
-    public Response throttlingPoliciesSubscriptionPost(SubscriptionThrottlePolicyDTO body, String contentType,
-                                                       MessageContext messageContext) throws APIManagementException {
+    public Response throttlingPoliciesSubscriptionPost(String contentType, SubscriptionThrottlePolicyDTO body,
+                                               MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
@@ -641,9 +639,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, SubscriptionThrottlePolicyDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext)
-            throws APIManagementException{
+    public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, String contentType,
+                      SubscriptionThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince,
+                      MessageContext messageContext) throws APIManagementException{
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
@@ -767,8 +765,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Created policy along with the location of it with Location header
      */
     @Override
-    public Response throttlingPoliciesCustomPost(CustomRuleDTO body, String contentType,
-                                                 MessageContext messageContext) throws APIManagementException {
+    public Response throttlingPoliciesCustomPost(String contentType, CustomRuleDTO body, MessageContext messageContext)
+                                                                throws APIManagementException {
 
         RestApiAdminUtils
                 .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
@@ -855,9 +853,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesCustomRuleIdPut(String ruleId, CustomRuleDTO body, String contentType,
-                                                      String ifMatch, String ifUnmodifiedSince,
-                                                      MessageContext messageContext) throws APIManagementException {
+    public Response throttlingPoliciesCustomRuleIdPut(String ruleId, String contentType, CustomRuleDTO body,
+                    String ifMatch, String ifUnmodifiedSince, MessageContext messageContext)
+                    throws APIManagementException {
 
         RestApiAdminUtils
                 .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
@@ -967,7 +965,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Created block condition along with the location of it with Location header
      */
     @Override
-    public Response throttlingBlacklistPost(BlockingConditionDTO body, String contentType,
+    public Response throttlingBlacklistPost(String contentType, BlockingConditionDTO body,
                                             MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -1098,9 +1096,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return 200 response if successful
      */
     @Override
-    public Response throttlingBlacklistConditionIdPatch(String conditionId, BlockingConditionStatusDTO body,
-                                                        String contentType, String ifMatch, String ifUnmodifiedSince,
-                                                        MessageContext messageContext) {
+    public Response throttlingBlacklistConditionIdPatch(String conditionId, String contentType,
+            BlockingConditionStatusDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();

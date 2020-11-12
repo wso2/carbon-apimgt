@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/tenant-theme")
 
 @Api(description = "the tenant-theme API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class TenantThemeApi  {
@@ -38,12 +38,12 @@ TenantThemeApiService delegate = new TenantThemeApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
-    @Produces({ "application/zip" })
+    
+    @Produces({ "application/zip", "application/json",  })
     @ApiOperation(value = "Export a DevPortal Tenant Theme", notes = "This operation can be used to export a DevPortal tenant theme as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes")
         })
     }, tags={ "Tenant Theme",  })
     @ApiResponses(value = { 
@@ -61,8 +61,8 @@ TenantThemeApiService delegate = new TenantThemeApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a DevPortal Tenant Theme", notes = "This operation can be used to import a DevPortal tenant theme. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes")
         })
     }, tags={ "Tenant Theme" })
     @ApiResponses(value = { 

@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/export")
 
 @Api(description = "the export API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class ExportApi  {
@@ -38,8 +38,8 @@ ExportApiService delegate = new ExportApiServiceImpl();
 
     @GET
     @Path("/api")
-    @Consumes({ "application/json" })
-    @Produces({ "application/zip" })
+    
+    @Produces({ "application/zip", "application/json",  })
     @ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
@@ -56,12 +56,12 @@ ExportApiService delegate = new ExportApiServiceImpl();
 
     @GET
     @Path("/api-product")
-    @Consumes({ "application/json" })
-    @Produces({ "application/zip" })
+    
+    @Produces({ "application/zip", "application/json",  })
     @ApiOperation(value = "Export an API Product", notes = "This operation can be used to export the details of a particular API Product as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
     }, tags={ "API Product (Individual)",  })
     @ApiResponses(value = { 
@@ -74,12 +74,12 @@ ExportApiService delegate = new ExportApiServiceImpl();
 
     @GET
     @Path("/applications")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json", "application/zip" })
     @ApiOperation(value = "Export an Application", notes = "This operation can be used to export the details of a particular application as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations")
         })
     }, tags={ "Application (Individual)" })
     @ApiResponses(value = { 

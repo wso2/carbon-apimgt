@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -18,45 +19,27 @@ import javax.validation.Valid;
 
 
 
-public class AlertTypeDTO   {
+public class ApplicationThrottlePolicyAllOfDTO   {
   
-    private String id = null;
-    private String name = null;
+    private ThrottleLimitDTO defaultLimit = null;
 
   /**
-   * The alert Id
    **/
-  public AlertTypeDTO id(String id) {
-    this.id = id;
+  public ApplicationThrottlePolicyAllOfDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "The alert Id")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
+  @ApiModelProperty(required = true, value = "")
+      @Valid
+  @JsonProperty("defaultLimit")
+  @NotNull
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
   }
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   * The name of the alert.
-   **/
-  public AlertTypeDTO name(String name) {
-    this.name = name;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "AbnormalResponseTime", value = "The name of the alert.")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
-  }
-  public void setName(String name) {
-    this.name = name;
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
   }
 
 
@@ -68,23 +51,21 @@ public class AlertTypeDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    AlertTypeDTO alertType = (AlertTypeDTO) o;
-    return Objects.equals(id, alertType.id) &&
-        Objects.equals(name, alertType.name);
+    ApplicationThrottlePolicyAllOfDTO applicationThrottlePolicyAllOf = (ApplicationThrottlePolicyAllOfDTO) o;
+    return Objects.equals(defaultLimit, applicationThrottlePolicyAllOf.defaultLimit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name);
+    return Objects.hash(defaultLimit);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class AlertTypeDTO {\n");
+    sb.append("class ApplicationThrottlePolicyAllOfDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

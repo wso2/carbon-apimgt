@@ -18,45 +18,27 @@ import javax.validation.Valid;
 
 
 
-public class AlertTypeDTO   {
+public class RequestCountLimitAllOfDTO   {
   
-    private String id = null;
-    private String name = null;
+    private Long requestCount = null;
 
   /**
-   * The alert Id
+   * Maximum number of requests allowed
    **/
-  public AlertTypeDTO id(String id) {
-    this.id = id;
+  public RequestCountLimitAllOfDTO requestCount(Long requestCount) {
+    this.requestCount = requestCount;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "The alert Id")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
+  @ApiModelProperty(example = "30", required = true, value = "Maximum number of requests allowed")
+  @JsonProperty("requestCount")
+  @NotNull
+  public Long getRequestCount() {
+    return requestCount;
   }
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   * The name of the alert.
-   **/
-  public AlertTypeDTO name(String name) {
-    this.name = name;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "AbnormalResponseTime", value = "The name of the alert.")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
-  }
-  public void setName(String name) {
-    this.name = name;
+  public void setRequestCount(Long requestCount) {
+    this.requestCount = requestCount;
   }
 
 
@@ -68,23 +50,21 @@ public class AlertTypeDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    AlertTypeDTO alertType = (AlertTypeDTO) o;
-    return Objects.equals(id, alertType.id) &&
-        Objects.equals(name, alertType.name);
+    RequestCountLimitAllOfDTO requestCountLimitAllOf = (RequestCountLimitAllOfDTO) o;
+    return Objects.equals(requestCount, requestCountLimitAllOf.requestCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name);
+    return Objects.hash(requestCount);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class AlertTypeDTO {\n");
+    sb.append("class RequestCountLimitAllOfDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -26,8 +26,8 @@ import javax.validation.constraints.*;
 @Path("/labels")
 
 @Api(description = "the labels API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class LabelsApi  {
@@ -39,12 +39,12 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all registered Labels", notes = "Get all Registered Labels ", response = LabelListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:label_read", description = "Retrieve microgateway labels"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:label_read", description = "Retrieve microgateway labels")
         })
     }, tags={ "Label Collection",  })
     @ApiResponses(value = { 
@@ -55,18 +55,18 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
 
     @DELETE
     @Path("/{labelId}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Label", notes = "Delete a Label by label Id ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:label_manage", description = "Manage microgateway labels"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage microgateway labels")
         })
     }, tags={ "Label",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Label successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response labelsLabelIdDelete(@ApiParam(value = "Label UUID ",required=true) @PathParam("labelId") String labelId, @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
+    public Response labelsLabelIdDelete(@ApiParam(value = "Label UUID ",required=true) @PathParam("labelId") String labelId,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
         return delegate.labelsLabelIdDelete(labelId, ifMatch, ifUnmodifiedSince, securityContext);
     }
 
@@ -76,8 +76,8 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a Label", notes = "Update a Label by label Id ", response = LabelDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:label_manage", description = "Manage microgateway labels"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage microgateway labels")
         })
     }, tags={ "Label",  })
     @ApiResponses(value = { 
@@ -94,8 +94,8 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a Label", notes = "Add a new gateway label ", response = LabelDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:label_manage", description = "Manage microgateway labels"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage microgateway labels")
         })
     }, tags={ "Label" })
     @ApiResponses(value = { 

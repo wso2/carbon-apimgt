@@ -27,8 +27,8 @@ import javax.validation.constraints.*;
 @Path("/system-scopes")
 
 @Api(description = "the system-scopes API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class SystemScopesApi  {
@@ -40,7 +40,7 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Role Scope Mappings ", notes = "This operation is used to get the list of role scope mapping from tenant-conf for the apim admin dashboard ", response = ScopeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -57,12 +57,12 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
 
     @GET
     @Path("/role-aliases")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve Role Alias Mappings", notes = "This operation can be used to retreive role alias mapping ", response = RoleAliasListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes")
         })
     }, tags={ "System Scopes",  })
     @ApiResponses(value = { 
@@ -92,12 +92,12 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
 
     @GET
     @Path("/{scopeName}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve Scopes for a Particular User", notes = "This operation will return the scope list of particular user In order to get it, we need to pass the userId as a query parameter ", response = ScopeSettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes")
         })
     }, tags={ "System Scopes",  })
     @ApiResponses(value = { 
@@ -114,8 +114,8 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update Roles For Scope ", notes = "This operation is used to update the roles for all scopes ", response = ScopeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes")
         })
     }, tags={ "System Scopes" })
     @ApiResponses(value = { 
