@@ -261,7 +261,6 @@ function AddEdit(props) {
                 Alert.error(message);
             }
             return null;
-            Alert.error(e);
         }).finally(() => {
             setSaving(false);
         });

@@ -46,95 +46,95 @@ public class ThrottlingApi  {
 ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
 
 
-    @DELETE
-    @Path("/blacklist/{conditionId}")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a Blocking Condition", notes = "Deletes an existing blocking condition ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:bl_manage", description = "Update and delete deny policies")
-        })
-    }, tags={ "Blacklist (Individual)",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response throttlingBlacklistConditionIdDelete(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.throttlingBlacklistConditionIdDelete(conditionId, ifMatch, ifUnmodifiedSince, securityContext);
-    }
-
     @GET
-    @Path("/blacklist/{conditionId}")
+    @Path("/deny-policies")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a Blocking Condition", notes = "Retrieves a Blocking Condition providing the condition Id ", response = BlockingConditionDTO.class, authorizations = {
+    @ApiOperation(value = "Get all Deny Policies", notes = "Retrieves all existing deny policies. ", response = BlockingConditionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:bl_view", description = "View deny policies")
         })
-    }, tags={ "Blacklist (Individual)",  })
+    }, tags={ "Deny Policies (Collection)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Deny Policies returned ", response = BlockingConditionListDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response throttlingDenyPoliciesGet( @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-Modified-Since") String ifModifiedSince) throws APIManagementException{
+        return delegate.throttlingDenyPoliciesGet(accept, ifNoneMatch, ifModifiedSince, securityContext);
+    }
+
+    @POST
+    @Path("/deny-policies")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Add a deny policy", notes = "Adds a new deny policy ", response = BlockingConditionDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:bl_manage", description = "Update and delete deny policies")
+        })
+    }, tags={ "Deny Policies (Collection)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = BlockingConditionDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
+    public Response throttlingDenyPoliciesPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Blocking condition object that should to be added " ,required=true) BlockingConditionDTO body) throws APIManagementException{
+        return delegate.throttlingDenyPoliciesPost(contentType, body, securityContext);
+    }
+
+    @DELETE
+    @Path("/deny-policy/{conditionId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete a Deny Policy", notes = "Deletes an existing deny policy ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:bl_manage", description = "Update and delete deny policies")
+        })
+    }, tags={ "Deny Policy (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response throttlingDenyPolicyConditionIdDelete(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
+        return delegate.throttlingDenyPolicyConditionIdDelete(conditionId, ifMatch, ifUnmodifiedSince, securityContext);
+    }
+
+    @GET
+    @Path("/deny-policy/{conditionId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get a Deny Policy", notes = "Retrieves a Deny policy providing the condition Id ", response = BlockingConditionDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:bl_view", description = "View deny policies")
+        })
+    }, tags={ "Deny Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Condition returned ", response = BlockingConditionDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response throttlingBlacklistConditionIdGet(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-Modified-Since") String ifModifiedSince) throws APIManagementException{
-        return delegate.throttlingBlacklistConditionIdGet(conditionId, ifNoneMatch, ifModifiedSince, securityContext);
+    public Response throttlingDenyPolicyConditionIdGet(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-Modified-Since") String ifModifiedSince) throws APIManagementException{
+        return delegate.throttlingDenyPolicyConditionIdGet(conditionId, ifNoneMatch, ifModifiedSince, securityContext);
     }
 
     @PATCH
-    @Path("/blacklist/{conditionId}")
+    @Path("/deny-policy/{conditionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a Blocking Condition", notes = "Update a blocking condition by Id ", response = BlockingConditionDTO.class, authorizations = {
+    @ApiOperation(value = "Update a Deny Policy", notes = "Update a deny policy by Id ", response = BlockingConditionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:bl_manage", description = "Update and delete deny policies")
         })
-    }, tags={ "Blacklist (Individual)",  })
+    }, tags={ "Deny Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully updated. ", response = BlockingConditionDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response throttlingBlacklistConditionIdPatch(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Blocking condition with updated status " ,required=true) BlockingConditionStatusDTO body,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.throttlingBlacklistConditionIdPatch(conditionId, contentType, body, ifMatch, ifUnmodifiedSince, securityContext);
-    }
-
-    @GET
-    @Path("/blacklist")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get all Blocking Condtions", notes = "Retrieves all existing blocking condtions. ", response = BlockingConditionListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:bl_view", description = "View deny policies")
-        })
-    }, tags={ "Blacklist (Collection)",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Blocking conditions returned ", response = BlockingConditionListDTO.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response throttlingBlacklistGet( @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-Modified-Since") String ifModifiedSince) throws APIManagementException{
-        return delegate.throttlingBlacklistGet(accept, ifNoneMatch, ifModifiedSince, securityContext);
-    }
-
-    @POST
-    @Path("/blacklist")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Add a Blocking Condition", notes = "Adds a new blocking condition. ", response = BlockingConditionDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:bl_manage", description = "Update and delete deny policies")
-        })
-    }, tags={ "Blacklist (Collection)",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = BlockingConditionDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response throttlingBlacklistPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Blocking condition object that should to be added " ,required=true) BlockingConditionDTO body) throws APIManagementException{
-        return delegate.throttlingBlacklistPost(contentType, body, securityContext);
+    public Response throttlingDenyPolicyConditionIdPatch(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Blocking condition with updated status " ,required=true) BlockingConditionStatusDTO body,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
+        return delegate.throttlingDenyPolicyConditionIdPatch(conditionId, contentType, body, ifMatch, ifUnmodifiedSince, securityContext);
     }
 
     @GET

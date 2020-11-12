@@ -3,7 +3,7 @@ info:
   title: WSO2 API Manager - Admin
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - **Admin Portal**.
-    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.7.206/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
+    Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.7.206/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/src/main/resources/admin-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
 
     # Authentication
     Our REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking
@@ -2566,13 +2566,13 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
-  /throttling/blacklist:
+  /throttling/deny-policies:
     get:
       tags:
-      - Blacklist (Collection)
-      summary: Get all Blocking Condtions
+      - Deny Policies (Collection)
+      summary: Get all Deny Policies
       description: |
-        Retrieves all existing blocking condtions.
+        Retrieves all existing deny policies.
       parameters:
       - name: Accept
         in: header
@@ -2599,7 +2599,7 @@ paths:
         200:
           description: |
             OK.
-            Blocking conditions returned
+            Deny Policies returned
           headers:
             ETag:
               description: |
@@ -2646,13 +2646,13 @@ paths:
       x-code-samples:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/blacklist"'
+          "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policies"'
     post:
       tags:
-      - Blacklist (Collection)
-      summary: Add a Blocking Condition
+      - Deny Policies (Collection)
+      summary: Add a deny policy
       description: |
-        Adds a new blocking condition.
+        Adds a new deny policy
       parameters:
       - name: Content-Type
         in: header
@@ -2729,15 +2729,15 @@ paths:
       x-code-samples:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/blacklist"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policies"'
       x-codegen-request-body-name: body
-  /throttling/blacklist/{conditionId}:
+  /throttling/deny-policy/{conditionId}:
     get:
       tags:
-      - Blacklist (Individual)
-      summary: Get a Blocking Condition
+      - Deny Policy (Individual)
+      summary: Get a Deny Policy
       description: |
-        Retrieves a Blocking Condition providing the condition Id
+        Retrieves a Deny policy providing the condition Id
       parameters:
       - name: conditionId
         in: path
@@ -2823,13 +2823,13 @@ paths:
       x-code-samples:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/blacklist/b513eb68-69e8-4c32-92cf-852c101363c"'
+          "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
     delete:
       tags:
-      - Blacklist (Individual)
-      summary: Delete a Blocking Condition
+      - Deny Policy (Individual)
+      summary: Delete a Deny Policy
       description: |
-        Deletes an existing blocking condition
+        Deletes an existing deny policy
       parameters:
       - name: conditionId
         in: path
@@ -2889,13 +2889,13 @@ paths:
       x-code-samples:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/blacklist/b513eb68-69e8-4c32-92cf-852c101363c"'
+          "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
     patch:
       tags:
-      - Blacklist (Individual)
-      summary: Update a Blocking Condition
+      - Deny Policy (Individual)
+      summary: Update a Deny Policy
       description: |
-        Update a blocking condition by Id
+        Update a deny policy by Id
       parameters:
       - name: conditionId
         in: path
@@ -2972,7 +2972,7 @@ paths:
       x-code-samples:
       - lang: Shell
         source: 'curl -k -X PATCH -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/blacklist/b513eb68-69e8-4c32-92cf-852c101363c"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
       x-codegen-request-body-name: body
   /applications:
     get:

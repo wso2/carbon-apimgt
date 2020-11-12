@@ -31,11 +31,11 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ThrottlingApiService {
-      public Response throttlingBlacklistConditionIdDelete(String conditionId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingBlacklistConditionIdGet(String conditionId, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingBlacklistConditionIdPatch(String conditionId, String contentType, BlockingConditionStatusDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingBlacklistGet(String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingBlacklistPost(String contentType, BlockingConditionDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingDenyPoliciesGet(String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingDenyPoliciesPost(String contentType, BlockingConditionDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingDenyPolicyConditionIdDelete(String conditionId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingDenyPolicyConditionIdGet(String conditionId, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingDenyPolicyConditionIdPatch(String conditionId, String contentType, BlockingConditionStatusDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
       public Response throttlingPoliciesAdvancedGet(String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
       public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
       public Response throttlingPoliciesAdvancedPolicyIdGet(String policyId, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;

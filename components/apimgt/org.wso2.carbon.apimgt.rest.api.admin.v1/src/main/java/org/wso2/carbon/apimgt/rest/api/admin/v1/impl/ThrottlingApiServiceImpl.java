@@ -942,7 +942,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return All matched block conditions to the given request
      */
     @Override
-    public Response throttlingBlacklistGet(String accept, String ifNoneMatch, String ifModifiedSince,
+    public Response throttlingDenyPoliciesGet(String accept, String ifNoneMatch, String ifModifiedSince,
                                            MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -965,7 +965,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Created block condition along with the location of it with Location header
      */
     @Override
-    public Response throttlingBlacklistPost(String contentType, BlockingConditionDTO body,
+    public Response throttlingDenyPoliciesPost(String contentType, BlockingConditionDTO body,
                                             MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -1025,7 +1025,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Matched block condition for the given Id
      */
     @Override
-    public Response throttlingBlacklistConditionIdGet(String conditionId, String ifNoneMatch, String ifModifiedSince,
+    public Response throttlingDenyPolicyConditionIdGet(String conditionId, String ifNoneMatch, String ifModifiedSince,
                                                       MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -1061,7 +1061,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return 200 OK response if successfully deleted the block condition
      */
     @Override
-    public Response throttlingBlacklistConditionIdDelete(String conditionId, String ifMatch, String ifUnmodifiedSince
+    public Response throttlingDenyPolicyConditionIdDelete(String conditionId, String ifMatch, String ifUnmodifiedSince
             , MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -1096,7 +1096,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return 200 response if successful
      */
     @Override
-    public Response throttlingBlacklistConditionIdPatch(String conditionId, String contentType,
+    public Response throttlingDenyPolicyConditionIdPatch(String conditionId, String contentType,
             BlockingConditionStatusDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();

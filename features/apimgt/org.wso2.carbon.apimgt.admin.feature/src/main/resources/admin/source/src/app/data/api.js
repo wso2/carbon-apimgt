@@ -501,18 +501,18 @@ class API extends Resource {
      */
     blacklistPoliciesGet() {
         return this.client.then((client) => {
-            return client.apis['Blacklist (Collection)'].get_throttling_blacklist(
+            return client.apis['Deny Policies (Collection)'].get_throttling_deny_policies(
                 this._requestMetaData(),
             );
         });
     }
 
     /**
-     * Delete an Blacklist Policy
+     * Delete an Deny Policy
      */
     deleteBlacklistPolicy(policyId) {
         return this.client.then((client) => {
-            return client.apis['Blacklist (Individual)'].delete_throttling_blacklist__conditionId_(
+            return client.apis['Deny Policy (Individual)'].delete_throttling_deny_policy__conditionId_(
                 { conditionId: policyId },
                 this._requestMetaData(),
             );
@@ -520,14 +520,14 @@ class API extends Resource {
     }
 
     /**
-     * Add a Blacklist Policy
+     * Add a Deny Policy
      */
     addBlacklistPolicy(body) {
         return this.client.then((client) => {
             const payload = {
                 'Content-Type': 'application/json',
             };
-            return client.apis['Blacklist (Collection)'].post_throttling_blacklist(
+            return client.apis['Deny Policies (Collection)'].post_throttling_deny_policies(
                 payload,
                 { requestBody: body },
                 this._requestMetaData(),
@@ -536,11 +536,11 @@ class API extends Resource {
     }
 
     /**
-     * Get details of a Blacklist Policy
+     * Get details of a Deny Policy
      */
     blacklistPolicyGet(policyId) {
         return this.client.then((client) => {
-            return client.apis['Blacklist (Individual)'].get_throttling_blacklist__conditionId_(
+            return client.apis['Deny Policy (Individual)'].get_throttling_deny_policy__conditionId_(
                 { conditionId: policyId },
                 this._requestMetaData(),
             );
@@ -548,14 +548,14 @@ class API extends Resource {
     }
 
     /**
-     * Update the Condition Status of a Blacklist Policy
+     * Update the Condition Status of a Deny Policy
      */
     updateBlacklistPolicy(policyId, conditionStatus) {
         return this.client.then((client) => {
             const payload = {
                 conditionStatus: conditionStatus,
             };
-            return client.apis['Blacklist (Individual)'].patch_throttling_blacklist__conditionId_(
+            return client.apis['Deny Policy (Individual)'].patch_throttling_deny_policy__conditionId_(
                 { conditionId: policyId, 'Content-Type': 'application/json', },
                 { requestBody: payload },
                 this._requestMetaData(),
