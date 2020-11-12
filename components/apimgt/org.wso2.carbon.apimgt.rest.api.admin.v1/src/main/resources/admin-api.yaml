@@ -5873,6 +5873,7 @@ components:
           type: string
           description: Display name of the policy
           example: 30PerMin
+          maxLength: 512
         description:
           maxLength: 1024
           type: string
@@ -6442,9 +6443,9 @@ components:
           type: string
           example: IN
           enum:
-          - in
-          - out
-          - fault
+          - IN
+          - OUT
+          - FAULT
         config:
           type: string
           example: <sequence xmlns="http://ws.apache.org/ns/synapse" name="custom_log_in_message">

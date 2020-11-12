@@ -26,9 +26,9 @@ public class MediationDTO   {
     @XmlType(name="TypeEnum")
     @XmlEnum(String.class)
     public enum TypeEnum {
-        IN("in"),
-        OUT("out"),
-        FAULT("fault");
+        IN("IN"),
+        OUT("OUT"),
+        FAULT("FAULT");
         private String value;
 
         TypeEnum (String v) {

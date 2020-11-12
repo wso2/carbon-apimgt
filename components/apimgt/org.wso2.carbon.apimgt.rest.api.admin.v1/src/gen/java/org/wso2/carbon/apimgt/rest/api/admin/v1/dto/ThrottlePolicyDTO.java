@@ -76,7 +76,7 @@ public class ThrottlePolicyDTO   {
   
   @ApiModelProperty(example = "30PerMin", value = "Display name of the policy")
   @JsonProperty("displayName")
-  public String getDisplayName() {
+ @Size(max=512)  public String getDisplayName() {
     return displayName;
   }
   public void setDisplayName(String displayName) {
