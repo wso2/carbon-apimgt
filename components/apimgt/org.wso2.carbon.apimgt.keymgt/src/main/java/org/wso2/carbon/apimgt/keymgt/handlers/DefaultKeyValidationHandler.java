@@ -151,9 +151,9 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         String resourceList = validationContext.getMatchingResource();
         List<String> resourceArray;
-        if((validationContext.getHttpVerb().equals(APIConstants.GRAPHQL_QUERY))
-                || (validationContext.getHttpVerb().equals(APIConstants.GRAPHQL_MUTATION))
-                || (validationContext.getHttpVerb().equals(APIConstants.GRAPHQL_SUBSCRIPTION))) {
+        if ((validationContext.getHttpVerb().equalsIgnoreCase(APIConstants.GRAPHQL_QUERY))
+                || (validationContext.getHttpVerb().equalsIgnoreCase(APIConstants.GRAPHQL_MUTATION))
+                || (validationContext.getHttpVerb().equalsIgnoreCase(APIConstants.GRAPHQL_SUBSCRIPTION))) {
             resourceArray = new ArrayList<>(Arrays.asList(resourceList.split(",")));
         } else {
             resourceArray = new ArrayList<>(Arrays.asList(resourceList));
