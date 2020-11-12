@@ -11619,7 +11619,7 @@ public final class APIUtil {
         Set<Map.Entry<String, JsonElement>> roleMappingEntries = newRoleMappingJson.entrySet();
         for (Map.Entry<String, JsonElement> entry: roleMappingEntries) {
             List<String> currentRoles = Arrays.asList(String.valueOf(entry.getValue()).split(","));
-            boolean isOriginalRoleAlreadyInroles = false;
+            boolean isOriginalRoleAlreadyInRoles = false;
             for (String role: currentRoles) {
                 if (role.equals(entry.getKey())) {
                     isOriginalRoleAlreadyInRoles = true;
