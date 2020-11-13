@@ -1017,6 +1017,7 @@ public final class APIConstants {
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";
+    public static final String LC_CACHE_NAME = "lcCache";
     public static final String APP_SCOPE_CACHE = "appScopeCache";
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650;

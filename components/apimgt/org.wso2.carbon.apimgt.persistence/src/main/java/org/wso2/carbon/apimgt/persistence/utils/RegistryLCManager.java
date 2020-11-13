@@ -52,41 +52,41 @@ public class RegistryLCManager {
             throws RegistryException, XMLStreamException, ParserConfigurationException, SAXException, IOException {
         UserRegistry registry;
 
-            registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
-            String data = CommonUtil.getLifecycleConfiguration("APILifeCycle", registry);
-            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
-            Document doc = builder.parse(inputStream);
-            Element root = doc.getDocumentElement();
+        registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+        String data = CommonUtil.getLifecycleConfiguration("APILifeCycle", registry);
+        DocumentBuilderFactory factory = getSecuredDocumentBuilder();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+        Document doc = builder.parse(inputStream);
+        Element root = doc.getDocumentElement();
 
-            // Get all nodes with state
-            NodeList states = root.getElementsByTagName("state");
-            int nStates = states.getLength();
-            for (int i = 0; i < nStates; i++) {
-                Node node = states.item(i);
-                Node id = node.getAttributes().getNamedItem("id");
-                if (id != null && !id.getNodeValue().isEmpty()) {
-                    LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
-                    NodeList transitions = node.getChildNodes();
-                    int nTransitions = transitions.getLength();
-                    for (int j = 0; j < nTransitions; j++) {
-                        Node transition = transitions.item(j);
-                        // Add transitions
-                        if ("transition".equals(transition.getNodeName())) {
-                            Node target = transition.getAttributes().getNamedItem("target");
-                            Node action = transition.getAttributes().getNamedItem("event");
-                            if (target != null && action != null) {
-                                lifeCycleTransition.addTransition(target.getNodeValue().toUpperCase(),
-                                        action.getNodeValue());
-                                stateTransitionMap.put(action.getNodeValue(), target.getNodeValue().toUpperCase());
-                            }
+        // Get all nodes with state
+        NodeList states = root.getElementsByTagName("state");
+        int nStates = states.getLength();
+        for (int i = 0; i < nStates; i++) {
+            Node node = states.item(i);
+            Node id = node.getAttributes().getNamedItem("id");
+            if (id != null && !id.getNodeValue().isEmpty()) {
+                LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
+                NodeList transitions = node.getChildNodes();
+                int nTransitions = transitions.getLength();
+                for (int j = 0; j < nTransitions; j++) {
+                    Node transition = transitions.item(j);
+                    // Add transitions
+                    if ("transition".equals(transition.getNodeName())) {
+                        Node target = transition.getAttributes().getNamedItem("target");
+                        Node action = transition.getAttributes().getNamedItem("event");
+                        if (target != null && action != null) {
+                            lifeCycleTransition.addTransition(target.getNodeValue().toUpperCase(),
+                                    action.getNodeValue());
+                            stateTransitionMap.put(action.getNodeValue(), target.getNodeValue().toUpperCase());
                         }
                     }
-                    stateHashMap.put(id.getNodeValue().toUpperCase(), lifeCycleTransition);
                 }
+                stateHashMap.put(id.getNodeValue().toUpperCase(), lifeCycleTransition);
             }
-        
+        }
+
     }
 
     public String getTransitionAction(String currentState, String targetState) {

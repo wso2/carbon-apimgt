@@ -157,6 +157,7 @@ import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -908,6 +909,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         
         //add labels
         validateAndSetLables(api);
+        
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+
+        //Add default API LC if it is not there
+        try {
+            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
+                    registryService.getConfigSystemRegistry(tenantId))) {
+                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
+                        + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
+                File file = new File(defaultLifecyclePath);
+                String content = null;
+                if (file != null && file.exists()) {
+                    content = FileUtils.readFileToString(file);
+                }
+                if (content != null) {
+                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
+                            CommonUtil.getRootSystemRegistry(tenantId));
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Error occurred while adding default APILifeCycle.", e);
+        } catch (IOException e) {
+            handleException("Error occurred while loading APILifeCycle.xml.", e);
+        } catch (XMLStreamException e) {
+            handleException("Error occurred while adding default API LifeCycle.", e);
+        }
 
         try {
             PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(tenantDomain),
@@ -6284,7 +6311,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException, FaultGatewaysException {
-        log.info("++++++++++++++++++++ old lc change ++++++++++++++++++");
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -6470,7 +6496,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public APIStateChangeResponse changeLifeCycleStatus(String uuid, String action, Map<String, Boolean> checklist)
             throws APIManagementException, FaultGatewaysException {
-        log.info("======================  new lc change =======================");
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -6550,7 +6575,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //RegistryLCManager.getInstance().getStateForTransition(action);
                     //apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     //targetStatus = apiArtifact.getLifecycleState();
-                    targetStatus = LCManagerFactory.getLCManager(tenantId).getStateForTransition(action);
+                    targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
                     apiPersistenceInstance.changeAPILifeCycle(new Organization(tenantDomain), uuid, targetStatus);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
                     
@@ -6661,6 +6686,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Couldn't read tenant configuration from tenant registry", e);
         } catch (APIPersistenceException e) {
             handleException("Error while accessing persistance layer", e);
+        } catch (PersistenceException e) {
+            handleException("Error while accessing lifecycle information ", e);
         }  finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
