@@ -295,8 +295,29 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        API api = APIMapper.INSTANCE.toApi(publisherAPI);
+        GenericArtifactManager artifactManager;
+        PublisherAPI updatedPubAPI;
+        try {
+            artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            // get the exsisting artifact and update the content with the new values
+            GenericArtifact artifact = artifactManager.getGenericArtifact(publisherAPI.getId()); // This might not needed if we send the full api
+            GenericArtifact updateApiArtifact = RegistryPersistenceUtil.createAPIArtifactContent(artifact, api);
+            artifactManager.updateGenericArtifact(updateApiArtifact);
+            artifact = artifactManager.getGenericArtifact(publisherAPI.getId());
+            API updatedAPI = RegistryPersistenceUtil.getApiForPublishing(registry, artifact);
+            //TODO directly map to PublisherAPI from the registry
+            updatedPubAPI = APIMapper.INSTANCE.toPublisherApi(updatedAPI) ; 
+            if (log.isDebugEnabled()) {
+                log.debug("API for id " + updatedPubAPI.getId() + " : " + updatedPubAPI.toString());
+            }
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while retrieving artifact manager ", e);
+        } catch (GovernanceException e) {
+            throw new APIPersistenceException("Error while retrieving artifact ", e);
+        }
+
+        return updatedPubAPI;
     }
 
     /**

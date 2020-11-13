@@ -2601,10 +2601,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         if (APIConstants.PUBLISHED.equals(newStatus) || APIConstants.DEPRECATED.equals(newStatus)
                             || APIConstants.BLOCKED.equals(newStatus) || APIConstants.PROTOTYPED.equals(newStatus)) {
                             failedGateways = publishToGateway(api);
-                            //Sending Notifications to existing subscribers
-                            if (APIConstants.PUBLISHED.equals(newStatus)) {
-                                sendEmailNotification(api);
-                            }
                         } else { // API Status : RETIRED or CREATED
                             failedGateways = removeFromGateway(api);
                         }
@@ -2777,7 +2773,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 publishedEnvironments.removeAll(new ArrayList<String>(failedToPublishEnvironments
                                         .keySet()));
                                 api.setEnvironments(publishedEnvironments);
-                                updateApiArtifact(api, true, false);
+                                //updateApiArtifactNew(api, true, false);
                                 failedGateways.clear();
                                 failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
                                 failedGateways.put("PUBLISHED", failedToPublishEnvironments);
@@ -2793,7 +2789,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
                                 publishedEnvironments.addAll(failedToRemoveEnvironments.keySet());
                                 api.setEnvironments(publishedEnvironments);
-                                updateApiArtifact(api, true, false);
+                                //updateApiArtifactNew(api, true, false);
                                 failedGateways.clear();
                                 failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
                                 failedGateways.put("PUBLISHED", Collections.<String, String>emptyMap());
@@ -2802,7 +2798,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     }
 
-                    updateApiArtifact(api, false, false);
+                    //updateApiArtifactNew(api, false, false);
+                    PublisherAPI publisherAPI =  APIMapper.INSTANCE.toPublisherApi(api);
+                    try {
+                        apiPersistenceInstance.updateAPI(new Organization(tenantDomain), publisherAPI);
+                    } catch (APIPersistenceException e) {
+                        handleException("Error while persisting the updated API ", e); 
+                    }
 
                     if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) { // published default version need
                         // to be changed
@@ -3071,21 +3073,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " published to gateway";
             log.debug(logMessage);
-        }
-        //if the API is websocket and if default version is selected, update the other versions
-        if (APIConstants.APITransportType.WS.toString().equals(api.getType()) && api.isDefaultVersion()) {
-            Set<String> versions = getAPIVersions(api.getId().getProviderName(), api.getId().getName());
-            for (String version : versions) {
-                if (version.equals(api.getId().getVersion())) {
-                    continue;
-                }
-                API otherApi = getAPI(new APIIdentifier(api.getId().getProviderName(), api.getId().getName(), version));//TODO extract
-                APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                        APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, otherApi.getId().getApiName(),
-                        0, version, api.getType(), otherApi.getContext(), otherApi.getId().getProviderName(),
-                        otherApi.getStatus());
-                APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-            }
         }
         return failedEnvironment;
     }
@@ -6566,6 +6553,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     targetStatus = LCManagerFactory.getLCManager(tenantId).getStateForTransition(action);
                     apiPersistenceInstance.changeAPILifeCycle(new Organization(tenantDomain), uuid, targetStatus);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
+                    
+                    //Sending Notifications to existing subscribers
+                    if (APIConstants.PUBLISHED.equals(targetStatus)) {
+                        sendEmailNotification(api);// TODO has registry access
+                    }
+                    
                     if (!currentStatus.equalsIgnoreCase(targetStatus)) {
                         apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus.toUpperCase(),
                                 targetStatus.toUpperCase(), this.username, this.tenantId);
@@ -6668,19 +6661,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Couldn't read tenant configuration from tenant registry", e);
         } catch (APIPersistenceException e) {
             handleException("Error while accessing persistance layer", e);
-        } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
+        }  finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
         return response;
     }
 
-    private boolean changeLifeCycle(API api,
+    private void changeLifeCycle(API api,
             String currentState, String targetState, Map<String, Boolean> checklist)
-            throws APIManagementException, FaultGatewaysException, org.wso2.carbon.registry.api.RegistryException {
-        boolean executed;
+            throws APIManagementException, FaultGatewaysException {
 
         String oldStatus = currentState.toUpperCase();
         String newStatus = (targetState != null) ? targetState.toUpperCase() : targetState;
@@ -6711,6 +6700,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // push the state change to gateway
             Map<String, String> failedGateways = propergateAPIStatusChangeToGateways(api.getId(),
                     newStatus, api);
+            
+            if (APIConstants.PUBLISHED.equals(newStatus) || !oldStatus.equals(newStatus)) { //TODO has registry access
+                //if the API is websocket and if default version is selected, update the other versions
+                if (APIConstants.APITransportType.WS.toString().equals(api.getType()) && api.isDefaultVersion()) {
+                    Set<String> versions = getAPIVersions(api.getId().getProviderName(), api.getId().getName());
+                    for (String version : versions) {
+                        if (version.equals(api.getId().getVersion())) {
+                            continue;
+                        }
+                        API otherApi = getAPI(new APIIdentifier(api.getId().getProviderName(), api.getId().getName(), version));//TODO extract
+                        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                                APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, otherApi.getId().getApiName(),
+                                0, version, api.getType(), otherApi.getContext(), otherApi.getId().getProviderName(),
+                                otherApi.getStatus());
+                        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+                    }
+                }
+            }
+
 
             if (log.isDebugEnabled()) {
                 String logMessage = "Publish changed status to the Gateway. API Name: " + api.getId().getApiName()
@@ -6720,13 +6728,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             // update api related information for state change
-            executed = updateAPIforStateChange(api.getId(), currentState, newStatus, failedGateways);
+            updateAPIforStateChange(api.getId(), currentState, newStatus, failedGateways);
 
-            // Setting resource again to the context as it's updated within updateAPIStatus method
-            //String apiPath = APIUtil.getAPIPath(api.getId());
-
-            //apiResource = registry.get(apiPath);
-            //context.setResource(apiResource);
 
             if (log.isDebugEnabled()) {
                 String logMessage = "API related information successfully updated. API Name: "
@@ -6775,8 +6778,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 publishInPrivateJet(api, api.getId());
             }
         }
-
-        return executed;
     }
     /**
      * To get the API artifact from the registry
