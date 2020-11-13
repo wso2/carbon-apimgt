@@ -72,7 +72,9 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -129,6 +131,7 @@ public final class APIImportUtil {
         String lifecycleAction = null;
         UserRegistry registry;
         int tenantId = APIUtil.getTenantId(currentUser);
+        String uuid = null;
 
         try {
             registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantId);
@@ -204,7 +207,7 @@ public final class APIImportUtil {
                 targetApi = apiProvider.getAPI(apiIdentifier);
                 // Store target API status
                 currentStatus = targetApi.getStatus();
-
+                uuid = targetApi.getUuid();
                 // Since the overwrite should be done, the imported API Identifier should be equal to the target API Identifier
                 importedApi.setId(targetApi.getId());
             } else {
@@ -256,7 +259,8 @@ public final class APIImportUtil {
             }
             if (Boolean.FALSE.equals(overwrite)) {
                 //Add API in CREATED state
-                apiProvider.addAPI(importedApi);
+                API addedAPI = apiProvider.addAPI(importedApi);
+                uuid = addedAPI.getUuid();
             }
 
             //Swagger definition will only be available of API type HTTP. Web socket API does not have it.
@@ -329,13 +333,16 @@ public final class APIImportUtil {
             }
 
             // Change API lifecycle if state transition is required
+            Map<String, Boolean> checklistMap = new HashMap<String, Boolean>();
             if (StringUtils.isNotEmpty(lifecycleAction)) {
                 log.info("Changing lifecycle from " + currentStatus + " to " + targetStatus);
                 if (StringUtils.equals(lifecycleAction, APIConstants.LC_PUBLISH_LC_STATE)) {
                     apiProvider.changeAPILCCheckListItems(importedApi.getId(),
-                            APIImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
+                            APIImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);//TODO remove
+                            checklistMap.put(APIImportExportConstants.REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM_DESC, true);
                 }
-                apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction);
+                
+                apiProvider.changeLifeCycleStatus(uuid, lifecycleAction, checklistMap);
                 //Change the status of the imported API to targetStatus
                 importedApi.setStatus(targetStatus);
             }

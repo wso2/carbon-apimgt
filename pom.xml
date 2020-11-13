@@ -59,11 +59,6 @@
                     <version>${maven.findbugsplugin.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>${maven.checkstyleplugin.version}</version>
-                </plugin>
-                <plugin>
                     <groupId>io.swagger</groupId>
                     <artifactId>swagger-codegen-maven-plugin</artifactId>
                     <version>${io.swagger.codegen.version}</version>
@@ -714,6 +709,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.persistence</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            
+            <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
@@ -1104,6 +1105,13 @@
                 <type>zip</type>
             </dependency>
 
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.persistence.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+            
             <dependency>
                 <groupId>org.apache.ws.commons.axiom.wso2</groupId>
                 <artifactId>axiom</artifactId>
@@ -1736,6 +1744,16 @@
                 <artifactId>org.apache.servicemix.bundles.jedis</artifactId>
                 <version>${servicemix.bundles.jedis.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${org.wso2.orbit.org.mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${org.mapstruct.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1992,5 +2010,7 @@
         <maven.spotbugsplugin.version>3.1.10</maven.spotbugsplugin.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <version.checkstyle>8.34</version.checkstyle>
+        <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
+        <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
     </properties>
 </project>

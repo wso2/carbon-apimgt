@@ -3920,17 +3920,20 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".
+            Map<String, Boolean> lcMap = new HashMap<String, Boolean>();
             for (String checkListItem : checkListItems) {
                 String[] attributeValPair = checkListItem.split(":");
                 if (attributeValPair.length == 2) {
                     String checkListItemName = attributeValPair[0].trim();
                     boolean checkListItemValue = Boolean.valueOf(attributeValPair[1].trim());
-                    apiProvider.checkAndChangeAPILCCheckListItem(apiIdentifier, checkListItemName, checkListItemValue);
+                    lcMap.put(checkListItemName, checkListItemValue);
+                    //apiProvider.checkAndChangeAPILCCheckListItem(apiIdentifier, checkListItemName, checkListItemValue);
                 }
             }
 
             //todo: check if API's tiers are properly set before Publishing
-            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action.toString());
+            //APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action.toString());
+            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiId, action.toString(), lcMap);
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId);

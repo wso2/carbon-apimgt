@@ -218,6 +218,7 @@ public class API implements Serializable {
      *
      * @return flag to indicate the monetization status (true or false)
      */
+    @Deprecated
     public boolean getMonetizationStatus() {
         return isMonetizationEnabled;
     }
@@ -227,8 +228,27 @@ public class API implements Serializable {
      *
      * @param monetizationStatus flag to indicate the monetization status (true or false)
      */
+    @Deprecated
     public void setMonetizationStatus(boolean monetizationStatus) {
         this.isMonetizationEnabled = monetizationStatus;
+    }
+    
+    /**
+     * This method is used to get the properties related to monetization
+     *
+     * @return properties related to monetization
+     */
+    public boolean isMonetizationEnabled() {
+        return isMonetizationEnabled;
+    }
+
+    /**
+     * This method is used to set the monetization status (true or false)
+     *
+     * @param isMonetizationEnabled flag to indicate the monetization status (true or false)
+     */
+    public void setMonetizationEnabled(boolean isMonetizationEnabled) {
+        this.isMonetizationEnabled = isMonetizationEnabled;
     }
 
     /**
@@ -328,15 +348,24 @@ public class API implements Serializable {
     private boolean isLatest;
 
     //TODO: missing - total user count, up time statistics,tier
-
+    @Deprecated
     public String getUUID() {
         return uuid;
     }
-
+    
+    @Deprecated
     public void setUUID(String uuid) {
         this.uuid = uuid;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    } 
+    
     public String getProductionMaxTps() {
         return productionMaxTps;
     }
@@ -490,8 +519,13 @@ public class API implements Serializable {
     public Set<String> getTags() {
         return Collections.unmodifiableSet(tags);
     }
-
+    
+    @Deprecated
     public void addTags(Set<String> tags) {
+        this.tags.addAll(tags);
+    }
+    
+    public void setTags(Set<String> tags) {
         this.tags.addAll(tags);
     }
 
@@ -520,21 +554,30 @@ public class API implements Serializable {
     }
 
     public Date getLastUpdated() {
-        return new Date(lastUpdated.getTime());
+        if (lastUpdated != null) {
+            return new Date(lastUpdated.getTime());
+        }
+        return null;
     }
 
     public void setLastUpdated(Date lastUpdated) {
-        this.lastUpdated = new Date(lastUpdated.getTime());
+        if (lastUpdated != null) {
+            this.lastUpdated = new Date(lastUpdated.getTime());
+        }
     }
 
     public Set<Tier> getAvailableTiers() {
         return Collections.unmodifiableSet(availableTiers);
     }
 
+    @Deprecated
     public void addAvailableTiers(Set<Tier> availableTiers) {
         this.availableTiers.addAll(availableTiers);
     }
 
+    public void setAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers.addAll(availableTiers);
+    } 
     /**
      * Removes all Tiers from the API object.
      */
@@ -827,8 +870,13 @@ public class API implements Serializable {
         this.scopes = scopes;
     }
 
+    @Deprecated
     public void setAsDefaultVersion(boolean value) {
         isDefaultVersion = value;
+    }
+
+    public void setDefaultVersion(boolean isDefaultVersion) {
+        this.isDefaultVersion = isDefaultVersion;
     }
 
     public void setAsPublishedDefaultVersion(boolean value) {
@@ -916,6 +964,7 @@ public class API implements Serializable {
      *
      * @return Status of the validator property.
      */
+    @Deprecated
     public boolean isEnabledSchemaValidation() {
         return enableSchemaValidation;
     }
@@ -927,6 +976,15 @@ public class API implements Serializable {
      */
     public void setEnableSchemaValidation(boolean enableSchemaValidation) {
         this.enableSchemaValidation = enableSchemaValidation;
+    }
+
+    /**
+     * Check the status of the Json schema validation property.
+     *
+     * @return Status of the validator property.
+     */
+    public boolean isEnableSchemaValidation() {
+        return enableSchemaValidation;
     }
 
     /**
