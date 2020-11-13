@@ -20,29 +20,55 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.xml.sax.SAXException;
 
 public class LCManagerFactory {
 
     private static final Log log = LogFactory.getLog(LCManagerFactory.class);
-    private static Map<Integer, RegistryLCManager> managers = new HashMap<Integer, RegistryLCManager>();
-    public static RegistryLCManager getLCManager(int tenantId) {
-        if(!managers.containsKey(tenantId)) {
+    private static LCManagerFactory instance;
+
+    private LCManagerFactory() {
+
+    }
+
+    public static LCManagerFactory getInstance() {
+        if (instance == null) {
+            instance = new LCManagerFactory();
+        }
+        return instance;
+    }
+
+    public RegistryLCManager getLCManager() throws PersistenceException {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String cacheName = tenantDomain + "_" + APIConstants.LC_CACHE_NAME;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        Cache lcCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .getCache(APIConstants.LC_CACHE_NAME);
+        RegistryLCManager lcManager = (RegistryLCManager) lcCache.get(cacheName);
+        if (lcManager != null) {
+            log.debug("Lifecycle info servered from Cache.");
+            return lcManager;
+        } else {
             try {
-                RegistryLCManager lcManager = new RegistryLCManager(tenantId);
-                managers.put(tenantId, lcManager);
+                log.debug("Lifecycle info not found in Cache.");
+                lcManager = new RegistryLCManager(tenantId);
+                lcCache.put(cacheName, lcManager);
+                return lcManager;
             } catch (RegistryException | XMLStreamException | ParserConfigurationException | SAXException
                     | IOException e) {
-                log.error("Error while retrieving lifecycle manager ", e);
+                throw new PersistenceException("Error while accessing the lifecycle resource ", e);
             }
-        } 
-        return managers.get(tenantId);
+        }
     }
 }

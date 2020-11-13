@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceExc
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
@@ -180,29 +181,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
         
-        //Add default API LC if it is not there
-        try {
-            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
-                                            registryService.getConfigSystemRegistry(tenantId))) {
-                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
-                                                + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
-                File file = new File(defaultLifecyclePath);
-                String content = null;
-                if (file != null && file.exists()) {
-                    content = FileUtils.readFileToString(file);
-                }
-                if (content != null) {
-                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
-                                                    CommonUtil.getRootSystemRegistry(tenantId));
-                }
-            }
-        } catch (RegistryException e) {
-            throw new APIPersistenceException("Error occurred while adding default APILifeCycle.", e);
-        } catch (IOException e) {
-            throw new APIPersistenceException("Error occurred while loading APILifeCycle.xml.", e);
-        } catch (XMLStreamException e) {
-            throw new APIPersistenceException("Error occurred while adding default API LifeCycle.", e);
-        }
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
         if (apiGenericArtifactManager == null) {
             String errorMessage = "Failed to retrieve artifact manager when creating API " + api.getId().getApiName();
@@ -426,7 +404,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (GovernanceUtils.findGovernanceArtifactConfiguration(APIConstants.API_KEY, registry) != null) {
                 artifactManager = new GenericArtifactManager(registry, APIConstants.API_KEY);
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
-                String action = LCManagerFactory.getLCManager(tenantId)
+                String action = LCManagerFactory.getInstance().getLCManager()
                         .getTransitionAction(apiArtifact.getLifecycleState().toUpperCase(), status.toUpperCase());
                 apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
             } else {
@@ -440,6 +418,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException("Error while changing the lifecycle. ", e);
         } catch (RegistryException e) {
             throw new APIPersistenceException("Error while accessing the registry. ", e);
+        } catch (PersistenceException e) {
+            throw new APIPersistenceException("Error while accessing the lifecycle. ", e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
