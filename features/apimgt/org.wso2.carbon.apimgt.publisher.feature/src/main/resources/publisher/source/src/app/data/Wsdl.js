@@ -55,7 +55,12 @@ class Wsdl extends Resource {
     static validateUrl(url) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then((client) => {
-            return client.apis.Validation.validateWSDLDefinition({ url });
+            return client.apis.Validation.validateWSDLDefinition(
+                {},
+                {
+                    requestBody: { url },
+                },
+            );
         });
     }
 
@@ -72,12 +77,16 @@ class Wsdl extends Resource {
     static importByUrl(url, additionalProperties, implementationType = 'SOAP') {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then((client) => {
-            const promisedResponse = client.apis.APIs.importWSDLDefinition({
-                url,
-                additionalProperties: JSON.stringify(additionalProperties),
-                implementationType,
-            });
-
+            const promisedResponse = client.apis.APIs.importWSDLDefinition(
+                {},
+                {
+                    requestBody: {
+                        url,
+                        additionalProperties: JSON.stringify(additionalProperties),
+                        implementationType,
+                    },
+                },
+            );
             return promisedResponse.then((response) => new API(response.body));
         });
     }

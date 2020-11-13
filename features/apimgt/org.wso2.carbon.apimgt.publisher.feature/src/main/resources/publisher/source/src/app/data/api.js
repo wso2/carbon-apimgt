@@ -648,10 +648,10 @@ class API extends Resource {
      */
     configureMonetizationToApi(apiId, body) {
         const promised_status = this.client.then(client => {
-            return client.apis['API Monetization'].post_apis__apiId__monetize({
-                apiId,
-                body,
-            });
+            return client.apis['API Monetization'].post_apis__apiId__monetize(
+                { apiId },
+                { requestBody: body },
+            );
         });
         return promised_status;
     }
@@ -1418,7 +1418,7 @@ class API extends Resource {
                 additionalProperties: api_data.additionalProperties,
                 file: api_data.file,
             }
-        }
+        };
 
         promise_create = this.client.then(client => {
             return client.apis['APIs'].post_apis_import_graphql_schema(
@@ -1861,11 +1861,11 @@ class API extends Resource {
         const promised_updateComplexity = this.client.then(client => {
             const payload = {
                 apiId: api_id,
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['GraphQL Policies'].put_apis__apiId__graphql_policies_complexity(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
