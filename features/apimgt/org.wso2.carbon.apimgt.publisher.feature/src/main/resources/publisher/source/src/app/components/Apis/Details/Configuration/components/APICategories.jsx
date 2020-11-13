@@ -82,7 +82,7 @@ function APICategories(props) {
                         <ListItemText primary={(
                             <FormattedMessage
                                 id='Apis.Details.Configurations.api.categories.empty'
-                                defaultMessage='No API Categories defined yet. Please create an API Category first.'
+                                defaultMessage='No API Categories defined.'
                             />
                         )}
                         />
