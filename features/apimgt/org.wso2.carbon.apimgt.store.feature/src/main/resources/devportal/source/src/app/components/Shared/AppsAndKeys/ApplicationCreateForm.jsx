@@ -42,11 +42,6 @@ const styles = (theme) => ({
     quotaHelp: {
         position: 'relative',
     },
-    mandatoryStarSelect: {
-        '& label>span:nth-child(2)': {
-            color: 'red',
-        },
-    },
     mandatoryStarText: {
         '& label>span:nth-child(1)': {
             color: 'red',
@@ -164,7 +159,7 @@ const ApplicationCreate = (props) => {
             />
             <TextField
                 classes={{
-                    root: classes.mandatoryStarSelect,
+                    root: classes.mandatoryStarText,
                 }}
                 required
                 fullWidth
