@@ -17,17 +17,17 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import { FormattedMessage, injectIntl } from 'react-intl';
-import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage } from 'react-intl';
+import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Help from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
 import Configurations from 'Config';
 
-const styles = (theme) => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         marginTop: theme.spacing(4),
         marginLeft: theme.spacing(3),
@@ -57,21 +57,21 @@ const styles = (theme) => ({
         paddingRight: theme.spacing(10),
     },
     buttonStyle: {
-        color: theme.custom.buttonText,
-        borderColor: theme.custom.buttonBorder,
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
+        borderColor: theme.custom.serviceCatalog.onboarding.buttonBorder,
     },
-});
+    docLinkStyle: {
+        paddingLeft: theme.spacing(1),
+    },
+}));
 
 /**
  * Service Catalog On boarding
  *
- * @param {*} props
  * @returns
  */
-function Onboarding(props) {
-    const {
-        classes,
-    } = props;
+function Onboarding() {
+    const classes = useStyles();
 
     return (
         <div className={classes.root}>
@@ -138,6 +138,7 @@ function Onboarding(props) {
                                     defaultMessage='Get Started'
                                 />
                             </Typography>
+                            <OpenInNewIcon className={classes.docLinkStyle} />
                         </Button>
                     </div>
                 </Grid>
@@ -185,8 +186,4 @@ function Onboarding(props) {
     );
 }
 
-Onboarding.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-};
-
-export default injectIntl(withStyles(styles, { withTheme: true })(Onboarding));
+export default Onboarding;
