@@ -53,21 +53,25 @@ class APIClientFactory {
             throw new Error('Environment label is undefined, Please provide'
                 + 'a valid environment object with keys (host,label & loginTokenPath)');
         }
+        const apiClientEnvLabel = environment.label + Utils.CONST.API_CLIENT;
+        const catalogClientEnvLabel = environment.label + Utils.CONST.SERVICE_CATALOG_CLIENT;
         let apiClient;
         if (clientType === Utils.CONST.API_CLIENT) {
-            apiClient = this._APIClientMap.get(environment.label + Utils.CONST.API_CLIENT);
+            apiClient = this._APIClientMap.get(apiClientEnvLabel);
+            if (apiClient) {
+                return apiClient;
+            } else {
+                apiClient = new APIClient(environment);
+                this._APIClientMap.set(apiClientEnvLabel);
+            }
         } else if (clientType === Utils.CONST.SERVICE_CATALOG_CLIENT) {
-            apiClient = this._APIClientMap.get(environment.label + Utils.CONST.SERVICE_CATALOG_CLIENT);
-        }
-        if (apiClient) {
-            return apiClient;
-        }
-        if (clientType === Utils.CONST.API_CLIENT) {
-            apiClient = new APIClient(environment);
-            this._APIClientMap.set(environment.label + Utils.CONST.API_CLIENT, apiClient);
-        } else if (clientType === Utils.CONST.SERVICE_CATALOG_CLIENT) {
-            apiClient = new ServiceCatalogClient(environment);
-            this._APIClientMap.set(environment.label + Utils.CONST.SERVICE_CATALOG_CLIENT, apiClient);
+            apiClient = this._APIClientMap.get(catalogClientEnvLabel);
+            if (apiClient) {
+                return apiClient;
+            } else {
+                apiClient = new ServiceCatalogClient(environment);
+                this._APIClientMap.set(catalogClientEnvLabel);
+            }
         }
         return apiClient;
     }

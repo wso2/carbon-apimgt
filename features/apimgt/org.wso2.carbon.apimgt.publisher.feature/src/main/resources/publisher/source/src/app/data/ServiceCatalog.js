@@ -17,18 +17,7 @@
 /* eslint-disable */
 import cloneDeep from 'lodash.clonedeep';
 import Utils from './Utils';
-import {
-    getSettings,
-    searchServices,
-    checkServiceExistence,
-    createService,
-    deleteService,
-    exportService,
-    importService,
-    getServiceById,
-    getServiceDefinition,
-    updateService
-} from './MockResponses';
+import MockResponses from './MockResponses';
 import APIClientFactory from './APIClientFactory';
 
 /**
@@ -93,7 +82,7 @@ class ServiceCatalog {
             .client;
         const promisedServiceCatalogSettings = serviceCatalog.then(client => {
             // return client.apis['Services'].getSettings();
-            return getSettings();
+            return MockResponses.getSettings();
         });
         return promisedServiceCatalogSettings.then(response => response.body);
     }
@@ -107,7 +96,7 @@ class ServiceCatalog {
             .client;
         const promisedServices = serviceCatalog.then(client => {
             // return client.apis['Services'].searchServices();
-            return searchServices();
+            return MockResponses.searchServices();
         });
         return promisedServices.then(response => response.body);
     }
@@ -127,7 +116,7 @@ class ServiceCatalog {
             //     },
             //     this._requestMetaData()
             // );
-            return checkServiceExistence();
+            return MockResponses.checkServiceExistence();
         });
         return promisedService.then(response => response.body);
     }
@@ -145,7 +134,7 @@ class ServiceCatalog {
             //     body,
             //     this._requestMetaData()
             // );
-            return createService();
+            return MockResponses.createService();
         });
         return promisedService.then(response => response.body);
     }
@@ -165,7 +154,7 @@ class ServiceCatalog {
             //     },
             //     this._requestMetaData()
             // );
-            return deleteService();
+            return MockResponses.deleteService();
         });
         return promisedService.then(response => response.body);
     }
@@ -185,7 +174,7 @@ class ServiceCatalog {
             //     },
             //     this._requestMetaData()
             // );
-            return exportService();
+            return MockResponses.exportService();
         });
         return promisedServices.then(response => response.body);
     }
@@ -205,7 +194,7 @@ class ServiceCatalog {
             //     },
             //     this._requestMetaData()
             // );
-            return importService();
+            return MockResponses.importService();
         });
         return promisedServices.then(response => response.body);
     }
@@ -225,7 +214,7 @@ class ServiceCatalog {
             //     },
             //     this._requestMetaData()
             // );
-            return getServiceById();
+            return MockResponses.getServiceById();
         });
         return promisedServices.then(response => response.body);
     }
@@ -245,7 +234,7 @@ class ServiceCatalog {
             //     },
             //     this._requestMetaData()
             // );
-            return getServiceDefinition();
+            return MockResponses.getServiceDefinition();
         });
         return promisedServices.then(response => response.body);
     }
@@ -266,7 +255,7 @@ class ServiceCatalog {
             //     },
             //     this._requestMetaData()
             // );
-            return updateService();
+            return MockResponses.updateService();
         });
         return promisedService.then(response => response.body);
     }
