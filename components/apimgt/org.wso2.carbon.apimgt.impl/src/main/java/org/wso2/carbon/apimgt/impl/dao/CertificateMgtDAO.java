@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -175,32 +176,31 @@ public class CertificateMgtDAO {
      * @return : True if the information is added successfully, false otherwise.
      * @throws CertificateManagementException if existing entry is found for the given endpoint or alias.
      */
-    public boolean addCertificate(String alias, String endpoint, int tenantId) throws CertificateManagementException,
+    public boolean addCertificate(String certificate, String alias, String endpoint, int tenantId)
+            throws CertificateManagementException,
             CertificateAliasExistsException {
 
         boolean result = false;
         String addCertQuery = SQLConstants.CertificateConstants.INSERT_CERTIFICATE;
 
         //Check whether any certificate is uploaded for the same alias or endpoint by another user/ tenant.
-        CertificateMetadataDTO existingCertificate = getCertificate(alias);
 
-        if (existingCertificate != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("A certificate for the endpoint " + endpoint + " has already added with alias " +
-                        existingCertificate.getAlias());
-            }
-            String message = "Alias or Endpoint exists in the database!";
-            if (existingCertificate.getAlias().equals(alias)) {
-                throw new CertificateAliasExistsException(message);
-            }
-        }
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
+            boolean certificateExist = isCertificateExist(connection, alias, tenantId);
+            if (certificateExist){
+                if (log.isDebugEnabled()) {
+                    log.debug("A certificate for the endpoint " + endpoint + " has already added with alias " + alias);
+                }
+                String message = "Alias or Endpoint exists in the database!";
+                throw new CertificateAliasExistsException(message);
+            }
             connection.setAutoCommit(false);
             try (PreparedStatement preparedStatement = connection.prepareStatement(addCertQuery)) {
                 preparedStatement.setInt(1, tenantId);
                 preparedStatement.setString(2, endpoint);
                 preparedStatement.setString(3, alias);
+                preparedStatement.setBinaryStream(4, getInputStream(certificate));
                 result = preparedStatement.executeUpdate() == 1;
                 connection.commit();
             } catch (SQLException e) {
@@ -217,39 +217,18 @@ public class CertificateMgtDAO {
         return result;
     }
 
-    /**
-     * Method to retrieve certificate metadata from db for specific alias or endpoint.
-     * From alias and endpoint, only one parameter is required. This will be used to query all the certificates
-     * without a limitation for tenant.
-     * Addresses : If some tenant is trying to add a certificate with the same alias, proper error should be shown in
-     * the UI.
-     *
-     * @param alias : Alias for the certificate. (Optional)
-     * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
-     */
-    private CertificateMetadataDTO getCertificate(String alias) throws CertificateManagementException {
-
-        CertificateMetadataDTO certificateMetadataDTO = null;
-        String getCertQuery = SQLConstants.CertificateConstants.GET_CERTIFICATE_ALL_TENANTS;
-
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(getCertQuery)) {
-                preparedStatement.setString(1, alias);
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    while (resultSet.next()) {
-                        certificateMetadataDTO = new CertificateMetadataDTO();
-                        certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
-                        certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
-                    }
+    private boolean isCertificateExist(Connection connection, String alias,int tenantId) throws SQLException {
+        String query = SQLConstants.CertificateConstants.CERTIFICATE_EXIST;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1,alias);
+            preparedStatement.setInt(2,tenantId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()){
+                    return true;
                 }
             }
-        } catch (SQLException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Error while retrieving certificate metadata for alias " + alias);
-            }
-            handleException("Error while retrieving certificate metadata for alias " + alias, e);
         }
-        return certificateMetadataDTO;
+        return false;
     }
 
     /**
@@ -378,6 +357,42 @@ public class CertificateMgtDAO {
         return certificateMetadataList;
     }
 
+    /**
+     * Method to retrieve certificate metadata from db for specific tenant which matches alias or endpoint.
+     * From alias and endpoint, only one parameter is required.
+     *
+     * @param tenantId : The id of the tenant which the certificate belongs to.
+     * @param alias    : Alias for the certificate. (Optional)
+     * @param endpoint : The endpoint/ server url which the certificate is mapped to. (Optional)
+     * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
+     */
+    public CertificateMetadataDTO getCertificate(String alias, String endpoint, int tenantId)
+            throws CertificateManagementException {
+
+        String getCertQuery;
+        getCertQuery = SQLConstants.CertificateConstants.GET_CERTIFICATE_TENANT_ALIAS_ENDPOINT;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(getCertQuery)) {
+                preparedStatement.setInt(1, tenantId);
+                preparedStatement.setString(2, alias);
+                preparedStatement.setString(3, endpoint);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
+                        certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
+                        certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
+                        try (InputStream certificate = resultSet.getBinaryStream("CERTIFICATE")) {
+                            certificateMetadataDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(certificate));
+                        }
+                        return certificateMetadataDTO;
+                    }
+                }
+            }
+        } catch (SQLException | IOException e) {
+            handleException("Error while retrieving certificate metadata.", e);
+        }
+        throw new CertificateManagementException("Certificate didn't exist with alias" + alias);
+    }
     /**
      * To remove the entries of updated certificates from gateway.
      *

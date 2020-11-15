@@ -3359,7 +3359,7 @@ public class SQLConstants {
 
     public static class CertificateConstants {
         public static final String INSERT_CERTIFICATE = "INSERT INTO AM_CERTIFICATE_METADATA " +
-                "(TENANT_ID, END_POINT, ALIAS) VALUES(?, ?, ?)";
+                "(TENANT_ID, END_POINT, ALIAS,CERTIFICATE) VALUES(?, ?, ?,?)";
 
         public static final String GET_CERTIFICATES = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=?";
 
@@ -3367,6 +3367,8 @@ public class SQLConstants {
                 "(ALIAS=?)";
         public static final String GET_CERTIFICATE_TENANT = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
                 "AND (ALIAS=? OR END_POINT=?)";
+        public static final String GET_CERTIFICATE_TENANT_ALIAS_ENDPOINT = "SELECT * FROM AM_CERTIFICATE_METADATA " +
+                       "WHERE TENANT_ID=? AND ALIAS=? AND END_POINT=?";
 
         public static final String DELETE_CERTIFICATES = "DELETE FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
                 "AND ALIAS=?";
@@ -3376,6 +3378,8 @@ public class SQLConstants {
 
         public static final String SELECT_CERTIFICATE_FOR_ALIAS = "SELECT * FROM AM_CERTIFICATE_METADATA "
                 + "WHERE ALIAS=?";
+        public static final String CERTIFICATE_EXIST =
+                "SELECT 1 FROM AM_CERTIFICATE_METADATA WHERE ALIAS=? AND TENANT_ID=?";
     }
 
     public static class ClientCertificateConstants{
