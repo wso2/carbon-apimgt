@@ -111,7 +111,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response endpointCertificatesAliasPut( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias) throws APIManagementException{
+    public Response endpointCertificatesAliasPut( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail,  @Size(min=1,max=30)@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias) throws APIManagementException{
         return delegate.endpointCertificatesAliasPut(certificateInputStream, certificateDetail, alias, securityContext);
     }
 
@@ -130,7 +130,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response endpointCertificatesGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Alias for the certificate")  @QueryParam("alias") String alias,  @ApiParam(value = "Endpoint of which the certificate is uploaded")  @QueryParam("endpoint") String endpoint) throws APIManagementException{
+    public Response endpointCertificatesGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @Size(max=30) @ApiParam(value = "Alias for the certificate")  @QueryParam("alias") String alias,  @ApiParam(value = "Endpoint of which the certificate is uploaded")  @QueryParam("endpoint") String endpoint) throws APIManagementException{
         return delegate.endpointCertificatesGet(limit, offset, alias, endpoint, securityContext);
     }
 
@@ -148,7 +148,9 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = CertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response endpointCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @Multipart(value = "endpoint")  String endpoint) throws APIManagementException{
+    public Response endpointCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  @Size(min=1,max=30) 
+  String alias, @Multipart(value = "endpoint")  
+  String endpoint) throws APIManagementException{
         return delegate.endpointCertificatesPost(certificateInputStream, certificateDetail, alias, endpoint, securityContext);
     }
 }

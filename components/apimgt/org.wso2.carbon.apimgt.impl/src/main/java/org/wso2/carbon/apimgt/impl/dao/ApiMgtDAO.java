@@ -5713,6 +5713,11 @@ public class ApiMgtDAO {
             prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(8, api.getApiLevelPolicy());
             prepStmt.setString(9, api.getType());
+            if (!api.getOrganizationId().isEmpty()) {
+                prepStmt.setString(10, api.getOrganizationId());
+            } else {
+                prepStmt.setNull(10, Types.VARCHAR);
+            }
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();

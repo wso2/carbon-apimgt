@@ -249,7 +249,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisPost(APIDTO body, String oasVersion, MessageContext messageContext) {
+    public Response apisPost(APIDTO body, String organizationId, String oasVersion, MessageContext messageContext) throws APIManagementException {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
@@ -276,6 +276,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             API apiToAdd = prepareToCreateAPIByDTO(body);
+            if (organizationId != null) {
+                apiToAdd.setOrganizationId(organizationId);
+            }
             validateScopes(apiToAdd);
             //validate API categories
             List<APICategory> apiCategories = apiToAdd.getApiCategories();
@@ -642,7 +645,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
+
     public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
         APIDTO updatedApiDTO;
         String[] tokenScopes =
@@ -2820,6 +2823,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.serverError().build();
     }
 
+    @Override
+    public Response apisApiIdPut(String apiId, APIDTO body, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
     /**
      * Publish API to given external stores.
      *
@@ -4111,6 +4119,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
         return null;
     }
+
+
+
     /**
      * Validate graphQL Schema
      * @param fileInputStream  input file

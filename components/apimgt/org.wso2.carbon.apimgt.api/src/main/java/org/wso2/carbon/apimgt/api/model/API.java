@@ -133,6 +133,7 @@ public class API implements Serializable {
     private Set<String> environments;
 
     private String createdTime;
+    private String organizationId;
     /**
      * Customized properties relevant to the particular API.
      */
@@ -335,6 +336,14 @@ public class API implements Serializable {
 
     public void setUUID(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
     }
 
     public String getProductionMaxTps() {

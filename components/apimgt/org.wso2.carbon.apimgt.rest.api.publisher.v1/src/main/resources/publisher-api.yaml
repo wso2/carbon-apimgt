@@ -284,6 +284,7 @@ paths:
       x-examples:
         $ref: docs/examples/apis/apis_post.yaml
       parameters:
+        - $ref : '#/parameters/organizationId'
         - in: body
           name: body
           description: |
@@ -402,6 +403,7 @@ paths:
             curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f"
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/organizationId'
         - in: body
           name: body
           description: |
@@ -6614,6 +6616,14 @@ parameters:
       - api
       - subcription
     required: true
+
+  # The Organization which the API belongs to
+  organizationId:
+    name: organizationId
+    in: query
+    description: |
+      The Organization which the API belongs to.
+    type: string
 
   # Used for pagination:
   # The maximum number of resoures to be returned by a GET
