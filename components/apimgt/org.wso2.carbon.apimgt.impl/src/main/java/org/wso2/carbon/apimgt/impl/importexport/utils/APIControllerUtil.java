@@ -40,7 +40,7 @@ public class APIControllerUtil {
         // if endpointType field is not specified in the api_params.yaml, it will be considered as HTTP/REST
         String endpointType = envParams.get("EndpointType").getAsString();
         String updatedEndpointType;
-        if (envParams.get("EndpointType").isJsonNull()|| StringUtils.isEmpty(endpointType)) {
+        if (envParams.get("EndpointType").isJsonNull() || StringUtils.isEmpty(endpointType)) {
             updatedEndpointType = "rest";
         } else {
             updatedEndpointType = envParams.get("EndpointType").getAsString();
@@ -53,22 +53,72 @@ public class APIControllerUtil {
         importedApi.setEndpointConfig(test2);
 
         //handle gateway environments
-        if (!envParams.get("GatewayEnvironments").isJsonNull()){
-            Set <String> environments = setupGatewayEnvironments(envParams.get("GatewayEnvironments").getAsJsonArray());
+        if (!envParams.get("GatewayEnvironments").isJsonNull()) {
+            Set<String> environments = setupGatewayEnvironments(envParams.get("GatewayEnvironments").getAsJsonArray());
             importedApi.setEnvironmentList(environments);
         }
         //handle mutualSSL certificates and then security types
 
 
         //handle security configs
+        handleEndpointSecurityConfigs(envParams, importedApi);
 
         return importedApi;
     }
 
-    private static Set<String> setupGatewayEnvironments (JsonArray gatewayEnvironments)  {
 
-        Set <String> environments = new HashSet<>();
-        for(int i=0; i < gatewayEnvironments.size(); i++) {
+    private static void handleEndpointSecurityConfigs(JsonObject envParams, API importedApi) throws APIImportExportException {
+        // If the user has set (either true or false) the enabled field under security in api_params.yaml,
+        // the following code should be executed.
+        JsonObject security = envParams.getAsJsonObject("Security");
+        if (security.isJsonNull()) {
+            return;
+        }
+        String securityEnabled = security.get("enabled").getAsString();
+        boolean isSecurityEnabled = Boolean.parseBoolean(securityEnabled);
+        //set endpoint security details to API
+        importedApi.setEndpointSecured(isSecurityEnabled);
+
+        // If endpoint security is enabled
+        if (isSecurityEnabled) {
+            // Check whether the username, password and type fields have set in api_params.yaml
+            JsonElement username = security.get("username");
+            JsonElement password = security.get("password");
+            JsonElement type = security.get("type");
+
+            if (username.isJsonNull()) {
+                throw new APIImportExportException("You have enabled endpoint security but the username is not found " +
+                        "in the api_params.yaml. Please specify usename field for" +
+                        envParams.get("Name").getAsString() + " and continue...");
+            } else if (password.isJsonNull()) {
+                throw new APIImportExportException("You have enabled endpoint security but the password is not found " +
+                        "in the api_params.yaml. Please specify password field for" +
+                        envParams.get("Name").getAsString() + " and continue...");
+            } else if (type.isJsonNull()) {
+                throw new APIImportExportException("You have enabled endpoint security but the password is not found " +
+                        "in the api_params.yaml. Please specify password field for" +
+                        envParams.get("Name").getAsString() + " and continue...");
+            } else {
+                importedApi.setEndpointUTUsername(username.getAsString());
+                importedApi.setEndpointUTPassword(password.getAsString());
+                //setup security type
+                if (StringUtils.equals(type.getAsString(), "digest")) {
+                    importedApi.setEndpointAuthDigest(Boolean.TRUE);
+                } else if (StringUtils.equals(type.getAsString(), "basic")) {
+                    importedApi.setEndpointAuthDigest(Boolean.FALSE);
+                } else {
+                    throw new APIImportExportException("Invalid endpoint security type found in the api_params.yaml. " +
+                            "Should be either basic or digest" + "Please specify correct security types field for"
+                            + envParams.get("Name").getAsString() + " and continue...");
+                }
+            }
+        }
+    }
+
+    private static Set<String> setupGatewayEnvironments(JsonArray gatewayEnvironments) {
+
+        Set<String> environments = new HashSet<>();
+        for (int i = 0; i < gatewayEnvironments.size(); i++) {
             environments.add(gatewayEnvironments.get(i).getAsString());
         }
         return environments;
@@ -79,17 +129,17 @@ public class APIControllerUtil {
         //default production and sandbox endpoints
         JsonObject defaultProductionEndpoint = new JsonObject();
 //        defaultProductionEndpoint.addProperty("config","null");
-        defaultProductionEndpoint.addProperty("url","http://localhost:8080");
+        defaultProductionEndpoint.addProperty("url", "http://localhost:8080");
         JsonObject defaultSandboxEndpoint = new JsonObject();
 //        defaultSandboxEndpoint.addProperty("config","null");
-        defaultSandboxEndpoint.addProperty("url","http://localhost:8081");
+        defaultSandboxEndpoint.addProperty("url", "http://localhost:8081");
 
         JsonObject multipleEndpointsConfig = null;
         String routingPolicy = null;
 
         // if the endpoint routing policy or the endpoints field is not specified and
         // if the endpoint type is AWS or Dynamic
-        if (! envParams.get("EndpointRoutingPolicy").isJsonNull()){
+        if (!envParams.get("EndpointRoutingPolicy").isJsonNull()) {
             routingPolicy = envParams.get("EndpointRoutingPolicy").getAsString();
         }
         if (StringUtils.isEmpty(routingPolicy)) {
@@ -102,9 +152,9 @@ public class APIControllerUtil {
                 JsonObject updatedDynamicEndpointParams = new JsonObject();
                 //replace url property in dynamic endpoints
                 defaultProductionEndpoint.remove("url");
-                defaultProductionEndpoint.addProperty("url","default");
+                defaultProductionEndpoint.addProperty("url", "default");
                 defaultSandboxEndpoint.remove("url");
-                defaultSandboxEndpoint.addProperty("url","default");
+                defaultSandboxEndpoint.addProperty("url", "default");
 
                 updatedDynamicEndpointParams.addProperty("endpoint_type", "default");
                 updatedDynamicEndpointParams.addProperty("failOver", Boolean.FALSE.toString());
@@ -267,13 +317,13 @@ public class APIControllerUtil {
             updatedEndpointParams.add("sandbox_endpoints", defaultSandboxEndpoint);
         } else {
             //handle production endpoints
-            if (endpointConfigs.get("production_endpoints").isJsonNull()){
+            if (endpointConfigs.get("production_endpoints") == null) {
                 updatedEndpointParams.add("production_endpoints", defaultProductionEndpoint);
             } else {
                 updatedEndpointParams.add("production_endpoints", endpointConfigs.get("production_endpoints"));
             }
             //handle sandbox endpoints
-            if (endpointConfigs.get("sandbox_endpoints").isJsonNull()){
+            if (endpointConfigs.get("sandbox_endpoints") == null) {
                 updatedEndpointParams.add("sandbox_endpoints", defaultSandboxEndpoint);
             } else {
                 updatedEndpointParams.add("sandbox_endpoints", endpointConfigs.get("sandbox_endpoints"));
@@ -283,18 +333,17 @@ public class APIControllerUtil {
 
     private static JsonArray handleSoapFailoverAndLoadBalancedEndpointValues(JsonArray failoverEndpoints) {
 
-        for (JsonElement endpoint : failoverEndpoints){
+        for (JsonElement endpoint : failoverEndpoints) {
             JsonObject endpointObject = endpoint.getAsJsonObject();
-            endpointObject.addProperty("endpoint_type","address");
+            endpointObject.addProperty("endpoint_type", "address");
         }
         return failoverEndpoints;
     }
 
     private static JsonObject handleSoapProdAndSandboxEndpointValues(JsonObject soapEndpoint) {
 
-        soapEndpoint.addProperty("endpoint_type","address");
+        soapEndpoint.addProperty("endpoint_type", "address");
         return soapEndpoint;
     }
-
 
 }
