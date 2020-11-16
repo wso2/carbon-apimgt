@@ -27,7 +27,7 @@ public class APIKeyRevokeRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "API Key to revoke")
+  @ApiModelProperty(example = "eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=", value = "API Key to revoke")
   @JsonProperty("apikey")
   public String getApikey() {
     return apikey;

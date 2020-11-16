@@ -49,7 +49,7 @@ public class AlertConfigDTO   {
   }
 
   
-  @ApiModelProperty(example = "{\"apiName\":\"PizzaShackAPI\",\"apiVersion\":\"1.0.0\",\"applicationName\":\"DefaultApplication\",\"requestConunt\":\"12\"}", value = "The config parameters.")
+  @ApiModelProperty(example = "{\"apiName\":\"PizzaShackAPI\",\"apiVersion\":\"1.0.0\",\"applicationName\":\"DefaultApplication\",\"requestCount\":\"12\"}", value = "The config parameters.")
   @JsonProperty("configuration")
   public Map<String, String> getConfiguration() {
     return _configuration;

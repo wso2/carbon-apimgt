@@ -30,7 +30,7 @@ public class MonetizationUsagePublishInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "State of usage publish job")
+  @ApiModelProperty(example = "RUNNING", value = "State of usage publish job")
   @JsonProperty("state")
   public String getState() {
     return state;
@@ -48,7 +48,7 @@ public class MonetizationUsagePublishInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "Status of usage publish job")
+  @ApiModelProperty(example = "SUCCESSFULL", value = "Status of usage publish job")
   @JsonProperty("status")
   public String getStatus() {
     return status;
@@ -66,7 +66,7 @@ public class MonetizationUsagePublishInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "Timestamp of the started time of the Job")
+  @ApiModelProperty(example = "1599196134000", value = "Timestamp of the started time of the Job")
   @JsonProperty("startedTime")
   public String getStartedTime() {
     return startedTime;
@@ -84,7 +84,7 @@ public class MonetizationUsagePublishInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "Timestamp of the last published time")
+  @ApiModelProperty(example = "1599196134000", value = "Timestamp of the last published time")
   @JsonProperty("lastPublsihedTime")
   public String getLastPublsihedTime() {
     return lastPublsihedTime;

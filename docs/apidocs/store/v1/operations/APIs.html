@@ -2,13 +2,13 @@
     <h1><a name="APIs"></a>APIs</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdGet"></a>Get details of an API
+            <h4 class="operation-heading"><a name="apisApiIdGet"></a>Get Details of an API
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1/apis/{apiId}</code>
             <p class="marked"></p>
 
             <p class="marked">Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
 
-&#x60;X-WSO2-Tenant&#x60; header can be used to retrive an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+&#x60;X-WSO2-Tenant&#x60; header can be used to retrieve an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
 
 **NOTE:**
 * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles. \n
@@ -84,7 +84,7 @@
                         </td>
                         <td>
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
+  retrieved from.
 </p>
                         </td>
                         <td>
@@ -163,7 +163,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -172,7 +172,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -182,13 +182,13 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdGraphqlSchemaGet"></a>Get graphQL definition
+            <h4 class="operation-heading"><a name="apisApiIdGraphqlSchemaGet"></a>Get GraphQL Definition
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1/apis/{apiId}/graphql-schema</code>
             <p class="marked"></p>
 
             <p class="marked">You can use this operation to retrieve the swagger definition of an API.
 
- &#x60;X-WSO2-Tenant&#x60; header can be used to retrive the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+ &#x60;X-WSO2-Tenant&#x60; header can be used to retrieve the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
 
 **NOTE:**
 * This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s swagger definition, you need to provide Authorization header.
@@ -293,7 +293,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
+  retrieved from.
 </p>
                         </td>
                         <td>
@@ -343,7 +343,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -352,7 +352,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -362,7 +362,7 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdSubscriptionPoliciesGet"></a>Get details of the subscription throttling policies of an API
+            <h4 class="operation-heading"><a name="apisApiIdSubscriptionPoliciesGet"></a>Get Details of the Subscription Throttling Policies of an API
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1/apis/{apiId}/subscription-policies</code>
             <p class="marked"></p>
 
@@ -441,7 +441,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
+  retrieved from.
 </p>
                         </td>
                         <td>
@@ -520,7 +520,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested Throttling Policy does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -529,7 +529,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported. </p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -539,13 +539,13 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdSwaggerGet"></a>Get swagger definition
+            <h4 class="operation-heading"><a name="apisApiIdSwaggerGet"></a>Get Swagger Definition
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1/apis/{apiId}/swagger</code>
             <p class="marked"></p>
 
             <p class="marked">You can use this operation to retrieve the swagger definition of an API.
 
- &#x60;X-WSO2-Tenant&#x60; header can be used to retrive the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+ &#x60;X-WSO2-Tenant&#x60; header can be used to retrieve the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
 
 **NOTE:**
 * This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s swagger definition, you need to provide Authorization header.
@@ -734,7 +734,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
+  retrieved from.
 </p>
                         </td>
                         <td>
@@ -784,7 +784,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -793,7 +793,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -803,7 +803,7 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdThumbnailGet"></a>Get thumbnail image</h4> <code>GET https://apis.wso2.com/api/am/store/v1/apis/{apiId}/thumbnail</code>
+            <h4 class="operation-heading"><a name="apisApiIdThumbnailGet"></a>Get Thumbnail Image</h4> <code>GET https://apis.wso2.com/api/am/store/v1/apis/{apiId}/thumbnail</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to download a thumbnail image of an API.
@@ -884,7 +884,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
+  retrieved from.
 </p>
                         </td>
                         <td>
@@ -963,7 +963,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested Document does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -972,7 +972,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -990,7 +990,7 @@ variant of the resourec.
 
 Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
 
-This operation supports retriving APIs of other tenants. The required tenant domain need to be specified as a header &#x60;X-WSO2-Tenant&#x60;. If not specified super tenant&#39;s APIs will be retrieved. If you used an Authorization header, the user&#39;s tenant associated with the access token will be used.
+This operation supports retrieving APIs of other tenants. The required tenant domain need to be specified as a header &#x60;X-WSO2-Tenant&#x60;. If not specified super tenant&#39;s APIs will be retrieved. If you used an Authorization header, the user&#39;s tenant associated with the access token will be used.
 
 **NOTE:**
 * By default, this operation retrieves Published APIs. In order to retrieve Prototyped APIs, you need to use **query** parameter and specify **status:PROTOTYPED**.
@@ -1211,7 +1211,7 @@ Content-Type: application/json
                         </td>
                         <td>
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
+  retrieved from.
 </p>
                         </td>
                         <td>
@@ -1325,7 +1325,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -1568,7 +1568,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
+  retrieved from.
 </p>
                         </td>
                         <td>
@@ -1618,7 +1618,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -1627,7 +1627,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

@@ -134,10 +134,7 @@ public class CertificateMgtDaoTest {
         }
     }
 
-    @Test
-    public void testIsTableExists() throws CertificateManagementException {
-        Assert.assertTrue(certificateMgtDAO.isTableExists());
-    }
+
 
     @Test
     public void testGetCertificateWithNoCertificate() throws CertificateManagementException {
@@ -325,7 +322,7 @@ public class CertificateMgtDaoTest {
      * @throws CertificateManagementException Certificate Management Exception.
      */
     private boolean addClientCertificate() throws CertificateManagementException {
-        return certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, "test", "Gold", TENANT_ID, null);
+        return certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, "test", "Gold", TENANT_ID);
     }
 
     /**
@@ -335,7 +332,7 @@ public class CertificateMgtDaoTest {
      * @throws CertificateManagementException Certificate Management Exception.
      */
     private boolean deleteClientCertificate() throws CertificateManagementException {
-        return certificateMgtDAO.deleteClientCertificate(apiIdentifier, "test", TENANT_ID, null);
+        return certificateMgtDAO.deleteClientCertificate(apiIdentifier, "test", TENANT_ID);
     }
 
 }

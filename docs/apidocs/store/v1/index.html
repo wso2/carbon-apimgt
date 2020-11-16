@@ -20,7 +20,7 @@
     <script src="assets/js/main.js" type="text/javascript"></script>
     <script src="assets/js/marked.min.js" type="text/javascript"></script>
 
-    <title>WSO2 API Manager - Store : vv1.1</title>
+    <title>WSO2 API Manager - Developer Portal : vv1.1</title>
 
 
     <!-- Custom CSS -->
@@ -78,16 +78,18 @@
                         <span class="class-name">API Category (Collection)</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apiCategoriesGet"><a href="#!/operations#APICategoryCollection#apiCategoriesGet">Get all API categories</a></li>
+                                        <li id="op-apiCategoriesGet"><a href="#!/operations#APICategoryCollection#apiCategoriesGet">Get All API Categories</a></li>
                             </ul>
                         </li>
                         <hr/>
                         <span class="class-name">API Documents</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apisApiIdDocumentsDocumentIdContentGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdContentGet">Get the content of an API document
+                                        <li id="op-apisApiIdDocumentsDocumentIdContentGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdContentGet">Get the Content of an API Document
 </a></li>
-                                        <li id="op-apisApiIdDocumentsGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsGet">Get a list of documents of an API
+                                        <li id="op-apisApiIdDocumentsDocumentIdGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdGet">Get a Document of an API
+</a></li>
+                                        <li id="op-apisApiIdDocumentsGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsGet">Get a List of Documents of an API
 </a></li>
                             </ul>
                         </li>
@@ -103,22 +105,22 @@
                         <span class="class-name">API Monetization</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-subscriptionsSubscriptionIdUsageGet"><a href="#!/operations#APIMonetization#subscriptionsSubscriptionIdUsageGet">Get details of a pending invoice for a monetized subscription with metered billing.</a></li>
+                                        <li id="op-subscriptionsSubscriptionIdUsageGet"><a href="#!/operations#APIMonetization#subscriptionsSubscriptionIdUsageGet">Get Details of a Pending Invoice for a Monetized Subscription with Metered Billing.</a></li>
                             </ul>
                         </li>
                         <hr/>
                         <span class="class-name">APIs</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apisApiIdGet"><a href="#!/operations#APIs#apisApiIdGet">Get details of an API
+                                        <li id="op-apisApiIdGet"><a href="#!/operations#APIs#apisApiIdGet">Get Details of an API
 </a></li>
-                                        <li id="op-apisApiIdGraphqlSchemaGet"><a href="#!/operations#APIs#apisApiIdGraphqlSchemaGet">Get graphQL definition
+                                        <li id="op-apisApiIdGraphqlSchemaGet"><a href="#!/operations#APIs#apisApiIdGraphqlSchemaGet">Get GraphQL Definition
 </a></li>
-                                        <li id="op-apisApiIdSubscriptionPoliciesGet"><a href="#!/operations#APIs#apisApiIdSubscriptionPoliciesGet">Get details of the subscription throttling policies of an API
+                                        <li id="op-apisApiIdSubscriptionPoliciesGet"><a href="#!/operations#APIs#apisApiIdSubscriptionPoliciesGet">Get Details of the Subscription Throttling Policies of an API
 </a></li>
-                                        <li id="op-apisApiIdSwaggerGet"><a href="#!/operations#APIs#apisApiIdSwaggerGet">Get swagger definition
+                                        <li id="op-apisApiIdSwaggerGet"><a href="#!/operations#APIs#apisApiIdSwaggerGet">Get Swagger Definition
 </a></li>
-                                        <li id="op-apisApiIdThumbnailGet"><a href="#!/operations#APIs#apisApiIdThumbnailGet">Get thumbnail image</a></li>
+                                        <li id="op-apisApiIdThumbnailGet"><a href="#!/operations#APIs#apisApiIdThumbnailGet">Get Thumbnail Image</a></li>
                                         <li id="op-apisGet"><a href="#!/operations#APIs#apisGet">Retrieve/Search APIs
 </a></li>
                                         <li id="op-getWSDLOfAPI"><a href="#!/operations#APIs#getWSDLOfAPI">Get API WSDL definition</a></li>
@@ -128,11 +130,11 @@
                         <span class="class-name">Alert Configuration</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-addAlertConfig"><a href="#!/operations#AlertConfiguration#addAlertConfig">Add AbnormalRequestsPerMin alert configurations.
+                                        <li id="op-addAlertConfig"><a href="#!/operations#AlertConfiguration#addAlertConfig">Add AbnormalRequestsPerMin Alert Configurations.
 </a></li>
-                                        <li id="op-deleteAlertConfig"><a href="#!/operations#AlertConfiguration#deleteAlertConfig">Delete the selected configuration from AbnormalRequestsPerMin alert type.
+                                        <li id="op-deleteAlertConfig"><a href="#!/operations#AlertConfiguration#deleteAlertConfig">Delete the Selected Configuration from AbnormalRequestsPerMin Alert Type.
 </a></li>
-                                        <li id="op-getAllAlertConfigs"><a href="#!/operations#AlertConfiguration#getAllAlertConfigs">Get all AbnormalRequestsPerMin alert configurations
+                                        <li id="op-getAllAlertConfigs"><a href="#!/operations#AlertConfiguration#getAllAlertConfigs">Get All AbnormalRequestsPerMin Alert Configurations
 </a></li>
                             </ul>
                         </li>
@@ -140,11 +142,11 @@
                         <span class="class-name">Alert Subscriptions</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-getSubscribedAlertTypes"><a href="#!/operations#AlertSubscriptions#getSubscribedAlertTypes">Get the list of API Store alert types subscribed by the user.
+                                        <li id="op-getSubscribedAlertTypes"><a href="#!/operations#AlertSubscriptions#getSubscribedAlertTypes">Get the List of API Developer Portal Alert Types Subscribed by the User.
 </a></li>
-                                        <li id="op-subscribeToAlerts"><a href="#!/operations#AlertSubscriptions#subscribeToAlerts">Subscribe to the selected alert types by the user.
+                                        <li id="op-subscribeToAlerts"><a href="#!/operations#AlertSubscriptions#subscribeToAlerts">Subscribe to the Selected Alert Types by the User.
 </a></li>
-                                        <li id="op-unsubscribeAllAlerts"><a href="#!/operations#AlertSubscriptions#unsubscribeAllAlerts">Unsubscribe user from all the alert types.
+                                        <li id="op-unsubscribeAllAlerts"><a href="#!/operations#AlertSubscriptions#unsubscribeAllAlerts">Unsubscribe User from All the Alert Types.
 </a></li>
                             </ul>
                         </li>
@@ -152,7 +154,7 @@
                         <span class="class-name">Alerts</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-getStoreAlertTypes"><a href="#!/operations#Alerts#getStoreAlertTypes">Get the list of API Store alert types.
+                                        <li id="op-getStoreAlertTypes"><a href="#!/operations#Alerts#getStoreAlertTypes">Get the List of API Developer Portal Alert Types.
 </a></li>
                             </ul>
                         </li>
@@ -160,23 +162,23 @@
                         <span class="class-name">Application Keys</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-applicationsApplicationIdGenerateKeysPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdGenerateKeysPost">Generate application keys</a></li>
-                                        <li id="op-applicationsApplicationIdKeysGet"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdKeysGet">Retrieve all application keys</a></li>
-                                        <li id="op-applicationsApplicationIdKeysKeyTypeCleanUpPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdKeysKeyTypeCleanUpPost">Clean up application keys</a></li>
-                                        <li id="op-applicationsApplicationIdKeysKeyTypeGet"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdKeysKeyTypeGet">Get key details of a given type
+                                        <li id="op-applicationsApplicationIdGenerateKeysPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdGenerateKeysPost">Generate Application Keys</a></li>
+                                        <li id="op-applicationsApplicationIdKeysGet"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdKeysGet">Retrieve All Application Keys</a></li>
+                                        <li id="op-applicationsApplicationIdKeysKeyTypeCleanUpPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdKeysKeyTypeCleanUpPost">Clean-Up Application Keys</a></li>
+                                        <li id="op-applicationsApplicationIdKeysKeyTypeGet"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdKeysKeyTypeGet">Get Key Details of a Given Type
 </a></li>
-                                        <li id="op-applicationsApplicationIdKeysKeyTypePut"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdKeysKeyTypePut">Update grant types and callback url of an application
+                                        <li id="op-applicationsApplicationIdKeysKeyTypePut"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdKeysKeyTypePut">Update Grant Types and Callback Url of an Application
 </a></li>
-                                        <li id="op-applicationsApplicationIdKeysKeyTypeRegenerateSecretPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdKeysKeyTypeRegenerateSecretPost">Re-generate consumer secret
+                                        <li id="op-applicationsApplicationIdKeysKeyTypeRegenerateSecretPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdKeysKeyTypeRegenerateSecretPost">Re-Generate Consumer Secret
 </a></li>
-                                        <li id="op-applicationsApplicationIdMapKeysPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdMapKeysPost">Map application keys</a></li>
-                                        <li id="op-applicationsApplicationIdOauthKeysGet"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdOauthKeysGet">Retrieve all application keys</a></li>
-                                        <li id="op-applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost">Clean up application keys</a></li>
-                                        <li id="op-applicationsApplicationIdOauthKeysKeyMappingIdGet"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdOauthKeysKeyMappingIdGet">Get key details of a given type
+                                        <li id="op-applicationsApplicationIdMapKeysPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdMapKeysPost">Map Application Keys</a></li>
+                                        <li id="op-applicationsApplicationIdOauthKeysGet"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdOauthKeysGet">Retrieve All Application Keys</a></li>
+                                        <li id="op-applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost">Clean-Up Application Keys</a></li>
+                                        <li id="op-applicationsApplicationIdOauthKeysKeyMappingIdGet"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdOauthKeysKeyMappingIdGet">Get Key Details of a Given Type
 </a></li>
-                                        <li id="op-applicationsApplicationIdOauthKeysKeyMappingIdPut"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdOauthKeysKeyMappingIdPut">Update grant types and callback url of an application
+                                        <li id="op-applicationsApplicationIdOauthKeysKeyMappingIdPut"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdOauthKeysKeyMappingIdPut">Update Grant Types and Callback URL of an Application
 </a></li>
-                                        <li id="op-applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost">Re-generate consumer secret
+                                        <li id="op-applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost"><a href="#!/operations#ApplicationKeys#applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost">Re-Generate Consumer Secret
 </a></li>
                             </ul>
                         </li>
@@ -184,23 +186,23 @@
                         <span class="class-name">Application Tokens</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-applicationsApplicationIdKeysKeyTypeGenerateTokenPost"><a href="#!/operations#ApplicationTokens#applicationsApplicationIdKeysKeyTypeGenerateTokenPost">Generate application token</a></li>
-                                        <li id="op-applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost"><a href="#!/operations#ApplicationTokens#applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost">Generate application token</a></li>
+                                        <li id="op-applicationsApplicationIdKeysKeyTypeGenerateTokenPost"><a href="#!/operations#ApplicationTokens#applicationsApplicationIdKeysKeyTypeGenerateTokenPost">Generate Application Token</a></li>
+                                        <li id="op-applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost"><a href="#!/operations#ApplicationTokens#applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost">Generate Application Token</a></li>
                             </ul>
                         </li>
                         <hr/>
                         <span class="class-name">Applications</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-applicationsApplicationIdDelete"><a href="#!/operations#Applications#applicationsApplicationIdDelete">Remove an application
+                                        <li id="op-applicationsApplicationIdDelete"><a href="#!/operations#Applications#applicationsApplicationIdDelete">Remove an Application
 </a></li>
-                                        <li id="op-applicationsApplicationIdGet"><a href="#!/operations#Applications#applicationsApplicationIdGet">Get details of an application
+                                        <li id="op-applicationsApplicationIdGet"><a href="#!/operations#Applications#applicationsApplicationIdGet">Get Details of an Application
 </a></li>
-                                        <li id="op-applicationsApplicationIdPut"><a href="#!/operations#Applications#applicationsApplicationIdPut">Update an application
+                                        <li id="op-applicationsApplicationIdPut"><a href="#!/operations#Applications#applicationsApplicationIdPut">Update an Application
 </a></li>
-                                        <li id="op-applicationsGet"><a href="#!/operations#Applications#applicationsGet">Retrieve/Search applications
+                                        <li id="op-applicationsGet"><a href="#!/operations#Applications#applicationsGet">Retrieve/Search Applications
 </a></li>
-                                        <li id="op-applicationsPost"><a href="#!/operations#Applications#applicationsPost">Create a new application
+                                        <li id="op-applicationsPost"><a href="#!/operations#Applications#applicationsPost">Create a New Application
 </a></li>
                             </ul>
                         </li>
@@ -208,50 +210,42 @@
                         <span class="class-name">Comments</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-addCommentToAPI"><a href="#!/operations#Comments#addCommentToAPI">Add an API comment</a></li>
-                                        <li id="op-deleteComment"><a href="#!/operations#Comments#deleteComment">Delete an API comment</a></li>
-                                        <li id="op-getAllCommentsOfAPI"><a href="#!/operations#Comments#getAllCommentsOfAPI">Retrieve API comments</a></li>
-                                        <li id="op-getCommentOfAPI"><a href="#!/operations#Comments#getCommentOfAPI">Get details of an API comment</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">Documents</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-apisApiIdDocumentsDocumentIdGet"><a href="#!/operations#Documents#apisApiIdDocumentsDocumentIdGet">Get a document of an API
-</a></li>
+                                        <li id="op-addCommentToAPI"><a href="#!/operations#Comments#addCommentToAPI">Add an API Comment</a></li>
+                                        <li id="op-deleteComment"><a href="#!/operations#Comments#deleteComment">Delete an API Comment</a></li>
+                                        <li id="op-getAllCommentsOfAPI"><a href="#!/operations#Comments#getAllCommentsOfAPI">Retrieve API Comments</a></li>
+                                        <li id="op-getCommentOfAPI"><a href="#!/operations#Comments#getCommentOfAPI">Get Details of an API Comment</a></li>
                             </ul>
                         </li>
                         <hr/>
                         <span class="class-name">GraphQL Policies</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apisApiIdGraphqlPoliciesComplexityGet"><a href="#!/operations#GraphQLPolicies#apisApiIdGraphqlPoliciesComplexityGet">Get the complexity related details of an API</a></li>
-                                        <li id="op-apisApiIdGraphqlPoliciesComplexityTypesGet"><a href="#!/operations#GraphQLPolicies#apisApiIdGraphqlPoliciesComplexityTypesGet">Retrieve types and fields of a GraphQL Schema</a></li>
+                                        <li id="op-apisApiIdGraphqlPoliciesComplexityGet"><a href="#!/operations#GraphQLPolicies#apisApiIdGraphqlPoliciesComplexityGet">Get the Complexity Related Details of an API</a></li>
+                                        <li id="op-apisApiIdGraphqlPoliciesComplexityTypesGet"><a href="#!/operations#GraphQLPolicies#apisApiIdGraphqlPoliciesComplexityTypesGet">Retrieve Types and Fields of a GraphQL Schema</a></li>
                             </ul>
                         </li>
                         <hr/>
                         <span class="class-name">Key Managers (Collection)</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-keyManagersGet"><a href="#!/operations#KeyManagersCollection#keyManagersGet">Get all Key Managers</a></li>
+                                        <li id="op-keyManagersGet"><a href="#!/operations#KeyManagersCollection#keyManagersGet">Get All Key Managers</a></li>
                             </ul>
                         </li>
                         <hr/>
                         <span class="class-name">Ratings</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apisApiIdRatingsGet"><a href="#!/operations#Ratings#apisApiIdRatingsGet">Retrieve API ratings</a></li>
-                                        <li id="op-apisApiIdUserRatingDelete"><a href="#!/operations#Ratings#apisApiIdUserRatingDelete">Delete user API rating</a></li>
-                                        <li id="op-apisApiIdUserRatingGet"><a href="#!/operations#Ratings#apisApiIdUserRatingGet">Retrieve API rating of user</a></li>
-                                        <li id="op-apisApiIdUserRatingPut"><a href="#!/operations#Ratings#apisApiIdUserRatingPut">Add or update logged in user's rating for an API</a></li>
+                                        <li id="op-apisApiIdRatingsGet"><a href="#!/operations#Ratings#apisApiIdRatingsGet">Retrieve API Ratings</a></li>
+                                        <li id="op-apisApiIdUserRatingDelete"><a href="#!/operations#Ratings#apisApiIdUserRatingDelete">Delete User API Rating</a></li>
+                                        <li id="op-apisApiIdUserRatingGet"><a href="#!/operations#Ratings#apisApiIdUserRatingGet">Retrieve API Rating of User</a></li>
+                                        <li id="op-apisApiIdUserRatingPut"><a href="#!/operations#Ratings#apisApiIdUserRatingPut">Add or Update Logged in User's Rating for an API</a></li>
                             </ul>
                         </li>
                         <hr/>
                         <span class="class-name">Recommendations</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-recommendationsGet"><a href="#!/operations#Recommendations#recommendationsGet">Give API recommendations for a user</a></li>
+                                        <li id="op-recommendationsGet"><a href="#!/operations#Recommendations#recommendationsGet">Give API Recommendations for a User</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -260,7 +254,7 @@
                             <ul class="nav nav-stacked">
                                         <li id="op-apisApiIdSdksLanguageGet"><a href="#!/operations#SDKs#apisApiIdSdksLanguageGet">Generate a SDK for an API
 </a></li>
-                                        <li id="op-sdkGenLanguagesGet"><a href="#!/operations#SDKs#sdkGenLanguagesGet">Get a list of supported SDK languages
+                                        <li id="op-sdkGenLanguagesGet"><a href="#!/operations#SDKs#sdkGenLanguagesGet">Get a List of Supported SDK Languages
 </a></li>
                             </ul>
                         </li>
@@ -268,7 +262,7 @@
                         <span class="class-name">Settings</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-settingsApplicationAttributesGet"><a href="#!/operations#Settings#settingsApplicationAttributesGet">Get all application attributes from configuration
+                                        <li id="op-settingsApplicationAttributesGet"><a href="#!/operations#Settings#settingsApplicationAttributesGet">Get All Application Attributes from Configuration
 </a></li>
                                         <li id="op-settingsGet"><a href="#!/operations#Settings#settingsGet">Retreive store settings</a></li>
                             </ul>
@@ -277,17 +271,17 @@
                         <span class="class-name">Subscriptions</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-subscriptionsGet"><a href="#!/operations#Subscriptions#subscriptionsGet">Get all subscriptions
+                                        <li id="op-subscriptionsGet"><a href="#!/operations#Subscriptions#subscriptionsGet">Get All Subscriptions
 </a></li>
-                                        <li id="op-subscriptionsMultiplePost"><a href="#!/operations#Subscriptions#subscriptionsMultiplePost">Add new subscriptions
+                                        <li id="op-subscriptionsMultiplePost"><a href="#!/operations#Subscriptions#subscriptionsMultiplePost">Add New Subscriptions
 </a></li>
-                                        <li id="op-subscriptionsPost"><a href="#!/operations#Subscriptions#subscriptionsPost">Add a new subscription
+                                        <li id="op-subscriptionsPost"><a href="#!/operations#Subscriptions#subscriptionsPost">Add a New Subscription
 </a></li>
-                                        <li id="op-subscriptionsSubscriptionIdDelete"><a href="#!/operations#Subscriptions#subscriptionsSubscriptionIdDelete">Remove a subscription
+                                        <li id="op-subscriptionsSubscriptionIdDelete"><a href="#!/operations#Subscriptions#subscriptionsSubscriptionIdDelete">Remove a Subscription
 </a></li>
-                                        <li id="op-subscriptionsSubscriptionIdGet"><a href="#!/operations#Subscriptions#subscriptionsSubscriptionIdGet">Get details of a subscription
+                                        <li id="op-subscriptionsSubscriptionIdGet"><a href="#!/operations#Subscriptions#subscriptionsSubscriptionIdGet">Get Details of a Subscription
 </a></li>
-                                        <li id="op-subscriptionsSubscriptionIdPut"><a href="#!/operations#Subscriptions#subscriptionsSubscriptionIdPut">Update existing subscription
+                                        <li id="op-subscriptionsSubscriptionIdPut"><a href="#!/operations#Subscriptions#subscriptionsSubscriptionIdPut">Update Existing Subscription
 </a></li>
                             </ul>
                         </li>
@@ -295,15 +289,15 @@
                         <span class="class-name">Tags</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-tagsGet"><a href="#!/operations#Tags#tagsGet">Get all tags
+                                        <li id="op-tagsGet"><a href="#!/operations#Tags#tagsGet">Get All Tags
 </a></li>
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">tenants</span>
+                        <span class="class-name">Tenants</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-tenantsGet"><a href="#!/operations#Tenants#tenantsGet">Get get tenants by state
+                                        <li id="op-tenantsGet"><a href="#!/operations#Tenants#tenantsGet">Get Tenants by State
 </a></li>
                             </ul>
                         </li>
@@ -311,8 +305,8 @@
                         <span class="class-name">Throttling Policies</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-throttlingPoliciesPolicyLevelGet"><a href="#!/operations#ThrottlingPolicies#throttlingPoliciesPolicyLevelGet">Get all available throttling policies</a></li>
-                                        <li id="op-throttlingPoliciesPolicyLevelPolicyIdGet"><a href="#!/operations#ThrottlingPolicies#throttlingPoliciesPolicyLevelPolicyIdGet">Get details of a throttling policy
+                                        <li id="op-throttlingPoliciesPolicyLevelGet"><a href="#!/operations#ThrottlingPolicies#throttlingPoliciesPolicyLevelGet">Get All Available Throttling Policies</a></li>
+                                        <li id="op-throttlingPoliciesPolicyLevelPolicyIdGet"><a href="#!/operations#ThrottlingPolicies#throttlingPoliciesPolicyLevelPolicyIdGet">Get Details of a Throttling Policy
 </a></li>
                             </ul>
                         </li>
@@ -320,7 +314,7 @@
                         <span class="class-name">Unified Search</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-searchGet"><a href="#!/operations#UnifiedSearch#searchGet">Retrieve/Search APIs and API Documents by content
+                                        <li id="op-searchGet"><a href="#!/operations#UnifiedSearch#searchGet">Retrieve/Search APIs and API Documents by Content
 </a></li>
                             </ul>
                         </li>
@@ -328,7 +322,7 @@
                         <span class="class-name">Users</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-changeUserPassword"><a href="#!/operations#Users#changeUserPassword">Change the password of the user</a></li>
+                                        <li id="op-changeUserPassword"><a href="#!/operations#Users#changeUserPassword">Change the Password of the user</a></li>
                             </ul>
                         </li>
             </ul>
@@ -748,9 +742,87 @@
                         <div class="main-content">
                             <h2>Introduction</h2>
 
-                            <p class="marked">This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
+                            <p class="marked">This document specifies a **RESTful API** for WSO2 **API Manager** - **Developer Portal**.
+Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.7.206/components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/src/main/resources/store-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
 
-It is written with [swagger 2](http://swagger.io/).
+# Authentication
+Our REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking
+the API, you need to obtain an access token with the required scopes. This guide will walk you through the steps
+that you will need to follow to obtain an access token.
+First you need to obtain the consumer key/secret key pair by calling the dynamic client registration (DCR) endpoint. You can add your preferred grant types
+in the payload. A Sample payload is shown below.
+```
+  {
+  "callbackUrl":"www.google.lk",
+  "clientName":"rest_api_devportal",
+  "owner":"admin",
+  "grantType":"client_credentials password refresh_token",
+  "saasApp":true
+  }
+```
+Create a file (payload.json) with the above sample payload, and use the cURL shown below to invoke the DCR endpoint. Authorization header of this should contain the
+base64 encoded admin username and password.
+**Format of the request**
+```
+  curl -X POST -H "Authorization: Basic Base64(admin_username:admin_password)" -H "Content-Type: application/json"
+  \ -d @payload.json https://<host>:<servlet_port>/client-registration/v0.17/register
+```
+**Sample request**
+```
+  curl -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json"
+  \ -d @payload.json https://localhost:9443/client-registration/v0.17/register
+```
+Following is a sample response after invoking the above curl.
+```
+{
+"clientId": "fOCi4vNJ59PpHucC2CAYfYuADdMa",
+"clientName": "rest_api_store",
+"callBackURL": "www.google.lk",
+"clientSecret": "a4FwHlq0iCIKVs2MPIIDnepZnYMa",
+"isSaasApplication": true,
+"appOwner": "admin",
+"jsonString": "{\"grant_types\":\"client_credentials password refresh_token\",\"redirect_uris\":\"www.google.lk\",\"client_name\":\"rest_api_devportal\"}",
+"jsonAppAttribute": "{}",
+"tokenType": null
+}
+```
+Next you must use the above client id and secret to obtain the access token.
+We will be using the password grant type for this, you can use any grant type you desire.
+You also need to add the proper **scope** when getting the access token. All possible scopes for devportal REST API can be viewed in **OAuth2 Security** section
+of this document and scope for each resource is given in **authorization** section of resource documentation.
+Following is the format of the request if you are using the password grant type.
+```
+curl -k -d "grant_type=password&username=<admin_username>&password=<admin_password>&scope=<scopes separated by space>"
+\ -H "Authorization: Basic base64(cliet_id:client_secret)"
+\ https://<host>:<gateway_port>/token
+```
+**Sample request**
+```
+curl https://localhost:8243/token -k \
+-H "Authorization: Basic Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h" \
+-d "grant_type=password&username=admin&password=admin&scope=apim:subscribe apim:api_key"
+```
+Shown below is a sample response to the above request.
+```
+{
+"access_token": "e79bda48-3406-3178-acce-f6e4dbdcbb12",
+"refresh_token": "a757795d-e69f-38b8-bd85-9aded677a97c",
+"scope": "apim:subscribe apim:api_key",
+"token_type": "Bearer",
+"expires_in": 3600
+}
+```
+Now you have a valid access token, which you can use to invoke an API.
+Navigate through the API descriptions to find the required API, obtain an access token as described above and invoke the API with the authentication header.
+If you use a different authentication mechanism, this process may change.
+
+# Try out in Postman
+If you want to try-out the embedded postman collection with "Run in Postman" option, please follow the guidelines listed below.
+* All of the OAuth2 secured endpoints have been configured with an Authorization Bearer header with a parameterized access token. Before invoking any REST API resource make sure you run the `Register DCR Application` and `Generate Access Token` requests to fetch an access token with all required scopes.
+* Make sure you have an API Manager instance up and running.
+* Update the `basepath` parameter to match the hostname and port of the APIM instance.
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/5bc0161b8aa7e701d7bf)
 </p>
 
                             <div class="sect2">

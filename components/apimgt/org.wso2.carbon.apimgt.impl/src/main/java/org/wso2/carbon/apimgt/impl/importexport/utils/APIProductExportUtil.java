@@ -25,6 +25,8 @@ import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -50,6 +52,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This is the util class which consists of all the functions for exporting API Product.
@@ -197,6 +200,9 @@ public class APIProductExportUtil {
         CommonUtil.createDirectory(archivePath + File.separator + APIImportExportConstants.META_INFO_DIRECTORY);
         // Remove unnecessary data from exported API Product
         cleanApiProductDataToExport(apiProductToReturn);
+        // Get only the subscription tier names of the API, rather than retrieving the whole object array
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiProductToReturn);
+        Set<String> availableSubscriptionTierNames = APIAndAPIProductCommonUtil.getAvailableTierNames(apiTypeWrapper);
 
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -227,6 +233,11 @@ public class APIProductExportUtil {
 
 
             String apiInJson = gson.toJson(apiProductToReturn);
+            JSONParser jsonParser = new JSONParser();
+            org.json.simple.JSONObject apiJsonObject = (org.json.simple.JSONObject) jsonParser.parse(apiInJson);
+            apiJsonObject.remove(APIConstants.SUBSCRIPTION_TIERS);
+            apiJsonObject.put(APIConstants.SUBSCRIPTION_TIERS, availableSubscriptionTierNames);
+            apiInJson = gson.toJson(apiJsonObject);
             switch (exportFormat) {
                 case JSON:
                     CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_API_FILE_LOCATION, apiInJson);
@@ -245,6 +256,9 @@ public class APIProductExportUtil {
             String errorMessage = "Error while retrieving saving as YAML for API Product: " + apiProductToReturn.getId().getName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiProductToReturn.getId().getVersion();
             throw new APIImportExportException(errorMessage, e);
+        } catch (ParseException e) {
+            String msg = "ParseException thrown when parsing API Product config";
+            throw new APIManagementException(msg, e);
         }
     }
 

@@ -132,11 +132,10 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
-import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -6160,9 +6159,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Validating x-throttling tiers defined in swagger api definition resource");
         }
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        checkResourceThrottlingTiersInURITemplates(uriTemplates, tenantDomain);
+    }
+
+    @Override
+    public void validateResourceThrottlingTiers(String swaggerContent, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating x-throttling tiers defined in swagger api definition resource");
+        }
+        APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
+        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
+        checkResourceThrottlingTiersInURITemplates(uriTemplates, tenantDomain);
+    }
+
+    @Override
+    public void validateAPIThrottlingTier(API api, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating apiLevelPolicy defined in the API");
+        }
         Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
         if (tierMap != null) {
-            Set<URITemplate> uriTemplates = api.getUriTemplates();
+            String apiLevelPolicy = api.getApiLevelPolicy();
+            if (apiLevelPolicy != null && !tierMap.containsKey(apiLevelPolicy)) {
+                String message = "Invalid API level throttling tier " + apiLevelPolicy + " found in api definition";
+                throw new APIManagementException(message);
+            }
+        }
+    }
+
+    @Override
+    public void validateProductThrottlingTier(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating productLevelPolicy defined in the API Product");
+        }
+        Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+        if (tierMap != null) {
+            String apiLevelPolicy = apiProduct.getProductLevelPolicy();
+            if (apiLevelPolicy != null && !tierMap.containsKey(apiLevelPolicy)) {
+                String message = "Invalid Product level throttling tier " + apiLevelPolicy + " found in api definition";
+                throw new APIManagementException(message);
+            }
+        }
+    }
+
+    private void checkResourceThrottlingTiersInURITemplates(Set<URITemplate> uriTemplates, String tenantDomain)
+            throws APIManagementException {
+        Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+        if (tierMap != null) {
             for (URITemplate template : uriTemplates) {
                 if (template.getThrottlingTier() != null && !tierMap.containsKey(template.getThrottlingTier())) {
                     String message = "Invalid x-throttling tier " + template.getThrottlingTier() +
@@ -7166,122 +7210,83 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public void addPolicy(Policy policy) throws APIManagementException {
 
-        ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
-        ThrottlePolicyTemplateBuilder policyBuilder = getThrottlePolicyTemplateBuilder();
-        Map<String, String> executionFlows = new HashMap<String, String>();
-        String policyLevel = null;
-
-        try {
-            if (policy instanceof APIPolicy) {
-                APIPolicy apiPolicy = (APIPolicy) policy;
-                //Check if there's a policy exists before adding the new policy
-                Policy existingPolicy = getAPIPolicy(userNameWithoutChange, apiPolicy.getPolicyName());
-                if (existingPolicy != null) {
-                    handleException("Advanced Policy with name " + apiPolicy.getPolicyName() + " already exists");
-                }
-                apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
-                apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
-                executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
-                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
-                String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + apiPolicy.getPolicyName();
-                String defaultPolicyName = policyFile + "_default";
-                executionFlows.put(defaultPolicyName, defaultPolicy);
-                policyLevel = PolicyConstants.POLICY_LEVEL_API;
-                APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
-                        apiPolicy.getTenantDomain(), apiPolicy.getPolicyId(), apiPolicy.getPolicyName(),
-                        apiPolicy.getDefaultQuotaPolicy().getType());
-                APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
-            } else if (policy instanceof ApplicationPolicy) {
-                ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
-                //Check if there's a policy exists before adding the new policy
-                Policy existingPolicy = getApplicationPolicy(userNameWithoutChange, appPolicy.getPolicyName());
-                if (existingPolicy != null) {
-                    handleException("Application Policy with name " + appPolicy.getPolicyName() + " already exists");
-                }
-                String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
-                String policyFile = appPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + appPolicy.getPolicyName();
-                executionFlows.put(policyFile, policyString);
-                apiMgtDAO.addApplicationPolicy(appPolicy);
-                policyLevel = PolicyConstants.POLICY_LEVEL_APP;
-                //policy id is not set. retrieving policy to get the id.
-                ApplicationPolicy retrievedPolicy = apiMgtDAO.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
-                ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
-                        appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
-                        appPolicy.getDefaultQuotaPolicy().getType());
-                APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
-            } else if (policy instanceof SubscriptionPolicy) {
-                SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
-                //Check if there's a policy exists before adding the new policy
-                Policy existingPolicy = getSubscriptionPolicy(userNameWithoutChange, subPolicy.getPolicyName());
-                if (existingPolicy != null) {
-                    handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
-                }
-                String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
-                String policyFile = subPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + subPolicy.getPolicyName();
-                executionFlows.put(policyFile, policyString);
-                apiMgtDAO.addSubscriptionPolicy(subPolicy);
-                String monetizationPlan = subPolicy.getMonetizationPlan();
-                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
-                if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
-                    createMonetizationPlan(subPolicy);
-                }
-                policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
-                //policy id is not set. retrieving policy to get the id.
-                SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
-                SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
-                        subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
-                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),
-                        subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity());
-                APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
-            } else if (policy instanceof GlobalPolicy) {
-                GlobalPolicy globalPolicy = (GlobalPolicy) policy;
-                String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
-
-                // validating custom execution plan
-                if (!manager.validateExecutionPlan(policyString)) {
-                    throw new APIManagementException("Invalid Execution Plan");
-                }
-
-                // checking if policy already exist
-                Policy existingPolicy = getGlobalPolicy(globalPolicy.getPolicyName());
-                if (existingPolicy != null) {
-                    throw new APIManagementException("Policy name already exists");
-                }
-
-                String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + globalPolicy.getPolicyName();
-                executionFlows.put(policyFile, policyString);
-
-                apiMgtDAO.addGlobalPolicy(globalPolicy);
-
-                publishKeyTemplateEvent(globalPolicy.getKeyTemplate(), "add");
-                policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
-            } else {
-                String msg = "Policy type " + policy.getClass().getName() + " is not supported";
-                log.error(msg);
-                throw new UnsupportedPolicyTypeException(msg);
+        if (policy instanceof APIPolicy) {
+            APIPolicy apiPolicy = (APIPolicy) policy;
+            //Check if there's a policy exists before adding the new policy
+            Policy existingPolicy = getAPIPolicy(userNameWithoutChange, apiPolicy.getPolicyName());
+            if (existingPolicy != null) {
+                handleException("Advanced Policy with name " + apiPolicy.getPolicyName() + " already exists");
             }
-        } catch (APITemplateException e) {
-            handleException("Error while generating policy", e);
-        }
-
-        // deploy in global cep and gateway manager
-        try {
-            Iterator iterator = executionFlows.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, String> entry = (Map.Entry<String, String>) iterator.next();
-                String policyName = entry.getKey();
-                String flowString = entry.getValue();
-                manager.deployPolicyToGlobalCEP(flowString);
+            apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
+            apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
+            List<Integer> addedConditionGroupIds = new ArrayList<>();
+            for (Pipeline pipeline : apiPolicy.getPipelines()) {
+                addedConditionGroupIds.add(pipeline.getId());
             }
-            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
-        } catch (APIManagementException e) {
-            String msg = "Error while deploying policy";
-            // Add deployment fail flag to database and throw the exception
-            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), false);
-            throw new PolicyDeploymentFailureException(msg, e);
+            APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
+                    apiPolicy.getTenantDomain(), apiPolicy.getPolicyId(), apiPolicy.getPolicyName(),
+                    apiPolicy.getDefaultQuotaPolicy().getType(), addedConditionGroupIds, null);
+            APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
+        } else if (policy instanceof ApplicationPolicy) {
+            ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
+            //Check if there's a policy exists before adding the new policy
+            Policy existingPolicy = getApplicationPolicy(userNameWithoutChange, appPolicy.getPolicyName());
+            if (existingPolicy != null) {
+                handleException("Application Policy with name " + appPolicy.getPolicyName() + " already exists");
+            }
+            apiMgtDAO.addApplicationPolicy(appPolicy);
+            //policy id is not set. retrieving policy to get the id.
+            ApplicationPolicy retrievedPolicy = apiMgtDAO.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
+            ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
+                    appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
+                    appPolicy.getDefaultQuotaPolicy().getType());
+            APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
+        } else if (policy instanceof SubscriptionPolicy) {
+            SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
+            //Check if there's a policy exists before adding the new policy
+            Policy existingPolicy = getSubscriptionPolicy(userNameWithoutChange, subPolicy.getPolicyName());
+            if (existingPolicy != null) {
+                handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
+            }
+            apiMgtDAO.addSubscriptionPolicy(subPolicy);
+            String monetizationPlan = subPolicy.getMonetizationPlan();
+            Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+            if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
+                createMonetizationPlan(subPolicy);
+            }
+            //policy id is not set. retrieving policy to get the id.
+            SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
+            SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+                    subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
+                    subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),
+                    subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity());
+            APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
+        } else if (policy instanceof GlobalPolicy) {
+            GlobalPolicy globalPolicy = (GlobalPolicy) policy;
+
+            // checking if policy already exist
+            Policy existingPolicy = getGlobalPolicy(globalPolicy.getPolicyName());
+            if (existingPolicy != null) {
+                throw new APIManagementException("Policy name already exists");
+            }
+
+            apiMgtDAO.addGlobalPolicy(globalPolicy);
+
+            publishKeyTemplateEvent(globalPolicy.getKeyTemplate(), "add");
+
+            GlobalPolicy retrievedPolicy = apiMgtDAO.getGlobalPolicy(globalPolicy.getPolicyName());
+            GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
+                    globalPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+                    globalPolicy.getPolicyName());
+            APIUtil.sendNotification(globalPolicyEvent, APIConstants.NotifierType.POLICY.name());
+        } else {
+            String msg = "Policy type " + policy.getClass().getName() + " is not supported";
+            log.error(msg);
+            throw new UnsupportedPolicyTypeException(msg);
         }
     }
 
@@ -7463,164 +7468,111 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public void updatePolicy(Policy policy) throws APIManagementException {
 
-        ThrottlePolicyDeploymentManager deploymentManager = ThrottlePolicyDeploymentManager.getInstance();
-        ThrottlePolicyTemplateBuilder policyBuilder = getThrottlePolicyTemplateBuilder();
-        Map<String, String> executionFlows = new HashMap<String, String>();
-        String policyLevel = null;
         String oldKeyTemplate = null;
         String newKeyTemplate = null;
-        String policyName = policy.getPolicyName();
-        List<String> policiesToUndeploy = new ArrayList<String>();
-        try {
-            if (policy instanceof APIPolicy) {
-                APIPolicy apiPolicy = (APIPolicy) policy;
-                apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
-                //TODO this has done due to update policy method not deleting the second level entries when delete on cascade
-                //TODO Need to fix appropriately
-                List<Pipeline> pipelineList = apiPolicy.getPipelines();
-                if (pipelineList != null && pipelineList.size() != 0) {
-                    Iterator<Pipeline> pipelineIterator = pipelineList.iterator();
-                    while (pipelineIterator.hasNext()) {
-                        Pipeline pipeline = pipelineIterator.next();
-                        if (!pipeline.isEnabled()) {
-                            pipelineIterator.remove();
-                        } else {
-                            if (pipeline.getConditions() != null && pipeline.getConditions().size() != 0) {
-                                Iterator<Condition> conditionIterator = pipeline.getConditions().iterator();
-                                while (conditionIterator.hasNext()) {
-                                    Condition condition = conditionIterator.next();
-                                    if (JavaUtils.isFalseExplicitly(condition.getConditionEnabled())) {
-                                        conditionIterator.remove();
-                                    }
+        if (policy instanceof APIPolicy) {
+            APIPolicy apiPolicy = (APIPolicy) policy;
+            apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
+            //TODO this has done due to update policy method not deleting the second level entries when delete on cascade
+            //TODO Need to fix appropriately
+            List<Pipeline> pipelineList = apiPolicy.getPipelines();
+            if (pipelineList != null && pipelineList.size() != 0) {
+                Iterator<Pipeline> pipelineIterator = pipelineList.iterator();
+                while (pipelineIterator.hasNext()) {
+                    Pipeline pipeline = pipelineIterator.next();
+                    if (!pipeline.isEnabled()) {
+                        pipelineIterator.remove();
+                    } else {
+                        if (pipeline.getConditions() != null && pipeline.getConditions().size() != 0) {
+                            Iterator<Condition> conditionIterator = pipeline.getConditions().iterator();
+                            while (conditionIterator.hasNext()) {
+                                Condition condition = conditionIterator.next();
+                                if (JavaUtils.isFalseExplicitly(condition.getConditionEnabled())) {
+                                    conditionIterator.remove();
                                 }
-                            } else {
-                                pipelineIterator.remove();
                             }
+                        } else {
+                            pipelineIterator.remove();
                         }
                     }
                 }
-                APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
-                apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
-                executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
-                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
-                //TODO rename level to  resource or appropriate name
-                String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
-                String defaultPolicyName = policyFile + "_default";
-                executionFlows.put(defaultPolicyName, defaultPolicy);
-                //add default policy file name
-                policiesToUndeploy.add(defaultPolicyName);
-                for (int i = 0; i < existingPolicy.getPipelines().size(); i++) {
-                    policiesToUndeploy.add(policyFile + "_condition_" + existingPolicy.getPipelines().get(i).getId());
-                }
-                policyLevel = PolicyConstants.POLICY_LEVEL_API;
-
-                APIManagerConfiguration config = getAPIManagerConfiguration();
-                if (log.isDebugEnabled()) {
-                        log.debug("Calling invalidation cache for API Policy for tenant ");
-                    }
-                    String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
-                            + "/";
-                    invalidateResourceCache(policyContext, null, Collections.EMPTY_SET);
-                APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
-                        apiPolicy.getTenantDomain(), apiPolicy.getPolicyId(), apiPolicy.getPolicyName(),
-                        apiPolicy.getDefaultQuotaPolicy().getType());
-                APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
-            } else if (policy instanceof ApplicationPolicy) {
-                ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
-                String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
-                apiMgtDAO.updateApplicationPolicy(appPolicy);
-                String policyFile = appPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
-                executionFlows.put(policyFile, policyString);
-                policiesToUndeploy.add(policyFile);
-                policyLevel = PolicyConstants.POLICY_LEVEL_APP;
-                //policy id is not set. retrieving policy to get the id.
-                ApplicationPolicy retrievedPolicy = apiMgtDAO.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
-                ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
-                        appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
-                        appPolicy.getDefaultQuotaPolicy().getType());
-                APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
-            } else if (policy instanceof SubscriptionPolicy) {
-                SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
-                String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
-                apiMgtDAO.updateSubscriptionPolicy(subPolicy);
-                String monetizationPlan = subPolicy.getMonetizationPlan();
-                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
-                //call the monetization extension point to create plans (if any)
-                if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
-                    updateMonetizationPlan(subPolicy);
-                }
-                String policyFile = subPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
-                policiesToUndeploy.add(policyFile);
-                executionFlows.put(policyFile, policyString);
-                policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
-                //policy id is not set. retrieving policy to get the id.
-                SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
-                SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
-                        subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
-                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),subPolicy.getGraphQLMaxDepth(),
-                        subPolicy.getGraphQLMaxComplexity());
-                APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
-            } else if (policy instanceof GlobalPolicy) {
-                GlobalPolicy globalPolicy = (GlobalPolicy) policy;
-                String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
-
-                // validating custom execution plan
-                if (!deploymentManager.validateExecutionPlan(policyString)) {
-                    throw new APIManagementException("Invalid Execution Plan");
-                }
-
-                // getting key templates before updating database
-                GlobalPolicy oldGlobalPolicy = apiMgtDAO.getGlobalPolicy(policy.getPolicyName());
-                oldKeyTemplate = oldGlobalPolicy.getKeyTemplate();
-                newKeyTemplate = globalPolicy.getKeyTemplate();
-
-                apiMgtDAO.updateGlobalPolicy(globalPolicy);
-                String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policyName;
-                executionFlows.put(policyFile, policyString);
-                policiesToUndeploy.add(policyFile);
-                policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
-            } else {
-                String msg = "Policy type " + policy.getClass().getName() + " is not supported";
-                log.error(msg);
-                throw new UnsupportedPolicyTypeException(msg);
             }
-        } catch (APITemplateException e) {
-            handleException("Error while generating policy for update");
+            APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
+            apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
+            //TODO rename level to  resource or appropriate name
+
+            APIManagerConfiguration config = getAPIManagerConfiguration();
+            if (log.isDebugEnabled()) {
+                log.debug("Calling invalidation cache for API Policy for tenant ");
+            }
+            String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
+                    + "/";
+            invalidateResourceCache(policyContext, null, Collections.EMPTY_SET);
+            List<Integer> addedConditionGroupIds = new ArrayList<>();
+            List<Integer> deletedConditionGroupIds = new ArrayList<>();
+            for (Pipeline pipeline : existingPolicy.getPipelines()) {
+                deletedConditionGroupIds.add(pipeline.getId());
+            }
+            for (Pipeline pipeline : apiPolicy.getPipelines()) {
+                addedConditionGroupIds.add(pipeline.getId());
+            }
+            APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
+                    apiPolicy.getTenantDomain(), apiPolicy.getPolicyId(), apiPolicy.getPolicyName(),
+                    apiPolicy.getDefaultQuotaPolicy().getType(), addedConditionGroupIds, deletedConditionGroupIds);
+            APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
+        } else if (policy instanceof ApplicationPolicy) {
+            ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
+            apiMgtDAO.updateApplicationPolicy(appPolicy);
+            //policy id is not set. retrieving policy to get the id.
+            ApplicationPolicy retrievedPolicy = apiMgtDAO.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
+            ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
+                    appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
+                    appPolicy.getDefaultQuotaPolicy().getType());
+            APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
+        } else if (policy instanceof SubscriptionPolicy) {
+            SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
+            apiMgtDAO.updateSubscriptionPolicy(subPolicy);
+            String monetizationPlan = subPolicy.getMonetizationPlan();
+            Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+            //call the monetization extension point to create plans (if any)
+            if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
+                updateMonetizationPlan(subPolicy);
+            }
+            //policy id is not set. retrieving policy to get the id.
+            SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
+            SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+                    subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
+                    subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),subPolicy.getGraphQLMaxDepth(),
+                    subPolicy.getGraphQLMaxComplexity());
+            APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
+        } else if (policy instanceof GlobalPolicy) {
+            GlobalPolicy globalPolicy = (GlobalPolicy) policy;
+
+            // getting key templates before updating database
+            GlobalPolicy oldGlobalPolicy = apiMgtDAO.getGlobalPolicy(policy.getPolicyName());
+            oldKeyTemplate = oldGlobalPolicy.getKeyTemplate();
+            newKeyTemplate = globalPolicy.getKeyTemplate();
+
+            apiMgtDAO.updateGlobalPolicy(globalPolicy);
+
+            GlobalPolicy retrievedPolicy = apiMgtDAO.getGlobalPolicy(globalPolicy.getPolicyName());
+            GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
+                    globalPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+                    globalPolicy.getPolicyName());
+            APIUtil.sendNotification(globalPolicyEvent, APIConstants.NotifierType.POLICY.name());
+        } else {
+            String msg = "Policy type " + policy.getClass().getName() + " is not supported";
+            log.error(msg);
+            throw new UnsupportedPolicyTypeException(msg);
         }
-        // Deploy in global cep and gateway manager
-        try {
-            /* If single pipeline fails to deploy then whole deployment should fail.
-             * Therefore for loop is wrapped inside a try catch block
-             */
-            if (PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
-                for (String flowName : policiesToUndeploy) {
-                    deploymentManager.undeployPolicyFromGlobalCEP(flowName);
-                }
-            }
-
-            Iterator iterator = executionFlows.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, String> pair = (Map.Entry<String, String>) iterator.next();
-                String policyPlanName = pair.getKey();
-                String flowString = pair.getValue();
-                deploymentManager.updatePolicyToGlobalCEP(policyPlanName, flowString);
-
-                //publishing keytemplate after update
-                if (oldKeyTemplate != null && newKeyTemplate != null) {
-                    publishKeyTemplateEvent(oldKeyTemplate, "remove");
-                    publishKeyTemplateEvent(newKeyTemplate, "add");
-                }
-            }
-
-            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
-        } catch (APIManagementException e) {
-            String msg = "Error while deploying policy to gateway";
-            // Add deployment fail flag to database and throw the exception
-            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), false);
-            throw new PolicyDeploymentFailureException(msg, e);
+        //publishing keytemplate after update
+        if (oldKeyTemplate != null && newKeyTemplate != null) {
+            publishKeyTemplateEvent(oldKeyTemplate, "remove");
+            publishKeyTemplateEvent(newKeyTemplate, "add");
         }
     }
 
@@ -7643,32 +7595,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException {
         int tenantID = APIUtil.getTenantId(username);
-        List<String> policyFileNames = new ArrayList<String>();
-        String policyFile = null;
 
         if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             //need to load whole policy object to get the pipelines
             APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
-
-            //add default policy file name
-            if (policy.isDeployed()) {
-                policyFile = policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
-                policyFileNames.add(policyFile + "_default");
-                for (Pipeline pipeline : policy.getPipelines()) {
-                    policyFileNames.add(policyFile + "_condition_" + pipeline.getId());
-                }
+            List<Integer> deletedConditionGroupIds = new ArrayList<>();
+            for (Pipeline pipeline : policy.getPipelines()) {
+                deletedConditionGroupIds.add(pipeline.getId());
             }
             APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.POLICY_DELETE.name(), tenantId, policy.getTenantDomain(),
-                    policy.getPolicyId(), policy.getPolicyName(), policy.getDefaultQuotaPolicy().getType());
+                    policy.getPolicyId(), policy.getPolicyName(), policy.getDefaultQuotaPolicy().getType(),
+                    null, deletedConditionGroupIds);
             APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
 
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
             ApplicationPolicy appPolicy = apiMgtDAO.getApplicationPolicy(policyName, tenantID);
-            if (appPolicy.isDeployed()) {
-                policyFile = appPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
-                policyFileNames.add(policyFile);
-            }
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
                     appPolicy.getTenantDomain(), appPolicy.getPolicyId(), appPolicy.getPolicyName(),
@@ -7676,11 +7618,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
             SubscriptionPolicy subscriptionPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantID);
-            if (subscriptionPolicy.isDeployed()) {
-                policyFile = subscriptionPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" +
-                        policyName;
-                policyFileNames.add(policyFile);
-            }
             //call the monetization extension point to delete plans if any
             deleteMonetizationPlan(subscriptionPolicy);
             SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
@@ -7693,20 +7630,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
-            if (globalPolicy.isDeployed()) {
-                policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policyName;
-                policyFileNames.add(policyFile);
-            }
-        }
-
-        ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
-        try {
-            manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));
-
-        } catch (Exception e) {
-            String msg = "Error while undeploying policy: ";
-            log.error(msg, e);
-            throw new APIManagementException(msg);
+            GlobalPolicyEvent globalPolicyEvent = new GlobalPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
+                    globalPolicy.getTenantDomain(), globalPolicy.getPolicyId(), globalPolicy.getPolicyName());
+            APIUtil.sendNotification(globalPolicyEvent, APIConstants.NotifierType.POLICY.name());
         }
 
         GlobalPolicy globalPolicy = null;
@@ -8335,10 +8262,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected void invalidateResourceCache(String apiContext, String apiVersion,Set<URITemplate> uriTemplates) {
         APIAuthenticationAdminClient client = new APIAuthenticationAdminClient();
         client.invalidateResourceCache(apiContext, apiVersion, uriTemplates);
-    }
-
-    protected ThrottlePolicyTemplateBuilder getThrottlePolicyTemplateBuilder() {
-        return new ThrottlePolicyTemplateBuilder();
     }
 
     /**

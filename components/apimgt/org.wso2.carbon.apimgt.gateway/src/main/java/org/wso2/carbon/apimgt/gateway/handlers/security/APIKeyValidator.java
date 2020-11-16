@@ -346,7 +346,11 @@ public class APIKeyValidator {
         ArrayList<String> resourceArray = null;
 
         if (electedResource != null) {
-            resourceArray = new ArrayList<>(Arrays.asList(electedResource.split(",")));
+            if (APIConstants.GRAPHQL_API.equalsIgnoreCase((String)synCtx.getProperty(APIConstants.API_TYPE))) {
+                resourceArray = new ArrayList<>(Arrays.asList(electedResource.split(",")));
+            } else {
+                resourceArray = new ArrayList<>(Arrays.asList(electedResource));
+            }
         }
 
         String requestPath = getRequestPath(synCtx, apiContext, apiVersion, fullRequestPath);

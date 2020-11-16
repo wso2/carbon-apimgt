@@ -805,6 +805,34 @@ public interface APIProvider extends APIManager {
     void validateResourceThrottlingTiers(API api, String tenantDomain) throws APIManagementException;
 
     /**
+     * This method validates the existence of all the resource level throttling tiers in URI templates of API
+     * when the swagger file is provided
+     *
+     * @param swaggerContent swagger file
+     * @param tenantDomain   tenant domain
+     * @throws APIManagementException
+     */
+    void validateResourceThrottlingTiers(String swaggerContent, String tenantDomain) throws APIManagementException;
+
+    /**
+     * This method validates the existence of the API level throttling tier of API
+     *
+     * @param api           api
+     * @param tenantDomain  tenant domain
+     * @throws APIManagementException
+     */
+    void validateAPIThrottlingTier(API api, String tenantDomain) throws APIManagementException;
+
+    /**
+     * This method validates the existence of the API level throttling tier of API
+     *
+     * @param apiProduct   api product
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException
+     */
+    void validateProductThrottlingTier(APIProduct apiProduct, String tenantDomain) throws APIManagementException;
+
+    /**
      * This method is used to configure monetization for a given API
      *
      * @param api API to be updated with monetization

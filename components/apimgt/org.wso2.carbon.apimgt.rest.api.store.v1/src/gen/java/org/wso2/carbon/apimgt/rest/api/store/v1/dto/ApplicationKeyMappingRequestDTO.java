@@ -61,7 +61,7 @@ return null;
   }
 
   
-  @ApiModelProperty(required = true, value = "Consumer key of the application")
+  @ApiModelProperty(example = "oYhwZu4P2ThDmiDprBk6c0YfjR8a", required = true, value = "Consumer key of the application")
   @JsonProperty("consumerKey")
   @NotNull
   public String getConsumerKey() {
@@ -80,7 +80,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Consumer secret of the application")
+  @ApiModelProperty(example = "ondWGtFTCOVM4sfPyOfZ7fel610a", value = "Consumer secret of the application")
   @JsonProperty("consumerSecret")
   public String getConsumerSecret() {
     return consumerSecret;
@@ -98,7 +98,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Key Manager Name")
+  @ApiModelProperty(example = "Resident Key Manager", value = "Key Manager Name")
   @JsonProperty("keyManager")
   public String getKeyManager() {
     return keyManager;

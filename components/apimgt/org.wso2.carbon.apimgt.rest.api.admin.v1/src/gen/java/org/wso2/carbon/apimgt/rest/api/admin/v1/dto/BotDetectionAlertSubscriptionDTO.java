@@ -46,7 +46,7 @@ public class BotDetectionAlertSubscriptionDTO   {
   }
 
   
-  @ApiModelProperty(example = "abc@.com", required = true, value = "email")
+  @ApiModelProperty(example = "abc@gmail.com", required = true, value = "email")
   @JsonProperty("email")
   @NotNull
   public String getEmail() {

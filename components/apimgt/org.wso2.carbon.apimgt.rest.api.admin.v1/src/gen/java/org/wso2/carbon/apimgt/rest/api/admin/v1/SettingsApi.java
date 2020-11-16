@@ -40,7 +40,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retreive admin settings", notes = "Retreive admin settings ", response = SettingsDTO.class, authorizations = {
+    @ApiOperation(value = "Retreive Admin Settings", notes = "Retreive admin settings ", response = SettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
@@ -48,7 +48,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     }, tags={ "Settings" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Settings returned ", response = SettingsDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response settingsGet() throws APIManagementException{
         return delegate.settingsGet(securityContext);
     }
