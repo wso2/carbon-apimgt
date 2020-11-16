@@ -34,6 +34,9 @@ public class SQLConstants {
     public static final String GET_VERSIONS_MATCHES_API_NAME_SQL=
             "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ?";
 
+    public static final String GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL=
+            "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ? AND ORGANIZATION_UUID = ?";
+
     public static final String GET_USER_ID_FROM_CONSUMER_KEY_SQL =
             " SELECT " +
             "   SUBS.USER_ID " +

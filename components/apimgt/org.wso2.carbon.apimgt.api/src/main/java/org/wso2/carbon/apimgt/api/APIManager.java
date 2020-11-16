@@ -646,7 +646,7 @@ public interface APIManager {
      * @return api versions that matches context template
      * @throws APIManagementException If failed to get the list of api versions
      */
-    List<String> getApiVersionsMatchingApiName(String apiName,String username) throws APIManagementException;
+    List<String> getApiVersionsMatchingApiName(String apiName,String username, String OrganizationId) throws APIManagementException;
 
     /**
      * Returns list of wsdls

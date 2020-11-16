@@ -404,7 +404,6 @@ paths:
       parameters:
         - $ref : '#/parameters/organizationId'
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/organizationId'
         - in: body
           name: body
           description: |
@@ -1101,6 +1100,7 @@ paths:
       description: |
         This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.
       parameters:
+        - $ref: '#/parameters/organizationId'
         - name: newVersion
           description: Version of the new API.
           type: string
@@ -1159,6 +1159,7 @@ paths:
 
         Some actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter. Please see parameters table for more information.
       parameters:
+        - $ref: '#/parameters/organizationId'
         - name: action
           description: |
             The action to demote or promote the state of the API.
@@ -1348,6 +1349,7 @@ paths:
       description: |
         This operation can be used to remove pending lifecycle state change requests that are in pending state
       parameters:
+        - $ref: '#/parameters/organizationId'
         - $ref: '#/parameters/apiId'
       tags:
         - API Lifecycle
@@ -1388,6 +1390,7 @@ paths:
         Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
       operationId: importOpenAPIDefinition
       parameters:
+        - $ref: '#/parameters/organizationId'
         - in: formData
           name: file
           description: Definition to upload as a file
@@ -1463,6 +1466,7 @@ paths:
       x-examples:
         $ref: docs/examples/apis/wsdl/import_wsdl_post.yaml
       parameters:
+        - $ref: '#/parameters/organizationId'
         - in: formData
           name: file
           description: WSDL definition as a file
@@ -1545,6 +1549,7 @@ paths:
 
         API definition is GraphQL Schema
       parameters:
+        - $ref: '#/parameters/organizationId'
         - in: formData
           name: type
           description: Definition type to upload

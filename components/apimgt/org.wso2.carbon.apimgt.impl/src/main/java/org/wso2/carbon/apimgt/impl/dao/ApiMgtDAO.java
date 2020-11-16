@@ -172,18 +172,26 @@ public class ApiMgtDAO {
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
     }
 
-    public List<String> getAPIVersionsMatchingApiName(String apiName, String username) throws APIManagementException {
+    public List<String> getAPIVersionsMatchingApiName(String apiName, String username, String organizationId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         List<String> versionList = new ArrayList<String>();
         ResultSet resultSet = null;
+        String sqlQuery = null;
 
-        String sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
+        if (organizationId != null) {
+            sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
+        } else {
+            sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL;
+        }
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiName);
             ps.setString(2, username);
+            if (organizationId != null) {
+                ps.setString(3, organizationId);
+            }
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 versionList.add(resultSet.getString("API_VERSION"));

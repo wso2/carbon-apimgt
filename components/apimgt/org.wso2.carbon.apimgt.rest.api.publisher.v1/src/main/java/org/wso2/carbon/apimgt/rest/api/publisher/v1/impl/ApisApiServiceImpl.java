@@ -276,10 +276,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                 }
             }
-
-            API apiToAdd = prepareToCreateAPIByDTO(body);
+            API apiToAdd;
             if (organizationId != null) {
-                apiToAdd.setOrganizationId(organizationId);
+                apiToAdd = prepareToCreateAPIByDTO(body, organizationId);
+            } else {
+                apiToAdd = prepareToCreateAPIByDTO(body, null);
             }
             validateScopes(apiToAdd);
             //validate API categories
@@ -331,10 +332,11 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Prepares the API Model object to be created using the DTO object
      *
      * @param body APIDTO of the API
+     * @param body UUID of the organization
      * @return API object to be created
      * @throws APIManagementException Error while creating the API
      */
-    private API prepareToCreateAPIByDTO(APIDTO body) throws APIManagementException {
+    private API prepareToCreateAPIByDTO(APIDTO body, String organizationId) throws APIManagementException {
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String username = RestApiUtil.getLoggedInUsername();
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
@@ -388,7 +390,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         //Get all existing versions of  api been adding
-        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
+        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username, organizationId);
         if (apiVersions.size() > 0) {
             //If any previous version exists
             for (String version : apiVersions) {
@@ -449,6 +451,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
+        if (organizationId != null) {
+            apiToAdd.setOrganizationId(organizationId);
+        }
         //Overriding some properties:
         //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
         if (!APIConstants.PROTOTYPED.equals(apiToAdd.getStatus())) {
@@ -2331,7 +2336,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, MessageContext messageContext) {
+    public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, String organizationId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -3538,7 +3543,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Import using OpenAPI definition response
      */
     @Override
-    public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
+    public Response importOpenAPIDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, MessageContext messageContext) {
 
         // Validate and retrieve the OpenAPI definition
@@ -3577,7 +3582,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Import the API and Definition
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            API apiToAdd = prepareToCreateAPIByDTO(apiDTOFromProperties);
+            API apiToAdd;
+            if (organizationId != null) {
+                apiToAdd = prepareToCreateAPIByDTO(apiDTOFromProperties, organizationId);
+            } else {
+                apiToAdd = prepareToCreateAPIByDTO(apiDTOFromProperties, null);
+            }
 
             boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
             // Rearrange paths according to the API payload and save the OpenAPI definition
@@ -3708,7 +3718,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred during the operation
      */
     @Override
-    public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
+    public Response importWSDLDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail, String url,
             String additionalProperties, String implementationType, MessageContext messageContext)
             throws APIManagementException {
         try {
@@ -3729,7 +3739,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             additionalPropertiesAPI.setProvider(RestApiUtil.getLoggedInUsername());
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
-            API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
+            API apiToAdd;
+            if (organizationId != null) {
+                apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI, organizationId);
+            } else {
+                apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI, null);
+            }
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
             if (isSoapAPI) {
@@ -3925,6 +3940,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+
     /**
      * Update the WSDL of an API
      *
@@ -3959,8 +3975,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
-                                            String ifMatch, MessageContext messageContext) {
+    public Response apisChangeLifecyclePost(String action, String apiId, String organizationId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) {
         //pre-processing
         String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
@@ -4013,7 +4028,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion,
+    public Response apisCopyApiPost(String newVersion, String apiId, String organizationId, Boolean defaultVersion,
                                     MessageContext messageContext) {
         URI newVersionedApiUri;
         APIDTO newVersionedApi;
@@ -4107,7 +4122,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response with GraphQL API
      */
     @Override
-    public Response apisImportGraphqlSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
+    public Response apisImportGraphqlSchemaPost(String organizationId, String type, InputStream fileInputStream, Attachment fileDetail,
                                                 String additionalProperties, String ifMatch,
                                                 MessageContext messageContext) {
         APIDTO additionalPropertiesAPI = null;
@@ -4131,7 +4146,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
+            API apiToAdd;
+            if (organizationId != null) {
+                apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI, organizationId);
+            } else {
+                apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI, null);
+            }
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
