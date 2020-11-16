@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class APIControllerUtil {
@@ -52,13 +53,25 @@ public class APIControllerUtil {
         importedApi.setEndpointConfig(test2);
 
         //handle gateway environments
-
+        if (!envParams.get("GatewayEnvironments").isJsonNull()){
+            Set <String> environments = setupGatewayEnvironments(envParams.get("GatewayEnvironments").getAsJsonArray());
+            importedApi.setEnvironmentList(environments);
+        }
         //handle mutualSSL certificates and then security types
 
 
         //handle security configs
 
         return importedApi;
+    }
+
+    private static Set<String> setupGatewayEnvironments (JsonArray gatewayEnvironments)  {
+
+        Set <String> environments = new HashSet<>();
+        for(int i=0; i < gatewayEnvironments.size(); i++) {
+            environments.add(gatewayEnvironments.get(i).getAsString());
+        }
+        return environments;
     }
 
     private static JsonObject setupMultipleEndpoints(JsonObject envParams, String endpointType) throws APIImportExportException {
