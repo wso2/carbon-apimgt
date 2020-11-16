@@ -2330,7 +2330,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
             boolean isLazyLoad) throws APIManagementException {
         Map<String, Object> searchResults =
-                super.searchPaginatedAPIs(searchQuery, requestedTenantDomain, start, end, isLazyLoad);
+                searchPaginatedAPIs(searchQuery, requestedTenantDomain, start, end, isLazyLoad, false);
         if (APIUtil.isAllowDisplayMultipleVersions()) {
             return searchResults;
         }
@@ -4986,7 +4986,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         String criteria = getUserRoleListQuery();
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-            criteria = criteria + "&" + searchQuery;
+            criteria =  searchQuery + "&" + criteria;
         }
         return criteria;
     }
@@ -5839,4 +5839,78 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
     }
+
+    @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
+            boolean isLazyLoad, boolean isPublisherListing) throws APIManagementException {
+        Map<String, Object> result = new HashMap<String, Object>();
+        log.info("=============== consumer searchPaginatedAPIs ===============");
+        boolean isTenantFlowStarted = false;
+        if (log.isDebugEnabled()) {
+            log.debug("Original search query received : " + searchQuery);
+        }
+        searchQuery = getSearchQuery(super.getQuery(searchQuery));
+        if (log.isDebugEnabled()) {
+            log.debug("Final search query after the post processing for the custom properties : " + searchQuery);
+        }
+        try {
+            boolean isTenantMode = (requestedTenantDomain != null);
+            if (isTenantMode && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
+                isTenantFlowStarted = true;
+                startTenantFlow(requestedTenantDomain);
+            } else {
+                requestedTenantDomain = org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                isTenantFlowStarted = true;
+                startTenantFlow(requestedTenantDomain);
+
+            }
+
+            Registry userRegistry;
+            int tenantIDLocal = 0;
+            String userNameLocal = this.username;
+            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
+                tenantIDLocal = getTenantManager()
+                        .getTenantId(requestedTenantDomain);
+                APIUtil.loadTenantRegistry(tenantIDLocal);
+                userRegistry = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
+                userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
+                if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                    APIUtil.loadTenantConfigBlockingMode(requestedTenantDomain);
+                }
+            } else {
+                userRegistry = this.registry;
+                tenantIDLocal = tenantId;
+            }
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
+
+            if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+                Map<Documentation, API> apiDocMap =
+                        searchAPIDoc(userRegistry, tenantIDLocal, userNameLocal, searchQuery.split("=")[1]);
+                result.put("apis", apiDocMap);
+                /*Pagination for Document search results is not supported yet, hence length is sent as end-start*/
+                if (apiDocMap.isEmpty()) {
+                    result.put("length", 0);
+                } else {
+                    result.put("length", end - start);
+                }
+            } else if (searchQuery != null && searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
+                result = searchAPIsByURLPattern(userRegistry, searchQuery.split("=")[1], start, end);
+            } else if (searchQuery != null && searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                result = searchPaginatedAPIsByContent(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
+            } else {
+                result = searchPaginatedAPIs(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad,
+                        isPublisherListing);
+            }
+
+        } catch (Exception e) {
+            String msg = "Failed to Search APIs";
+            throw new APIManagementException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                endTenantFlow();
+            }
+        }
+        return result;
+    }
+
 }
