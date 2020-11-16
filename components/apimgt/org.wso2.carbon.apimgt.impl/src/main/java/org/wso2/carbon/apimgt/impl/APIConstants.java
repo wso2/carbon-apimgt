@@ -579,6 +579,7 @@ public final class APIConstants {
     public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
+    public static final String GATEWAY_INTROSPECT_CACHE_NAME = "GatewayIntrospectCache";
 
     public static final String DELEM_COLON = ":";
     public static final String DELEM_COMMA = ",";
