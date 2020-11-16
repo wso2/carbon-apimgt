@@ -402,6 +402,7 @@ paths:
           source: |-
             curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f"
       parameters:
+        - $ref : '#/parameters/organizationId'
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/organizationId'
         - in: body
@@ -556,6 +557,7 @@ paths:
       description: |
         This operation can be used to update the swagger definition of an existing API. Swagger definition to be updated is passed as a form data parameter `apiDefinition`.
       parameters:
+        - $ref : '#/parameters/organizationId'
         - $ref: '#/parameters/apiId'
         - in: formData
           name: apiDefinition
@@ -629,6 +631,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
       parameters:
+        - $ref: '#/parameters/organizationId'
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -862,6 +865,7 @@ paths:
       description: |
         This operation can be used to update the resource policy(inflow/outflow) definition for the given resource identifier of an existing API. resource policy definition to be updated is passed as a body parameter `content`.
       parameters:
+        - $ref : '#/parameters/organizationId'
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/resourcePolicyId'
         - in: body
@@ -980,6 +984,7 @@ paths:
         This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`.
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/organizationId'
         - in: formData
           name: file
           description: Image to upload

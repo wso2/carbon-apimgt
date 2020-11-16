@@ -3316,6 +3316,41 @@ public class ApiMgtDAO {
     }
 
     /**
+     * @param organizationID  Organization UUID
+     * @return All subscriptions of a given API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public List<API> getAPIsOfOrganization(String organizationID)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
+        List<API> apis = new ArrayList<>();
+
+        try {
+            String sqlQuery = SQLConstants. GET_API_CONTEXT_BY_ORGANIZATION_UUID ;
+            connection = APIMgtDBUtil.getConnection();
+
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setString(1, organizationID);
+            result = ps.executeQuery();
+
+            while (result.next()) {
+                APIIdentifier apiId = new APIIdentifier(result.getString("API_PROVIDER"),
+                        result.getString("API_NAME"),
+                        result.getString("API_VERSION"));
+                API api = new API(apiId);
+                apis.add(api);
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while fetching APIS", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+        return apis;
+    }
+
+    /**
      * @param apiName    Name of the API
      * @param apiVersion Version of the API
      * @param provider Name of API creator
@@ -5713,7 +5748,7 @@ public class ApiMgtDAO {
             prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(8, api.getApiLevelPolicy());
             prepStmt.setString(9, api.getType());
-            if (!api.getOrganizationId().isEmpty()) {
+            if (api.getOrganizationId() != null) {
                 prepStmt.setString(10, api.getOrganizationId());
             } else {
                 prepStmt.setNull(10, Types.VARCHAR);

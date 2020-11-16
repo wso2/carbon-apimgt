@@ -2235,6 +2235,9 @@ public class SQLConstants {
     public static final String GET_API_CONTEXT_BY_API_NAME_SQL =
             "SELECT CONTEXT FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION  = ?";
 
+    public static final String GET_API_CONTEXT_BY_ORGANIZATION_UUID =
+            "SELECT API_PROVIDER,API_NAME,API_VERSION FROM AM_API WHERE ORGANIZATION_UUID = ?";
+
     public static final String GET_ALL_CONTEXT_SQL = "SELECT CONTEXT FROM AM_API ";
 
     public static final String GET_APPLICATION_REGISTRATION_ENTRY_BY_SUBSCRIBER_SQL =

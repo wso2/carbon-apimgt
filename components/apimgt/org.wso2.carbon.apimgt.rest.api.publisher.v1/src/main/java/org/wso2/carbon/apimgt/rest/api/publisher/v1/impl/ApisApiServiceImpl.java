@@ -170,6 +170,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GraphqlQueryAnalysisMappingUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -646,11 +647,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-
-    public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
+    @Override
+    public Response apisApiIdPut(String apiId, APIDTO body, String organizationId, String ifMatch,
+                                 MessageContext messageContext) {
         APIDTO updatedApiDTO;
-        String[] tokenScopes =
-                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+        String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
         if (tokenScopes == null) {
             RestApiUtil.handleInternalServerError("Error occurred while updating the  API " + apiId +
@@ -660,6 +662,18 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            if (!organizationId.isEmpty()) {
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    String errorMessage =
+                            "APIs should be deployed in super tenant space";
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+                if (!validateOrganization(organizationId, apiId)) {
+                    String errorMessage =
+                            "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+            }
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = originalAPI.getId();
@@ -2824,10 +2838,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.serverError().build();
     }
 
-    @Override
-    public Response apisApiIdPut(String apiId, APIDTO body, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException {
-        return null;
-    }
 
     /**
      * Publish API to given external stores.
@@ -2865,6 +2875,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return Response.serverError().build();
     }
+
 
     /**
      * Get the resource policies(inflow/outflow).
@@ -2983,9 +2994,22 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdResourcePoliciesResourcePolicyIdPut(String apiId, String resourcePolicyId,
-            ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
+                                                                 ResourcePolicyInfoDTO body, String organizationId,
+                                                                 String ifMatch, MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            if (!organizationId.isEmpty()) {
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    String errorMessage =
+                            "APIs should be deployed in super tenant space";
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+                if (!validateOrganization(organizationId, apiId)) {
+                    String errorMessage =
+                            "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+            }
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             boolean isSoapToRESTApi = SOAPOperationBindingUtils
                     .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
@@ -3094,6 +3118,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
+
     /**
      * Updates the swagger definition of an existing API
      *
@@ -3106,11 +3131,23 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
+    public Response apisApiIdSwaggerPut(String apiId, String organizationId, String apiDefinition, String url, InputStream fileInputStream,
             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
         try {
             String updatedSwagger;
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            if (!organizationId.isEmpty()) {
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    String errorMessage =
+                            "APIs should be deployed in super tenant space";
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+                if (!validateOrganization(organizationId, apiId)) {
+                    String errorMessage =
+                            "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+            }
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             boolean isSoapToRestConvertedAPI = SOAPOperationBindingUtils.isSOAPToRESTApi(apiIdentifier.getApiName(),
                     apiIdentifier.getVersion(), apiIdentifier.getProviderName());
@@ -3273,11 +3310,22 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail,
-            String ifMatch, MessageContext messageContext) {
+    public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String organizationId, String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            if (!organizationId.isEmpty()) {
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    String errorMessage =
+                            "APIs should be deployed in super tenant space";
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+                if (!validateOrganization(organizationId, apiId)) {
+                    String errorMessage =
+                            "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+            }
             String fileName = fileDetail.getDataHandler().getName();
             String fileContentType = URLConnection.guessContentTypeFromName(fileName);
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -4195,8 +4243,20 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response generateMockScripts(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (!organizationId.isEmpty()) {
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                String errorMessage =
+                        "APIs should be deployed in super tenant space";
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
+            if (!validateOrganization(organizationId, apiId)) {
+                String errorMessage =
+                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
+        }
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIIdentifier apiIdentifier = originalAPI.getId();
@@ -4267,6 +4327,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(deploymentStatusListDTO).build();
     }
 
+
+
     private APIDTO getAPIByID(String apiId) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -4287,6 +4349,21 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
+
+    /**
+     * Validate the provided organization UUID
+     * @return Boolean of trye or false
+     */
+    private boolean validateOrganization(String organizationId, String apiId) throws APIManagementException {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        if (organizationId.equals(api.getOrganizationId())) {
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * Validate the provided OpenAPI definition (via file or url) and return a Map with the validation response
