@@ -40,14 +40,14 @@ RecommendationsApiService delegate = new RecommendationsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Give API recommendations for a user", notes = "This API can be used to get recommended APIs for a user who logs into the API store", response = RecommendationsDTO.class, authorizations = {
+    @ApiOperation(value = "Give API Recommendations for a User", notes = "This API can be used to get recommended APIs for a user who logs into the API store", response = RecommendationsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Recommendations" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested recommendations are returned ", response = RecommendationsDTO.class),
-        @ApiResponse(code = 404, message = "Recommendations not Found. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response recommendationsGet() throws APIManagementException{
         return delegate.recommendationsGet(securityContext);
     }

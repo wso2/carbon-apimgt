@@ -172,8 +172,12 @@ public class JWTValidatorImpl implements JWTValidator {
         jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());
         jwtValidationInfo.setValid(true);
         jwtValidationInfo.setClaims(jwtClaimsSet.getClaims());
-        jwtValidationInfo.setExpiryTime(jwtClaimsSet.getExpirationTime().getTime());
-        jwtValidationInfo.setIssuedTime(jwtClaimsSet.getIssueTime().getTime());
+        if (jwtClaimsSet.getExpirationTime() != null){
+            jwtValidationInfo.setExpiryTime(jwtClaimsSet.getExpirationTime().getTime());
+        }
+        if (jwtClaimsSet.getIssueTime() != null){
+            jwtValidationInfo.setIssuedTime(jwtClaimsSet.getIssueTime().getTime());
+        }
         jwtValidationInfo.setUser(jwtClaimsSet.getSubject());
         jwtValidationInfo.setJti(jwtClaimsSet.getJWTID());
         if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.SCOPE) != null) {

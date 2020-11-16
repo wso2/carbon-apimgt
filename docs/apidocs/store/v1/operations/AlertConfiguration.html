@@ -2,7 +2,7 @@
     <h1><a name="Alert Configuration"></a>Alert Configuration</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="addAlertConfig"></a>Add AbnormalRequestsPerMin alert configurations.
+            <h4 class="operation-heading"><a name="addAlertConfig"></a>Add AbnormalRequestsPerMin Alert Configurations.
 </h4> <code>PUT https://apis.wso2.com/api/am/store/v1/alerts/{alertType}/configurations/{configurationId}</code>
             <p class="marked"></p>
 
@@ -121,6 +121,7 @@ Content-Type: application/json
                         </td>
                         <td>
                             <p class="param-description marked">The alert configuration id.
+Base64 encoded value of &#39;apiName#apiVersion#applicationName&#39;.
 </p>
                         </td>
                         <td>
@@ -189,7 +190,7 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request The request parameters validation failed. </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -198,7 +199,7 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">500</p></td>
-                        <td class="parameter"><p class="marked">Internal Server Error An error occurred while retrieving subscribed alert types by user. </p></td>
+                        <td class="parameter"><p class="marked">Internal Server Error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -208,7 +209,7 @@ Content-Type: application/json
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="deleteAlertConfig"></a>Delete the selected configuration from AbnormalRequestsPerMin alert type.
+            <h4 class="operation-heading"><a name="deleteAlertConfig"></a>Delete the Selected Configuration from AbnormalRequestsPerMin Alert Type.
 </h4> <code>DELETE https://apis.wso2.com/api/am/store/v1/alerts/{alertType}/configurations/{configurationId}</code>
             <p class="marked"></p>
 
@@ -309,6 +310,7 @@ Content-Type: application/json
                         </td>
                         <td>
                             <p class="param-description marked">The alert configuration id.
+Base64 encoded value of &#39;apiName#apiVersion#applicationName&#39;.
 </p>
                         </td>
                         <td>
@@ -349,7 +351,7 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request The request parameters validation failed. </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -358,7 +360,7 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. The provided alert configuration is not found. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -367,7 +369,7 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">500</p></td>
-                        <td class="parameter"><p class="marked">Internal Server Error An error occurred while retrieving subscribed alert types by user. </p></td>
+                        <td class="parameter"><p class="marked">Internal Server Error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -377,7 +379,7 @@ Content-Type: application/json
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="getAllAlertConfigs"></a>Get all AbnormalRequestsPerMin alert configurations
+            <h4 class="operation-heading"><a name="getAllAlertConfigs"></a>Get All AbnormalRequestsPerMin Alert Configurations
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1/alerts/{alertType}/configurations</code>
             <p class="marked"></p>
 
@@ -504,7 +506,7 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">500</p></td>
-                        <td class="parameter"><p class="marked">Internal Server Error An error occurred while retrieving subscribed alert types by user. </p></td>
+                        <td class="parameter"><p class="marked">Internal Server Error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

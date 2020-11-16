@@ -24,16 +24,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.api.model.subscription.API;
-import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
-import org.wso2.carbon.apimgt.api.model.subscription.Application;
-import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
-import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
-import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.subscription.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -41,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -183,89 +181,204 @@ public class SubscriptionValidationDAO {
      * */
     public List<SubscriptionPolicy> getAllSubscriptionPolicies() {
 
-        List<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
                         conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_SUBSCRIPTION_POLICIES_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
-            populateSubscriptionPolicyList(subscriptionPolicies, resultSet);
+            return populateSubscriptionPolicyList(resultSet);
 
         } catch (SQLException e) {
             log.error("Error in loading Subscription policies : ", e);
         }
 
-        return subscriptionPolicies;
+        return null;
     }
 
-    private void populateSubscriptionPolicyList(List<SubscriptionPolicy> subscriptionPolicies, ResultSet resultSet)
+    private List<SubscriptionPolicy> populateSubscriptionPolicyList(ResultSet resultSet)
             throws SQLException {
+        List<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
 
-        if (subscriptionPolicies != null && resultSet != null) {
+        if (resultSet != null) {
             while (resultSet.next()) {
                 SubscriptionPolicy subscriptionPolicyDTO = new SubscriptionPolicy();
 
-                subscriptionPolicyDTO.setId(resultSet.getInt("POLICY_ID"));
-                subscriptionPolicyDTO.setName(resultSet.getString("POLICY_NAME"));
-                subscriptionPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                subscriptionPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                subscriptionPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                subscriptionPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_POLICY_NAME));
+                subscriptionPolicyDTO.setQuotaType(resultSet.getString(
+                        ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                subscriptionPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(subscriptionPolicyDTO.getTenantId());
+                subscriptionPolicyDTO.setTenantDomain(tenantDomain);
 
-                subscriptionPolicyDTO.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
-                subscriptionPolicyDTO.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
-                subscriptionPolicyDTO.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
-                subscriptionPolicyDTO.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
-                subscriptionPolicyDTO.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
+                subscriptionPolicyDTO.setRateLimitCount(resultSet.getInt(
+                        ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                subscriptionPolicyDTO.setRateLimitTimeUnit(resultSet.getString(
+                        ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                subscriptionPolicyDTO.setStopOnQuotaReach(resultSet.getBoolean(
+                        ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                subscriptionPolicyDTO.setGraphQLMaxDepth(resultSet.getInt(
+                        ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
+                subscriptionPolicyDTO.setGraphQLMaxComplexity(resultSet.getInt(
+                        ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
+                setCommonProperties(subscriptionPolicyDTO, resultSet);
 
                 subscriptionPolicies.add(subscriptionPolicyDTO);
             }
         }
+        return subscriptionPolicies;
     }
 
     /*
-     * This method can be used to retrieve all the ApplicationPolicys in the database
+     * This method can be used to retrieve all the ApplicationPolicies in the database
      *
      * @return {@link List<ApplicationPolicy>}
      * */
     public List<ApplicationPolicy> getAllApplicationPolicies() {
 
-        List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
                         conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APPLICATION_POLICIES_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
-            populateApplicationPolicyList(applicationPolicies, resultSet);
+            return populateApplicationPolicyList(resultSet);
 
         } catch (SQLException e) {
             log.error("Error in loading application policies : ", e);
         }
 
-        return applicationPolicies;
+        return null;
     }
 
     /*
-     * This method can be used to retrieve all the ApplicationPolicys in the database
+     * This method can be used to retrieve all the Api Policies in the database
      *
-     * @return {@link List<ApplicationPolicy>}
+     * @return {@link List<ApiPolicy>}
      * */
     public List<APIPolicy> getAllApiPolicies() {
 
-        List<APIPolicy> applicationPolicies = new ArrayList<>();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APPLICATION_POLICIES_SQL);
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_API_POLICIES_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
-            populateApiPolicyList(applicationPolicies, resultSet);
+            return populateApiPolicyList(resultSet);
 
         } catch (SQLException e) {
-            log.error("Error in loading application policies : ", e);
+            log.error("Error in loading api policies : ", e);
         }
 
-        return applicationPolicies;
+        return null;
+    }
+
+    public List<GlobalPolicy> getAllGlobalPolicies() {
+        try (
+                Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps =
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_GLOBAL_POLICIES_SQL);
+                ResultSet resultSet = ps.executeQuery();
+        ) {
+            return populateGlobalPolicyList(resultSet);
+
+        } catch (SQLException e) {
+            log.error("Error in loading global policies : ", e);
+        }
+
+        return null;
+    }
+
+    public List<GlobalPolicy> getAllGlobalPolicies(String tenantDomain) {
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_GLOBAL_POLICIES_SQL)) {
+            int tenantId = 0;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                log.error("Error in loading Global Policies for tenantDomain : " + tenantDomain, e);
+            }
+            ps.setInt(1, tenantId);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                return populateGlobalPolicyList(resultSet);
+            }
+
+        } catch (SQLException e) {
+            log.error("Error in loading global policies for tenantId : " + tenantDomain, e);
+        }
+
+        return null;
+    }
+
+    public GlobalPolicy getGlobalPolicyByNameForTenant(String policyName, String tenantDomain) {
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_GLOBAL_POLICY_SQL)) {
+            int tenantId = 0;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                log.error("Error in loading Global Policy for tenantDomain : " + tenantDomain, e);
+            }
+            ps.setString(1, policyName);
+            ps.setInt(2, tenantId);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    GlobalPolicy globalPolicyDTO = new GlobalPolicy();
+                    globalPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                    globalPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                    globalPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                    globalPolicyDTO.setTenantDomain(tenantDomain);
+                    globalPolicyDTO.setKeyTemplate(resultSet.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+                    InputStream siddhiQueryBlob = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                    String siddhiQuery = null;
+                    if (siddhiQueryBlob != null) {
+                        siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                    }
+                    globalPolicyDTO.setSiddhiQuery(siddhiQuery);
+
+                    return globalPolicyDTO;
+                }
+            }
+
+        } catch (SQLException e) {
+            log.error("Error in loading global policies by policyId : " + policyName + " of " + policyName, e);
+        }
+
+        return null;
+    }
+
+
+    private List<GlobalPolicy> populateGlobalPolicyList(ResultSet resultSet) throws SQLException {
+
+        List<GlobalPolicy> globalPolicies = new ArrayList<>();
+        if (resultSet != null) {
+            while (resultSet.next()) {
+                GlobalPolicy globalPolicyDTO = new GlobalPolicy();
+                globalPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                globalPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                globalPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(globalPolicyDTO.getTenantId());
+                globalPolicyDTO.setTenantDomain(tenantDomain);
+                globalPolicyDTO.setKeyTemplate(resultSet.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+                InputStream siddhiQueryBlob = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                String siddhiQuery = null;
+                if (siddhiQueryBlob != null) {
+                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                }
+                globalPolicyDTO.setSiddhiQuery(siddhiQuery);
+                globalPolicies.add(globalPolicyDTO);
+            }
+        }
+        return globalPolicies;
     }
 
     /*
@@ -544,7 +657,6 @@ public class SubscriptionValidationDAO {
      * */
     public List<SubscriptionPolicy> getAllSubscriptionPolicies(String tenantDomain) {
 
-        ArrayList<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTION_POLICIES_SQL)) {
@@ -558,14 +670,14 @@ public class SubscriptionValidationDAO {
             ps.setInt(1, tenantId);
 
             try (ResultSet resultSet = ps.executeQuery()) {
-                populateSubscriptionPolicyList(subscriptionPolicies, resultSet);
+                return populateSubscriptionPolicyList(resultSet);
             }
 
         } catch (SQLException e) {
             log.error("Error in loading Subscription Policies for tenanatId : " + tenantDomain, e);
         }
 
-        return subscriptionPolicies;
+        return null;
     }
 
     /*
@@ -574,7 +686,6 @@ public class SubscriptionValidationDAO {
      * */
     public List<ApplicationPolicy> getAllApplicationPolicies(String tenantDomain) {
 
-        ArrayList<ApplicationPolicy> applicationPolicies = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                         conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATION_POLICIES_SQL)) {
@@ -588,29 +699,33 @@ public class SubscriptionValidationDAO {
             ps.setInt(1, tenantId);
 
             try (ResultSet resultSet = ps.executeQuery()) {
-                populateApplicationPolicyList(applicationPolicies, resultSet);
+                return populateApplicationPolicyList(resultSet);
             }
 
         } catch (SQLException e) {
             log.error("Error in loading application policies for tenantId : " + tenantDomain, e);
         }
 
-        return applicationPolicies;
+        return null;
     }
 
-    private void populateApplicationPolicyList(List<ApplicationPolicy> applicationPolicies, ResultSet resultSet)
+    private List<ApplicationPolicy> populateApplicationPolicyList(ResultSet resultSet)
             throws SQLException {
-
-        if (applicationPolicies != null && resultSet != null) {
+        List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
+        if (resultSet != null) {
             while (resultSet.next()) {
                 ApplicationPolicy applicationPolicyDTO = new ApplicationPolicy();
-                applicationPolicyDTO.setId(resultSet.getInt("POLICY_ID"));
-                applicationPolicyDTO.setName(resultSet.getString("NAME"));
-                applicationPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                applicationPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                applicationPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                applicationPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                applicationPolicyDTO.setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                applicationPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(applicationPolicyDTO.getTenantId());
+                applicationPolicyDTO.setTenantDomain(tenantDomain);
+                setCommonProperties(applicationPolicyDTO, resultSet);
                 applicationPolicies.add(applicationPolicyDTO);
             }
         }
+        return applicationPolicies;
     }
 
     /*
@@ -619,7 +734,6 @@ public class SubscriptionValidationDAO {
      * */
     public List<APIPolicy> getAllApiPolicies(String tenantDomain) {
 
-        ArrayList<APIPolicy> apiPolicies = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICIES_SQL)) {
@@ -633,37 +747,41 @@ public class SubscriptionValidationDAO {
             ps.setInt(1, tenantId);
 
             try (ResultSet resultSet = ps.executeQuery()) {
-                populateApiPolicyList(apiPolicies, resultSet);
+                return populateApiPolicyList(resultSet);
             }
 
         } catch (SQLException e) {
             log.error("Error in loading api policies for tenantId : " + tenantDomain, e);
         }
 
-        return apiPolicies;
+        return null;
     }
 
-    private void populateApiPolicyList(List<APIPolicy> apiPolicies, ResultSet resultSet)
+    private List<APIPolicy> populateApiPolicyList(ResultSet resultSet)
             throws SQLException {
 
+        List<APIPolicy> apiPolicies = new ArrayList<>();
         Map<Integer, APIPolicy> temp = new ConcurrentHashMap<>();
-        if (apiPolicies != null && resultSet != null) {
+        if (resultSet != null) {
             while (resultSet.next()) {
-                int policyId = resultSet.getInt("POLICY_ID");
+                int policyId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID);
                 APIPolicy apiPolicy = temp.get(policyId);
                 if (apiPolicy == null) {
                     apiPolicy = new APIPolicy();
                     apiPolicy.setId(policyId);
-                    apiPolicy.setName(resultSet.getString("NAME"));
-                    apiPolicy.setQuotaType(resultSet.getString("DEFAULT_QUOTA_TYPE"));
-                    apiPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
-                    apiPolicy.setApplicableLevel(resultSet.getString("APPLICABLE_LEVEL"));
+                    apiPolicy.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                    apiPolicy.setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE));
+                    apiPolicy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                    String tenantDomain = APIUtil.getTenantDomainFromTenantId(apiPolicy.getTenantId());
+                    apiPolicy.setTenantDomain(tenantDomain);
+                    apiPolicy.setApplicableLevel(resultSet.getString(ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
+                    setCommonProperties(apiPolicy, resultSet);
                     apiPolicies.add(apiPolicy);
                 }
                 APIPolicyConditionGroup apiPolicyConditionGroup = new APIPolicyConditionGroup();
-                int conditionGroup = resultSet.getInt("CONDITION_GROUP_ID");
+                int conditionGroup = resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONDITION_ID);
                 apiPolicyConditionGroup.setConditionGroupId(conditionGroup);
-                apiPolicyConditionGroup.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                apiPolicyConditionGroup.setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                 apiPolicyConditionGroup.setPolicyId(policyId);
                 ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
                 ConditionGroupDTO conditionGroupDTO = null;
@@ -674,10 +792,12 @@ public class SubscriptionValidationDAO {
                 }
                 ConditionDTO[] conditionDTOS = conditionGroupDTO.getConditions();
                 apiPolicyConditionGroup.setConditionDTOS(Arrays.asList(conditionDTOS));
+                setCommonProperties(apiPolicyConditionGroup, resultSet);
                 apiPolicy.addConditionGroup(apiPolicyConditionGroup);
                 temp.put(policyId, apiPolicy);
             }
         }
+        return apiPolicies;
     }
 
     /*
@@ -757,10 +877,12 @@ public class SubscriptionValidationDAO {
                 if (resultSet.next()) {
                     ApplicationPolicy applicationPolicy = new ApplicationPolicy();
 
-                    applicationPolicy.setId(resultSet.getInt("POLICY_ID"));
-                    applicationPolicy.setName(resultSet.getString("NAME"));
-                    applicationPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                    applicationPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    applicationPolicy.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                    applicationPolicy.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                    applicationPolicy.setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                    applicationPolicy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                    applicationPolicy.setTenantDomain(tenantDomain);
+                    setCommonProperties(applicationPolicy, resultSet);
 
                     return applicationPolicy;
                 }
@@ -793,8 +915,7 @@ public class SubscriptionValidationDAO {
             ps.setString(2, policyName);
 
             try (ResultSet resultSet = ps.executeQuery()) {
-                List<APIPolicy> apiPolicies = new ArrayList<APIPolicy>();
-                populateApiPolicyList(apiPolicies, resultSet);
+                List<APIPolicy> apiPolicies = populateApiPolicyList(resultSet);
                 if (!apiPolicies.isEmpty()) {
                     policy = apiPolicies.get(0);
                 }
@@ -831,16 +952,25 @@ public class SubscriptionValidationDAO {
                     if (resultSet.next()) {
                         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
 
-                        subscriptionPolicy.setId(resultSet.getInt("POLICY_ID"));
-                        subscriptionPolicy.setName(resultSet.getString("POLICY_NAME"));
-                        subscriptionPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                        subscriptionPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                        subscriptionPolicy.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                        subscriptionPolicy.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_POLICY_NAME));
+                        subscriptionPolicy.setQuotaType(resultSet.getString(
+                                ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                        subscriptionPolicy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                        subscriptionPolicy.setTenantDomain(APIUtil.getTenantDomainFromTenantId(tenantId));
 
-                        subscriptionPolicy.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
-                        subscriptionPolicy.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
-                        subscriptionPolicy.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
-                        subscriptionPolicy.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
-                        subscriptionPolicy.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
+                        subscriptionPolicy.setRateLimitCount(resultSet.getInt(
+                                ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                        subscriptionPolicy.setRateLimitTimeUnit(resultSet.getString(
+                                ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                        subscriptionPolicy.setStopOnQuotaReach(resultSet.getBoolean(
+                                ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                        subscriptionPolicy.setGraphQLMaxDepth(resultSet.getInt(
+                                ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
+                        subscriptionPolicy.setGraphQLMaxComplexity(resultSet.getInt(
+                                ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
+
+                        setCommonProperties(subscriptionPolicy, resultSet);
                         return subscriptionPolicy;
                     }
                 }
@@ -850,6 +980,57 @@ public class SubscriptionValidationDAO {
             }
         }
         return null;
+    }
+
+    private void setCommonProperties(Policy policy, ResultSet resultSet) throws SQLException {
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        String prefix = "";
+
+        if (policy instanceof APIPolicy) {
+            prefix = "DEFAULT_";
+        }
+
+        quotaPolicy.setType(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+        if (quotaPolicy.getType() != null) {
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+                RequestCountLimit reqLimit = new RequestCountLimit();
+                reqLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                reqLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                reqLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+                quotaPolicy.setLimit(reqLimit);
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+                BandwidthLimit bandLimit = new BandwidthLimit();
+                bandLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                bandLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                bandLimit.setDataAmount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+                bandLimit.setDataUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
+                quotaPolicy.setLimit(bandLimit);
+            }
+            policy.setQuotaPolicy(quotaPolicy);
+        }
+    }
+
+    private void setCommonProperties(APIPolicyConditionGroup apiPolicyConditionGroup, ResultSet resultSet)
+            throws SQLException {
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+        if (quotaPolicy.getType() != null) {
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+                RequestCountLimit reqLimit = new RequestCountLimit();
+                reqLimit.setUnitTime(resultSet.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                reqLimit.setTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                reqLimit.setRequestCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_QUOTA));
+                quotaPolicy.setLimit(reqLimit);
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+                BandwidthLimit bandLimit = new BandwidthLimit();
+                bandLimit.setUnitTime(resultSet.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                bandLimit.setTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                bandLimit.setDataAmount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_QUOTA));
+                bandLimit.setDataUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
+                quotaPolicy.setLimit(bandLimit);
+            }
+            apiPolicyConditionGroup.setQuotaPolicy(quotaPolicy);
+        }
     }
 
     /*

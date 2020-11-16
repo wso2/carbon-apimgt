@@ -854,6 +854,14 @@ public class APIManagerConfiguration {
                 throttleProperties.setEnableQueryParamConditions(JavaUtils.isTrueExplicitly(enableQueryParamElement
                         .getText()));
             }
+            // Check skip redeploy throttle policies
+            OMElement skipRedeployingPoliciesElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                            .SKIP_REDEPLOYING_POLICIES));
+            if (skipRedeployingPoliciesElement != null) {
+                throttleProperties.setSkipRedeployingPolicies(skipRedeployingPoliciesElement
+                        .getText().split(APIConstants.DELEM_COMMA));
+            }
             // Check subscription spike arrest enable
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants

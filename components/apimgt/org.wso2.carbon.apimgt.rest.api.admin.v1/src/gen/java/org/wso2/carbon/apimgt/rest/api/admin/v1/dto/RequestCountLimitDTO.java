@@ -68,7 +68,7 @@ public class RequestCountLimitDTO   {
   }
 
   
-  @ApiModelProperty(example = "1000", required = true, value = "Maximum number of requests allowed")
+  @ApiModelProperty(example = "30", required = true, value = "Maximum number of requests allowed")
   @JsonProperty("requestCount")
   @NotNull
   public Long getRequestCount() {

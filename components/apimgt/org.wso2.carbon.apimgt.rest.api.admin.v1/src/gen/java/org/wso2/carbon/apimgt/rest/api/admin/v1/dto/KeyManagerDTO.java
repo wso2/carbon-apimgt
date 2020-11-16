@@ -75,7 +75,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "WSO2 IS", required = true, value = "")
+  @ApiModelProperty(example = "WSO2 Identity Server", required = true, value = "")
   @JsonProperty("name")
   @NotNull
  @Size(min=1,max=100)  public String getName() {
@@ -94,7 +94,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "KeyManager1", value = "display name of Key Manager to  show in UI ")
+  @ApiModelProperty(example = "WSO2 Identity Server", value = "display name of Key Manager to  show in UI ")
   @JsonProperty("displayName")
  @Size(max=100)  public String getDisplayName() {
     return displayName;
@@ -111,7 +111,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "IS", required = true, value = "")
+  @ApiModelProperty(example = "WSO2-IS", required = true, value = "")
   @JsonProperty("type")
   @NotNull
  @Size(min=1,max=45)  public String getType() {
@@ -164,7 +164,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(example = "https://localhost:9444/oauth2/introspect", value = "")
   @JsonProperty("introspectionEndpoint")
   public String getIntrospectionEndpoint() {
     return introspectionEndpoint;
@@ -181,7 +181,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(example = "https://localhost:9444/keymanager-operations/dcr/register", value = "")
   @JsonProperty("clientRegistrationEndpoint")
   public String getClientRegistrationEndpoint() {
     return clientRegistrationEndpoint;
@@ -198,7 +198,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(example = "https://localhost:9444/oauth2/token", value = "")
   @JsonProperty("tokenEndpoint")
   public String getTokenEndpoint() {
     return tokenEndpoint;
@@ -215,7 +215,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(example = "https://localhost:9444/oauth2/revoke", value = "")
   @JsonProperty("revokeEndpoint")
   public String getRevokeEndpoint() {
     return revokeEndpoint;
@@ -232,7 +232,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(example = "https://localhost:9444/oauth2/userinfo?schema=openid", value = "")
   @JsonProperty("userInfoEndpoint")
   public String getUserInfoEndpoint() {
     return userInfoEndpoint;
@@ -249,7 +249,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(example = "https://localhost:9444/oauth2/authorize", value = "")
   @JsonProperty("authorizeEndpoint")
   public String getAuthorizeEndpoint() {
     return authorizeEndpoint;
@@ -283,7 +283,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(example = "https://localhost:9444/services", value = "")
   @JsonProperty("issuer")
   public String getIssuer() {
     return issuer;
@@ -300,7 +300,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(example = "https://wso2is.com:9444/api/identity/oauth2/v1.0/scopes", value = "")
   @JsonProperty("scopeManagementEndpoint")
   public String getScopeManagementEndpoint() {
     return scopeManagementEndpoint;
@@ -521,7 +521,7 @@ public class KeyManagerDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "{\"self_validate_jwt\":true,\"Username\":\"admin\",\"Password\":\"admin\"}", value = "")
   @JsonProperty("additionalProperties")
   public Object getAdditionalProperties() {
     return additionalProperties;

@@ -78,7 +78,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "json_fault.xml", required = true, value = "")
+  @ApiModelProperty(example = "custom_log_in_message.xml", required = true, value = "")
   @JsonProperty("name")
   @NotNull
   public String getName() {
@@ -96,7 +96,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "in", required = true, value = "")
+  @ApiModelProperty(example = "IN", required = true, value = "")
   @JsonProperty("type")
   @NotNull
   public TypeEnum getType() {
@@ -114,7 +114,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"log_in_message\"> <log level=\"full\"> <property name=\"IN_MESSAGE\" value=\"IN_MESSAGE_21133232\"/> </log> </sequence>", required = true, value = "")
+  @ApiModelProperty(example = "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"custom_log_in_message\"> <log level=\"full\"> <property name=\"IN_MESSAGE\" value=\"IN_MESSAGE_21133232\"/> </log> </sequence>", required = true, value = "")
   @JsonProperty("config")
   @NotNull
   public String getConfig() {

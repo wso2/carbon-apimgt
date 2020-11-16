@@ -29,7 +29,7 @@ public class AlertTypeDTO   {
   }
 
   
-  @ApiModelProperty(example = "1", value = "The alert Id")
+  @ApiModelProperty(example = "3", value = "The alert Id")
   @JsonProperty("id")
   public Integer getId() {
     return id;

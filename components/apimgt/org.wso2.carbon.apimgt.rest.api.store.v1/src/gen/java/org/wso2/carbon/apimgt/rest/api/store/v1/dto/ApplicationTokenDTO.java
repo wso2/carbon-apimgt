@@ -49,7 +49,7 @@ public class ApplicationTokenDTO   {
   }
 
   
-  @ApiModelProperty(example = "\"default,read_api,write_api\"", value = "Valid comma seperated scopes for the access token")
+  @ApiModelProperty(example = "[\"default\",\"read_api\",\"write_api\"]", value = "Valid comma seperated scopes for the access token")
   @JsonProperty("tokenScopes")
   public List<String> getTokenScopes() {
     return tokenScopes;

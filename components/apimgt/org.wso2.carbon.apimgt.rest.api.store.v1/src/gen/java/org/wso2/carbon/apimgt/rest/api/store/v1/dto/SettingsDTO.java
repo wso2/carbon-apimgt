@@ -231,7 +231,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "The 'PasswordJavaRegEx' cofigured in the UserStoreManager")
+  @ApiModelProperty(example = "", value = "The 'PasswordJavaRegEx' cofigured in the UserStoreManager")
   @JsonProperty("userStorePasswordPattern")
   public String getUserStorePasswordPattern() {
     return userStorePasswordPattern;
@@ -249,7 +249,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "The regex configured in the Password Policy property 'passwordPolicy.pattern'")
+  @ApiModelProperty(example = "", value = "The regex configured in the Password Policy property 'passwordPolicy.pattern'")
   @JsonProperty("passwordPolicyPattern")
   public String getPasswordPolicyPattern() {
     return passwordPolicyPattern;
