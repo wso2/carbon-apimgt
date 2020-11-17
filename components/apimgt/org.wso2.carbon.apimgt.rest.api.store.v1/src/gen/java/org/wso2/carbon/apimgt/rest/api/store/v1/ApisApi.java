@@ -205,7 +205,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @GET
     @Path("/{apiId}/sdks/{language}")
     
-    @Produces({ "application/zip", "application/json",  })
+    @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Generate a SDK for an API ", notes = "This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Developer Portal, for a requested development language. ", response = byte[].class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
@@ -216,7 +216,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response apisApiIdSdksLanguageGet(@ApiParam(value = "ID of the specific API for which the SDK is required. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Programming language of the SDK that is required. ",required=true) @PathParam("language") String language,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+    public Response apisApiIdSdksLanguageGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Programming language of the SDK that is required. ",required=true) @PathParam("language") String language,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.apisApiIdSdksLanguageGet(apiId, language, xWSO2Tenant, securityContext);
     }
 
@@ -396,7 +396,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @GET
     @Path("/{apiId}/wsdl")
     
-    @Produces({ "application/json", "application/wsdl", "application/zip" })
+    @Produces({ "application/json" })
     @ApiOperation(value = "Get API WSDL definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             

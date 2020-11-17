@@ -39,7 +39,7 @@ ExportApiService delegate = new ExportApiServiceImpl();
     @GET
     @Path("/api")
     
-    @Produces({ "application/zip", "application/json",  })
+    @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
@@ -57,7 +57,7 @@ ExportApiService delegate = new ExportApiServiceImpl();
     @GET
     @Path("/api-product")
     
-    @Produces({ "application/zip", "application/json",  })
+    @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Export an API Product", notes = "This operation can be used to export the details of a particular API Product as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),

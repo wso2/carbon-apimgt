@@ -1,3 +1,17 @@
+#   Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+################################################################################
 openapi: 3.0.1
 info:
   title: WSO2 API Manager - Developer Portal
@@ -93,6 +107,9 @@ info:
   version: v1.1
 servers:
 - url: https://apis.wso2.com/api/am/store/v1
+######################################################
+# The "API Collection" resource APIs
+######################################################
 paths:
   /apis:
     get:
@@ -111,27 +128,9 @@ paths:
         * By default, this operation retrieves Published APIs. In order to retrieve Prototyped APIs, you need to use **query** parameter and specify **status:PROTOTYPED**.
         * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles.
       parameters:
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/requestedTenant'
       - name: query
         in: query
         description: |
@@ -154,13 +153,7 @@ paths:
           given query string against API Name.
         schema:
           type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -171,22 +164,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/APIList'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis"
+
   /apis/{apiId}:
     get:
       tags:
@@ -201,27 +185,9 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles. \n
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -249,34 +215,15 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed"
+
   /apis/{apiId}/swagger:
     get:
       tags:
@@ -291,45 +238,12 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: labelName
-        in: query
-        description: |
-          Name of the API microgateway labels
-        schema:
-          type: string
-      - name: environmentName
-        in: query
-        description: |
-          Name of the API gateway environment.
-        schema:
-          type: string
-      - name: clusterName
-        in: query
-        description: |
-          Name of the container managed cluster name.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/labelName'
+      - $ref: '#/components/parameters/environmentName'
+      - $ref: '#/components/parameters/clusterName'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -371,34 +285,15 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger"
+
   /apis/{apiId}/graphql-schema:
     get:
       tags:
@@ -413,27 +308,9 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -458,34 +335,15 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/graphql-schema"
+
   /apis/{apiId}/sdks/{language}:
     get:
       tags:
@@ -495,13 +353,7 @@ paths:
       description: |
         This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Developer Portal, for a requested development language.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          ID of the specific API for which the SDK is required.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
       - name: language
         in: path
         description: |
@@ -509,13 +361,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -527,45 +373,11 @@ paths:
                 type: string
                 format: byte
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/json:
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/json:
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         500:
-          description: Internal Server Error.
-          content:
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/json:
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -574,6 +386,7 @@ paths:
         source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/sdks/java"
           > Swagger Petstore_java_1.0.0.zip
+
   /apis/{apiId}/wsdl:
     get:
       tags:
@@ -583,39 +396,11 @@ paths:
         This operation can be used to retrieve the swagger definition of an API.
       operationId: getWSDLOfAPI
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: labelName
-        in: query
-        description: |
-          Name of the API microgateway labels
-        schema:
-          type: string
-      - name: environmentName
-        in: query
-        description: |
-          Name of the API gateway environment.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/labelName'
+      - $ref: '#/components/parameters/environmentName'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -640,46 +425,18 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
-            application/wsdl:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
-            application/wsdl:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/wsdl"
+
+  ######################################################
+  # The "Document Collection" resource APIs
+  ######################################################
   /apis/{apiId}/documents:
     get:
       tags:
@@ -694,41 +451,11 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's documents, you need to provide Authorization header.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -750,34 +477,18 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents"
+
+  ######################################################
+  # The "Individual Document" resource APIs
+  ######################################################
   /apis/{apiId}/documents/{documentId}:
     get:
       tags:
@@ -792,34 +503,10 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's document, you need to provide Authorization header.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: documentId
-        in: path
-        description: |
-          Document Identifier
-        required: true
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/documentId'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -842,34 +529,15 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c"
+
   /apis/{apiId}/documents/{documentId}/content:
     get:
       tags:
@@ -893,34 +561,10 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's document content, you need to provide Authorization header.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: documentId
-        in: path
-        description: |
-          Document Identifier
-        required: true
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/documentId'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -957,34 +601,15 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content"
+
   /apis/{apiId}/thumbnail:
     get:
       tags:
@@ -998,27 +623,9 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's thumbnail, you need to provide Authorization header.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -1049,34 +656,15 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail"
+
   /apis/{apiId}/ratings:
     get:
       tags:
@@ -1087,34 +675,10 @@ paths:
 
         `X-WSO2-Tenant` header can be used to retrieve ratings of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -1125,22 +689,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/RatingList'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings"
+
   /apis/{apiId}/user-rating:
     get:
       tags:
@@ -1151,27 +706,9 @@ paths:
 
         `X-WSO2-Tenant` header can be used to retrieve the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -1200,29 +737,9 @@ paths:
             Empty body because the client already has the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -1230,6 +747,7 @@ paths:
       - lang: Curl
         source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
+
     put:
       tags:
       - Ratings
@@ -1239,20 +757,8 @@ paths:
 
         `X-WSO2-Tenant` header can be used to add or update the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/requestedTenant'
       requestBody:
         description: |
           Rating object that should to be added
@@ -1277,30 +783,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Rating'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         415:
-          description: Unsupported Media Type. The entity of the request was not in
-            a supported format.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 415
-                message: Unsupported media type
-                description: The entity of the request was not in a supported format
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -1309,6 +794,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Ratings
@@ -1318,26 +804,9 @@ paths:
 
         `X-WSO2-Tenant` header can be used to delete the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-Match'
       responses:
         200:
           description: |
@@ -1351,6 +820,7 @@ paths:
       - lang: Curl
         source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
+
   /apis/{apiId}/comments:
     get:
       tags:
@@ -1360,34 +830,10 @@ paths:
         Get a list of Comments that are already added to APIs
       operationId: getAllCommentsOfAPI
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
       responses:
         200:
           description: |
@@ -1398,47 +844,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/CommentList'
         401:
-          description: Unauthorized. The user is not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401
-                message: Unauthorized
-                description: The user is not authorized
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Unauthorized'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
+
     post:
       tags:
       - Comments
       summary: Add an API Comment
       operationId: addCommentToAPI
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
       requestBody:
         description: |
           Comment object that should to be added
@@ -1469,42 +890,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Comment'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         401:
-          description: Unauthorized. The user is not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401
-                message: Unauthorized
-                description: The user is not authorized
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Unauthorized'
         415:
-          description: Unsupported Media Type. The entity of the request was not in
-            a supported format.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 415
-                message: Unsupported media type
-                description: The entity of the request was not in a supported format
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -1513,6 +903,7 @@ paths:
         source: 'curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
       x-codegen-request-body-name: body
+
   /apis/{apiId}/comments/{commentId}:
     get:
       tags:
@@ -1522,34 +913,10 @@ paths:
         Get the individual comment given by a username for a certain API.
       operationId: getCommentOfAPI
       parameters:
-      - name: commentId
-        in: path
-        description: |
-          Comment Id
-        required: true
-        schema:
-          type: string
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/commentId'
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -1578,46 +945,17 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         401:
-          description: Unauthorized. The user is not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401
-                message: Unauthorized
-                description: The user is not authorized
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Unauthorized'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
+
     delete:
       tags:
       - Comments
@@ -1626,26 +964,9 @@ paths:
         Remove a Comment
       operationId: deleteComment
       parameters:
-      - name: commentId
-        in: path
-        description: |
-          Comment Id
-        required: true
-        schema:
-          type: string
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/commentId'
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/If-Match'
       responses:
         200:
           description: |
@@ -1653,29 +974,9 @@ paths:
             Resource successfully deleted.
           content: {}
         401:
-          description: Unauthorized. The user is not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 401
-                message: Unauthorized
-                description: The user is not authorized
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Unauthorized'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -1683,6 +984,7 @@ paths:
       - lang: Curl
         source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
+
   /apis/{apiId}/subscription-policies:
     get:
       tags:
@@ -1694,27 +996,9 @@ paths:
 
         `X-WSO2-Tenant` header can be used to retrive API subscription throttling policies that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -1743,34 +1027,18 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies"
+
+  ######################################################
+  # The "Application Collection" resource APIs
+  ######################################################
   /applications:
     get:
       tags:
@@ -1780,12 +1048,7 @@ paths:
       description: |
         This operation can be used to retrieve list of applications that is belonged to the user associated with the provided access token.
       parameters:
-      - name: groupId
-        in: query
-        description: |
-          Application Group Id
-        schema:
-          type: string
+      - $ref: '#/components/parameters/groupId'
       - name: query
         in: query
         description: |
@@ -1814,27 +1077,9 @@ paths:
           enum:
           - asc
           - desc
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -1857,29 +1102,9 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -1889,6 +1114,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/applications"'
+
     post:
       tags:
       - Applications
@@ -1940,42 +1166,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         409:
-          description: Conflict. Specified resource already exists.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 409
-                message: Conflict
-                description: Specified resource already exists
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Conflict'
         415:
-          description: Unsupported Media Type. The entity of the request was not in
-            a supported format.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 415
-                message: Unsupported media type
-                description: The entity of the request was not in a supported format
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -1985,6 +1180,10 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual Application" resource APIs
+  ######################################################
   /applications/{applicationId}:
     get:
       tags:
@@ -1994,20 +1193,8 @@ paths:
       description: |
         This operation can be used to retrieve details of an individual application specifying the application id in the URI.
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -2035,29 +1222,9 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -2066,6 +1233,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015"'
+
     put:
       tags:
       - Applications
@@ -2074,19 +1242,8 @@ paths:
       description: |
         This operation can be used to update an application. Upon succesfull you will retrieve the updated application as the response.
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: |
           Application object that needs to be updated
@@ -2122,43 +1279,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Application'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -2168,6 +1293,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Applications
@@ -2176,19 +1302,8 @@ paths:
       description: |
         This operation can be used to remove an application specifying its id.
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/If-Match'
       responses:
         200:
           description: |
@@ -2210,31 +1325,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -2244,6 +1337,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -X DELETE "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015"'
+
   /applications/{applicationId}/generate-keys:
     post:
       tags:
@@ -2252,13 +1346,7 @@ paths:
       description: |
         Generate keys (Consumer key/secret) for application
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
       requestBody:
         description: |
           Application key generation request object
@@ -2277,43 +1365,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationKey'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -2323,6 +1379,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/generate-keys"'
       x-codegen-request-body-name: body
+
   /applications/{applicationId}/map-keys:
     post:
       tags:
@@ -2331,13 +1388,7 @@ paths:
       description: |
         Map keys (Consumer key/secret) to an application
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
       requestBody:
         description: |
           Application key mapping request object
@@ -2356,43 +1407,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationKey'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -2402,6 +1421,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/map-keys"'
       x-codegen-request-body-name: body
+
   /applications/{applicationId}/keys:
     get:
       tags:
@@ -2410,13 +1430,7 @@ paths:
       description: |
         Retrieve keys (Consumer key/secret) of application
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
       responses:
         200:
           description: |
@@ -2427,43 +1441,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationKeyList'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       deprecated: true
       security:
       - OAuth2Security:
@@ -2473,6 +1455,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys"'
+
   /applications/{applicationId}/keys/{keyType}:
     get:
       tags:
@@ -2482,29 +1465,9 @@ paths:
       description: |
         This operation can be used to retrieve key details of an individual application specifying the key type in the URI.
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyType
-        in: path
-        description: |
-          **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
-        required: true
-        schema:
-          type: string
-          enum:
-          - PRODUCTION
-          - SANDBOX
-      - name: groupId
-        in: query
-        description: |
-          Application Group Id
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyType'
+      - $ref: '#/components/parameters/groupId'
       responses:
         200:
           description: |
@@ -2515,43 +1478,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationKey'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       deprecated: true
       security:
       - OAuth2Security:
@@ -2561,6 +1492,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION"'
+
     put:
       tags:
       - Application Keys
@@ -2569,23 +1501,8 @@ paths:
       description: |
         This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response.
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyType
-        in: path
-        description: |
-          **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
-        required: true
-        schema:
-          type: string
-          enum:
-          - PRODUCTION
-          - SANDBOX
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyType'
       requestBody:
         description: |
           Grant types/Callback URL update request object
@@ -2604,43 +1521,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationKey'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       deprecated: true
       security:
       - OAuth2Security:
@@ -2651,6 +1536,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION"'
       x-codegen-request-body-name: body
+
   /applications/{applicationId}/keys/{keyType}/regenerate-secret:
     post:
       tags:
@@ -2660,23 +1546,8 @@ paths:
       description: |
         This operation can be used to re generate consumer secret for an application for the give key type
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyType
-        in: path
-        description: |
-          **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
-        required: true
-        schema:
-          type: string
-          enum:
-          - PRODUCTION
-          - SANDBOX
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyType'
       responses:
         200:
           description: |
@@ -2705,43 +1576,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationKeyReGenerateResponse'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       deprecated: true
       security:
       - OAuth2Security:
@@ -2751,6 +1590,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION/regenerate-secret"'
+
   /applications/{applicationId}/keys/{keyType}/clean-up:
     post:
       tags:
@@ -2759,29 +1599,9 @@ paths:
       description: |
         Clean up keys after failed key generation of an application
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyType
-        in: path
-        description: |
-          **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
-        required: true
-        schema:
-          type: string
-          enum:
-          - PRODUCTION
-          - SANDBOX
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyType'
+      - $ref: '#/components/parameters/If-Match'
       responses:
         200:
           description: |
@@ -2789,43 +1609,11 @@ paths:
             Clean up is performed
           content: {}
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       deprecated: true
       security:
       - OAuth2Security:
@@ -2835,6 +1623,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION/clean-up"'
+
   /applications/{applicationId}/keys/{keyType}/generate-token:
     post:
       tags:
@@ -2843,29 +1632,9 @@ paths:
       description: |
         Generate an access token for application by client_credentials grant type
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyType
-        in: path
-        description: |
-          **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
-        required: true
-        schema:
-          type: string
-          enum:
-          - PRODUCTION
-          - SANDBOX
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyType'
+      - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: |
           Application token generation request object
@@ -2884,43 +1653,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationToken'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       deprecated: true
       security:
       - OAuth2Security:
@@ -2931,6 +1668,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/keys/PRODUCTION/generate-token"'
       x-codegen-request-body-name: body
+
   /applications/{applicationId}/oauth-keys:
     get:
       tags:
@@ -2939,13 +1677,7 @@ paths:
       description: |
         Retrieve keys (Consumer key/secret) of application
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
       responses:
         200:
           description: |
@@ -2956,43 +1688,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationKeyList'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3001,6 +1701,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys"'
+
   /applications/{applicationId}/oauth-keys/{keyMappingId}:
     get:
       tags:
@@ -3010,26 +1711,9 @@ paths:
       description: |
         This operation can be used to retrieve key details of an individual application specifying the key type in the URI.
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyMappingId
-        in: path
-        description: |
-          OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping.
-        required: true
-        schema:
-          type: string
-      - name: groupId
-        in: query
-        description: |
-          Application Group Id
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyMappingId'
+      - $ref: '#/components/parameters/groupId'
       responses:
         200:
           description: |
@@ -3040,43 +1724,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationKey'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3085,6 +1737,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"'
+
     put:
       tags:
       - Application Keys
@@ -3093,20 +1746,8 @@ paths:
       description: |
         This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response.
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyMappingId
-        in: path
-        description: |
-          OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyMappingId'
       requestBody:
         description: |
           Grant types/Callback URL update request object
@@ -3125,43 +1766,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationKey'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3171,6 +1780,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"'
       x-codegen-request-body-name: body
+
   /applications/{applicationId}/oauth-keys/{keyMappingId}/regenerate-secret:
     post:
       tags:
@@ -3180,20 +1790,8 @@ paths:
       description: |
         This operation can be used to re generate consumer secret for an application for the give key type
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyMappingId
-        in: path
-        description: |
-          OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyMappingId'
       responses:
         200:
           description: |
@@ -3222,43 +1820,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationKeyReGenerateResponse'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3267,6 +1833,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/store/v1//applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/regenerate-secret"'
+
   /applications/{applicationId}/oauth-keys/{keyMappingId}/clean-up:
     post:
       tags:
@@ -3275,26 +1842,9 @@ paths:
       description: |
         Clean up keys after failed key generation of an application
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyMappingId
-        in: path
-        description: |
-          OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping.
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyMappingId'
+      - $ref: '#/components/parameters/If-Match'
       responses:
         200:
           description: |
@@ -3302,43 +1852,11 @@ paths:
             Clean up is performed
           content: {}
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3347,6 +1865,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/clean-up"'
+
   /applications/{applicationId}/oauth-keys/{keyMappingId}/generate-token:
     post:
       tags:
@@ -3355,26 +1874,9 @@ paths:
       description: |
         Generate an access token for application by client_credentials grant type
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyMappingId
-        in: path
-        description: |
-          OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping.
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyMappingId'
+      - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: |
           Application token generation request object
@@ -3393,43 +1895,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationToken'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3439,6 +1909,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/{keyMappingId}/generate-token"'
       x-codegen-request-body-name: body
+
   /applications/{applicationId}/api-keys/{keyType}/generate:
     post:
       tags:
@@ -3447,29 +1918,9 @@ paths:
       description: |
         Generate a self contained API Key for the application
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyType
-        in: path
-        description: |
-          **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
-        required: true
-        schema:
-          type: string
-          enum:
-          - PRODUCTION
-          - SANDBOX
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyType'
+      - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: |
           API Key generation request object
@@ -3488,43 +1939,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/APIKey'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3535,6 +1954,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/generate"'
       x-codegen-request-body-name: body
+
   /applications/{applicationId}/api-keys/{keyType}/revoke:
     post:
       tags:
@@ -3543,29 +1963,9 @@ paths:
       description: |
         Revoke a self contained API Key for the application
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application Identifier consisting of the UUID of the Application.
-        required: true
-        schema:
-          type: string
-      - name: keyType
-        in: path
-        description: |
-          **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
-        required: true
-        schema:
-          type: string
-          enum:
-          - PRODUCTION
-          - SANDBOX
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/keyType'
+      - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: |
           API Key revoke request object
@@ -3581,31 +1981,9 @@ paths:
             apikey revoked successfully.
           content: {}
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3616,6 +1994,10 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/revoke"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Subscription Collection" resource APIs
+  ######################################################
   /subscriptions:
     get:
       tags:
@@ -3634,52 +2016,13 @@ paths:
         **IMPORTANT:**
         * It is mandatory to provide either **apiId** or **applicationId**.
       parameters:
-      - name: apiId
-        in: query
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        schema:
-          type: string
-      - name: applicationId
-        in: query
-        description: |
-          **Application Identifier** consisting of the UUID of the Application.
-        schema:
-          type: string
-      - name: groupId
-        in: query
-        description: |
-          Application Group Id
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId-Q'
+      - $ref: '#/components/parameters/applicationId-Q'
+      - $ref: '#/components/parameters/groupId'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -3702,17 +2045,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3721,6 +2054,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/subscriptions?apiId=02e658e7-71c7-4b1d-a623-be145b789340"'
+
     post:
       tags:
       - Subscriptions
@@ -3729,13 +2063,7 @@ paths:
       description: |
         This operation can be used to add a new subscription providing the id of the API and the application.
       parameters:
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/requestedTenant'
       requestBody:
         description: |
           Subscription object that should to be added
@@ -3780,22 +2108,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         415:
-          description: |
-            Unsupported media type.
-            The entity of the request was in a not supported format.
-          content: {}
+          $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3805,6 +2120,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/subscriptions"'
       x-codegen-request-body-name: body
+
   /subscriptions/multiple:
     post:
       tags:
@@ -3814,13 +2130,7 @@ paths:
       description: |
         This operation can be used to add a new subscriptions providing the ids of the APIs and the applications.
       parameters:
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/requestedTenant'
       requestBody:
         description: |
           Subscription objects that should to be added
@@ -3854,22 +2164,9 @@ paths:
                 items:
                   $ref: '#/components/schemas/Subscription'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         415:
-          description: |
-            Unsupported media type.
-            The entity of the request was in a not supported format.
-          content: {}
+          $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3879,6 +2176,10 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/subscriptions/multiple"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual Subscription" resource APIs
+  ######################################################
   /subscriptions/{subscriptionId}:
     get:
       tags:
@@ -3888,20 +2189,8 @@ paths:
       description: |
         This operation can be used to get details of a single subscription.
       parameters:
-      - name: subscriptionId
-        in: path
-        description: |
-          Subscription Id
-        required: true
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/subscriptionId'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -3928,17 +2217,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -3947,6 +2226,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"'
+
     put:
       tags:
       - Subscriptions
@@ -3955,20 +2235,8 @@ paths:
       description: |
         This operation can be used to update a subscription providing the subscription id, api id, application Id, status and updated throttling policy tier.
       parameters:
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: subscriptionId
-        in: path
-        description: |
-          Subscription Id
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/subscriptionId'
       requestBody:
         description: |
           Subscription object that should to be added
@@ -4018,17 +2286,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
           description: |
             Not Found.
@@ -4048,6 +2306,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/store/v1/subscriptions/80369180-7d90-4ee8-99a1-19fa68512aa5"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Subscriptions
@@ -4056,19 +2315,8 @@ paths:
       description: |
         This operation can be used to remove a subscription.
       parameters:
-      - name: subscriptionId
-        in: path
-        description: |
-          Subscription Id
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/subscriptionId'
+      - $ref: '#/components/parameters/If-Match'
       responses:
         200:
           description: |
@@ -4090,31 +2338,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -4128,6 +2354,7 @@ paths:
       x-wso2-request: |
         DELETE https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
       x-wso2-response: HTTP/1.1 200 OK
+
   /subscriptions/{subscriptionId}/usage:
     get:
       tags:
@@ -4137,13 +2364,7 @@ paths:
       description: |
         This operation can be used to get details of a pending invoice for a monetized subscription with metered billing.
       parameters:
-      - name: subscriptionId
-        in: path
-        description: |
-          Subscription Id
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/subscriptionId'
       responses:
         200:
           description: |
@@ -4174,17 +2395,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -4193,6 +2404,10 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9/usage"'
+
+  ######################################################
+  # The "Throttling Policy Collection" resource APIs
+  ######################################################
   /throttling-policies/{policyLevel}:
     get:
       tags:
@@ -4201,44 +2416,11 @@ paths:
       description: |
         Get available Throttling Policies
       parameters:
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
-      - name: policyLevel
-        in: path
-        description: |
-          List Application or Subscription type thro.
-        required: true
-        schema:
-          type: string
-          enum:
-          - application
-          - subscription
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/policyLevel'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -4263,22 +2445,16 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/throttling-policies/application"
+
+  ######################################################
+  # The "Individual Throttling Policy" resource APIs
+  ######################################################
   /throttling-policies/{policyLevel}/{policyId}:
     get:
       tags:
@@ -4290,37 +2466,10 @@ paths:
 
         `X-WSO2-Tenant` header can be used to retrive throttling policy that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
-      - name: policyId
-        in: path
-        description: |
-          The name of the policy
-        required: true
-        schema:
-          type: string
-      - name: policyLevel
-        in: path
-        description: |
-          List Application or Subscription type thro.
-        required: true
-        schema:
-          type: string
-          enum:
-          - application
-          - subscription
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/policyId'
+      - $ref: '#/components/parameters/policyLevel'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -4349,34 +2498,18 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/throttling-policies/application/10PerMin"
+
+  ######################################################
+  # The "Tag Collection" resource API
+  ######################################################
   /tags:
     get:
       tags:
@@ -4391,34 +2524,10 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's tags, you need to provide Authorization header.
       parameters:
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -4441,34 +2550,18 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/tags"
+
+  ######################################################
+  # The "Content Search Results" resource APIs
+  ######################################################
   /search:
     get:
       tags:
@@ -4478,27 +2571,9 @@ paths:
       description: |
         This operation provides you a list of available APIs and API Documents qualifying the given keyword match.
       parameters:
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/requestedTenant'
       - name: query
         in: query
         description: |
@@ -4507,13 +2582,7 @@ paths:
           You can search by using providing the search term in the query parameters.
         schema:
           type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -4539,22 +2608,16 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/search?query=PizzaShackAPI"
+
+  ######################################################
+  # The "SDK Generation Languages" list resource APIs
+  ######################################################
   /sdk-gen/languages:
     get:
       tags:
@@ -4570,30 +2633,9 @@ paths:
             List of supported languages for generating SDKs.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -4601,6 +2643,10 @@ paths:
       - lang: Curl
         source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/sdk-gen/languages"
+
+  ######################################################
+  # The Developer Portal settings List
+  ######################################################
   /settings:
     get:
       tags:
@@ -4609,13 +2655,7 @@ paths:
       description: |
         Retreive Store Settings
       parameters:
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -4626,17 +2666,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Settings'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:store_settings
@@ -4644,6 +2674,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/settings"'
+
   /settings/application-attributes:
     get:
       tags:
@@ -4653,13 +2684,7 @@ paths:
       description: |
         This operation can be used to retrieve the application attributes from configuration. It will not return hidden attributes.
       parameters:
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resourec.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -4676,29 +2701,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationAttributeList'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -4706,6 +2711,10 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/settings/application-attributes"'
+
+  ######################################################
+  # The tenant resource APIs
+  ######################################################
   /tenants:
     get:
       tags:
@@ -4727,20 +2736,8 @@ paths:
           enum:
           - active
           - inactive
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
       responses:
         200:
           description: |
@@ -4757,34 +2754,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/TenantList'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security: []
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/tenants"
+
+  ######################################################
+  # The "Recommendations" resource API
+  ######################################################
   /recommendations:
     get:
       tags:
@@ -4808,17 +2789,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Recommendations'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -4826,6 +2797,10 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/recommendations"'
+
+  ####################################################
+  # Developer Portal Alerts management REST API
+  ####################################################
   /alert-types:
     get:
       tags:
@@ -4851,18 +2826,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AlertTypesList'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:sub_alert_manage
@@ -4870,6 +2834,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/alert-types"'
+
   /alert-subscriptions:
     get:
       tags:
@@ -4895,18 +2860,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AlertsInfo'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:sub_alert_manage
@@ -4914,6 +2868,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/alert-subscriptions"'
+
     put:
       tags:
       - Alert Subscriptions
@@ -4950,18 +2905,7 @@ paths:
             Invalid Request or request validation failure.
           content: {}
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:sub_alert_manage
@@ -4970,6 +2914,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/alert-subscriptions"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Alert Subscriptions
@@ -4991,18 +2936,7 @@ paths:
                 type: string
           content: {}
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:sub_alert_manage
@@ -5010,6 +2944,7 @@ paths:
       - lang: Curl
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/alert-subscriptions"'
+
   /alerts/{alertType}/configurations:
     get:
       tags:
@@ -5020,13 +2955,7 @@ paths:
         This operation is used to get all configurations of the AbnormalRequestsPerMin alert type.
       operationId: getAllAlertConfigs
       parameters:
-      - name: alertType
-        in: path
-        description: |
-          The alert type.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/alertType'
       responses:
         200:
           description: |
@@ -5043,18 +2972,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AlertConfigList'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:sub_alert_manage
@@ -5062,6 +2980,7 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/alerts/AbnormalRequestsPerMin/configurations"'
+
   /alerts/{alertType}/configurations/{configurationId}:
     put:
       tags:
@@ -5072,21 +2991,8 @@ paths:
         This operation is used to add configuration for the AbnormalRequestsPerMin alert type.
       operationId: addAlertConfig
       parameters:
-      - name: alertType
-        in: path
-        description: |
-          The alert type.
-        required: true
-        schema:
-          type: string
-      - name: configurationId
-        in: path
-        description: |
-          The alert configuration id.
-          Base64 encoded value of 'apiName#apiVersion#applicationName'.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/alertType'
+      - $ref: '#/components/parameters/configurationId'
       requestBody:
         description: Configuration for AbnormalRequestCount alert type
         content:
@@ -5111,30 +3017,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/AlertConfig'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:sub_alert_manage
@@ -5143,6 +3028,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/alerts/AbnormalRequestsPerMin/configurations/UGV0c3RvcmUjMS4wI0FwcDE"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Alert Configuration
@@ -5152,21 +3038,8 @@ paths:
         This operation is used to delete configuration from the AbnormalRequestsPerMin alert type.
       operationId: deleteAlertConfig
       parameters:
-      - name: alertType
-        in: path
-        description: |
-          The alert type.
-        required: true
-        schema:
-          type: string
-      - name: configurationId
-        in: path
-        description: |
-          The alert configuration id.
-          Base64 encoded value of 'apiName#apiVersion#applicationName'.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/alertType'
+      - $ref: '#/components/parameters/configurationId'
       responses:
         200:
           description: |
@@ -5174,42 +3047,11 @@ paths:
             The alert config is deleted successfully.
           content: {}
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:sub_alert_manage
@@ -5217,6 +3059,10 @@ paths:
       - lang: Curl
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/alerts/AbnormalRequestsPerMin/configurations/UGV0c3RvcmUjMS4wI0FwcDE"'
+
+  ######################################################
+  # The "Category Collection" resource API
+  ######################################################
   /api-categories:
     get:
       tags:
@@ -5225,13 +3071,7 @@ paths:
       description: |
         Get all API categories
       parameters:
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -5246,6 +3086,10 @@ paths:
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/api-categories"
+
+  ######################################################
+  # The "Key Manager Collection" resource API
+  ######################################################
   /key-managers:
     get:
       tags:
@@ -5254,13 +3098,7 @@ paths:
       description: |
         Get all Key managers
       parameters:
-      - name: X-WSO2-Tenant
-        in: header
-        description: |
-          For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-            retrieved from.
-        schema:
-          type: string
+      - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -5277,6 +3115,10 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/key-managers"'
+
+  ######################################################
+  # GraphQL "Query Complexity" resource APIs
+  ######################################################
   /apis/{apiId}/graphql-policies/complexity:
     get:
       tags:
@@ -5285,13 +3127,7 @@ paths:
       description: |
         This operation can be used to retrieve complexity related details belonging to an API by providing the API id.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
       responses:
         200:
           description: |
@@ -5308,6 +3144,7 @@ paths:
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/graphql-policies/complexity"
+
   /apis/{apiId}/graphql-policies/complexity/types:
     get:
       tags:
@@ -5316,13 +3153,7 @@ paths:
       description: |
         This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id.
       parameters:
-      - name: apiId
-        in: path
-        description: |
-          **API ID** consisting of the **UUID** of the API.
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiId'
       responses:
         200:
           description: |
@@ -5349,6 +3180,10 @@ paths:
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/graphql-policies/complexity/types"
+
+  ######################################################
+  # User resource APIs
+  ######################################################
   /me/change-password:
     post:
       tags:
@@ -5370,17 +3205,7 @@ paths:
           description: OK. User password changed successfully
           content: {}
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
       security:
       - OAuth2Security:
         - apim:subscribe
@@ -5389,6 +3214,7 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/me/change-password"'
       x-codegen-request-body-name: body
+
 components:
   schemas:
     APIList:

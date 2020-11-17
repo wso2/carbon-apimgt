@@ -39,7 +39,7 @@ TenantThemeApiService delegate = new TenantThemeApiServiceImpl();
     @GET
     
     
-    @Produces({ "application/zip", "application/json",  })
+    @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Export a DevPortal Tenant Theme", notes = "This operation can be used to export a DevPortal tenant theme as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),

@@ -1,3 +1,17 @@
+#   Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+################################################################################
 openapi: 3.0.1
 info:
   title: WSO2 API Manager - Admin
@@ -94,6 +108,9 @@ info:
 servers:
 - url: https://apis.wso2.com/api/am/admin/v1
 paths:
+  ######################################################
+  # The "Application Throttling Policy Collection" resource API
+  ######################################################
   /throttling/policies/application:
     get:
       tags:
@@ -102,27 +119,9 @@ paths:
       description: |
         Retrieves all existing application throttling policies.
       parameters:
-      - name: Accept
-        in: header
-        description: |
-          Media types acceptable for the response. Default is application/json.
-        schema:
-          type: string
-          default: application/json
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Accept'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -155,17 +154,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -174,6 +163,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/application"'
+
     post:
       tags:
       - Application Policy (Collection)
@@ -181,14 +171,7 @@ paths:
       description: |
         This operation can be used to add a new application level throttling policy.
       parameters:
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
+      - $ref: '#/components/parameters/Content-Type'
       requestBody:
         description: |
           Application level policy object that should to be added
@@ -237,30 +220,9 @@ paths:
                     unitTime: 1
                     requestCount: 20
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         415:
-          description: Unsupported Media Type. The entity of the request was not in
-            a supported format.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 415
-                message: Unsupported media type
-                description: The entity of the request was not in a supported format
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
         - apim:admin
@@ -270,6 +232,10 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/application"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual Application Throttling Policy" resource API
+  ######################################################
   /throttling/policies/application/{policyId}:
     get:
       tags:
@@ -278,27 +244,9 @@ paths:
       description: |
         Retrieves an application throttling policy.
       parameters:
-      - name: policyId
-        in: path
-        description: |
-          Thorttle policy UUID
-        required: true
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/policyId'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -344,29 +292,9 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -375,6 +303,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/application/4e098fff-7f94-459a-981f-d257332f69d0"'
+
     put:
       tags:
       - Application Policy (Individual)
@@ -382,33 +311,10 @@ paths:
       description: |
         Updates an existing application level throttling policy. Upon a succesfull update, you will receive the updated application policy as the response.
       parameters:
-      - name: policyId
-        in: path
-        description: |
-          Thorttle policy UUID
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/policyId'
+      - $ref: '#/components/parameters/Content-Type'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Policy object that needs to be modified
@@ -462,43 +368,11 @@ paths:
                     unitTime: 1
                     requestCount: 20
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -508,6 +382,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/application/4e098fff-7f94-459a-981f-d257332f69d0"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Application Policy (Individual)
@@ -515,25 +390,9 @@ paths:
       description: |
         Deletes an application level throttling policy.
       parameters:
-      - name: policyId
-        in: path
-        description: |
-          Thorttle policy UUID
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/policyId'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -541,31 +400,9 @@ paths:
             Resource successfully deleted.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -574,6 +411,10 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/application/4e098fff-7f94-459a-981f-d257332f69d0"'
+
+  ######################################################
+  # The "Global Mediation Policy Collections" resource API
+  ######################################################
   /policies/mediation:
     get:
       tags:
@@ -583,39 +424,15 @@ paths:
       description: |
         This operation provides you a list of all available global mediation policies.
       parameters:
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
       - name: query
         in: query
         description: -Not supported yet-
         schema:
           type: string
-      - name: Accept
-        in: header
-        description: |
-          Media types acceptable for the response. Default is application/json.
-        schema:
-          type: string
-          default: application/json
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Accept'
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -641,17 +458,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -660,6 +467,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/policies/mediation"'
+
     post:
       tags:
       - Mediation Policy (Collection)
@@ -667,26 +475,9 @@ paths:
       description: |
         This operation can be used to add a new global mediation policy.
       parameters:
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Content-Type'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: mediation policy to upload
         content:
@@ -727,43 +518,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Mediation'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -773,6 +532,10 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/policies/mediation"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual Global Mediation Policy" resource
+  ######################################################
   /policies/mediation/{mediationPolicyId}:
     get:
       tags:
@@ -781,34 +544,10 @@ paths:
       description: |
         This operation can be used to retrieve a particular global mediation policy.
       parameters:
-      - name: mediationPolicyId
-        in: path
-        description: |
-          Mediation policy Id
-        required: true
-        schema:
-          type: string
-      - name: Accept
-        in: header
-        description: |
-          Media types acceptable for the response. Default is application/json.
-        schema:
-          type: string
-          default: application/json
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/mediationPolicyId'
+      - $ref: '#/components/parameters/Accept'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -842,29 +581,9 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -873,6 +592,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/policies/mediation/2253cf01-0356-4cc1-9941-3034a8c29007"'
+
     put:
       tags:
       - Mediation Policy (Individual)
@@ -880,33 +600,10 @@ paths:
       description: |
         This operation can be used to update an existing global mediation policy.
       parameters:
-      - name: mediationPolicyId
-        in: path
-        description: |
-          Mediation policy Id
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/mediationPolicyId'
+      - $ref: '#/components/parameters/Content-Type'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Mediation policy object that needs to be updated
@@ -947,57 +644,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Mediation'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         403:
-          description: Forbidden. The request must be conditional but no condition
-            has been specified.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 403
-                message: Forbidden
-                description: The request must be conditional but no condition has
-                  been specified
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Forbidden'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1007,6 +660,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/policies/mediation/2253cf01-0356-4cc1-9941-3034a8c29007"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Mediation Policy (Individual)
@@ -1014,25 +668,9 @@ paths:
       description: |
         This operation can be used to delete an existing global mediation policy providing the Id of the mediation policy.
       parameters:
-      - name: mediationPolicyId
-        in: path
-        description: |
-          Mediation policy Id
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/mediationPolicyId'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -1040,45 +678,11 @@ paths:
             Mediation policy successfully deleted.
           content: {}
         403:
-          description: Forbidden. The request must be conditional but no condition
-            has been specified.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 403
-                message: Forbidden
-                description: The request must be conditional but no condition has
-                  been specified
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Forbidden'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1087,6 +691,10 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/policies/mediation/2253cf01-0356-4cc1-9941-3034a8c29007"'
+
+  ######################################################
+  # The "Subscription Throttling Policy Collection" resource API
+  ######################################################
   /throttling/policies/subscription:
     get:
       tags:
@@ -1095,27 +703,9 @@ paths:
       description: |
         This operation can be used to retrieve all Subscription level throttling policies.
       parameters:
-      - name: Accept
-        in: header
-        description: |
-          Media types acceptable for the response. Default is application/json.
-        schema:
-          type: string
-          default: application/json
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Accept'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -1149,17 +739,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1168,6 +748,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/subscription"'
+
     post:
       tags:
       - Subscription Policy (Collection)
@@ -1175,14 +756,7 @@ paths:
       description: |
         This operation can be used to add a Subscription level throttling policy specifying the details of the policy in the payload.
       parameters:
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
+      - $ref: '#/components/parameters/Content-Type'
       requestBody:
         description: |
           Subscripion level policy object that should to be added
@@ -1237,30 +811,9 @@ paths:
                 stopOnQuotaReach: true
                 billingPlan: FREE
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         415:
-          description: Unsupported Media Type. The entity of the request was not in
-            a supported format.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 415
-                message: Unsupported media type
-                description: The entity of the request was not in a supported format
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1270,6 +823,10 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/subscription"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual Subscription Throttling Policy" resource API
+  ######################################################
   /throttling/policies/subscription/{policyId}:
     get:
       tags:
@@ -1278,27 +835,9 @@ paths:
       description: |
         This operation can be used to retrieves subscription level throttling policy by specifying the Id of the policy as a path paramter
       parameters:
-      - name: policyId
-        in: path
-        description: |
-          Thorttle policy UUID
-        required: true
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/policyId'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -1350,29 +889,9 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1381,6 +900,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/subscription/c948c723-71dd-4d50-8c77-0a0e99c8cbb1"'
+
     put:
       tags:
       - Subscription Policy (Individual)
@@ -1388,33 +908,10 @@ paths:
       description: |
         Updates an existing subscription level throttling policy.
       parameters:
-      - name: policyId
-        in: path
-        description: |
-          Thorttle policy UUID
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/policyId'
+      - $ref: '#/components/parameters/Content-Type'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Policy object that needs to be modified
@@ -1474,43 +971,11 @@ paths:
                 stopOnQuotaReach: true
                 billingPlan: FREE
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1520,6 +985,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/subscription/c948c723-71dd-4d50-8c77-0a0e99c8cbb1"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Subscription Policy (Individual)
@@ -1527,25 +993,9 @@ paths:
       description: |
         This operation can be used to delete a subscription level throttling policy by specifying the Id of the policy as a path paramter.
       parameters:
-      - name: policyId
-        in: path
-        description: |
-          Thorttle policy UUID
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/policyId'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -1553,31 +1003,9 @@ paths:
             Resource successfully deleted.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1586,6 +1014,10 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/subscription/c948c723-71dd-4d50-8c77-0a0e99c8cbb1"'
+
+  ######################################################
+  # The "Custom Rules Collection" resource API
+  ######################################################
   /throttling/policies/custom:
     get:
       tags:
@@ -1597,27 +1029,9 @@ paths:
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
-      - name: Accept
-        in: header
-        description: |
-          Media types acceptable for the response. Default is application/json.
-        schema:
-          type: string
-          default: application/json
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Accept'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -1651,17 +1065,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1670,6 +1074,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/custom"'
+
     post:
       tags:
       - Custom Rules (Collection)
@@ -1680,14 +1085,7 @@ paths:
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
+      - $ref: '#/components/parameters/Content-Type'
       requestBody:
         description: |
           Custom Rule object that should to be added
@@ -1736,30 +1134,9 @@ paths:
                   \ ResultStream;"
                 keyTemplate: $userId
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         415:
-          description: Unsupported Media Type. The entity of the request was not in
-            a supported format.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 415
-                message: Unsupported media type
-                description: The entity of the request was not in a supported format
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1769,6 +1146,10 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/custom"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual Custom Rule" resource API
+  ######################################################
   /throttling/policies/custom/{ruleId}:
     get:
       tags:
@@ -1780,27 +1161,9 @@ paths:
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
-      - name: ruleId
-        in: path
-        description: |
-          Custom rule UUID
-        required: true
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/ruleId'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -1846,29 +1209,9 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1877,6 +1220,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
+
     put:
       tags:
       - Custom Rules (Individual)
@@ -1887,33 +1231,10 @@ paths:
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
-      - name: ruleId
-        in: path
-        description: |
-          Custom rule UUID
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/ruleId'
+      - $ref: '#/components/parameters/Content-Type'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Policy object that needs to be modified
@@ -1967,43 +1288,11 @@ paths:
                   \ ResultStream;"
                 keyTemplate: $userId
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2013,6 +1302,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Custom Rules (Individual)
@@ -2023,25 +1313,9 @@ paths:
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
-      - name: ruleId
-        in: path
-        description: |
-          Custom rule UUID
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/ruleId'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -2049,31 +1323,9 @@ paths:
             Resource successfully deleted.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2082,6 +1334,10 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
+
+  ######################################################
+  # The "Advanced Throttling Policy Collection" resource API
+  ######################################################
   /throttling/policies/advanced:
     get:
       tags:
@@ -2090,27 +1346,9 @@ paths:
       description: |
         Retrieves all existing advanced throttling policies.
       parameters:
-      - name: Accept
-        in: header
-        description: |
-          Media types acceptable for the response. Default is application/json.
-        schema:
-          type: string
-          default: application/json
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Accept'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -2144,17 +1382,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2163,6 +1391,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/advanced"'
+
     post:
       tags:
       - Advanced Policy (Collection)
@@ -2170,14 +1399,7 @@ paths:
       description: |
         Add a new advanced throttling policy.
       parameters:
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
+      - $ref: '#/components/parameters/Content-Type'
       requestBody:
         description: |
           Advanced level policy object that should to be added
@@ -2227,30 +1449,9 @@ paths:
                     requestCount: 10000
                 conditionalGroups: []
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         415:
-          description: Unsupported Media Type. The entity of the request was not in
-            a supported format.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 415
-                message: Unsupported media type
-                description: The entity of the request was not in a supported format
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2260,6 +1461,10 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/advanced"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual Advanced Throttling Policy" resource API
+  ######################################################
   /throttling/policies/advanced/{policyId}:
     get:
       tags:
@@ -2268,27 +1473,9 @@ paths:
       description: |
         Retrieves an advanced throttling policy.
       parameters:
-      - name: policyId
-        in: path
-        description: |
-          Thorttle policy UUID
-        required: true
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/policyId'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -2335,29 +1522,9 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2366,6 +1533,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
+
     put:
       tags:
       - Advanced Policy (Individual)
@@ -2373,33 +1541,10 @@ paths:
       description: |
         Updates an existing Advanced throttling policy.
       parameters:
-      - name: policyId
-        in: path
-        description: |
-          Thorttle policy UUID
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/policyId'
+      - $ref: '#/components/parameters/Content-Type'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Policy object that needs to be modified
@@ -2454,43 +1599,11 @@ paths:
                     requestCount: 10000
                 conditionalGroups: []
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2500,6 +1613,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Advanced Policy (Individual)
@@ -2507,25 +1621,9 @@ paths:
       description: |
         Deletes an advanced throttling policy.
       parameters:
-      - name: policyId
-        in: path
-        description: |
-          Thorttle policy UUID
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/policyId'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -2533,31 +1631,9 @@ paths:
             Resource successfully deleted.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2566,6 +1642,10 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
+
+  ######################################################
+  # The "Deny Policy Collection" resource API
+  ######################################################
   /throttling/deny-policies:
     get:
       tags:
@@ -2574,27 +1654,9 @@ paths:
       description: |
         Retrieves all existing deny policies.
       parameters:
-      - name: Accept
-        in: header
-        description: |
-          Media types acceptable for the response. Default is application/json.
-        schema:
-          type: string
-          default: application/json
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Accept'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -2628,17 +1690,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2647,6 +1699,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policies"'
+
     post:
       tags:
       - Deny Policies (Collection)
@@ -2654,14 +1707,7 @@ paths:
       description: |
         Adds a new deny policy
       parameters:
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
+      - $ref: '#/components/parameters/Content-Type'
       requestBody:
         description: |
           Blocking condition object that should to be added
@@ -2698,30 +1744,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/BlockingCondition'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         415:
-          description: Unsupported Media Type. The entity of the request was not in
-            a supported format.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 415
-                message: Unsupported media type
-                description: The entity of the request was not in a supported format
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2731,6 +1756,10 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policies"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual Deny Policy" resource API
+  ######################################################
   /throttling/deny-policy/{conditionId}:
     get:
       tags:
@@ -2739,27 +1768,9 @@ paths:
       description: |
         Retrieves a Deny policy providing the condition Id
       parameters:
-      - name: conditionId
-        in: path
-        description: |
-          Blocking condition identifier
-        required: true
-        schema:
-          type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Modified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header of the
-          formerly retrieved variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/conditionId'
+      - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -2793,29 +1804,9 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2824,6 +1815,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
+
     delete:
       tags:
       - Deny Policy (Individual)
@@ -2831,25 +1823,9 @@ paths:
       description: |
         Deletes an existing deny policy
       parameters:
-      - name: conditionId
-        in: path
-        description: |
-          Blocking condition identifier
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/conditionId'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -2857,31 +1833,9 @@ paths:
             Resource successfully deleted.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2890,6 +1844,7 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
+
     patch:
       tags:
       - Deny Policy (Individual)
@@ -2897,33 +1852,10 @@ paths:
       description: |
         Update a deny policy by Id
       parameters:
-      - name: conditionId
-        in: path
-        description: |
-          Blocking condition identifier
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: |
-          Media type of the entity in the body. Default is application/json.
-        required: true
-        schema:
-          type: string
-          default: application/json
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/conditionId'
+      - $ref: '#/components/parameters/Content-Type'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Blocking condition with updated status
@@ -2942,29 +1874,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/BlockingCondition'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2974,6 +1886,10 @@ paths:
         source: 'curl -k -X PATCH -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Application Collection" resource APIs
+  ######################################################
   /applications:
     get:
       tags:
@@ -2984,40 +1900,11 @@ paths:
         This operation can be used to retrieve list of applications owned by the given user, If no user
         is provided, the applications owned by the user associated with the provided access token will be returned.
       parameters:
-      - name: user
-        in: query
-        description: |
-          username of the application creator
-        schema:
-          type: string
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
-      - name: Accept
-        in: header
-        description: |
-          Media types acceptable for the response. Default is application/json.
-        schema:
-          type: string
-          default: application/json
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/user'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/Accept'
+      - $ref: '#/components/parameters/If-None-Match'
       - name: name
         in: query
         description: |
@@ -3054,29 +1941,9 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -3086,6 +1953,10 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/applications"'
+
+  ######################################################
+  # The "Individual Application" resource APIs
+  ######################################################
   /applications/{applicationId}:
     delete:
       tags:
@@ -3095,19 +1966,8 @@ paths:
       description: |
         This operation can be used to delete an application by specifying its id.
       parameters:
-      - name: applicationId
-        in: path
-        description: |
-          Application UUID
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
+      - $ref: '#/components/parameters/If-Match'
       responses:
         200:
           description: |
@@ -3129,31 +1989,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -3162,6 +2000,7 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b"'
+
   /applications/{applicationId}/change-owner:
     post:
       tags:
@@ -3176,13 +2015,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: applicationId
-        in: path
-        description: |
-          Application UUID
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/applicationId'
       responses:
         200:
           description: |
@@ -3190,43 +2023,11 @@ paths:
             Application owner changed successfully.
           content: {}
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         412:
-          description: Precondition Failed. The request has not been performed because
-            one of the preconditions is not met.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 412
-                message: Precondition Failed
-                description: The request has not been performed because one of the
-                  preconditions is not met
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -3235,6 +2036,10 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b/change-owner?owner=admin"'
+
+  ######################################################
+  # Export Resource API
+  ######################################################
   /export/applications:
     get:
       tags:
@@ -3284,50 +2089,11 @@ paths:
                 type: string
                 format: binary
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -3337,6 +2103,156 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/export/applications?appName=sampleApp&appOwner=admin&withKeys=true"
           > exported-application.zip'
+
+  /export/api:
+    get:
+      tags:
+      - API (Individual)
+      summary: Export an API
+      description: |
+        This operation can be used to export the details of a particular API as a zip file.
+      parameters:
+      - name: name
+        in: query
+        description: |
+          API Name
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: query
+        description: |
+          Version of the API
+        required: true
+        schema:
+          type: string
+      - name: providerName
+        in: query
+        description: |
+          Provider name of the API
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: |
+          Format of output documents. Can be YAML or JSON.
+        schema:
+          type: string
+          enum:
+          - JSON
+          - YAML
+      - name: preserveStatus
+        in: query
+        description: |
+          Preserve API Status on export
+        schema:
+          type: boolean
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+      - OAuth2Security:
+        - apim:admin
+        - apim:api_import_export
+      x-code-samples:
+      - lang: Shell
+        source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v1/export/api?name=PizzaShackAPI&version=1.0.0&providerName=admin&format=YAML&preserveStatus=true"
+          > exportAPI.zip'
+
+  /export/api-product:
+    get:
+      tags:
+      - API Product (Individual)
+      summary: Export an API Product
+      description: |
+        This operation can be used to export the details of a particular API Product as a zip file.
+      parameters:
+      - name: name
+        in: query
+        description: |
+          API Product Name
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: query
+        description: |
+          Version of the API Product
+        required: true
+        schema:
+          type: string
+      - name: providerName
+        in: query
+        description: |
+          Provider name of the API Product
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: |
+          Format of output documents. Can be YAML or JSON.
+        schema:
+          type: string
+          enum:
+          - JSON
+          - YAML
+      - name: preserveStatus
+        in: query
+        description: |
+          Preserve API Product Status on export
+        schema:
+          type: boolean
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+      - OAuth2Security:
+        - apim:admin
+        - apim:api_product_import_export
+      x-code-samples:
+      - lang: Shell
+        source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v1/export/api-product?name=PizzaShackAPIProduct&version=1.0.0&providerName=admin&format=YAML&preserveStatus=true"
+          > exportAPIProduct.zip'
+
+  ######################################################
+  # Import Resource API
+  ######################################################
   /import/applications:
     post:
       tags:
@@ -3412,29 +2328,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/APIInfoList'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -3443,6 +2339,7 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@exported-application.zip "https://127.0.0.1:9443/api/am/admin/v1/import/applications?preserveOwner=true&skipSubscriptions=false&appOwner=admin&skipApplicationKeys=false&update=true"'
+
   /import/api:
     post:
       tags:
@@ -3483,56 +2380,13 @@ paths:
             API Imported Successfully.
           content: {}
         403:
-          description: Forbidden. The request must be conditional but no condition
-            has been specified.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 403
-                message: Forbidden
-                description: The request must be conditional but no condition has
-                  been specified
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Forbidden'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         409:
-          description: Conflict. Specified resource already exists.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 409
-                message: Conflict
-                description: Specified resource already exists
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Conflict'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -3541,101 +2395,7 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@admin-PizzaShackAPI-1.0.0.zip "https://127.0.0.1:9443/api/am/admin/v1/import/api?preserveProvider=false&overwrite=false"'
-  /export/api:
-    get:
-      tags:
-      - API (Individual)
-      summary: Export an API
-      description: |
-        This operation can be used to export the details of a particular API as a zip file.
-      parameters:
-      - name: name
-        in: query
-        description: |
-          API Name
-        required: true
-        schema:
-          type: string
-      - name: version
-        in: query
-        description: |
-          Version of the API
-        required: true
-        schema:
-          type: string
-      - name: providerName
-        in: query
-        description: |
-          Provider name of the API
-        schema:
-          type: string
-      - name: format
-        in: query
-        description: |
-          Format of output documents. Can be YAML or JSON.
-        schema:
-          type: string
-          enum:
-          - JSON
-          - YAML
-      - name: preserveStatus
-        in: query
-        description: |
-          Preserve API Status on export
-        schema:
-          type: boolean
-      responses:
-        200:
-          description: |
-            OK.
-            Export Successful.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/zip:
-              schema:
-                type: string
-                format: binary
-        404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/json:
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
-        500:
-          description: Internal Server Error.
-          content:
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/json:
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
-      security:
-      - OAuth2Security:
-        - apim:admin
-        - apim:api_import_export
-      x-code-samples:
-      - lang: Shell
-        source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v1/export/api?name=PizzaShackAPI&version=1.0.0&providerName=admin&format=YAML&preserveStatus=true"
-          > exportAPI.zip'
+
   /import/api-product:
     post:
       tags:
@@ -3688,56 +2448,13 @@ paths:
             API Product Imported Successfully.
           content: {}
         403:
-          description: Forbidden. The request must be conditional but no condition
-            has been specified.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 403
-                message: Forbidden
-                description: The request must be conditional but no condition has
-                  been specified
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Forbidden'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         409:
-          description: Conflict. Specified resource already exists.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 409
-                message: Conflict
-                description: Specified resource already exists
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Conflict'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -3746,101 +2463,10 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@exportAPIProduct.zip "https://127.0.0.1:9443/api/am/admin/v1/import/api-product?preserveProvider=false&overwriteAPIProduct=false&overwriteAPIs=false&importAPIs=false"'
-  /export/api-product:
-    get:
-      tags:
-      - API Product (Individual)
-      summary: Export an API Product
-      description: |
-        This operation can be used to export the details of a particular API Product as a zip file.
-      parameters:
-      - name: name
-        in: query
-        description: |
-          API Product Name
-        required: true
-        schema:
-          type: string
-      - name: version
-        in: query
-        description: |
-          Version of the API Product
-        required: true
-        schema:
-          type: string
-      - name: providerName
-        in: query
-        description: |
-          Provider name of the API Product
-        schema:
-          type: string
-      - name: format
-        in: query
-        description: |
-          Format of output documents. Can be YAML or JSON.
-        schema:
-          type: string
-          enum:
-          - JSON
-          - YAML
-      - name: preserveStatus
-        in: query
-        description: |
-          Preserve API Product Status on export
-        schema:
-          type: boolean
-      responses:
-        200:
-          description: |
-            OK.
-            Export Successful.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/zip:
-              schema:
-                type: string
-                format: binary
-        404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/json:
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
-        500:
-          description: Internal Server Error.
-          content:
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/json:
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
-      security:
-      - OAuth2Security:
-        - apim:admin
-        - apim:api_product_import_export
-      x-code-samples:
-      - lang: Shell
-        source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v1/export/api-product?name=PizzaShackAPIProduct&version=1.0.0&providerName=admin&format=YAML&preserveStatus=true"
-          > exportAPIProduct.zip'
+
+  ######################################################
+  # The "Label" resource API
+  ######################################################
   /labels:
     get:
       tags:
@@ -3865,6 +2491,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/labels"'
+
     post:
       tags:
       - Label
@@ -3889,17 +2516,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Label'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
       security:
       - OAuth2Security:
         - apim:admin
@@ -3909,6 +2526,80 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/labels"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual label" resource APIs
+  ######################################################
+  /labels/{labelId}:
+    put:
+      tags:
+      - Label
+      summary: Update a Label
+      description: |
+        Update a Label by label Id
+      parameters:
+      - $ref: '#/components/parameters/labelId'
+      requestBody:
+        description: |
+          Label object with updated information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Label'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Label updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+      - OAuth2Security:
+        - apim:admin
+        - apim:label_manage
+      x-code-samples:
+      - lang: Shell
+        source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+      x-codegen-request-body-name: body
+
+    delete:
+      tags:
+      - Label
+      summary: Delete a Label
+      description: |
+        Delete a Label by label Id
+      parameters:
+      - $ref: '#/components/parameters/labelId'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
+      responses:
+        200:
+          description: |
+            OK.
+            Label successfully deleted.
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+      - OAuth2Security:
+        - apim:admin
+        - apim:label_manage
+      x-code-samples:
+      - lang: Shell
+        source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v1/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+
+  ######################################################
+  # The Bot Detection Data API resources
+  ######################################################
   /bot-detection-data:
     get:
       tags:
@@ -3934,17 +2625,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BotDetectionDataList'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:admin
@@ -3953,123 +2634,10 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/bot-detection-data"'
-  /labels/{labelId}:
-    put:
-      tags:
-      - Label
-      summary: Update a Label
-      description: |
-        Update a Label by label Id
-      parameters:
-      - name: labelId
-        in: path
-        description: |
-          Label UUID
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: |
-          Label object with updated information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Label'
-        required: true
-      responses:
-        200:
-          description: |
-            OK.
-            Label updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Label'
-        400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
-        404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
-      security:
-      - OAuth2Security:
-        - apim:admin
-        - apim:label_manage
-      x-code-samples:
-      - lang: Shell
-        source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
-      x-codegen-request-body-name: body
-    delete:
-      tags:
-      - Label
-      summary: Delete a Label
-      description: |
-        Delete a Label by label Id
-      parameters:
-      - name: labelId
-        in: path
-        description: |
-          Label UUID
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
-      responses:
-        200:
-          description: |
-            OK.
-            Label successfully deleted.
-          content: {}
-        404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
-      security:
-      - OAuth2Security:
-        - apim:admin
-        - apim:label_manage
-      x-code-samples:
-      - lang: Shell
-        source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v1/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+
+  ######################################################
+  # The "Monetization" resource APIs
+  ######################################################
   /monetization/publish-usage:
     post:
       tags:
@@ -4091,30 +2659,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublishStatus'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4123,6 +2670,7 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/monetization/publish-usage"'
+
   /monetization/publish-usage/status:
     get:
       tags:
@@ -4147,6 +2695,10 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/monetization/publish-usage/status"'
+
+  ######################################################
+  # The "Workflow Collection" resource APIs
+  ######################################################
   /workflows:
     get:
       tags:
@@ -4156,34 +2708,10 @@ paths:
       description: |
         This operation can be used to retrieve list of workflow pending processes.
       parameters:
-      - name: limit
-        in: query
-        description: |
-          Maximum size of resource array to return.
-        schema:
-          type: integer
-          default: 25
-      - name: offset
-        in: query
-        description: |
-          Starting point within the complete list of items qualified.
-        schema:
-          type: integer
-          default: 0
-      - name: Accept
-        in: header
-        description: |
-          Media types acceptable for the response. Default is application/json.
-        schema:
-          type: string
-          default: application/json
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/Accept'
+      - $ref: '#/components/parameters/If-None-Match'
       - name: workflowType
         in: query
         description: |
@@ -4221,41 +2749,11 @@ paths:
             Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           content: {}
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4264,6 +2762,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/workflows"'
+
   /workflows/{externalWorkflowRef}:
     get:
       tags:
@@ -4280,13 +2779,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: If-None-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on the ETag of the formerly retrieved
-          variant of the resource (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -4302,29 +2795,9 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4333,6 +2806,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"'
+
   /workflows/update-workflow-status:
     post:
       tags:
@@ -4341,13 +2815,7 @@ paths:
       description: |
         This operation can be used to approve or reject a workflow task.
       parameters:
-      - name: workflowReferenceId
-        in: query
-        description: |
-          Workflow reference id
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/workflowReferenceId-Q'
       requestBody:
         description: |
           Workflow event that need to be updated
@@ -4372,29 +2840,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Workflow'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4404,6 +2852,10 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The Tenant Info resource API
+  ######################################################
   /tenant-info/{username}:
     get:
       tags:
@@ -4438,29 +2890,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/TenantInfo'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4469,6 +2901,10 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/tenant-info/john"'
+
+  ######################################################
+  # The Custom URL Info resource API
+  ######################################################
   /custom-urls/{tenantDomain}:
     get:
       tags:
@@ -4502,29 +2938,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/CustomUrlInfo'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4533,6 +2949,10 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/custom-urls/wso2.com"'
+
+  ######################################################
+  # The "Category Collection" resource API
+  ######################################################
   /api-categories:
     get:
       tags:
@@ -4557,6 +2977,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/api-categories"'
+
     post:
       tags:
       - API Category (Individual)
@@ -4581,17 +3002,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/APICategory'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4601,6 +3012,10 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/api-categories"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual Category" resource APIs
+  ######################################################
   /api-categories/{apiCategoryId}:
     put:
       tags:
@@ -4609,13 +3024,7 @@ paths:
       description: |
         Update an API Category by category Id
       parameters:
-      - name: apiCategoryId
-        in: path
-        description: |
-          API Category UUID
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiCategoryId'
       requestBody:
         description: |
           API Category object with updated information
@@ -4634,29 +3043,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/APICategory'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4666,6 +3055,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - API Category (Individual)
@@ -4673,25 +3063,9 @@ paths:
       description: |
         Delete an API Category by API Category Id
       parameters:
-      - name: apiCategoryId
-        in: path
-        description: |
-          API Category UUID
-        required: true
-        schema:
-          type: string
-      - name: If-Match
-        in: header
-        description: |
-          Validator for conditional requests; based on ETag (Will be supported in future).
-        schema:
-          type: string
-      - name: If-Unmodified-Since
-        in: header
-        description: |
-          Validator for conditional requests; based on Last Modified header (Will be supported in future).
-        schema:
-          type: string
+      - $ref: '#/components/parameters/apiCategoryId'
+      - $ref: '#/components/parameters/If-Match'
+      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -4699,17 +3073,7 @@ paths:
             API Category successfully deleted.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4718,6 +3082,10 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+
+  ######################################################
+  # The Admin settings List
+  ######################################################
   /settings:
     get:
       tags:
@@ -4735,17 +3103,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Settings'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4754,6 +3112,10 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/settings"'
+
+  ####################################################
+  # The Admin alert  management resources
+  ####################################################
   /alert-types:
     get:
       tags:
@@ -4779,18 +3141,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AlertTypesList'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4799,6 +3150,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/alert-types"'
+
   /alert-subscriptions:
     get:
       tags:
@@ -4824,18 +3176,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AlertsSubscription'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4844,6 +3185,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/alert-subscriptions"'
+
     put:
       tags:
       - Alert Subscriptions
@@ -4875,30 +3217,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/AlertsSubscription'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4908,6 +3229,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/alert-subscriptions"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Alert Subscriptions
@@ -4929,18 +3251,7 @@ paths:
                 type: string
           content: {}
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4949,6 +3260,7 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/alert-subscriptions"'
+
   /alert-subscriptions/bot-detection:
     get:
       tags:
@@ -4974,18 +3286,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BotDetectionAlertSubscriptionList'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -4994,6 +3295,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/alert-subscriptions/bot-detection"'
+
     post:
       tags:
       - Bot Detection Alert Subscriptions
@@ -5025,30 +3327,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/BotDetectionAlertSubscription'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5058,6 +3339,7 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/alert-subscriptions/bot-detection"'
       x-codegen-request-body-name: body
+
   /alert-subscriptions/bot-detection/{uuid}:
     delete:
       tags:
@@ -5086,30 +3368,9 @@ paths:
                 type: string
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5118,6 +3379,10 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/alert-subscriptions/bot-detection"'
+
+  ######################################################
+  # System scopes resource API
+  ######################################################
   /system-scopes/{scopeName}:
     get:
       tags:
@@ -5132,13 +3397,7 @@ paths:
         in: query
         schema:
           type: string
-      - name: scopeName
-        in: path
-        description: |
-          scope name to be validated
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/scopeName'
       responses:
         200:
           description: |
@@ -5149,29 +3408,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScopeSettings'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5180,6 +3419,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/system-scopes/YXBpbTpzdWJzY3JpYmU?username=john"'
+
   /system-scopes:
     get:
       tags:
@@ -5205,18 +3445,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScopeList'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:scope_manage
@@ -5225,6 +3454,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/system-scopes"'
+
     put:
       tags:
       - System Scopes
@@ -5257,30 +3487,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScopeList'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5290,6 +3499,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/system-scopes"'
       x-codegen-request-body-name: body
+
   /system-scopes/role-aliases:
     get:
       tags:
@@ -5313,17 +3523,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RoleAliasList'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5332,6 +3532,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/system-scopes/role-aliases"'
+
     put:
       tags:
       - System Scopes
@@ -5355,30 +3556,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/RoleAliasList'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:scope_manage
@@ -5388,6 +3568,10 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/system-scopes/role-aliases"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The Tenant Theme resource APIs
+  ######################################################
   /tenant-theme:
     get:
       tags:
@@ -5413,47 +3597,11 @@ paths:
                 type: string
                 format: binary
         403:
-          description: Forbidden. The request must be conditional but no condition
-            has been specified.
-          content:
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/json:
-              example:
-                code: 403
-                message: Forbidden
-                description: The request must be conditional but no condition has
-                  been specified
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Forbidden'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/json:
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         500:
-          description: Internal Server Error.
-          content:
-            application/zip:
-              schema:
-                $ref: '#/components/schemas/Error'
-            application/json:
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5462,6 +3610,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/tenant-theme" > theme.zip'
+
     put:
       tags:
       - Tenant Theme
@@ -5489,45 +3638,11 @@ paths:
             Tenant Theme Imported Successfully.
           content: {}
         403:
-          description: Forbidden. The request must be conditional but no condition
-            has been specified.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 403
-                message: Forbidden
-                description: The request must be conditional but no condition has
-                  been specified
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/Forbidden'
         413:
-          description: Payload Too Large. Request entity is larger than limits defined
-            by server.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 413
-                message: Payload Too Large
-                description: Request entity is larger than limits defined by server
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/PayloadTooLarge'
         500:
-          description: Internal Server Error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 500
-                message: Internal Server Error
-                description: The server encountered an internal error. Please contact
-                  administrator.
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/InternalServerError'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5536,6 +3651,10 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@theme.zip "https://127.0.0.1:9443/api/am/admin/v1/tenant-theme"'
+
+  ######################################################
+  # The "Key Manager Collection" resource API
+  ######################################################
   /key-managers:
     get:
       tags:
@@ -5560,6 +3679,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/key-managers"'
+
     post:
       tags:
       - Key Manager (Collection)
@@ -5584,17 +3704,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/KeyManager'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5604,6 +3714,10 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/key-managers"'
       x-codegen-request-body-name: body
+
+  ######################################################
+  # The "Individual KeyManager" resource APIs
+  ######################################################
   /key-managers/{keyManagerId}:
     get:
       tags:
@@ -5612,13 +3726,7 @@ paths:
       description: |
         Retrieve a single Key Manager Configuration. We should provide the Id of the KeyManager as a path parameter.
       parameters:
-      - name: keyManagerId
-        in: path
-        description: |
-          Key Manager UUID
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/keyManagerId'
       responses:
         200:
           description: |
@@ -5635,29 +3743,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/KeyManager'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
         406:
-          description: Not Acceptable. The requested media type is not supported.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 406
-                message: Not Acceptable
-                description: The requested media type is not supported
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotAcceptable'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5666,6 +3754,7 @@ paths:
       - lang: Shell
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
+
     put:
       tags:
       - Key Manager (Individual)
@@ -5673,13 +3762,7 @@ paths:
       description: |
         Update a Key Manager by keyManager id
       parameters:
-      - name: keyManagerId
-        in: path
-        description: |
-          Key Manager UUID
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/keyManagerId'
       requestBody:
         description: |
           Key Manager object with updated information
@@ -5698,29 +3781,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/KeyManager'
         400:
-          description: Bad Request. Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 400
-                message: Bad Request
-                description: Invalid request or validation error
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/BadRequest'
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5730,6 +3793,7 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
       x-codegen-request-body-name: body
+
     delete:
       tags:
       - Key Manager (Individual)
@@ -5737,13 +3801,7 @@ paths:
       description: |
         Delete a Key Manager by keyManager id
       parameters:
-      - name: keyManagerId
-        in: path
-        description: |
-          Key Manager UUID
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/keyManagerId'
       responses:
         200:
           description: |
@@ -5751,17 +3809,7 @@ paths:
             Key Manager successfully deleted.
           content: {}
         404:
-          description: Not Found. The specified resource does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: 404
-                message: Not Found
-                description: The specified resource does not exist
-                moreInfo: ""
-                error: []
+          $ref: '#/components/responses/NotFound'
       security:
       - OAuth2Security:
         - apim:admin
@@ -5770,6 +3818,7 @@ paths:
       - lang: Shell
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v1/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
+
   /key-managers/discover:
     post:
       tags:
@@ -5807,6 +3856,7 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F "type=WSO2-IS" "https://127.0.0.1:9443/api/am/admin/v1/key-managers/discover"'
+
 components:
   schemas:
     Error:
