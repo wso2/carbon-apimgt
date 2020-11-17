@@ -333,7 +333,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
         String context = "/" +  body.getContext() + "/" + body.getVersion();
-        System.out.println(context);
+
 
         if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
             for (String apiSecurityScheme : apiSecuritySchemes) {
