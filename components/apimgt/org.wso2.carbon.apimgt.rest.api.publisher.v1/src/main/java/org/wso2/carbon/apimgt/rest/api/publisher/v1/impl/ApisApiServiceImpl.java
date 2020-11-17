@@ -334,7 +334,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
         String context = "/" +  body.getContext() + "/" + body.getVersion();
 
-
         if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
             for (String apiSecurityScheme : apiSecuritySchemes) {
                 if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
@@ -372,7 +371,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
                     + " already exists.", log);
         }
-
 
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIUtil
