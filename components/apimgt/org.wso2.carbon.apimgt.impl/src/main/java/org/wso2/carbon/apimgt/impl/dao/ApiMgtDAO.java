@@ -7840,6 +7840,7 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
 
         String sql = SQLConstants.GET_API_CONTEXT_SQL;
+
         try {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sql);
@@ -13841,8 +13842,8 @@ public class ApiMgtDAO {
                     while (rs.next()) {
                         ResourcePath resourcePath = new ResourcePath();
                         resourcePath.setId(rs.getInt("URL_MAPPING_ID"));
-                        resourcePath.setResourcePath(rs.getString("HTTP_METHOD"));
-                        resourcePath.setHttpVerb(rs.getString("URL_PATTERN"));
+                        resourcePath.setResourcePath(rs.getString("URL_PATTERN"));
+                        resourcePath.setHttpVerb(rs.getString("HTTP_METHOD"));
                         resourcePathList.add(resourcePath);
                     }
                 }

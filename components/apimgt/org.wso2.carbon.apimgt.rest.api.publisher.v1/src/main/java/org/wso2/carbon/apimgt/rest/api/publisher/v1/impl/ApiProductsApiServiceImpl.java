@@ -505,7 +505,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 }
             }
 
-            APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, username);
+            APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, username, apiProvider);
             //We do not allow to modify provider,name,version  and uuid. Set the origial value
             APIProductIdentifier productIdentifier = retrievedProduct.getId();
             product.setID(productIdentifier);
@@ -720,7 +720,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
             }
 
-            APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
+            APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider, apiProvider);
 
             Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.addAPIProductWithoutPublishingToGateway(productToBeAdded);
             apiProvider.addAPIProductSwagger(apiToProductResourceMapping, productToBeAdded);

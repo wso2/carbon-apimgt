@@ -332,6 +332,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String username = RestApiUtil.getLoggedInUsername();
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
+        String context = "/" +  body.getContext() + "/" + body.getVersion();
+        System.out.println(context);
+
         if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
             for (String apiSecurityScheme : apiSecuritySchemes) {
                 if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
@@ -355,13 +358,22 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         if (body.getContext() == null) {
             RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
-        } else if (body.getContext().endsWith("/")) {
+        }
+        if (body.getContext().endsWith("/")) {
             RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
         }
+
+        if (apiProvider.isContextExist(context)) {
+            RestApiUtil.handleBadRequest("Error occurred while adding API. API with the context " + body.getContext()
+                    + " already exists.", log);
+        }
+
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
             RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
                     + " already exists.", log);
         }
+
+
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIUtil
                     .getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));

@@ -2158,7 +2158,7 @@ public class APIMappingUtil {
         }
     }
 
-    public static APIProduct fromDTOtoAPIProduct(APIProductDTO dto, String provider)
+    public static APIProduct fromDTOtoAPIProduct(APIProductDTO dto, String provider, APIProvider apiProvider)
             throws APIManagementException {
         APIProduct product = new APIProduct();
         APIProductIdentifier id = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), dto.getName(), APIConstants.API_PRODUCT_VERSION); //todo: replace this with dto.getVersion
@@ -2166,7 +2166,12 @@ public class APIMappingUtil {
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
 
-        String context = dto.getContext();
+        String context = "/" + dto.getContext();
+
+        if (apiProvider.isContextExist(context)) {
+            RestApiUtil.handleBadRequest("Error occurred while adding API. API with the context " + context
+                    + " already exists.", log);
+        }
 
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
