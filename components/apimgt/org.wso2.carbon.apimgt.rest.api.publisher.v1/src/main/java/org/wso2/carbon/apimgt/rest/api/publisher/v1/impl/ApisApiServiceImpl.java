@@ -251,7 +251,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisPost(APIDTO body, String organizationId, String oasVersion, MessageContext messageContext) throws APIManagementException {
+    public Response apisPost(APIDTO body, String organizationId, String oasVersion, MessageContext messageContext) {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
@@ -2843,7 +2843,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.serverError().build();
     }
 
-
     /**
      * Publish API to given external stores.
      *
@@ -2880,7 +2879,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return Response.serverError().build();
     }
-
 
     /**
      * Get the resource policies(inflow/outflow).
@@ -3940,7 +3938,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-
     /**
      * Update the WSDL of an API
      *
@@ -4189,8 +4186,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-
-
     /**
      * Validate graphQL Schema
      * @param fileInputStream  input file
@@ -4346,8 +4341,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         DeploymentStatusListDTO deploymentStatusListDTO = APIMappingUtil.fromDeploymentStatustoDTO(apiIdentifier);
         return Response.ok().entity(deploymentStatusListDTO).build();
     }
-
-
 
     private APIDTO getAPIByID(String apiId) {
         try {

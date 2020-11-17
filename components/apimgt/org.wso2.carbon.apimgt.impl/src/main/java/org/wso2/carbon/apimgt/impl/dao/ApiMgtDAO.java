@@ -180,9 +180,9 @@ public class ApiMgtDAO {
         String sqlQuery = null;
 
         if (organizationId != null) {
-            sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
-        } else {
             sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL;
+        } else {
+            sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
         }
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -3324,12 +3324,11 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param organizationID  Organization UUID
-     * @return All subscriptions of a given API
+     * @param organizationID  UUID of the organization
+     * @return All APIs of a given Organization
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public List<API> getAPIsOfOrganization(String organizationID)
-            throws APIManagementException {
+    public List<API> getAPIsOfOrganization(String organizationID) throws APIManagementException {
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;

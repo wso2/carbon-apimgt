@@ -781,7 +781,7 @@ public class APIMgtDAOTest {
         api2.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
         apiMgtDAO.addAPI(api2, -1234);
         List<String> versionList = apiMgtDAO.getAPIVersionsMatchingApiName("getAPIVersionsMatchingApiName",
-                "getAPIVersionsMatchingApiName");
+                "getAPIVersionsMatchingApiName",null);
         assertNotNull(versionList);
         assertTrue(versionList.contains("1.0.0"));
         assertTrue(versionList.contains("2.0.0"));
