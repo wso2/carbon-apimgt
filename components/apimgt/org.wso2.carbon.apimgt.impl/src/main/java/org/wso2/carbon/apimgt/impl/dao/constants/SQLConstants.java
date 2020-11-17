@@ -1862,8 +1862,9 @@ public class SQLConstants {
             "   AND SUB.SUB_STATUS != '" + APIConstants.SubscriptionStatus.ON_HOLD + "'";
 
     public static final String ADD_API_SQL =
-            " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY,CREATED_TIME, API_TIER, API_TYPE)" +
-            " VALUES (?,?,?,?,?,?,?,?,?)";
+            " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
+            "CREATED_TIME, API_TIER, API_TYPE, API_UUID)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -2231,6 +2232,13 @@ public class SQLConstants {
 
     public static final String GET_API_CONTEXT_SQL =
             "SELECT CONTEXT FROM AM_API " + " WHERE CONTEXT= ?";
+
+    public static final String GET_API_IDENTIFIER_BY_UUID_SQL =
+            "SELECT API_PROVIDER, API_NAME, API_VERSION FROM AM_API WHERE API_UUID = ?";
+    public static final String GET_UUID_BY_IDENTIFIER_SQL =
+            "SELECT API_UUID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ?";
+    public static final String GET_API_TYPE_BY_UUID =
+            "SELECT API_TYPE FROM AM_API WHERE API_UUID = ?";
 
     public static final String GET_API_CONTEXT_BY_API_NAME_SQL =
             "SELECT CONTEXT FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION  = ?";
@@ -3081,7 +3089,7 @@ public class SQLConstants {
     public static final String ADD_API_PRODUCT =
             "INSERT INTO "
             + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"
-            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE) VALUES (?,?,?,?,?,?,?,?)";
+            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID) VALUES (?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
