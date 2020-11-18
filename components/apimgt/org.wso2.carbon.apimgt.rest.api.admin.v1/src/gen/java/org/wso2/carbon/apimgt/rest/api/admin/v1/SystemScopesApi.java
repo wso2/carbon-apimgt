@@ -86,8 +86,8 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Role mapping alias returned ", response = RoleAliasListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response systemScopesRoleAliasesPut(@ApiParam(value = "role-alias mapping" ,required=true) RoleAliasListDTO body) throws APIManagementException{
-        return delegate.systemScopesRoleAliasesPut(body, securityContext);
+    public Response systemScopesRoleAliasesPut(@ApiParam(value = "role-alias mapping" ,required=true) RoleAliasListDTO roleAliasListDTO) throws APIManagementException{
+        return delegate.systemScopesRoleAliasesPut(roleAliasListDTO, securityContext);
     }
 
     @GET
@@ -122,7 +122,7 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Successful response with the newly added roles. ", response = ScopeListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response updateRolesForScope(@ApiParam(value = "Scope list object with updated scope to role mappings " ,required=true) ScopeListDTO body) throws APIManagementException{
-        return delegate.updateRolesForScope(body, securityContext);
+    public Response updateRolesForScope(@ApiParam(value = "Scope list object with updated scope to role mappings " ,required=true) ScopeListDTO scopeListDTO) throws APIManagementException{
+        return delegate.updateRolesForScope(scopeListDTO, securityContext);
     }
 }

@@ -78,8 +78,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = BlockingConditionDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response throttlingDenyPoliciesPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Blocking condition object that should to be added " ,required=true) BlockingConditionDTO body) throws APIManagementException{
-        return delegate.throttlingDenyPoliciesPost(contentType, body, securityContext);
+    public Response throttlingDenyPoliciesPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Blocking condition object that should to be added " ,required=true) BlockingConditionDTO blockingConditionDTO) throws APIManagementException{
+        return delegate.throttlingDenyPoliciesPost(contentType, blockingConditionDTO, securityContext);
     }
 
     @DELETE
@@ -133,8 +133,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Resource successfully updated. ", response = BlockingConditionDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response throttlingDenyPolicyConditionIdPatch(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Blocking condition with updated status " ,required=true) BlockingConditionStatusDTO body,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.throttlingDenyPolicyConditionIdPatch(conditionId, contentType, body, ifMatch, ifUnmodifiedSince, securityContext);
+    public Response throttlingDenyPolicyConditionIdPatch(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Blocking condition with updated status " ,required=true) BlockingConditionStatusDTO blockingConditionStatusDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
+        return delegate.throttlingDenyPolicyConditionIdPatch(conditionId, contentType, blockingConditionStatusDTO, ifMatch, ifUnmodifiedSince, securityContext);
     }
 
     @GET
@@ -207,8 +207,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesAdvancedPolicyIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Policy object that needs to be modified " ,required=true) AdvancedThrottlePolicyDTO body,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.throttlingPoliciesAdvancedPolicyIdPut(policyId, contentType, body, ifMatch, ifUnmodifiedSince, securityContext);
+    public Response throttlingPoliciesAdvancedPolicyIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Policy object that needs to be modified " ,required=true) AdvancedThrottlePolicyDTO advancedThrottlePolicyDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
+        return delegate.throttlingPoliciesAdvancedPolicyIdPut(policyId, contentType, advancedThrottlePolicyDTO, ifMatch, ifUnmodifiedSince, securityContext);
     }
 
     @POST
@@ -225,8 +225,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = AdvancedThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesAdvancedPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Advanced level policy object that should to be added " ,required=true) AdvancedThrottlePolicyDTO body) throws APIManagementException{
-        return delegate.throttlingPoliciesAdvancedPost(contentType, body, securityContext);
+    public Response throttlingPoliciesAdvancedPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Advanced level policy object that should to be added " ,required=true) AdvancedThrottlePolicyDTO advancedThrottlePolicyDTO) throws APIManagementException{
+        return delegate.throttlingPoliciesAdvancedPost(contentType, advancedThrottlePolicyDTO, securityContext);
     }
 
     @GET
@@ -299,8 +299,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesApplicationPolicyIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Policy object that needs to be modified " ,required=true) ApplicationThrottlePolicyDTO body,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.throttlingPoliciesApplicationPolicyIdPut(policyId, contentType, body, ifMatch, ifUnmodifiedSince, securityContext);
+    public Response throttlingPoliciesApplicationPolicyIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Policy object that needs to be modified " ,required=true) ApplicationThrottlePolicyDTO applicationThrottlePolicyDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
+        return delegate.throttlingPoliciesApplicationPolicyIdPut(policyId, contentType, applicationThrottlePolicyDTO, ifMatch, ifUnmodifiedSince, securityContext);
     }
 
     @POST
@@ -317,8 +317,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = ApplicationThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesApplicationPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Application level policy object that should to be added " ,required=true) ApplicationThrottlePolicyDTO body) throws APIManagementException{
-        return delegate.throttlingPoliciesApplicationPost(contentType, body, securityContext);
+    public Response throttlingPoliciesApplicationPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Application level policy object that should to be added " ,required=true) ApplicationThrottlePolicyDTO applicationThrottlePolicyDTO) throws APIManagementException{
+        return delegate.throttlingPoliciesApplicationPost(contentType, applicationThrottlePolicyDTO, securityContext);
     }
 
     @GET
@@ -353,8 +353,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = CustomRuleDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesCustomPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Custom Rule object that should to be added " ,required=true) CustomRuleDTO body) throws APIManagementException{
-        return delegate.throttlingPoliciesCustomPost(contentType, body, securityContext);
+    public Response throttlingPoliciesCustomPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Custom Rule object that should to be added " ,required=true) CustomRuleDTO customRuleDTO) throws APIManagementException{
+        return delegate.throttlingPoliciesCustomPost(contentType, customRuleDTO, securityContext);
     }
 
     @DELETE
@@ -409,8 +409,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesCustomRuleIdPut(@ApiParam(value = "Custom rule UUID ",required=true) @PathParam("ruleId") String ruleId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Policy object that needs to be modified " ,required=true) CustomRuleDTO body,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.throttlingPoliciesCustomRuleIdPut(ruleId, contentType, body, ifMatch, ifUnmodifiedSince, securityContext);
+    public Response throttlingPoliciesCustomRuleIdPut(@ApiParam(value = "Custom rule UUID ",required=true) @PathParam("ruleId") String ruleId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Policy object that needs to be modified " ,required=true) CustomRuleDTO customRuleDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
+        return delegate.throttlingPoliciesCustomRuleIdPut(ruleId, contentType, customRuleDTO, ifMatch, ifUnmodifiedSince, securityContext);
     }
 
     @GET
@@ -483,8 +483,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesSubscriptionPolicyIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Policy object that needs to be modified " ,required=true) SubscriptionThrottlePolicyDTO body,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.throttlingPoliciesSubscriptionPolicyIdPut(policyId, contentType, body, ifMatch, ifUnmodifiedSince, securityContext);
+    public Response throttlingPoliciesSubscriptionPolicyIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Policy object that needs to be modified " ,required=true) SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
+        return delegate.throttlingPoliciesSubscriptionPolicyIdPut(policyId, contentType, subscriptionThrottlePolicyDTO, ifMatch, ifUnmodifiedSince, securityContext);
     }
 
     @POST
@@ -501,7 +501,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = SubscriptionThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesSubscriptionPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Subscripion level policy object that should to be added " ,required=true) SubscriptionThrottlePolicyDTO body) throws APIManagementException{
-        return delegate.throttlingPoliciesSubscriptionPost(contentType, body, securityContext);
+    public Response throttlingPoliciesSubscriptionPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Subscripion level policy object that should to be added " ,required=true) SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO) throws APIManagementException{
+        return delegate.throttlingPoliciesSubscriptionPost(contentType, subscriptionThrottlePolicyDTO, securityContext);
     }
 }

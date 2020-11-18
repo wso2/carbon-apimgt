@@ -793,7 +793,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -902,7 +901,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
-      x-codegen-request-body-name: body
 
   /apis/{apiId}/comments/{commentId}:
     get:
@@ -1179,7 +1177,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual Application" resource APIs
@@ -1292,7 +1289,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -1378,7 +1374,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/generate-keys"'
-      x-codegen-request-body-name: body
 
   /applications/{applicationId}/map-keys:
     post:
@@ -1420,7 +1415,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/map-keys"'
-      x-codegen-request-body-name: body
 
   /applications/{applicationId}/keys:
     get:
@@ -1535,7 +1529,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/store/v1/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION"'
-      x-codegen-request-body-name: body
 
   /applications/{applicationId}/keys/{keyType}/regenerate-secret:
     post:
@@ -1667,7 +1660,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/keys/PRODUCTION/generate-token"'
-      x-codegen-request-body-name: body
 
   /applications/{applicationId}/oauth-keys:
     get:
@@ -1779,7 +1771,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"'
-      x-codegen-request-body-name: body
 
   /applications/{applicationId}/oauth-keys/{keyMappingId}/regenerate-secret:
     post:
@@ -1908,7 +1899,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/{keyMappingId}/generate-token"'
-      x-codegen-request-body-name: body
 
   /applications/{applicationId}/api-keys/{keyType}/generate:
     post:
@@ -1953,7 +1943,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/generate"'
-      x-codegen-request-body-name: body
 
   /applications/{applicationId}/api-keys/{keyType}/revoke:
     post:
@@ -1993,7 +1982,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/revoke"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Subscription Collection" resource APIs
@@ -2119,7 +2107,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/subscriptions"'
-      x-codegen-request-body-name: body
 
   /subscriptions/multiple:
     post:
@@ -2175,7 +2162,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/subscriptions/multiple"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual Subscription" resource APIs
@@ -2305,7 +2291,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/store/v1/subscriptions/80369180-7d90-4ee8-99a1-19fa68512aa5"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -2913,7 +2898,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/alert-subscriptions"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -3027,7 +3011,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/alerts/AbnormalRequestsPerMin/configurations/UGV0c3RvcmUjMS4wI0FwcDE"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -3213,7 +3196,6 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/me/change-password"'
-      x-codegen-request-body-name: body
 
 components:
   schemas:

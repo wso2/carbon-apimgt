@@ -68,8 +68,8 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Label updated. ", response = APICategoryDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response apiCategoriesApiCategoryIdPut(@ApiParam(value = "API Category UUID ",required=true) @PathParam("apiCategoryId") String apiCategoryId, @ApiParam(value = "API Category object with updated information " ,required=true) APICategoryDTO body) throws APIManagementException{
-        return delegate.apiCategoriesApiCategoryIdPut(apiCategoryId, body, securityContext);
+    public Response apiCategoriesApiCategoryIdPut(@ApiParam(value = "API Category UUID ",required=true) @PathParam("apiCategoryId") String apiCategoryId, @ApiParam(value = "API Category object with updated information " ,required=true) APICategoryDTO apICategoryDTO) throws APIManagementException{
+        return delegate.apiCategoriesApiCategoryIdPut(apiCategoryId, apICategoryDTO, securityContext);
     }
 
     @GET
@@ -101,7 +101,7 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. ", response = APICategoryDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
-    public Response apiCategoriesPost(@ApiParam(value = "API Category object that should to be added " ,required=true) APICategoryDTO body) throws APIManagementException{
-        return delegate.apiCategoriesPost(body, securityContext);
+    public Response apiCategoriesPost(@ApiParam(value = "API Category object that should to be added " ,required=true) APICategoryDTO apICategoryDTO) throws APIManagementException{
+        return delegate.apiCategoriesPost(apICategoryDTO, securityContext);
     }
 }

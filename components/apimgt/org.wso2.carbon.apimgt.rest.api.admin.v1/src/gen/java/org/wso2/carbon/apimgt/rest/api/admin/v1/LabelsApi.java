@@ -84,8 +84,8 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Label updated. ", response = LabelDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response labelsLabelIdPut(@ApiParam(value = "Label UUID ",required=true) @PathParam("labelId") String labelId, @ApiParam(value = "Label object with updated information " ,required=true) LabelDTO body) throws APIManagementException{
-        return delegate.labelsLabelIdPut(labelId, body, securityContext);
+    public Response labelsLabelIdPut(@ApiParam(value = "Label UUID ",required=true) @PathParam("labelId") String labelId, @ApiParam(value = "Label object with updated information " ,required=true) LabelDTO labelDTO) throws APIManagementException{
+        return delegate.labelsLabelIdPut(labelId, labelDTO, securityContext);
     }
 
     @POST
@@ -101,7 +101,7 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. ", response = LabelDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
-    public Response labelsPost(@ApiParam(value = "Label object that should to be added " ,required=true) LabelDTO body) throws APIManagementException{
-        return delegate.labelsPost(body, securityContext);
+    public Response labelsPost(@ApiParam(value = "Label object that should to be added " ,required=true) LabelDTO labelDTO) throws APIManagementException{
+        return delegate.labelsPost(labelDTO, securityContext);
     }
 }

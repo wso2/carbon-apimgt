@@ -147,8 +147,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdDocumentsDocumentIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Document object that needs to be added" ,required=true) DocumentDTO body,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.apiProductsApiProductIdDocumentsDocumentIdPut(apiProductId, documentId, body, ifMatch, securityContext);
+    public Response apiProductsApiProductIdDocumentsDocumentIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Document object that needs to be added" ,required=true) DocumentDTO documentDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apiProductsApiProductIdDocumentsDocumentIdPut(apiProductId, documentId, documentDTO, ifMatch, securityContext);
     }
 
     @GET
@@ -182,8 +182,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document. ", response = DocumentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdDocumentsPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document object that needs to be added" ,required=true) DocumentDTO body) throws APIManagementException{
-        return delegate.apiProductsApiProductIdDocumentsPost(apiProductId, body, securityContext);
+    public Response apiProductsApiProductIdDocumentsPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document object that needs to be added" ,required=true) DocumentDTO documentDTO) throws APIManagementException{
+        return delegate.apiProductsApiProductIdDocumentsPost(apiProductId, documentDTO, securityContext);
     }
 
     @GET
@@ -237,8 +237,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "API object that needs to be added" ,required=true) APIProductDTO body,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.apiProductsApiProductIdPut(apiProductId, body, ifMatch, securityContext);
+    public Response apiProductsApiProductIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "API object that needs to be added" ,required=true) APIProductDTO apIProductDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apiProductsApiProductIdPut(apiProductId, apIProductDTO, ifMatch, securityContext);
     }
 
     @GET
@@ -325,7 +325,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 201, message = "'Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.' ", response = APIProductDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response apiProductsPost(@ApiParam(value = "API object that needs to be added" ,required=true) APIProductDTO body) throws APIManagementException{
-        return delegate.apiProductsPost(body, securityContext);
+    public Response apiProductsPost(@ApiParam(value = "API object that needs to be added" ,required=true) APIProductDTO apIProductDTO) throws APIManagementException{
+        return delegate.apiProductsPost(apIProductDTO, securityContext);
     }
 }

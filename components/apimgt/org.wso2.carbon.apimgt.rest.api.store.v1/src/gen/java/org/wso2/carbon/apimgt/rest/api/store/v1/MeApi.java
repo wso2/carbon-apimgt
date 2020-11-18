@@ -48,7 +48,7 @@ MeApiService delegate = new MeApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. User password changed successfully", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
-    public Response changeUserPassword(@ApiParam(value = "Current and new password of the user " ,required=true) CurrentAndNewPasswordsDTO body) throws APIManagementException{
-        return delegate.changeUserPassword(body, securityContext);
+    public Response changeUserPassword(@ApiParam(value = "Current and new password of the user " ,required=true) CurrentAndNewPasswordsDTO currentAndNewPasswordsDTO) throws APIManagementException{
+        return delegate.changeUserPassword(currentAndNewPasswordsDTO, securityContext);
     }
 }

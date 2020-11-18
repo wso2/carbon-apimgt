@@ -51,8 +51,8 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created Scope object as an entity in the body. ", response = ScopeDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response addSharedScope(@ApiParam(value = "Scope object that needs to be added" ,required=true) ScopeDTO body) throws APIManagementException{
-        return delegate.addSharedScope(body, securityContext);
+    public Response addSharedScope(@ApiParam(value = "Scope object that needs to be added" ,required=true) ScopeDTO scopeDTO) throws APIManagementException{
+        return delegate.addSharedScope(scopeDTO, securityContext);
     }
 
     @DELETE
@@ -132,8 +132,8 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Successful response with updated Scope object ", response = ScopeDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response updateSharedScope(@ApiParam(value = "Scope Id consisting the UUID of the shared scope ",required=true) @PathParam("scopeId") String scopeId, @ApiParam(value = "Scope object that needs to be updated" ,required=true) ScopeDTO body) throws APIManagementException{
-        return delegate.updateSharedScope(scopeId, body, securityContext);
+    public Response updateSharedScope(@ApiParam(value = "Scope Id consisting the UUID of the shared scope ",required=true) @PathParam("scopeId") String scopeId, @ApiParam(value = "Scope object that needs to be updated" ,required=true) ScopeDTO scopeDTO) throws APIManagementException{
+        return delegate.updateSharedScope(scopeId, scopeDTO, securityContext);
     }
 
     @HEAD

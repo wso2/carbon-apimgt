@@ -51,8 +51,8 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with newly created object as entity. Location header contains URL of newly created entity. ", response = AlertConfigDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response addAlertConfig(@ApiParam(value = "The alert type.",required=true) @PathParam("alertType") String alertType, @ApiParam(value = "The alert configuration id.",required=true) @PathParam("configurationId") String configurationId, @ApiParam(value = "Configuration for AbnormalRequestCount alert type" ,required=true) Map<String, String> body) throws APIManagementException{
-        return delegate.addAlertConfig(alertType, configurationId, body, securityContext);
+    public Response addAlertConfig(@ApiParam(value = "The alert type.",required=true) @PathParam("alertType") String alertType, @ApiParam(value = "The alert configuration id.",required=true) @PathParam("configurationId") String configurationId, @ApiParam(value = "Configuration for AbnormalRequestCount alert type" ,required=true) Map<String, String> requestBody) throws APIManagementException{
+        return delegate.addAlertConfig(alertType, configurationId, requestBody, securityContext);
     }
 
     @DELETE

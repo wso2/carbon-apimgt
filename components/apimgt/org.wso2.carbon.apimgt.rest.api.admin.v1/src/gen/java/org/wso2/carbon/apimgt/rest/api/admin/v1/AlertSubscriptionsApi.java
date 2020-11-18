@@ -86,8 +86,8 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Bot detection alert subscription is registered successfully. ", response = BotDetectionAlertSubscriptionDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response subscribeForBotDetectionAlerts(@ApiParam(value = "The email to register to receive bot detection alerts " ,required=true) BotDetectionAlertSubscriptionDTO body) throws APIManagementException{
-        return delegate.subscribeForBotDetectionAlerts(body, securityContext);
+    public Response subscribeForBotDetectionAlerts(@ApiParam(value = "The email to register to receive bot detection alerts " ,required=true) BotDetectionAlertSubscriptionDTO botDetectionAlertSubscriptionDTO) throws APIManagementException{
+        return delegate.subscribeForBotDetectionAlerts(botDetectionAlertSubscriptionDTO, securityContext);
     }
 
     @PUT
@@ -104,8 +104,8 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Successful response with the newly subscribed alerts. ", response = AlertsSubscriptionDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response subscribeToAlerts(@ApiParam(value = "The alerts list and the email list to subscribe." ,required=true) AlertsSubscriptionDTO body) throws APIManagementException{
-        return delegate.subscribeToAlerts(body, securityContext);
+    public Response subscribeToAlerts(@ApiParam(value = "The alerts list and the email list to subscribe." ,required=true) AlertsSubscriptionDTO alertsSubscriptionDTO) throws APIManagementException{
+        return delegate.subscribeToAlerts(alertsSubscriptionDTO, securityContext);
     }
 
     @DELETE

@@ -91,7 +91,7 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Workflow request information is returned. ", response = WorkflowDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response workflowsUpdateWorkflowStatusPost( @NotNull @ApiParam(value = "Workflow reference id ",required=true)  @QueryParam("workflowReferenceId") String workflowReferenceId, @ApiParam(value = "Workflow event that need to be updated " ,required=true) WorkflowDTO body) throws APIManagementException{
-        return delegate.workflowsUpdateWorkflowStatusPost(workflowReferenceId, body, securityContext);
+    public Response workflowsUpdateWorkflowStatusPost( @NotNull @ApiParam(value = "Workflow reference id ",required=true)  @QueryParam("workflowReferenceId") String workflowReferenceId, @ApiParam(value = "Workflow event that need to be updated " ,required=true) WorkflowDTO workflowDTO) throws APIManagementException{
+        return delegate.workflowsUpdateWorkflowStatusPost(workflowReferenceId, workflowDTO, securityContext);
     }
 }

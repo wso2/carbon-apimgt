@@ -59,8 +59,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Comment object that should to be added " ,required=true) CommentDTO body) throws APIManagementException{
-        return delegate.addCommentToAPI(apiId, body, securityContext);
+    public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Comment object that should to be added " ,required=true) CommentDTO commentDTO) throws APIManagementException{
+        return delegate.addCommentToAPI(apiId, commentDTO, securityContext);
     }
 
     @GET
@@ -320,8 +320,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Successful response with the newly created or updated object as entity in the body. ", response = RatingDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response apisApiIdUserRatingPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Rating object that should to be added " ,required=true) RatingDTO body,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.apisApiIdUserRatingPut(apiId, body, xWSO2Tenant, securityContext);
+    public Response apisApiIdUserRatingPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Rating object that should to be added " ,required=true) RatingDTO ratingDTO,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.apisApiIdUserRatingPut(apiId, ratingDTO, xWSO2Tenant, securityContext);
     }
 
     @GET

@@ -231,7 +231,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/application"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual Application Throttling Policy" resource API
@@ -381,7 +380,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/application/4e098fff-7f94-459a-981f-d257332f69d0"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -531,7 +529,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/policies/mediation"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual Global Mediation Policy" resource
@@ -659,7 +656,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/policies/mediation/2253cf01-0356-4cc1-9941-3034a8c29007"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -822,7 +818,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/subscription"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual Subscription Throttling Policy" resource API
@@ -984,7 +979,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/subscription/c948c723-71dd-4d50-8c77-0a0e99c8cbb1"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -1145,7 +1139,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/custom"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual Custom Rule" resource API
@@ -1301,7 +1294,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -1460,7 +1452,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/advanced"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual Advanced Throttling Policy" resource API
@@ -1612,7 +1603,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/advanced/229a3c46-c836-43c8-b988-8eebd9c7774b"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -1755,7 +1745,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policies"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual Deny Policy" resource API
@@ -1885,7 +1874,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PATCH -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/throttling/policies/deny-policy/b513eb68-69e8-4c32-92cf-852c101363c"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Application Collection" resource APIs
@@ -2525,7 +2513,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/labels"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual label" resource APIs
@@ -2568,7 +2555,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -2851,7 +2837,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The Tenant Info resource API
@@ -3011,7 +2996,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/api-categories"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual Category" resource APIs
@@ -3054,7 +3038,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -3228,7 +3211,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/alert-subscriptions"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -3338,7 +3320,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/alert-subscriptions/bot-detection"'
-      x-codegen-request-body-name: body
 
   /alert-subscriptions/bot-detection/{uuid}:
     delete:
@@ -3498,7 +3479,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/system-scopes"'
-      x-codegen-request-body-name: body
 
   /system-scopes/role-aliases:
     get:
@@ -3567,7 +3547,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/system-scopes/role-aliases"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The Tenant Theme resource APIs
@@ -3713,7 +3692,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/key-managers"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual KeyManager" resource APIs
@@ -3792,7 +3770,6 @@ paths:
       - lang: Shell
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v1/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:

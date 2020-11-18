@@ -254,7 +254,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis"'
-      x-codegen-request-body-name: body
 
   ######################################################
   # The "Individual API" resource APIs
@@ -380,7 +379,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -839,7 +837,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/resource-policies/8efc32a4-c7f1-4bee-b860-b7566e2bc0d5"'
-      x-codegen-request-body-name: body
 
   /apis/{apiId}/thumbnail:
     get:
@@ -1934,7 +1931,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize'
-      x-codegen-request-body-name: body
 
   /apis/{apiId}/monetization:
     get:
@@ -2117,7 +2113,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents"'
-      x-codegen-request-body-name: body
 
   /apis/{apiId}/documents/{documentId}:
     get:
@@ -2237,7 +2232,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @doc.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -3019,7 +3013,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/graphql-policies/complexity"'
-      x-codegen-request-body-name: body
 
   /apis/{apiId}/graphql-policies/complexity/types:
     get:
@@ -4549,7 +4542,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/api-products"'
-      x-codegen-request-body-name: body
 
   ################################################################
   # The "Individual API Product" resource APIs
@@ -4671,7 +4663,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -5027,7 +5018,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
-      x-codegen-request-body-name: body
 
   /api-products/{apiProductId}/documents/{documentId}:
     get:
@@ -5147,7 +5137,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -5671,7 +5660,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/alert-subscriptions"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -5781,7 +5769,6 @@ paths:
       security:
       - OAuth2Security:
         - apim:pub_alert_manage
-      x-codegen-request-body-name: body
 
     delete:
       tags:
@@ -5943,7 +5930,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/scopes"'
-      x-codegen-request-body-name: body
 
   /scopes/{scopeId}:
     get:
@@ -6022,7 +6008,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/scopes/01234567-0123-0123-0123-012345678901"'
-      x-codegen-request-body-name: body
 
     delete:
       tags:

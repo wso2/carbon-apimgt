@@ -23,7 +23,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface AlertsApiService {
-      public Response addAlertConfig(String alertType, String configurationId, Map<String, String> body, MessageContext messageContext) throws APIManagementException;
+      public Response addAlertConfig(String alertType, String configurationId, Map<String, String> requestBody, MessageContext messageContext) throws APIManagementException;
       public Response deleteAlertConfig(String alertType, String configurationId, MessageContext messageContext) throws APIManagementException;
       public Response getAllAlertConfigs(String alertType, MessageContext messageContext) throws APIManagementException;
 }

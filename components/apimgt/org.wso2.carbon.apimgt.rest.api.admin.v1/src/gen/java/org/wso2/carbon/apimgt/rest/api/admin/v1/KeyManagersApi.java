@@ -119,8 +119,8 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Label updated. ", response = KeyManagerDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response keyManagersKeyManagerIdPut(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId, @ApiParam(value = "Key Manager object with updated information " ,required=true) KeyManagerDTO body) throws APIManagementException{
-        return delegate.keyManagersKeyManagerIdPut(keyManagerId, body, securityContext);
+    public Response keyManagersKeyManagerIdPut(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId, @ApiParam(value = "Key Manager object with updated information " ,required=true) KeyManagerDTO keyManagerDTO) throws APIManagementException{
+        return delegate.keyManagersKeyManagerIdPut(keyManagerId, keyManagerDTO, securityContext);
     }
 
     @POST
@@ -136,7 +136,7 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. ", response = KeyManagerDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
-    public Response keyManagersPost(@ApiParam(value = "Key Manager object that should to be added " ,required=true) KeyManagerDTO body) throws APIManagementException{
-        return delegate.keyManagersPost(body, securityContext);
+    public Response keyManagersPost(@ApiParam(value = "Key Manager object that should to be added " ,required=true) KeyManagerDTO keyManagerDTO) throws APIManagementException{
+        return delegate.keyManagersPost(keyManagerDTO, securityContext);
     }
 }
