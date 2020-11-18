@@ -332,6 +332,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String username = RestApiUtil.getLoggedInUsername();
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
+        //building the context string as in the template. ex:/pizza/1.0.0
         String context = "/" +  body.getContext() + "/" + body.getVersion();
 
         if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
@@ -361,7 +362,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (body.getContext().endsWith("/")) {
             RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
         }
-
+        //Check whether the context already exists.
         if (apiProvider.isContextExist(context)) {
             RestApiUtil.handleBadRequest("Error occurred while adding API. API with the context " + body.getContext()
                     + " already exists.", log);

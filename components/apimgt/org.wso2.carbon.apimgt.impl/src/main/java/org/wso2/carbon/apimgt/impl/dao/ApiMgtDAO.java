@@ -13842,7 +13842,9 @@ public class ApiMgtDAO {
                     while (rs.next()) {
                         ResourcePath resourcePath = new ResourcePath();
                         resourcePath.setId(rs.getInt("URL_MAPPING_ID"));
+                        //Set the URL pattern as the resource path
                         resourcePath.setResourcePath(rs.getString("URL_PATTERN"));
+                        //Set the HTTP method as the HTTPVerb
                         resourcePath.setHttpVerb(rs.getString("HTTP_METHOD"));
                         resourcePathList.add(resourcePath);
                     }

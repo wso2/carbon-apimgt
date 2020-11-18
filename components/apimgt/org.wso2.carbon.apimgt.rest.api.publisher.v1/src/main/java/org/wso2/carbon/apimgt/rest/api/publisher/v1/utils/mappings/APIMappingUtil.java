@@ -2166,18 +2166,19 @@ public class APIMappingUtil {
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
 
-        String context = "/" + dto.getContext();
-
-        if (apiProvider.isContextExist(context)) {
-            RestApiUtil.handleBadRequest("Error occurred while adding API. API with the context " + context
-                    + " already exists.", log);
-        }
+        String context = dto.getContext();
 
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
 
         context = context.startsWith("/") ? context : ("/" + context);
+        //Check whether the context already exists
+        if (apiProvider.isContextExist(context)) {
+            RestApiUtil.handleBadRequest("Error occurred while adding API. API with the context " + context
+                    + " already exists.", log);
+        }
+
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) &&
                 dto.getId() == null) {
