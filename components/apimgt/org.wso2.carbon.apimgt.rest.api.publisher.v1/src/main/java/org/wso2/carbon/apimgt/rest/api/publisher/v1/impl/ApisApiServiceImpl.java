@@ -3485,6 +3485,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, MessageContext messageContext) {
 
+        // validate 'additionalProperties' json
+        if (StringUtils.isBlank(additionalProperties)) {
+            RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);
+        }
+
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
