@@ -26,7 +26,7 @@ public class ScopeSettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "apim:subscribe", value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
