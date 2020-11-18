@@ -407,6 +407,19 @@ public class OAS3Parser extends APIDefinition {
                         } else {
                             template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
                         }
+                    } else if (!getScopeOfOperations("OAuth2Security", operation).isEmpty()) {
+                        opScopes = getScopeOfOperations("OAuth2Security", operation);
+                        if (opScopes.size() == 1) {
+                            String firstScope = opScopes.get(0);
+                            Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                            if (scope == null) {
+                                throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                            }
+                            template.setScope(scope);
+                            template.setScopes(scope);
+                        } else {
+                            template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
+                        }
                     }
                     Map<String, Object> extensios = operation.getExtensions();
                     if (extensios != null) {
