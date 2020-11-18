@@ -1,14 +1,23 @@
 package org.wso2.carbon.apimgt.impl.importexport.utils;
 
 import com.google.gson.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
 public class APIControllerUtil {
+
+    private static final Log log = LogFactory.getLog(APIAndAPIProductCommonUtil.class);
 
     /**
      * Method created to resolve the api controller related environment parameters
@@ -29,6 +38,36 @@ public class APIControllerUtil {
                     .getAsJsonObject();
             return paramsObject;
         }
+    }
+
+    /**
+     * Retrieve API params file as JSON.
+     *
+     * @param pathToArchive Path to API or API Product archive
+     * @return String Json string of environment parameters
+     * @throws IOException If an error occurs while reading the file
+     */
+    public static String getParamsDefinitionAsJSON(String pathToArchive) throws IOException {
+
+        String jsonContent = null;
+        String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_API_PARAMS_FILE_LOCATION;
+        String pathToJsonFile = pathToArchive + APIImportExportConstants.JSON_API_PARAMS_FILE_LOCATION;
+
+        // load yaml representation first if it is present
+        if (CommonUtil.checkFileExistence(pathToYamlFile)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found api params definition file " + pathToYamlFile);
+            }
+            String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
+            jsonContent = CommonUtil.yamlToJson(yamlContent);
+        } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
+            // load as a json fallback
+            if (log.isDebugEnabled()) {
+                log.debug("Found api params definition file " + pathToJsonFile);
+            }
+            jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+        }
+        return jsonContent;
     }
 
     public static API injectEnvParamsToAPI(API importedApi, JsonObject envParams) throws APIImportExportException {
@@ -101,12 +140,13 @@ public class APIControllerUtil {
             } else {
                 importedApi.setEndpointUTUsername(username.getAsString());
                 importedApi.setEndpointUTPassword(password.getAsString());
-                //setup security type
+                //setup security type (basic or digest)
                 if (StringUtils.equals(type.getAsString(), "digest")) {
                     importedApi.setEndpointAuthDigest(Boolean.TRUE);
                 } else if (StringUtils.equals(type.getAsString(), "basic")) {
                     importedApi.setEndpointAuthDigest(Boolean.FALSE);
                 } else {
+                    // If the type is not either basic or digest, return an error
                     throw new APIImportExportException("Invalid endpoint security type found in the api_params.yaml. " +
                             "Should be either basic or digest" + "Please specify correct security types field for"
                             + envParams.get("Name").getAsString() + " and continue...");

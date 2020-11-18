@@ -136,4 +136,10 @@ public final class APIImportExportConstants {
         // To identify thumbnail icons
         fileExtensionMapping.put("application/json", "json");
     }
+
+    //Api controller Env Params related constants
+    public static final String YAML_API_PARAMS_FILE_LOCATION = File.separator + "Meta-information" + File.separator +
+            "api_params.yaml";
+    public static final String JSON_API_PARAMS_FILE_LOCATION = File.separator + "Meta-information" + File.separator +
+            "api_params.json";
 }
