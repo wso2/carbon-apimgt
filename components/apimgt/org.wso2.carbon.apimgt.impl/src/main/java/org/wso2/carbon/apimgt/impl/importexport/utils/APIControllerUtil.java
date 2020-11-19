@@ -1,17 +1,22 @@
 package org.wso2.carbon.apimgt.impl.importexport.utils;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonArray;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -70,7 +75,7 @@ public class APIControllerUtil {
         return jsonContent;
     }
 
-    public static API injectEnvParamsToAPI(API importedApi, JsonObject envParams) throws APIImportExportException {
+    public static API injectEnvParamsToAPI(API importedApi, JsonObject envParams, String pathToArchive) throws APIImportExportException {
 
         if (envParams == null) {
             return importedApi;
@@ -86,22 +91,47 @@ public class APIControllerUtil {
         }
 
         //Handle multiple end points
-        JsonObject test = setupMultipleEndpoints(envParams, updatedEndpointType);
-        String test1 = String.valueOf(test);
-        String test2 = test1.replace("\\\"", "\"");
-        importedApi.setEndpointConfig(test2);
+        JsonObject configObject = setupMultipleEndpoints(envParams, updatedEndpointType);
+        String endPointConfig = configObject.toString();
+        importedApi.setEndpointConfig(endPointConfig);
 
         //handle gateway environments
         if (!envParams.get("GatewayEnvironments").isJsonNull()) {
             Set<String> environments = setupGatewayEnvironments(envParams.get("GatewayEnvironments").getAsJsonArray());
             importedApi.setEnvironmentList(environments);
         }
-        //handle mutualSSL certificates and then security types
 
+        //handle mutualSSL certificates
+        JsonElement clientCertificates = envParams.get("MutualSslCerts");
+        if (clientCertificates != null) {
+            try {
+                String jsonString = clientCertificates.getAsString();
+                handleClientCertificates(new JsonParser().parse(jsonString).getAsJsonArray(), importedApi.getId(), pathToArchive);
+            } catch (IOException e) {
+                //Error is logged and when generating certificate details and certs in the archive
+                String errorMessage = "Error while generating meta information of client certificates from path.";
+                throw new APIImportExportException(errorMessage, e);
+            }
+        }
+
+        //handle endpoint certificates
+        JsonElement endpointCertificates = envParams.get("Certs");
+        if (endpointCertificates != null) {
+            try {
+                String jsonString = endpointCertificates.getAsString();
+                handleEndpointCertificates(new JsonParser().parse(jsonString).getAsJsonArray(), pathToArchive);
+            } catch (IOException e) {
+                //Error is logged and when generating certificate details and certs in the archive
+                String errorMessage = "Error while generating meta information of client certificates from path.";
+                throw new APIImportExportException(errorMessage, e);
+            }
+        }
 
         //handle security configs
-        handleEndpointSecurityConfigs(envParams, importedApi);
-
+        JsonObject securityConfigs = envParams.getAsJsonObject("Security");
+        if (securityConfigs != null) {
+            handleEndpointSecurityConfigs(envParams, importedApi);
+        }
         return importedApi;
     }
 
@@ -110,9 +140,6 @@ public class APIControllerUtil {
         // If the user has set (either true or false) the enabled field under security in api_params.yaml,
         // the following code should be executed.
         JsonObject security = envParams.getAsJsonObject("Security");
-        if (security.isJsonNull()) {
-            return;
-        }
         String securityEnabled = security.get("enabled").getAsString();
         boolean isSecurityEnabled = Boolean.parseBoolean(securityEnabled);
         //set endpoint security details to API
@@ -125,15 +152,15 @@ public class APIControllerUtil {
             JsonElement password = security.get("password");
             JsonElement type = security.get("type");
 
-            if (username.isJsonNull()) {
+            if (username == null) {
                 throw new APIImportExportException("You have enabled endpoint security but the username is not found " +
                         "in the api_params.yaml. Please specify usename field for" +
                         envParams.get("Name").getAsString() + " and continue...");
-            } else if (password.isJsonNull()) {
+            } else if (password == null) {
                 throw new APIImportExportException("You have enabled endpoint security but the password is not found " +
                         "in the api_params.yaml. Please specify password field for" +
                         envParams.get("Name").getAsString() + " and continue...");
-            } else if (type.isJsonNull()) {
+            } else if (type == null) {
                 throw new APIImportExportException("You have enabled endpoint security but the password is not found " +
                         "in the api_params.yaml. Please specify password field for" +
                         envParams.get("Name").getAsString() + " and continue...");
@@ -191,9 +218,7 @@ public class APIControllerUtil {
             if (StringUtils.equals(endpointType, "dynamic")) {
                 JsonObject updatedDynamicEndpointParams = new JsonObject();
                 //replace url property in dynamic endpoints
-                defaultProductionEndpoint.remove("url");
                 defaultProductionEndpoint.addProperty("url", "default");
-                defaultSandboxEndpoint.remove("url");
                 defaultSandboxEndpoint.addProperty("url", "default");
 
                 updatedDynamicEndpointParams.addProperty("endpoint_type", "default");
@@ -311,8 +336,6 @@ public class APIControllerUtil {
                 updatedSOAPEndpointParams.add("sessionTimeOut", loadBalancedConfigs.get("sessionTimeOut"));
                 // If the user has specified this as "transport", this should be removed.
                 // Otherwise APIM won't recognize this as "transport".
-                String tt = loadBalancedConfigs.get("sessionManagement").getAsString();
-                System.out.println(tt);
                 if (!StringUtils.equals(loadBalancedConfigs.get("sessionManagement").getAsString(), "transport")) {
                     updatedSOAPEndpointParams.add("sessionManagement", loadBalancedConfigs.get("sessionManagement"));
                 }
@@ -384,6 +407,86 @@ public class APIControllerUtil {
 
         soapEndpoint.addProperty("endpoint_type", "address");
         return soapEndpoint;
+    }
+
+    private static void handleClientCertificates(JsonArray certificates, APIIdentifier apiIdentifier, String pathToArchive) throws IOException {
+
+        JsonArray updatedCertificates = new JsonArray();
+
+        for (JsonElement certificate : certificates) {
+            JsonObject certObject = certificate.getAsJsonObject();
+            String alias = certObject.get("alias").getAsString();
+            // add api identifier details
+            JsonObject jsonApiIdentifier = new JsonObject();
+            jsonApiIdentifier.addProperty("apiName", apiIdentifier.getApiName());
+            jsonApiIdentifier.addProperty("version", apiIdentifier.getVersion());
+            jsonApiIdentifier.addProperty("providerName", apiIdentifier.getProviderName());
+            certObject.add("apiIdentifier", jsonApiIdentifier);
+            //replace certificate element with updated info
+            updatedCertificates.add(certObject);
+
+            //create certificate in the path
+            String content = "-----BEGIN CERTIFICATE-----\n" + certObject.get("certificate").getAsString()
+                    + "\n-----END CERTIFICATE-----";
+            String certPath = pathToArchive + "/Client-certificates/" + alias + ".crt";
+            generateFiles(certPath, content);
+        }
+
+        //generate meta-data yaml file
+        String yamlContent = CommonUtil.jsonToYaml(updatedCertificates.toString());
+        generateFiles(pathToArchive + "/Client-certificates/client_certificates.yaml", yamlContent);
+
+    }
+
+    private static void handleEndpointCertificates(JsonArray certificates, String pathToArchive) throws IOException {
+
+
+        for (JsonElement certificate : certificates) {
+            //create certificate in the path
+            JsonObject certObject = certificate.getAsJsonObject();
+            String alias = certObject.get("alias").getAsString();
+            String content = "-----BEGIN CERTIFICATE-----\n" + certObject.get("certificate").getAsString()
+                    + "\n-----END CERTIFICATE-----";
+            String certPath = pathToArchive + "/Endpoint-certificates/" + alias + ".crt";
+            generateFiles(certPath, content);
+        }
+
+        //generate meta-data yaml file
+        String yamlContent = CommonUtil.jsonToYaml(certificates.toString());
+        generateFiles(pathToArchive + "/Endpoint-certificates/endpoint_certificates.yaml", yamlContent);
+    }
+
+
+    //later move this to CommonUtil.java
+    public static void generateFiles(String filePath, String content) throws IOException {
+        FileOutputStream fos = null;
+        File file;
+        try {
+            //Specify the file path here
+            file = new File(filePath);
+            fos = new FileOutputStream(file);
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            byte[] bytesArray = content.getBytes();
+
+            fos.write(bytesArray);
+            fos.flush();
+
+        } catch (IOException e) {
+            String errorMessage = "Error while generating meta information of client certificates from path.";
+            throw new IOException(errorMessage, e);
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                String errorMessage = "Error while generating meta information of client certificates from path.";
+                throw new IOException(errorMessage, e);
+            }
+        }
     }
 
 }
