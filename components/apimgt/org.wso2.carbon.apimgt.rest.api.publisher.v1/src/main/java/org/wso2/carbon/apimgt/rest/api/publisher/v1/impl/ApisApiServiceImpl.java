@@ -332,8 +332,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String username = RestApiUtil.getLoggedInUsername();
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
-        //building the context string as in the template. ex:/pizza/1.0.0
-        String context = "/" +  body.getContext() + "/" + body.getVersion();
+        String context = body.getContext();
+        //Make sure context starts with "/". ex: /pizza
+        context = context.startsWith("/") ? context : ("/" + context);
 
         if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
             for (String apiSecurityScheme : apiSecuritySchemes) {
@@ -361,11 +362,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         if (body.getContext().endsWith("/")) {
             RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
-        }
-        //Check whether the context already exists.
-        if (apiProvider.isContextExist(context)) {
-            RestApiUtil.handleBadRequest("Error occurred while adding API. API with the context " + body.getContext()
-                    + " already exists.", log);
         }
 
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
@@ -399,10 +395,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(body.getVersion())) {
                     //If version already exists
-                    if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                    if (apiProvider.isDuplicateContextTemplate(context)) {
                         RestApiUtil.handleResourceAlreadyExistsError("Error occurred while " +
                                 "adding the API. A duplicate API already exists for "
-                                + body.getName() + "-" + body.getVersion(), log);
+                                + context, log);
                     } else {
                         RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
                                 body.getName() + " already exists with different " +
@@ -412,9 +408,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } else {
             //If no any previous version exists
-            if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+            if (apiProvider.isDuplicateContextTemplate(context)) {
                 RestApiUtil.handleBadRequest("Error occurred while adding the API. A duplicate API context " +
-                        "already exists for " + body.getContext(), log);
+                        "already exists for " + context, log);
             }
         }
 
