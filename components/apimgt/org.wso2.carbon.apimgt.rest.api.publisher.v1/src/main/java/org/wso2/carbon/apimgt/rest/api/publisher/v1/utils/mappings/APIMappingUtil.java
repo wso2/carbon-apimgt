@@ -992,6 +992,16 @@ public class APIMappingUtil {
             }
             dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         }
+
+        if (APIConstants.APITransportType.WS.toString().equals(model.getType())) {
+            if (StringUtils.isEmpty(model.getTransports())) {
+                List<String> transports = new ArrayList<>();
+                transports.add(APIConstants.WS_PROTOCOL);
+                dto.setTransport(transports);
+            }
+            dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+        }
+
         if (StringUtils.isEmpty(model.getTransports())) {
             dto.setVisibility(APIDTO.VisibilityEnum.PUBLIC);
         }

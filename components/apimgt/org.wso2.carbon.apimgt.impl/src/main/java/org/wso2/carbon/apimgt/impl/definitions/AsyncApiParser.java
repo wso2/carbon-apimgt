@@ -7,17 +7,19 @@ import io.apicurio.datamodels.asyncapi.models.AaiServer;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ChannelItem;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Server;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.*;
 
@@ -1571,6 +1573,52 @@ public class AsyncApiParser extends APIDefinition {
         Aai20ChannelItem channelItem = aaiDocument.createChannelItem("/echo");
         aaiDocument.addChannelItem(channelItem);
         return Library.writeDocumentToJSONString(aaiDocument);
+    }
+
+    /**
+     * Update AsyncAPI definition for store
+     *
+     * @param api            API
+     * @param asyncAPIDefinition  AsyncAPI definition
+     * @param hostsWithSchemes host addresses with protocol mapping
+     * @return AsyncAPI definition
+     * @throws APIManagementException throws if an error occurred
+     */
+    public String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition, Map<String, String> hostsWithSchemes)
+            throws APIManagementException {
+        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(asyncAPIDefinition);
+        String channelName = api.getContext();
+        String transports = api.getTransports();
+
+        String url = StringUtils.EMPTY;
+        String[] apiTransports = transports.split(",");
+        if (ArrayUtils.contains(apiTransports, APIConstants.WSS_PROTOCOL)
+                && hostsWithSchemes.get(APIConstants.WSS_PROTOCOL) != null) {
+            url = hostsWithSchemes.get(APIConstants.WSS_PROTOCOL).trim()
+                    .replace(APIConstants.WSS_PROTOCOL_URL_PREFIX, "");
+        }
+        if (ArrayUtils.contains(apiTransports, APIConstants.WSS_PROTOCOL)
+                && hostsWithSchemes.get(APIConstants.WS_PROTOCOL) != null) {
+            if (StringUtils.isEmpty(url)) {
+                url = hostsWithSchemes.get(APIConstants.WS_PROTOCOL).trim()
+                        .replace(APIConstants.WS_PROTOCOL_URL_PREFIX, "");
+            }
+        }
+
+        Aai20Server server = (Aai20Server) aai20Document.getServers().get(0);
+        server.url = url;
+
+        Map<String, AaiChannelItem> channels = aai20Document.channels;
+        Aai20ChannelItem channelDetails = null;
+        for (String x : channels.keySet()) {
+            channelDetails = (Aai20ChannelItem) channels.get(x);
+            aai20Document.channels.remove(x);
+        }
+        assert channelDetails != null;
+        channelDetails._name = channelName;
+        aai20Document.channels.put(channelName, channelDetails);
+
+        return Library.writeDocumentToJSONString(aai20Document);
     }
 
 }

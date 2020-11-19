@@ -218,6 +218,7 @@ export default function ApiCreateAsyncAPI(props) {
                             onChange={handleOnChange}
                             api={apiInputs}
                             isAPIProduct={false}
+                            isWebSocket={true}
                         />
                     )}
                 </Grid>

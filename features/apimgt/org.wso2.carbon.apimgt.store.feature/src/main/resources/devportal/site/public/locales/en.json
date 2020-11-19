@@ -98,6 +98,8 @@
   "Apis.Details.Documents.View.file.availability": "No file available",
   "Apis.Details.Environments.copied": "Copied",
   "Apis.Details.Environments.copy.to.clipboard": "Copy to clipboard",
+  "Apis.Details.Environments.download.asyncAPI": "AsyncAPI Definition",
+  "Apis.Details.Environments.download.asyncAPI.error": "Error downloading the AsyncAPI Definition",
   "Apis.Details.Environments.download.swagger": "Swagger",
   "Apis.Details.Environments.download.swagger.error": "Error downloading the Swagger",
   "Apis.Details.Environments.download.wsdl": "WSDL",

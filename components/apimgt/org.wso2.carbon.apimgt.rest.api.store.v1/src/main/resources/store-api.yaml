@@ -286,6 +286,66 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /apis/{apiId}/asyncapi:
+    #-----------------------------------------------------
+    # Retrieve the AsyncAPI definition
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security: [ ]
+      summary: |
+        Get AsyncAPI definition
+      description: |
+        You can use this operation to retrieve the AsyncAPI definition of an API.
+
+         `X-WSO2-Tenant` header can be used to retrive the AsyncAPI definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+
+         **NOTE:**
+         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/labelName'
+        - $ref: '#/parameters/environmentName'
+        - $ref: '#/parameters/clusterName'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/requestedTenant'
+      tags:
+        - APIs
+      responses:
+        200:
+          schema:
+            type: string
+            example: ""
+          description: |
+            OK.
+            Requested AsyncAPI document of the API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used bt caches, or in conditional requests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            NotFound.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
   /apis/{apiId}/graphql-schema:
     #-----------------------------------------------------
     # Retrieve the GraphQL schema definition

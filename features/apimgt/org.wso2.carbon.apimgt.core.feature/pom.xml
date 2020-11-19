@@ -66,6 +66,11 @@
             <groupId>org.wso2.orbit.com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.apicurio</groupId>
+            <artifactId>apicurio-data-models</artifactId>
+            <version>1.1.5</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -218,6 +223,7 @@
                                 <bundleDef>io.github.openfeign:feign-slf4j:${openfeign.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okio:okio</bundleDef>
+                                <bundleDef>io.apicurio:apicurio-data-models</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

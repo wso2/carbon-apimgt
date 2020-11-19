@@ -3675,6 +3675,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         //validate websocket url and change type of the API in APIDTO
         if (RestApiPublisherUtils.isValidWSAPI(apiDTOFromProperties)){
             apiDTOFromProperties.setType(APIDTO.TypeEnum.WS);
+            ArrayList<String> websocketTransports = new ArrayList<>();
+            websocketTransports.add("ws");
+            websocketTransports.add("wss");
+            apiDTOFromProperties.setTransport(websocketTransports);
         }
 
         //Only WS type APIs should be allowed

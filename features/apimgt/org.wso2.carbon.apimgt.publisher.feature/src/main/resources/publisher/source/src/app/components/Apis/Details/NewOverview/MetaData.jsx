@@ -101,7 +101,7 @@ function MetaData(props) {
                         <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                             <FormattedMessage
                                 id='Apis.Details.NewOverview.MetaData.context:'
-                                defaultMessage='Context:'
+                                defaultMessage={api.type === 'WS' ? 'Channel:' : 'Context:'}
                             />
                         </Typography>
                     </Grid>

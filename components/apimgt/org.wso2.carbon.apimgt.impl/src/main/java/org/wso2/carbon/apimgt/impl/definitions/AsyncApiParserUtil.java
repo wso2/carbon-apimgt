@@ -40,7 +40,7 @@ public class AsyncApiParserUtil {
         if (!validationResponse.isValid()){
             for (ErrorHandler errorItem : validationResponse.getErrorItems()){
                 if (errorItem.getErrorMessage().equals("#: required key [asyncapi] not found")){
-                    addErrorToValidationResponse(validationResponse, "attribute asyncapi should present");
+                    addErrorToValidationResponse(validationResponse, "#: attribute [asyncapi] should be present");
                     return validationResponse;
                 }
             }

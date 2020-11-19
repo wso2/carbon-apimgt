@@ -42,6 +42,9 @@ import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import AuthManager from '../../../data/AuthManager';
 import Environments from './Environments';
 import Labels from './Labels';
+import CloudDownloadRounded from "@material-ui/icons/CloudDownloadRounded";
+import Utils from "AppData/Utils";
+import Alert from "AppComponents/Shared/Alert";
 /**
  *
  *
@@ -172,6 +175,9 @@ const styles = (theme) => {
         content: {},
         contentLoader: {},
         contentLoaderRightMenu: {},
+        buttonIcon: {
+            marginRight: 10,
+        },
     };
 };
 
@@ -203,6 +209,7 @@ class InfoBar extends React.Component {
         this.getSchema = this.getSchema.bind(this);
         this.getProvider = this.getProvider.bind(this);
         this.setRatingUpdate = this.setRatingUpdate.bind(this);
+        this.downloadAsyncAPI = this.downloadAsyncAPI.bind(this);
     }
 
     ditectCurrentMenu = (location) => {
@@ -323,6 +330,28 @@ class InfoBar extends React.Component {
             const { avgRating, total, count } = ratings;
             this.setState({ avgRating, total, count });
         }
+    }
+
+    /**
+     * Downloads the AsyncAPI definition of the WebSocket api for the provided environment
+     *
+     * @param {string} apiId uuid of the API
+     * @param {string} environment name of the environment
+     */
+    downloadAsyncAPI(apiId, environment) {
+        const newAPI = new API();
+        const promiseAsyncAPI = newAPI.getAsyncAPIByAPIIdAndEnvironment(apiId, environment);
+        promiseAsyncAPI
+            .then((done) => {
+                Utils.downloadFile(done);
+            })
+            .catch((error) => {
+                console.log(error);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Environments.download.asyncAPI.error',
+                    defaultMessage: 'Error downloading the AsyncAPI Definition',
+                }));
+            });
     }
 
     /**
@@ -702,6 +731,26 @@ class InfoBar extends React.Component {
                                                         {additionalProperties[displayProp]}
                                                     </TableCell>
                                                 </TableRow>))
+                                        )}
+                                        {(api.type === 'WS') && (
+                                            <TableRow>
+                                                <TableCell component='th' scope='row' />
+                                                <TableCell>
+                                                    <div style={{ float: 'right' }}>
+                                                        <Button
+                                                            size='small'
+                                                            variant="contained"
+                                                            onClick={() => api.endpointURLs.map((endpoint) => {this.downloadAsyncAPI(api.id, endpoint.environmentName)})}
+                                                        >
+                                                            <CloudDownloadRounded className={classes.buttonIcon} />
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Environments.download.asyncAPI'
+                                                                defaultMessage='AsyncAPI Definition'
+                                                            />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
                                         )}
                                     </TableBody>
                                 </Table>

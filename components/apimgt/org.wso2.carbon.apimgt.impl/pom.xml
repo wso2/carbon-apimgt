@@ -28,23 +28,6 @@
         </repository>
     </repositories>
     <dependencies>
-        <!--<dependency>
-            <groupId>com.github.everit-org.json-schema</groupId>
-            <artifactId>org.everit.json.schema</artifactId>
-            <version>1.12.1</version>
-            <scope>compile</scope>
-        </dependency>-->
-        <!--<dependency>
-            <groupId>org.wso2.orbit.org.everit.json</groupId>
-            <artifactId>org.everit.json.schema</artifactId>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.json</groupId>
-                    <artifactId>json</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>-->
         <dependency>
             <groupId>org.wso2.orbit.org.everit.json.asyncapi</groupId>
             <artifactId>org.everit.json.schema</artifactId>
@@ -592,8 +575,10 @@
                             !org.wso2.carbon.apimgt.impl.dto.xsd;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}",
                             !org.apache.commons.collections4.*,
+                            <!--apicurio-data-models.*;version="1.1.5",-->
                         </Export-Package>
                         <Import-Package>
+                            <!--apicurio-data-models.*;version="1.1.5",-->
                             org.everit.json.schema.*;version="[1.12.1, 1.12.2)",
                             org.wso2.carbon.governance.api.*,
                             org.wso2.carbon.registry.ws.client.*,
@@ -685,6 +670,3 @@
         </plugins>
     </build>
 </project>
-
-<!--
-org.everit.json.schema.*;version="${org.everit.json.schema.version}",-->

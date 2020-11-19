@@ -288,6 +288,106 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Retrieves the swagger document of an API
+     *
+     * @param apiId API identifier
+     * @param labelName name of the gateway label
+     * @param environmentName name of the gateway environment
+     * @param clusterName name of the container managed cluster
+     * @param ifNoneMatch If-None-Match header value
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param messageContext CXF message context
+     * @return AsyncAPI document of the API for the given label or gateway environment
+     */
+    @Override
+    public Response apisApiIdAsyncapiGet(String apiId, String labelName, String environmentName, String clusterName,
+             String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+
+            if (StringUtils.isNotEmpty(labelName) ?
+                    StringUtils.isNotEmpty(environmentName) || StringUtils.isNotEmpty(clusterName) :
+                    StringUtils.isNotEmpty(environmentName) && StringUtils.isNotEmpty(clusterName)) {
+                RestApiUtil.handleBadRequest(
+                        "Only one of 'labelName', 'environmentName' or 'clusterName' can be provided", log
+                );
+            }
+
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+
+            // gets the first available environment if any of label, environment or cluster name is not provided
+            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)
+                    && StringUtils.isEmpty(clusterName)) {
+                Map<String, Environment> existingEnvironments = APIUtil.getEnvironments();
+
+                //find a valid environment name from API
+                //gateway environment may be invalid due to inconsistent state of the API
+                //example: publish an API and later rename gateway environment from configurations
+                //          then the old gateway environment name becomes invalid
+                for (String environmentNameOfAPI : api.getEnvironments()) {
+                    if (existingEnvironments.get(environmentNameOfAPI) != null) {
+                        environmentName = environmentNameOfAPI;
+                        break;
+                    }
+                }
+
+                // if all environment of API are invalid or there are no environments (i.e. empty)
+                if (StringUtils.isEmpty(environmentName)) {
+                    //if there are no environments in the API, take a random environment from the existing ones.
+                    //This is to make sure the swagger doesn't have invalid endpoints
+                    if (!existingEnvironments.keySet().isEmpty()) {
+                        environmentName = existingEnvironments.keySet().iterator().next();
+                    }
+                }
+            }
+
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
+                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
+            }
+
+            String asyncAPIDefinition = null;
+            if (StringUtils.isNotEmpty(environmentName)) {
+                try {
+                    asyncAPIDefinition = apiConsumer.getAsyncAPIDefinitionForEnvironment(api.getId(), environmentName);
+                } catch (APIManagementException e) {
+                    // handle gateway not found exception otherwise pass it
+                    if (RestApiUtil.isDueToResourceNotFound(e)) {
+                        RestApiUtil.handleResourceNotFoundError(
+                                "Gateway environment '" + environmentName + "' not found", e, log);
+                        return null;
+                    }
+                    throw e;
+                }
+            } else if (StringUtils.isNotEmpty(labelName)) {
+                asyncAPIDefinition = apiConsumer.getAsyncAPIDefinitionForLabel(api.getId(), labelName);
+            } else if (StringUtils.isNotEmpty(clusterName)) {
+                asyncAPIDefinition = apiConsumer.getAsyncAPIDefinitionForClusterName(api.getId(), clusterName);
+            } else {
+                asyncAPIDefinition = apiConsumer.getAsyncAPIDefinition(api.getId());
+            }
+
+            return Response.ok().entity(asyncAPIDefinition).header("Content-Disposition",
+                    "attachment; filename=\"" + "AsyncAPI.json" + "\"").build();
+
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving AsyncAPI Definition of API : " +apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
     @Override
     public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
                                         MessageContext messageContext) {
