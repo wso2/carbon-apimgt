@@ -111,6 +111,7 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
@@ -123,6 +124,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.CertificateMappingUtil;
@@ -170,6 +172,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GraphqlQueryAnalysisMappingUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -3064,11 +3067,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
-            APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            String updatedDefinition = parser.getOASDefinitionForPublisher(api, apiSwagger);
+            String updatedDefinition = RestApiPublisherUtils.retrieveSwaggerDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"" ).build();
         } catch (APIManagementException e) {
@@ -4019,30 +4019,79 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisExportGet(String apiId, String name, String version, String providerName, String format,
-                                  Boolean preserveStatus, MessageContext messageContext)
-            throws APIManagementException {
-        ExportApiUtil exportApiUtil = new ExportApiUtil();
-        if (apiId == null) {
+                                  Boolean preserveStatus, MessageContext messageContext) {
+        APIIdentifier apiIdentifier;
+        APIDTO apiDtoToReturn;
+        // Default export format is YAML
+        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
+                ExportFormat.YAML;
 
-            return exportApiUtil.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus,
-                    RestApiConstants.RESOURCE_API);
-        } else {
-            try {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String userName = RestApiUtil.getLoggedInUsername();
+
+            // apiId == null means the path from the API Controller
+            if (apiId == null) {
+                // Validate API name, version and provider before exporting
+                String provider = validateExportParams(name, version, providerName);
+                apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+                apiDtoToReturn = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
+            } else {
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus, format);
-            } catch (APIManagementException e) {
-                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-                } else if (isAuthorizationFailure(e)) {
-                    RestApiUtil.handleAuthorizationFailure(
-                            "Authorization failure while exporting the  API " + apiId, e, log);
-                } else {
-                    RestApiUtil.handleInternalServerError("Error while exporting the API " + apiId, e, log);
-                }
+                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+                apiDtoToReturn = getAPIByID(apiId);
             }
+
+            File file = ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, userName, exportFormat,
+                    preserveStatus);
+            return Response.ok(file)
+                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
+                            + file.getName() + "\"")
+                    .build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
         }
         return null;
+    }
+
+    /**
+     * Validate name, version and provider before exporting an API/API Product
+     *
+     * @param name         API/API Product Name
+     * @param version      API/API Product version
+     * @param providerName Name of the provider
+     * @return Name of the provider
+     * @throws APIManagementException If an error occurs while retrieving the provider name from name, version
+     *                                and tenant
+     */
+    private String validateExportParams(String name, String version, String providerName)
+            throws APIManagementException {
+        if (name == null || version == null) {
+            RestApiUtil.handleBadRequest("'name' (" + name + ") or 'version' (" + version
+                    + ") should not be null.", log);
+        }
+        String apiRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+        // If provider name is not given
+        if (StringUtils.isBlank(providerName)) {
+            // Retrieve the provider who is in same tenant domain and who owns the same API (by comparing
+            // API name and the version)
+            providerName = APIUtil.getAPIProviderFromAPINameVersionTenant(name, version, apiRequesterDomain);
+
+            // If there is no provider in current domain, the API cannot be exported
+            if (providerName == null) {
+                String errorMessage = "Error occurred while exporting. API: " + name + " version: " + version
+                        + " not found";
+                RestApiUtil.handleResourceNotFoundError(errorMessage, log);
+            }
+        }
+
+        if (!StringUtils.equals(MultitenantUtils.getTenantDomain(providerName), apiRequesterDomain)) {
+            // Not authorized to export requested API
+            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API +
+                    " name:" + name + " version:" + version + " provider:" + providerName, log);
+        }
+        return providerName;
     }
 
     /**
