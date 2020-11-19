@@ -643,10 +643,13 @@ public interface APIManager {
      * Returns a list of api versions that matches the given context template
      *
      * @param apiName api name in the payload
+     * @param username logged in user name of the user
+     * @param organizationId UUID of the organization to which the API belongs to
      * @return api versions that matches context template
      * @throws APIManagementException If failed to get the list of api versions
      */
-    List<String> getApiVersionsMatchingApiName(String apiName,String username, String OrganizationId) throws APIManagementException;
+    List<String> getApiVersionsMatchingApiName(String apiName, String username, String organizationId)
+            throws APIManagementException;
 
     /**
      * Returns list of wsdls
