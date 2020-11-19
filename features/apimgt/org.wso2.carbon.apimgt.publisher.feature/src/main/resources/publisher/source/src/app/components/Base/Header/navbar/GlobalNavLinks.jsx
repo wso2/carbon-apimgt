@@ -113,6 +113,8 @@ function GlobalNavLinks(props) {
             setSelected('scopes');
         } else if (/\/settings($|\/)/g.test(pathname)) {
             setSelected('alerts');
+        } else if (/\/service-catalog($|\/)/g.test(pathname)) {
+            setSelected('service-catalog');
         }
     };
     useEffect(() => {
@@ -232,18 +234,23 @@ function GlobalNavLinks(props) {
                 </Link>
             </Collapse>
             <Divider className={classes.divider} />
-            <ListItem className={classes.categoryHeader} button>
-                <ListItemText
-                    classes={{
-                        primary: classes.categoryHeaderPrimary,
-                    }}
-                >
-                    <FormattedMessage
-                        id='Base.Header.navbar.GlobalNavBar.Service.Catalog'
-                        defaultMessage='Service Catalog'
-                    />
-                </ListItemText>
-            </ListItem>
+            <Link
+                to='/service-catalog'
+                className={classNames({ [classes.selected]: selected === 'service-catalog', [classes.links]: true })}
+            >
+                <ListItem className={classes.categoryHeader} button onClick={toggleGlobalNavBar}>
+                    <ListItemText
+                        classes={{
+                            primary: classes.categoryHeaderPrimary,
+                        }}
+                    >
+                        <FormattedMessage
+                            id='Base.Header.navbar.GlobalNavBar.Service.Catalog'
+                            defaultMessage='Service Catalog'
+                        />
+                    </ListItemText>
+                </ListItem>
+            </Link>
             <Divider className={classes.divider} />
             <ListItem className={classes.categoryHeader} button onClick={handleSettingsClick}>
                 <ListItemText

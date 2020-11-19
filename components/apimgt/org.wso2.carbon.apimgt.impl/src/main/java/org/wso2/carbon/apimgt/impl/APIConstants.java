@@ -579,6 +579,7 @@ public final class APIConstants {
     public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
+    public static final String GATEWAY_INTROSPECT_CACHE_NAME = "GatewayIntrospectCache";
 
     public static final String DELEM_COLON = ":";
     public static final String DELEM_COMMA = ",";
@@ -796,6 +797,7 @@ public final class APIConstants {
     public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
     public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
     public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
+    public static final String IS_KM_REVERSE_PROXY_ENABLED = "ISKMReverseProxyEnabled";
 
     public static final String IDENTITY_PROVIDER = "IdentityProvider.";
     public static final String IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT = IDENTITY_PROVIDER + "AuthorizeEndpoint";

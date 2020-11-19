@@ -11610,6 +11610,25 @@ public final class APIUtil {
         } catch (UserStoreException e) {
             APIUtil.handleException("Couldn't read tenant configuration from User Store", e);
         }
+
+        //append original role to the role mapping list
+        Set<Map.Entry<String, JsonElement>> roleMappingEntries = newRoleMappingJson.entrySet();
+        for (Map.Entry<String, JsonElement> entry: roleMappingEntries) {
+            List<String> currentRoles = Arrays.asList(String.valueOf(entry.getValue()).split(","));
+            boolean isOriginalRoleAlreadyInRoles = false;
+            for (String role: currentRoles) {
+                if (role.equals(entry.getKey())) {
+                    isOriginalRoleAlreadyInRoles = true;
+                    break;
+                }
+            }
+
+            if (!isOriginalRoleAlreadyInRoles) {
+                String newRoles = entry.getKey() + "," + entry.getValue();
+                newRoleMappingJson.replace(entry.getKey(), entry.getValue(), newRoles);
+            }
+        }
+
         existingTenantConfObject.remove(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
         JsonElement jsonElement = new JsonParser().parse(String.valueOf(newRoleMappingJson));
         existingTenantConfObject.add(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG, jsonElement);
@@ -11751,5 +11770,49 @@ public final class APIUtil {
         }
         return false;
     }
-}
 
+
+    /**
+     * Get UUID by the API Identifier.
+     *
+     * @param identifier
+     * @return String uuid string
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static String getUUIDFromIdentifier(APIIdentifier identifier) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+    }
+
+    /**
+     * Get UUID by the API Identifier.
+     *
+     * @param identifier
+     * @return String uuid string
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static String getUUIDFromIdentifier(APIProductIdentifier identifier) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+    }
+
+    /**
+     * Get the API Product Identifier from UUID.
+     *
+     * @param uuid UUID of the API
+     * @return API Product Identifier
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getAPIProductIdentifierFromUUID(uuid);
+    }
+
+    /**
+     * Get the API Identifier from UUID.
+     *
+     * @param uuid UUID of the API
+     * @return API Identifier
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
+    }
+}

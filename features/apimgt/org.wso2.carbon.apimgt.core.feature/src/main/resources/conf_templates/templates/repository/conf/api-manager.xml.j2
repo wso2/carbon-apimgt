@@ -33,6 +33,11 @@
         <!-- Indicates whether the permissions checking of the user (on the Publisher and Developer Portal) should be done
            via a remote service. The check will be done on the local server when false. -->
         <CheckPermissionsRemotely>false</CheckPermissionsRemotely>
+        <!-- Indicates whether the authentication endpoint has been reverse proxied through the Gateway when using
+             APIM with IS-KM. -->
+        {% if apim.auth_manager.iskm_reverseproxy_enabled is defined %}
+        <ISKMReverseProxyEnabled>{{apim.auth_manager.iskm_reverseproxy_enabled}}</ISKMReverseProxyEnabled>
+        {% endif %}
     </AuthManager>
 
     {% if apim.idp is defined %}
@@ -391,7 +396,7 @@
         <!-- Scope used for marking Application Tokens. If a token is generated with this scope, they will be treated as Application Access Tokens -->
         <ApplicationTokenScope>{{apim.oauth_config.default_app_scope}}</ApplicationTokenScope>
         <!-- All  scopes under the AllowedScopes element are not validating against roles that has assigned to it.
-             By default ^device_.* and openid scopes have been white listed internally. -->
+             By default ^device_.* and openid scopes have been allowed internally. -->
         <AllowedScopes>
         {%for scope in apim.oauth_config.allowed_scopes%}
             <Scope>{{scope}}</Scope>
@@ -556,7 +561,7 @@
     <!-- VelocityLogger>VELOCITY</VelocityLogger -->
 
     <RESTAPI>
-        <!--Configure white-listed URIs of REST API. Accessing white-listed URIs does not require credentials (does not require Authorization header). -->
+        <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
         <AllowedURIs>
          {% if apim.rest_api.allowed_uri is defined %}
             {% for uri in apim.rest_api.allowed_uri %}
@@ -615,8 +620,20 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
+                <URI>/api/am/store/{version}/apis/{apiId}/comments/{commentId}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
                  <URI>/api/am/store/{version}/apis/{apiId}/subscription-policies</URI>
                  <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/store/{version}/throttling-policies/{policyLevel}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/store/{version}/throttling-policies/{policyLevel}/{policyId}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
                  <URI>/api/am/store/{version}/apis/{apiId}/graphql-schema</URI>
@@ -636,6 +653,10 @@
             </AllowedURI>
             <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/thumbnail</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/store/{version}/apis/{apiId}/ratings</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
@@ -701,6 +722,14 @@
             <AllowedURI>
                 <URI>/api/am/store/{version}/api-categories</URI>
                 <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/store/{version}/apis/{apiId}/graphql-policies/complexity</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/store/{version}/apis/{apiId}/graphql-policies/complexity/types</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>
         <ETagSkipList>

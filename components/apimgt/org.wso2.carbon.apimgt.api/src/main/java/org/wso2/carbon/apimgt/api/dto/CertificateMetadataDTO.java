@@ -24,6 +24,17 @@ public class CertificateMetadataDTO {
 
     private String alias;
     private String endpoint;
+    private String certificate;
+
+    public String getCertificate() {
+
+        return certificate;
+    }
+
+    public void setCertificate(String certificate) {
+
+        this.certificate = certificate;
+    }
 
     public String getAlias() {
         return alias;

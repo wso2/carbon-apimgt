@@ -203,7 +203,7 @@ class Subscriptions extends React.Component {
     }
 
     handleOpenDialog() {
-        this.setState((prevState) => ({ openDialog: !prevState.openDialog }));
+        this.setState((prevState) => ({ openDialog: !prevState.openDialog, searchText: '' }));
     }
 
     /**
