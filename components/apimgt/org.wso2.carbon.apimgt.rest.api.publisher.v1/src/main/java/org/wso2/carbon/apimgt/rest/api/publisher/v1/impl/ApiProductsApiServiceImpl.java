@@ -728,7 +728,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             context = context.startsWith("/") ? context : ("/" + context);
             //Check whether the context already exists
             if (apiProvider.isContextExist(context)) {
-                RestApiUtil.handleBadRequest("Error occurred while adding API. API with the context " + context
+                RestApiUtil.handleBadRequest("Error occurred while adding API Product. API Product with the context " + context
                         + " already exists.", log);
             }
 
