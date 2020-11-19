@@ -106,7 +106,6 @@ info:
   version: v1.1
 servers:
 - url: https://apis.wso2.com/api/am/publisher/v1
-- url: http://apis.wso2.com/api/am/publisher/v1
 security:
 - OAuth2Security:
   - apim:api_view
@@ -2307,7 +2306,10 @@ paths:
                 The content type of the body.
               schema:
                 type: string
-          content: {}
+          content:
+            application/octet-stream:
+              schema:
+                type: string
         303:
           description: |
             See Other.

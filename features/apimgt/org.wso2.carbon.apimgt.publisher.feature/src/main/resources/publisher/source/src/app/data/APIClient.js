@@ -114,7 +114,9 @@ class APIClient {
      */
     _fixSpec(spec) {
         const updatedSpec = spec;
-        updatedSpec.host = this.environment.host;
+        const url = new URL(spec.servers[0].url);
+        url.host = this.environment.host;
+        updatedSpec.servers[0].url = String(url);
         return updatedSpec;
     }
 
@@ -147,9 +149,6 @@ class APIClient {
      */
     _getRequestInterceptor() {
         return (request) => {
-            const url = new URL(request.url);
-            url.host = this.environment.host;
-            request.url = String(url);
             const existingUser = AuthManager.getUser(this.environment.label);
             if (!existingUser) {
                 console.log('User not found. Token refreshing failed.');

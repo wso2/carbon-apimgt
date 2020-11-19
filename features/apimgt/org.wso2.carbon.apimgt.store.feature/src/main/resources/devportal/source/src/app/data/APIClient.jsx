@@ -116,7 +116,9 @@ class APIClient {
      * @private
      */
     _fixSpec(spec) {
-        spec.host = this.host;
+        const url = new URL(spec.servers[0].url);
+        url.host = this.host;
+        spec.servers[0].url = String(url);
         spec.security = [{ OAuth2Security: ['apim:api_subscribe'] }];
         return spec;
     }
