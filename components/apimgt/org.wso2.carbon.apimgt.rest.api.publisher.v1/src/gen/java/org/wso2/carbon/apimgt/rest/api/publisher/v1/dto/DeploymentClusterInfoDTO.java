@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -21,7 +22,7 @@ public class DeploymentClusterInfoDTO   {
     private String clusterName = null;
     private String accessURL = null;
     private String displayName = null;
-    private Map<String, String> properties = new HashMap<>();
+    private Map<String, String> properties = new HashMap<String, String>();
 
   /**
    **/

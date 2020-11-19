@@ -16,6 +16,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -26,45 +27,43 @@ public class ApplicationDTO   {
     private String throttlingPolicy = null;
     private String description = null;
 
-@XmlType(name="TokenTypeEnum")
-@XmlEnum(String.class)
-public enum TokenTypeEnum {
+    @XmlType(name="TokenTypeEnum")
+    @XmlEnum(String.class)
+    public enum TokenTypeEnum {
+        OAUTH("OAUTH"),
+        JWT("JWT");
+        private String value;
 
-    @XmlEnumValue("OAUTH") OAUTH(String.valueOf("OAUTH")), @XmlEnumValue("JWT") JWT(String.valueOf("JWT"));
-
-
-    private String value;
-
-    TokenTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TokenTypeEnum fromValue(String v) {
-        for (TokenTypeEnum b : TokenTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        TokenTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TokenTypeEnum fromValue(String v) {
+            for (TokenTypeEnum b : TokenTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private TokenTypeEnum tokenType = TokenTypeEnum.JWT;
     private String status = "";
-    private List<String> groups = new ArrayList<>();
+    private List<String> groups = new ArrayList<String>();
     private Integer subscriptionCount = null;
-    private List<ApplicationKeyDTO> keys = new ArrayList<>();
-    private Map<String, String> attributes = new HashMap<>();
-    private List<ScopeInfoDTO> subscriptionScopes = new ArrayList<>();
+    private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
+    private Map<String, String> attributes = new HashMap<String, String>();
+    private List<ScopeInfoDTO> subscriptionScopes = new ArrayList<ScopeInfoDTO>();
     private String owner = null;
     private Boolean hashEnabled = null;
 
@@ -96,7 +95,7 @@ public enum TokenTypeEnum {
   @ApiModelProperty(example = "CalculatorApp", required = true, value = "")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=70)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -114,7 +113,7 @@ public enum TokenTypeEnum {
   @ApiModelProperty(example = "Unlimited", required = true, value = "")
   @JsonProperty("throttlingPolicy")
   @NotNull
-  public String getThrottlingPolicy() {
+ @Size(min=1)  public String getThrottlingPolicy() {
     return throttlingPolicy;
   }
   public void setThrottlingPolicy(String throttlingPolicy) {
@@ -131,7 +130,7 @@ public enum TokenTypeEnum {
   
   @ApiModelProperty(example = "Sample calculator application", value = "")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=512)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
@@ -139,7 +138,7 @@ public enum TokenTypeEnum {
   }
 
   /**
-   * Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. 
+   * Type of the access token generated for this application.  **OAUTH:** A UUID based access token **JWT:** A self-contained, signed JWT based access token which is issued by default. 
    **/
   public ApplicationDTO tokenType(TokenTypeEnum tokenType) {
     this.tokenType = tokenType;
@@ -147,7 +146,7 @@ public enum TokenTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "JWT", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. ")
+  @ApiModelProperty(example = "JWT", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token **JWT:** A self-contained, signed JWT based access token which is issued by default. ")
   @JsonProperty("tokenType")
   public TokenTypeEnum getTokenType() {
     return tokenType;
@@ -181,7 +180,7 @@ public enum TokenTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "\"\"", value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("groups")
   public List<String> getGroups() {
     return groups;
@@ -232,7 +231,7 @@ public enum TokenTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "\"External Reference ID, Billing Tier\"", value = "")
+  @ApiModelProperty(example = "{}", value = "")
   @JsonProperty("attributes")
   public Map<String, String> getAttributes() {
     return attributes;
@@ -284,7 +283,7 @@ public enum TokenTypeEnum {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "false", value = "")
   @JsonProperty("hashEnabled")
   public Boolean isHashEnabled() {
     return hashEnabled;

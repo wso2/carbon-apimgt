@@ -23,6 +23,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -39,26 +40,28 @@ public class APIDTO   {
     private String lifeCycleStatus = null;
     private Boolean isDefaultVersion = null;
     private String type = null;
-    private List<String> transport = new ArrayList<>();
-    private List<APIOperationsDTO> operations = new ArrayList<>();
+    private List<String> transport = new ArrayList<String>();
+    private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private String authorizationHeader = null;
-    private List<String> securityScheme = new ArrayList<>();
-    private List<String> tags = new ArrayList<>();
-    private List<APITiersDTO> tiers = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<String>();
+    private List<String> tags = new ArrayList<String>();
+    private List<APITiersDTO> tiers = new ArrayList<APITiersDTO>();
     private Boolean hasThumbnail = false;
-    private Map<String, String> additionalProperties = new HashMap<>();
+    private Map<String, String> additionalProperties = new HashMap<String, String>();
     private APIMonetizationInfoDTO monetization = null;
-    private List<APIIngressURLsDTO> ingressURLs = new ArrayList<>();
-    private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<>();
+    private List<APIIngressURLsDTO> ingressURLs = new ArrayList<APIIngressURLsDTO>();
+    private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<APIEndpointURLsDTO>();
     private APIBusinessInformationDTO businessInformation = null;
-    private List<LabelDTO> labels = new ArrayList<>();
-    private List<String> environmentList = new ArrayList<>();
-    private List<ScopeInfoDTO> scopes = new ArrayList<>();
+    private List<LabelDTO> labels = new ArrayList<LabelDTO>();
+    private List<String> environmentList = new ArrayList<String>();
+    private List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
     private String avgRating = null;
     private AdvertiseInfoDTO advertiseInfo = null;
     private Boolean isSubscriptionAvailable = null;
-    private List<String> categories = new ArrayList<>();
+    private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
+    private String createdTime = null;
+    private String lastUpdatedTime = null;
 
   /**
    * UUID of the api 
@@ -287,7 +290,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("operations")
   public List<APIOperationsDTO> getOperations() {
     return operations;
@@ -305,7 +308,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
+  @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
   @JsonProperty("authorizationHeader")
   public String getAuthorizationHeader() {
     return authorizationHeader;
@@ -323,7 +326,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @ApiModelProperty(example = "[\"oauth2\",\"oauth_basic_auth_api_key_mandatory\"]", value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
     return securityScheme;
@@ -613,6 +616,40 @@ public class APIDTO   {
     this.keyManagers = keyManagers;
   }
 
+  /**
+   **/
+  public APIDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2020-10-31T13:57:16.229", value = "")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   **/
+  public APIDTO lastUpdatedTime(String lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2020-10-31T13:57:16.229", value = "")
+  @JsonProperty("lastUpdatedTime")
+  public String getLastUpdatedTime() {
+    return lastUpdatedTime;
+  }
+  public void setLastUpdatedTime(String lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -653,12 +690,14 @@ public class APIDTO   {
         Objects.equals(advertiseInfo, API.advertiseInfo) &&
         Objects.equals(isSubscriptionAvailable, API.isSubscriptionAvailable) &&
         Objects.equals(categories, API.categories) &&
-        Objects.equals(keyManagers, API.keyManagers);
+        Objects.equals(keyManagers, API.keyManagers) &&
+        Objects.equals(createdTime, API.createdTime) &&
+        Objects.equals(lastUpdatedTime, API.lastUpdatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime);
   }
 
   @Override
@@ -697,6 +736,8 @@ public class APIDTO   {
     sb.append("    isSubscriptionAvailable: ").append(toIndentedString(isSubscriptionAvailable)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }

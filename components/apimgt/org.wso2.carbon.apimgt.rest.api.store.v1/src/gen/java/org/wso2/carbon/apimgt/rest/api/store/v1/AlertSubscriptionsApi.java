@@ -41,14 +41,14 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the list of API Store alert types subscribed by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoDTO.class, authorizations = {
+    @ApiOperation(value = "Get the List of API Developer Portal Alert Types Subscribed by the User. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
         })
     }, tags={ "Alert Subscriptions",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The list of subscribed alert types are returned. ", response = AlertsInfoDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getSubscribedAlertTypes() throws APIManagementException{
         return delegate.getSubscribedAlertTypes(securityContext);
     }
@@ -57,7 +57,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Subscribe to the selected alert types by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoResponseDTO.class, authorizations = {
+    @ApiOperation(value = "Subscribe to the Selected Alert Types by the User. ", notes = "This operation is used to subscribe to the selected alert types by the user. ", response = AlertsInfoResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
         })
@@ -65,7 +65,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "OK. Successful response with the newly subscribed alerts. ", response = AlertsInfoResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid Request or request validation failure. ", response = Void.class),
-        @ApiResponse(code = 500, message = "Internal Server Error An internal server error occurred while subscribing to alerts. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response subscribeToAlerts(@ApiParam(value = "The alerts list and the email list to subscribe." ,required=true) AlertsInfoDTO body) throws APIManagementException{
         return delegate.subscribeToAlerts(body, securityContext);
     }
@@ -74,14 +74,14 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Unsubscribe user from all the alert types. ", notes = "This operation is used to unsubscribe the respective user from all the alert types. ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Unsubscribe User from All the Alert Types. ", notes = "This operation is used to unsubscribe the respective user from all the alert types. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
         })
     }, tags={ "Alert Subscriptions" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The user is unsubscribed from the alerts successfully. ", response = Void.class),
-        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response unsubscribeAllAlerts() throws APIManagementException{
         return delegate.unsubscribeAllAlerts(securityContext);
     }

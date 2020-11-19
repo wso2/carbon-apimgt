@@ -13,46 +13,46 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class EndpointEndpointConfigDTO   {
   
 
-@XmlType(name="EndpointTypeEnum")
-@XmlEnum(String.class)
-public enum EndpointTypeEnum {
+    @XmlType(name="EndpointTypeEnum")
+    @XmlEnum(String.class)
+    public enum EndpointTypeEnum {
+        SINGLE("SINGLE"),
+        LOAD_BALANCED("LOAD_BALANCED"),
+        FAIL_OVER("FAIL_OVER");
+        private String value;
 
-    @XmlEnumValue("SINGLE") SINGLE(String.valueOf("SINGLE")), @XmlEnumValue("LOAD_BALANCED") LOAD_BALANCED(String.valueOf("LOAD_BALANCED")), @XmlEnumValue("FAIL_OVER") FAIL_OVER(String.valueOf("FAIL_OVER"));
-
-
-    private String value;
-
-    EndpointTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static EndpointTypeEnum fromValue(String v) {
-        for (EndpointTypeEnum b : EndpointTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        EndpointTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static EndpointTypeEnum fromValue(String v) {
+            for (EndpointTypeEnum b : EndpointTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private EndpointTypeEnum endpointType = null;
-    private List<EndpointConfigDTO> list = new ArrayList<>();
+    private List<EndpointConfigDTO> list = new ArrayList<EndpointConfigDTO>();
 
   /**
    **/

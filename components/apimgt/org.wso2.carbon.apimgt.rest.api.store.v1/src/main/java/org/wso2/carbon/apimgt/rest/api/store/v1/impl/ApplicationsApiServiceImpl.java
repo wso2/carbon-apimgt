@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApi;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
@@ -95,7 +96,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder,
-            Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) {
+                                    Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;

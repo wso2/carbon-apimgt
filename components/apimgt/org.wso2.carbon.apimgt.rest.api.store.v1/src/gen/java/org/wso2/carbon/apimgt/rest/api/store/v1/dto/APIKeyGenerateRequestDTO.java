@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -27,7 +28,7 @@ public class APIKeyGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Token validity period")
+  @ApiModelProperty(example = "3600", value = "Token validity period")
   @JsonProperty("validityPeriod")
   public Integer getValidityPeriod() {
     return validityPeriod;

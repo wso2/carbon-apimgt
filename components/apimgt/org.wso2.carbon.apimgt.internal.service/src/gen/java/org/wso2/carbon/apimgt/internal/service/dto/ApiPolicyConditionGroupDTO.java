@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -13,6 +14,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -22,6 +24,7 @@ public class ApiPolicyConditionGroupDTO   {
     private String quotaType = null;
     private Integer conditionGroupId = null;
     private List<ConditionDTO> condition = new ArrayList<>();
+    private ThrottleLimitDTO defaultLimit = null;
 
   /**
    **/
@@ -91,6 +94,23 @@ public class ApiPolicyConditionGroupDTO   {
     this.condition = condition;
   }
 
+  /**
+   **/
+  public ApiPolicyConditionGroupDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("defaultLimit")
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
+  }
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -104,12 +124,13 @@ public class ApiPolicyConditionGroupDTO   {
     return Objects.equals(policyId, apiPolicyConditionGroup.policyId) &&
         Objects.equals(quotaType, apiPolicyConditionGroup.quotaType) &&
         Objects.equals(conditionGroupId, apiPolicyConditionGroup.conditionGroupId) &&
-        Objects.equals(condition, apiPolicyConditionGroup.condition);
+        Objects.equals(condition, apiPolicyConditionGroup.condition) &&
+        Objects.equals(defaultLimit, apiPolicyConditionGroup.defaultLimit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyId, quotaType, conditionGroupId, condition);
+    return Objects.hash(policyId, quotaType, conditionGroupId, condition, defaultLimit);
   }
 
   @Override
@@ -121,6 +142,7 @@ public class ApiPolicyConditionGroupDTO   {
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    conditionGroupId: ").append(toIndentedString(conditionGroupId)).append("\n");
     sb.append("    condition: ").append(toIndentedString(condition)).append("\n");
+    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

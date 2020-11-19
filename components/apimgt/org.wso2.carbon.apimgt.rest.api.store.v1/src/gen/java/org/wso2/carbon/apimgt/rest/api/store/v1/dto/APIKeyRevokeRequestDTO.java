@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -26,7 +27,7 @@ public class APIKeyRevokeRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "API Key to revoke")
+  @ApiModelProperty(example = "eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=", value = "API Key to revoke")
   @JsonProperty("apikey")
   public String getApikey() {
     return apikey;

@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -23,7 +24,7 @@ public class KeyManagerInfoDTO   {
     private String type = null;
     private String description = null;
     private Boolean enabled = null;
-    private List<Object> additionalProperties = new ArrayList<>();
+    private List<Object> additionalProperties = new ArrayList<Object>();
 
   /**
    **/

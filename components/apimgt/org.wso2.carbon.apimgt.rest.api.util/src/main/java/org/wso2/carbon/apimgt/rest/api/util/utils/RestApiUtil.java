@@ -621,6 +621,21 @@ public class RestApiUtil {
     }
 
     /**
+     * Check if the specified throwable e is happened as the provided throttling policy is missing
+     *
+     * @param e throwable to check
+     * @return true if the specified throwable e is happened as the provided throttling policy is missing, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToProvidedThrottlingPolicyMissing(Throwable e) {
+        return detailedMessageMatches(e, "Invalid x-throttling tier") ||
+                detailedMessageMatches(e, "Invalid API level throttling tier") ||
+                detailedMessageMatches(e, "Invalid Product level throttling tier") ||
+                detailedMessageMatches(e, "Invalid Subscription level throttling tier") ||
+                detailedMessageMatches(e, "Invalid Application level throttling tier") ;
+    }
+
+    /**
      * Check if the specified throwable e is happened as the updated/new resource conflicting with an already existing
      * resource
      *

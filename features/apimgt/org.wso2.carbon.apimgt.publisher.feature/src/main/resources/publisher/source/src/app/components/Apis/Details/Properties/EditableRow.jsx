@@ -29,10 +29,16 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import { injectIntl } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles(() => ({
     link: {
         cursor: 'pointer',
+    },
+    content: {
+        margin: 'auto',
+        wordBreak: 'break-all',
+        whiteSpace: 'normal',
     },
 }));
 
@@ -108,7 +114,11 @@ function EditableRow(props) {
                     />
                 </TableCell>
             ) : (
-                <TableCell>{oldKey}</TableCell>
+                <TableCell>
+                    <Typography className={classes.content}>
+                        {oldKey}
+                    </Typography>
+                </TableCell>
             )}
             {editMode ? (
                 <TableCell>
@@ -130,7 +140,11 @@ function EditableRow(props) {
                     />
                 </TableCell>
             ) : (
-                <TableCell>{oldValue}</TableCell>
+                <TableCell>
+                    <Typography className={classes.content}>
+                        {oldValue}
+                    </Typography>
+                </TableCell>
             )}
             <TableCell align='right'>
                 {editMode ? (

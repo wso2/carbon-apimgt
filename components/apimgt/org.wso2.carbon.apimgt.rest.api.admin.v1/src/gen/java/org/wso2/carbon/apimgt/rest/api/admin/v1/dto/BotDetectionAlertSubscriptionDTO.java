@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -45,7 +46,7 @@ public class BotDetectionAlertSubscriptionDTO   {
   }
 
   
-  @ApiModelProperty(example = "abc@.com", required = true, value = "email")
+  @ApiModelProperty(example = "abc@gmail.com", required = true, value = "email")
   @JsonProperty("email")
   @NotNull
   public String getEmail() {

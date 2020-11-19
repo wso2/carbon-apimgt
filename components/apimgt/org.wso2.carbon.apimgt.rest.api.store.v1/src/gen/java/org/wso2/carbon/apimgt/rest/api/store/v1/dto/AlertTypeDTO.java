@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -28,7 +29,7 @@ public class AlertTypeDTO   {
   }
 
   
-  @ApiModelProperty(example = "1", value = "The alert Id")
+  @ApiModelProperty(example = "3", value = "The alert Id")
   @JsonProperty("id")
   public Integer getId() {
     return id;

@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -20,7 +21,7 @@ public class SharedScopeUsageDTO   {
   
     private String id = null;
     private String name = null;
-    private List<SharedScopeUsedAPIInfoDTO> usedApiList = new ArrayList<>();
+    private List<SharedScopeUsedAPIInfoDTO> usedApiList = new ArrayList<SharedScopeUsedAPIInfoDTO>();
 
   /**
    * UUID of the Scope. Valid only for shared scopes. 

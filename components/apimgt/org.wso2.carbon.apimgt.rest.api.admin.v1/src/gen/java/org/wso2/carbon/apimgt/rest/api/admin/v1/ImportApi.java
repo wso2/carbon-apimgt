@@ -50,10 +50,10 @@ ImportApiService delegate = new ImportApiServiceImpl();
     }, tags={ "API (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Created. API Imported Successfully. ", response = Void.class),
-        @ApiResponse(code = 403, message = "Forbidden Not Authorized to import. ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested API to update not found. ", response = ErrorDTO.class),
-        @ApiResponse(code = 409, message = "Conflict. API to import already exists. ", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error. Error in importing API. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response importApiPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider. ")  @QueryParam("preserveProvider") Boolean preserveProvider,  @ApiParam(value = "Whether to update the API or not. This is used when updating already existing APIs. ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
         return delegate.importApiPost(fileInputStream, fileDetail, preserveProvider, overwrite, securityContext);
     }
@@ -70,10 +70,10 @@ ImportApiService delegate = new ImportApiServiceImpl();
     }, tags={ "API Product (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Created. API Product Imported Successfully. ", response = Void.class),
-        @ApiResponse(code = 403, message = "Forbidden Not Authorized to import. ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested API Product to update not found. ", response = ErrorDTO.class),
-        @ApiResponse(code = 409, message = "Conflict. API Product to import already exists. ", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error. Error in importing API Product. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response importApiProductPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Provider of the API Product. This is the user choice to keep or replace the API Product provider. ")  @QueryParam("preserveProvider") Boolean preserveProvider,  @ApiParam(value = "Whether to import the dependent APIs or not. ")  @QueryParam("importAPIs") Boolean importAPIs,  @ApiParam(value = "Whether to update the API Product or not. This is used when updating already existing API Products. ")  @QueryParam("overwriteAPIProduct") Boolean overwriteAPIProduct,  @ApiParam(value = "Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product. ")  @QueryParam("overwriteAPIs") Boolean overwriteAPIs) throws APIManagementException{
         return delegate.importApiProductPost(fileInputStream, fileDetail, preserveProvider, importAPIs, overwriteAPIProduct, overwriteAPIs, securityContext);
     }
@@ -82,7 +82,7 @@ ImportApiService delegate = new ImportApiServiceImpl();
     @Path("/applications")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Import an Application", notes = "This operation can be used to import an Application. ", response = ApplicationInfoDTO.class, authorizations = {
+    @ApiOperation(value = "Import an Application", notes = "This operation can be used to import an application. ", response = ApplicationInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
@@ -91,8 +91,8 @@ ImportApiService delegate = new ImportApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with the updated object information as entity in the body. ", response = ApplicationInfoDTO.class),
         @ApiResponse(code = 207, message = "Multi Status. Partially successful response with skipped APIs information object as entity in the body. ", response = APIInfoListDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response importApplicationsPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Creator of the Application ")  @QueryParam("preserveOwner") Boolean preserveOwner,  @ApiParam(value = "Skip importing Subscriptions of the Application ")  @QueryParam("skipSubscriptions") Boolean skipSubscriptions,  @ApiParam(value = "Expected Owner of the Application in the Import Environment ")  @QueryParam("appOwner") String appOwner,  @ApiParam(value = "Skip importing Keys of the Application ")  @QueryParam("skipApplicationKeys") Boolean skipApplicationKeys,  @ApiParam(value = "Update if application exists ")  @QueryParam("update") Boolean update) throws APIManagementException{
         return delegate.importApplicationsPost(fileInputStream, fileDetail, preserveOwner, skipSubscriptions, appOwner, skipApplicationKeys, update, securityContext);
     }

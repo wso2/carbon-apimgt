@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -22,42 +23,40 @@ public class ApplicationKeyDTO   {
     private String keyManager = null;
     private String consumerKey = null;
     private String consumerSecret = null;
-    private List<String> supportedGrantTypes = new ArrayList<>();
+    private List<String> supportedGrantTypes = new ArrayList<String>();
     private String callbackUrl = null;
     private String keyState = null;
 
-@XmlType(name="KeyTypeEnum")
-@XmlEnum(String.class)
-public enum KeyTypeEnum {
+    @XmlType(name="KeyTypeEnum")
+    @XmlEnum(String.class)
+    public enum KeyTypeEnum {
+        PRODUCTION("PRODUCTION"),
+        SANDBOX("SANDBOX");
+        private String value;
 
-    @XmlEnumValue("PRODUCTION") PRODUCTION(String.valueOf("PRODUCTION")), @XmlEnumValue("SANDBOX") SANDBOX(String.valueOf("SANDBOX"));
-
-
-    private String value;
-
-    KeyTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static KeyTypeEnum fromValue(String v) {
-        for (KeyTypeEnum b : KeyTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        KeyTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static KeyTypeEnum fromValue(String v) {
+            for (KeyTypeEnum b : KeyTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private KeyTypeEnum keyType = null;
     private String groupId = null;
     private ApplicationTokenDTO token = null;
@@ -72,7 +71,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(value = "Key Manager Mapping UUID")
+  @ApiModelProperty(example = "92ab520c-8847-427a-a921-3ed19b15aad7", value = "Key Manager Mapping UUID")
   @JsonProperty("keyMappingId")
   public String getKeyMappingId() {
     return keyMappingId;
@@ -90,7 +89,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(value = "Key Manager Name")
+  @ApiModelProperty(example = "Resident Key Manager", value = "Key Manager Name")
   @JsonProperty("keyManager")
   public String getKeyManager() {
     return keyManager;

@@ -2,7 +2,7 @@
     <h1><a name="Applications"></a>Applications</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="applicationsApplicationIdDelete"></a>Remove an application
+            <h4 class="operation-heading"><a name="applicationsApplicationIdDelete"></a>Remove an Application
 </h4> <code>DELETE https://apis.wso2.com/api/am/store/v1/applications/{applicationId}</code>
             <p class="marked"></p>
 
@@ -130,7 +130,7 @@
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Resource to be deleted does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -139,7 +139,7 @@
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -149,7 +149,7 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="applicationsApplicationIdGet"></a>Get details of an application
+            <h4 class="operation-heading"><a name="applicationsApplicationIdGet"></a>Get Details of an Application
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1/applications/{applicationId}</code>
             <p class="marked"></p>
 
@@ -277,7 +277,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested application does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -286,7 +286,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -296,7 +296,7 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="applicationsApplicationIdPut"></a>Update an application
+            <h4 class="operation-heading"><a name="applicationsApplicationIdPut"></a>Update an Application
 </h4> <code>PUT https://apis.wso2.com/api/am/store/v1/applications/{applicationId}</code>
             <p class="marked"></p>
 
@@ -443,7 +443,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -452,7 +452,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. The resource to be updated does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -461,7 +461,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -471,7 +471,7 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="applicationsGet"></a>Retrieve/Search applications
+            <h4 class="operation-heading"><a name="applicationsGet"></a>Retrieve/Search Applications
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1/applications</code>
             <p class="marked"></p>
 
@@ -589,9 +589,9 @@ Currently this does not support wildcards. Given name must exactly match the app
 
 <code>name</code>
 
-<code>owner</code>
+<code>throttlingPolicy</code>
 
-<code>throttlingTier</code>
+<code>status</code>
 
                         </td>
                         <td>
@@ -759,7 +759,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -768,7 +768,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported. </p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -778,7 +778,7 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="applicationsPost"></a>Create a new application
+            <h4 class="operation-heading"><a name="applicationsPost"></a>Create a New Application
 </h4> <code>POST https://apis.wso2.com/api/am/store/v1/applications</code>
             <p class="marked"></p>
 
@@ -878,7 +878,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -887,7 +887,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">409</p></td>
-                        <td class="parameter"><p class="marked">Conflict. Application already exists. </p></td>
+                        <td class="parameter"><p class="marked">Conflict. Specified resource already exists.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -896,7 +896,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">415</p></td>
-                        <td class="parameter"><p class="marked">Unsupported media type. The entity of the request was in a not supported format. </p></td>
+                        <td class="parameter"><p class="marked">Unsupported Media Type. The entity of the request was not in a supported format.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

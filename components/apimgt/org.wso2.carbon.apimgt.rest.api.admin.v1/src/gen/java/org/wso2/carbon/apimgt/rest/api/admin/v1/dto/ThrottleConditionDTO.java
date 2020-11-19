@@ -18,44 +18,45 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 @ApiModel(description = "Conditions used for Throttling")
 
 public class ThrottleConditionDTO   {
   
 
-@XmlType(name="TypeEnum")
-@XmlEnum(String.class)
-public enum TypeEnum {
+    @XmlType(name="TypeEnum")
+    @XmlEnum(String.class)
+    public enum TypeEnum {
+        HEADERCONDITION("HEADERCONDITION"),
+        IPCONDITION("IPCONDITION"),
+        JWTCLAIMSCONDITION("JWTCLAIMSCONDITION"),
+        QUERYPARAMETERCONDITION("QUERYPARAMETERCONDITION");
+        private String value;
 
-    @XmlEnumValue("HEADERCONDITION") HEADERCONDITION(String.valueOf("HEADERCONDITION")), @XmlEnumValue("IPCONDITION") IPCONDITION(String.valueOf("IPCONDITION")), @XmlEnumValue("JWTCLAIMSCONDITION") JWTCLAIMSCONDITION(String.valueOf("JWTCLAIMSCONDITION")), @XmlEnumValue("QUERYPARAMETERCONDITION") QUERYPARAMETERCONDITION(String.valueOf("QUERYPARAMETERCONDITION"));
-
-
-    private String value;
-
-    TypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TypeEnum fromValue(String v) {
-        for (TypeEnum b : TypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        TypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TypeEnum fromValue(String v) {
+            for (TypeEnum b : TypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private TypeEnum type = null;
     private Boolean invertCondition = false;
     private HeaderConditionDTO headerCondition = null;

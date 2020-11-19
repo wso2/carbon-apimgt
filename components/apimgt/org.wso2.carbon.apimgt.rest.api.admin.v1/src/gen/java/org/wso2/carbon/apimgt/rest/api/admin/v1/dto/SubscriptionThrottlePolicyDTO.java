@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -29,7 +30,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     private MonetizationInfoDTO monetization = null;
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
-    private List<CustomAttributeDTO> customAttributes = new ArrayList<>();
+    private List<CustomAttributeDTO> customAttributes = new ArrayList<CustomAttributeDTO>();
     private Boolean stopOnQuotaReach = false;
     private String billingPlan = null;
     private SubscriptionThrottlePolicyPermissionDTO permissions = null;
@@ -132,7 +133,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(value = "Burst control time unit")
+  @ApiModelProperty(example = "min", value = "Burst control time unit")
   @JsonProperty("rateLimitTimeUnit")
   public String getRateLimitTimeUnit() {
     return rateLimitTimeUnit;
@@ -150,7 +151,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "{}", value = "Custom attributes added to the Subscription Throttling Policy ")
+  @ApiModelProperty(example = "[]", value = "Custom attributes added to the Subscription Throttling Policy ")
   @JsonProperty("customAttributes")
   public List<CustomAttributeDTO> getCustomAttributes() {
     return customAttributes;
@@ -186,7 +187,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. ")
+  @ApiModelProperty(example = "FREE", value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. ")
   @JsonProperty("billingPlan")
   public String getBillingPlan() {
     return billingPlan;

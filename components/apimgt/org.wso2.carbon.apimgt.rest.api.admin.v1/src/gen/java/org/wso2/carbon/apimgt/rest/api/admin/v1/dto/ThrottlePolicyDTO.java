@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -50,10 +51,10 @@ public class ThrottlePolicyDTO   {
   }
 
   
-  @ApiModelProperty(example = "Policy1", required = true, value = "Name of policy")
+  @ApiModelProperty(example = "30PerMin", required = true, value = "Name of policy")
   @JsonProperty("policyName")
   @NotNull
-  public String getPolicyName() {
+ @Size(min=1,max=60)  public String getPolicyName() {
     return policyName;
   }
   public void setPolicyName(String policyName) {
@@ -69,7 +70,7 @@ public class ThrottlePolicyDTO   {
   }
 
   
-  @ApiModelProperty(value = "Display name of the policy")
+  @ApiModelProperty(example = "30PerMin", value = "Display name of the policy")
   @JsonProperty("displayName")
   public String getDisplayName() {
     return displayName;
@@ -87,9 +88,9 @@ public class ThrottlePolicyDTO   {
   }
 
   
-  @ApiModelProperty(value = "Description of the policy")
+  @ApiModelProperty(example = "Allows 30 request per minute", value = "Description of the policy")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=1024)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {

@@ -128,6 +128,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
@@ -137,7 +138,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
@@ -162,10 +162,11 @@ import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIDConnectDiscoveryClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
-import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
@@ -295,6 +296,7 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.UUID;
 
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -567,7 +569,7 @@ public final class APIUtil {
      * @throws IOException
      */
     public static CloseableHttpResponse executeHTTPRequest(HttpRequestBase method, HttpClient httpClient)
-            throws IOException, ArtifactSynchronizerException {
+            throws IOException, APIManagementException {
         CloseableHttpResponse httpResponse = null;
         int retryCount = 0;
         boolean retry;
@@ -599,7 +601,7 @@ public final class APIUtil {
             httpResponse.close();
             String errorMessage = EntityUtils.toString(httpResponse.getEntity(),
                     APIConstants.DigestAuthConstants.CHARSET);
-            throw new ArtifactSynchronizerException(errorMessage + "Event-Hub status code is : "
+            throw new APIManagementException(errorMessage + "Event-Hub status code is : "
                     + httpResponse.getStatusLine().getStatusCode());
         }
     }
@@ -4868,6 +4870,7 @@ public final class APIUtil {
     public static void createDevOpsRole(String roleName, int tenantId) throws APIManagementException {
 
         Permission[] devOpsPermissions = new Permission[]{
+                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION),
                 new Permission(APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION),
                 new Permission(APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION),
                 new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION),
@@ -8194,8 +8197,6 @@ public final class APIUtil {
             return;
         }
 
-        ThrottlePolicyDeploymentManager deploymentManager = ThrottlePolicyDeploymentManager.getInstance();
-        ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         Map<String, Long> defualtLimits = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getThrottleProperties().getDefaultThrottleTierLimits();
         long tenPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN) ?
@@ -8242,18 +8243,15 @@ public final class APIUtil {
             }
 
             if (needDeployment) {
-                String policyString;
-                try {
-                    policyString = policyBuilder.getThrottlePolicyForAppLevel(applicationPolicy);
-                    String policyFile = applicationPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP +
-                            "_" + applicationPolicy.getPolicyName();
-                    if (!APIConstants.DEFAULT_APP_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
-                        deploymentManager.deployPolicyToGlobalCEP(policyString);
-                    }
-                    apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_APP, applicationPolicy.getPolicyName(),
-                            applicationPolicy.getTenantId(), true);
-                } catch (APITemplateException e) {
-                    throw new APIManagementException("Error while adding default subscription policy" + applicationPolicy.getPolicyName(), e);
+                if (!APIConstants.DEFAULT_APP_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                    ApplicationPolicy retrievedPolicy = apiMgtDAO.getApplicationPolicy(policyName, tenantId);
+                    ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(
+                            UUID.randomUUID().toString(),
+                            System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
+                            retrievedPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+                            retrievedPolicy.getPolicyName(),
+                            retrievedPolicy.getDefaultQuotaPolicy().getType());
+                    APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
                 }
             }
         }
@@ -8303,18 +8301,17 @@ public final class APIUtil {
             }
 
             if (needDeployment) {
-                String policyString;
-                try {
-                    policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subscriptionPolicy);
-                    String policyFile = subscriptionPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB +
-                            "_" + subscriptionPolicy.getPolicyName();
-                    if (!APIConstants.DEFAULT_SUB_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
-                        deploymentManager.deployPolicyToGlobalCEP(policyString);
-                    }
-                    apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_SUB, subscriptionPolicy.getPolicyName(),
-                            subscriptionPolicy.getTenantId(), true);
-                } catch (APITemplateException e) {
-                    throw new APIManagementException("Error while adding default application policy " + subscriptionPolicy.getPolicyName(), e);
+                if (!APIConstants.DEFAULT_SUB_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                    SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
+                    SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(
+                            UUID.randomUUID().toString(),
+                            System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
+                            retrievedPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+                            retrievedPolicy.getPolicyName(), retrievedPolicy.getDefaultQuotaPolicy().getType(),
+                            retrievedPolicy.getRateLimitCount(), retrievedPolicy.getRateLimitTimeUnit(),
+                            retrievedPolicy.isStopOnQuotaReach(),
+                            retrievedPolicy.getGraphQLMaxDepth(), retrievedPolicy.getGraphQLMaxComplexity());
+                    APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
                 }
             }
         }
@@ -8364,18 +8361,18 @@ public final class APIUtil {
             }
 
             if (needDeployment) {
-                String policyString;
-                try {
-                    policyString = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
-                    String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_API +
-                            "_" + apiPolicy.getPolicyName() + "_default";
-                    if (!APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
-                        deploymentManager.deployPolicyToGlobalCEP(policyString);
+                if (!APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                    APIPolicy retrievedPolicy = apiMgtDAO.getAPIPolicy(policyName, tenantId);
+                    List<Integer> addedConditionGroupIds = new ArrayList<>();
+                    for (Pipeline pipeline : retrievedPolicy.getPipelines()) {
+                        addedConditionGroupIds.add(pipeline.getId());
                     }
-                    apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_API, apiPolicy.getPolicyName(),
-                            apiPolicy.getTenantId(), true);
-                } catch (APITemplateException e) {
-                    throw new APIManagementException("Error while adding default api policy " + apiPolicy.getPolicyName(), e);
+                    APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
+                            System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
+                            retrievedPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+                            retrievedPolicy.getPolicyName(),
+                            retrievedPolicy.getDefaultQuotaPolicy().getType(), addedConditionGroupIds, null);
+                    APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
                 }
             }
         }
@@ -11619,6 +11616,25 @@ public final class APIUtil {
         } catch (UserStoreException e) {
             APIUtil.handleException("Couldn't read tenant configuration from User Store", e);
         }
+
+        //append original role to the role mapping list
+        Set<Map.Entry<String, JsonElement>> roleMappingEntries = newRoleMappingJson.entrySet();
+        for (Map.Entry<String, JsonElement> entry: roleMappingEntries) {
+            List<String> currentRoles = Arrays.asList(String.valueOf(entry.getValue()).split(","));
+            boolean isOriginalRoleAlreadyInRoles = false;
+            for (String role: currentRoles) {
+                if (role.equals(entry.getKey())) {
+                    isOriginalRoleAlreadyInRoles = true;
+                    break;
+                }
+            }
+
+            if (!isOriginalRoleAlreadyInRoles) {
+                String newRoles = entry.getKey() + "," + entry.getValue();
+                newRoleMappingJson.replace(entry.getKey(), entry.getValue(), newRoles);
+            }
+        }
+
         existingTenantConfObject.remove(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
         JsonElement jsonElement = new JsonParser().parse(String.valueOf(newRoleMappingJson));
         existingTenantConfObject.add(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG, jsonElement);
@@ -11760,5 +11776,49 @@ public final class APIUtil {
         }
         return false;
     }
-}
 
+
+    /**
+     * Get UUID by the API Identifier.
+     *
+     * @param identifier
+     * @return String uuid string
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static String getUUIDFromIdentifier(APIIdentifier identifier) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+    }
+
+    /**
+     * Get UUID by the API Identifier.
+     *
+     * @param identifier
+     * @return String uuid string
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static String getUUIDFromIdentifier(APIProductIdentifier identifier) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+    }
+
+    /**
+     * Get the API Product Identifier from UUID.
+     *
+     * @param uuid UUID of the API
+     * @return API Product Identifier
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getAPIProductIdentifierFromUUID(uuid);
+    }
+
+    /**
+     * Get the API Identifier from UUID.
+     *
+     * @param uuid UUID of the API
+     * @return API Identifier
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
+    }
+}

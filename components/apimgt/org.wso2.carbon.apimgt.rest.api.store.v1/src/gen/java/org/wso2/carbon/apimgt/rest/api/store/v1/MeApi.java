@@ -40,14 +40,14 @@ MeApiService delegate = new MeApiServiceImpl();
     @Path("/change-password")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Change the password of the user", notes = "Using this operation, logged-in user can change his/her password. ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Change the Password of the user", notes = "Using this operation, logged-in user can change their password. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Users" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. User password changed successfully", response = Void.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class) })
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
     public Response changeUserPassword(@ApiParam(value = "Current and new password of the user " ,required=true) CurrentAndNewPasswordsDTO body) throws APIManagementException{
         return delegate.changeUserPassword(body, securityContext);
     }

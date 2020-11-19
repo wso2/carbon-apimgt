@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -22,7 +23,7 @@ public class ErrorDTO   {
     private String message = null;
     private String description = null;
     private String moreInfo = null;
-    private List<ErrorListItemDTO> error = new ArrayList<>();
+    private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
   /**
    * Error code

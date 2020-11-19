@@ -13,13 +13,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class KeyManagerListDTO   {
   
     private Integer count = null;
-    private List<KeyManagerInfoDTO> list = new ArrayList<>();
+    private List<KeyManagerInfoDTO> list = new ArrayList<KeyManagerInfoDTO>();
 
   /**
    * Number of Key managers returned. 

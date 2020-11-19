@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -24,40 +25,38 @@ public class APIProductInfoDTO   {
     private String provider = null;
     private Boolean hasThumbnail = null;
 
-@XmlType(name="StateEnum")
-@XmlEnum(String.class)
-public enum StateEnum {
+    @XmlType(name="StateEnum")
+    @XmlEnum(String.class)
+    public enum StateEnum {
+        CREATED("CREATED"),
+        PUBLISHED("PUBLISHED");
+        private String value;
 
-    @XmlEnumValue("CREATED") CREATED(String.valueOf("CREATED")), @XmlEnumValue("PUBLISHED") PUBLISHED(String.valueOf("PUBLISHED"));
-
-
-    private String value;
-
-    StateEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static StateEnum fromValue(String v) {
-        for (StateEnum b : StateEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        StateEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StateEnum fromValue(String v) {
+            for (StateEnum b : StateEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private StateEnum state = null;
-    private List<String> securityScheme = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<String>();
 
   /**
    * UUID of the api product 
@@ -86,7 +85,7 @@ public enum StateEnum {
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPIProduct", value = "Name of the API Product")
+  @ApiModelProperty(example = "PizzaShackAPIProduct", value = "Name of the API Product")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -103,7 +102,7 @@ public enum StateEnum {
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPI", value = "")
+  @ApiModelProperty(example = "pizzaproduct", value = "")
   @JsonProperty("context")
   public String getContext() {
     return context;
@@ -121,7 +120,7 @@ public enum StateEnum {
   }
 
   
-  @ApiModelProperty(example = "A calculator API Product that supports basic operations", value = "A brief description about the API")
+  @ApiModelProperty(example = "This is a simple API for Pizza Shack online pizza delivery store", value = "A brief description about the API")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -192,7 +191,7 @@ public enum StateEnum {
   }
 
   
-  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @ApiModelProperty(example = "[\"oauth2\"]", value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
     return securityScheme;

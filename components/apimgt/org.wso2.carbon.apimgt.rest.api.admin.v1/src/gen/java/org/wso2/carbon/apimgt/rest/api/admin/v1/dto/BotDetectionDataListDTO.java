@@ -13,13 +13,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class BotDetectionDataListDTO   {
   
     private Integer count = null;
-    private List<BotDetectionDataDTO> list = new ArrayList<>();
+    private List<BotDetectionDataDTO> list = new ArrayList<BotDetectionDataDTO>();
 
   /**
    * Number of Bot Detection Data returned. 

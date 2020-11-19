@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -25,38 +26,40 @@ public class SubscriptionDTO   {
     private String throttlingPolicy = null;
     private String requestedThrottlingPolicy = null;
 
-@XmlType(name="StatusEnum")
-@XmlEnum(String.class)
-public enum StatusEnum {
+    @XmlType(name="StatusEnum")
+    @XmlEnum(String.class)
+    public enum StatusEnum {
+        BLOCKED("BLOCKED"),
+        PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"),
+        UNBLOCKED("UNBLOCKED"),
+        ON_HOLD("ON_HOLD"),
+        REJECTED("REJECTED"),
+        TIER_UPDATE_PENDING("TIER_UPDATE_PENDING");
+        private String value;
 
-    @XmlEnumValue("BLOCKED") BLOCKED(String.valueOf("BLOCKED")), @XmlEnumValue("PROD_ONLY_BLOCKED") PROD_ONLY_BLOCKED(String.valueOf("PROD_ONLY_BLOCKED")), @XmlEnumValue("UNBLOCKED") UNBLOCKED(String.valueOf("UNBLOCKED")), @XmlEnumValue("ON_HOLD") ON_HOLD(String.valueOf("ON_HOLD")), @XmlEnumValue("REJECTED") REJECTED(String.valueOf("REJECTED")), @XmlEnumValue("TIER_UPDATE_PENDING") TIER_UPDATE_PENDING(String.valueOf("TIER_UPDATE_PENDING"));
-
-
-    private String value;
-
-    StatusEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static StatusEnum fromValue(String v) {
-        for (StatusEnum b : StatusEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        StatusEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StatusEnum fromValue(String v) {
+            for (StatusEnum b : StatusEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private StatusEnum status = null;
     private String redirectionParams = null;
 
@@ -106,7 +109,7 @@ public enum StatusEnum {
   }
 
   
-  @ApiModelProperty(value = "The unique identifier of the API.")
+  @ApiModelProperty(example = "2962f3bb-8330-438e-baee-0ee1d6434ba4", value = "The unique identifier of the API.")
   @JsonProperty("apiId")
   public String getApiId() {
     return apiId;
@@ -210,7 +213,7 @@ public enum StatusEnum {
   }
 
   
-  @ApiModelProperty(value = "A url and other parameters the subscriber can be redirected.")
+  @ApiModelProperty(example = "", value = "A url and other parameters the subscriber can be redirected.")
   @JsonProperty("redirectionParams")
   public String getRedirectionParams() {
     return redirectionParams;

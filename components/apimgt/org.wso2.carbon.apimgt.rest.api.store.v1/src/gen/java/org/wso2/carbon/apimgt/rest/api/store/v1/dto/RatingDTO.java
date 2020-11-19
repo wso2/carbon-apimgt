@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -28,7 +29,7 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "32acfa7a-77f8-4fe0-bb7f-a902f36546d0", value = "")
   @JsonProperty("ratingId")
   public String getRatingId() {
     return ratingId;
@@ -45,7 +46,7 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "e93fb282-b456-48fc-8981-003fb89086ae", value = "")
   @JsonProperty("apiId")
   public String getApiId() {
     return apiId;
@@ -62,9 +63,9 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("ratedBy")
-  public String getRatedBy() {
+ @Size(max=50)  public String getRatedBy() {
     return ratedBy;
   }
   public void setRatedBy(String ratedBy) {
@@ -79,7 +80,7 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "4", required = true, value = "")
   @JsonProperty("rating")
   @NotNull
   public Integer getRating() {

@@ -13,13 +13,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class SettingsDTO   {
   
-    private List<String> grantTypes = new ArrayList<>();
-    private List<String> scopes = new ArrayList<>();
+    private List<String> grantTypes = new ArrayList<String>();
+    private List<String> scopes = new ArrayList<String>();
     private Boolean applicationSharingEnabled = false;
     private Boolean mapExistingAuthApps = false;
     private String apiGatewayEndpoint = null;
@@ -230,7 +231,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "The 'PasswordJavaRegEx' cofigured in the UserStoreManager")
+  @ApiModelProperty(example = "", value = "The 'PasswordJavaRegEx' cofigured in the UserStoreManager")
   @JsonProperty("userStorePasswordPattern")
   public String getUserStorePasswordPattern() {
     return userStorePasswordPattern;
@@ -248,7 +249,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "The regex configured in the Password Policy property 'passwordPolicy.pattern'")
+  @ApiModelProperty(example = "", value = "The regex configured in the Password Policy property 'passwordPolicy.pattern'")
   @JsonProperty("passwordPolicyPattern")
   public String getPasswordPolicyPattern() {
     return passwordPolicyPattern;

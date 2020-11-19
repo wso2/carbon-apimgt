@@ -13,13 +13,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class LifecycleHistoryDTO   {
   
     private Integer count = null;
-    private List<LifecycleHistoryItemDTO> list = new ArrayList<>();
+    private List<LifecycleHistoryItemDTO> list = new ArrayList<LifecycleHistoryItemDTO>();
 
   /**
    **/

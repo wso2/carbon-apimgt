@@ -14,13 +14,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class WSDLValidationResponseDTO   {
   
     private Boolean isValid = null;
-    private List<ErrorListItemDTO> errors = new ArrayList<>();
+    private List<ErrorListItemDTO> errors = new ArrayList<ErrorListItemDTO>();
     private WSDLValidationResponseWsdlInfoDTO wsdlInfo = null;
 
   /**

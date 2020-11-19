@@ -25,7 +25,7 @@ export default class Resource {
      * @memberof Resource
      */
     constructor() {
-        this.client = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        this.client = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
     }
 
     /**

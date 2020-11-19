@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
-import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -67,9 +66,9 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    protected void createAPI(API api) throws APIManagementException {
+    protected String createAPI(API api) throws APIManagementException {
         this.api = api;
-        super.createAPI(api);
+        return super.createAPI(api);
     }
 
     @Override
@@ -108,16 +107,6 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     protected void invalidateResourceCache(String apiContext, String apiVersion, Set<URITemplate> uriTemplates)  {
         //do nothing
     }
-
-    @Override
-    protected ThrottlePolicyTemplateBuilder getThrottlePolicyTemplateBuilder() {
-        final String POLICY_LOCATION = "repository" + File.separator + "resources" + File.separator + "policy_templates"
-                + File.separator + "";
-        ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
-        policyBuilder.setPolicyTemplateLocation(POLICY_LOCATION);
-        return policyBuilder;
-    }
-
 
     @Override
     public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {

@@ -16,16 +16,17 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 @ApiModel(description = "CORS configuration for the API ")
 
 public class APICorsConfigurationDTO   {
   
     private Boolean corsConfigurationEnabled = false;
-    private List<String> accessControlAllowOrigins = new ArrayList<>();
+    private List<String> accessControlAllowOrigins = new ArrayList<String>();
     private Boolean accessControlAllowCredentials = false;
-    private List<String> accessControlAllowHeaders = new ArrayList<>();
-    private List<String> accessControlAllowMethods = new ArrayList<>();
+    private List<String> accessControlAllowHeaders = new ArrayList<String>();
+    private List<String> accessControlAllowMethods = new ArrayList<String>();
 
   /**
    **/

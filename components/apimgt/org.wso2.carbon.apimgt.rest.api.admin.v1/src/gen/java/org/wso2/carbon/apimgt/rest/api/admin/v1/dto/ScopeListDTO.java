@@ -13,13 +13,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class ScopeListDTO   {
   
     private Integer count = null;
-    private List<ScopeDTO> list = new ArrayList<>();
+    private List<ScopeDTO> list = new ArrayList<ScopeDTO>();
 
   /**
    * Number of scopes available for tenant. 

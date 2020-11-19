@@ -426,8 +426,8 @@ class ApplicationFormHandler extends React.Component {
                     <FormattedMessage
                         id='Applications.Create.ApplicationFormHandler.create.application.sub.heading'
                         defaultMessage={
-                            'Create an application providing name, quota and token type parameters.'
-                            + ' Description is optional'
+                            'Create an application providing name and quota parameters.'
+                            + ' Description is optional.'
                         }
                     />
                 </Typography>
@@ -453,8 +453,8 @@ class ApplicationFormHandler extends React.Component {
                     <FormattedMessage
                         id='Applications.Create.ApplicationFormHandler.edit.application.sub.heading'
                         defaultMessage={
-                            'Edit this application. Name, quota and token type are mandatory parameters'
-                            + ' and description is optional'
+                            'Edit this application. Name and quota are mandatory parameters'
+                            + ' and description is optional.'
                         }
                     />
                 </Typography>

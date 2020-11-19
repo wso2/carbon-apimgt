@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -21,7 +22,7 @@ public class ProductAPIDTO   {
     private String name = null;
     private String apiId = null;
     private String version = null;
-    private List<APIOperationsDTO> operations = new ArrayList<>();
+    private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
 
   /**
    **/
@@ -31,7 +32,7 @@ public class ProductAPIDTO   {
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPI", value = "")
+  @ApiModelProperty(example = "PizzaShackAPI", value = "")
   @JsonProperty("name")
   public String getName() {
     return name;

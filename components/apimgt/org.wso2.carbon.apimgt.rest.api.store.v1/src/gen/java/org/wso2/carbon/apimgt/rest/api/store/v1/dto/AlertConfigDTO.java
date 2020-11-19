@@ -13,13 +13,14 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class AlertConfigDTO   {
   
     private String configurationId = null;
-    private Map<String, String> _configuration = new HashMap<>();
+    private Map<String, String> _configuration = new HashMap<String, String>();
 
   /**
    * The alert config subscription id.
@@ -48,7 +49,7 @@ public class AlertConfigDTO   {
   }
 
   
-  @ApiModelProperty(example = "{\"apiName\":\"PizzaShackAPI\",\"apiVersion\":\"1.0.0\",\"applicationName\":\"DefaultApplication\",\"requestConunt\":\"12\"}", value = "The config parameters.")
+  @ApiModelProperty(example = "{\"apiName\":\"PizzaShackAPI\",\"apiVersion\":\"1.0.0\",\"applicationName\":\"DefaultApplication\",\"requestCount\":\"12\"}", value = "The config parameters.")
   @JsonProperty("configuration")
   public Map<String, String> getConfiguration() {
     return _configuration;

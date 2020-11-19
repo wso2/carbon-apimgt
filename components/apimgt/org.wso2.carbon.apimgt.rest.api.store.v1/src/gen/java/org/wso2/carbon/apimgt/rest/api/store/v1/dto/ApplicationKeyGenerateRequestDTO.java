@@ -12,49 +12,48 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class ApplicationKeyGenerateRequestDTO   {
   
 
-@XmlType(name="KeyTypeEnum")
-@XmlEnum(String.class)
-public enum KeyTypeEnum {
+    @XmlType(name="KeyTypeEnum")
+    @XmlEnum(String.class)
+    public enum KeyTypeEnum {
+        PRODUCTION("PRODUCTION"),
+        SANDBOX("SANDBOX");
+        private String value;
 
-    @XmlEnumValue("PRODUCTION") PRODUCTION(String.valueOf("PRODUCTION")), @XmlEnumValue("SANDBOX") SANDBOX(String.valueOf("SANDBOX"));
-
-
-    private String value;
-
-    KeyTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static KeyTypeEnum fromValue(String v) {
-        for (KeyTypeEnum b : KeyTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        KeyTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static KeyTypeEnum fromValue(String v) {
+            for (KeyTypeEnum b : KeyTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private KeyTypeEnum keyType = null;
     private String keyManager = null;
-    private List<String> grantTypesToBeSupported = new ArrayList<>();
+    private List<String> grantTypesToBeSupported = new ArrayList<String>();
     private String callbackUrl = null;
-    private List<String> scopes = new ArrayList<>();
+    private List<String> scopes = new ArrayList<String>();
     private String validityTime = null;
     private String clientId = null;
     private String clientSecret = null;
@@ -87,7 +86,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(value = "key Manager to Generate Keys")
+  @ApiModelProperty(example = "Resident Key Manager", value = "key Manager to Generate Keys")
   @JsonProperty("keyManager")
   public String getKeyManager() {
     return keyManager;
@@ -105,7 +104,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(required = true, value = "Grant types that should be supported by the application")
+  @ApiModelProperty(example = "[\"password\",\"client_credentials\"]", required = true, value = "Grant types that should be supported by the application")
   @JsonProperty("grantTypesToBeSupported")
   @NotNull
   public List<String> getGrantTypesToBeSupported() {
@@ -124,7 +123,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(value = "Callback URL")
+  @ApiModelProperty(example = "http://sample.com/callback/url", value = "Callback URL")
   @JsonProperty("callbackUrl")
   public String getCallbackUrl() {
     return callbackUrl;
@@ -177,7 +176,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "", value = "Client ID for generating access token.")
+  @ApiModelProperty(example = "sZzoeSCI_vL2cjSXZQmsmV8JEyga", value = "Client ID for generating access token.")
   @JsonProperty("clientId")
   public String getClientId() {
     return clientId;
@@ -195,7 +194,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "", value = "Client secret for generating access token. This is given together with the client Id.")
+  @ApiModelProperty(example = "nrs3YAP4htxnz_DqpvGhf9Um04oa", value = "Client secret for generating access token. This is given together with the client Id.")
   @JsonProperty("clientSecret")
   public String getClientSecret() {
     return clientSecret;
@@ -213,7 +212,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "\"\"", value = "Additional properties needed.")
+  @ApiModelProperty(example = "{}", value = "Additional properties needed.")
   @JsonProperty("additionalProperties")
   public Object getAdditionalProperties() {
     return additionalProperties;

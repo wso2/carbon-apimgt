@@ -17,11 +17,16 @@
  */
 import React, { useState, useEffect } from 'react';
 import {
-    ListItemIcon, List, withStyles, ListItem, ListItemText,
+    ListItemIcon, withStyles, ListItem, ListItemText, Divider,
 } from '@material-ui/core';
+
 import ScopesIcon from '@material-ui/icons/ListAlt';
+import NotificationImportantIcon from '@material-ui/icons/NotificationImportant';
 import PropTypes from 'prop-types';
 import { Link, withRouter } from 'react-router-dom';
+import Collapse from '@material-ui/core/Collapse';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { FormattedMessage } from 'react-intl';
 import classNames from 'classnames';
@@ -33,9 +38,6 @@ const styles = (theme) => ({
     },
     listText: {
         color: theme.palette.getContrastText(theme.palette.background.drawer),
-    },
-    listTextSmall: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
     },
     smallIcon: {
         marginRight: 5,
@@ -57,6 +59,27 @@ const styles = (theme) => ({
     scopeIconColor: {
         fill: theme.palette.getContrastText(theme.palette.background.leftMenu),
     },
+    alertIconColor: {
+        fill: theme.palette.getContrastText(theme.palette.background.leftMenu),
+    },
+    divider: {
+        marginTop: theme.spacing(1),
+        backgroundColor: theme.palette.background.divider,
+    },
+    categoryHeader: {
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
+        '& svg': {
+            color: theme.palette.common.white,
+        },
+    },
+    categoryHeaderPrimary: {
+        color: theme.palette.common.white,
+    },
+    itemIcon: {
+        minWidth: 'auto',
+        marginRight: theme.spacing(2),
+    },
 });
 
 /**
@@ -67,109 +90,212 @@ const styles = (theme) => ({
  */
 function GlobalNavLinks(props) {
     const [selected, setSelected] = useState('apis');
+    const [openAPIs, setOpenAPIs] = React.useState(true);
+    const [openSettings, setOpenSettings] = React.useState(false);
+    const handleAPIsClick = () => {
+        setOpenAPIs(!openAPIs);
+    };
+    const handleSettingsClick = () => {
+        setOpenSettings(!openSettings);
+    };
     const {
-        classes, theme, smallView, history,
+        classes, theme, smallView, history, toggleGlobalNavBar,
     } = props;
 
     const publisherUser = !AuthManager.isNotPublisher();
-    const ditectCurrentMenu = (location) => {
+    const detectCurrentMenu = (location) => {
         const { pathname } = location;
-        if (/\/apis$/g.test(pathname) || /\/apis\//g.test(pathname)) {
+        if (/\/apis($|\/)/g.test(pathname)) {
             setSelected('apis');
-        } else if (/\/api-products$/g.test(pathname) || /\/api-products\//g.test(pathname)) {
+        } else if (/\/api-products($|\/)/g.test(pathname)) {
             setSelected('api-products');
-        } else if (/\/scopes$/g.test(pathname) || /\/scopes\//g.test(pathname)) {
+        } else if (/\/scopes($|\/)/g.test(pathname)) {
             setSelected('scopes');
+        } else if (/\/settings($|\/)/g.test(pathname)) {
+            setSelected('alerts');
+        } else if (/\/service-catalog($|\/)/g.test(pathname)) {
+            setSelected('service-catalog');
         }
     };
     useEffect(() => {
         const { location } = history;
-        ditectCurrentMenu(location);
+        detectCurrentMenu(location);
     }, []);
     history.listen((location) => {
-        ditectCurrentMenu(location);
+        detectCurrentMenu(location);
     });
     let strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
-    let iconWidth = 32;
+    let iconWidth = 24;
     if (smallView) {
         iconWidth = 16;
         strokeColor = theme.palette.getContrastText(theme.palette.background.appBar);
     }
     return (
-        <List className={classes.listRoot}>
-            <Link to='/apis' className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}>
-                <ListItem button>
-                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                        <CustomIcon width={iconWidth} height={iconWidth} icon='api' strokeColor={strokeColor} />
-                    </ListItemIcon>
-                    <ListItemText
-                        classes={{
-                            primary: classNames({
-                                [classes.selectedText]: selected === 'apis',
-                                [classes.listText]: selected !== 'apis' && !smallView,
-                                [classes.listTextSmall]: selected !== 'apis' && smallView,
-                            }),
-                        }}
-                        primary={<FormattedMessage id='Base.Header.navbar.GlobalNavBar.apis' defaultMessage='APIs' />}
-                    />
-                </ListItem>
-            </Link>
-            <Link
-                to='/scopes'
-                className={classNames({ [classes.selected]: selected === 'scopes', [classes.links]: true })}
-            >
-                <ListItem button>
-                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                        <ScopesIcon className={classes.scopeIconColor} />
-                    </ListItemIcon>
-                    <ListItemText
-                        classes={{
-                            primary: classNames({
-                                [classes.selectedText]: selected === 'scopes',
-                                [classes.listText]: selected !== 'scopes' && !smallView,
-                                [classes.listTextSmall]: selected !== 'scopes' && smallView,
-                            }),
-                        }}
-                        primary={
-                            <FormattedMessage id='Base.Header.navbar.GlobalNavBar.scopes' defaultMessage='Scopes' />
-                        }
-                    />
-                </ListItem>
-            </Link>
-            { publisherUser
-            && (
-                <Link
-                    to='/api-products'
-                    className={classNames({ [classes.selected]: selected === 'api-products', [classes.links]: true })}
+        <>
+            <ListItem className={classes.categoryHeader} button onClick={handleAPIsClick}>
+                <ListItemText
+                    classes={{
+                        primary: classes.categoryHeaderPrimary,
+                    }}
                 >
-                    <ListItem button>
-                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                            <CustomIcon
-                                width={iconWidth}
-                                height={iconWidth}
-                                icon='api-product'
-                                strokeColor={strokeColor}
-                            />
+                    <FormattedMessage id='Base.Header.navbar.GlobalNavBar.APIs' defaultMessage='APIs' />
+                </ListItemText>
+                {openAPIs ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <Collapse in={openAPIs} timeout='auto' unmountOnExit>
+                <Link
+                    to='/apis'
+                    className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}
+                >
+                    <ListItem button onClick={toggleGlobalNavBar}>
+                        <ListItemIcon
+                            classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}
+                            className={classes.itemIcon}
+                        >
+                            <CustomIcon width={iconWidth} height={iconWidth} icon='api' strokeColor={strokeColor} />
                         </ListItemIcon>
                         <ListItemText
                             classes={{
                                 primary: classNames({
-                                    [classes.selectedText]: selected === 'api-products',
-                                    [classes.listText]: selected !== 'api-products' && !smallView,
-                                    [classes.listTextSmall]: selected !== 'api-products' && smallView,
+                                    [classes.selectedText]: selected === 'apis',
+                                    [classes.listText]: selected !== 'apis',
                                 }),
                             }}
                             primary={(
                                 <FormattedMessage
-                                    id='Base.Header.navbar.GlobalNavBar.api.products'
-                                    defaultMessage='API Products'
+                                    id='Base.Header.navbar.GlobalNavBar.apis'
+                                    defaultMessage='API Listing'
                                 />
                             )}
                         />
                     </ListItem>
                 </Link>
-            )}
-        </List>
+                { publisherUser
+                && (
+                    <Link
+                        to='/api-products'
+                        className={classNames({
+                            [classes.selected]: selected === 'api-products',
+                            [classes.links]: true,
+                        })}
+                    >
+                        <ListItem button onClick={toggleGlobalNavBar}>
+                            <ListItemIcon
+                                classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}
+                                className={classes.itemIcon}
+                            >
+                                <CustomIcon
+                                    width={iconWidth}
+                                    height={iconWidth}
+                                    icon='api-product'
+                                    strokeColor={strokeColor}
+                                />
+                            </ListItemIcon>
+                            <ListItemText
+                                classes={{
+                                    primary: classNames({
+                                        [classes.selectedText]: selected === 'api-products',
+                                        [classes.listText]: selected !== 'api-products',
+                                    }),
+                                }}
+                                primary={(
+                                    <FormattedMessage
+                                        id='Base.Header.navbar.GlobalNavBar.api.products'
+                                        defaultMessage='API Product Listing'
+                                    />
+                                )}
+                            />
+                        </ListItem>
+                    </Link>
+                )}
+                <Link
+                    to='/scopes'
+                    className={classNames({ [classes.selected]: selected === 'scopes', [classes.links]: true })}
+                >
+                    <ListItem button onClick={toggleGlobalNavBar}>
+                        <ListItemIcon
+                            classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}
+                            className={classes.itemIcon}
+                        >
+                            <ScopesIcon className={classes.scopeIconColor} />
+                        </ListItemIcon>
+                        <ListItemText
+                            classes={{
+                                primary: classNames({
+                                    [classes.selectedText]: selected === 'scopes',
+                                    [classes.listText]: selected !== 'scopes',
+                                }),
+                            }}
+                            primary={
+                                <FormattedMessage id='Base.Header.navbar.GlobalNavBar.scopes' defaultMessage='Scopes' />
+                            }
+                        />
+                    </ListItem>
+                </Link>
+            </Collapse>
+            <Divider className={classes.divider} />
+            <Link
+                to='/service-catalog'
+                className={classNames({ [classes.selected]: selected === 'service-catalog', [classes.links]: true })}
+            >
+                <ListItem className={classes.categoryHeader} button onClick={toggleGlobalNavBar}>
+                    <ListItemText
+                        classes={{
+                            primary: classes.categoryHeaderPrimary,
+                        }}
+                    >
+                        <FormattedMessage
+                            id='Base.Header.navbar.GlobalNavBar.Service.Catalog'
+                            defaultMessage='Service Catalog'
+                        />
+                    </ListItemText>
+                </ListItem>
+            </Link>
+            <Divider className={classes.divider} />
+            <ListItem className={classes.categoryHeader} button onClick={handleSettingsClick}>
+                <ListItemText
+                    classes={{
+                        primary: classes.categoryHeaderPrimary,
+                    }}
+                >
+                    <FormattedMessage id='Base.Header.navbar.GlobalNavBar.Settings' defaultMessage='Settings' />
+                </ListItemText>
+                {openSettings ? <ExpandLess /> : <ExpandMore />}
+
+            </ListItem>
+            <Collapse in={openSettings} timeout='auto' unmountOnExit>
+                <Link
+                    to='/settings'
+                    className={classNames({ [classes.selected]: selected === 'alerts', [classes.links]: true })}
+                >
+                    <ListItem button onClick={toggleGlobalNavBar}>
+                        <ListItemIcon
+                            classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}
+                            className={classes.itemIcon}
+                        >
+                            <NotificationImportantIcon className={classes.alertIconColor} />
+                        </ListItemIcon>
+                        <ListItemText
+                            classes={{
+                                primary: classNames({
+                                    [classes.selectedText]: selected === 'alerts',
+                                    [classes.listText]: selected !== 'alerts',
+                                }),
+                            }}
+                            primary={
+                                (
+                                    <FormattedMessage
+                                        id='Base.Header.navbar.GlobalNavBar.manage.alerts'
+                                        defaultMessage='Manage Alerts'
+                                    />
+                                )
+                            }
+                        />
+                    </ListItem>
+                </Link>
+            </Collapse>
+            <Divider className={classes.divider} />
+        </>
     );
 }
 GlobalNavLinks.propTypes = {
@@ -178,6 +304,7 @@ GlobalNavLinks.propTypes = {
         list: PropTypes.string,
         listText: PropTypes.string,
     }).isRequired,
+    toggleGlobalNavBar: PropTypes.func.isRequired,
     theme: PropTypes.shape({
         palette: PropTypes.shape({
             getContrastText: PropTypes.func,

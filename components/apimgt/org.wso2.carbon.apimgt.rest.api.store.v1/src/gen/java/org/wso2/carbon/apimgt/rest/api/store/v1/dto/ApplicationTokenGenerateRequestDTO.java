@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -19,7 +20,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   
     private String consumerSecret = null;
     private Long validityPeriod = null;
-    private List<String> scopes = new ArrayList<>();
+    private List<String> scopes = new ArrayList<String>();
     private String revokeToken = null;
     private Object additionalProperties = null;
 
@@ -32,7 +33,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Consumer secret of the application")
+  @ApiModelProperty(example = "cV5pvyisxug5b5QZInq9cGZrMOMa", value = "Consumer secret of the application")
   @JsonProperty("consumerSecret")
   public String getConsumerSecret() {
     return consumerSecret;
@@ -50,7 +51,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Token validity period")
+  @ApiModelProperty(example = "3600", value = "Token validity period")
   @JsonProperty("validityPeriod")
   public Long getValidityPeriod() {
     return validityPeriod;
@@ -68,7 +69,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Allowed scopes (space seperated) for the access token")
+  @ApiModelProperty(example = "[\"apim:subscribe\"]", value = "Allowed scopes (space seperated) for the access token")
   @JsonProperty("scopes")
   public List<String> getScopes() {
     return scopes;
@@ -86,7 +87,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Token to be revoked, if any")
+  @ApiModelProperty(example = "", value = "Token to be revoked, if any")
   @JsonProperty("revokeToken")
   public String getRevokeToken() {
     return revokeToken;

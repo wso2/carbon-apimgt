@@ -40,15 +40,15 @@ BotDetectionDataApiService delegate = new BotDetectionDataApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all bot detected data ", notes = "Get all bot detected data ", response = BotDetectionDataListDTO.class, authorizations = {
+    @ApiOperation(value = "Get all Bot Detected Data ", notes = "Get all bot detected data ", response = BotDetectionDataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:bot_data", description = "Retrieve bot detection data"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
-    }, tags={  })
+    }, tags={ "Bot Detection Data" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Bot detected data returned. ", response = BotDetectionDataListDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Analytics Not Enabled. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getBotDetectionData() throws APIManagementException{
         return delegate.getBotDetectionData(securityContext);
     }

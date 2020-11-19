@@ -105,14 +105,13 @@ public class APIKeyMgtUtil {
 
         boolean cacheEnabledKeyMgt = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
 
-        if (cacheKey != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Storing KeyValidationDTO for key: " + cacheKey + ".");
-            }
-        }
-
         if (validationInfoDTO != null) {
             if (cacheEnabledKeyMgt) {
+                if (cacheKey != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Storing KeyValidationDTO for key: " + cacheKey + ".");
+                    }
+                }
                 Cache cache = getKeyManagerCache();
                 cache.put(cacheKey, validationInfoDTO);
             }
