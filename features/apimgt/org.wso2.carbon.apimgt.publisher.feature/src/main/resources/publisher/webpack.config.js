@@ -23,7 +23,10 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 
 const config = {
-    entry: { index: './source/index.jsx', swaggerWorkerInit: './source/src/app/webWorkers/swaggerWorkerInit.js' },
+    entry: {
+        index: './source/index.jsx',
+        swaggerWorkerInit: './source/src/app/webWorkers/swaggerWorkerInit.js',
+    },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
         filename: '[name].[contenthash].bundle.js',
