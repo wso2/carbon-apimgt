@@ -57,6 +57,27 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>${mongodb.driver.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>bson</artifactId>
+            <version>${mongodb.driver.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-core</artifactId>
+            <version>${mongodb.driver.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.consensys.cava</groupId>
+            <artifactId>cava-toml</artifactId>
+            <version>0.5.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
             <version>${pax.logging.api.version}</version>

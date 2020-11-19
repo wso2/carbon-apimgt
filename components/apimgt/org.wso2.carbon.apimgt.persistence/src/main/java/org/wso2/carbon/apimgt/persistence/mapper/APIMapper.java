@@ -22,9 +22,15 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.Gson;
+import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -34,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 
@@ -45,13 +52,13 @@ public interface APIMapper {
     @Mapping(source = "providerName", target = "id.providerName")
     @Mapping(source = "apiName", target = "id.apiName")
     @Mapping(source = "version", target = "id.version")
-    @Mapping(source = "id", target = "uuid")  
+    @Mapping(source = "id", target = "uuid")
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "availableTierNames", target = "availableTiers")
     @Mapping(source = "visibleOrganizations", target = "visibleTenants")
     @Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
     API toApi(PublisherAPI api);
-    
+
     @Mapping(source = "id.providerName", target = "providerName")
     @Mapping(source = "id.apiName", target = "apiName")
     @Mapping(source = "id.version", target = "version")
@@ -61,23 +68,44 @@ public interface APIMapper {
     @Mapping(source = "visibleTenants", target = "visibleOrganizations")
     @Mapping(source = "subscriptionAvailableTenants", target = "subscriptionAvailableOrgs")
     PublisherAPI toPublisherApi(API api);
-    
+
     @Mapping(source = "providerName", target = "id.providerName")
     @Mapping(source = "apiName", target = "id.apiName")
     @Mapping(source = "version", target = "id.version")
-    @Mapping(source = "id", target = "uuid")  
+    @Mapping(source = "id", target = "uuid")
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "context", target = "contextTemplate")
     API toApi(PublisherAPIInfo api);
-    
+
     @Mapping(source = "providerName", target = "id.providerName")
     @Mapping(source = "apiName", target = "id.apiName")
     @Mapping(source = "version", target = "id.version")
-    @Mapping(source = "id", target = "uuid")  
+    @Mapping(source = "id", target = "uuid")
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "context", target = "contextTemplate")
     API toApi(DevPortalAPIInfo api);
-    
+
+
+    default JSONObject mapJSONMapToJSONObject(Map<String,String> jsonMap) throws ParseException {
+        if (jsonMap != null) {
+            JSONParser parser = new JSONParser();
+            String jsonText = JSONValue.toJSONString(jsonMap);
+            JSONObject jsonObject = (JSONObject) parser.parse(jsonText);
+            return jsonObject;
+        }
+        return null;
+    }
+
+    default Map<String, Object> JSONObjectToJSONMap(JSONObject jsonObject){
+        Gson gson = new Gson();
+        if (jsonObject != null) {
+            jsonObject.toJSONString();
+            Map<String,Object> fromJson = gson.fromJson(jsonObject.toJSONString(), Map.class);
+
+            return fromJson;
+        }
+        return null;
+    }
 
     default List<Label> mapLabelToList(Set<String> labelSet) {
         List<Label> labels = new ArrayList<Label>();
@@ -91,7 +119,7 @@ public interface APIMapper {
         return labels;
 
     }
-    
+
     default Set<String> mapLabelToSet(List<Label> labelList) {
         Set<String> labelSet = new HashSet<String>();
         if (labelList != null) {
@@ -118,7 +146,7 @@ public interface APIMapper {
             return null;
         }
     }
-    
+
     default List<APICategory> mapAPICategoriesToList(Set<String> apiCategories) {
         List<APICategory> categoryList = new ArrayList<APICategory>();
         if (apiCategories != null) {
@@ -138,16 +166,16 @@ public interface APIMapper {
             }
         }
         return categorySet;
-        
+
     }
-    
+
     /*
-     * this method is created to create compatibility with json-simple 1.1 
+     * this method is created to create compatibility with json-simple 1.1
      */
     default JSONObject mapJson(JSONObject json) {
         return json;
     }
-    
+
     default Date mapStringToDate(String dateString) {
         if (dateString != null) {
             return new Date(Long.parseLong(dateString));
@@ -161,9 +189,9 @@ public interface APIMapper {
         }
         return null;
     }
-    
+
     default Set<Tier> mapStringToSet(Set<String> tierSet) {
-        
+
         HashSet<Tier> mappedTiers = new HashSet<Tier>();
         if (tierSet != null) {
             for (String tierName : tierSet) {
@@ -174,7 +202,7 @@ public interface APIMapper {
     }
 
     default Set<String> mapTierToSet(Set<Tier> tierSet) {
-        
+
         HashSet<String> mappedTiers = new HashSet<String>();
         if (tierSet != null) {
             for (Tier tier : tierSet) {

@@ -24,13 +24,13 @@ public class PersistenceManager {
     public static APIPersistence getPersistenceInstance(String userName) {
         //condition to check the configured Persistence type
         // if (Persistence type is Registry)
-        if (apiPersistenceInstance == null) {
-            synchronized (RegistryPersistenceImplOld.class) {
-                if (apiPersistenceInstance == null) {
-                    apiPersistenceInstance = new RegistryPersistenceImplOld(userName);
-                }
-            }
-        }
+//        if (apiPersistenceInstance == null) {
+//            synchronized (RegistryPersistenceImplOld.class) {
+//                if (apiPersistenceInstance == null) {
+//                    apiPersistenceInstance = new RegistryPersistenceImplOld(userName);
+//                }
+//            }
+//        }
         /*//else if (Persistence type is MongoDb)
         else if (apiPersistenceInstance == null) {
             synchronized (RegistryPersistenceImpl.class) {
@@ -39,9 +39,13 @@ public class PersistenceManager {
                 }
             }
         }*/
-
-        return new RegistryPersistenceImpl(userName);
-        //return apiPersistenceInstance;
+            synchronized (RegistryPersistenceImpl.class) {
+                if (apiPersistenceInstance == null) {
+                    apiPersistenceInstance = new MongoDBPersistenceImpl(userName);
+                }
+            }
+//        return new RegistryPersistenceImpl(userName);
+        return apiPersistenceInstance;
     }
 
 //    public static APIPersistence getInstance(String username) throws APIManagementException {
