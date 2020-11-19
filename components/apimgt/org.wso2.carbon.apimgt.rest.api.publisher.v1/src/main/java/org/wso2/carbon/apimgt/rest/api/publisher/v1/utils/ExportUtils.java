@@ -18,7 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -30,19 +34,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
@@ -51,6 +57,8 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -61,10 +69,8 @@ import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
@@ -77,7 +83,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,16 +95,57 @@ public class ExportUtils {
     private static final String SOAPTOREST = "SoapToRest";
 
     /**
+     * Validate name, version and provider before exporting an API/API Product
+     *
+     * @param name         API/API Product Name
+     * @param version      API/API Product version
+     * @param providerName Name of the provider
+     * @return Name of the provider
+     * @throws APIManagementException If an error occurs while retrieving the provider name from name, version
+     *                                and tenant
+     */
+    public static String validateExportParams(String name, String version, String providerName)
+            throws APIManagementException {
+        if (name == null || version == null) {
+            RestApiUtil.handleBadRequest("'name' (" + name + ") or 'version' (" + version
+                    + ") should not be null.", log);
+        }
+        String apiRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+        // If provider name is not given
+        if (StringUtils.isBlank(providerName)) {
+            // Retrieve the provider who is in same tenant domain and who owns the same API (by comparing
+            // API name and the version)
+            providerName = APIUtil.getAPIProviderFromAPINameVersionTenant(name, version, apiRequesterDomain);
+
+            // If there is no provider in current domain, the API cannot be exported
+            if (providerName == null) {
+                String errorMessage = "Error occurred while exporting. API: " + name + " version: " + version
+                        + " not found";
+                RestApiUtil.handleResourceNotFoundError(errorMessage, log);
+            }
+        }
+
+        if (!StringUtils.equals(MultitenantUtils.getTenantDomain(providerName), apiRequesterDomain)) {
+            // Not authorized to export requested API
+            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API +
+                    " name:" + name + " version:" + version + " provider:" + providerName, log);
+        }
+        return providerName;
+    }
+
+    /**
      * Exports an API from API Manager for a given API. Meta information, API icon, documentation,
      * WSDL and sequences are exported.
      *
      * @param apiProvider    API Provider
      * @param apiIdentifier  API Identifier
-     * @param apiDtoToReturn APIDTO
+     * @param apiDtoToReturn API DTO
      * @param userName       Username
      * @param exportFormat   Format of output documents. Can be YAML or JSON
      * @param preserveStatus Preserve API status on export
      * @return
+     * @throws APIManagementException If an error occurs while getting governance registry
      */
     public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn,
                                  String userName, ExportFormat exportFormat, Boolean preserveStatus)
@@ -153,6 +199,64 @@ public class ExportUtils {
             throw new APIManagementException(errorMessage, e);
         } catch (APIManagementException | APIImportExportException e) {
             RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Exports an API Product from API Manager for a given API Product. MMeta information, API Product icon, documentation, client certificates
+     * and dependent APIs are exported.
+     *
+     * @param apiProvider           API Provider
+     * @param apiProductIdentifier  API Product Identifier
+     * @param apiProductDtoToReturn API Product DTO
+     * @param userName              Username
+     * @param exportFormat          Format of output documents. Can be YAML or JSON
+     * @param preserveStatus        Preserve API Product status on export
+     * @return
+     * @throws APIManagementException If an error occurs while getting governance registry
+     */
+    public static File exportApiProduct(APIProvider apiProvider, APIProductIdentifier apiProductIdentifier,
+                                        APIProductDTO apiProductDtoToReturn, String userName, ExportFormat exportFormat,
+                                        Boolean preserveStatus)
+            throws APIManagementException {
+        int tenantId = 0;
+        try {
+            // Create temp location for storing API Product data
+            File exportFolder = CommonUtil.createTempDirectory(apiProductIdentifier);
+            String exportAPIBasePath = exportFolder.toString();
+            String archivePath = exportAPIBasePath.concat(File.separator + apiProductIdentifier.getName() + "-"
+                    + apiProductIdentifier.getVersion());
+            tenantId = APIUtil.getTenantId(userName);
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry(tenantId);
+            APIProduct apiProduct = APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToReturn, userName);
+
+            CommonUtil.createDirectory(archivePath);
+
+            addThumbnailToArchive(archivePath, apiProductIdentifier, registry);
+            addAPIDocumentationToArchive(archivePath, apiProductIdentifier, registry, exportFormat, apiProvider);
+            addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider,
+                    userName);
+            addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName, preserveStatus);
+
+            // Export mTLS authentication related certificates
+            if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Mutual SSL enabled. Exporting client certificates.");
+                }
+                ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiProduct);
+                addClientCertificatesToArchive(archivePath, apiTypeWrapper, tenantId, apiProvider, exportFormat);
+            }
+            CommonUtil.archiveDirectory(exportAPIBasePath);
+            FileUtils.deleteQuietly(new File(exportAPIBasePath));
+            return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
+        } catch (RegistryException e) {
+            String errorMessage = "Error while getting governance registry for tenant: " + tenantId;
+            throw new APIManagementException(errorMessage, e);
+        } catch (APIManagementException | APIImportExportException e) {
+            RestApiUtil.handleInternalServerError("Error while exporting " +
+                    RestApiConstants.RESOURCE_API_PRODUCT, e, log);
         }
         return null;
     }
@@ -799,7 +903,7 @@ public class ExportUtils {
      * @param tenantId       Tenant id of the user
      * @param provider       Api Provider
      * @param exportFormat   Export format of file
-     * @throws APIImportExportException
+     * @throws APIImportExportException If an error occurs when writing to file or retrieving certificate metadata
      */
     public static void addClientCertificatesToArchive(String archivePath, ApiTypeWrapper apiTypeWrapper,
                                                       int tenantId, APIProvider provider,
@@ -830,7 +934,7 @@ public class ExportUtils {
                         exportFormat, certificatesJson);
             }
         } catch (IOException e) {
-            String errorMessage = "Error while retrieving saving as YAML";
+            String errorMessage = "Error while saving as YAML or JSON";
             throw new APIImportExportException(errorMessage, e);
         } catch (APIManagementException e) {
             String errorMsg = "Error retrieving certificate meta data. tenantId [" + tenantId + "] api ["
@@ -872,6 +976,81 @@ public class ExportUtils {
             }
         });
         return certificatesList;
+    }
+
+    /**
+     * Retrieve meta information of the API Product to export and store it in the archive directory.
+     * URL template information are stored in swagger.json definition while rest of the required
+     * data are in api.json
+     *
+     * @param archivePath           Folder path to export meta information
+     * @param apiProductDtoToReturn APIProductDTO to be exported
+     * @param exportFormat          Export format of file
+     * @param apiProvider           API Provider
+     * @param userName              Username
+     * @throws APIImportExportException If an error occurs while exporting meta information
+     */
+    public static void addAPIProductMetaInformationToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
+                                                             ExportFormat exportFormat, APIProvider apiProvider,
+                                                             String userName)
+            throws APIImportExportException {
+
+        CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.META_INFO_DIRECTORY);
+
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            String formattedSwaggerJson = apiProvider.getAPIDefinitionOfAPIProduct(
+                    APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToReturn, userName));
+            writeToYamlOrJson(archivePath +
+                    ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat, formattedSwaggerJson);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Meta information retrieved successfully for API Product: " + apiProductDtoToReturn.getName());
+            }
+
+            JsonObject apiProductJsonObject = addTypeAndVersionToFile(ImportExportConstants.TYPE_API_PRODUCT,
+                    ImportExportConstants.APIM_VERSION, gson.toJsonTree(apiProductDtoToReturn));
+            String apiProductInJson = gson.toJson(apiProductJsonObject);
+            writeToYamlOrJson(archivePath +
+                    ImportExportConstants.API_FILE_LOCATION, exportFormat, apiProductInJson);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving Swagger definition for API Product: "
+                    + apiProductDtoToReturn.getName();
+            throw new APIImportExportException(errorMessage, e);
+        } catch (IOException e) {
+            String errorMessage = "Error while saving as YAML for API Product: " + apiProductDtoToReturn.getName();
+            throw new APIImportExportException(errorMessage, e);
+        }
+    }
+
+    /**
+     * Retrieve dependent APIs by checking the resources of the API Product and store those in the archive directory.
+     *
+     * @param archivePath           Temp location to save the API artifacts
+     * @param apiProductDtoToReturn API Product DTO which the resources should be considered
+     * @param userName              User name of the requester
+     * @param provider              API Product Provider
+     * @param exportFormat          Export format of the API meta data, could be yaml or json
+     * @param isStatusPreserved     Whether API status is preserved while export
+     * @throws APIImportExportException If an error occurs while creating the directory or extracting the archive
+     * @throws APIManagementException   If an error occurs while retrieving API related resources
+     */
+    public static void addDependentAPIsToArchive(String archivePath, APIProductDTO apiProductDtoToReturn, ExportFormat exportFormat,
+                                                 APIProvider provider, String userName, Boolean isStatusPreserved)
+            throws APIImportExportException, APIManagementException {
+        String apisDirectoryPath = archivePath + File.separator + APIImportExportConstants.APIS_DIRECTORY;
+        CommonUtil.createDirectory(apisDirectoryPath);
+
+        List<ProductAPIDTO> apisList = apiProductDtoToReturn.getApis();
+        for (ProductAPIDTO productAPIDTO : apisList) {
+            String apiProductRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
+            APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api);
+            File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, userName, exportFormat,
+                    isStatusPreserved);
+            CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
+        }
     }
 
     /**

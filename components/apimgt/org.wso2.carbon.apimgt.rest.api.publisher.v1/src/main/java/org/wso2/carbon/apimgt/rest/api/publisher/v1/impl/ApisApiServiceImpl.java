@@ -4022,6 +4022,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                                   Boolean preserveStatus, MessageContext messageContext) {
         APIIdentifier apiIdentifier;
         APIDTO apiDtoToReturn;
+
+        //If not specified status is preserved by default
+        preserveStatus = preserveStatus == null || preserveStatus;
+
         // Default export format is YAML
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
                 ExportFormat.YAML;
@@ -4033,7 +4037,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             // apiId == null means the path from the API Controller
             if (apiId == null) {
                 // Validate API name, version and provider before exporting
-                String provider = validateExportParams(name, version, providerName);
+                String provider = ExportUtils.validateExportParams(name, version, providerName);
                 apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
                 apiDtoToReturn = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
             } else {
@@ -4052,46 +4056,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
         }
         return null;
-    }
-
-    /**
-     * Validate name, version and provider before exporting an API/API Product
-     *
-     * @param name         API/API Product Name
-     * @param version      API/API Product version
-     * @param providerName Name of the provider
-     * @return Name of the provider
-     * @throws APIManagementException If an error occurs while retrieving the provider name from name, version
-     *                                and tenant
-     */
-    private String validateExportParams(String name, String version, String providerName)
-            throws APIManagementException {
-        if (name == null || version == null) {
-            RestApiUtil.handleBadRequest("'name' (" + name + ") or 'version' (" + version
-                    + ") should not be null.", log);
-        }
-        String apiRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
-        // If provider name is not given
-        if (StringUtils.isBlank(providerName)) {
-            // Retrieve the provider who is in same tenant domain and who owns the same API (by comparing
-            // API name and the version)
-            providerName = APIUtil.getAPIProviderFromAPINameVersionTenant(name, version, apiRequesterDomain);
-
-            // If there is no provider in current domain, the API cannot be exported
-            if (providerName == null) {
-                String errorMessage = "Error occurred while exporting. API: " + name + " version: " + version
-                        + " not found";
-                RestApiUtil.handleResourceNotFoundError(errorMessage, log);
-            }
-        }
-
-        if (!StringUtils.equals(MultitenantUtils.getTenantDomain(providerName), apiRequesterDomain)) {
-            // Not authorized to export requested API
-            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API +
-                    " name:" + name + " version:" + version + " provider:" + providerName, log);
-        }
-        return providerName;
     }
 
     /**

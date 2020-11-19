@@ -44,7 +44,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
 
     @DELETE
     @Path("/{apiProductId}")
-    
+
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an API Product", notes = "This operation can be used to delete an existing API Product proving the Id of the API Product. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -63,7 +63,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
 
     @GET
     @Path("/{apiProductId}/documents/{documentId}/content")
-    
+
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Content of an API Product Document", notes = "This operation can be used to retrive the content of an API's document.  The document can be of 3 types. In each cases responses are different.  1. **Inline type**:    The content of the document will be retrieved in `text/plain` content type     _Sample cURL_ : `curl -k -H \"Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51\" -F inlineContent=@\"docs.txt\" -X POST \"https://localhost:9443/api/am/publisher/v1/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content` 2. **FILE type**:    The file will be downloaded with the related content type (eg. `application/pdf`) 3. **URL type**:     The client will recieve the URL of the document as the Location header with the response with - `303 See Other` ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -100,7 +100,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
 
     @DELETE
     @Path("/{apiProductId}/documents/{documentId}")
-    
+
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Document of an API Product", notes = "This operation can be used to delete a document associated with an API Product. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -117,7 +117,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
 
     @GET
     @Path("/{apiProductId}/documents/{documentId}")
-    
+
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a Document of an API Product", notes = "This operation can be used to retrieve a particular document's metadata associated with an API. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -153,7 +153,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
 
     @GET
     @Path("/{apiProductId}/documents")
-    
+
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a List of Documents of an API Product", notes = "This operation can be used to retrive a list of documents belonging to an API Product by providing the id of the API Product. ", response = DocumentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -188,7 +188,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
 
     @GET
     @Path("/{apiProductId}")
-    
+
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of an API Product", notes = "Using this operation, you can retrieve complete details of a single API Product. You need to provide the Id of the API to retrive it. ", response = APIProductDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -206,7 +206,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
 
     @GET
     @Path("/{apiProductId}/is-outdated")
-    
+
     @Produces({ "application/json" })
     @ApiOperation(value = "Check Whether API Product is Outdated", notes = "This operation can be used to retrieve the status indicating if an API Product is outdated due to updating of dependent APIs (This resource is not supported at the moment) ", response = APIProductOutdatedStatusDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -243,7 +243,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
 
     @GET
     @Path("/{apiProductId}/swagger")
-    
+
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Swagger Definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -261,7 +261,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
 
     @GET
     @Path("/{apiProductId}/thumbnail")
-    
+
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Thumbnail Image", notes = "This operation can be used to download a thumbnail image of an API product. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -296,8 +296,25 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     }
 
     @GET
+    @Path("/export")
+    @Consumes({ "application/json" })
+    @Produces({ "application/zip" })
+    @ApiOperation(value = "Export an API Product", notes = "This operation can be used to export the details of a particular API Product as a zip file. ", response = File.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
+        })
+    }, tags={ "Import Export",  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response apiProductsExportGet( @NotNull @ApiParam(value = "API Product Name ",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "Version of the API Product ",required=true)  @QueryParam("version") String version,  @ApiParam(value = "Provider name of the API Product ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve API Product Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus) throws APIManagementException{
+        return delegate.apiProductsExportGet(name, version, providerName, format, preserveStatus, securityContext);
+    }
+
+    @GET
     
-    
+
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/Search API Products ", notes = "This operation provides you a list of available API Products qualifying under a given search condition.  Each retrieved API Product is represented with a minimal amount of attributes. If you want to get complete details of an API Product, you need to use **Get details of an API Product** operation. ", response = APIProductListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

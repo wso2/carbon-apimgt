@@ -73,6 +73,8 @@ public final class ImportExportConstants {
 
     public static final String TYPE_API = "api";
 
+    public static final String TYPE_API_PRODUCT = "api_product";
+
     public static final String TYPE_DOCUMENTS = "document";
 
     public static final String TYPE_ENDPOINT_CERTIFICATES = "endpoint_certificates";
