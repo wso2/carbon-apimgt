@@ -170,6 +170,8 @@ paths:
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis"
+      x-examples:
+        $ref: docs/examples/apis/apis.yaml#/get
 
   /apis/{apiId}:
     get:
@@ -433,6 +435,8 @@ paths:
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/c43a325c-260b-4302-81cb-768eafaa3aed/wsdl"
+      x-examples:
+        $ref: docs/examples/apis/wsdl/apiId_wsdl_get.yaml
 
   ######################################################
   # The "Document Collection" resource APIs
@@ -695,6 +699,8 @@ paths:
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings"
+      x-examples:
+        $ref: docs/examples/apis/apis_id_ratings_get.yaml
 
   /apis/{apiId}/user-rating:
     get:
@@ -747,6 +753,8 @@ paths:
       - lang: Curl
         source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
+      x-examples:
+        $ref: docs/examples/apis/apis_id_user-rating.yaml#/get
 
     put:
       tags:
@@ -793,6 +801,8 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"'
+      x-examples:
+        $ref: docs/examples/apis/apis_id_user-rating.yaml#/put
 
     delete:
       tags:
@@ -819,6 +829,8 @@ paths:
       - lang: Curl
         source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
+      x-examples:
+        $ref: docs/examples/apis/apis_id_user-rating.yaml#/delete
 
   /apis/{apiId}/comments:
     get:
@@ -851,6 +863,8 @@ paths:
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
+      x-examples:
+        $ref: docs/examples/apis/comments.yaml#/get
 
     post:
       tags:
@@ -901,6 +915,8 @@ paths:
       - lang: Curl
         source: 'curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
+      x-examples:
+        $ref: docs/examples/apis/comments.yaml#/post
 
   /apis/{apiId}/comments/{commentId}:
     get:
@@ -953,6 +969,8 @@ paths:
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
+      x-examples:
+        $ref: docs/examples/apis/comment_id-comments.yaml#/get
 
     delete:
       tags:
@@ -982,6 +1000,8 @@ paths:
       - lang: Curl
         source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
+      x-examples:
+        $ref: docs/examples/apis/comment_id-comments.yaml#/delete
 
   /apis/{apiId}/subscription-policies:
     get:
@@ -2747,6 +2767,8 @@ paths:
       x-code-samples:
       - lang: Curl
         source: curl -k "https://localhost:9443/api/am/store/v1/tenants"
+      x-examples:
+        $ref: docs/examples/tenants/tenants.yam
 
   ######################################################
   # The "Recommendations" resource API
@@ -2819,6 +2841,8 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/alert-types"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts.yaml#/get
 
   /alert-subscriptions:
     get:
@@ -2853,6 +2877,8 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/alert-subscriptions"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/get
 
     put:
       tags:
@@ -2898,6 +2924,8 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/alert-subscriptions"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/put
 
     delete:
       tags:
@@ -2928,6 +2956,8 @@ paths:
       - lang: Curl
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/alert-subscriptions"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/delete
 
   /alerts/{alertType}/configurations:
     get:
@@ -2964,6 +2994,8 @@ paths:
       - lang: Curl
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/alerts/AbnormalRequestsPerMin/configurations"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/get
 
   /alerts/{alertType}/configurations/{configurationId}:
     put:
@@ -3011,6 +3043,8 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/store/v1/alerts/AbnormalRequestsPerMin/configurations/UGV0c3RvcmUjMS4wI0FwcDE"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/put
 
     delete:
       tags:
@@ -3042,6 +3076,8 @@ paths:
       - lang: Curl
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/store/v1/alerts/AbnormalRequestsPerMin/configurations/UGV0c3RvcmUjMS4wI0FwcDE"'
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/delete
 
   ######################################################
   # The "Category Collection" resource API
