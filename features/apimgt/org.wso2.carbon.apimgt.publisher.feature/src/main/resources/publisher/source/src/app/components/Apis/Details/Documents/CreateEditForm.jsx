@@ -113,6 +113,10 @@ const styles = theme => ({
     uploadedFile: {
         fontSize: 11,
     },
+    mandatoryStar: {
+        color: theme.palette.error.main,
+        marginLeft: theme.spacing(0.1),
+    },
 });
 
 class CreateEditForm extends React.Component {
@@ -409,12 +413,15 @@ class CreateEditForm extends React.Component {
                                 this.validate('name', value);
                             },
                         }}
-                        label={
-                            <FormattedMessage
-                                id='Apis.Details.Documents.CreateEditForm.document.name'
-                                defaultMessage='Name *'
-                            />
-                        }
+                        label={(
+                            <>
+                                <FormattedMessage
+                                    id='Apis.Details.Documents.CreateEditForm.document.name'
+                                    defaultMessage='Name'
+                                />
+                                <sup className={classes.mandatoryStar}>*</sup>
+                            </>
+                        )}
                         helperText={this.showNameHelper()}
                         type='text'
                         variant='outlined'
@@ -444,12 +451,15 @@ class CreateEditForm extends React.Component {
                         }}
                         margin='normal'
                         variant='outlined'
-                        label={
-                            <FormattedMessage
-                                id='Apis.Details.Documents.CreateEditForm.document.summary'
-                                defaultMessage='Summary *'
-                            />
-                        }
+                        label={(
+                            <>
+                                <FormattedMessage
+                                    id='Apis.Details.Documents.CreateEditForm.document.summary'
+                                    defaultMessage='Summary'
+                                />
+                                <sup className={classes.mandatoryStar}>*</sup>
+                            </>
+                        )}
                         helperText={
                             summeryEmpty ? (
                                 <FormattedMessage
@@ -630,15 +640,18 @@ class CreateEditForm extends React.Component {
                     <FormControl margin='normal' className={classes.FormControlOdd}>
                         <TextField
                             fullWidth
-                            label={
-                                <FormattedMessage
-                                    id={
-                                        'Apis.Details.Documents.CreateEditForm.document.create.type.other.document.' +
-                                        'category'
-                                    }
-                                    defaultMessage='Other Document Type *'
-                                />
-                            }
+                            label={(
+                                <>
+                                    <FormattedMessage
+                                        id={
+                                            'Apis.Details.Documents.CreateEditForm.document.create.type.other.document.' +
+                                            'category'
+                                        }
+                                        defaultMessage='Other Document Type'
+                                    />
+                                    <sup className={classes.mandatoryStar}>*</sup>
+                                </>
+                            )}
                             helperText={
                                 <FormattedMessage
                                     id={
