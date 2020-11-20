@@ -32,10 +32,10 @@ public final class ImportExportConstants {
 
     //location of the api swagger definition file
     public static final String SWAGGER_DEFINITION_LOCATION = File.separator
-            + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "swagger";
+            + ImportExportConstants.META_INFO_DIRECTORY + File.separator + "swagger";
     //location of the graphql schema definition file
     public static final String GRAPHQL_SCHEMA_DEFINITION_LOCATION = File.separator
-            + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "schema.graphql";
+            + ImportExportConstants.META_INFO_DIRECTORY + File.separator + "schema.graphql";
     public static final String JSON_EXTENSION = ".json";
     public static final String YAML_EXTENSION = ".yaml";
 
@@ -58,6 +58,8 @@ public final class ImportExportConstants {
     public static final String ENDPOINTS_CERTIFICATE_FILE = File.separator + "endpoint_certificates";
 
     public static final String CLIENT_CERTIFICATE_FILE = File.separator + "client_certificates";
+
+    public static final String APIS_DIRECTORY = "APIs";
 
     public static final String CERTIFICATE_FILE = "certificate";
 
