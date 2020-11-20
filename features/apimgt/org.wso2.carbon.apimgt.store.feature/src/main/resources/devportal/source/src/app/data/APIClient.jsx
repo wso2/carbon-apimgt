@@ -159,9 +159,6 @@ class APIClient {
      */
     _getRequestInterceptor() {
         return (request) => {
-            const url = new URL(request.url);
-            url.host = this.environment.host;
-            request.url = String(url);
             const { location } = window;
             if (location) {
                 const { tenant } = queryString.parse(location.search);
