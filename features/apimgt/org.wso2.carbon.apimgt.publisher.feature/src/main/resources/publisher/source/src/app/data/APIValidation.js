@@ -156,6 +156,10 @@ const definition = {
         }),
     userRole: userRoleSchema.userRole().role(),
     apiParameter: apiSchema.api().isAPIParameterExist(),
+    apiDocumentName: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+        .error((errors) => {
+            return errors.map((error) => ({ ...error, message: 'Document name ' + getMessage(error.type) }));
+        }),
     apiDocument: documentSchema.document().isDocumentPresent(),
     operationVerbs: Joi.array().items(Joi.string()).min(1).unique(),
     operationTarget: Joi.string().required(),

@@ -129,6 +129,7 @@ class CreateEditForm extends React.Component {
             otherTypeName: null,
             nameNotDuplicate: true,
             nameMaxLengthExceeds: false,
+            nameHasSpecialCharacters: false,
             invalidUrl: false,
             nameEmpty: false,
             summeryEmpty: false,
@@ -167,7 +168,7 @@ class CreateEditForm extends React.Component {
             this.setState({ sourceUrl: value });
         } else if (name === 'otherTypeName') {
             this.setState({ otherTypeName: value });
-        }else if (name === 'visibility') {
+        } else if (name === 'visibility') {
             this.setState({ visibility: value });
         }
     };
@@ -256,18 +257,24 @@ class CreateEditForm extends React.Component {
             }
         } else if (field === 'name') {
             if (value) {
-                const promise = APIValidation.apiDocument.validate({ id: this.props.apiId, name: value });
-                promise
-                    .then((isDocumentPresent) => {
-                        this.setState({ nameNotDuplicate: !isDocumentPresent });
-                    })
-                    .catch((error) => {
-                        if (error.status === 404) {
-                            this.setState({ nameNotDuplicate: true });
-                        } else {
-                            Alert.error('Error when validating document name');
-                        }
-                    });
+                const nameValidity = APIValidation.apiDocumentName.required().validate(value, { abortEarly: false }).error;
+                if (nameValidity !== null) {
+                    this.setState({ nameHasSpecialCharacters: true });
+                } else {
+                    this.setState({ nameHasSpecialCharacters: false });
+                    const promise = APIValidation.apiDocument.validate({ id: this.props.apiId, name: value });
+                    promise
+                        .then((isDocumentPresent) => {
+                            this.setState({ nameNotDuplicate: !isDocumentPresent });
+                        })
+                        .catch((error) => {
+                            if (error.status === 404) {
+                                this.setState({ nameNotDuplicate: true });
+                            } else {
+                                Alert.error('Error when validating document name');
+                            }
+                        });
+                }
             } else {
                 this.setState({ nameNotDuplicate: true });
             }
@@ -295,12 +302,19 @@ class CreateEditForm extends React.Component {
         }
     }
     showNameHelper() {
-        const { nameEmpty, nameNotDuplicate, nameMaxLengthExceeds } = this.state;
+        const { nameEmpty, nameNotDuplicate, nameMaxLengthExceeds, nameHasSpecialCharacters } = this.state;
         if (nameMaxLengthExceeds) {
             return (
                 <FormattedMessage
                     id='Apis.Details.Documents.CreateEditForm.exceeds.document.name.length.helper.text'
                     defaultMessage='Document name exceeds the maximum length of 60 characters'
+                />
+            );
+        } else if (nameHasSpecialCharacters) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Documents.CreateEditForm.document.name.special.characters.error.text'
+                    defaultMessage='Document name should not contain spaces or special characters'
                 />
             );
         } else if (nameNotDuplicate && !nameEmpty) {
@@ -327,7 +341,7 @@ class CreateEditForm extends React.Component {
         }
     }
     getUrlHelperText() {
-        const { invalidUrl, urlEmpty} = this.state;
+        const { invalidUrl, urlEmpty } = this.state;
 
         if (invalidUrl) {
             return (
@@ -365,6 +379,7 @@ class CreateEditForm extends React.Component {
             invalidUrl,
             nameNotDuplicate,
             nameMaxLengthExceeds,
+            nameHasSpecialCharacters,
             nameEmpty,
             summeryEmpty,
             urlEmpty,
@@ -377,6 +392,7 @@ class CreateEditForm extends React.Component {
             summary !== '' &&
             nameNotDuplicate &&
             !nameMaxLengthExceeds &&
+            !nameHasSpecialCharacters &&
             ((!invalidUrl && sourceUrl !== '') || sourceType !== 'URL')
         ) {
             setSaveDisabled(false);
@@ -411,7 +427,7 @@ class CreateEditForm extends React.Component {
                         }}
                         autoFocus
                         disabled={disableName}
-                        error={!nameNotDuplicate || nameEmpty || nameMaxLengthExceeds}
+                        error={!nameNotDuplicate || nameEmpty || nameMaxLengthExceeds || nameHasSpecialCharacters}
                     />
                 </FormControl>
                 <FormControl margin='normal' className={classes.FormControlOdd}>

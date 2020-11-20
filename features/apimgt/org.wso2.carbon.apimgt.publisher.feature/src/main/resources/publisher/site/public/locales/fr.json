@@ -266,6 +266,7 @@
   "Apis.Details.Documents.CreateEditForm.document.docVisibility.dropdown.public": "",
   "Apis.Details.Documents.CreateEditForm.document.name": "",
   "Apis.Details.Documents.CreateEditForm.document.name.helper.text": "",
+  "Apis.Details.Documents.CreateEditForm.document.name.special.characters.error.text": "",
   "Apis.Details.Documents.CreateEditForm.document.summary": "",
   "Apis.Details.Documents.CreateEditForm.document.summary.error.empty": "",
   "Apis.Details.Documents.CreateEditForm.document.summary.helper.text": "",
