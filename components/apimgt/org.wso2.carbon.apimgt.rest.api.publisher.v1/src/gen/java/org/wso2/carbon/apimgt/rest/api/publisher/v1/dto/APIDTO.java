@@ -2,10 +2,13 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
@@ -25,6 +28,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -210,8 +215,7 @@ return null;
     }
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<String>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    private Object businessInformation = null;
+    private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
     private java.util.Date createdTime = null;
@@ -286,7 +290,7 @@ return null;
   @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Size(min=1,max=50)  public String getName() {
+ @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+]*$)") @Size(min=1,max=50)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -339,7 +343,7 @@ return null;
   @ApiModelProperty(example = "1.0.0", required = true, value = "")
   @JsonProperty("version")
   @NotNull
- @Size(min=1,max=30)  public String getVersion() {
+ @Pattern(regexp="^[^~!@#;:%^*()+={}|\\\\<>\"',&/$]+$") @Size(min=1,max=30)  public String getVersion() {
     return version;
   }
   public void setVersion(String version) {
@@ -390,6 +394,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("wsdlInfo")
   public WSDLInfoDTO getWsdlInfo() {
     return wsdlInfo;
@@ -684,6 +689,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("maxTps")
   public APIMaxTpsDTO getMaxTps() {
     return maxTps;
@@ -754,6 +760,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("endpointSecurity")
   public APIEndpointSecurityDTO getEndpointSecurity() {
     return endpointSecurity;
@@ -790,6 +797,7 @@ return null;
 
   
   @ApiModelProperty(value = "List of selected deployment environments and clusters ")
+      @Valid
   @JsonProperty("deploymentEnvironments")
   public List<DeploymentEnvironmentsDTO> getDeploymentEnvironments() {
     return deploymentEnvironments;
@@ -825,6 +833,7 @@ return null;
 
   
   @ApiModelProperty(example = "[{\"name\":\"json_to_xml_in_message\",\"type\":\"in\"},{\"name\":\"xml_to_json_out_message\",\"type\":\"out\"},{\"name\":\"json_fault\",\"type\":\"fault\"}]", value = "")
+      @Valid
   @JsonProperty("mediationPolicies")
   public List<MediationPolicyDTO> getMediationPolicies() {
     return mediationPolicies;
@@ -895,6 +904,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("monetization")
   public APIMonetizationInfoDTO getMonetization() {
     return monetization;
@@ -941,18 +951,19 @@ return null;
 
   /**
    **/
-  public APIDTO businessInformation(Object businessInformation) {
+  public APIDTO businessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("businessInformation")
-  public Object getBusinessInformation() {
+  public APIBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
   }
-  public void setBusinessInformation(Object businessInformation) {
+  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
   }
 
@@ -965,6 +976,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("corsConfiguration")
   public APICorsConfigurationDTO getCorsConfiguration() {
     return corsConfiguration;
@@ -998,7 +1010,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
   public java.util.Date getCreatedTime() {
     return createdTime;
@@ -1015,7 +1027,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedTime")
   public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;
@@ -1034,6 +1046,7 @@ return null;
 
   
   @ApiModelProperty(example = "{\"endpoint_type\":\"http\",\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"},\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"}}", value = "Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  `Simple REST Endpoint`   {     \"endpoint_type\": \"http\",     \"sandbox_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     },     \"production_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     }   }  `Loadbalanced Endpoint`    {     \"endpoint_type\": \"load_balance\",     \"algoCombo\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\",     \"sessionManagement\": \"\",     \"sandbox_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/2\"        }     ],     \"production_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/3\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ],     \"sessionTimeOut\": \"\",     \"algoClassName\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\"   }  `Failover Endpoint`    {     \"production_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        }     ],     \"endpoint_type\":\"failover\",     \"sandbox_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/2\"     },     \"production_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/3\"     },     \"sandbox_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ]   }  `Default Endpoint`    {     \"endpoint_type\":\"default\",     \"sandbox_endpoints\":{        \"url\":\"default\"     },     \"production_endpoints\":{        \"url\":\"default\"     }   }  `Endpoint from Endpoint Registry`   {     \"endpoint_type\": \"Registry\",     \"endpoint_id\": \"{registry-name:entry-name:version}\",   } ")
+      @Valid
   @JsonProperty("endpointConfig")
   public Object getEndpointConfig() {
     return endpointConfig;
@@ -1068,6 +1081,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("scopes")
   public List<APIScopeDTO> getScopes() {
     return scopes;
@@ -1085,6 +1099,7 @@ return null;
 
   
   @ApiModelProperty(example = "[{\"target\":\"/order/{orderId}\",\"verb\":\"POST\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"},{\"target\":\"/menu\",\"verb\":\"GET\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"}]", value = "")
+      @Valid
   @JsonProperty("operations")
   public List<APIOperationsDTO> getOperations() {
     return operations;
@@ -1102,6 +1117,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("threatProtectionPolicies")
   public APIThreatProtectionPoliciesDTO getThreatProtectionPolicies() {
     return threatProtectionPolicies;
@@ -1138,6 +1154,7 @@ return null;
 
   
   @ApiModelProperty(value = "API Key Managers ")
+      @Valid
   @JsonProperty("keyManagers")
   public Object getKeyManagers() {
     return keyManagers;

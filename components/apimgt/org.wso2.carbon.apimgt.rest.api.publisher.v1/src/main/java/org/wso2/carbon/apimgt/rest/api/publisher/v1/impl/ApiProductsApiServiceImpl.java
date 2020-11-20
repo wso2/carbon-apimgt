@@ -160,9 +160,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(String apiProductId,
-            String documentId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch,
-            MessageContext messageContext) {
+    public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(String apiProductId, String documentId,
+                              String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent,
+                                                                          MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
