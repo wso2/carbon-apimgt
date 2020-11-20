@@ -41,8 +41,10 @@ public final class ImportExportConstants {
 
     //Image resource
     public static final String IMAGE_RESOURCE = "Image";
+
     //Custom type
     public static final String CUSTOM_TYPE = "Custom";
+
     public static final String DOCUMENT_FILE_NAME = File.separator + "document";
 
     public static final String DOCUMENT_DIRECTORY = "Docs";
@@ -58,6 +60,8 @@ public final class ImportExportConstants {
     public static final String CLIENT_CERTIFICATE_FILE = File.separator + "client_certificates";
 
     public static final String CERTIFICATE_FILE = "certificate";
+
+    public static final String SEQUENCE_FILE_NAME = File.separator + "sequence";
 
     public static final Map<String, String> fileExtensionMapping = new HashMap<>();
 
@@ -80,6 +84,8 @@ public final class ImportExportConstants {
     public static final String TYPE_ENDPOINT_CERTIFICATES = "endpoint_certificates";
 
     public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
+
+    public static final String TYPE_SEQUENCE = "sequence";
 
     public static final String APIM_VERSION = "v4";
 }
