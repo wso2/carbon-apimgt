@@ -29,7 +29,6 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import queryString from 'query-string';
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
@@ -88,6 +87,9 @@ const styles = (theme) => ({
     },
     tableStyle: {
         marginTop: theme.spacing(4),
+    },
+    serviceNameStyle: {
+        color: theme.palette.primary.main,
     },
 });
 
@@ -251,16 +253,11 @@ class Listing extends React.Component {
                         if (tableMeta.rowData) {
                             const artifact = tableViewObj.state.serviceList[tableMeta.rowIndex];
                             const serviceName = tableMeta.rowData[1];
-                            const serviceId = tableMeta.rowData[0];
                             if (artifact) {
                                 return (
-                                    <Link
-                                        to={'/service-catalog/' + serviceId + '/overview'}
-                                        className={classes.serviceNameLink}
-                                    >
-                                        <CustomIcon width={16} height={16} icon='service' strokeColor='#444444' />
+                                    <div className={classes.serviceNameStyle}>
                                         <span>{serviceName}</span>
-                                    </Link>
+                                    </div>
                                 );
                             }
                         }
