@@ -56,7 +56,8 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
 
     private final String USER_NAME = "admin";
     private final String API_CONTEXT = "/apicontext/1.0.0";
-    private final String API_NAME = "apiname";
+    private final String API_NAME = "test_api";
+    private final String DEFAULT_API_NAME = "default_api";
     private final String API_VERSION = "1.0.0";
     private final String DEFAULT_API_VERSION = "_default_1.0.0";
     private final String SUBSCRIBER = "subscriber";
@@ -125,7 +126,6 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
         param2.setMatchingResource(RESOURCE);
         param2.setHttpVerb(HTTP_VERB);
 
-
         SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
         SubscriptionDataStore tenantSubscriptionStore = Mockito.mock(SubscriptionDataStore.class);
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
@@ -140,14 +140,13 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
         Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore(eq(TENANT_DOMAIN))).thenReturn(tenantSubscriptionStore);
         Mockito.when(tenantSubscriptionStore.getApiByContextAndVersion(eq(API_CONTEXT), eq(API_VERSION))).thenReturn(api);
 
-
         DefaultKeyValidationHandler defaultKeyValidationHandler = new DefaultKeyValidationHandler();
 
         boolean isScopeValidated = defaultKeyValidationHandler.validateScopes(param1);
         boolean isScopeValidated_default = defaultKeyValidationHandler.validateScopes(param2);
 
-        Assert.assertTrue("Scope validation fails for NOT default API!", isScopeValidated);
-        Assert.assertTrue("Scope validation fails for default API!", isScopeValidated_default);
+        Assert.assertTrue("Scope validation fails for API "+API_NAME, isScopeValidated);
+        Assert.assertTrue("Scope validation fails for default API "+DEFAULT_API_NAME, isScopeValidated_default);
 
     }
 }
