@@ -3364,79 +3364,6 @@ paths:
           > exportAPI.zip'
 
   ######################################################
-  # Export Resource API Product
-  ######################################################
-  /api-products/export:
-    #--------------------------------------------------------
-    # Get an API Product as a Zip File
-    #--------------------------------------------------------
-    get:
-      security:
-        - OAuth2Security:
-            - apim:api_product_import_export
-      produces:
-        - application/zip
-      x-code-samples:
-        - lang: Shell
-          source: |-
-            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://127.0.0.1:9443/api/am/admin/v1/export/api-product?name=PizzaShackAPIProduct&version=1.0.0&providerName=admin&format=YAML&preserveStatus=true" > exportAPIProduct.zip
-      summary: Export an API Product
-      description: |
-        This operation can be used to export the details of a particular API Product as a zip file.
-      parameters:
-        - name: name
-          in: query
-          description: |
-            API Product Name
-          required: true
-          type: string
-        - name: version
-          in: query
-          description: |
-            Version of the API Product
-          required: true
-          type: string
-        - name: providerName
-          in: query
-          description: |
-            Provider name of the API Product
-          required: false
-          type: string
-        - name: format
-          in: query
-          description: |
-            Format of output documents. Can be YAML or JSON.
-          type: string
-          enum:
-            - JSON
-            - YAML
-          required: false
-        - name: preserveStatus
-          in: query
-          description: |
-            Preserve API Product Status on export
-          required: false
-          type: boolean
-      tags:
-        - Import Export
-      responses:
-        200:
-          description: |
-            OK.
-            Export Successful.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-          schema:
-            type: file
-        404:
-          $ref: '#/responses/NotFound'
-        500:
-          $ref: '#/responses/InternalServerError'
-
-  ######################################################
   # The "Subscription Collection" resource APIs
   ######################################################
   /subscriptions:
@@ -5440,6 +5367,76 @@ paths:
       - lang: Curl
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: multipart/form-data" -F file=@sample.pdf "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
+
+  /api-products/export:
+    get:
+      tags:
+        - Import Export
+      summary: Export an API Product
+      description: |
+        This operation can be used to export the details of a particular API Product as a zip file.
+      parameters:
+        - name: name
+          in: query
+          description: |
+            API Product Name
+          schema:
+            type: string
+        - name: version
+          in: query
+          description: |
+            Version of the API Product
+          schema:
+            type: string
+        - name: providerName
+          in: query
+          description: |
+            Provider name of the API Product
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: |
+            Format of output documents. Can be YAML or JSON.
+          schema:
+            type: string
+            enum:
+              - JSON
+              - YAML
+        - name: preserveStatus
+          in: query
+          description: |
+            Preserve API Product Status on export
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v1/api-products/export?name=LeasingAPIProduct&version=1.0.0&provider=admin&format=YAML"
+          > exportAPIProduct.zip'
 
   ######################################################
   # Roles resource APIs

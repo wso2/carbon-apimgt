@@ -69,7 +69,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/amznResourceNames")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve the ARNs of AWS Lambda Functions", notes = "This operation can be use to retrieve ARNs of AWS Lambda function for a given AWS credentials. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -85,7 +85,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/auditapi")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve the Security Audit Report of the Audit API", notes = "Retrieve the Security Audit Report of the Audit API ", response = AuditReportDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -101,7 +101,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/client-certificates/{alias}/content")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Download a Certificate", notes = "This operation can be used to download a certificate which matches the given alias. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -120,7 +120,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @DELETE
     @Path("/{apiId}/client-certificates/{alias}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Certificate", notes = "This operation can be used to delete an uploaded certificate. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -139,7 +139,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/client-certificates/{alias}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Certificate Information", notes = "This operation can be used to get the information about a certificate. ", response = CertificateInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -177,7 +177,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/client-certificates")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/ Search Uploaded Client Certificates", notes = "This operation can be used to retrieve and search the uploaded client certificates. ", response = ClientCertificatesDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -213,7 +213,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @DELETE
     @Path("/{apiId}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an API", notes = "This operation can be used to delete an existing API proving the Id of the API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -233,7 +233,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/documents/{documentId}/content")
-
+    
     @Produces({ "application/octet-stream", "application/json" })
     @ApiOperation(value = "Get the Content of an API Document", notes = "This operation can be used to retrive the content of an API's document.  The document can be of 3 types. In each cases responses are different.  1. **Inline type**:    The content of the document will be retrieved in `text/plain` content type     _Sample cURL_ : `curl -k -H \"Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51\" -F inlineContent=@\"docs.txt\" -X POST \"https://localhost:9443/api/am/publisher/v1/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content` 2. **FILE type**:    The file will be downloaded with the related content type (eg. `application/pdf`) 3. **URL type**:     The client will recieve the URL of the document as the Location header with the response with - `303 See Other` ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -271,7 +271,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @DELETE
     @Path("/{apiId}/documents/{documentId}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Document of an API", notes = "This operation can be used to delete a document associated with an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -289,7 +289,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/documents/{documentId}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a Document of an API", notes = "This operation can be used to retrieve a particular document's metadata associated with an API. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -326,7 +326,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/documents")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a List of Documents of an API", notes = "This operation can be used to retrieve a list of documents belonging to an API by providing the id of the API. ", response = DocumentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -362,7 +362,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of an API", notes = "Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it. ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -382,7 +382,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/graphql-policies/complexity")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Complexity Related Details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the API id. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -415,7 +415,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/graphql-policies/complexity/types")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve Types and Fields of a GraphQL Schema", notes = "This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id. ", response = GraphQLSchemaTypeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -432,7 +432,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/graphql-schema")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Schema of a GraphQL API", notes = "This operation can be used to retrieve the Schema definition of a GraphQL API. ", response = GraphQLSchemaDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -469,7 +469,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/lifecycle-history")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Lifecycle State Change History of the API.", notes = "This operation can be used to retrieve Lifecycle state change history of the API. ", response = LifecycleHistoryDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -486,7 +486,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/lifecycle-state")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Lifecycle State Data of the API.", notes = "This operation can be used to retrieve Lifecycle state data of the API. ", response = LifecycleStateDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -505,7 +505,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @DELETE
     @Path("/{apiId}/lifecycle-state/pending-tasks")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete Pending Lifecycle State Change Tasks", notes = "This operation can be used to remove pending lifecycle state change requests that are in pending state ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -522,7 +522,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/mediation-policies")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get All Mediation Policies of an API ", notes = "This operation provides you a list of available mediation policies of an API. ", response = MediationListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -540,7 +540,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/mediation-policies/{mediationPolicyId}/content")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Download an API Specific Mediation Policy", notes = "This operation can be used to download a particular API specific mediation policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -578,7 +578,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @DELETE
     @Path("/{apiId}/mediation-policies/{mediationPolicyId}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an API Specific Mediation Policy", notes = "This operation can be used to delete an existing API specific mediation policy providing the Id of the API and the Id of the mediation policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -597,7 +597,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/mediation-policies/{mediationPolicyId}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get an API Specific Mediation Policy", notes = "This operation can be used to retrieve a particular API specific mediation policy. ", response = MediationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -635,7 +635,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/monetization")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Monetization Status for each Tier in a Given API", notes = "This operation can be used to get monetization status for each tier in a given API ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -692,7 +692,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/resource-paths")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Resource Paths of an API", notes = "This operation can be used to retrieve resource paths defined for a specific api. ", response = ResourcePathListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -710,7 +710,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/resource-policies")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Resource Policy(inflow/outflow) Definitions", notes = "This operation can be used to retrieve conversion policy resource definitions of an API. ", response = ResourcePolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -728,7 +728,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/resource-policies/{resourcePolicyId}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Resource Policy(inflow/outflow) Definition for a Given Resource Identifier.", notes = "This operation can be used to retrieve conversion policy resource definitions of an API given the resource identifier. ", response = ResourcePolicyInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -766,7 +766,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/revenue")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Total Revenue Details of a Given Monetized API with Meterd Billing", notes = "This operation can be used to get details of total revenue details of a given monetized API with meterd billing. ", response = APIRevenueDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -783,7 +783,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/subscription-policies")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of the Subscription Throttling Policies of an API ", notes = "This operation can be used to retrieve details of the subscription throttling policy of an API by specifying the API Id.  `X-WSO2-Tenant` header can be used to retrive API subscription throttling policies that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = ThrottlingPolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -801,7 +801,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/swagger")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Swagger Definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -838,7 +838,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/thumbnail")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Thumbnail Image", notes = "This operation can be used to download a thumbnail image of an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -856,7 +856,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @POST
     @Path("/change-lifecycle")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Change API Status", notes = "This operation is used to change the lifecycle of an API. Eg: Publish an API which is in `CREATED` state. In order to change the lifecycle, we need to provide the lifecycle `action` as a query parameter.  For example, to Publish an API, `action` should be `Publish`. Note that the `Re-publish` action is available only after calling `Block`.  Some actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter. Please see parameters table for more information. ", response = WorkflowResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -877,7 +877,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @POST
     @Path("/copy-api")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a New API Version", notes = "This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state. ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -894,7 +894,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/export")
-
+    
     @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -913,7 +913,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/Search APIs ", notes = "This operation provides you a list of available APIs qualifying under a given search condition.  Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation. ", response = APIListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -982,7 +982,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/deployments")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve Deployment Status Details", notes = "This operation can be used to retrieve the status of deployments in cloud clusters.  With that you can get the status of the deployed APIs in cloud environments. ", response = DeploymentStatusListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1000,7 +1000,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @POST
     @Path("/{apiId}/generate-mock-scripts")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Generate Mock Response Payloads", notes = "This operation can be used to generate mock responses from examples of swagger definition of an API. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1018,7 +1018,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/external-stores")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the List of External Stores to which an API is Published", notes = "This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API. ", response = APIExternalStoreListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1035,7 +1035,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/generated-mock-scripts")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Generated Mock Response Payloads", notes = "This operation can be used to get generated mock responses from examples of swagger definition of an API. ", response = MockResponsePayloadListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1053,7 +1053,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/wsdl-info")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get WSDL Meta Information", notes = "This operation can be used to retrieve the WSDL meta information of an API. It states whether the API is a SOAP API. If the API is a SOAP API, it states whether it has a single WSDL or a WSDL archive. ", response = WSDLInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1070,7 +1070,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/wsdl")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get WSDL definition", notes = "This operation can be used to retrieve the WSDL definition of an API. It can be either a single WSDL file or a WSDL archive.  The type of the WSDL of the API is indicated at the \"wsdlInfo\" element of the API payload definition. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1122,7 +1122,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @POST
     @Path("/{apiId}/publish-to-external-stores")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Publish an API to External Stores", notes = "This operation can be used to publish an API to a list of external stores. ", response = APIExternalStoreListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1177,7 +1177,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @POST
     @Path("/validate")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Check Given API Context Name already Exists", notes = "Using this operation, you can check a given API context is already used. You need to provide the context name you want to check. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1194,7 +1194,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @POST
     @Path("/{apiId}/documents/validate")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Check Whether a Document with the Provided Name Exist", notes = "This operation can be used to verify the document name exists or not. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1212,7 +1212,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @POST
     @Path("/validate-endpoint")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Check Whether Given Endpoint URL is Valid", notes = "Using this operation, it is possible check whether the given API endpoint url is a valid url ", response = ApiEndpointValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
