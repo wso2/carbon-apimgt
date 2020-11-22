@@ -881,7 +881,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
     public Response getAllPublishedExternalStoresByAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.getAllPublishedExternalStoresByAPI(apiId, ifNoneMatch, securityContext);
     }
-
     @GET
     @Path("/{apiId}/amznResourceNames")
     
