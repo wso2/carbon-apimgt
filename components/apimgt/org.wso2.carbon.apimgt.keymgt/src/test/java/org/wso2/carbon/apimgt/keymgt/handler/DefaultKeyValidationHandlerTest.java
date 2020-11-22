@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.keymgt.handlers;
+package org.wso2.carbon.apimgt.keymgt.handler;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -57,7 +57,6 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
     private final String USER_NAME = "admin";
     private final String API_CONTEXT = "/apicontext/1.0.0";
     private final String API_NAME = "test_api";
-    private final String DEFAULT_API_NAME = "default_api";
     private final String API_VERSION = "1.0.0";
     private final String DEFAULT_API_VERSION = "_default_1.0.0";
     private final String SUBSCRIBER = "subscriber";
@@ -134,15 +133,17 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
 
         Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
         Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn(TENANT_DOMAIN);
-        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore(eq(TENANT_DOMAIN))).thenReturn(tenantSubscriptionStore);
-        Mockito.when(tenantSubscriptionStore.getApiByContextAndVersion(eq(API_CONTEXT), eq(API_VERSION))).thenReturn(api);
+        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore(eq(TENANT_DOMAIN)))
+                .thenReturn(tenantSubscriptionStore);
+        Mockito.when(tenantSubscriptionStore.getApiByContextAndVersion(eq(API_CONTEXT), eq(API_VERSION)))
+                .thenReturn(api);
 
         DefaultKeyValidationHandler defaultKeyValidationHandler = new DefaultKeyValidationHandler();
         boolean isScopeValidated = defaultKeyValidationHandler.validateScopes(param1);
         boolean isScopeValidated_default = defaultKeyValidationHandler.validateScopes(param2);
 
-        Assert.assertTrue("Scope validation fails for API "+API_NAME, isScopeValidated);
-        Assert.assertTrue("Scope validation fails for default API "+DEFAULT_API_NAME, isScopeValidated_default);
+        Assert.assertTrue("Scope validation fails for API " + API_NAME, isScopeValidated);
+        Assert.assertTrue("Scope validation fails for default API " + API_NAME, isScopeValidated_default);
 
     }
 }
