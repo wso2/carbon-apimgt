@@ -3823,7 +3823,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (fileInputStream != null) {
                 String filename = fileDetail.getContentDisposition().getFilename();
                 if (filename.endsWith(".zip")) {
-                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);;
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath, url);
                 } else if (filename.endsWith(".wsdl")) {
                     byte[] wsdlContent = APIUtil.toByteArray(fileInputStream);
                     wsdlArchiveExtractedPath = wsdlArchiveExtractedPath.substring(0, wsdlArchiveExtractedPath.lastIndexOf('/'));
