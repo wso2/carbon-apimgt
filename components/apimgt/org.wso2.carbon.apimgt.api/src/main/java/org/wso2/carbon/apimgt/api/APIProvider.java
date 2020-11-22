@@ -1542,5 +1542,4 @@ public interface APIProvider extends APIManager {
      * @return a list of Deploymentstatus objects in different cloud environments
      */
     List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
-    
 }

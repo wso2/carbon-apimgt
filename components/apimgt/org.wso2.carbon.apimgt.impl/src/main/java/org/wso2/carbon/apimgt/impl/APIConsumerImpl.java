@@ -5872,7 +5872,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (log.isDebugEnabled()) {
                     log.debug("searched Devportal APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
                 }
-                log.info("searched Devportal APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
                 SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
                 if (searchAPIs != null) {
                     List<DevPortalAPIInfo> list = searchAPIs.getDevPortalAPIInfoList();
