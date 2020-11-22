@@ -3535,11 +3535,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.delete(docFilePath);
                 }
             }
-
-            Association[] associations = registry.getAssociations(docPath, APIConstants.DOCUMENTATION_KEY);
-            for (Association association : associations) {
-                registry.delete(association.getDestinationPath());
-            }
         } catch (RegistryException e) {
             handleException("Failed to delete documentation", e);
         }
@@ -3576,23 +3571,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
             docPath = artifact.getPath();
-            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
-
-            if (docFilePath != null) {
-                File tempFile = new File(docFilePath);
-                String fileName = tempFile.getName();
-                docFilePath = APIUtil.getDocumentationFilePath(id, fileName);
-                if (registry.resourceExists(docFilePath)) {
-                    registry.delete(docFilePath);
+            if (docPath != null) {
+                if (registry.resourceExists(docPath)) {
+                    registry.delete(docPath);
                 }
             }
 
-            Association[] associations = registry.getAssociations(docPath,
-                    APIConstants.DOCUMENTATION_ASSOCIATION);
-
-            for (Association association : associations) {
-                registry.delete(association.getDestinationPath());
-            }
         } catch (RegistryException e) {
             handleException("Failed to delete documentation", e);
         }
@@ -3661,7 +3645,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             docContent.setMediaType(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE);
             registry.put(contentPath, docContent);
-            registry.addAssociation(documentationPath, contentPath, APIConstants.DOCUMENTATION_CONTENT_ASSOCIATION);
             String apiPath = APIUtil.getAPIPath(identifier);
             String[] authorizedRoles = getAuthorizedRoles(apiPath);
             String docVisibility = doc.getVisibility().name();
@@ -3808,7 +3791,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles, filePath,
                         registry);
-                registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
             }
 
         } catch (RegistryException e) {
@@ -3986,9 +3968,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact artifact = artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
             artifactManager.addGenericArtifact(APIUtil.createDocArtifactContent(artifact, apiId, documentation));
             String apiPath = APIUtil.getAPIPath(apiId);
-
-            //Adding association from api to documentation . (API -----> doc)
-            registry.addAssociation(apiPath, artifact.getPath(), APIConstants.DOCUMENTATION_ASSOCIATION);
             String docVisibility = documentation.getVisibility().name();
             String[] authorizedRoles = getAuthorizedRoles(apiPath);
             String visibility = api.getVisibility();
@@ -4010,7 +3989,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),visibility, authorizedRoles, filePath, registry);
-                registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
             }
             documentation.setId(artifact.getId());
         } catch (RegistryException e) {
