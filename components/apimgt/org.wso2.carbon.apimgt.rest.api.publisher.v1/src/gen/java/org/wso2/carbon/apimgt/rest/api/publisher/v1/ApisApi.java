@@ -879,7 +879,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
     public Response getAmazonResourceNamesOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.getAmazonResourceNamesOfAPI(apiId, securityContext);
     }
-
     @GET
     @Path("/{apiId}/auditapi")
     
@@ -1085,7 +1084,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
     public Response restoreAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("apiRevisionId") String apiRevisionId) throws APIManagementException{
         return delegate.restoreAPIRevision(apiId, apiRevisionId, securityContext);
     }
-
     @PUT
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -1221,7 +1219,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
     public Response updateAPISwagger(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @Multipart(value = "apiDefinition", required = false)  String apiDefinition, @Multipart(value = "url", required = false)  String url,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail) throws APIManagementException{
         return delegate.updateAPISwagger(apiId, ifMatch, apiDefinition, url, fileInputStream, fileDetail, securityContext);
     }
-
     @PUT
     @Path("/{apiId}/thumbnail")
     @Consumes({ "multipart/form-data" })
