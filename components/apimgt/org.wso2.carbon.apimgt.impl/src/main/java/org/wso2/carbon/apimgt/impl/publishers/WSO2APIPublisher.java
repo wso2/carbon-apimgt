@@ -147,7 +147,7 @@ public class WSO2APIPublisher implements APIPublisher {
                     api.getId().getProviderName()));
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            api.setRedirectURL(getExternalStoreRedirectURL(tenantId));
+            api.setRedirectURL(getExternalStoreRedirectURLForAPI(tenantId, api.getUUID()));
             //remove custom sequences from API to prevent them getting deployed in external store gateway
             api.setInSequence(null);
             api.setOutSequence(null);
@@ -646,6 +646,23 @@ public class WSO2APIPublisher implements APIPublisher {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
+    }
+
+    /**
+     * Get External store redirecting URL for the API
+     *
+     * @param tenantId Tenant Id
+     * @param apiId    API UUID of the API to redirect
+     * @return Exact redirect URL for the API in external store
+     */
+    private String getExternalStoreRedirectURLForAPI(int tenantId, String apiId) throws APIManagementException {
+
+        String redirectURL = getExternalStoreRedirectURL(tenantId);
+        if (redirectURL.split(APIConstants.EXTERNAL_API_DEVPORTAL_URL_REGEX).length == 0) {
+            return redirectURL;
+        }
+        return redirectURL.split(APIConstants.EXTERNAL_API_DEVPORTAL_URL_REGEX)[0]
+                + APIConstants.RestApiConstants.REST_API_PUB_RESOURCE_PATH_APIS + "/" + apiId;
     }
 
     /**
