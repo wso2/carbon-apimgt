@@ -4602,4 +4602,64 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return apiEndpointValidationResponseDTO;
     }
+
+    public Response getAPIRevisions(String apiId, MessageContext messageContext) {
+        // remove errorObject and add implementation code!
+        ErrorDTO errorObject = new ErrorDTO();
+        Response.Status status = Response.Status.NOT_IMPLEMENTED;
+        errorObject.setCode((long) status.getStatusCode());
+        errorObject.setMessage(status.toString());
+        errorObject.setDescription("The requested resource has not been implemented");
+        return Response.status(status).entity(errorObject).build();
+    }
+
+    public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) {
+        // remove errorObject and add implementation code!
+        ErrorDTO errorObject = new ErrorDTO();
+        Response.Status status = Response.Status.NOT_IMPLEMENTED;
+        errorObject.setCode((long) status.getStatusCode());
+        errorObject.setMessage(status.toString());
+        errorObject.setDescription("The requested resource has not been implemented");
+        return Response.status(status).entity(errorObject).build();
+    }
+
+    public Response getAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) {
+        // remove errorObject and add implementation code!
+        ErrorDTO errorObject = new ErrorDTO();
+        Response.Status status = Response.Status.NOT_IMPLEMENTED;
+        errorObject.setCode((long) status.getStatusCode());
+        errorObject.setMessage(status.toString());
+        errorObject.setDescription("The requested resource has not been implemented");
+        return Response.status(status).entity(errorObject).build();
+    }
+
+    public Response deleteAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) {
+        // remove errorObject and add implementation code!
+        ErrorDTO errorObject = new ErrorDTO();
+        Response.Status status = Response.Status.NOT_IMPLEMENTED;
+        errorObject.setCode((long) status.getStatusCode());
+        errorObject.setMessage(status.toString());
+        errorObject.setDescription("The requested resource has not been implemented");
+        return Response.status(status).entity(errorObject).build();
+    }
+
+    public Response deployAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) {
+        // remove errorObject and add implementation code!
+        ErrorDTO errorObject = new ErrorDTO();
+        Response.Status status = Response.Status.NOT_IMPLEMENTED;
+        errorObject.setCode((long) status.getStatusCode());
+        errorObject.setMessage(status.toString());
+        errorObject.setDescription("The requested resource has not been implemented");
+        return Response.status(status).entity(errorObject).build();
+    }
+
+    public Response restoreAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) {
+        // remove errorObject and add implementation code!
+        ErrorDTO errorObject = new ErrorDTO();
+        Response.Status status = Response.Status.NOT_IMPLEMENTED;
+        errorObject.setCode((long) status.getStatusCode());
+        errorObject.setMessage(status.toString());
+        errorObject.setDescription("The requested resource has not been implemented");
+        return Response.status(status).entity(errorObject).build();
+    }
 }
