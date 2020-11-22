@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 
@@ -68,6 +69,15 @@ public interface APIMapper {
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "context", target = "contextTemplate")
     API toApi(PublisherAPIInfo api);
+    
+    @Mapping(source = "providerName", target = "id.providerName")
+    @Mapping(source = "apiName", target = "id.apiName")
+    @Mapping(source = "version", target = "id.version")
+    @Mapping(source = "id", target = "uuid")  
+    @Mapping(source = "thumbnail", target = "thumbnailUrl")
+    @Mapping(source = "context", target = "contextTemplate")
+    API toApi(DevPortalAPIInfo api);
+    
 
     default List<Label> mapLabelToList(Set<String> labelSet) {
         List<Label> labels = new ArrayList<Label>();

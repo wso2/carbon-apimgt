@@ -34,4 +34,10 @@ public class DevPortalAPISearchResult {
     public void setReturnedAPIsCount(int returnedAPIsCount) {
         this.returnedAPIsCount = returnedAPIsCount;
     }
+
+    @Override
+    public String toString() {
+        return "DevPortalAPISearchResult [returnedAPIsCount=" + returnedAPIsCount + ", totalAPIsCount=" + totalAPIsCount
+                + ", devPortalAPIInfoList=" + devPortalAPIInfoList + "]";
+    }
 }

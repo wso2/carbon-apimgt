@@ -1543,15 +1543,4 @@ public interface APIProvider extends APIManager {
      */
     List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
     
-    /**
-     * Temporary impl. Rename after all the search functionalities are implemented
-     * @param searchQuery
-     * @param tenantDomain
-     * @param start
-     * @param end
-     * @return
-     * @throws APIManagementException
-     */
-    Map<String, Object> searchPaginatedAPIsNew(String searchQuery, String tenantDomain, int start, int end)
-            throws APIManagementException;
 }
