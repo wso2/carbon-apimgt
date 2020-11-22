@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.keymgt.handler;
+package org.wso2.carbon.apimgt.keymgt.handlers;
 
 import org.junit.Assert;
 import org.junit.Before;
