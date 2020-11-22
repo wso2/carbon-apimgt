@@ -5,6 +5,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
@@ -728,6 +730,55 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.getAPIThumbnail(apiId, ifNoneMatch, securityContext);
     }
 
+    @POST
+    @Path("/{apiId}/revisions")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Create a new API revision", notes = "Create a new API revision ", response = APIRevisionDTO.class, authorizations = {
+            @Authorization(value = "OAuth2Security", scopes = {
+                    @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            })
+    }, tags={ "API Revisions",  })
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Created. Successful response with the newly created APIRevision object as the entity in the body. ", response = APIRevisionDTO.class),
+            @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+            @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response createAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API object that needs to be added" ) APIRevisionDTO apIRevisionDTO) throws APIManagementException{
+            return delegate.createAPIRevision(apiId, apIRevisionDTO, securityContext);
+    }
+
+    @DELETE
+    @Path("/{apiId}/revisions/{apiRevisionId}")
+
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete a revision of an API", notes = "Delete a revision of an API ", response = Void.class, authorizations = {
+            @Authorization(value = "OAuth2Security", scopes = {
+                    @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            })
+    }, tags={ "API Revisions",  })
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "No Content. Successfully deleted the revision ", response = Void.class),
+            @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response deleteAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Revision ID of an API ",required=true) @PathParam("apiRevisionId") String apiRevisionId) throws APIManagementException{
+            return delegate.deleteAPIRevision(apiId, apiRevisionId, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/deploy-revision")
+
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Deploy a revision", notes = "Deploy a revision ", response = Void.class, authorizations = {
+            @Authorization(value = "OAuth2Security", scopes = {
+                    @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            })
+    }, tags={ "API Revisions",  })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. ", response = Void.class),
+            @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response deployAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("apiRevisionId") String apiRevisionId) throws APIManagementException{
+            return delegate.deployAPIRevision(apiId, apiRevisionId, securityContext);
+    }
+
     @GET
     @Path("/{apiId}/mediation-policies")
     
@@ -762,6 +813,38 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response getAllAPIs( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API contains \"wso2\". \"provider:\"wso2\"\" will match an API if the provider of the API is exactly \"wso2\". \"status:PUBLISHED\" will match an API if the API is in PUBLISHED state. \"label:external\" will match an API if it contains a Microgateway label called \"external\".  Also you can use combined modifiers Eg. name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.  Supported attribute modifiers are [**version, context, name, status, description, subcontext, doc, provider, label**]  If no advanced attribute modifier has been specified,  the API names containing the search term will be returned as a result.  Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl) ")  @QueryParam("query") String query,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Defines whether the returned response should contain full details of API ")  @QueryParam("expand") Boolean expand,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
         return delegate.getAllAPIs(limit, offset, xWSO2Tenant, query, ifNoneMatch, expand, accept, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/revisions/{apiRevisionId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "List available revisions of an API", notes = "List available revisions of an API ", response = APIRevisionDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "API Revisions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of API revisions are returned. ", response = APIRevisionDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response getAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Revision ID of an API ",required=true) @PathParam("apiRevisionId") String apiRevisionId) throws APIManagementException{
+        return delegate.getAPIRevision(apiId, apiRevisionId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/revisions")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "List available revisions of an API", notes = "List available revisions of an API ", response = APIRevisionListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "API Revisions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of API revisions are returned. ", response = APIRevisionListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response getAPIRevisions(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getAPIRevisions(apiId, securityContext);
     }
 
     @GET
@@ -985,6 +1068,22 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response publishAPIToExternalStores(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "External Store Ids of stores which the API needs to be published or updated.",required=true)  @QueryParam("externalStoreIds") String externalStoreIds,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.publishAPIToExternalStores(apiId, externalStoreIds, ifMatch, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/restore-revision")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Restore a revision", notes = "Restore a revision to the working copy of the API ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "API Revisions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response restoreAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("apiRevisionId") String apiRevisionId) throws APIManagementException{
+        return delegate.restoreAPIRevision(apiId, apiRevisionId, securityContext);
     }
 
     @PUT
