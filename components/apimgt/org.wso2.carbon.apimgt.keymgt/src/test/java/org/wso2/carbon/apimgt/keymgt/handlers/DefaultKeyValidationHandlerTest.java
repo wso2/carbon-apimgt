@@ -69,12 +69,18 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
     private final String SCOPES = "subscriber";
     private final String ACCESS_TOKEN = "ca19a540f544777860e44e75f605d927";
     private final String TIER = "unlimited";
+    private PrivilegedCarbonContext privilegedCarbonContext;
+    private SubscriptionDataHolder subscriptionDataHolder;
+    private SubscriptionDataStore tenantSubscriptionStore;
 
     @Before
     public void setup() throws Exception {
         System.setProperty(CARBON_HOME, "");
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
+        tenantSubscriptionStore = Mockito.mock(SubscriptionDataStore.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        PowerMockito.mockStatic(SubscriptionDataHolder.class);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
     }
 
@@ -108,7 +114,7 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
         dto.setSubscriberTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
 
-        // TokenValidationContext for not default API
+        // TokenValidationContext for non default API
         TokenValidationContext param1 = new TokenValidationContext();
         param1.setValidationInfoDTO(dto);
         param1.setContext(API_CONTEXT);
@@ -126,22 +132,12 @@ public class DefaultKeyValidationHandlerTest extends DefaultKeyValidationHandler
         param2.setMatchingResource(RESOURCE);
         param2.setHttpVerb(HTTP_VERB);
 
-        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
-        SubscriptionDataStore tenantSubscriptionStore = Mockito.mock(SubscriptionDataStore.class);
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-
-        PowerMockito.mockStatic(SubscriptionDataHolder.class);
         Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
-
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        Mockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
         Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn(TENANT_DOMAIN);
-
         Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore(eq(TENANT_DOMAIN))).thenReturn(tenantSubscriptionStore);
         Mockito.when(tenantSubscriptionStore.getApiByContextAndVersion(eq(API_CONTEXT), eq(API_VERSION))).thenReturn(api);
 
         DefaultKeyValidationHandler defaultKeyValidationHandler = new DefaultKeyValidationHandler();
-
         boolean isScopeValidated = defaultKeyValidationHandler.validateScopes(param1);
         boolean isScopeValidated_default = defaultKeyValidationHandler.validateScopes(param2);
 
