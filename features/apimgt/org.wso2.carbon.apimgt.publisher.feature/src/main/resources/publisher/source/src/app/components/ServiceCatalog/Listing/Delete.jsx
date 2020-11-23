@@ -37,6 +37,7 @@ function Delete(props) {
         setOpen(!open);
     };
     const { serviceName, serviceId, getData } = props;
+
     const deleteService = () => {
         const deleteServicePromise = ServiceCatalog.deleteService(serviceId);
         deleteServicePromise.then(() => {

@@ -86,11 +86,25 @@ const styles = (theme) => ({
         borderTop: '0px',
         width: '100%',
     },
-    tableStyle: {
-        marginTop: theme.spacing(4),
-    },
     serviceNameStyle: {
         color: theme.palette.primary.main,
+    },
+    tableStyle: {
+        marginTop: theme.spacing(4),
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        '& > td[class^=MUIDataTableBodyCell-cellHide-]': {
+            display: 'none',
+        },
+        '& .MUIDataTableBodyCell-cellHide-793': {
+            display: 'none',
+        },
+        '& td': {
+            wordBreak: 'break-word',
+        },
+        '& th': {
+            minWidth: '150px',
+        },
     },
 });
 
