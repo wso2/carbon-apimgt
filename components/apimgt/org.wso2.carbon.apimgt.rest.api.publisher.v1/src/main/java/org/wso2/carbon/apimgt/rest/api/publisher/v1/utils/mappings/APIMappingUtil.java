@@ -1002,7 +1002,7 @@ public class APIMappingUtil {
         if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
             List<APIOperationsDTO> apiOperationsDTO;
             String apiSwaggerDefinition;
-            if(model.getSwaggerDefinition() != null) {
+            if (model.getSwaggerDefinition() != null) {
                 apiSwaggerDefinition = model.getSwaggerDefinition();
             } else {
                 apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
