@@ -1388,9 +1388,9 @@ paths:
     get:
       tags:
         - API Revisions
-      summary: List available revisions of an API
+      summary: Retrieve a revision of an API
       description: |
-        List available revisions of an API
+        Retrieve a revision of an API
       operationId: getAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -1399,7 +1399,7 @@ paths:
         200:
           description: |
             OK.
-            List of API revisions are returned.
+            An API revision is returned.
           content:
             application/json:
               schema:
