@@ -45,6 +45,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String visibleRoles;
     private String visibleOrganizations; //visibleTenants
     private boolean endpointSecured;
+    private String swaggerDefinition;
     private boolean endpointAuthDigest;
     private String endpointUTUsername;
     private String endpointUTPassword;
@@ -85,6 +86,14 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String thumbnail;
     private String createdTime;
     private String lastUpdated;
+
+    public String getSwaggerDefinition() {
+        return swaggerDefinition;
+    }
+
+    public void setSwaggerDefinition(String swaggerDefinition) {
+        this.swaggerDefinition = swaggerDefinition;
+    }
 
     public boolean isDefaultVersion() {
         return isDefaultVersion;

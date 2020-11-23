@@ -46,6 +46,8 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 //import org.wso2.carbon.apimgt.persistence.documents.OrganizationDocument;
 //import org.wso2.carbon.apimgt.persistence.documents.TiersDocument;
 //import org.wso2.carbon.apimgt.persistence.documents.URITemplateDocument;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.dto.MongoDBDevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -92,15 +94,19 @@ public class MongoDBPersistenceUtil {
                 ConnectionString connectionString = new ConnectionString(parsedConnectionString);
 
                 ClassModel<MongoDBPublisherAPI> mongoDBAPIDocument = ClassModel.builder(MongoDBPublisherAPI.class)
-                        .enableDiscriminator(true).build();
+                        .enableDiscriminator(false).build();
                 ClassModel<PublisherAPI> publisherAPI = ClassModel.builder(PublisherAPI.class)
-                        .enableDiscriminator(true).build();
+                        .enableDiscriminator(false).build();
 //                ClassModel<Label> label = ClassModel.builder(Label.class)
 //                        .enableDiscriminator(true).build();
 //                ClassModel<Scope> Scope = ClassModel.builder(Scope.class)
 //                        .enableDiscriminator(true).build();
                 ClassModel<DeploymentEnvironments> deploymentEnv = ClassModel.builder(DeploymentEnvironments.class)
-                        .enableDiscriminator(true).build();
+                        .enableDiscriminator(false).build();
+                ClassModel<MongoDBDevPortalAPI> mongoDBDevPortalAPI = ClassModel.builder(MongoDBDevPortalAPI.class)
+                        .enableDiscriminator(false).build();
+                ClassModel<DevPortalAPI> devPortalAPI = ClassModel.builder(DevPortalAPI.class)
+                        .enableDiscriminator(false).build();
 //                ClassModel<APIEndpoint> apiEndpoint = ClassModel.builder(APIEndpoint.class)
 //                        .enableDiscriminator(true).build();
 //                ClassModel<APICategory> apiCategory = ClassModel.builder(APICategory.class)
@@ -118,11 +124,9 @@ public class MongoDBPersistenceUtil {
 //                        .enableDiscriminator(true).build();
 //                ClassModel<OrganizationDocument> organization = ClassModel.builder(OrganizationDocument.class)
 //                        .enableDiscriminator(true).build();
-                ClassModel<JSONObject> jsonObject = ClassModel.builder(JSONObject.class)
-                        .enableDiscriminator(true).build();
                 CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder()
                         .register(publisherAPI, deploymentEnv, corsConfiguration, mongoDBAPIDocument,
-                                jsonObject).build());
+                                mongoDBDevPortalAPI, devPortalAPI).build());
                 CodecRegistry codecRegistry = fromRegistries(MongoClientSettings
                         .getDefaultCodecRegistry(), pojoCodecRegistry);
 

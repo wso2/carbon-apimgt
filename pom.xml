@@ -1798,6 +1798,8 @@
         <carbon.registry.version>4.7.35</carbon.registry.version>
         <carbon.mediation.version>4.7.61</carbon.mediation.version>
 
+        <mongodb.driver.version>4.1.0</mongodb.driver.version>
+
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.18.180</carbon.identity.version>
         <carbon.identity.governance.version>1.4.70</carbon.identity.governance.version>

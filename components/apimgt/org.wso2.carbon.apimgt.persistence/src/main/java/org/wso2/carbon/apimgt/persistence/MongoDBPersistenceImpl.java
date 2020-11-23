@@ -4,6 +4,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.InsertOneResult;
+import org.bson.types.ObjectId;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
@@ -11,6 +12,7 @@ import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.Mediation;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
+import org.wso2.carbon.apimgt.persistence.dto.MongoDBDevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
@@ -26,7 +28,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceExcepti
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.MongoAPIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.MongoDBPersistenceUtil;
 
@@ -36,6 +37,7 @@ import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
 import static com.mongodb.client.model.Updates.set;
+import static com.mongodb.client.model.Projections.exclude;
 
 public class MongoDBPersistenceImpl implements APIPersistence {
 
@@ -48,39 +50,58 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getCollection(org.getName());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
         MongoDBPublisherAPI mongoDBPublisherAPI = MongoAPIMapper.INSTANCE.toMongoDBPublisherApi(publisherAPI);
-        try {
-            InsertOneResult insertOneResult = collection.insertOne(mongoDBPublisherAPI);
-            MongoDBPublisherAPI createdDoc = collection.find(eq("_id",
-                    insertOneResult.getInsertedId())).first();
-            PublisherAPI api = MongoAPIMapper.INSTANCE.toPublisherApi(createdDoc);
-            return api;
-        } catch (Exception e) {
-            log.error("Error when creating api ", e);
-            throw new APIPersistenceException("Error when creating api ", e);
-        }
+        InsertOneResult insertOneResult = collection.insertOne(mongoDBPublisherAPI);
+        MongoDBPublisherAPI createdDoc = collection.find(eq("_id",
+                insertOneResult.getInsertedId())).first();
+        getDevPortalAPI(org, createdDoc.getMongodbUuId().toString());
+        return MongoAPIMapper.INSTANCE.toPublisherApi(createdDoc);
     }
 
     @Override
     public PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI)
             throws APIPersistenceException {
-        return null;
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        MongoDBPublisherAPI mongoDBPublisherAPI = MongoAPIMapper.INSTANCE.toMongoDBPublisherApi(publisherAPI);
+        String apiId = mongoDBPublisherAPI.getId();
+        MongoDBPublisherAPI updatedDocument =
+                collection.findOneAndReplace(eq("_id", new ObjectId(apiId)), mongoDBPublisherAPI);
+        return MongoAPIMapper.INSTANCE.toPublisherApi(updatedDocument);
     }
 
     @Override
     public PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException {
-        return null;
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        MongoDBPublisherAPI mongoDBAPIDocument =
+                collection.find(eq("_id", new ObjectId(apiId)))
+                        .projection(exclude("swaggerDefinition")).first();
+        if (mongoDBAPIDocument == null) {
+            String msg = "Failed to get API. " + apiId + " does not exist in mongodb database";
+            log.error(msg);
+            throw new APIPersistenceException(msg);
+        }
+        PublisherAPI api = MongoAPIMapper.INSTANCE.toPublisherApi(mongoDBAPIDocument);
+        return api;
     }
 
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
-        return null;
+        MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(org.getName());
+        MongoDBDevPortalAPI mongoDBAPIDocument = collection.find(eq("_id", new ObjectId(apiId))).first();
+        if (mongoDBAPIDocument == null) {
+            String msg = "Failed to get API. " + apiId + " does not exist in mongodb database";
+            log.error(msg);
+            throw new APIPersistenceException(msg);
+        }
+        return MongoAPIMapper.INSTANCE.toDevPortalApi(mongoDBAPIDocument);
     }
 
     @Override
     public void deleteAPI(Organization org, String apiId) throws APIPersistenceException {
-
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        collection.deleteOne(eq("_id", new ObjectId(apiId)));
+        log.info("successfully deleted " + apiId + " from mongodb");
     }
 
     @Override
@@ -92,13 +113,15 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
+        //published prototyped only
         return null;
     }
 
     @Override
     public void changeAPILifeCycle(Organization org, String apiId, String status)
             throws APIPersistenceException {
-
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        collection.updateOne(eq("_id", new ObjectId(apiId)), set("status", status));
     }
 
     @Override
@@ -115,12 +138,20 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition)
             throws OASPersistenceException {
-
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        collection.updateOne(eq("_id", new ObjectId(apiId)), set("swaggerDefinition", apiDefinition));
     }
 
     @Override
     public String getOASDefinition(Organization org, String apiId) throws OASPersistenceException {
-        return null;
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        MongoDBPublisherAPI api = collection.find(eq("_id", new ObjectId(apiId)))
+                .projection(include("swaggerDefinition")).first();
+        if (api == null) {
+            throw new OASPersistenceException("Failed to get api definition. Api " + apiId + " does not exist in " +
+                    "mongodb");
+        }
+        return api.getSwaggerDefinition();
     }
 
     @Override
@@ -217,9 +248,18 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
-    private MongoCollection<MongoDBPublisherAPI> getCollection(String orgName) {
+    private MongoCollection<MongoDBPublisherAPI> getPublisherCollection(String orgName) {
         MongoClient mongoClient = MongoDBPersistenceUtil.getMongoClient();
         MongoDatabase database = mongoClient.getDatabase("APIM_DB");
+
         return database.getCollection(orgName, MongoDBPublisherAPI.class);
     }
+
+    private MongoCollection<MongoDBDevPortalAPI> getDevPortalCollection(String orgName) {
+        MongoClient mongoClient = MongoDBPersistenceUtil.getMongoClient();
+        MongoDatabase database = mongoClient.getDatabase("APIM_DB");
+
+        return database.getCollection(orgName, MongoDBDevPortalAPI.class);
+    }
+
 }
