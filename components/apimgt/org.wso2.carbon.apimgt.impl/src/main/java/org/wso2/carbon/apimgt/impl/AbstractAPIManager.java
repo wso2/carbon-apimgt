@@ -1230,6 +1230,18 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return definition;
     }
+    
+    @Override
+    public String getOpenAPIDefinition(String apiId) throws APIManagementException {
+        String apiTenantDomain = getTenantDomain(apiId);
+        String definition = null;
+        try {
+            definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), apiId);
+        } catch (OASPersistenceException e) {
+            throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
+        }
+        return definition;
+    }
 
     public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile) throws APIManagementException {
         try {

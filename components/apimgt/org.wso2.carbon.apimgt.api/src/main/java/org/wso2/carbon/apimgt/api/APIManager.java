@@ -187,6 +187,14 @@ public interface APIManager {
     String getOpenAPIDefinition(Identifier apiId) throws APIManagementException;
 
     /**
+     * Returns the OpenAPI definition as a string
+     *
+     * @param apiId id of the api
+     * @return swagger string
+     * @throws APIManagementException
+     */
+    String getOpenAPIDefinition(String apiId) throws APIManagementException;
+    /**
      * Checks whether the given document already exists for the given api/product
      *
      * @param identifier API/Product Identifier
