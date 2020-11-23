@@ -117,8 +117,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                 newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
             }
 
-            Map allMatchedApisMap = apiConsumer
-                    .searchPaginatedAPIs(newSearchQuery, requestedTenantDomain, offset, limit, false);
+            Map allMatchedApisMap;
+            // temporary check. this is done to route only api listing to new impl
+            if (query.contains("content:") || query.contains("subcontext:") || query.contains("doc:")) {
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIs(newSearchQuery, requestedTenantDomain, offset,
+                        limit, false);
+            } else {
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIsNew(newSearchQuery, requestedTenantDomain, offset,
+                        limit);
+            }
+
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 

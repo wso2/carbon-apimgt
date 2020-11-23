@@ -3576,4 +3576,54 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiDocContent;
 
     }
+    
+    public String extractQuery(String searchQuery) {
+        String[] searchQueries = searchQuery.split("&");
+        StringBuilder filteredQuery = new StringBuilder();
+
+        // Filtering the queries related with custom properties
+        for (String query : searchQueries) {
+            if (searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX) ||
+                    searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+                filteredQuery.append(query);
+                break;
+            }
+            // If the query does not contains "=" then it is an errornous scenario.
+            if (query.contains("=")) {
+                String[] searchKeys = query.split("=");
+
+                if (searchKeys.length >= 2) {
+                    if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
+                                    + " appending " + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");
+                        }
+                        searchKeys[0] = (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]);
+                    }
+
+                    // Ideally query keys for label and  category searchs are as below
+                    //      label -> labels_labelName
+                    //      category -> apiCategories_categoryName
+                    // Since these are not user friendly we allow to use prefixes label and api-category. And label and
+                    // category search should only return results that exactly match.
+                    if (searchKeys[0].equals(APIConstants.LABEL_SEARCH_TYPE_PREFIX)) {
+                        searchKeys[0] = APIConstants.API_LABELS_GATEWAY_LABELS;
+                        searchKeys[1] = searchKeys[1].replace("*", "");
+                    } else if (searchKeys[0].equals(APIConstants.CATEGORY_SEARCH_TYPE_PREFIX)) {
+                        searchKeys[0] = APIConstants.API_CATEGORIES_CATEGORY_NAME;
+                        searchKeys[1] = searchKeys[1].replace("*", "");
+                    }
+
+                    if (filteredQuery.length() == 0) {
+                        filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
+                    } else {
+                        filteredQuery.append("&").append(searchKeys[0]).append("=").append(searchKeys[1]);
+                    }
+                }
+            } else {
+                filteredQuery.append(query);
+            }
+        }
+        return filteredQuery.toString();
+    }
 }

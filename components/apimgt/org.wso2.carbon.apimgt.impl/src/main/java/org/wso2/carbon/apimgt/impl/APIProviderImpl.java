@@ -137,6 +137,7 @@ import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
+import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
@@ -154,6 +155,9 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
@@ -10141,5 +10145,53 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing the OAS definition", e);
         }
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedAPIsNew(String searchQuery, String tenantDomain, int start, int end)
+            throws APIManagementException {
+        Map<String, Object> result = new HashMap<String, Object>();
+        if (log.isDebugEnabled()) {
+            log.debug("Original search query received : " + searchQuery);
+        }
+        searchQuery = getSearchQuery(extractQuery(searchQuery));
+        if (log.isDebugEnabled()) {
+            log.debug("Final search query after the post processing for the custom properties : " + searchQuery);
+        }
+        Organization org = new Organization(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
+        UserContext userCtx = new UserContext(userNameWithoutChange, org, null);
+        try {
+            if (searchQuery != null && searchQuery.contains(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX + "=")) {
+                // TODO
+            } else {
+                PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
+                        start, end, userCtx);
+                if (log.isDebugEnabled()) {
+                    log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
+                }
+                SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
+                if (searchAPIs != null) {
+                    List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                    List<Object> apiList = new ArrayList<>();
+                    for (PublisherAPIInfo publisherAPIInfo : list) {
+                        API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                        apiList.add(mappedAPI);
+                    }
+                    apiSet.addAll(apiList);
+                    result.put("apis", apiSet);
+                    result.put("length", searchAPIs.getReturnedAPIsCount());
+                    result.put("isMore", true); // TODO fix this
+                } else {
+                    result.put("apis", apiSet);
+                    result.put("length", 0);
+                    result.put("isMore", false);
+                }
+            }
+
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching the api ", e);
+        }
+        return result ;
     }
 }

@@ -19,6 +19,7 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleExc
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
@@ -49,6 +51,7 @@ import org.wso2.carbon.apimgt.persistence.dto.Mediation;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
@@ -75,6 +78,7 @@ import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -382,15 +386,271 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
             UserContext ctx) throws APIPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        String requestedTenantDomain = org.getName();
+        boolean isTenantMode = (requestedTenantDomain != null);
+        boolean isTenantFlowStarted = false;
+        PublisherAPISearchResult result = null;
+        try {
+
+            if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                requestedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
+            }
+
+            Registry userRegistry;
+            int tenantIDLocal = 0;
+            String userNameLocal = this.username;
+            if ((isTenantMode && this.tenantDomain == null)
+                    || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {// Tenant store anonymous
+                                                                                            // mode
+                tenantIDLocal = getTenantManager().getTenantId(requestedTenantDomain);
+                RegistryPersistenceUtil.loadTenantRegistry(tenantIDLocal);
+                userRegistry = getRegistryService()
+                        .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
+                userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
+                if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                    RegistryPersistenceUtil.loadTenantConfigBlockingMode(requestedTenantDomain);
+                }
+            } else {
+                userRegistry = this.registry;
+                tenantIDLocal = tenantId;
+            }
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
+
+            if (searchQuery != null && searchQuery.contains(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX + "=")) {
+                // TODO
+            } else if (searchQuery != null && searchQuery.contains(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX + "=")) {
+                // TODO
+            } else if (searchQuery != null && searchQuery.contains(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
+                // TODO
+            } else {
+                result = searchPaginatedPublisherAPIs(userRegistry, tenantIDLocal, searchQuery, start, offset);
+            }
+        } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException | APIManagementException e) {
+            throw new APIPersistenceException("Error while searching APIs " , e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return result;
+    }
+
+    private PublisherAPISearchResult searchPaginatedPublisherAPIs(Registry userRegistry, int tenantIDLocal, String searchQuery,
+            int start, int offset) throws APIManagementException {
+        int totalLength = 0;
+        boolean isMore = false;
+        PublisherAPISearchResult searchResults = new PublisherAPISearchResult();
+        try {
+
+            final int maxPaginationLimit = getMaxPaginationLimit();
+
+            PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
+
+            List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
+                    .findGovernanceArtifacts(searchQuery, registry, APIConstants.API_RXT_MEDIA_TYPE,
+                            true);
+            totalLength = PaginationContext.getInstance().getLength();
+            boolean isFound = true;
+            if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
+                if (searchQuery.contains(APIConstants.API_OVERVIEW_PROVIDER)) {
+                    searchQuery = searchQuery.replaceAll(APIConstants.API_OVERVIEW_PROVIDER, APIConstants.API_OVERVIEW_OWNER);
+                    governanceArtifacts = GovernanceUtils.findGovernanceArtifacts(searchQuery, registry,
+                            APIConstants.API_RXT_MEDIA_TYPE, true);
+                    if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
+                        isFound = false;
+                    }
+                } else {
+                    isFound = false;
+                }
+            }
+
+            if (!isFound) {
+                return searchResults;
+            }
+
+            // Check to see if we can speculate that there are more APIs to be loaded
+            if (maxPaginationLimit == totalLength) {
+                isMore = true;  // More APIs exist, cannot determine total API count without incurring perf hit
+                --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
+            }
+            List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<PublisherAPIInfo>();
+            int tempLength = 0;
+            for (GovernanceArtifact artifact : governanceArtifacts) {
+
+                PublisherAPIInfo apiInfo = new PublisherAPIInfo();
+                apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+                apiInfo.setId(artifact.getId());
+                apiInfo.setApiName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+                apiInfo.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
+                apiInfo.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+                apiInfo.setStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+                apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+                apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                publisherAPIInfoList.add(apiInfo);
+
+                // Ensure the APIs returned matches the length, there could be an additional API
+                // returned due incrementing the pagination limit when getting from registry
+                tempLength++;
+                if (tempLength >= totalLength) {
+                    break;
+                }
+            }
+
+            searchResults.setPublisherAPIInfoList(publisherAPIInfoList);
+            searchResults.setReturnedAPIsCount(publisherAPIInfoList.size());
+            searchResults.setTotalAPIsCount(totalLength);
+        } catch (RegistryException e) {
+            String msg = "Failed to search APIs with type";
+            throw new APIManagementException(msg, e);
+        } finally {
+            PaginationContext.destroy();
+        }
+
+        return searchResults;
     }
 
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
             UserContext ctx) throws APIPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        String requestedTenantDomain = org.getName();
+        boolean isTenantMode = (requestedTenantDomain != null);
+        boolean isTenantFlowStarted = false;
+        DevPortalAPISearchResult result = null;
+        try {
+
+            if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                requestedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
+            }
+
+            Registry userRegistry;
+            int tenantIDLocal = 0;
+            String userNameLocal = this.username;
+            if ((isTenantMode && this.tenantDomain == null)
+                    || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {// Tenant store anonymous
+                                                                                            // mode
+                tenantIDLocal = getTenantManager().getTenantId(requestedTenantDomain);
+                RegistryPersistenceUtil.loadTenantRegistry(tenantIDLocal);
+                userRegistry = getRegistryService()
+                        .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
+                userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
+                if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                    RegistryPersistenceUtil.loadTenantConfigBlockingMode(requestedTenantDomain);
+                }
+            } else {
+                userRegistry = this.registry;
+                tenantIDLocal = tenantId;
+            }
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
+
+            if (searchQuery != null && searchQuery.contains(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX + "=")) {
+                // TODO
+            } else if (searchQuery != null && searchQuery.contains(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX + "=")) {
+                // TODO
+            } else if (searchQuery != null && searchQuery.contains(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
+                // TODO
+            } else {
+                result = searchPaginatedDevPortalAPIs(userRegistry, tenantIDLocal, searchQuery, start, offset);
+            }
+        } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException | APIManagementException e) {
+            throw new APIPersistenceException("Error while searching APIs " , e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return result;
+    }
+
+    private DevPortalAPISearchResult searchPaginatedDevPortalAPIs(Registry userRegistry, int tenantIDLocal,
+            String searchQuery, int start, int offset) throws APIManagementException {
+        int totalLength = 0;
+        boolean isMore = false;
+        DevPortalAPISearchResult searchResults = new DevPortalAPISearchResult();
+        try {
+
+            final int maxPaginationLimit = getMaxPaginationLimit();
+
+            PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
+
+            List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
+                    .findGovernanceArtifacts(searchQuery, registry, APIConstants.API_RXT_MEDIA_TYPE,
+                            true);
+            totalLength = PaginationContext.getInstance().getLength();
+            boolean isFound = true;
+            if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
+                if (searchQuery.contains(APIConstants.API_OVERVIEW_PROVIDER)) {
+                    searchQuery = searchQuery.replaceAll(APIConstants.API_OVERVIEW_PROVIDER, APIConstants.API_OVERVIEW_OWNER);
+                    governanceArtifacts = GovernanceUtils.findGovernanceArtifacts(searchQuery, registry,
+                            APIConstants.API_RXT_MEDIA_TYPE, true);
+                    if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
+                        isFound = false;
+                    }
+                } else {
+                    isFound = false;
+                }
+            }
+
+            if (!isFound) {
+                return searchResults;
+            }
+
+            // Check to see if we can speculate that there are more APIs to be loaded
+            if (maxPaginationLimit == totalLength) {
+                isMore = true;  // More APIs exist, cannot determine total API count without incurring perf hit
+                --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
+            }
+            List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<DevPortalAPIInfo>();
+            int tempLength = 0;
+            for (GovernanceArtifact artifact : governanceArtifacts) {
+
+                DevPortalAPIInfo apiInfo = new DevPortalAPIInfo();
+                //devPortalAPIInfoList apiInfo = new devPortalAPIInfoList();
+                apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+                apiInfo.setId(artifact.getId());
+                apiInfo.setApiName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+                apiInfo.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
+                apiInfo.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+                //apiInfo.setStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+                apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+                apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+                apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                devPortalAPIInfoList.add(apiInfo);
+
+                // Ensure the APIs returned matches the length, there could be an additional API
+                // returned due incrementing the pagination limit when getting from registry
+                tempLength++;
+                if (tempLength >= totalLength) {
+                    break;
+                }
+            }
+
+            searchResults.setDevPortalAPIInfoList(devPortalAPIInfoList);
+            searchResults.setReturnedAPIsCount(devPortalAPIInfoList.size());
+            searchResults.setTotalAPIsCount(totalLength);
+        } catch (RegistryException e) {
+            String msg = "Failed to search APIs with type";
+            throw new APIManagementException(msg, e);
+        } finally {
+            PaginationContext.destroy();
+        }
+
+        return searchResults;
     }
 
     @Override
@@ -683,6 +943,36 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             registry.put(artifactPath, apiResource);
         }
+    }
+    
+    protected int getMaxPaginationLimit() {
+        // TODO fix this
+        /*
+        String paginationLimit = getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
+        // If the Config exists use it to set the pagination limit
+        final int maxPaginationLimit;
+        if (paginationLimit != null) {
+            // The additional 1 added to the maxPaginationLimit is to help us determine if more
+            // APIs may exist so that we know that we are unable to determine the actual total
+            // API count. We will subtract this 1 later on so that it does not interfere with
+            // the logic of the rest of the application
+            int pagination = Integer.parseInt(paginationLimit);
+            // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
+            // limit to at least 11 or the pagination done at this level will conflict with the store pagination
+            // leading to some of the APIs not being displayed
+            if (pagination < 11) {
+                pagination = 11;
+                log.warn("Value of '" + APIConstants.API_STORE_APIS_PER_PAGE + "' is too low, defaulting to 11");
+            }
+            maxPaginationLimit = start + pagination + 1;
+        }
+        // Else if the config is not specified we go with default functionality and load all
+        else {
+            maxPaginationLimit = Integer.MAX_VALUE;
+        }*/
+
+        return Integer.MAX_VALUE;
     }
 
 }

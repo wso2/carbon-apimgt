@@ -91,6 +91,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
+import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -108,6 +109,14 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -5838,5 +5847,53 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 throw new APIManagementException(genericErrorMessage);
             }
         }
+    }
+    
+    @Override
+    public Map<String, Object> searchPaginatedAPIsNew(String searchQuery, String tenantDomain, int start, int end)
+            throws APIManagementException {
+        Map<String, Object> result = new HashMap<String, Object>();
+        if (log.isDebugEnabled()) {
+            log.debug("Original search query received : " + searchQuery);
+        }
+        searchQuery = getSearchQuery(extractQuery(searchQuery));
+        if (log.isDebugEnabled()) {
+            log.debug("Final search query after the post processing for the custom properties : " + searchQuery);
+        }
+        Organization org = new Organization(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
+        UserContext userCtx = new UserContext(userNameWithoutChange, org, null);
+        try {
+            if (searchQuery != null && searchQuery.contains(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX + "=")) {
+                // TODO
+            } else {
+                DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
+                        start, end, userCtx);
+                if (log.isDebugEnabled()) {
+                    log.debug("searched Devportal APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
+                }
+                SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
+                if (searchAPIs != null) {
+                    List<DevPortalAPIInfo> list = searchAPIs.getDevPortalAPIInfoList();
+                    List<Object> apiList = new ArrayList<>();
+                    for (DevPortalAPIInfo devPortalAPIInfo : list) {
+                        API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
+                        apiList.add(mappedAPI);
+                    }
+                    apiSet.addAll(apiList);
+                    result.put("apis", apiSet);
+                    result.put("length", searchAPIs.getReturnedAPIsCount());
+                    result.put("isMore", true); // TODO fix this
+                } else {
+                    result.put("apis", apiSet);
+                    result.put("length", 0);
+                    result.put("isMore", false);
+                }
+            }
+
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching the api ", e);
+        }
+        return result ;
     }
 }

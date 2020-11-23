@@ -213,9 +213,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain, username);
             }*/
+            Map<String, Object> result;
+            // temporary check. this is done to route only api listing to new impl
+            if (query.contains("content:") || query.contains("subcontext:") || query.contains("doc:")) {
+                result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
+                        offset, limit, false, !expand);
+            } else {
+                result = apiProvider.searchPaginatedAPIsNew(newSearchQuery, tenantDomain, offset, limit);
+            }
 
-            Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
-                    offset, limit, false, !expand);
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
 
