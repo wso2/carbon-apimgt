@@ -239,6 +239,26 @@ public class RegistryPersistenceImpl implements APIPersistence {
             RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                                             visibleRoles, artifactPath, registry);
 
+            if (api.getSwaggerDefinition() != null) {
+                String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
+                        api.getId().getVersion(), api.getId().getProviderName());
+                resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+                Resource resource;
+                if (!registry.resourceExists(resourcePath)) {
+                    resource = registry.newResource();
+                } else {
+                    resource = registry.get(resourcePath);
+                }
+                resource.setContent(api.getSwaggerDefinition());
+                resource.setMediaType("application/json");
+                registry.put(resourcePath, resource);
+                //Need to set anonymous if the visibility is public
+                RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
+                        ((UserRegistry) registry).getTenantId());
+                RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                        visibleRoles, resourcePath);
+            }
+            
             registry.commitTransaction();
             api.setUuid(artifact.getId());
             transactionCommitted = true;

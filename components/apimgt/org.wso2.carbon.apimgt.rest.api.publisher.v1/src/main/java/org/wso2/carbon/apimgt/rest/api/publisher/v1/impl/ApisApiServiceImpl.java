@@ -291,8 +291,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
                 }
             }
-            //adding the api
-            apiProvider.addAPI(apiToAdd);
 
             if (!isWSAPI) {
                 APIDefinition oasParser;
@@ -303,8 +301,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 SwaggerData swaggerData = new SwaggerData(apiToAdd);
                 String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
-                apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
+                apiToAdd.setSwaggerDefinition(apiDefinition);
             }
+            //adding the api
+            apiProvider.addAPI(apiToAdd);
 
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
