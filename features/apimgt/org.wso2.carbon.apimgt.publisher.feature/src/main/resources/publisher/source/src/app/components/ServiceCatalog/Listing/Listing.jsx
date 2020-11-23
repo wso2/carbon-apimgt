@@ -32,6 +32,7 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
+import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
 import Grid from '@material-ui/core/Grid';
 import Help from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -321,6 +322,8 @@ class Listing extends React.Component {
                 options: {
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
+                            const serviceId = tableMeta.rowData[0];
+                            const serviceName = tableMeta.rowData[1];
                             return (
                                 <Box display='flex' flexDirection='row'>
                                     <Link>
@@ -336,9 +339,7 @@ class Listing extends React.Component {
                                     <Button>
                                         <Icon>edit</Icon>
                                     </Button>
-                                    <Button>
-                                        <Icon>delete_forever</Icon>
-                                    </Button>
+                                    <Delete serviceName={serviceName} serviceId={serviceId} getData={this.getData} />
                                 </Box>
                             );
                         }
