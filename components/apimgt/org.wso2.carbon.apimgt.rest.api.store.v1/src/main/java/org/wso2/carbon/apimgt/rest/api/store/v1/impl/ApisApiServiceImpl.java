@@ -807,7 +807,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     break;
                 }
                 default: {
-                    throw new IllegalArgumentException("Can't handle " + rating);
+                    RestApiUtil.handleBadRequest("Provided API Rating is not in the range from 1 to 5", log);
                 }
             }
             JSONObject obj = apiConsumer.getUserRatingInfo(identifier, username);
