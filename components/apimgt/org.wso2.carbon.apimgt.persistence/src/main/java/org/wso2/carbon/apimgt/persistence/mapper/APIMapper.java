@@ -26,21 +26,18 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
-import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 
@@ -84,7 +81,6 @@ public interface APIMapper {
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "context", target = "contextTemplate")
     API toApi(DevPortalAPIInfo api);
-
 
     default JSONObject mapJSONMapToJSONObject(Map<String,String> jsonMap) throws ParseException {
         if (jsonMap != null) {

@@ -251,14 +251,12 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     private MongoCollection<MongoDBPublisherAPI> getPublisherCollection(String orgName) {
         MongoClient mongoClient = MongoDBPersistenceUtil.getMongoClient();
         MongoDatabase database = mongoClient.getDatabase("APIM_DB");
-
         return database.getCollection(orgName, MongoDBPublisherAPI.class);
     }
 
     private MongoCollection<MongoDBDevPortalAPI> getDevPortalCollection(String orgName) {
         MongoClient mongoClient = MongoDBPersistenceUtil.getMongoClient();
         MongoDatabase database = mongoClient.getDatabase("APIM_DB");
-
         return database.getCollection(orgName, MongoDBDevPortalAPI.class);
     }
 
