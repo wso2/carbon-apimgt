@@ -328,4 +328,42 @@ public class CommonUtil {
             throw new APIImportExportException(errorMessage, e);
         }
     }
+
+    /**
+     * This method will be used to generate Endpoint certificates and meta information related to endpoint certs
+     *
+     * @param filePath String of new file path
+     * @param content  String of content to write into the file
+     * @throws IOException If an error occurs when generating new certs and yaml file
+     */
+    public static void generateFiles(String filePath, String content) throws IOException {
+        FileOutputStream fos = null;
+        File file;
+        try {
+            //Specify the file path here
+            file = new File(filePath);
+            fos = new FileOutputStream(file);
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            byte[] bytesArray = content.getBytes();
+
+            fos.write(bytesArray);
+            fos.flush();
+
+        } catch (IOException e) {
+            String errorMessage = "Error while generating meta information of client certificates from path.";
+            throw new IOException(errorMessage, e);
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                String errorMessage = "Error while generating meta information of client certificates from path.";
+                throw new IOException(errorMessage, e);
+            }
+        }
+    }
 }

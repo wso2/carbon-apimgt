@@ -139,7 +139,81 @@ public final class APIImportExportConstants {
 
     //Api controller Env Params related constants
     public static final String YAML_API_PARAMS_FILE_LOCATION = File.separator + "Meta-information" + File.separator +
-            "api_params.yaml";
+            "env_params.yaml";
     public static final String JSON_API_PARAMS_FILE_LOCATION = File.separator + "Meta-information" + File.separator +
-            "api_params.json";
+            "env_params.json";
+    //Env param fields
+    public static final String ENV_NAME_FIELD = "Name";
+    public static final String ENDPOINT_TYPE_FIELD = "EndpointType";
+    public static final String GATEWAY_ENVIRONMENTS_FIELD = "GatewayEnvironments";
+    public static final String MUTUAL_SSL_CERTIFICATES_FIELD = "MutualSslCerts";
+    public static final String ENDPOINT_CERTIFICATES_FIELD = "Certs";
+    public static final String ENDPOINT_SECURITY_FIELD = "Security";
+    public static final String ROUTING_POLICY_FIELD = "EndpointRoutingPolicy";
+    public static final String ENDPOINTS_FIELD = "Endpoints";
+    public static final String LOAD_BALANCE_ENDPOINTS_FIELD = "LoadBalanceEndpoints";
+    public static final String FAILOVER_ENDPOINTS_FIELD = "FailoverEndpoints";
+
+    //Security config related constants
+    public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
+    public static final String ENDPOINT_UT_USERNAME = "username";
+    public static final String ENDPOINT_UT_PASSWORD = "password";
+    public static final String ENDPOINT_SECURITY_TYPE = "type";
+    public static final String ENDPOINT_DIGEST_SECURITY_TYPE = "digest";
+    public static final String ENDPOINT_BASIC_SECURITY_TYPE = "basic";
+
+    //Default values for Endpoints
+    public static final String ENDPOINT_URL = "url";
+    public static final String DEFAULT_PRODUCTION_ENDPOINT_URL = "";
+    public static final String DEFAULT_SANDBOX_ENDPOINT_URL = "";
+    public static final String DEFAULT_DYNAMIC_ENDPOINT_URL = "default";
+    public static final String DEFAULT_ALGORITHM_CLASS = "org.apache.synapse.endpoints.algorithms.RoundRobin";
+    public static final String SOAP_ENDPOINT_TYPE_FOR_JSON = "address";
+
+    //Endpoint types
+    public static final String HTTP_TYPE_ENDPOINT = "http";
+    public static final String REST_TYPE_ENDPOINT = "rest";
+    public static final String SOAP_TYPE_ENDPOINT = "soap";
+    public static final String DYNAMIC_TYPE_ENDPOINT = "dynamic";
+    public static final String AWS_TYPE_ENDPOINT = "aws";
+    public static final String AWS_LAMBDA_TYPE_ENDPOINT = "awslambda";
+    public static final String LOAD_BALANCE_TYPE_ENDPOINT = "load_balance";
+    public static final String FAILOVER_TYPE_ENDPOINT = "failOver";
+    public static final String ENDPOINT_TYPE_PROPERTY = "endpoint_type";
+
+    // AWS endpoint related constants
+    public static final String AWS_LAMBDA_ENDPOINT_PROPERTY = "AWSLambdaEndpoints";
+    public static final String AWS_ACCESS_METHOD_PROPERTY = "access_method";
+    public static final String AWS_AMZN_REGION_PROPERTY = "amznRegion";
+    public static final String AWS_AMZN_ACCESS_KEY_PROPERTY = "amznAccessKey";
+    public static final String AWS_AMZN_SECRET_KEY_PROPERTY = "amznSecretKey";
+    public static final String AWS_STORED_ACCESS_METHOD = "stored";
+    public static final String AWS_ROLE_SUPPLIED_ACCESS_METHOD = "role-supplied";
+
+    //REST/SOAP endpoint related constants
+    public static final String FAILOVER_ROUTING_POLICY = "failover";
+    public static final String LOAD_BALANCE_ROUTING_POLICY = "load_balanced";
+    public static final String LOAD_BALANCE_ALGORITHM_CLASS_PROPERTY = "algoClassName";
+    public static final String LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY = "sessionManagement";
+    public static final String LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY = "sessionTimeOut";
+    public static final String PRODUCTION_FAILOVERS_ENDPOINTS_PROPERTY = "production_failovers";
+    public static final String SANDBOX_FAILOVERS_ENDPOINTS_PROPERTY = "sandbox_failovers";
+    public static final String PRODUCTION_ENDPOINTS_PROPERTY = "production_endpoints";
+    public static final String SANDBOX_ENDPOINTS_PROPERTY = "sandbox_endpoints";
+    public static final String LOAD_BALANCE_SESSION_MANAGEMENT_TRANSPORT_TYPE = "transport";
+
+    //Certificate related constants
+    public static final String CERTIFICATE_API_IDENTIFIER_PROPERTY = "apiIdentifier";
+    public static final String CERTIFICATE_CERTIFICATE_CONTENT_PROPERTY = "certificate";
+    public static final String CERTIFICATE_HOST_NAME_PROPERTY = "hostName";
+    public static final String CERTIFICATE_TIER_NAME_PROPERTY = "tierName";
+    public static final String DATA_PROPERTY = "data";
+    public static final String CERTIFICATE_PREFIX_STRING = "-----BEGIN CERTIFICATE-----\n";
+    public static final String CERTIFICATE_SUFFIX_STRING = "\n-----END CERTIFICATE-----";
+    public static final String CERTIFICATE_FILE_EXTENSION = ".crt";
+    public static final String META_INFO_DIRECTORY_PATH = ZIP_FILE_SEPARATOR + "Meta-information" + ZIP_FILE_SEPARATOR;
+    public static final String ENDPOINT_CERTIFICATES_DIRECTORY_PATH = META_INFO_DIRECTORY_PATH + "Endpoint-certificates" + ZIP_FILE_SEPARATOR;
+    public static final String CLIENT_CERTIFICATES_DIRECTORY_PATH = META_INFO_DIRECTORY_PATH + "Client-certificates" + ZIP_FILE_SEPARATOR;
+    public static final String ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH = META_INFO_DIRECTORY_PATH + "endpoint_certificates.yaml";
+    public static final String CLIENT_CERTIFICATES_META_DATA_FILE_PATH = META_INFO_DIRECTORY_PATH + "client_certificates.yaml";
 }
