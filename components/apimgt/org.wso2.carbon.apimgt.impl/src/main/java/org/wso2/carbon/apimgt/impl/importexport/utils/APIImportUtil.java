@@ -194,6 +194,10 @@ public final class APIImportUtil {
                 APIAndAPIProductCommonUtil.setCurrentProviderToAPIProperties(apiTypeWrapper, currentTenantDomain, prevTenantDomain);
             }
 
+            // Get API params Definition as JSON
+            JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(pathToArchive);
+            importedApi = APIControllerUtil.injectEnvParamsToAPI(importedApi, paramsConfigObject, pathToArchive);
+
             // Store imported API status
             targetStatus = importedApi.getStatus();
             if (Boolean.TRUE.equals(overwrite)) {
@@ -356,6 +360,9 @@ public final class APIImportUtil {
                         + ": " + importedApi.getId().getVersion();
             }
             throw new APIImportExportException(errorMessage + " " + e.getMessage(), e);
+        } catch (APIImportExportException e) {
+            String errorMessage = "Error while importing API: " + e.getMessage();
+            throw new APIImportExportException(errorMessage, e);
         }
     }
 
