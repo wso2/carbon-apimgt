@@ -304,11 +304,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiToAdd.setSwaggerDefinition(apiDefinition);
             }
             //adding the api
-            apiProvider.addAPI(apiToAdd);
+            API createdApi = apiProvider.addAPI(apiToAdd);
 
-            APIIdentifier createdApiId = apiToAdd.getId();
-            //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPI(createdApiId);
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -3070,8 +3067,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
+            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            String apiSwagger = apiProvider.getOpenAPIDefinition(apiId);
             APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             String updatedDefinition = parser.getOASDefinitionForPublisher(api, apiSwagger);

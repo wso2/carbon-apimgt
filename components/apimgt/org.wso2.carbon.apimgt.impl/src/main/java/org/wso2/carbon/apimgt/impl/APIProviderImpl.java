@@ -943,6 +943,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(tenantDomain),
                     APIMapper.INSTANCE.toPublisherApi(api));
             api.setUuid(addedAPI.getId());
+            api.setCreatedTime(addedAPI.getCreatedTime());
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while persisting API ", e);
         }
@@ -3089,7 +3090,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<String> policyNames = apiMgtDAO
                 .getNamesOfTierWithBandwidthQuotaType(APIUtil.getTenantIdFromTenantDomain(tenantDomain));
         String definition = OASParserUtil.getOASDefinitionWithTierContentAwareProperty(
-                getOpenAPIDefinition(api.getId()), policyNames, api.getApiLevelPolicy());
+                getOpenAPIDefinition(api.getUuid()), policyNames, api.getApiLevelPolicy());
         api.setSwaggerDefinition(definition);
         try {
             builder = getAPITemplateBuilder(api);
@@ -10056,8 +10057,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
             
             //templates
-            String id = APIUtil.getconvertedId(api.getId());
-            String resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, id);
+            String resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
             JSONParser jsonParser = new JSONParser();
             JSONObject paths = null;
             if (resourceConfigsString != null) {

@@ -20,6 +20,7 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleExc
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -267,7 +268,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
                         + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
             }
-            
+            api.setCreatedTime(String.valueOf(new Date().getTime()));// set current time as created time for returning api.
             PublisherAPI returnAPI = APIMapper.INSTANCE.toPublisherApi(api);
             if (log.isDebugEnabled()) {
                 log.debug("Created API :" + returnAPI.toString());
@@ -365,6 +366,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
             if (apiArtifact != null) {
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
+                api.setSwaggerDefinition(this.getOASDefinition(org, apiId));
                 //TODO directly map to PublisherAPI from the registry
                 PublisherAPI pubApi = APIMapper.INSTANCE.toPublisherApi(api) ; 
                 if (log.isDebugEnabled()) {
@@ -383,6 +385,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException(msg, e);
         } catch (APIManagementException e) {
             String msg = "Failed to get API";
+            throw new APIPersistenceException(msg, e);
+        } catch (OASPersistenceException e) {
+            String msg = "Failed to retrieve OpenAPI definition for the API";
             throw new APIPersistenceException(msg, e);
         } finally {
             if (tenantFlowStarted) {
@@ -746,11 +751,36 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 registryType = registry;
             }
             String[] idArray = apiId.split(":");
-            Identifier id;
-            if("API".equals(idArray[0])) {
-                id = new APIIdentifier(idArray[1], idArray[2], idArray[3]);
+            Identifier id = null;
+            if (idArray.length > 1) { // this is a temp impl. id comes as provider-name-version combination. remove this
+                                      // to uuid based impl in the else section
+                log.info("definition from provider-name-version combination");
+                if ("API".equals(idArray[0])) {
+                    id = new APIIdentifier(idArray[1], idArray[2], idArray[3]);
+                } else {
+                    id = new APIProductIdentifier(idArray[1], idArray[2], idArray[3]);
+                }
+                
             } else {
-                id = new APIProductIdentifier(idArray[1], idArray[2], idArray[3]);
+                log.info("definition from uuid");
+                GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                        APIConstants.API_KEY);
+
+                GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+                if (apiArtifact != null) {
+
+                    String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+                    if ("APIProduct".equals(type)) {
+                        id = new APIProductIdentifier(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
+                                apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
+                                apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                    } else {
+                        id = new APIIdentifier(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
+                                apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
+                                apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                    }
+
+                }
             }
             definition = RegistryPersistenceUtil.getAPIDefinition(id, registryType);
             if (log.isDebugEnabled()) {
