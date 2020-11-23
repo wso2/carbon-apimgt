@@ -1071,13 +1071,13 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/revisions/{apiRevisionId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "List available revisions of an API", notes = "List available revisions of an API ", response = APIRevisionDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve a revision of an API", notes = "Retrieve a revision of an API ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Revisions",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. List of API revisions are returned. ", response = APIRevisionDTO.class),
+        @ApiResponse(code = 200, message = "OK. An API revision is returned. ", response = APIRevisionDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Revision ID of an API ",required=true) @PathParam("apiRevisionId") String apiRevisionId) throws APIManagementException{
         return delegate.getAPIRevision(apiId, apiRevisionId, securityContext);
