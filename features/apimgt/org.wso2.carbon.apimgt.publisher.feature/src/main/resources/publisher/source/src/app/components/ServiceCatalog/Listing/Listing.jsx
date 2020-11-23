@@ -26,7 +26,6 @@ import Icon from '@material-ui/core/Icon';
 import Typography from '@material-ui/core/Typography';
 import MUIDataTable from 'mui-datatables';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import queryString from 'query-string';
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Alert from 'AppComponents/Shared/Alert';
@@ -127,59 +126,19 @@ class Listing extends React.Component {
             notFound: true,
             loading: true,
         };
-        this.page = 0;
-        this.count = 100;
-        this.rowsPerPage = localStorage.getItem('serviceCatalog.rowsPerPage') || 10;
-        this.updateData = this.updateData.bind(this);
     }
 
     componentDidMount() {
         this.getData();
     }
 
-    componentDidUpdate(prevProps) {
-        const { query } = this.props;
-        if (query !== prevProps.query) {
-            this.getData();
-        }
-    }
-
-    componentWillUnmount() {
-        // The following is resetting the styles for the mui-datatables
-        const { theme } = this.props;
-        const themeAdditions = {
-            overrides: {
-                MUIDataTable: {
-                    tableRoot: {
-                        display: 'table',
-                        '& tbody': {
-                            display: 'table-row-group',
-                        },
-                        '& thead': {
-                            display: 'table-header-group',
-                        },
-                    },
-                },
-            },
-        };
-        Object.assign(theme, themeAdditions);
-    }
-
     // Get Services
     getData = () => {
         const { intl } = this.props;
-        this.xhrRequest().then((data) => {
+        const promisedServices = ServiceCatalog.searchServices();
+        promisedServices.then((data) => {
             const { body } = data;
-            const { list, pagination } = body;
-            const { total } = pagination;
-            // When there is a count stored in the localstorage and it's greater than 0
-            // We check if the response in the rest api calls have 0 items.
-            // We remove the local storage and redo the api call
-            if (this.count > 0 && total === 0) {
-                this.page = 0;
-                this.getData();
-            }
-            this.count = total;
+            const { list } = body;
             this.setState({ serviceList: list, notFound: false });
         }).catch(() => {
             Alert.error(intl.formatMessage({
@@ -191,53 +150,6 @@ class Listing extends React.Component {
         });
     };
 
-    changePage = (page) => {
-        this.page = page;
-        const { intl } = this.props;
-        this.setState({ loading: true });
-        this.xhrRequest().then((data) => {
-            const { body } = data;
-            const { list } = body;
-            this.setState({
-                serviceList: list,
-                notFound: false,
-            });
-        }).catch(() => {
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error While Loading Services',
-                id: 'ServiceCatalog.Listing.Listing.on.change.error.loading',
-            }));
-        })
-            .finally(() => {
-                this.setState({ loading: false });
-            });
-    };
-
-    xhrRequest = () => {
-        const { page, rowsPerPage } = this;
-        const { query } = this.props;
-        if (query) {
-            const composeQuery = queryString.parse(query);
-            composeQuery.limit = this.rowsPerPage;
-            composeQuery.offset = page * rowsPerPage;
-            return ServiceCatalog.searchServices(composeQuery);
-        }
-        return ServiceCatalog.searchServices({ limit: this.rowsPerPage, offset: page * rowsPerPage });
-    };
-
-    /**
-     *
-     * Update Services list if a Service gets deleted
-     * @memberof Listing
-     */
-    updateData() {
-        const { page, rowsPerPage, count } = this;
-        if (count - 1 === rowsPerPage * page && page !== 0) {
-            this.page = page - 1;
-        }
-        this.getData();
-    }
-
     /**
      *
      *
@@ -246,7 +158,7 @@ class Listing extends React.Component {
      */
     render() {
         const {
-            intl, classes, query,
+            intl, classes,
         } = this.props;
         const { loading } = this.state;
         const columns = [
@@ -365,58 +277,28 @@ class Listing extends React.Component {
                 },
             },
         ];
-        const { page, count, rowsPerPage } = this;
         const {
             serviceList, notFound,
         } = this.state;
         const options = {
             filterType: 'dropdown',
-            rowsPerPageOptions: [5, 10, 25, 50, 100],
-            responsive: 'stacked',
-            serverSide: true,
-            search: true,
-            count,
-            page,
-            onTableChange: (action, tableState) => {
-                switch (action) {
-                    case 'changePage':
-                        this.changePage(tableState.page);
-                        break;
-                    default:
-                        break;
-                }
-            },
             selectableRows: 'none',
-            rowsPerPage,
-            onChangeRowsPerPage: (numberOfRows) => {
-                this.rowsPerPage = numberOfRows;
-                if (page * numberOfRows > count) {
-                    this.page = 0;
-                } else if (count - 1 === rowsPerPage * page && page !== 0) {
-                    this.page = page - 1;
-                }
-                localStorage.setItem('serviceCatalog.rowsPerPage', numberOfRows);
-                this.getData();
-            },
+            title: false,
+            filter: false,
+            sort: false,
+            print: false,
+            download: false,
+            viewColumns: false,
+            customToolbar: false,
+            rowsPerPageOptions: [5, 10, 25, 50, 100],
         };
-        options.customRowRender = null;
-        options.title = true;
-        options.filter = false;
-        options.print = true;
-        options.download = true;
-        options.viewColumns = false;
-        if (page === 0 && this.count <= rowsPerPage && rowsPerPage === 10) {
-            options.pagination = false;
-        } else {
-            options.pagination = true;
-        }
         if (loading || !serviceList) {
             return <Progress per={90} message='Loading Services ...' />;
         }
         if (notFound) {
             return <ResourceNotFound />;
         }
-        if (serviceList.length === 0 && !query) {
+        if (serviceList.length === 0) {
             return (
                 <Onboarding />
             );
@@ -470,9 +352,4 @@ Listing.propTypes = {
     theme: PropTypes.shape({
         custom: PropTypes.string,
     }).isRequired,
-    query: PropTypes.string,
-};
-
-Listing.defaultProps = {
-    query: '',
 };
