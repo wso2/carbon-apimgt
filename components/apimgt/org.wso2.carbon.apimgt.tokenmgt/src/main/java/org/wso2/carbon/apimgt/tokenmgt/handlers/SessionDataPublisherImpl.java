@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.dto.SystemApplicationDTO;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
@@ -44,6 +45,7 @@ import org.wso2.carbon.identity.oauth2.dao.OAuthTokenPersistenceFactory;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.identity.application.mgt.ApplicationMgtUtil;
 
 import java.util.*;
 import javax.cache.Cache;
@@ -241,12 +243,7 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
         SystemApplicationDTO[] systemApplicationDTOS;
         SystemApplicationDAO systemApplicationDAO = new SystemApplicationDAO();
         Set<String> systemAppClientIds = new HashSet<>();
-        try {
-            clientIds = OAuthTokenPersistenceFactory.getInstance().getTokenManagementDAO()
-                    .getAllTimeAuthorizedClientIds(authenticatedUser);
-        } catch (IdentityOAuth2Exception e) {
-            throw handleError("Error occurred while retrieving apps authorized by User ID : " + username, e);
-        }
+
         try {
             systemApplicationDTOS = systemApplicationDAO.getApplications(tenantDomain);
             if (systemApplicationDTOS.length < 0) {
@@ -255,15 +252,20 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                 }
             } else {
                 for (SystemApplicationDTO applicationDTO : systemApplicationDTOS) {
-                    systemAppClientIds.add(applicationDTO.getConsumerKey());
+                    try {
+                        if (ApplicationMgtUtil.isUserAuthorized(applicationDTO.getName(),tenantAwareusername)) {
+                            systemAppClientIds.add(applicationDTO.getConsumerKey());
+                        }
+                    } catch (IdentityApplicationManagementException e) {
+                        log.error("Error occurred while checking the authorization of the application "
+                                + applicationDTO.getName(), e);
+                    }
                 }
             }
         } catch (APIMgtDAOException e) {
             log.error("Error thrown while retrieving system applications for the tenant domain " + tenantDomain, e);
         }
-        if (clientIds.containsAll(systemAppClientIds)) {
-            clientIds = systemAppClientIds;
-        }
+        clientIds = systemAppClientIds;
         Set<OAuthConsumerAppDTO> appDTOs = new HashSet<>();
         for (String clientId : clientIds) {
             Set<AccessTokenDO> accessTokenDOs;
