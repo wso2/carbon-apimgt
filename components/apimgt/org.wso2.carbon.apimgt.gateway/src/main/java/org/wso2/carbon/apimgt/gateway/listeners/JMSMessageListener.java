@@ -48,7 +48,7 @@ public class JMSMessageListener implements MessageListener {
     private static final int API_PATTERN_GROUPS = 3;
     private static final int API_PATTERN_CONDITION_INDEX = 2;
 
-    private Pattern resourcePattern = Pattern.compile("/.*/(.*)/\\1(.*)?:[A-Z]{0,5}_(condition_(\\d*)|default)");
+    private Pattern resourcePattern = Pattern.compile("/.*/(.*)/\\1(.*)?:[A-Z]{0,7}_(condition_(\\d*)|default)");
     public static final int RESOURCE_PATTERN_GROUPS = 4;
     public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
 

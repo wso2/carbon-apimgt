@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -252,6 +253,11 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
     @Override
     public ErrorHandler getError() {
         return error;
+    }
+
+    @Override
+    public void loadXSDs(APIMWSDLReader wsdlReader, String url) throws APIManagementException {
+
     }
 
     @Override
