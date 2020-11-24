@@ -1,6 +1,22 @@
-package org.wso2.carbon.apimgt.persistence.dto;
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-import org.json.simple.JSONObject;
+package org.wso2.carbon.apimgt.persistence.dto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +35,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String technicalOwnerEmail;
     private String businessOwner;
     private String businessOwnerEmail;
-    private List<String> transport = new ArrayList<>();
+    private String transports;
     private String redirectURL;  // (originalStoreUrl)
     private String apiOwner;
     private boolean advertiseOnly;
@@ -39,6 +55,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String endpointConfig;
     private String type;
     private Boolean advertisedOnly;
+    private String swaggerDefinition;
 
     public String getStatus() {
         return status;
@@ -104,12 +121,20 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.businessOwnerEmail = businessOwnerEmail;
     }
 
-    public List<String> getTransport() {
-        return transport;
+    public Boolean getIsDefaultVersion() {
+        return isDefaultVersion;
     }
 
-    public void setTransport(List<String> transport) {
-        this.transport = transport;
+    public void setIsDefaultVersion(Boolean isDefaultVersion) {
+        this.isDefaultVersion = isDefaultVersion;
+    }
+
+    public String getTransports() {
+        return transports;
+    }
+
+    public void setTransports(String transport) {
+        this.transports = transport;
     }
 
     public String getRedirectURL() {
@@ -264,6 +289,32 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     public void setAdvertisedOnly(Boolean advertisedOnly) {
         this.advertisedOnly = advertisedOnly;
     }
+
+    public String getSwaggerDefinition() {
+        return swaggerDefinition;
+    }
+
+    public void setSwaggerDefinition(String swaggerDefinition) {
+        this.swaggerDefinition = swaggerDefinition;
+    }
+
+    @Override
+    public String toString() {
+        return "DevPortalAPI [status=" + status + ", isDefaultVersion=" + isDefaultVersion + ", description="
+                + description + ", wsdlUrl=" + wsdlUrl + ", technicalOwner=" + technicalOwner + ", technicalOwnerEmail="
+                + technicalOwnerEmail + ", businessOwner=" + businessOwner + ", businessOwnerEmail="
+                + businessOwnerEmail + ", transports=" + transports + ", redirectURL=" + redirectURL + ", apiOwner="
+                + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
+                + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
+                + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
+                + ", availableTierNames=" + availableTierNames + ", environments=" + environments + ", gatewayLabels="
+                + gatewayLabels + ", apiCategories=" + apiCategories + ", isMonetizationEnabled="
+                + isMonetizationEnabled + ", keyManagers=" + keyManagers + ", deploymentEnvironments="
+                + deploymentEnvironments + ", tags=" + tags + ", additionalProperties=" + additionalProperties
+                + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly=" + advertisedOnly
+                + ", swaggerDefinition=" + swaggerDefinition + "]";
+    }
+    
 
     /*
     private String accessControl; //publisher accessControl : 'restricted', 'all' // this won't be required

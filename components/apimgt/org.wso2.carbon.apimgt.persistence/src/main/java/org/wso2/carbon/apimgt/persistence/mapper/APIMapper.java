@@ -35,8 +35,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
@@ -81,6 +83,29 @@ public interface APIMapper {
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "context", target = "contextTemplate")
     API toApi(DevPortalAPIInfo api);
+    
+    @Mapping(source = "providerName", target = "id.providerName")
+    @Mapping(source = "apiName", target = "id.apiName")
+    @Mapping(source = "version", target = "id.version")
+    @Mapping(source = "id", target = "uuid")
+    //@Mapping(source = "thumbnail", target = "thumbnailUrl")
+    @Mapping(source = "availableTierNames", target = "availableTiers")
+    //@Mapping(source = "visibleOrganizations", target = "visibleTenants")
+    @Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
+    //@Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
+    API toApi(DevPortalAPI api);
+    
+    @Mapping(source = "id.providerName", target = "providerName")
+    @Mapping(source = "id.apiName", target = "apiName")
+    @Mapping(source = "id.version", target = "version")
+    @Mapping(source = "thumbnailUrl", target = "thumbnail")
+    @Mapping(source = "availableTiers", target = "availableTierNames")
+    @Mapping(source = "uuid", target = "id")
+    //@Mapping(source = "visibleTenants", target = "visibleOrganizations")
+    @Mapping(source = "subscriptionAvailableTenants", target = "subscriptionAvailableOrgs")
+    DevPortalAPI toDevPortalApi(API api);
+    
+    APIProduct toApiProduct(DevPortalAPI api);
 
     default JSONObject mapJSONMapToJSONObject(Map<String,String> jsonMap) throws ParseException {
         if (jsonMap != null) {
