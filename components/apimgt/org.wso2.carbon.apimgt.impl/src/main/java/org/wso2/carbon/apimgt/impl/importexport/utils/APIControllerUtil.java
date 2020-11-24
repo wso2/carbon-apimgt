@@ -30,9 +30,9 @@ public class APIControllerUtil {
     public static JsonObject resolveAPIControllerEnvParams(String pathToArchive) throws IOException {
 
         String jsonParamsContent;
-        jsonParamsContent = APIControllerUtil.getParamsDefinitionAsJSON(pathToArchive);
+        jsonParamsContent = getParamsDefinitionAsJSON(pathToArchive);
         if (jsonParamsContent == null) {
-            throw new IOException("Cannot find API Params definition. api_params.json or api_params.yaml should present");
+            return null;
         }
         JsonElement paramsElement = new JsonParser().parse(jsonParamsContent);
         return paramsElement.getAsJsonObject();
