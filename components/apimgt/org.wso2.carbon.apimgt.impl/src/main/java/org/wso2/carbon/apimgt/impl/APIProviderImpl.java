@@ -3089,8 +3089,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //update the swagger definition with content-aware property for policies with bandwidth type.
         List<String> policyNames = apiMgtDAO
                 .getNamesOfTierWithBandwidthQuotaType(APIUtil.getTenantIdFromTenantDomain(tenantDomain));
-        String definition = OASParserUtil.getOASDefinitionWithTierContentAwareProperty(
-                getOpenAPIDefinition(api.getUuid()), policyNames, api.getApiLevelPolicy());
+        String definition = OASParserUtil.getOASDefinitionWithTierContentAwareProperty(api.getSwaggerDefinition(),
+                policyNames, api.getApiLevelPolicy());
         api.setSwaggerDefinition(definition);
         try {
             builder = getAPITemplateBuilder(api);

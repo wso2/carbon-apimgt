@@ -5398,35 +5398,33 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String getOpenAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
+    public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException {
-        return getOpenAPIDefinitionForDeployment(apiId, environmentName, null);
+        return getOpenAPIDefinitionForDeployment(api, environmentName, null);
     }
 
     @Override
-    public String getOpenAPIDefinitionForClusterName(Identifier apiId, String clusterName)
+    public String getOpenAPIDefinitionForClusterName(API api, String clusterName)
             throws APIManagementException {
-        return getOpenAPIDefinitionForDeployment(apiId, null, clusterName);
+        return getOpenAPIDefinitionForDeployment(api, null, clusterName);
     }
 
     @Override
-    public String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName) throws APIManagementException {
+    public String getOpenAPIDefinitionForLabel(API api, String labelName) throws APIManagementException {
         List<Label> gatewayLabels;
         String updatedDefinition = null;
         Map<String,String> hostsWithSchemes;
-        String definition = super.getOpenAPIDefinition(apiId);
-        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-        if (apiId instanceof APIIdentifier) {
-            API api = getLightweightAPI((APIIdentifier) apiId);
-            gatewayLabels = api.getGatewayLabels();
-            hostsWithSchemes = getHostWithSchemeMappingForLabel(gatewayLabels, labelName);
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
-        } else if (apiId instanceof APIProductIdentifier) {
-            APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
-            gatewayLabels = apiProduct.getGatewayLabels();
-            hostsWithSchemes = getHostWithSchemeMappingForLabel(gatewayLabels, labelName);
-            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostsWithSchemes);
+        String definition;
+        if (api.getSwaggerDefinition() != null) {
+            definition = api.getSwaggerDefinition();
+        } else {
+            definition = super.getOpenAPIDefinition(api.getUuid());
         }
+        
+        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+        gatewayLabels = api.getGatewayLabels();
+        hostsWithSchemes = getHostWithSchemeMappingForLabel(gatewayLabels, labelName);
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
         return updatedDefinition;
     }
 
@@ -5478,6 +5476,40 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiProduct.setContext(getBasePath(apiTenantDomain, apiProduct.getContext()));
             updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostsWithSchemes);
         }
+        return updatedDefinition;
+    }
+    
+    /**
+     * Get server URL updated Open API definition for given deployment (synapse gateway or container managed cluster)
+     * @param apiId Id of the API
+     * @param synapseEnvName Name of the synapse gateway environment
+     * @param clusterName Name of the container managed cluster
+     * @return Updated Open API definition
+     * @throws APIManagementException
+     */
+    private String getOpenAPIDefinitionForDeployment(API api, String synapseEnvName, String clusterName)
+            throws APIManagementException {
+        String apiTenantDomain;
+        String updatedDefinition = null;
+        Map<String,String> hostsWithSchemes;
+        String definition;
+        if(api.getSwaggerDefinition() != null) {
+            definition = api.getSwaggerDefinition();
+        } else {
+            definition = super.getOpenAPIDefinition(api.getUuid());
+        }
+        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+        api.setScopes(oasParser.getScopes(definition));
+        api.setUriTemplates(oasParser.getURITemplates(definition));
+        apiTenantDomain = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        if (!StringUtils.isEmpty(synapseEnvName)) {
+            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, synapseEnvName);
+        } else {
+            hostsWithSchemes = getHostWithSchemeMappingForClusterName(clusterName);
+        }
+        api.setContext(getBasePath(apiTenantDomain, api.getContext()));
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
         return updatedDefinition;
     }
 
@@ -5938,7 +5970,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Organization org = new Organization(requestedTenantDomain);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
-                return APIMapper.INSTANCE.toApi(devPortalApi);
+                API api = APIMapper.INSTANCE.toApi(devPortalApi);
+                
+                /// populate relavant external info
+                // environment
+                String environmentString = null;
+                if (api.getEnvironments() != null) {
+                    environmentString = String.join(",", api.getEnvironments());
+                }
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+                //CORS . if null is returned, set default config from the configuration
+                if(api.getCorsConfiguration() == null) {
+                    api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
+                }
+                return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg);

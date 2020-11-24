@@ -641,12 +641,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
             } else {
                 requestedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
 
             }
 
@@ -701,7 +701,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
 
             List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
-                    .findGovernanceArtifacts(searchQuery, registry, APIConstants.API_RXT_MEDIA_TYPE,
+                    .findGovernanceArtifacts(searchQuery, userRegistry, APIConstants.API_RXT_MEDIA_TYPE,
                             true);
             totalLength = PaginationContext.getInstance().getLength();
             boolean isFound = true;

@@ -97,6 +97,7 @@ import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -1236,7 +1237,7 @@ public abstract class AbstractAPIManager implements APIManager {
     
     @Override
     public String getOpenAPIDefinition(String apiId) throws APIManagementException {
-        String apiTenantDomain = getTenantDomain(apiId);
+        String apiTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String definition = null;
         try {
             definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), apiId);
