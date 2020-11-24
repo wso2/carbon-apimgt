@@ -585,7 +585,7 @@ public class APIControllerUtil {
             String content = APIImportExportConstants.CERTIFICATE_PREFIX_STRING + certObject.get(
                     APIImportExportConstants.CERTIFICATE_CERTIFICATE_CONTENT_PROPERTY).getAsString()
                     + APIImportExportConstants.CERTIFICATE_SUFFIX_STRING;
-            String certificatePath = pathToArchive + APIImportExportConstants.META_INFO_DIRECTORY + alias +
+            String certificatePath = pathToArchive + APIImportExportConstants.META_INFO_DIRECTORY_PATH + alias +
                     APIImportExportConstants.CERTIFICATE_FILE_EXTENSION;
             CommonUtil.generateFiles(certificatePath, content);
         }
@@ -612,7 +612,7 @@ public class APIControllerUtil {
             String content = APIImportExportConstants.CERTIFICATE_PREFIX_STRING + certObject.get
                     (APIImportExportConstants.CERTIFICATE_CERTIFICATE_CONTENT_PROPERTY).getAsString()
                     + APIImportExportConstants.CERTIFICATE_SUFFIX_STRING;
-            String certificatePath = pathToArchive + APIImportExportConstants.META_INFO_DIRECTORY + alias +
+            String certificatePath = pathToArchive + APIImportExportConstants.META_INFO_DIRECTORY_PATH + alias +
                     APIImportExportConstants.CERTIFICATE_FILE_EXTENSION;
             CommonUtil.generateFiles(certificatePath, content);
         }
