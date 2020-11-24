@@ -58,10 +58,8 @@ function Delete(props) {
     const runAction = (confirm) => {
         if (confirm) {
             deleteService();
-            setOpen(!open);
-        } else {
-            setOpen(!open);
         }
+        setOpen(!open);
     };
 
     return (

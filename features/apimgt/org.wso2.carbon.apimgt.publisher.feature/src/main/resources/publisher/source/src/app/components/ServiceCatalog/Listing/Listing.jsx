@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,6 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
-import Icon from '@material-ui/core/Icon';
 import Typography from '@material-ui/core/Typography';
 import MUIDataTable from 'mui-datatables';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -32,6 +31,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
 import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
+import Edit from 'AppComponents/ServiceCatalog/Listing/Edit';
 import Grid from '@material-ui/core/Grid';
 import Help from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -246,10 +246,9 @@ class Listing extends React.Component {
             },
             {
                 options: {
-                    customBodyRender: (value, tableMeta) => {
+                    customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
                         if (tableMeta.rowData) {
-                            const serviceId = tableMeta.rowData[0];
-                            const serviceName = tableMeta.rowData[1];
+                            const dataRow = tableViewObj.state.serviceList[tableMeta.rowIndex];
                             return (
                                 <Box display='flex' flexDirection='row'>
                                     <Link>
@@ -262,10 +261,8 @@ class Listing extends React.Component {
                                             </Typography>
                                         </Button>
                                     </Link>
-                                    <Button>
-                                        <Icon>edit</Icon>
-                                    </Button>
-                                    <Delete serviceName={serviceName} serviceId={serviceId} getData={this.getData} />
+                                    <Edit dataRow={dataRow} getData={this.getData} />
+                                    <Delete serviceName={dataRow.name} serviceId={dataRow.id} getData={this.getData} />
                                 </Box>
                             );
                         }
