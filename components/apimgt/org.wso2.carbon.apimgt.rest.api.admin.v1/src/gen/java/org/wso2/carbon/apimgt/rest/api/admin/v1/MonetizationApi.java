@@ -26,8 +26,8 @@ import javax.validation.constraints.*;
 @Path("/monetization")
 
 @Api(description = "the monetization API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class MonetizationApi  {
@@ -39,12 +39,12 @@ MonetizationApiService delegate = new MonetizationApiServiceImpl();
 
     @POST
     @Path("/publish-usage")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Publish Usage Records", notes = "Publish usage records of monetized APIs ", response = PublishStatusDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records")
         })
     }, tags={ "Monetization (Collection)",  })
     @ApiResponses(value = { 
@@ -58,12 +58,12 @@ MonetizationApiService delegate = new MonetizationApiServiceImpl();
 
     @GET
     @Path("/publish-usage/status")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Status of Monetization Usage Publisher", notes = "Get the status of monetization usage publisher ", response = MonetizationUsagePublishInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records")
         })
     }, tags={ "Monetization (Collection)" })
     @ApiResponses(value = { 

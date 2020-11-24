@@ -99,11 +99,14 @@ class API extends Resource {
             const apiData = this.getDataFromSpecFields(client);
 
             payload = {
-                file: openAPIData,
-                additionalProperties: JSON.stringify(apiData),
+                requestBody: {
+                    file: openAPIData,
+                    additionalProperties: JSON.stringify(apiData),
+                }
             };
 
             const promisedResponse = client.apis['APIs'].importOpenAPIDefinition(
+                null,
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -121,11 +124,14 @@ class API extends Resource {
             const apiData = this.getDataFromSpecFields(client);
 
             payload = {
-                url: openAPIUrl,
-                additionalProperties: JSON.stringify(apiData),
+                requestBody: {
+                    url: openAPIUrl,
+                    additionalProperties: JSON.stringify(apiData),
+                }
             };
 
             const promisedResponse = client.apis['APIs'].importOpenAPIDefinition(
+                null,
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -143,9 +149,15 @@ class API extends Resource {
             file: openAPIData,
             'Content-Type': 'multipart/form-data',
         };
+        const requestBody = {
+            requestBody: {
+                file: openAPIData,
+            },
+        };
         promisedValidate = apiClient.then(client => {
             return client.apis.Validation.validateOpenAPIDefinition(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -157,13 +169,18 @@ class API extends Resource {
     static validateOpenAPIByUrl(url, params = { returnContent: false }) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const payload = {
-            url: url,
             'Content-Type': 'multipart/form-data',
             ...params
+        };
+        const requestBody = {
+            requestBody: {
+                url: url,
+            },
         };
         return apiClient.then(client => {
             return client.apis['Validation'].validateOpenAPIDefinition(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -231,11 +248,19 @@ class API extends Resource {
 
     updateResourcePolicy(resourcePolicy) {
         return this.client.then(client => {
-            return client.apis['API Resource Policies'].put_apis__apiId__resource_policies__resourcePolicyId_({
-                apiId: this.id,
-                resourcePolicyId: resourcePolicy.id,
-                body: resourcePolicy,
-            });
+            return client.apis['API Resource Policies'].put_apis__apiId__resource_policies__resourcePolicyId_(
+                {
+                    apiId: this.id,
+                    resourcePolicyId: resourcePolicy.id,
+                },
+                {
+                    requestBody: {
+                        httpVerb: resourcePolicy.httpVerb,
+                        resourcePath: resourcePolicy.resourcePath,
+                        content: resourcePolicy.content,
+                    }
+                }
+            );
         });
     }
 
@@ -280,7 +305,7 @@ class API extends Resource {
 
     save(openAPIVersion = 'v3') {
         const promisedAPIResponse = this.client.then(client => {
-            const properties = client.spec.definitions.API.properties;
+            const properties = client.spec.components.schemas.API.properties;
             const data = {};
             Object.keys(this).forEach(apiAttribute => {
                 if (apiAttribute in properties) {
@@ -288,11 +313,13 @@ class API extends Resource {
                 }
             });
             const payload = {
-                body: data,
                 'Content-Type': 'application/json',
                 openAPIVersion,
             };
-            return client.apis['APIs'].post_apis(payload, this._requestMetaData());
+            const requestBody = {
+                'requestBody': data,
+            };
+            return client.apis['APIs'].post_apis(payload, requestBody, this._requestMetaData());
         });
         return promisedAPIResponse.then(response => {
             return new API(response.body);
@@ -621,10 +648,10 @@ class API extends Resource {
      */
     configureMonetizationToApi(apiId, body) {
         const promised_status = this.client.then(client => {
-            return client.apis['API Monetization'].post_apis__apiId__monetize({
-                apiId,
-                body,
-            });
+            return client.apis['API Monetization'].post_apis__apiId__monetize(
+                { apiId },
+                { requestBody: body },
+            );
         });
         return promised_status;
     }
@@ -738,10 +765,15 @@ class API extends Resource {
     addSharedScope(body) {
         const promised_addSharedScope = this.client.then(client => {
             const payload = {
-                body,
                 'Content-Type': 'application/json',
             };
-            return client.apis['Scopes'].addSharedScope(payload, this._requestMetaData());
+            return client.apis['Scopes'].addSharedScope(
+                payload,
+                {
+                    requestBody: body
+                },
+                this._requestMetaData()
+            );
         });
         return promised_addSharedScope;
     }
@@ -756,10 +788,15 @@ class API extends Resource {
         const promised_updateSharedScope = this.client.then(client => {
             const payload = {
                 scopeId,
-                body,
                 'Content-Type': 'application/json',
             };
-            return client.apis['Scopes'].updateSharedScope(payload, this._requestMetaData());
+            return client.apis['Scopes'].updateSharedScope(
+                payload,
+                {
+                    requestBody: body
+                },
+                this._requestMetaData()
+            );
         });
         return promised_updateSharedScope;
     }
@@ -881,11 +918,16 @@ class API extends Resource {
         const promised_updateSchema = this.client.then(client => {
             const payload = {
                 apiId: apiId,
-                schemaDefinition: graphQLSchema,
                 'Content-Type': 'multipart/form-data',
             };
+            const requestBody = {
+                requestBody: {
+                    schemaDefinition: graphQLSchema
+                }
+            }
             return client.apis['GraphQL Schema'].put_apis__apiId__graphql_schema(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -903,11 +945,16 @@ class API extends Resource {
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: this.id,
-                apiDefinition: JSON.stringify(swagger),
                 'Content-Type': 'multipart/form-data',
+            };
+            const requestBody = {
+                requestBody: {
+                    apiDefinition: JSON.stringify(swagger),
+                },
             };
             return client.apis['APIs'].put_apis__apiId__swagger(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1061,9 +1108,11 @@ class API extends Resource {
         const promisedUpdate = this.client.then(client => {
             const payload = {
                 apiId: updatedAPI.id,
-                body: updatedAPI,
             };
-            return client.apis['APIs'].put_apis__apiId_(payload);
+            const requestBody = {
+                requestBody: updatedAPI,
+            };
+            return client.apis['APIs'].put_apis__apiId_(payload, requestBody);
         });
         return promisedUpdate.then(response => {
             return new API(response.body);
@@ -1078,9 +1127,11 @@ class API extends Resource {
         const promised_update = this.client.then(client => {
             const payload = {
                 apiProductId: api.id,
-                body: api,
             };
-            return client.apis['API Products'].put_api_products__apiProductId_(payload);
+            const requestBody = {
+                'requestBody': api,
+            };
+            return client.apis['API Products'].put_api_products__apiProductId_(payload, requestBody);
         });
         return promised_update;
     }
@@ -1182,10 +1233,13 @@ class API extends Resource {
         const promised_addDocument = this.client.then(client => {
             const payload = {
                 apiId: api_id,
-                body,
                 'Content-Type': 'application/json',
             };
-            return client.apis['API Documents'].post_apis__apiId__documents(payload, this._requestMetaData());
+            const requestBody = {
+                requestBody: body
+            };
+            return client.apis['API Documents'].post_apis__apiId__documents(payload, requestBody,
+                this._requestMetaData());
         });
         return promised_addDocument;
     }
@@ -1198,11 +1252,15 @@ class API extends Resource {
             const payload = {
                 apiId: api_id,
                 documentId: docId,
-                file: fileToDocument,
                 'Content-Type': 'application/json',
             };
             return client.apis['API Documents'].post_apis__apiId__documents__documentId__content(
                 payload,
+                {
+                    requestBody: {
+                        file: fileToDocument
+                    }
+                },
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1221,11 +1279,16 @@ class API extends Resource {
                 apiId,
                 documentId,
                 sourceType,
-                inlineContent,
                 'Content-Type': 'application/json',
+            };
+            const requestBody = {
+                requestBody: {
+                    inlineContent: inlineContent,
+                }
             };
             return client.apis['API Documents'].post_apis__apiId__documents__documentId__content(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1285,12 +1348,14 @@ class API extends Resource {
         const promised_updateDocument = this.client.then(client => {
             const payload = {
                 apiId: api_id,
-                body,
                 documentId: docId,
                 'Content-Type': 'application/json',
             };
             return client.apis['API Documents'].put_apis__apiId__documents__documentId_(
                 payload,
+                {
+                    requestBody: body,
+                },
                 this._requestMetaData(),
             );
         });
@@ -1345,15 +1410,20 @@ class API extends Resource {
         let payload;
         let promise_create;
         payload = {
-            type: 'GraphQL',
-            additionalProperties: api_data.additionalProperties,
-            file: api_data.file,
             'Content-Type': 'multipart/form-data',
+        };
+        const requestBody = {
+            requestBody: {
+                type: 'GraphQL',
+                additionalProperties: api_data.additionalProperties,
+                file: api_data.file,
+            }
         };
 
         promise_create = this.client.then(client => {
             return client.apis['APIs'].post_apis_import_graphql_schema(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1372,8 +1442,12 @@ class API extends Resource {
             return client.apis['Validation'].post_apis_validate_graphql_schema(
                 {
                     type: 'GraphQL',
-                    file,
                     'Content-Type': 'multipart/form-data',
+                },
+                {
+                    requestBody: {
+                        file,
+                    }
                 },
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -1428,7 +1502,11 @@ class API extends Resource {
             return client.apis['APIs'].updateWSDLOfAPI(
                 {
                     apiId,
-                    url,
+                },
+                {
+                    requestBody: {
+                        url,
+                    }
                 },
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -1449,7 +1527,11 @@ class API extends Resource {
             return client.apis['APIs'].updateWSDLOfAPI(
                 {
                     apiId,
-                    file,
+                },
+                {
+                    requestBody: {
+                        file,
+                    }
                 },
                 this._requestMetaData(),
             );
@@ -1604,11 +1686,16 @@ class API extends Resource {
         const promised_addAPIThumbnail = this.client.then(client => {
             const payload = {
                 apiId: api_id,
-                file: imageFile,
                 'Content-Type': imageFile.type,
+            };
+            const requestBody = {
+                requestBody: {
+                    file: imageFile,
+                },
             };
             return client.apis['APIs'].updateAPIThumbnail(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1722,7 +1809,7 @@ class API extends Resource {
      * @memberof API
      */
     getDataFromSpecFields(client) {
-        const properties = client.spec.definitions.API.properties;
+        const properties = client.spec.components.schemas.API.properties;
         const data = {};
         Object.keys(this).forEach(apiAttribute => {
             if (apiAttribute in properties) {
@@ -1774,11 +1861,11 @@ class API extends Resource {
         const promised_updateComplexity = this.client.then(client => {
             const payload = {
                 apiId: api_id,
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['GraphQL Policies'].put_apis__apiId__graphql_policies_complexity(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
@@ -2192,11 +2279,15 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
-                return client.apis['Endpoint Certificates'].post_endpoint_certificates({
-                    certificate: certificateFile,
-                    endpoint,
-                    alias,
-                });
+                return client.apis['Endpoint Certificates'].post_endpoint_certificates(
+                    {},
+                    {
+                        requestBody: {
+                            certificate: certificateFile,
+                            endpoint: endpoint,
+                            alias: alias,
+                        }
+                    });
             },
             this._requestMetaData({
                 'Content-Type': 'multipart/form-data',
@@ -2216,12 +2307,18 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
-                return client.apis['Client Certificates'].post_apis__apiId__client_certificates({
-                    certificate: certificateFile,
-                    alias,
-                    apiId,
-                    tier,
-                });
+                return client.apis['Client Certificates'].post_apis__apiId__client_certificates(
+                    {
+                        apiId,
+                    },
+                    {
+                        requestBody: {
+                            certificate: certificateFile,
+                            alias: alias,
+                            tier: tier,
+                        }
+                    }
+                );
             },
             this._requestMetaData({
                 'Content-Type': 'multipart/form-data',
@@ -2339,8 +2436,12 @@ class API extends Resource {
             return client.apis['API Mediation Policies'].apisApiIdMediationPoliciesPost(
                 {
                     apiId: apiId,
-                    type: type.toLowerCase(),
-                    mediationPolicyFile: policyFile,
+                },
+                {
+                    requestBody: {
+                        type: type.toLowerCase(),
+                        mediationPolicyFile: policyFile,
+                    },
                 },
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -2544,7 +2645,12 @@ class API extends Resource {
     static subscribeAlerts(alerts) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['Alert Subscriptions'].subscribeToAlerts({ body: alerts }, this._requestMetaData());
+            return client.apis['Alert Subscriptions'].subscribeToAlerts(
+                {},
+                {
+                    requestBody: alerts
+                },
+                this._requestMetaData());
         });
     }
 
@@ -2592,8 +2698,10 @@ class API extends Resource {
             return client.apis['Alert Configuration'].addAlertConfig(
                 {
                     alertType: alertType,
-                    body: alertConfig,
                     configurationId: configId,
+                },
+                {
+                    requestBody: alertConfig,
                 },
                 this._requestMetaData(),
             );

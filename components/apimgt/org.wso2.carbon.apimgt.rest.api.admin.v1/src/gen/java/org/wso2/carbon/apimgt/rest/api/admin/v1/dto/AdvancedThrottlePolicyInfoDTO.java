@@ -2,6 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyInfoAllOfDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
 import javax.validation.constraints.*;
@@ -13,6 +16,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -29,6 +34,7 @@ public class AdvancedThrottlePolicyInfoDTO extends ThrottlePolicyDTO  {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("defaultLimit")
   public ThrottleLimitDTO getDefaultLimit() {
     return defaultLimit;

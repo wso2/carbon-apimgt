@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndpointEndpointConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndpointEndpointSecurityDTO;
 import javax.validation.constraints.*;
@@ -13,6 +15,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -70,6 +74,7 @@ public class EndpointDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("endpointConfig")
   public EndpointEndpointConfigDTO getEndpointConfig() {
     return endpointConfig;
@@ -87,6 +92,7 @@ public class EndpointDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("endpointSecurity")
   public EndpointEndpointSecurityDTO getEndpointSecurity() {
     return endpointSecurity;

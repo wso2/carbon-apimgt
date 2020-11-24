@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
@@ -15,6 +17,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -51,7 +55,8 @@ public class ConditionalGroupDTO   {
   }
 
   
-  @ApiModelProperty(example = "\"[\\n  {\\n    \\\"type\\\": \\\"HEADERCONDITION\\\",\\n    \\\"invertCondition\\\": false,\\n    \\\"headerCondition\\\":\\n    {\\n      \\\"headerName\\\": \\\"Host\\\",\\n      \\\"headerValue\\\": \\\"10.100.7.77\\\"\\n    }\\n\\t},\\n\\t{\\n    \\\"type\\\": \\\"IPCONDITION\\\",\\n    \\\"invertCondition\\\": false,\\n    \\\"ipCondition\\\":\\n    {\\n      \\\"ipConditionType\\\": \\\"IPSPECIFIC\\\",\\n      \\\"specificIP\\\": \\\"10.100.1.22\\\",\\n      \\\"startingIP\\\": null,\\n      \\\"endingIP\\\": null\\n    }\\n\\t},\\n\\t{\\n    \\\"type\\\": \\\"QUERYPARAMETERCONDITION\\\",\\n    \\\"invertCondition\\\": false,\\n    \\\"queryParameterCondition\\\":\\n    {\\n      \\\"parameterName\\\": \\\"name\\\",\\n      \\\"parameterValue\\\": \\\"admin\\\"\\n    }\\n\\t},\\n\\t{\\n    \\\"type\\\": \\\"JWTCLAIMSCONDITION\\\",\\n    \\\"invertCondition\\\": true,\\n    \\\"jwtClaimsCondition\\\":\\n    {\\n      \\\"claimUrl\\\": \\\"claimUrl0\\\",\\n      \\\"attribute\\\": \\\"claimAttr0\\\"\\n    }\\n  }\\n]\\n\"", required = true, value = "Individual throttling conditions. They can be defined as either HeaderCondition, IPCondition, JWTClaimsCondition, QueryParameterCondition Please see schemas of each of those throttling condition in Definitions section. ")
+  @ApiModelProperty(example = "[   {     \"type\": \"HEADERCONDITION\",     \"invertCondition\": false,     \"headerCondition\":     {       \"headerName\": \"Host\",       \"headerValue\": \"10.100.7.77\"     }   },   {     \"type\": \"IPCONDITION\",     \"invertCondition\": false,     \"ipCondition\":     {       \"ipConditionType\": \"IPSPECIFIC\",       \"specificIP\": \"10.100.1.22\",       \"startingIP\": null,       \"endingIP\": null     }   },   {     \"type\": \"QUERYPARAMETERCONDITION\",     \"invertCondition\": false,     \"queryParameterCondition\":     {       \"parameterName\": \"name\",       \"parameterValue\": \"admin\"     }   },   {     \"type\": \"JWTCLAIMSCONDITION\",     \"invertCondition\": true,     \"jwtClaimsCondition\":     {       \"claimUrl\": \"claimUrl0\",       \"attribute\": \"claimAttr0\"     }   } ] ", required = true, value = "Individual throttling conditions. They can be defined as either HeaderCondition, IPCondition, JWTClaimsCondition, QueryParameterCondition Please see schemas of each of those throttling condition in Definitions section. ")
+      @Valid
   @JsonProperty("conditions")
   @NotNull
   public List<ThrottleConditionDTO> getConditions() {
@@ -70,6 +75,7 @@ public class ConditionalGroupDTO   {
 
   
   @ApiModelProperty(required = true, value = "")
+      @Valid
   @JsonProperty("limit")
   @NotNull
   public ThrottleLimitDTO getLimit() {

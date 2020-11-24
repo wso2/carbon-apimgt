@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/deployments")
 
 @Api(description = "the deployments API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class DeploymentsApi  {
@@ -38,7 +38,7 @@ DeploymentsApiService delegate = new DeploymentsApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve Deployment Environments Details", notes = "This operation can be used to retrieve cloud clusters information defines in tenant-conf.json file.  With that you can deploy an API to selected cloud environments. ", response = DeploymentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

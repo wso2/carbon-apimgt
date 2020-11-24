@@ -27,7 +27,7 @@ public interface EndpointCertificatesApiService {
       public Response endpointCertificatesAliasContentGet(String alias, MessageContext messageContext) throws APIManagementException;
       public Response endpointCertificatesAliasDelete(String alias, MessageContext messageContext) throws APIManagementException;
       public Response endpointCertificatesAliasGet(String alias, MessageContext messageContext) throws APIManagementException;
-      public Response endpointCertificatesAliasPut(InputStream certificateInputStream, Attachment certificateDetail, String alias, MessageContext messageContext) throws APIManagementException;
+      public Response endpointCertificatesAliasPut(String alias, InputStream certificateInputStream, Attachment certificateDetail, MessageContext messageContext) throws APIManagementException;
       public Response endpointCertificatesGet(Integer limit, Integer offset, String alias, String endpoint, MessageContext messageContext) throws APIManagementException;
       public Response endpointCertificatesPost(InputStream certificateInputStream, Attachment certificateDetail, String alias, String endpoint, MessageContext messageContext) throws APIManagementException;
 }

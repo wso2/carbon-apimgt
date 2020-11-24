@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigurator;
 import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertConfigDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertConfigInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.PublisherAlertsAPIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.AlertsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -45,7 +44,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
     private static final String API_VERSION = "apiVersion";
 
     @Override
-    public Response addAlertConfig(String alertType, String configurationId, AlertConfigInfoDTO body,
+    public Response addAlertConfig(String alertType, String configurationId, Map<String, String> body,
             MessageContext messageContext) {
         String tenantAwareUserName = RestApiUtil.getLoggedInUsername();
         PublisherAlertsAPIUtils.validateConfigParameters(configurationId);

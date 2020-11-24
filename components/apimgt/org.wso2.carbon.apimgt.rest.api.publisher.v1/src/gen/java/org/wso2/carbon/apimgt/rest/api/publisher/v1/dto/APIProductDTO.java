@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +22,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -723,6 +727,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("monetization")
   public APIMonetizationInfoDTO getMonetization() {
     return monetization;
@@ -740,6 +745,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("businessInformation")
   public APIProductBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
@@ -757,6 +763,7 @@ return null;
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("corsConfiguration")
   public APICorsConfigurationDTO getCorsConfiguration() {
     return corsConfiguration;
@@ -773,7 +780,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
   public java.util.Date getCreatedTime() {
     return createdTime;
@@ -790,7 +797,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedTime")
   public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;
@@ -809,6 +816,7 @@ return null;
 
   
   @ApiModelProperty(example = "[{\"name\":\"PizzaShackAPI\",\"apiId\":\"01234567-0123-0123-0123-012345678901\",\"version\":\"1.0\",\"operations\":[{\"target\":\"/order/{orderId}\",\"verb\":\"POST\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"},{\"target\":\"/menu\",\"verb\":\"GET\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"}]}]", value = "APIs and resources in the API Product. ")
+      @Valid
   @JsonProperty("apis")
   public List<ProductAPIDTO> getApis() {
     return apis;
@@ -826,6 +834,7 @@ return null;
 
   
   @ApiModelProperty(example = "[]", value = "")
+      @Valid
   @JsonProperty("scopes")
   public List<APIScopeDTO> getScopes() {
     return scopes;

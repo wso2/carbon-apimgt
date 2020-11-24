@@ -325,8 +325,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(
-            String applicationId, String keyType, APIKeyGenerateRequestDTO body, String ifMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType,
+                                    String ifMatch, APIKeyGenerateRequestDTO body, MessageContext messageContext) {
 
         String userName = RestApiUtil.getLoggedInUsername();
         Application application;
@@ -378,8 +378,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType,
-                                                                      APIKeyRevokeRequestDTO body, String ifMatch,
-                                                                      MessageContext messageContext) {
+                                  String ifMatch, APIKeyRevokeRequestDTO body, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         String apiKey = body.getApikey();
         if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
