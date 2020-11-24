@@ -111,7 +111,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                     RelayUtils.buildMessage(axis2MC);
                     OMElement body = axis2MC.getEnvelope().getBody().getFirstElement();
                     if (body != null && body.getChildrenWithName(QName.valueOf(QUERY_PAYLOAD_STRING)) != null) {
-                        payload = body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)).getText();;
+                        payload = body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)).getText();
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Invalid query parameter " + queryParams[0]);
