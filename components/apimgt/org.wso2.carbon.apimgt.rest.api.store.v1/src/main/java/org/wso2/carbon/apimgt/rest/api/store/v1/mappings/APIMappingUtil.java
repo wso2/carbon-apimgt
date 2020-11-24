@@ -113,7 +113,11 @@ public class APIMappingUtil {
         String apiSwaggerDefinition = null;
 
         if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
-            apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+            if (model.getSwaggerDefinition() != null) {
+                apiSwaggerDefinition = model.getSwaggerDefinition();
+            } else {
+                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+            }
         }
         dto.setApiDefinition(apiSwaggerDefinition);
 
@@ -277,7 +281,11 @@ public class APIMappingUtil {
         String apiSwaggerDefinition = null;
 
         if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
-            apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+            if (model.getDefinition() != null) {
+                apiSwaggerDefinition = model.getDefinition();
+            } else {
+                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+            }
         }
         dto.setApiDefinition(apiSwaggerDefinition);
 

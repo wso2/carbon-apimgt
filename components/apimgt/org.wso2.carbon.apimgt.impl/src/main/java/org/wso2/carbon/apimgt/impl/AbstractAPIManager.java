@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -64,6 +65,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
@@ -79,6 +81,7 @@ import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
@@ -3637,5 +3640,133 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         }
         return filteredQuery.toString();
+    }
+    
+    protected void populateAPIInformation(String uuid, String requestedTenantDomain, Organization org, API api)
+            throws APIManagementException, OASPersistenceException, ParseException {
+        //UUID
+        if(api.getUuid() == null) {
+            api.setUuid(uuid);
+        }
+        // environment
+        String environmentString = null;
+        if (api.getEnvironments() != null) {
+            environmentString = String.join(",", api.getEnvironments());
+        }
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+        // workflow status
+        APIIdentifier apiId = api.getId();
+        WorkflowDTO workflow = APIUtil.getAPIWorkflowStatus(apiId, WF_TYPE_AM_API_STATE);
+        if (workflow != null) {
+            WorkflowStatus status = workflow.getStatus();
+            api.setWorkflowStatus(status.toString());
+        }
+        // TODO try to use a single query to get info from db
+        // Ratings
+        int internalId = ApiMgtDAO.getInstance().getAPIID(apiId, null);
+        api.setRating(APIUtil.getAverageRating(internalId));
+        // api level tier
+        String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(internalId);
+        api.setApiLevelPolicy(apiLevelTier);
+
+        // available tier
+        String tiers = null;
+        Set<Tier> tiersSet = api.getAvailableTiers();
+        Set<String> tierNameSet = new HashSet<String>();
+        for (Tier t : tiersSet) {
+            tierNameSet.add(t.getName());
+        }
+        if (api.getAvailableTiers() != null) {
+            tiers = String.join("||", tierNameSet);
+        }
+        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
+        api.addAvailableTiers(availableTier);
+        
+        //Scopes 
+        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
+        api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
+        
+        //templates
+        String resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+        api.setSwaggerDefinition(resourceConfigsString);
+        JSONParser jsonParser = new JSONParser();
+        JSONObject paths = null;
+        if (resourceConfigsString != null) {
+            JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
+            paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
+        }
+        Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
+        for (URITemplate uriTemplate : uriTemplates) {
+            String uTemplate = uriTemplate.getUriTemplate();
+            String method = uriTemplate.getHTTPVerb();
+            List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
+            List<Scope> newTemplateScopes = new ArrayList<>();
+            if (!oldTemplateScopes.isEmpty()) {
+                for (Scope templateScope : oldTemplateScopes) {
+                    Scope scope = scopeToKeyMapping.get(templateScope.getKey());
+                    newTemplateScopes.add(scope);
+                }
+            }
+            uriTemplate.addAllScopes(newTemplateScopes);
+            uriTemplate.setResourceURI(api.getUrl());
+            uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
+            // AWS Lambda: set arn & timeout to URI template
+            if (paths != null) {
+                JSONObject path = (JSONObject) paths.get(uTemplate);
+                if (path != null) {
+                    JSONObject operation = (JSONObject) path.get(method.toLowerCase());
+                    if (operation != null) {
+                        if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                            uriTemplate.setAmznResourceName((String)
+                                    operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                        }
+                        if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+                            uriTemplate.setAmznResourceTimeout(((Long)
+                                    operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
+                        }
+                    }
+                }
+            }
+        }
+
+        if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
+            for (URITemplate template : uriTemplates) {
+                template.setMediationScript(template.getAggregatedMediationScript());
+            }
+        }
+        api.setUriTemplates(uriTemplates);
+        //CORS . if null is returned, set default config from the configuration
+        if(api.getCorsConfiguration() == null) {
+            api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
+        }
+        
+        // set category
+        List<APICategory> categories = api.getApiCategories();
+        if (categories != null) {
+            List<String> categoriesOfAPI = new ArrayList<String>();
+            for(APICategory apiCategory: categories) {
+                categoriesOfAPI.add(apiCategory.getName());
+            }
+            List<APICategory> categoryList = new ArrayList<>();
+
+            if (!categoriesOfAPI.isEmpty()) {
+                // category array retrieved from artifact has only the category name, therefore we need to fetch
+                // categories
+                // and fill out missing attributes before attaching the list to the api
+                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(requestedTenantDomain);
+
+                // todo-category: optimize this loop with breaks
+                for (String categoryName : categoriesOfAPI) {
+                    for (APICategory category : allCategories) {
+                        if (categoryName.equals(category.getName())) {
+                            categoryList.add(category);
+                            break;
+                        }
+                    }
+                }
+            }
+            api.setApiCategories(categoryList);
+        }
     }
 }

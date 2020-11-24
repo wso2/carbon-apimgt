@@ -109,6 +109,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
@@ -116,6 +117,7 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -5895,5 +5897,55 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException("Error while searching the api ", e);
         }
         return result ;
+    }
+    
+    @Override
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+            throws APIManagementException {
+        try {
+            Organization org = new Organization(requestedTenantDomain);
+            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org ,
+                    uuid);
+            if (devPortalApi != null) {
+                if (APIConstants.API_PRODUCT.equals(devPortalApi.getType())) {
+                    APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
+                    return new ApiTypeWrapper(apiProduct);
+                } else {
+                    API api = APIMapper.INSTANCE.toApi(devPortalApi);
+                    populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    return new ApiTypeWrapper(api);
+                }
+            } else {
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
+            String msg = "Failed to get API";
+            throw new APIManagementException(msg, e);
+        }
+    }
+    
+    /**
+     * Get minimal details of API by registry artifact id
+     *
+     * @param uuid Registry artifact id
+     * @return API of the provided artifact id
+     * @throws APIManagementException
+     */
+    @Override
+    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+        try {
+            Organization org = new Organization(requestedTenantDomain);
+            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
+            if (devPortalApi != null) {
+                return APIMapper.INSTANCE.toApi(devPortalApi);
+            } else {
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (APIPersistenceException e) {
+            String msg = "Failed to get API with uuid " + uuid;
+            throw new APIManagementException(msg, e);
+        }
     }
 }

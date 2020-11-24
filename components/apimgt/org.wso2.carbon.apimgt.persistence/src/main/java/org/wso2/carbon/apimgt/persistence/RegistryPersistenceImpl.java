@@ -39,7 +39,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
@@ -398,8 +400,93 @@ public class RegistryPersistenceImpl implements APIPersistence {
     
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        boolean tenantFlowStarted = false;
+        try {
+            Registry registry;
+            String requestedTenantDomain = org.getName();
+            if (requestedTenantDomain  != null) {
+                int id = getTenantManager().getTenantId(requestedTenantDomain);
+                RegistryPersistenceUtil.startTenantFlow(requestedTenantDomain);
+                tenantFlowStarted = true;
+                if (APIConstants.WSO2_ANONYMOUS_USER.equals(this.username)) {
+                    registry = getRegistryService().getGovernanceUserRegistry(this.username, id);
+                } else if (this.tenantDomain != null && !this.tenantDomain.equals(requestedTenantDomain)) {
+                    registry = getRegistryService().getGovernanceSystemRegistry(id);
+                } else {
+                    registry = this.registry;
+                }
+            } else {
+                registry = this.registry;
+            }
+
+
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+            if (apiArtifact != null) {
+                String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+
+                if (APIConstants.API_PRODUCT.equals(type)) {
+                    /*
+                    APIProduct apiProduct = getApiProduct(registry, apiArtifact);
+                    String productTenantDomain = MultitenantUtils.getTenantDomain(
+                            RegistryPersistenceUtil.replaceEmailDomainBack(apiProduct.getId().getProviderName()));
+                    if (APIConstants.API_GLOBAL_VISIBILITY.equals(apiProduct.getVisibility())) {
+                        return new ApiTypeWrapper(apiProduct);
+                    }
+
+                    if (this.tenantDomain == null || !this.tenantDomain.equals(productTenantDomain)) {
+                        throw new APIManagementException(
+                                "User " + username + " does not have permission to view API Product : " + apiProduct
+                                        .getId().getName());
+                    }
+
+                    return new ApiTypeWrapper(apiProduct);
+                    */
+                    
+                    //TODO previously there was a seperate method to get products. validate whether we could use api one instead
+                    API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
+                    String apiTenantDomain = MultitenantUtils.getTenantDomain(
+                            RegistryPersistenceUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                    if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) {
+                        return APIMapper.INSTANCE.toDevPortalApi(api);
+                    }
+
+                    if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
+                        throw new APIPersistenceException(
+                                "User " + username + " does not have permission to view API : " + api.getId()
+                                        .getApiName());
+                    }
+                    return APIMapper.INSTANCE.toDevPortalApi(api);
+                } else {
+                    API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
+                    String apiTenantDomain = MultitenantUtils.getTenantDomain(
+                            RegistryPersistenceUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                    if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) {
+                        //return new ApiTypeWrapper(api);
+                        return APIMapper.INSTANCE.toDevPortalApi(api);
+                    }
+
+                    if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
+                        throw new APIPersistenceException(
+                                "User " + username + " does not have permission to view API : " + api.getId()
+                                        .getApiName());
+                    }
+
+                    return APIMapper.INSTANCE.toDevPortalApi(api);
+                }
+            } else {
+                return null;
+            }
+        } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException | APIManagementException e) {
+            String msg = "Failed to get API";
+            throw new APIPersistenceException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+        }
     }
 
     @Override
@@ -754,7 +841,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             Identifier id = null;
             if (idArray.length > 1) { // this is a temp impl. id comes as provider-name-version combination. remove this
                                       // to uuid based impl in the else section
-                log.info("definition from provider-name-version combination");
+                log.info("definition from provider-name-version combination"); // TODO remove this log.
                 if ("API".equals(idArray[0])) {
                     id = new APIIdentifier(idArray[1], idArray[2], idArray[3]);
                 } else {
@@ -762,7 +849,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 
             } else {
-                log.info("definition from uuid");
                 GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                         APIConstants.API_KEY);
 
