@@ -757,34 +757,34 @@ public interface APIConsumer extends APIManager {
     /**
      * Returns the swagger definition of the API for the given gateway environment as a string
      *
-     * @param apiId id of the APIIdentifier
+     * @param api
      * @param environmentName API Gateway environment name
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
+    String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException;
 
     /**
      * Returns the swagger definition of the API for the given microgateway gateway label as a string
      * 
-     * @param apiId id of the APIIdentifier
+     * @param api api
      * @param labelName name of the microgateway label
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName)
+    String getOpenAPIDefinitionForLabel(API api, String labelName)
             throws APIManagementException;
 
     /**
      * Returns the swagger definition of the API for the given container managed cluster name as a string
      *
-     * @param apiId id of the APIIdentifier
+     * @param api api
      * @param clusterName name of the container managed cluster
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForClusterName(Identifier apiId, String clusterName)
+    String getOpenAPIDefinitionForClusterName(API api, String clusterName)
             throws APIManagementException;
 
     /**

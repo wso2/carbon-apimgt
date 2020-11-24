@@ -312,7 +312,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + isMonetizationEnabled + ", keyManagers=" + keyManagers + ", deploymentEnvironments="
                 + deploymentEnvironments + ", tags=" + tags + ", additionalProperties=" + additionalProperties
                 + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly=" + advertisedOnly
-                + ", swaggerDefinition=" + swaggerDefinition + "]";
+                + ", swaggerDefinition=" + swaggerDefinition + ", toString()=" + super.toString() + "]";
     }
     
 

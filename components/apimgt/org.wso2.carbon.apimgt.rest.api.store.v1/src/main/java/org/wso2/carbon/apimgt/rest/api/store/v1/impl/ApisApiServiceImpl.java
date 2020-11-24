@@ -656,6 +656,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+            if (api.getUuid() == null) {
+                api.setUuid(apiId);
+            }
 
             // gets the first available environment if any of label, environment or cluster name is not provided
             if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)
@@ -691,7 +694,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiSwagger = null;
             if (StringUtils.isNotEmpty(environmentName)) {
                 try {
-                    apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api.getId(), environmentName);
+                    apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api, environmentName);
                 } catch (APIManagementException e) {
                     // handle gateway not found exception otherwise pass it
                     if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -702,11 +705,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     throw e;
                 }
             } else if (StringUtils.isNotEmpty(labelName)) {
-                apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(api.getId(), labelName);
+                apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(api, labelName);
             } else if (StringUtils.isNotEmpty(clusterName)) {
-                apiSwagger = apiConsumer.getOpenAPIDefinitionForClusterName(api.getId(), clusterName);
+                apiSwagger = apiConsumer.getOpenAPIDefinitionForClusterName(api, clusterName);
             } else {
-                apiSwagger = apiConsumer.getOpenAPIDefinition(api.getId());
+                apiSwagger = apiConsumer.getOpenAPIDefinition(apiId);
             }
 
             return Response.ok().entity(apiSwagger).header("Content-Disposition",
