@@ -17,7 +17,7 @@
  */
 
 import React, { useReducer, useState, useEffect } from 'react';
-import { FormattedMessage, injectIntl, useIntl } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
@@ -409,4 +409,4 @@ Edit.propTypes = {
     intl: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(Edit);
+export default Edit;
