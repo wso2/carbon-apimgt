@@ -38,6 +38,7 @@ import Description from './components/Description';
 import AccessControl from './components/AccessControl';
 import StoreVisibility from './components/StoreVisibility';
 import Tags from './components/Tags';
+import Social from './components/Social';
 import APICategories from './components/APICategories';
 
 const useStyles = makeStyles((theme) => ({
@@ -138,6 +139,7 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
+        additionalProperties: { ...api.additionalProperties },
     };
 }
 /**
@@ -181,6 +183,10 @@ export default function DesignConfigurations() {
                 return { ...copyAPIConfig(state), [action]: value };
             case 'visibleRoles':
                 return { ...copyAPIConfig(state), [action]: value };
+            case 'github_repo':
+            case 'slack_url':
+                nextState.additionalProperties[action] = value;
+                return nextState;
             default:
                 return state;
         }
@@ -273,6 +279,9 @@ export default function DesignConfigurations() {
                                             configDispatcher={configDispatcher}
                                             categories={api.categories}
                                         />
+                                    </Box>
+                                    <Box py={1}>
+                                        <Social api={apiConfig} configDispatcher={configDispatcher} />
                                     </Box>
                                     <Box py={1}>
                                         {api.apiType !== 'APIProduct' && (
