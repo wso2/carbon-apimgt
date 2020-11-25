@@ -51,7 +51,6 @@ function reducer(state, { field, value }) {
         case 'name':
             return { ...state, [field]: value, displayName: value };
         case 'serviceUrl':
-            return { ...state, [field]: value };
         case 'definitionType':
             return { ...state, [field]: value };
         default:
@@ -86,10 +85,9 @@ function Edit(props) {
 
     useEffect(() => {
         const settingPromise = ServiceCatalog.getSettings();
-        // Take from settings when backend API is implemented
-        settingPromise.then(() => {
-            setSchemaTypeList(['OAS2', 'OAS3', 'WSDL1', 'WSDL2', 'GRAPHQL_SDL', 'ASYNC_API']);
-            setServiceTypeList(['OAS2', 'OAS3', 'WSDL1', 'WSDL2', 'GRAPHQL_SDL', 'ASYNC_API']);
+        settingPromise.then((response) => {
+            setSchemaTypeList(response.schemaTypes);
+            setServiceTypeList(response.serviceTypes);
         }).catch(() => {
             Alert.error(intl.formatMessage({
                 defaultMessage: 'Error while retrieving service and schema types',
