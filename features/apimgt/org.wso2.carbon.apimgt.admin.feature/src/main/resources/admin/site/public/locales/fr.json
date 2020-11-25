@@ -376,6 +376,7 @@
   "Throttling.Advanced.AddEdit.general.details": "",
   "Throttling.Advanced.AddEdit.general.details.description": "",
   "Throttling.Advanced.AddEdit.is.empty.error": "",
+  "Throttling.Advanced.AddEdit.is.negative.error" : "",
   "Throttling.Advanced.AddEdit.policy.name.too.long.error.msg": "",
   "Throttling.Advanced.AddEdit.special.characters.error": "",
   "Throttling.Advanced.AddEdit.title.edit": "",

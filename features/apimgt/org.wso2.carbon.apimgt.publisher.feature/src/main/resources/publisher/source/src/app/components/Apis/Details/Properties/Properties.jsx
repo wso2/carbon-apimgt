@@ -153,7 +153,7 @@ function Properties(props) {
     const keywords = ['provider', 'version', 'context', 'status', 'description',
         'subcontext', 'doc', 'lcState', 'name', 'tags'];
     const isInvalidName = keywords.includes(propertyKey) || /\s/g.test(propertyKey)
-        || (propertyKey && propertyKey.length > 80);
+        || (propertyKey && propertyKey.length > 80) || /[^A-Za-z0-9]/.test(propertyKey);
 
     const toggleAddProperty = () => {
         setShowAddProperty(!showAddProperty);

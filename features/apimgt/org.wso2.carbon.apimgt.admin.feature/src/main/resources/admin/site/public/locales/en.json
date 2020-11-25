@@ -376,6 +376,7 @@
   "Throttling.Advanced.AddEdit.general.details": "General Details",
   "Throttling.Advanced.AddEdit.general.details.description": "Provide name and description of the policy.The policy can be refered from the name.",
   "Throttling.Advanced.AddEdit.is.empty.error": "is empty",
+  "Throttling.Advanced.AddEdit.is.negative.error" : "should be greater than 1",
   "Throttling.Advanced.AddEdit.policy.name.too.long.error.msg": "Throttling policy name is too long",
   "Throttling.Advanced.AddEdit.special.characters.error": "contains invalid characters.",
   "Throttling.Advanced.AddEdit.title.edit": "Advance Rate Limiting Policy - Edit",
