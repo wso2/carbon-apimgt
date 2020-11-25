@@ -1720,7 +1720,10 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException {
-        String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+        String artifactOldPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         String tenantDomain = getTenantDomain(identifier);
@@ -1743,10 +1746,14 @@ public abstract class AbstractAPIManager implements APIManager {
                     registry = this.registry;
                 }
             }
+            String oldThumbPath = artifactOldPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
             String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
 
             if (registry.resourceExists(thumbPath)) {
                 Resource res = registry.get(thumbPath);
+                return new ResourceFile(res.getContentStream(), res.getMediaType());
+            } else if (registry.resourceExists(oldThumbPath)){
+                Resource res = registry.get(oldThumbPath);
                 return new ResourceFile(res.getContentStream(), res.getMediaType());
             }
         } catch (RegistryException e) {
