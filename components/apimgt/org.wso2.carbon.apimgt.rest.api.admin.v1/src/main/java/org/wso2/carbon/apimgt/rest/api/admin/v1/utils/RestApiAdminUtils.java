@@ -118,7 +118,7 @@ public class RestApiAdminUtils {
     }
 
     /**
-     * Validate the requestCount property of Throttle Policy
+     * Validate the properties of Throttle Policy
      *
      * @param  policyName         policyName property of Throttle Policy
      * @param  unitTime           unitTime  property of Throttle Policy
