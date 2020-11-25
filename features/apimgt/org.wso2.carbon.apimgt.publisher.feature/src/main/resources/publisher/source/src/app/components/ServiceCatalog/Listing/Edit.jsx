@@ -74,8 +74,7 @@ function Edit(props) {
     const toggleOpen = () => {
         setOpen(!open);
     };
-    const [initialState, setInitialState] = useState(dataRow);
-    const [state, dispatch] = useReducer(reducer, initialState);
+    const [state, dispatch] = useReducer(reducer, dataRow);
     const [validity, setValidity] = useState({});
 
     const {
@@ -86,7 +85,6 @@ function Edit(props) {
     } = state;
 
     useEffect(() => {
-        setInitialState(dataRow);
         const settingPromise = ServiceCatalog.getSettings();
         // Take from settings when backend API is implemented
         settingPromise.then(() => {
