@@ -29,10 +29,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -42,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Set;
@@ -116,6 +114,45 @@ public class RestApiAdminUtils {
                     ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
     }
+
+    public static void  validateConditionalGroups(List<ConditionalGroupDTO> conditionalGroupDTOList) throws
+            APIManagementException  {
+        for (ConditionalGroupDTO conditionalGroup : conditionalGroupDTOList) {
+            if (APIConstants.REQUEST_COUNT_LIMIT.equals(conditionalGroup.getLimit().getType().toString())) {
+                validateThrottlePolicyProperties(null,
+                        String.valueOf(conditionalGroup.getLimit().getRequestCount().getUnitTime()),
+                        String.valueOf(conditionalGroup.getLimit().getRequestCount().getRequestCount()), null);
+            } else {
+                validateThrottlePolicyProperties(null,
+                        String.valueOf(conditionalGroup.getLimit().getBandwidth().getUnitTime()), null,
+                        String.valueOf(conditionalGroup.getLimit().getBandwidth().getDataAmount()));
+            }
+            if (conditionalGroup.getConditions() != null) {
+                List<ThrottleConditionDTO> throttleConditionDTOList = conditionalGroup.getConditions();
+                for (ThrottleConditionDTO throttleConditionDTO : throttleConditionDTOList) {
+                    if ("HEADERCONDITION".equals(throttleConditionDTO.getType().toString())) {
+                        String headerName = throttleConditionDTO.getHeaderCondition().getHeaderName();
+                        //Validations for Header Name
+                        Pattern patternHeaderName = Pattern.compile("[^A-Za-z0-9]");//. represents single character
+                        Matcher matcherHeaderName = patternHeaderName.matcher(headerName);
+                        if (StringUtils.isBlank(headerName)) {
+                            throw new APIManagementException("Header name" + " property value of payload cannot " +
+                                    "be blank", ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE,
+                                    "Header Name"));
+                        }
+                        if (matcherHeaderName.find()) {
+                            throw new APIManagementException("Header name property value of payload cannot contain " +
+                                    "invalid characters", ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS,
+                                    "Header Name"));
+                        }
+                    } else if("JWTCLAIMSCONDITION".equals(throttleConditionDTO.getType().toString())) {
+                        String claimURL = throttleConditionDTO.getJwtClaimsCondition().getClaimUrl();
+                    }
+                }
+            }
+        }
+    }
+
 
     /**
      * Validate the properties of Throttle Policy

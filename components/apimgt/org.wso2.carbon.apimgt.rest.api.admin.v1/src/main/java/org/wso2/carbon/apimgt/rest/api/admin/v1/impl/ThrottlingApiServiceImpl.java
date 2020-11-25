@@ -111,6 +111,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
         }
 
+        if (body.getConditionalGroups() != null){
+            RestApiAdminUtils.validateConditionalGroups(body.getConditionalGroups());
+        }
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
@@ -203,6 +207,16 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //overridden parameters
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
+
+            if (APIConstants.REQUEST_COUNT_LIMIT.equals(body.getDefaultLimit().getType().toString())){
+                RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                        String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
+                        String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
+            } else {
+                RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                        String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
+                        null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+            }
 
             //update the policy
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
@@ -404,6 +418,16 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //overridden properties
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
+
+            if (APIConstants.REQUEST_COUNT_LIMIT.equals(body.getDefaultLimit().getType().toString())){
+                RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                        String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
+                        String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
+            } else {
+                RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                        String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
+                        null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+            }
 
             //update the policy
             ApplicationPolicy appPolicy =
@@ -679,6 +703,16 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //overridden properties
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
+
+            if (APIConstants.REQUEST_COUNT_LIMIT.equals(body.getDefaultLimit().getType().toString())){
+                RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                        String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
+                        String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
+            } else {
+                RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                        String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
+                        null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+            }
 
             // validate if permission info exists and halt the execution in case of an error
             validatePolicyPermissions(body);
