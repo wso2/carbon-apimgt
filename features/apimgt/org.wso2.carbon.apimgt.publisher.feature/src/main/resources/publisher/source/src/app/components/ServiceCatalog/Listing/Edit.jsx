@@ -32,6 +32,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Joi from '@hapi/joi';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
@@ -74,8 +75,8 @@ function Edit(props) {
         setOpen(!open);
     };
     const [initialState, setInitialState] = useState(dataRow);
-
     const [state, dispatch] = useReducer(reducer, initialState);
+    const [validity, setValidity] = useState({});
 
     const {
         id,
@@ -103,10 +104,83 @@ function Edit(props) {
         dispatch({ field: e.target.name, value: e.target.value });
     };
 
+    const validate = (fieldName, value) => {
+        let error = '';
+        const schema = Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/);
+        switch (fieldName) {
+            case 'name':
+                if (value === '') {
+                    error = intl.formatMessage({
+                        id: 'ServiceCatalog.Listing.Edit.service.name.empty',
+                        defaultMessage: 'Service name is empty ',
+                    });
+                } else if (value.indexOf(' ') !== -1) {
+                    error = intl.formatMessage({
+                        id: 'ServiceCatalog.Listing.Edit.service.name.space',
+                        defaultMessage: 'Service name contains spaces ',
+                    });
+                } else if (value.length > 60) {
+                    error = intl.formatMessage({
+                        id: 'ServiceCatalog.Listing.Edit.service.name.too.long',
+                        defaultMessage: 'Service name is too long ',
+                    });
+                } else if (schema.validate(value).error) {
+                    error = intl.formatMessage({
+                        id: 'ServiceCatalog.Listing.Edit.service.name.invalid.character',
+                        defaultMessage: 'Service name contains one or more illegal characters ',
+                    });
+                } else {
+                    error = '';
+                }
+                setValidity({
+                    ...validity,
+                    name: error,
+                });
+                break;
+            case 'serviceUrl':
+                error = value === '' ? intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Edit.service.url.empty',
+                    defaultMessage: 'Service Url is empty ',
+                }) : '';
+                setValidity({
+                    ...validity,
+                    serviceUrl: error,
+                });
+                break;
+            case 'definitionType':
+                error = value === '' ? intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Edit.service.definition.type.empty',
+                    defaultMessage: 'Definition Type is empty ',
+                }) : '';
+                setValidity({
+                    ...validity,
+                    definitionType: error,
+                });
+                break;
+            default:
+                break;
+        }
+        return error;
+    };
+
+    const getAllFormErrors = () => {
+        let errorText = '';
+        const serviceNameErrors = validate('name', name);
+        const serviceUrlErrors = validate('serviceUrl', serviceUrl);
+        const definitionTypeErrors = validate('definitionType', definitionType);
+        errorText += serviceNameErrors + serviceUrlErrors + definitionTypeErrors;
+        return errorText;
+    };
+
     /**
      * Function for updating a given service entry
      */
     function doneEditing() {
+        const formErrors = getAllFormErrors();
+        if (formErrors !== '') {
+            Alert.error(formErrors);
+            return false;
+        }
         const updateServicePromise = ServiceCatalog.updateService(id, state);
         updateServicePromise.then(() => {
             Alert.info(intl.formatMessage({
@@ -122,6 +196,7 @@ function Edit(props) {
             }));
         });
         setOpen(!open);
+        return true;
     }
 
     return (
@@ -157,13 +232,21 @@ function Edit(props) {
                         )}
                         value={name}
                         variant='outlined'
+                        error={validity.name}
                         fullWidth
-                        helperText={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Edit.service.name.helper.text'
-                                defaultMessage='Name of the service'
-                            />
-                        )}
+                        helperText={validity.name ? validity.name
+                            : (
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Edit.service.name.helper.text'
+                                    defaultMessage='Name of the service'
+                                />
+                            )}
+                        InputProps={{
+                            id: 'itest-id-servicename-input',
+                            onBlur: ({ target: { value } }) => {
+                                validate('name', value);
+                            },
+                        }}
                         onChange={handleChange}
                     />
                 </DialogContent>
@@ -182,12 +265,20 @@ function Edit(props) {
                         value={serviceUrl}
                         fullWidth
                         variant='outlined'
-                        helperText={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Edit.service.url.text'
-                                defaultMessage='URL of the Service'
-                            />
-                        )}
+                        error={validity.serviceUrl}
+                        helperText={validity.serviceUrl ? validity.serviceUrl
+                            : (
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Edit.service.url.text'
+                                    defaultMessage='URL of the Service'
+                                />
+                            )}
+                        InputProps={{
+                            id: 'itest-id-serviceurl-input',
+                            onBlur: ({ target: { value } }) => {
+                                validate('serviceUrl', value);
+                            },
+                        }}
                         onChange={handleChange}
                     />
                 </DialogContent>
@@ -209,12 +300,20 @@ function Edit(props) {
                                 value={definitionType}
                                 fullWidth
                                 variant='outlined'
-                                helperText={(
-                                    <FormattedMessage
-                                        id='ServiceCatalog.Listing.Edit.service.type.text'
-                                        defaultMessage='Type of the Service'
-                                    />
-                                )}
+                                error={validity.definitionType}
+                                helperText={validity.definitionType ? validity.definitionType
+                                    : (
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Edit.service.type.text'
+                                            defaultMessage='Type of the Service'
+                                        />
+                                    )}
+                                InputProps={{
+                                    id: 'itest-id-definitionType-input',
+                                    onBlur: ({ target: { value } }) => {
+                                        validate('definitionType', value);
+                                    },
+                                }}
                                 onChange={handleChange}
                             >
                                 {serviceTypeList.map((service) => (
@@ -246,12 +345,20 @@ function Edit(props) {
                                 value={definitionType}
                                 fullWidth
                                 variant='outlined'
-                                helperText={(
-                                    <FormattedMessage
-                                        id='ServiceCatalog.Listing.Edit.schema.type.text'
-                                        defaultMessage='Schema Type of the Service'
-                                    />
-                                )}
+                                error={validity.definitionType}
+                                helperText={validity.definitionType ? validity.definitionType
+                                    : (
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Edit.schema.type.text'
+                                            defaultMessage='Schema Type of the Service'
+                                        />
+                                    )}
+                                InputProps={{
+                                    id: 'itest-id-definitionType-input',
+                                    onBlur: ({ target: { value } }) => {
+                                        validate('definitionType', value);
+                                    },
+                                }}
                                 onChange={handleChange}
                             >
                                 {schemaTypeList.map((schema) => (
