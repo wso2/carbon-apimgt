@@ -877,24 +877,22 @@ public class AbstractAPIManagerTestCase {
                 "sample");
         genericArtifact.setAttribute(APIConstants.DOC_TYPE, "Other");
         genericArtifact.setAttribute(APIConstants.DOC_SOURCE_TYPE, "URL");
-        Association association = new Association();
-        String associationDestinationPath = "doc/destination";
-        association.setDestinationPath(associationDestinationPath);
-        Association[] associations = new Association[] { association };
         APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        String apiResourcePath =
+        String apiDocPath =
                 APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
                         + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
-                        + identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
-        Mockito.when(registry.getAssociations(apiResourcePath, APIConstants.DOCUMENTATION_ASSOCIATION))
-                .thenThrow(RegistryException.class).thenReturn(associations);
+                        + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                        APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
         PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.getAPIPath(identifier)).thenReturn(apiResourcePath);
+        PowerMockito.when(APIUtil.getAPIOrAPIProductDocPath(identifier)).thenReturn(apiDocPath);
+        Resource resource1 = new ResourceImpl();
+        resource1.setUUID(SAMPLE_RESOURCE_ID);
 
         Mockito.when(genericArtifact.getPath()).thenReturn("test");
         String docName = "sample";
         Documentation documentation = new Documentation(DocumentationType.HOWTO, docName);
         PowerMockito.when(APIUtil.getDocumentation(genericArtifact)).thenReturn(documentation);
+        Mockito.when(registry.resourceExists(apiDocPath)).thenThrow(RegistryException.class).thenReturn(true);
         try {
             abstractAPIManager.getAllDocumentation(identifier);
             Assert.fail("Registry exception not thrown for error scenario");
@@ -902,14 +900,21 @@ public class AbstractAPIManagerTestCase {
             Assert.assertTrue(e.getMessage().contains("Failed to get documentations for api"));
         }
 
-        Resource resource = new ResourceImpl();
-        resource.setUUID(SAMPLE_RESOURCE_ID);
-        Mockito.when(registry.get(associationDestinationPath)).thenReturn(resource);
+        Resource resource2 = new ResourceImpl();
+        resource2.setUUID(SAMPLE_RESOURCE_ID);
         Mockito.when(genericArtifactManager.getGenericArtifact(SAMPLE_RESOURCE_ID)).thenReturn(genericArtifact);
+
+        String documentationName = "doc1";
+        Collection documentCollection = new CollectionImpl();
+        documentCollection.setChildren(new String[] {
+                apiDocPath + documentationName, apiDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
+        });
+        Mockito.when(registry.get(apiDocPath)).thenReturn(documentCollection);
+        Mockito.when(registry.get(apiDocPath + documentationName)).thenReturn(resource2);
+        PowerMockito.when(APIUtil.getDocumentation(genericArtifact)).thenReturn(documentation);
         List<Documentation> documentationList = abstractAPIManager.getAllDocumentation(identifier);
         Assert.assertNotNull(documentationList);
         Assert.assertEquals(documentationList.size(), 1);
-        String documentationName = "doc1";
         String contentPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
                 + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
                 + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.DOC_DIR
@@ -918,8 +923,8 @@ public class AbstractAPIManagerTestCase {
         genericArtifact.setAttribute(APIConstants.DOC_NAME, documentationName);
         ResourceDO resourceDO = new ResourceDO();
         resourceDO.setLastUpdatedOn(12344567);
-        Resource resource1 = new ResourceImpl(contentPath, resourceDO);
-        Mockito.when(registry.get(contentPath)).thenReturn(resource1);
+        Resource resource3 = new ResourceImpl(contentPath, resourceDO);
+        Mockito.when(registry.get(contentPath)).thenReturn(resource3);
         documentationList = abstractAPIManager.getAllDocumentation(identifier);
         Assert.assertNotNull(documentationList);
         Assert.assertEquals(documentationList.size(), 1);
@@ -937,29 +942,28 @@ public class AbstractAPIManagerTestCase {
                 .thenReturn(tenantId);
         APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
         String loggedInUser = "admin";
-        try {
-            abstractAPIManager.getAllDocumentation(identifier, loggedInUser);
-            Assert.fail("User store exception not thrown for erroe scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get documentations for api"));
-        }
-        String apiResourcePath =
-                APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
-                        + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
-                        + identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
+
+        abstractAPIManager.registry = registry;
+
         GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
                 "sample");
         genericArtifact.setAttribute(APIConstants.DOC_TYPE, "Other");
         genericArtifact.setAttribute(APIConstants.DOC_SOURCE_TYPE, "URL");
-        Association association = new Association();
-        String associationDestinationPath = "doc/destination";
-        association.setDestinationPath(associationDestinationPath);
-        Association[] associations = new Association[] { association };
-        abstractAPIManager.registry = registry;
-        Mockito.when(registryService.getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId))
-                .thenThrow(RegistryException.class).thenReturn(registry);
-        Mockito.when(registry.getAssociations(apiResourcePath, APIConstants.DOCUMENTATION_ASSOCIATION))
-                .thenReturn(associations);
+        String apiDocPath =
+                APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
+                        + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
+                        + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                        APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getAPIOrAPIProductDocPath(identifier)).thenReturn(apiDocPath);
+        Resource resource1 = new ResourceImpl();
+        resource1.setUUID(SAMPLE_RESOURCE_ID);
+
+        Mockito.when(genericArtifact.getPath()).thenReturn("test");
+        String docName = "sample";
+        Documentation documentation = new Documentation(DocumentationType.HOWTO, docName);
+        PowerMockito.when(APIUtil.getDocumentation(genericArtifact)).thenReturn(documentation);
+        Mockito.when(registry.resourceExists(apiDocPath)).thenReturn(true);
         try {
             abstractAPIManager.getAllDocumentation(identifier, loggedInUser);
             Assert.fail("Registry exception not thrown for error scenario");
@@ -967,21 +971,21 @@ public class AbstractAPIManagerTestCase {
             Assert.assertTrue(e.getMessage().contains("Failed to get documentations for api"));
         }
 
-        Resource resource = new ResourceImpl();
-        resource.setUUID(SAMPLE_RESOURCE_ID);
-        Mockito.when(registry.get(associationDestinationPath)).thenThrow(RegistryException.class).thenReturn(resource);
-        try {
-            abstractAPIManager.getAllDocumentation(identifier, loggedInUser);
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get documentations for api"));
-        }
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
+        Resource resource2 = new ResourceImpl();
+        resource2.setUUID(SAMPLE_RESOURCE_ID);
         Mockito.when(genericArtifactManager.getGenericArtifact(SAMPLE_RESOURCE_ID)).thenReturn(genericArtifact);
-        List<Documentation> documentationList = abstractAPIManager.getAllDocumentation(identifier, loggedInUser);
+
+        String documentationName = "doc1";
+        Collection documentCollection = new CollectionImpl();
+        documentCollection.setChildren(new String[] {
+                apiDocPath + documentationName, apiDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
+        });
+        Mockito.when(registry.get(apiDocPath)).thenReturn(documentCollection);
+        Mockito.when(registry.get(apiDocPath + documentationName)).thenReturn(resource2);
+        PowerMockito.when(APIUtil.getDocumentation(genericArtifact,loggedInUser)).thenReturn(documentation);
+        List<Documentation> documentationList = abstractAPIManager.getAllDocumentation(identifier,loggedInUser);
         Assert.assertNotNull(documentationList);
         Assert.assertEquals(documentationList.size(), 1);
-        String documentationName = "doc1";
         String contentPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
                 + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
                 + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.DOC_DIR
@@ -990,8 +994,8 @@ public class AbstractAPIManagerTestCase {
         genericArtifact.setAttribute(APIConstants.DOC_NAME, documentationName);
         ResourceDO resourceDO = new ResourceDO();
         resourceDO.setLastUpdatedOn(12344567);
-        Resource resource1 = new ResourceImpl(contentPath, resourceDO);
-        Mockito.when(registry.get(contentPath)).thenReturn(resource1);
+        Resource resource3 = new ResourceImpl(contentPath, resourceDO);
+        Mockito.when(registry.get(contentPath)).thenReturn(resource3);
         documentationList = abstractAPIManager.getAllDocumentation(identifier, loggedInUser);
         Assert.assertNotNull(documentationList);
         Assert.assertEquals(documentationList.size(), 1);

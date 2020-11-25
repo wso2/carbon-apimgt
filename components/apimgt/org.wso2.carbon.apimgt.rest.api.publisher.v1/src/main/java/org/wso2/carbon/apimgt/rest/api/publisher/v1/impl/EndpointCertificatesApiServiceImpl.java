@@ -162,8 +162,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         return null;
     }
 
-    public Response endpointCertificatesAliasPut(InputStream certificateInputStream, Attachment certificateDetail,
-            String alias, MessageContext messageContext) {
+    public Response endpointCertificatesAliasPut(String alias, InputStream certificateInputStream,
+                                                 Attachment certificateDetail, MessageContext messageContext) {
         try {
             if (StringUtils.isEmpty(alias)) {
                 RestApiUtil.handleBadRequest("The alias should not be empty", log);

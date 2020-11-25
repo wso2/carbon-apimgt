@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -13,6 +15,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -87,7 +91,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "Token to be revoked, if any")
+  @ApiModelProperty(value = "Token to be revoked, if any")
   @JsonProperty("revokeToken")
   public String getRevokeToken() {
     return revokeToken;
@@ -106,6 +110,7 @@ public class ApplicationTokenGenerateRequestDTO   {
 
   
   @ApiModelProperty(value = "Additional parameters if Authorization server needs any")
+      @Valid
   @JsonProperty("additionalProperties")
   public Object getAdditionalProperties() {
     return additionalProperties;

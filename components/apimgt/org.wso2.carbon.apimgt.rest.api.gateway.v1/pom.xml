@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.95-SNAPSHOT</version>
+        <version>6.8.100-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -226,7 +226,7 @@
                             </configOptions>
                             <output>.</output>
                             <templateDirectory>
-                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates
+                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/swagger-templates
                             </templateDirectory>
                             <skipOverwrite>true</skipOverwrite>
                             <modelNameSuffix>DTO</modelNameSuffix>

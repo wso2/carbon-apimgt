@@ -111,6 +111,7 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
@@ -123,6 +124,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.CertificateMappingUtil;
@@ -170,6 +172,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GraphqlQueryAnalysisMappingUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -1622,8 +1625,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdClientCertificatesPost(InputStream certificateInputStream,
-                                                    Attachment certificateDetail, String alias, String apiId, String tier, MessageContext messageContext) {
+        public Response apisApiIdClientCertificatesPost(String apiId, InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
@@ -1837,8 +1839,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated document as DTO
      */
     @Override
-    public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
-                                                            InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
+    public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId, String ifMatch,
+                InputStream inputStream, Attachment fileDetail, String inlineContent,
                                                             MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -2478,8 +2480,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
 
     @Override
-    public Response apisApiIdMediationPoliciesMediationPolicyIdContentPut(String type, String apiId, String mediationPolicyId,
-                                                                   InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdMediationPoliciesMediationPolicyIdContentPut(String apiId, String mediationPolicyId,
+                                String type, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
+                                                          String inlineContent, MessageContext messageContext) {
 
         InputStream contentStream = null;
         APIIdentifier apiIdentifier;
@@ -2607,8 +2610,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated mediation DTO as response
      */
     @Override
-    public Response apisApiIdMediationPoliciesPost(String type, String apiId, InputStream fileInputStream,
-            Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext)
+    public Response apisApiIdMediationPoliciesPost(String apiId, String type, String ifMatch, InputStream
+            fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext)
             throws APIManagementException {
 
         String fileName = "";
@@ -3064,11 +3067,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
-            APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            String updatedDefinition = parser.getOASDefinitionForPublisher(api, apiSwagger);
+            String updatedDefinition = RestApiPublisherUtils.retrieveSwaggerDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"" ).build();
         } catch (APIManagementException e) {
@@ -3098,8 +3098,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
-            Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdSwaggerPut(String apiId, String ifMatch, String apiDefinition, String url,
+                                InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
         try {
             String updatedSwagger;
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -3456,8 +3456,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Definition validation response
      */
     @Override
-    public Response validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-          Boolean returnContent, MessageContext messageContext) {
+    public Response validateOpenAPIDefinition(Boolean returnContent, String url, InputStream fileInputStream,
+                                              Attachment fileDetail, MessageContext messageContext) {
 
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
@@ -3886,8 +3886,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred while trying to retrieve the WSDL
      */
     @Override
-    public Response updateWSDLOfAPI(String apiId, InputStream fileInputStream, Attachment fileDetail, String url,
-           String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
+                                    String url, MessageContext messageContext) throws APIManagementException {
 
         validateWSDLAndReset(fileInputStream, fileDetail, url);
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -4019,28 +4019,41 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisExportGet(String apiId, String name, String version, String providerName, String format,
-                                  Boolean preserveStatus, MessageContext messageContext)
-            throws APIManagementException {
-        ExportApiUtil exportApiUtil = new ExportApiUtil();
-        if (apiId == null) {
+                                  Boolean preserveStatus, MessageContext messageContext) {
+        APIIdentifier apiIdentifier;
+        APIDTO apiDtoToReturn;
 
-            return exportApiUtil.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus,
-                    RestApiConstants.RESOURCE_API);
-        } else {
-            try {
+        //If not specified status is preserved by default
+        preserveStatus = preserveStatus == null || preserveStatus;
+
+        // Default export format is YAML
+        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
+                ExportFormat.YAML;
+
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String userName = RestApiUtil.getLoggedInUsername();
+
+            // apiId == null means the path from the API Controller
+            if (apiId == null) {
+                // Validate API name, version and provider before exporting
+                String provider = ExportUtils.validateExportParams(name, version, providerName);
+                apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+                apiDtoToReturn = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
+            } else {
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus, format);
-            } catch (APIManagementException e) {
-                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-                } else if (isAuthorizationFailure(e)) {
-                    RestApiUtil.handleAuthorizationFailure(
-                            "Authorization failure while exporting the  API " + apiId, e, log);
-                } else {
-                    RestApiUtil.handleInternalServerError("Error while exporting the API " + apiId, e, log);
-                }
+                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+                apiDtoToReturn = getAPIByID(apiId);
             }
+
+            File file = ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, userName, exportFormat,
+                    preserveStatus);
+            return Response.ok(file)
+                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
+                            + file.getName() + "\"")
+                    .build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
         }
         return null;
     }
@@ -4056,9 +4069,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response with GraphQL API
      */
     @Override
-    public Response apisImportGraphqlSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
-                                                String additionalProperties, String ifMatch,
-                                                MessageContext messageContext) {
+    public Response apisImportGraphqlSchemaPost(String ifMatch, String type, InputStream fileInputStream,
+                                Attachment fileDetail, String additionalProperties, MessageContext messageContext) {
         APIDTO additionalPropertiesAPI = null;
         String schema = "";
 

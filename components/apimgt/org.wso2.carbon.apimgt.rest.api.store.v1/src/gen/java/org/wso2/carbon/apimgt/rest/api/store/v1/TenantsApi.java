@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/tenants")
 
 @Api(description = "the tenants API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class TenantsApi  {
@@ -38,7 +38,7 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Tenants by State ", notes = "This operation is to get tenants by state ", response = TenantListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

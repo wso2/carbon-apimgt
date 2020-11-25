@@ -159,9 +159,8 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @return updated mediation DTO as response
      */
     @Override
-    public Response policiesMediationMediationPolicyIdPut(String mediationPolicyId, MediationDTO body,
-                                                          String contentType, String ifMatch,
-                                                          String ifUnmodifiedSince, MessageContext messageContext) {
+    public Response policiesMediationMediationPolicyIdPut(String mediationPolicyId, String contentType,
+                  MediationDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
         InputStream contentStream = null;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -235,7 +234,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @return created mediation DTO as response
      */
     @Override
-    public Response policiesMediationPost(MediationDTO body, String contentType, String ifMatch,
+    public Response policiesMediationPost(String contentType, MediationDTO body, String ifMatch,
                                           String ifUnmodifiedSince, MessageContext messageContext) {
         InputStream contentStream = null;
         try {

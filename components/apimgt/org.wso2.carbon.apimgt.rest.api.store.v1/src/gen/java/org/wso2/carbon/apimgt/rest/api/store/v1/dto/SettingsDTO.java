@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsIdentityProviderDTO;
@@ -14,6 +16,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -180,6 +184,7 @@ public class SettingsDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("identityProvider")
   public SettingsIdentityProviderDTO getIdentityProvider() {
     return identityProvider;
@@ -231,7 +236,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "The 'PasswordJavaRegEx' cofigured in the UserStoreManager")
+  @ApiModelProperty(value = "The 'PasswordJavaRegEx' cofigured in the UserStoreManager")
   @JsonProperty("userStorePasswordPattern")
   public String getUserStorePasswordPattern() {
     return userStorePasswordPattern;
@@ -249,7 +254,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "The regex configured in the Password Policy property 'passwordPolicy.pattern'")
+  @ApiModelProperty(value = "The regex configured in the Password Policy property 'passwordPolicy.pattern'")
   @JsonProperty("passwordPolicyPattern")
   public String getPasswordPolicyPattern() {
     return passwordPolicyPattern;
