@@ -637,49 +637,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
     }
 
-    /**
-     * Get minimal details of API by registry artifact id
-     *
-     * @param uuid Registry artifact id
-     * @return API of the provided artifact id
-     * @throws APIManagementException
-     */
-    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-        try {
-            Registry registry;
-            if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
-                    (requestedTenantDomain)) {
-                int id = getTenantManager()
-                        .getTenantId(requestedTenantDomain);
-                registry = getRegistryService().getGovernanceSystemRegistry(id);
-            } else {
-                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
-                    // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
-                    registry = getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
-                } else {
-                    // both requested tenant and logged in user's tenant are carbon.super
-                    registry = this.registry;
-                }
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
-            if (apiArtifact != null) {
-                return getApiInformation(registry, apiArtifact);
-            } else {
-                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, uuid));
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get API with uuid " + uuid;
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get tenant Id while getting API with uuid " + uuid;
-            throw new APIManagementException(msg, e);
-        }
-    }
-
     protected API getApiInformation(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
         return APIUtil.getAPIInformation(apiArtifact, registry);
     }
