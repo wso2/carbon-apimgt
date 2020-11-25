@@ -1000,6 +1000,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
+        if ("null".equals(api.getAccessControlRoles())) {
+            api.setAccessControlRoles(null);
+        }
         //notify key manager with API addition
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
         return api;
