@@ -688,14 +688,10 @@
   "Apis.Details.Properties.Properties.editable.cancel": "Cancel",
   "Apis.Details.Properties.Properties.editable.row.edit.mode.property.value": "Property Value",
   "Apis.Details.Properties.Properties.editable.row.property.name": "Property Name",
-<<<<<<< HEAD
-  "Apis.Details.Properties.Properties.help": "Property name should be unique, should not contain spaces, cannot be more than 80 chars and cannot be any of the following reserved keywords : provider, version, context, status, description, subcontext, doc, lcState, name, tags.",
-=======
   "Apis.Details.Properties.Properties.editable.show.in.devporal": "Show in devportal",
   "Apis.Details.Properties.Properties.editable.update": "Update",
   "Apis.Details.Properties.Properties.editable.visible.in.store": "Visible in devportal",
-  "Apis.Details.Properties.Properties.help": "Property name should be unique, should not contain spaces and cannot be any of the following reserved keywords : provider, version, context, status, description, subcontext, doc, lcState, name, tags.",
->>>>>>> bfbe5feaa1b... Fixing https://github.com/wso2/product-apim/issues/8389
+  "Apis.Details.Properties.Properties.help": "Property name should be unique, should not contain spaces, cannot be more than 80 chars and cannot be any of the following reserved keywords : provider, version, context, status, description, subcontext, doc, lcState, name, tags.",
   "Apis.Details.Properties.Properties.help.main": "Usually, APIs have a pre-defined set of properties such as \n                        the name, version, context, etc. API Properties allows you to \n                         add specific custom properties to the API.",
   "Apis.Details.Properties.Properties.property.value": "Value",
   "Apis.Details.Properties.Properties.save": "Save",
