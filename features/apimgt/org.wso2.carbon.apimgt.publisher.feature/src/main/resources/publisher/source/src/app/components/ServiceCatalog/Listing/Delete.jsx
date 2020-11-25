@@ -17,13 +17,11 @@
  */
 
 import React, { useState } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
-import Alert from 'AppComponents/Shared/Alert';
 import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
-import ServiceCatalog from 'AppData/ServiceCatalog';
 
 /**
 * Service Catalog service delete
@@ -31,33 +29,15 @@ import ServiceCatalog from 'AppData/ServiceCatalog';
 * @returns {any} Returns the rendered UI for service delete.
 */
 function Delete(props) {
-    const intl = useIntl();
     const [open, setOpen] = useState(false);
     const toggleOpen = () => {
         setOpen(!open);
     };
-    const { serviceName, serviceId, getData } = props;
-
-    const deleteService = () => {
-        const deleteServicePromise = ServiceCatalog.deleteService(serviceId);
-        deleteServicePromise.then(() => {
-            Alert.info(intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Delete.service.deleted.successfully',
-                defaultMessage: 'Service deleted successfully!',
-            }));
-            // Reload the services list
-            getData();
-        }).catch(() => {
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while deleting service',
-                id: 'ServiceCatalog.Listing.Delete.error.delete',
-            }));
-        });
-    };
+    const { serviceName, serviceId, onDelete } = props;
 
     const runAction = (confirm) => {
         if (confirm) {
-            deleteService();
+            onDelete(serviceId);
         }
         setOpen(!open);
     };
@@ -104,7 +84,7 @@ Delete.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     serviceName: PropTypes.string.isRequired,
     serviceId: PropTypes.string.isRequired,
-    getData: PropTypes.shape({}).isRequired,
+    onDelete: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
 };
 

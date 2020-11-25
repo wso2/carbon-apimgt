@@ -67,7 +67,7 @@ function reducer(state, { field, value }) {
 function Edit(props) {
     const intl = useIntl();
     const classes = useStyles();
-    const { getData, dataRow } = props;
+    const { onEdit, dataRow } = props;
     const [open, setOpen] = useState(false);
     const [schemaTypeList, setSchemaTypeList] = useState([]);
     const [serviceTypeList, setServiceTypeList] = useState([]);
@@ -179,24 +179,10 @@ function Edit(props) {
         const formErrors = getAllFormErrors();
         if (formErrors !== '') {
             Alert.error(formErrors);
-            return false;
+        } else {
+            onEdit(id, state);
+            setOpen(!open);
         }
-        const updateServicePromise = ServiceCatalog.updateService(id, state);
-        updateServicePromise.then(() => {
-            Alert.info(intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Delete.service.updated.successfully',
-                defaultMessage: 'Service updated successfully!',
-            }));
-            // Reload the services list
-            getData();
-        }).catch(() => {
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while updating service',
-                id: 'ServiceCatalog.Listing.Edit.error.update',
-            }));
-        });
-        setOpen(!open);
-        return true;
     }
 
     return (
@@ -405,7 +391,7 @@ Edit.propTypes = {
         definitionType: PropTypes.string.isRequired,
         serviceUrl: PropTypes.string.isRequired,
     }).isRequired,
-    getData: PropTypes.shape({}).isRequired,
+    onEdit: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
 };
 

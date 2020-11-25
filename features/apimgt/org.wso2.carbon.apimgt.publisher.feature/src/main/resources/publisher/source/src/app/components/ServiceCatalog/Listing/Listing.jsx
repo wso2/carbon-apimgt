@@ -150,6 +150,47 @@ class Listing extends React.Component {
         });
     };
 
+    onDelete = (serviceId) => {
+        const { intl } = this.props;
+        const deleteServicePromise = ServiceCatalog.deleteService(serviceId);
+        deleteServicePromise.then(() => {
+            Alert.info(intl.formatMessage({
+                id: 'ServiceCatalog.Listing.Listing.service.deleted.successfully',
+                defaultMessage: 'Service deleted successfully!',
+            }));
+            // Reload the services list
+            this.getData();
+        }).catch(() => {
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'Error while deleting service',
+                id: 'ServiceCatalog.Listing.Listing.error.delete',
+            }));
+        });
+    };
+
+    /**
+     * Function for updating a given service entry
+     * @param {string} serviceId ID of the service
+     * @param {object} body service payload
+     */
+    onEdit = (serviceId, body) => {
+        const { intl } = this.props;
+        const updateServicePromise = ServiceCatalog.updateService(serviceId, body);
+        updateServicePromise.then(() => {
+            Alert.info(intl.formatMessage({
+                id: 'ServiceCatalog.Listing.Listing.service.updated.successfully',
+                defaultMessage: 'Service updated successfully!',
+            }));
+            // Reload the services list
+            this.getData();
+        }).catch(() => {
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'Error while updating service',
+                id: 'ServiceCatalog.Listing.Listing.error.update',
+            }));
+        });
+    }
+
     /**
      *
      *
@@ -261,8 +302,12 @@ class Listing extends React.Component {
                                             </Typography>
                                         </Button>
                                     </Link>
-                                    <Edit dataRow={dataRow} getData={this.getData} />
-                                    <Delete serviceName={dataRow.name} serviceId={dataRow.id} getData={this.getData} />
+                                    <Edit dataRow={dataRow} onEdit={this.onEdit} />
+                                    <Delete
+                                        serviceName={dataRow.name}
+                                        serviceId={dataRow.id}
+                                        onDelete={this.onDelete}
+                                    />
                                 </Box>
                             );
                         }
