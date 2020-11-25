@@ -37,6 +37,8 @@ public final class APIConstants {
     //key value of the provider rxt
     public static final String PROVIDER_KEY = "provider";
 
+    public static final String REQUEST_COUNT_LIMIT= "REQUESTCOUNTLIMIT";
+
     //key value of the APIImpl rxt
     public static final String API_KEY = "api";
 

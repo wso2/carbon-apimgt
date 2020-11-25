@@ -101,7 +101,15 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesAdvancedPost(String contentType, AdvancedThrottlePolicyDTO body,
                                                MessageContext messageContext) throws APIManagementException {
 
-        RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
+        if (APIConstants.REQUEST_COUNT_LIMIT.equals(body.getDefaultLimit().getType().toString())){
+            RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                    String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
+                    String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
+        } else {
+            RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                    String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
+                    null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+        }
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -292,7 +300,15 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesApplicationPost(String contentType, ApplicationThrottlePolicyDTO body,
                                                       MessageContext messageContext) throws APIManagementException {
 
-        RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
+        if (APIConstants.REQUEST_COUNT_LIMIT.equals(body.getDefaultLimit().getType().toString())){
+            RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                    String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
+                    String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
+        } else {
+            RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                    String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
+                    null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+        }
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -487,7 +503,15 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesSubscriptionPost(String contentType, SubscriptionThrottlePolicyDTO body,
                                                MessageContext messageContext) throws APIManagementException {
 
-        RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
+        if (APIConstants.REQUEST_COUNT_LIMIT.equals(body.getDefaultLimit().getType().toString())){
+            RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                    String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
+                    String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
+        } else {
+            RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                    String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
+                    null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+        }
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();

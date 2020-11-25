@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
@@ -117,24 +118,63 @@ public class RestApiAdminUtils {
     }
 
     /**
-     * Validate the policy name property of Throttle Policy
+     * Validate the requestCount property of Throttle Policy
      *
-     * @param policyName policy name value of throttle policy
+     * @param  policyName         policyName property of Throttle Policy
+     * @param  unitTime           unitTime  property of Throttle Policy
+     * @param  requestCount       requestCount property of Throttle Policy
+     * @param  dataAmount         dataAmount property of Throttle Policy
      */
-    public static void validateThrottlePolicyNameProperty(String policyName)
-            throws APIManagementException {
-        String propertyName = "policyName";
-        Pattern pattern = Pattern.compile("[^A-Za-z0-9]");//. represents single character
-        Matcher matcher = pattern.matcher(policyName);
+    public static void  validateThrottlePolicyProperties(String policyName, String unitTime,  String requestCount,
+                                                         String dataAmount) throws APIManagementException {
+
+        //Validations for policy Name
+        Pattern patternPolicyName = Pattern.compile("[^A-Za-z0-9]");//. represents single character
+        Matcher matcherPolicyName = patternPolicyName.matcher(policyName);
         if (StringUtils.isBlank(policyName)) {
-            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
-                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
+            throw new APIManagementException("Policy name" + " property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, "Policy Name"));
+        }
+        if (matcherPolicyName.find()) {
+            throw new APIManagementException("Policy name property value of payload cannot contain invalid characters",
+                    ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS, "Policy Name"));
         }
 
-        if (matcher.find()) {
-            throw new APIManagementException(propertyName +
-                    " property value of payload cannot contain invalid characters",
-                    ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS, propertyName));
+        //Validations for Request count and Data Bandwidth
+        if (requestCount != null) {
+            Pattern patternRequestCount = Pattern.compile("^[1-9][0-9]*$");
+            Matcher matcherRequestCount = patternRequestCount.matcher(requestCount);
+            if (StringUtils.isBlank(requestCount)) {
+                throw new APIManagementException("Request Count property value of payload cannot be blank",
+                        ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, "Request Count"));
+            }
+            if (!matcherRequestCount.find()) {
+                throw new APIManagementException("Request Count property value of payload  should be an Integer greater than 1",
+                        ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, "Request Count"));
+            }
+        } else {
+            Pattern patternRequestCount = Pattern.compile("^[1-9][0-9]*$");
+            Matcher matcherRequestCount = patternRequestCount.matcher(dataAmount);
+            if (StringUtils.isBlank(dataAmount)) {
+                throw new APIManagementException("Data Bandwidth property value of payload cannot be blank",
+                        ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, "Data Bandwidth"));
+            }
+            if (!matcherRequestCount.find()) {
+                throw new APIManagementException("Data Bandwidth property value of payload  should be an Integer greater than 1",
+                        ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, "Data Bandwidth"));
+            }
+        }
+
+        //Validations for Request count and Data Bandwidth
+        Pattern patternUnitTime= Pattern.compile("^[1-9][0-9]*$");
+        Matcher matcherUnitTime= patternUnitTime.matcher(unitTime);
+        if (StringUtils.isBlank(unitTime)) {
+            throw new APIManagementException("Unit Time  property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, "Unit Time"));
+        }
+        if (!matcherUnitTime.find()) {
+            throw new APIManagementException("Unit Time property value of payload  should be an Integer greater than 1",
+                    ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, "Unit Time"));
         }
     }
 

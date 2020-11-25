@@ -226,7 +226,7 @@ function AddEdit(props) {
     } = state;
 
     const formHasErrors = (validatingActive = false) => {
-        if (hasErrors('requestCount', description, validatingActive)
+        if (hasErrors('policyName', description, validatingActive)
             || hasErrors('dataAmount', description, validatingActive)
             || hasErrors('unitTime', description, validatingActive)) {
             return true;
