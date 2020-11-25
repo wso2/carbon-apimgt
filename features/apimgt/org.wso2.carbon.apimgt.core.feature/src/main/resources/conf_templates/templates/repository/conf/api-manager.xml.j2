@@ -418,6 +418,12 @@
 
     </OAuthConfigurations>
 
+    <AccessTokenBinding>
+        {% if apim.access_token_binding.enable is defined %}
+        <Enabled>{{apim.access_token_binding.enable}}</Enabled>
+        {% endif %}
+    </AccessTokenBinding>
+
     <TokenRevocationNotifiers class="{{apim.token.revocation.notifier_impl}}">
         {% if apim.token.revocation.enable_realtime_notifier %}
         <RealtimeNotifier>
