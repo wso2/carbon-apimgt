@@ -203,6 +203,7 @@ public final class APIImportExportConstants {
     public static final String LOAD_BALANCE_SESSION_MANAGEMENT_TRANSPORT_TYPE = "transport";
 
     //Certificate related constants
+    public static final String MUTUAL_SSL_ENABLED = "mutualssl";
     public static final String CERTIFICATE_API_IDENTIFIER_PROPERTY = "apiIdentifier";
     public static final String CERTIFICATE_CERTIFICATE_CONTENT_PROPERTY = "certificate";
     public static final String CERTIFICATE_HOST_NAME_PROPERTY = "hostName";
