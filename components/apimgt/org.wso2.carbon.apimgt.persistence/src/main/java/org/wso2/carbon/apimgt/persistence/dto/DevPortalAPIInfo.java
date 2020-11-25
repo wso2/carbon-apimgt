@@ -29,6 +29,7 @@ public class DevPortalAPIInfo {
     private String type;
     private String thumbnail;
     private String businessOwner;
+    private String status;
     
     //monetizationCategory which is returned to UI as 'monetizationLabel' is not required. it is derived from the
     // attached tiers.
@@ -80,10 +81,17 @@ public class DevPortalAPIInfo {
     public void setBusinessOwner(String businessOwner) {
         this.businessOwner = businessOwner;
     }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
     @Override
     public String toString() {
         return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", version=" + version + ", providerName="
                 + providerName + ", context=" + context + ", type=" + type + ", thumbnail=" + thumbnail
-                + ", businessOwner=" + businessOwner + "]";
+                + ", businessOwner=" + businessOwner + ", status=" + status + "]";
     }
+
 }
