@@ -210,11 +210,19 @@ public class RestApiAdminUtils {
         }
     }
 
-    public static void isPolicyAttachedtoResource(String username, Policy existingPolicy, String policyId)
-            throws APIManagementException {
+    /**
+     * Check whether the policy is associated with any resources
+     *
+     * @param username                 Logged in Username
+     * @param existingPolicy           policy which need to be deleted
+     * @param policyId                 UUID of the policy
+     * @param policyLevel              Identifier for the policies
+     */
+    public static void isPolicyAttachedtoResource(String username, Policy existingPolicy, String policyId,
+                                                  String policyLevel) throws APIManagementException {
         if (RestApiUtil.getLoggedInUserProvider().hasAttachments(username, existingPolicy.getPolicyName(),
-                PolicyConstants.POLICY_LEVEL_API)) {
-            throw new APIManagementException(policyId  + " already attached to API/Resource",
+                policyLevel)) {
+            throw new APIManagementException(policyId  + " already attached to a Resource",
                     ExceptionCodes.from(ExceptionCodes.POLICY_ATTACHED_TO_RESOURCE, policyId));
         }
     }
