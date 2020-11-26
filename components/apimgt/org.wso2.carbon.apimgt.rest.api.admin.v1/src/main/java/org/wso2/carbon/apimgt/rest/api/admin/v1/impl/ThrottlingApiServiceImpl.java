@@ -540,7 +540,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
                     null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
         }
-        RestApiAdminUtils.validateApplicationPolicy(body);
+        RestApiAdminUtils.validateSubscriptionPolicy(body);
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -718,7 +718,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                         String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
                         null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
             }
-            RestApiAdminUtils.validateApplicationPolicy(body);
+            RestApiAdminUtils.validateSubscriptionPolicy(body);
 
             // validate if permission info exists and halt the execution in case of an error
             validatePolicyPermissions(body);
