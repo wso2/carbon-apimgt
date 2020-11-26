@@ -29,7 +29,12 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConditionalGroupDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -149,7 +154,7 @@ public class RestApiAdminUtils {
     public static void  validateConditionalGroups(List<ConditionalGroupDTO> conditionalGroupDTOList) throws
             APIManagementException  {
         for (ConditionalGroupDTO conditionalGroup : conditionalGroupDTOList) {
-            if (APIConstants.REQUEST_COUNT_LIMIT.equals(conditionalGroup.getLimit().getType().toString())) {
+            if (ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT.equals(conditionalGroup.getLimit().getType())) {
                 validateThrottlePolicyProperties(null,
                         String.valueOf(conditionalGroup.getLimit().getRequestCount().getUnitTime()),
                         String.valueOf(conditionalGroup.getLimit().getRequestCount().getRequestCount()),
