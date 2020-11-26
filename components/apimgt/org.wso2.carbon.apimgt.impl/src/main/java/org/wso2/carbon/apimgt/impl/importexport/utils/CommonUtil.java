@@ -40,7 +40,11 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -364,6 +368,23 @@ public class CommonUtil {
                 String errorMessage = "Error while generating meta information of client certificates from path.";
                 throw new IOException(errorMessage, e);
             }
+        }
+    }
+
+
+    /**
+     * This method will be used to copy files from source to destination
+     *
+     * @param source String of the source file path
+     * @param dest  String of the destination file path
+     * @throws IOException If an error occurs when copying files
+     */
+    public static void moveFile(String source, String dest ) throws IOException {
+        try {
+             Files.move(Paths.get(source), Paths.get(dest));
+        } catch (IOException e) {
+            String errorMessage = "Error while moving file from" + source + "to" + dest;
+            throw new IOException(errorMessage, e);
         }
     }
 }
