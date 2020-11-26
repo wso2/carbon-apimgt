@@ -115,6 +115,34 @@ public class RestApiAdminUtils {
         }
     }
 
+    /**
+     * Validate the Subscription Policy Properties
+     *
+     * @param body SubscriptionThrottlePolicyDTO
+     */
+    public static void validateApplicationPolicy(SubscriptionThrottlePolicyDTO body) throws
+            APIManagementException  {
+        if (body.getGraphQLMaxComplexity() != null) {
+            validateThrottlePolicyCountProperties(String.valueOf(body.getGraphQLMaxComplexity()));
+        }
+        if (body.getGraphQLMaxDepth() != null) {
+            validateThrottlePolicyCountProperties(String.valueOf(body.getGraphQLMaxDepth()));
+        }
+        if (body.getRateLimitCount() != null) {
+            validateThrottlePolicyCountProperties(String.valueOf(body.getRateLimitCount()));
+        }
+        if (body.getCustomAttributes() != null) {
+            for (CustomAttributeDTO customAttributeDTO : body.getCustomAttributes()) {
+                validateThrottlePolicyNameProperty(customAttributeDTO.getName());
+            }
+        }
+    }
+
+    /**
+     * Validate the Conditional Groups of Advanced Throttle Policy
+     *
+     * @param conditionalGroupDTOList ConditionalGroupDTO List which contains all conditional Groups
+     */
     public static void  validateConditionalGroups(List<ConditionalGroupDTO> conditionalGroupDTOList) throws
             APIManagementException  {
         for (ConditionalGroupDTO conditionalGroup : conditionalGroupDTOList) {
@@ -130,29 +158,64 @@ public class RestApiAdminUtils {
             if (conditionalGroup.getConditions() != null) {
                 List<ThrottleConditionDTO> throttleConditionDTOList = conditionalGroup.getConditions();
                 for (ThrottleConditionDTO throttleConditionDTO : throttleConditionDTOList) {
-                    if ("HEADERCONDITION".equals(throttleConditionDTO.getType().toString())) {
+                    if (ThrottleConditionDTO.TypeEnum.HEADERCONDITION.equals(throttleConditionDTO.getType())) {
                         String headerName = throttleConditionDTO.getHeaderCondition().getHeaderName();
-                        //Validations for Header Name
-                        Pattern patternHeaderName = Pattern.compile("[^A-Za-z0-9]");//. represents single character
-                        Matcher matcherHeaderName = patternHeaderName.matcher(headerName);
-                        if (StringUtils.isBlank(headerName)) {
-                            throw new APIManagementException("Header name" + " property value of payload cannot " +
-                                    "be blank", ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE,
-                                    "Header Name"));
-                        }
-                        if (matcherHeaderName.find()) {
-                            throw new APIManagementException("Header name property value of payload cannot contain " +
-                                    "invalid characters", ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS,
-                                    "Header Name"));
-                        }
-                    } else if("JWTCLAIMSCONDITION".equals(throttleConditionDTO.getType().toString())) {
+                        validateThrottlePolicyNameProperty(headerName);
+                    } else if(ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION.equals(throttleConditionDTO.getType())) {
                         String claimURL = throttleConditionDTO.getJwtClaimsCondition().getClaimUrl();
+                        validateThrottlePolicyNameProperty(claimURL);
+                    } else if (ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION.equals(throttleConditionDTO.getType())) {
+                        String parameterName = throttleConditionDTO.getQueryParameterCondition().getParameterName();
+                        validateThrottlePolicyNameProperty(parameterName);
+                    } else {
+                       //DO NOTHING
                     }
                 }
             }
         }
     }
 
+    /**
+     * Validate the Conditional policy name property of Throttle Policy
+     *
+     * @param conditionPolicyName policy name value of throttle policy
+     */
+    public static void validateThrottlePolicyNameProperty(String conditionPolicyName)
+            throws APIManagementException {
+        Pattern pattern = Pattern.compile("[^A-Za-z0-9]");//. represents single character
+        Matcher matcher = pattern.matcher(conditionPolicyName);
+        if (StringUtils.isBlank(conditionPolicyName)) {
+            throw new APIManagementException(conditionPolicyName + " property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, conditionPolicyName));
+        }
+
+        if (matcher.find()) {
+            throw new APIManagementException(conditionPolicyName +
+                    " property value of payload cannot contain invalid characters",
+                    ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS, conditionPolicyName));
+        }
+    }
+
+    /**
+     * Validate the Conditional policy name property of Throttle Policy
+     *
+     * @param count count value of throttle policy
+     */
+    public static void validateThrottlePolicyCountProperties(String count)
+            throws APIManagementException {
+        Pattern pattern = Pattern.compile("[^A-Za-z0-9]");//. represents single character
+        Matcher matcher = pattern.matcher(count);
+        Pattern patternRequestCount = Pattern.compile("^[1-9][0-9]*$");
+        Matcher matcherRequestCount = patternRequestCount.matcher(count);
+        if (StringUtils.isBlank(count)) {
+            throw new APIManagementException("Request Count property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, "Request Count"));
+        }
+        if (!matcherRequestCount.find()) {
+            throw new APIManagementException("Request Count property value of payload  should be an Integer greater than 1",
+                    ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, "Request Count"));
+        }
+    }
 
     /**
      * Validate the properties of Throttle Policy
@@ -166,15 +229,8 @@ public class RestApiAdminUtils {
                                                          String dataAmount) throws APIManagementException {
 
         //Validations for policy Name
-        Pattern patternPolicyName = Pattern.compile("[^A-Za-z0-9]");//. represents single character
-        Matcher matcherPolicyName = patternPolicyName.matcher(policyName);
-        if (StringUtils.isBlank(policyName)) {
-            throw new APIManagementException("Policy name" + " property value of payload cannot be blank",
-                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, "Policy Name"));
-        }
-        if (matcherPolicyName.find()) {
-            throw new APIManagementException("Policy name property value of payload cannot contain invalid characters",
-                    ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS, "Policy Name"));
+        if (policyName != null) {
+          validateThrottlePolicyNameProperty(policyName);
         }
 
         //Validations for Request count and Data Bandwidth
@@ -215,6 +271,11 @@ public class RestApiAdminUtils {
         }
     }
 
+    /**
+     * Validate the IP Address of Conditional Groups
+     *
+     * @param ipAddress IP Address
+     */
     public static void validateIPAddress(String ipAddress) throws APIManagementException {
         String ip4 = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}" +
                 "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
