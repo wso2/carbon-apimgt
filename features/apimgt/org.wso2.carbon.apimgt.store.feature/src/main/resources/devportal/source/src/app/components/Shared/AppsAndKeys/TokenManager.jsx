@@ -402,6 +402,7 @@ class TokenManager extends React.Component {
                         id: 'Shared.AppsAndKeys.TokenManager.key.generate.success',
                         defaultMessage: 'Application keys generated successfully',
                     }));
+                    this.loadApplication();
                 }
                 
             })
