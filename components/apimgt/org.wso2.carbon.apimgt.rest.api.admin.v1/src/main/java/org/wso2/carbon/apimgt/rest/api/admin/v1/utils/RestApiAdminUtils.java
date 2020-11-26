@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -36,6 +37,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -208,6 +210,15 @@ public class RestApiAdminUtils {
         }
     }
 
+    public static void isPolicyAttachedtoResource(String username, Policy existingPolicy, String policyId)
+            throws APIManagementException {
+        if (RestApiUtil.getLoggedInUserProvider().hasAttachments(username, existingPolicy.getPolicyName(),
+                PolicyConstants.POLICY_LEVEL_API)) {
+            throw new APIManagementException(policyId  + " already attached to API/Resource",
+                    ExceptionCodes.from(ExceptionCodes.POLICY_ATTACHED_TO_RESOURCE, policyId));
+        }
+    }
+
     /**
      * Validate the Conditional policy name property of Throttle Policy
      *
@@ -222,8 +233,8 @@ public class RestApiAdminUtils {
                     ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
         if (!matcherCount.find()) {
-            throw new APIManagementException(propertyName + " property value of payload  should be an Integer greater than 1",
-                    ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, propertyName));
+            throw new APIManagementException(propertyName + " property value of payload  should be an Integer greater "
+                    + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, propertyName));
         }
     }
 
