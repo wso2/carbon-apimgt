@@ -163,6 +163,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -7070,6 +7071,43 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
+        return lcData;
+    }
+
+    public Map<String, Object> getAPILifeCycleData(String uuid) throws APIManagementException {
+
+        Map<String, Object> lcData = new HashMap<String, Object>();
+        API api = getAPIbyUUID(uuid, CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+
+        List<String> actionsList;
+        try {
+            actionsList = LCManagerFactory.getInstance().getLCManager().getAllowedActionsForState(api.getStatus());
+            if (actionsList != null) {
+                String[] actionsArray = new String[actionsList.size()];
+                actionsArray = actionsList.toArray(actionsArray);
+                lcData.put(APIConstants.LC_NEXT_STATES, actionsArray);
+
+            }
+            ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
+            List<String> checklistItemsList = LCManagerFactory.getInstance().getLCManager()
+                    .getCheckListItemsForState(api.getStatus());
+            if (checklistItemsList != null) {
+                for (String name : checklistItemsList) {
+                    CheckListItem item = new CheckListItem();
+                    item.setName(name);
+                    item.setValue("false");
+                    checkListItems.add(item);
+
+                }
+            }
+            lcData.put("items", checkListItems);
+
+        } catch (PersistenceException e) {
+            throw new APIManagementException("Error while parsing the lifecycle ", e);
+        }
+
+        lcData.put(APIConstants.LC_STATUS, api.getStatus());
+
         return lcData;
     }
 
