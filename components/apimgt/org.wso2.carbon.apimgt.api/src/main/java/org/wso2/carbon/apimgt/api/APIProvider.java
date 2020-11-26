@@ -903,6 +903,14 @@ public interface APIProvider extends APIManager {
      * @return Map<String,Object> a map with lifecycle data
      */
      Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException;
+     
+     /**
+     * This method returns the lifecycle data for an API including current state,next states.
+     *
+     * @param apiId id of the api
+     * @return Map<String,Object> a map with lifecycle data
+     */
+     Map<String, Object> getAPILifeCycleData(String apiId) throws APIManagementException;
 
      /**
       * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
