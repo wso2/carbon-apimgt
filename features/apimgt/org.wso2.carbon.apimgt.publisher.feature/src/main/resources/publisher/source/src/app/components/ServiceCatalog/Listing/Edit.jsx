@@ -48,8 +48,7 @@ const useStyles = makeStyles((theme) => ({
  */
 function reducer(state, { field, value }) {
     switch (field) {
-        case 'name':
-            return { ...state, [field]: value, displayName: value };
+        case 'displayName':
         case 'serviceUrl':
         case 'definitionType':
             return { ...state, [field]: value };
@@ -79,6 +78,7 @@ function Edit(props) {
     const {
         id,
         name,
+        displayName,
         serviceUrl,
         definitionType,
     } = state;
@@ -104,33 +104,28 @@ function Edit(props) {
         let error = '';
         const schema = Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/);
         switch (fieldName) {
-            case 'name':
+            case 'displayName':
                 if (value === '') {
                     error = intl.formatMessage({
-                        id: 'ServiceCatalog.Listing.Edit.service.name.empty',
-                        defaultMessage: 'Service name is empty ',
-                    });
-                } else if (value.indexOf(' ') !== -1) {
-                    error = intl.formatMessage({
-                        id: 'ServiceCatalog.Listing.Edit.service.name.space',
-                        defaultMessage: 'Service name contains spaces ',
+                        id: 'ServiceCatalog.Listing.Edit.service.display.name.empty',
+                        defaultMessage: 'Service display name is empty ',
                     });
                 } else if (value.length > 60) {
                     error = intl.formatMessage({
-                        id: 'ServiceCatalog.Listing.Edit.service.name.too.long',
-                        defaultMessage: 'Service name is too long ',
+                        id: 'ServiceCatalog.Listing.Edit.service.display.name.too.long',
+                        defaultMessage: 'Service display name is too long ',
                     });
                 } else if (schema.validate(value).error) {
                     error = intl.formatMessage({
-                        id: 'ServiceCatalog.Listing.Edit.service.name.invalid.character',
-                        defaultMessage: 'Service name contains one or more illegal characters ',
+                        id: 'ServiceCatalog.Listing.Edit.service.display.name.invalid.character',
+                        defaultMessage: 'Service display name contains one or more illegal characters ',
                     });
                 } else {
                     error = '';
                 }
                 setValidity({
                     ...validity,
-                    name: error,
+                    displayName: error,
                 });
                 break;
             case 'serviceUrl':
@@ -161,10 +156,10 @@ function Edit(props) {
 
     const getAllFormErrors = () => {
         let errorText = '';
-        const serviceNameErrors = validate('name', name);
+        const serviceDisplayNameErrors = validate('displayName', displayName);
         const serviceUrlErrors = validate('serviceUrl', serviceUrl);
         const definitionTypeErrors = validate('definitionType', definitionType);
-        errorText += serviceNameErrors + serviceUrlErrors + definitionTypeErrors;
+        errorText += serviceDisplayNameErrors + serviceUrlErrors + definitionTypeErrors;
         return errorText;
     };
 
@@ -207,26 +202,50 @@ function Edit(props) {
                             <>
                                 <FormattedMessage
                                     id='ServiceCatalog.Listing.Edit.service.name.label'
-                                    defaultMessage='Service'
+                                    defaultMessage='Service Name'
                                 />
                                 <sup className={classes.mandatoryStar}>*</sup>
                             </>
                         )}
                         value={name}
                         variant='outlined'
-                        error={validity.name}
                         fullWidth
-                        helperText={validity.name ? validity.name
+                        helperText={(
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Edit.service.name.helper.text'
+                                defaultMessage='Name of the service'
+                            />
+                        )}
+                        disabled
+                    />
+                </DialogContent>
+                <DialogContent>
+                    <TextField
+                        name='displayName'
+                        label={(
+                            <>
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Edit.service.display.name.label'
+                                    defaultMessage='Service Display Name'
+                                />
+                                <sup className={classes.mandatoryStar}>*</sup>
+                            </>
+                        )}
+                        value={displayName}
+                        variant='outlined'
+                        error={validity.displayName}
+                        fullWidth
+                        helperText={validity.displayName ? validity.displayName
                             : (
                                 <FormattedMessage
-                                    id='ServiceCatalog.Listing.Edit.service.name.helper.text'
-                                    defaultMessage='Name of the service'
+                                    id='ServiceCatalog.Listing.Edit.service.display.name.helper.text'
+                                    defaultMessage='Display name of the service'
                                 />
                             )}
                         InputProps={{
-                            id: 'itest-id-servicename-input',
+                            id: 'itest-id-servicedisplayname-input',
                             onBlur: ({ target: { value } }) => {
-                                validate('name', value);
+                                validate('displayName', value);
                             },
                         }}
                         onChange={handleChange}

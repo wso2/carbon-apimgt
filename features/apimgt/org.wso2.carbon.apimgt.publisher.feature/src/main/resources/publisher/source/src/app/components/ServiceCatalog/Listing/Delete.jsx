@@ -33,7 +33,7 @@ function Delete(props) {
     const toggleOpen = () => {
         setOpen(!open);
     };
-    const { serviceName, serviceId, onDelete } = props;
+    const { serviceDisplayName, serviceId, onDelete } = props;
 
     const runAction = (confirm) => {
         if (confirm) {
@@ -65,7 +65,7 @@ function Delete(props) {
                     <FormattedMessage
                         id='ServiceCatalog.Listing.Delete.ok.confirm'
                         defaultMessage='Are you sure you want to delete the service {service} ?'
-                        values={{ service: serviceName }}
+                        values={{ service: serviceDisplayName }}
                     />
                 )}
                 labelOk={(
@@ -82,7 +82,7 @@ function Delete(props) {
 }
 Delete.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    serviceName: PropTypes.string.isRequired,
+    serviceDisplayName: PropTypes.string.isRequired,
     serviceId: PropTypes.string.isRequired,
     onDelete: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,

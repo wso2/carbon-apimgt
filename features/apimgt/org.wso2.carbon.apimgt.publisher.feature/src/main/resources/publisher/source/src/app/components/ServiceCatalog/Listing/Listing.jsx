@@ -211,7 +211,7 @@ class Listing extends React.Component {
                 },
             },
             {
-                name: 'name',
+                name: 'displayName',
                 label: intl.formatMessage({
                     id: 'ServiceCatalog.Listing.Listing.name',
                     defaultMessage: 'Service',
@@ -219,12 +219,12 @@ class Listing extends React.Component {
                 options: {
                     customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
                         if (tableMeta.rowData) {
-                            const artifact = tableViewObj.state.serviceList[tableMeta.rowIndex];
-                            const serviceName = tableMeta.rowData[1];
-                            if (artifact) {
+                            const dataRow = tableViewObj.state.serviceList[tableMeta.rowIndex];
+                            const serviceDisplayName = tableMeta.rowData[1];
+                            if (dataRow) {
                                 return (
                                     <div className={classes.serviceNameStyle}>
-                                        <span>{serviceName}</span>
+                                        <span>{serviceDisplayName}</span>
                                     </div>
                                 );
                             }
@@ -304,7 +304,7 @@ class Listing extends React.Component {
                                     </Link>
                                     <Edit dataRow={dataRow} onEdit={this.onEdit} />
                                     <Delete
-                                        serviceName={dataRow.name}
+                                        serviceDisplayName={dataRow.displayName}
                                         serviceId={dataRow.id}
                                         onDelete={this.onDelete}
                                     />
