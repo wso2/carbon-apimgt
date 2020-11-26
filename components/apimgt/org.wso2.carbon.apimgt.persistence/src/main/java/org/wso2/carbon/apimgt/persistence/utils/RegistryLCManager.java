@@ -74,10 +74,10 @@ public class RegistryLCManager {
                 LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
                 List<String> actions = new ArrayList<String>();
                 List<String> checklistItems = new ArrayList<String>();
-                NodeList transitions = node.getChildNodes();
-                int nTransitions = transitions.getLength();
+                NodeList stateChiledNodes = node.getChildNodes();
+                int nTransitions = stateChiledNodes.getLength();
                 for (int j = 0; j < nTransitions; j++) {
-                    Node transition = transitions.item(j);
+                    Node transition = stateChiledNodes.item(j);
                     // Add transitions
                     if ("transition".equals(transition.getNodeName())) {
                         Node target = transition.getAttributes().getNamedItem("target");
@@ -87,6 +87,25 @@ public class RegistryLCManager {
                                     action.getNodeValue());
                             stateTransitionMap.put(action.getNodeValue(), target.getNodeValue().toUpperCase());
                             actions.add(action.getNodeValue());
+                        }
+                    }
+                    if ("datamodel".equals(transition.getNodeName())) {
+                        NodeList datamodels = transition.getChildNodes();
+                        int nDatamodel = datamodels.getLength();
+                        for (int k = 0; k < nDatamodel; k++) {
+                            Node dataNode = datamodels.item(k);
+                            if (dataNode != null && dataNode.getAttributes() != null && "checkItems"
+                                    .equals(dataNode.getAttributes().getNamedItem("name").getNodeValue())) {
+                                NodeList items = dataNode.getChildNodes();
+                                for (int x = 0; x < items.getLength(); x++) {
+                                    Node item = items.item(x);
+                                    if (item != null && item.getAttributes() != null
+                                            && item.getAttributes().getNamedItem("name") != null) {
+                                        checklistItems.add(item.getAttributes().getNamedItem("name").getNodeValue());
+
+                                    }
+                                }
+                            }
                         }
                     }
                 }
