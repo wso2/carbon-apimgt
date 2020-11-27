@@ -2760,16 +2760,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return isSuccess;
     }
 
-    public boolean updateAPIforStateChange(APIIdentifier identifier, String currentStatus, String newStatus,
+    public boolean updateAPIforStateChange(API api, String currentStatus, String newStatus,
             Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
 
         boolean isSuccess = false;
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
-        String provider = identifier.getProviderName();
-        String providerTenantMode = identifier.getProviderName();
+        String provider = api.getId().getProviderName();
+        String providerTenantMode = api.getId().getProviderName();
         provider = APIUtil.replaceEmailDomain(provider);
-        String name = identifier.getApiName();
-        String version = identifier.getVersion();
+        String name = api.getId().getApiName();
+        String version = api.getId().getVersion();
 
         boolean isTenantFlowStarted = false;
         try {
@@ -2780,8 +2780,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
-            APIIdentifier apiId = new APIIdentifier(provider, name, version);
-            API api = getAPI(apiId);
+            //APIIdentifier apiId = new APIIdentifier(provider, name, version);
+            //API api = getAPI(apiId);
             if (api != null) {
                 //String currentStatus = api.getStatus();
 
@@ -6818,7 +6818,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             // update api related information for state change
-            updateAPIforStateChange(api.getId(), currentState, newStatus, failedGateways);
+            updateAPIforStateChange(api, currentState, newStatus, failedGateways);
 
 
             if (log.isDebugEnabled()) {
