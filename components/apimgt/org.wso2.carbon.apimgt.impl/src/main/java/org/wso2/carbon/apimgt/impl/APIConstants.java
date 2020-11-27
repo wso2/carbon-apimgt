@@ -2055,6 +2055,7 @@ public final class APIConstants {
         public static final String INPROGRESS = "INPROGRESS";
         public static final String INITIATED = "INITIATED";
         public static final String SUCCESSFULL = "SUCCESSFULL";
+        public static final String COMMERCIAL = "COMMERCIAL";
         public static final String FAILED = "FAILED";
         public static final String USAGE_PUBLISH_DEFAULT_GRANULARITY = "days";
         public static final String USAGE_PUBLISH_DEFAULT_TIME_GAP_IN_DAYS = "1";

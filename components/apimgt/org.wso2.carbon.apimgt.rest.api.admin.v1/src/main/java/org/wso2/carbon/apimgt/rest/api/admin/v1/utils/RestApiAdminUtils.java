@@ -44,12 +44,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -137,7 +134,7 @@ public class RestApiAdminUtils {
             validateThrottlePolicyCountProperties(String.valueOf(body.getGraphQLMaxDepth()),
                     "GraphQL Max depth" );
         }
-        if (body.getRateLimitCount() != null) {
+        if (body.getRateLimitCount() != 0) {
             validateThrottlePolicyCountProperties(String.valueOf(body.getRateLimitCount()),
                     "Burst Control Rate");
         }
@@ -145,6 +142,12 @@ public class RestApiAdminUtils {
             for (CustomAttributeDTO customAttributeDTO : body.getCustomAttributes()) {
                 validateThrottlePolicyNameProperty(customAttributeDTO.getName(), "Custom Attribute Name");
             }
+        }
+
+        if ("COMMERCIAL".equals(body.getBillingPlan())) {
+            Map<String, String> monetizationProps =  body.getMonetization().getProperties();
+            String fixedPrice = monetizationProps.get(APIConstants.Monetization.FIXED_PRICE);
+            validateThrottlePolicyCountProperties(fixedPrice, APIConstants.Monetization.FIXED_PRICE);
         }
     }
 
