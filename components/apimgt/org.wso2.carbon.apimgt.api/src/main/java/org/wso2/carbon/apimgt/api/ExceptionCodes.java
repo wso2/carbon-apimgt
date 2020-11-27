@@ -213,6 +213,8 @@ ExceptionCodes implements ErrorHandler {
             "%s property value of payload cannot contain invalid values. It should be positive Integer"),
     POLICY_ATTACHED_TO_RESOURCE(900708, "Policy already attached to API/Resource", 400,
             " %s already attached to API/Resource"),
+    LENGTH_EXCEEDED(900708, "length exceeded", 400,
+            " %s length exceeded"),
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),

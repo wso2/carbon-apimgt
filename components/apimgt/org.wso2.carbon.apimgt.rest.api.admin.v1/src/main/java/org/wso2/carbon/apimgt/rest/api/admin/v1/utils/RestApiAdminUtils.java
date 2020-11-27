@@ -214,6 +214,13 @@ public class RestApiAdminUtils {
                     " property value of payload cannot contain invalid characters",
                     ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS, propertyName));
         }
+
+        if (conditionPolicyName.length() > 60) {
+            throw new APIManagementException(propertyName +
+                    " property value length exceeded",
+                    ExceptionCodes.from(ExceptionCodes.LENGTH_EXCEEDED, propertyName));
+
+        }
     }
 
     /**
