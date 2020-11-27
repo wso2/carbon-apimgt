@@ -34,9 +34,6 @@ class MockResponses {
             schemaTypes: [
                 'OAS2', 'OAS3', 'WSDL1', 'WSDL2', 'GRAPHQL_SDL', 'ASYNC_API',
             ],
-            serviceTypes: [
-                'OAS2', 'OAS3', 'WSDL1', 'WSDL2', 'GRAPHQL_SDL', 'ASYNC_API',
-            ],
         };
         return Promise.resolve({ body: response });
     }

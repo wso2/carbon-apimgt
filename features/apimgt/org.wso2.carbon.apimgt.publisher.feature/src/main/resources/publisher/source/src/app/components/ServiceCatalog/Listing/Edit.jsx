@@ -26,7 +26,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
-import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import { makeStyles } from '@material-ui/core/styles';
 import ServiceCatalog from 'AppData/ServiceCatalog';
@@ -49,6 +48,7 @@ const useStyles = makeStyles((theme) => ({
 function reducer(state, { field, value }) {
     switch (field) {
         case 'displayName':
+        case 'description':
         case 'serviceUrl':
         case 'definitionType':
             return { ...state, [field]: value };
@@ -68,7 +68,6 @@ function Edit(props) {
     const { onEdit, dataRow } = props;
     const [open, setOpen] = useState(false);
     const [schemaTypeList, setSchemaTypeList] = useState([]);
-    const [serviceTypeList, setServiceTypeList] = useState([]);
     const toggleOpen = () => {
         setOpen(!open);
     };
@@ -79,6 +78,7 @@ function Edit(props) {
         id,
         name,
         displayName,
+        description,
         serviceUrl,
         definitionType,
     } = state;
@@ -87,10 +87,9 @@ function Edit(props) {
         const settingPromise = ServiceCatalog.getSettings();
         settingPromise.then((response) => {
             setSchemaTypeList(response.schemaTypes);
-            setServiceTypeList(response.serviceTypes);
         }).catch(() => {
             Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while retrieving service and schema types',
+                defaultMessage: 'Error while retrieving schema types',
                 id: 'ServiceCatalog.Listing.Edit.error.retrieve.service.schema.types',
             }));
         });
@@ -141,7 +140,7 @@ function Edit(props) {
             case 'definitionType':
                 error = value === '' ? intl.formatMessage({
                     id: 'ServiceCatalog.Listing.Edit.service.definition.type.empty',
-                    defaultMessage: 'Definition Type is empty ',
+                    defaultMessage: 'Schema Type is empty ',
                 }) : '';
                 setValidity({
                     ...validity,
@@ -253,6 +252,28 @@ function Edit(props) {
                 </DialogContent>
                 <DialogContent>
                     <TextField
+                        name='description'
+                        label={(
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Edit.service.description.label'
+                                defaultMessage='Service description'
+                            />
+                        )}
+                        value={description}
+                        variant='outlined'
+                        fullWidth
+                        helperText={(
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Edit.service.description.helper.text'
+                                defaultMessage='Description of the service'
+                            />
+                        )}
+                        onChange={handleChange}
+                        multiline
+                    />
+                </DialogContent>
+                <DialogContent>
+                    <TextField
                         name='serviceUrl'
                         label={(
                             <>
@@ -283,98 +304,46 @@ function Edit(props) {
                         onChange={handleChange}
                     />
                 </DialogContent>
-                <Grid container spacing={0}>
-                    <Grid item md={6}>
-                        <DialogContent>
-                            <TextField
-                                name='definitionType'
-                                select
-                                label={(
-                                    <>
-                                        <FormattedMessage
-                                            id='ServiceCatalog.Listing.Edit.service.type.label'
-                                            defaultMessage='Service Type'
-                                        />
-                                        <sup className={classes.mandatoryStar}>*</sup>
-                                    </>
-                                )}
-                                value={definitionType}
-                                fullWidth
-                                variant='outlined'
-                                error={validity.definitionType}
-                                helperText={validity.definitionType ? validity.definitionType
-                                    : (
-                                        <FormattedMessage
-                                            id='ServiceCatalog.Listing.Edit.service.type.text'
-                                            defaultMessage='Type of the Service'
-                                        />
-                                    )}
-                                InputProps={{
-                                    id: 'itest-id-definitionType-input',
-                                    onBlur: ({ target: { value } }) => {
-                                        validate('definitionType', value);
-                                    },
-                                }}
-                                onChange={handleChange}
+                <DialogContent>
+                    <TextField
+                        name='definitionType'
+                        select
+                        label={(
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Edit.schema.type.label'
+                                defaultMessage='Schema Type'
+                            />
+                        )}
+                        value={definitionType}
+                        fullWidth
+                        variant='outlined'
+                        error={validity.definitionType}
+                        helperText={validity.definitionType ? validity.definitionType
+                            : (
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Edit.schema.type.text'
+                                    defaultMessage='Schema Type of the Service'
+                                />
+                            )}
+                        InputProps={{
+                            id: 'itest-id-definitionType-input',
+                            onBlur: ({ target: { value } }) => {
+                                validate('definitionType', value);
+                            },
+                        }}
+                        onChange={handleChange}
+                    >
+                        {schemaTypeList.map((schema) => (
+                            <MenuItem
+                                id={schema}
+                                key={schema}
+                                value={schema}
                             >
-                                {serviceTypeList.map((service) => (
-                                    <MenuItem
-                                        id={service}
-                                        key={service}
-                                        value={service}
-                                    >
-                                        <ListItemText primary={service} />
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                        </DialogContent>
-                    </Grid>
-                    <Grid item md={6}>
-                        <DialogContent>
-                            <TextField
-                                name='definitionType'
-                                select
-                                label={(
-                                    <>
-                                        <FormattedMessage
-                                            id='ServiceCatalog.Listing.Edit.schema.type.label'
-                                            defaultMessage='Schema Type'
-                                        />
-                                        <sup className={classes.mandatoryStar}>*</sup>
-                                    </>
-                                )}
-                                value={definitionType}
-                                fullWidth
-                                variant='outlined'
-                                error={validity.definitionType}
-                                helperText={validity.definitionType ? validity.definitionType
-                                    : (
-                                        <FormattedMessage
-                                            id='ServiceCatalog.Listing.Edit.schema.type.text'
-                                            defaultMessage='Schema Type of the Service'
-                                        />
-                                    )}
-                                InputProps={{
-                                    id: 'itest-id-definitionType-input',
-                                    onBlur: ({ target: { value } }) => {
-                                        validate('definitionType', value);
-                                    },
-                                }}
-                                onChange={handleChange}
-                            >
-                                {schemaTypeList.map((schema) => (
-                                    <MenuItem
-                                        id={schema}
-                                        key={schema}
-                                        value={schema}
-                                    >
-                                        <ListItemText primary={schema} />
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                        </DialogContent>
-                    </Grid>
-                </Grid>
+                                <ListItemText primary={schema} />
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </DialogContent>
                 <DialogActions>
                     <Button onClick={toggleOpen} color='primary'>
                         <FormattedMessage
