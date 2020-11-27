@@ -7105,8 +7105,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (PersistenceException e) {
             throw new APIManagementException("Error while parsing the lifecycle ", e);
         }
-
-        lcData.put(APIConstants.LC_STATUS, api.getStatus());
+        String status = api.getStatus();
+        status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase(); // First letter capital
+        lcData.put(APIConstants.LC_STATUS, status);
 
         return lcData;
     }
