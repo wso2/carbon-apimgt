@@ -331,6 +331,20 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
      */
     void updateAPI(API api) throws APIManagementException, FaultGatewaysException;
+    
+    /**
+     * Updates design and implementation of an existing API. This method must not be used to change API status. Implementations
+     * should throw an exceptions when such attempts are made. All life cycle state changes
+     * should be carried out using the changeAPIStatus method of this interface.
+     *
+     * @param api API
+     * @param existingAPI existing api
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update API
+     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
+     * @return updated API
+     */
+    API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
+
 
     /**
      * Updates manage of an existing API. This method must not be used to change API status. Implementations

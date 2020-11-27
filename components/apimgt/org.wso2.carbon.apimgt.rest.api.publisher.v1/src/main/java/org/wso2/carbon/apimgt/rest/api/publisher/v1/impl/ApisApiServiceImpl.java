@@ -893,14 +893,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             assignLabelsToDTO(body, apiToUpdate);
 
             //preserve monetization status in the update flow
-            apiProvider.configureMonetizationInAPIArtifact(originalAPI);
+            //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
 
             if (!isWSAPI) {
-                String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+                String oldDefinition = apiProvider.getOpenAPIDefinition(apiId);
                 APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
-                apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
+                apiToUpdate.setSwaggerDefinition(newDefinition);
+                //apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
                 if (!isGraphql) {
                     apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
                 }
@@ -915,9 +916,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
 
-            apiProvider.manageAPI(apiToUpdate);
-
-            API updatedApi = apiProvider.getAPI(apiIdentifier);
+            //apiProvider.manageAPI(apiToUpdate);
+            apiProvider.updateAPI(apiToUpdate, originalAPI);
+            API updatedApi = apiProvider.getAPIbyUUID(apiId, tenantDomain); ////// TODO use returend api
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
         } catch (APIManagementException e) {

@@ -56,6 +56,7 @@ import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -1178,18 +1179,6 @@ public class RegistryPersistenceUtil {
         }
     }
 
-    /**
-     * Utility method for get registry path for wsdl archive.
-     *
-     * @param identifier APIIdentifier
-     * @return wsdl archive path
-     */
-    public static String getWsdlArchivePath(APIIdentifier identifier) {
-
-        return APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + identifier
-                                        .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + identifier
-                                        .getApiName() + identifier.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
-    }
 
     /**
      * This is to get the registry resource's HTTP permlink path.
@@ -2451,6 +2440,76 @@ public class RegistryPersistenceUtil {
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while adding role permissions to API", e);
+        }
+    }
+    
+    /**
+     * This method will check the validity of given url. WSDL url should be
+     * contain http, https, "/t" (for tenant APIs) or file system path
+     * otherwise we will mark it as invalid wsdl url. How ever here we do not
+     * validate wsdl content.
+     *
+     * @param wsdlURL wsdl url tobe tested
+     * @return true if its valid url else fale
+     */
+    public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
+
+        if (wsdlURL != null && !"".equals(wsdlURL)) {
+            if (wsdlURL.startsWith("http:") || wsdlURL.startsWith("https:") ||
+                    wsdlURL.startsWith("file:") || (wsdlURL.startsWith("/t") && !wsdlURL.endsWith(".zip"))) {
+                return true;
+            }
+        } else if (!required) {
+            // If the WSDL in not required and URL is empty, then we don't need
+            // to add debug log.
+            // Hence returning.
+            return false;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("WSDL url validation failed. Provided wsdl url is not valid url: " + wsdlURL);
+        }
+        return false;
+    }
+
+    /**
+     * Utility method for get registry path for wsdl archive.
+     *
+     * @param identifier APIIdentifier
+     * @return wsdl archive path
+     */
+    public static String getWsdlArchivePath(APIIdentifier identifier) {
+
+        return APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + identifier
+                                        .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + identifier
+                                        .getApiName() + identifier.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+    }
+    
+    
+    /**
+     * Notify document artifacts if an api state change occured. This change is required to re-trigger the document
+     * indexer so that the documnet indexes will be updated with the new associated api status.
+     *
+     * @param apiArtifact
+     * @param registry
+     * @throws RegistryException
+     * @throws APIManagementException
+     */
+    public static void notifyAPIStateChangeToAssociatedDocuments(GenericArtifact apiArtifact, Registry registry)
+            throws RegistryException, APIManagementException {
+
+        Association[] docAssociations = registry
+                .getAssociations(apiArtifact.getPath(), APIConstants.DOCUMENTATION_ASSOCIATION);
+        for (Association association : docAssociations) {
+            String documentResourcePath = association.getDestinationPath();
+            Resource docResource = registry.get(documentResourcePath);
+            String oldStateChangeIndicatorStatus = docResource.getProperty(APIConstants.API_STATE_CHANGE_INDICATOR);
+            String newStateChangeIndicatorStatus = "false";
+            if (oldStateChangeIndicatorStatus != null) {
+                newStateChangeIndicatorStatus = String.valueOf(!Boolean.parseBoolean(oldStateChangeIndicatorStatus));
+            }
+            docResource.setProperty(APIConstants.API_STATE_CHANGE_INDICATOR, "false");
+            registry.put(documentResourcePath, docResource);
         }
     }
 }

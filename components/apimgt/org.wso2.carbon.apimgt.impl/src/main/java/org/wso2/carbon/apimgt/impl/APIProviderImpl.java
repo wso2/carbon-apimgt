@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+
+import kotlin.jvm.Throws;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -1726,7 +1729,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    public void updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException {
+    public API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         boolean isValid = true;//isAPIUpdateValid(api);//////////////////////// handled from rest api
@@ -1760,55 +1763,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         if (oldApi.getStatus().equals(api.getStatus())) {
-
+            
             String previousDefaultVersion = getDefaultVersion(api.getId());
             String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
-
-            if (previousDefaultVersion != null) {//////////////////////////////////
-
-                APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
-                        previousDefaultVersion);
-                if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
-                    // happen
-                    // Remove the previous default API entry from the Registry
-                    updateDefaultAPIInRegistry(defaultAPIId, false);
-                    if (!api.isDefaultVersion()) {// default api tick is removed
-                        // todo: if it is ok, these two variables can be put to the top of the function to remove
-                        // duplication
-                        String gatewayType = getAPIManagerConfiguration()
-                                .getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-                        if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-                            removeDefaultAPIFromGateway(api);
-                        }
-                    }
-                }
-            }
-
-            //Update WSDL in the registry
-            if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {////////////////////////
-                updateWsdlFromUrl(api);
-            }
-
-            if (api.getWsdlResource() != null) {//////////////////////////////////////
-                updateWsdlFromResourceFile(api);
-            }
-
-            boolean updatePermissions = false;
-            if (APIUtil.isAccessControlEnabled()) {
-                if (!oldApi.getAccessControl().equals(api.getAccessControl()) || (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getAccessControl()) &&
-                        !api.getAccessControlRoles().equals(oldApi.getAccessControlRoles())) || !oldApi.getVisibility().equals(api.getVisibility()) ||
-                        (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
-                                !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
-                    updatePermissions = true;
-                }
-            } else if (!oldApi.getVisibility().equals(api.getVisibility()) ||
-                    (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
-                            !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
-                updatePermissions = true;
-            }
+            
+            updateOtherAPIversionsForNewDefautlAPIChange(api, previousDefaultVersion);///////////////has registry access /////////////////
 
             updateEndpointSecurity(oldApi, api);
-
 
             if (!oldApi.getContext().equals(api.getContext())) {
                 api.setApiHeaderChanged(true);
@@ -1890,35 +1851,47 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             //If gateway(s) exist, remove resource paths saved on the cache.
-
             if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
                 Set<URITemplate> resourceVerbs = api.getUriTemplates();
-
-
-                    if (resourceVerbs != null) {
-                            invalidateResourceCache(api.getContext(), api.getId().getVersion(),resourceVerbs);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Calling invalidation cache");
-                            }
+                if (resourceVerbs != null) {
+                    invalidateResourceCache(api.getContext(), api.getId().getVersion(), resourceVerbs);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Calling invalidation cache");
                     }
-
+                }
             }
 
-            updateArtifact(api, true, updatePermissions);//////////////////////////////////////////
-            String visibleRolesList = api.getVisibleRoles();
-
-            String[] visibleRoles = new String[0];
-            if (visibleRolesList != null) {
-                visibleRoles = visibleRolesList.split(",");
+            //Validate Transports
+            validateAndSetTransports(api);
+            validateAndSetAPISecurity(api);
+            //This is a fix for broken APIs after migrating from 1.10 to 2.0.0.
+            //This sets the endpoint security of the APIs based on the old artifact.
+            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+            if (gatewayManager.isAPIPublished(api, tenantDomain)) {
+                if (!api.isEndpointSecured() && !api.isEndpointAuthDigest() && api.getEndpointUTUsername() != null) {
+                    String epAuthType = gatewayManager.getAPIEndpointSecurityType(api, tenantDomain);
+                    if (APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH.equalsIgnoreCase(epAuthType)) {
+                        api.setEndpointSecured(true);
+                        api.setEndpointAuthDigest(true);
+                    } else if (APIConstants.APIEndpointSecurityConstants.BASIC_AUTH.equalsIgnoreCase(epAuthType)) {
+                        api.setEndpointSecured(true);
+                    }
+                }
             }
-            updateDocumentPermissions(api, updatePermissions, visibleRoles);
+            try {
+                apiPersistenceInstance.updateAPI(new Organization(tenantDomain), APIMapper.INSTANCE.toPublisherApi(api));
+            } catch (APIPersistenceException e) {
+                throw new APIManagementException("Error while updating API details", e);
+            }
+            updateWSDL(oldApi);///////////////has registry access /////////////////
+
+            updateDocumentPermissions(api, oldApi);///////////////has registry access /////////////////
             // update apiContext cache
             if (APIUtil.isAPIManagementEnabled()) {
                 Cache contextCache = APIUtil.getAPIContextCache();
                 contextCache.remove(oldApi.getContext());
                 contextCache.put(api.getContext(), Boolean.TRUE);
             }
-
 
         } else {
             // We don't allow API status updates via this method.
@@ -1940,161 +1913,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+        return api;
     }
     
-    private void updateArtifact(API api, boolean updateMetadata, boolean updatePermissions)
+    private void updateOtherAPIversionsForNewDefautlAPIChange(API api, String previousDefaultVersion)
             throws APIManagementException {
 
-        //Validate Transports
-        validateAndSetTransports(api);
-        validateAndSetAPISecurity(api);
-        boolean transactionCommitted = false;
-        try {
-            registry.beginTransaction();
-            String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
-            if (artifactManager == null) {
-                String errorMessage = "Artifact manager is null when updating API artifact ID " + api.getId();
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
+        if (previousDefaultVersion != null) {
 
-            //This is a fix for broken APIs after migrating from 1.10 to 2.0.0.
-            //This sets the endpoint security of the APIs based on the old artifact.
-            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-            if (gatewayManager.isAPIPublished(api, tenantDomain)) {
-                if ((!api.isEndpointSecured() && !api.isEndpointAuthDigest())) {
-                    boolean isSecured = Boolean.parseBoolean(
-                            artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED));
-                    boolean isDigestSecured = Boolean.parseBoolean(
-                            artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST));
-                    String userName = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME);
-                    String password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD);
-
-                    //Check for APIs marked as non-secured, but username is set.
-                    if (!isSecured && !isDigestSecured && userName != null) {
-                        String epAuthType = gatewayManager.getAPIEndpointSecurityType(api, tenantDomain);
-                        if (APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH.equalsIgnoreCase(epAuthType)) {
-                            api.setEndpointSecured(true);
-                            api.setEndpointAuthDigest(true);
-                        } else if (APIConstants.APIEndpointSecurityConstants.BASIC_AUTH.equalsIgnoreCase(epAuthType)) {
-                            api.setEndpointSecured(true);
-                        }
-                        api.setEndpointUTUsername(userName);
-                        api.setEndpointUTPassword(password);
-                    }
-
-                }
-            }
-
-            String oldStatus = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-            Resource apiResource = registry.get(artifact.getPath());
-            String oldAccessControlRoles = api.getAccessControlRoles();
-            if (apiResource != null) {
-                oldAccessControlRoles = registry.get(artifact.getPath()).getProperty(APIConstants.PUBLISHER_ROLES);
-            }
-            GenericArtifact updateApiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiArtifact.getId());
-            org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
-            if (oldTags != null) {
-                for (org.wso2.carbon.registry.core.Tag tag : oldTags) {
-                    registry.removeTag(artifactPath, tag.getTagName());
-                }
-            }
-            Set<String> tagSet = api.getTags();
-            if (tagSet != null) {
-                for (String tag : tagSet) {
-                    registry.applyTag(artifactPath, tag);
-                }
-            }
-            if (api.isDefaultVersion()) {
-                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
-            } else {
-                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
-            }
-
-            if (updateMetadata && api.getEndpointConfig() != null && !api.getEndpointConfig().isEmpty()) {
-                // If WSDL URL get change only we update registry WSDL resource. If its registry resource patch we
-                // will skip registry update. Only if this API created with WSDL end point type we need to update
-                // wsdls for each update.
-                //check for wsdl endpoint
-                org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
-                boolean isWSAPI = APIConstants.APITransportType.WS.toString().equals(api.getType());
-                String wsdlURL;
-                if (!isWSAPI && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString()) && response1.has
-                        ("production_endpoints")) {
-                    wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
-
-                    if (APIUtil.isValidWSDLURL(wsdlURL, true)) {
-                        String path = APIUtil.createWSDL(registry, api);
-                        if (path != null) {
-                            registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                            // reset the wsdl path to permlink
-                            updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
-                        }
+            APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
+                    previousDefaultVersion);
+            if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
+                // happen
+                // Remove the previous default API entry from the Registry
+                updateDefaultAPIInRegistry(defaultAPIId, false);
+                if (!api.isDefaultVersion()) {// default api tick is removed
+                    // todo: if it is ok, these two variables can be put to the top of the function to remove
+                    // duplication
+                    String gatewayType = getAPIManagerConfiguration().getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+                    if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                        removeDefaultAPIFromGateway(api);
                     }
                 }
-            }
-            artifactManager.updateGenericArtifact(updateApiArtifact);
-
-            //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
-            //to gain performance
-            String apiStatus = api.getStatus().toUpperCase();
-            saveAPIStatus(artifactPath, apiStatus);
-            String[] visibleRoles = new String[0];
-            String publisherAccessControlRoles = api.getAccessControlRoles();
-
-            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
-                    api.getAdditionalProperties());
-
-            //propagate api status change and access control roles change to document artifact
-            String newStatus = updateApiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-            if (!StringUtils.equals(oldStatus, newStatus) || !StringUtils.equals(oldAccessControlRoles, publisherAccessControlRoles)) {
-                APIUtil.notifyAPIStateChangeToAssociatedDocuments(artifact, registry);
-            }
-
-            if (updatePermissions) {
-                APIUtil.clearResourcePermissions(artifactPath, api.getId(), ((UserRegistry) registry).getTenantId());
-                String visibleRolesList = api.getVisibleRoles();
-
-                if (visibleRolesList != null) {
-                    visibleRoles = visibleRolesList.split(",");
-                }
-                APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-                        artifactPath, registry);
-            }
-            //attaching api categories to the API
-            List<APICategory> attachedApiCategories = api.getApiCategories();
-            artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
-            if (attachedApiCategories != null) {
-                for (APICategory category : attachedApiCategories) {
-                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
-                }
-            }
-            registry.commitTransaction();
-            transactionCommitted = true;
-        } catch (Exception e) {
-            try {
-                registry.rollbackTransaction();
-            } catch (RegistryException re) {
-                // Throwing an error from this level will mask the original exception
-                log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
-            }
-            handleException("Error while performing registry transaction operation", e);
-        } finally {
-            try {
-                if (!transactionCommitted) {
-                    registry.rollbackTransaction();
-                }
-            } catch (RegistryException ex) {
-                handleException("Error occurred while rolling back the transaction.", ex);
             }
         }
     }
 
-    private void updateDocumentPermissions(API api, boolean updatePermissions, String[] visibleRoles)
-            throws APIManagementException {
+    private void updateDocumentPermissions(API api, API oldApi) throws APIManagementException {
+        
+        boolean updatePermissions = false;
+        if (APIUtil.isAccessControlEnabled()) {
+            if (!oldApi.getAccessControl().equals(api.getAccessControl()) || (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getAccessControl()) &&
+                    !api.getAccessControlRoles().equals(oldApi.getAccessControlRoles())) || !oldApi.getVisibility().equals(api.getVisibility()) ||
+                    (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
+                            !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
+                updatePermissions = true;
+            }
+        } else if (!oldApi.getVisibility().equals(api.getVisibility()) ||
+                (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
+                        !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
+            updatePermissions = true;
+        }
+        
+        String visibleRolesList = api.getVisibleRoles();
+
+        String[] visibleRoles = new String[0];
+        if (visibleRolesList != null) {
+            visibleRoles = visibleRolesList.split(",");
+        }
         //TODO check if registry.beginTransaction(); flow is needed
         List<Documentation> docs = getAllDocumentation(api.getId());
         if (updatePermissions) {
@@ -2154,7 +2020,71 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
+    
+    private void updateWSDL(API api) throws APIManagementException {
+        
+        //Update WSDL in the registry
+        if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {////////////////////////
+            updateWsdlFromUrl(api);
+        }
 
+        if (api.getWsdlResource() != null) {//////////////////////////////////////
+            updateWsdlFromResourceFile(api);
+        }
+        
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            if (artifactManager == null) {
+                String errorMessage = "Artifact manager is null when updating API artifact ID " + api.getId();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+
+            if (api.getEndpointConfig() != null && !api.getEndpointConfig().isEmpty()) {
+                // If WSDL URL get change only we update registry WSDL resource. If its registry resource patch we
+                // will skip registry update. Only if this API created with WSDL end point type we need to update
+                // wsdls for each update.
+                // check for wsdl endpoint
+                org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
+                boolean isWSAPI = APIConstants.APITransportType.WS.toString().equals(api.getType());
+                String wsdlURL;
+                if (!isWSAPI && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString())
+                        && response1.has("production_endpoints")) {
+                    wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
+
+                    if (APIUtil.isValidWSDLURL(wsdlURL, true)) {
+                        String path = APIUtil.createWSDL(registry, api);
+                        if (path != null) {
+                            registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
+                        }
+                    }
+                }
+            }
+            registry.commitTransaction();
+            transactionCommitted = true;
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error from this level will mask the original exception
+                log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error occurred while rolling back the transaction.", ex);
+            }
+        }
+    }
 
     private void replublish(API api, Map<String, Map<String, String>> failedGateways, API oldApi,
             String previousDefaultVersion, String publishedDefaultVersion) throws APIManagementException {

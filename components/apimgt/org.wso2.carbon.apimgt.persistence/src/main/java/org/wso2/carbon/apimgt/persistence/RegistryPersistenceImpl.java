@@ -38,6 +38,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -78,6 +79,7 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -297,7 +299,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
     }
-
+/*
     @Override
     public PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
@@ -324,6 +326,142 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
         return updatedPubAPI;
     }
+    */
+    @Override
+    public PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
+        API api = APIMapper.INSTANCE.toApi(publisherAPI);
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            String apiArtifactId = registry.get(RegistryPersistenceUtil.getAPIPath(api.getId())).getUUID();
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            if (artifactManager == null) {
+                String errorMessage = "Artifact manager is null when updating API artifact ID " + api.getId();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+
+            boolean isSecured = Boolean.parseBoolean(
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED));
+            boolean isDigestSecured = Boolean.parseBoolean(
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST));
+            String userName = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME);
+            String password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD);
+   
+            if (!isSecured && !isDigestSecured && userName != null) {
+                api.setEndpointUTUsername(userName);
+                api.setEndpointUTPassword(password);
+            }
+
+            String oldStatus = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+            Resource apiResource = registry.get(artifact.getPath());
+            String oldAccessControlRoles = api.getAccessControlRoles();
+            if (apiResource != null) {
+                oldAccessControlRoles = registry.get(artifact.getPath()).getProperty(APIConstants.PUBLISHER_ROLES);
+            }
+            GenericArtifact updateApiArtifact = RegistryPersistenceUtil.createAPIArtifactContent(artifact, api);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiArtifact.getId());
+            org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
+            if (oldTags != null) {
+                for (org.wso2.carbon.registry.core.Tag tag : oldTags) {
+                    registry.removeTag(artifactPath, tag.getTagName());
+                }
+            }
+            Set<String> tagSet = api.getTags();
+            if (tagSet != null) {
+                for (String tag : tagSet) {
+                    registry.applyTag(artifactPath, tag);
+                }
+            }
+            if (api.isDefaultVersion()) {
+                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
+            } else {
+                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
+            }
+
+
+            artifactManager.updateGenericArtifact(updateApiArtifact);
+
+            //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
+            //to gain performance
+            String apiStatus = api.getStatus().toUpperCase();
+            //saveAPIStatus(artifactPath, apiStatus);
+            String[] visibleRoles = new String[0];
+            String publisherAccessControlRoles = api.getAccessControlRoles();
+
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+                    api.getAdditionalProperties());
+
+            //propagate api status change and access control roles change to document artifact
+            String newStatus = updateApiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+            if (!StringUtils.equals(oldStatus, newStatus) || !StringUtils.equals(oldAccessControlRoles, publisherAccessControlRoles)) {
+                RegistryPersistenceUtil.notifyAPIStateChangeToAssociatedDocuments(artifact, registry);
+            }
+
+            // TODO Improve: add a visibility change check and only update if needed
+            RegistryPersistenceUtil.clearResourcePermissions(artifactPath, api.getId(),
+                    ((UserRegistry) registry).getTenantId());
+            String visibleRolesList = api.getVisibleRoles();
+
+            if (visibleRolesList != null) {
+                visibleRoles = visibleRolesList.split(",");
+            }
+            RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                    visibleRoles, artifactPath, registry);
+            
+            //attaching api categories to the API
+            List<APICategory> attachedApiCategories = api.getApiCategories();
+            artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+            if (attachedApiCategories != null) {
+                for (APICategory category : attachedApiCategories) {
+                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+                }
+            }
+            
+            if (api.getSwaggerDefinition() != null) {
+                String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
+                        api.getId().getVersion(), api.getId().getProviderName());
+                resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+                Resource resource;
+                if (!registry.resourceExists(resourcePath)) {
+                    resource = registry.newResource();
+                } else {
+                    resource = registry.get(resourcePath);
+                }
+                resource.setContent(api.getSwaggerDefinition());
+                resource.setMediaType("application/json");
+                registry.put(resourcePath, resource);
+                //Need to set anonymous if the visibility is public
+                RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
+                        ((UserRegistry) registry).getTenantId());
+                RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                        visibleRoles, resourcePath);
+            }
+            registry.commitTransaction();
+            transactionCommitted = true;
+            return APIMapper.INSTANCE.toPublisherApi(api);
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error from this level will mask the original exception
+                log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
+            }
+            throw new APIPersistenceException("Error while performing registry transaction operation ", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                throw new APIPersistenceException("Error occurred while rolling back the transaction. ", ex);
+            }
+        }
+    }
+    
+    
 
     /**
      * Things to populate manually -
