@@ -15259,4 +15259,29 @@ public class ApiMgtDAO {
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
     }
+    
+    /**
+     * Return the existing versions for the given api name for the provider
+     * @param apiName api name
+     * @param apiProvider provider
+     * @return set version
+     * @throws APIManagementException
+     */
+    public Set<String> getAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+        Set<String> versions = new HashSet<String>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS)) {
+            statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
+            statement.setString(2, apiName);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                versions.add(resultSet.getString("API_VERSION"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
+                    e);
+        }
+        return versions;
+    }
 }

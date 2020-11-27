@@ -2281,7 +2281,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 apiIdentifier = identifier;
             }
-            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
+            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId);
             if (apiLCData == null) {
                 String errorMessage = "Error while getting lifecycle state for API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, log);
@@ -2289,7 +2289,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             boolean apiOlderVersionExist = false;
             // check whether other versions of the current API exists
-            APIDTO currentAPI = getAPIByID(apiId);
             APIVersionStringComparator comparator = new APIVersionStringComparator();
             Set<String> versions = apiProvider.getAPIVersions(
                     APIUtil.replaceEmailDomain(apiIdentifier.getProviderName()), apiIdentifier.getName());
@@ -3915,7 +3914,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
+            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId);
             String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
             if (!ArrayUtils.contains(nextAllowedStates, action)) {
                 RestApiUtil.handleBadRequest(
@@ -3940,7 +3939,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiId, action.toString(), lcMap);
 
             //returns the current lifecycle state
-            LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId);
+            LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId); // todo try to prevent this call
 
             WorkflowResponseDTO workflowResponseDTO = APIMappingUtil
                     .toWorkflowResponseDTO(stateDTO, stateChangeResponse);

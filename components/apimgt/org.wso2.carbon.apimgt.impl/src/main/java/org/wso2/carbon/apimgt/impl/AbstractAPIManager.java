@@ -782,28 +782,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public Set<String> getAPIVersions(String providerName, String apiName)
             throws APIManagementException {
 
-        Set<String> versionSet = new HashSet<String>();
-        String apiPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                providerName + RegistryConstants.PATH_SEPARATOR + apiName;
-        try {
-            Resource resource = registry.get(apiPath);
-            if (resource instanceof Collection) {
-                Collection collection = (Collection) resource;
-                String[] versionPaths = collection.getChildren();
-                if (versionPaths == null || versionPaths.length == 0) {
-                    return versionSet;
-                }
-                for (String path : versionPaths) {
-                    versionSet.add(path.substring(apiPath.length() + 1));
-                }
-            } else {
-                throw new APIManagementException("API version must be a collection " + apiName);
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get versions for API: " + apiName;
-            throw new APIManagementException(msg, e);
-        }
-        return versionSet;
+        return apiMgtDAO.getAPIVersions(apiName, providerName);
     }
 
     /**

@@ -20,7 +20,9 @@ package org.wso2.carbon.apimgt.persistence.utils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -33,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.util.SecurityManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
@@ -46,6 +49,7 @@ public class RegistryLCManager {
     private static Log log = LogFactory.getLog(RegistryLCManager.class);
     private static final int ENTITY_EXPANSION_LIMIT = 0;
     private Map<String, String> stateTransitionMap = new HashMap<String, String>();
+    private Map<String, StateInfo> stateInfoMap = new HashMap<String, StateInfo>();
     private HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<String, LifeCycleTransition>();
 
     public RegistryLCManager(int tenantId)
@@ -68,10 +72,12 @@ public class RegistryLCManager {
             Node id = node.getAttributes().getNamedItem("id");
             if (id != null && !id.getNodeValue().isEmpty()) {
                 LifeCycleTransition lifeCycleTransition = new LifeCycleTransition();
-                NodeList transitions = node.getChildNodes();
-                int nTransitions = transitions.getLength();
+                List<String> actions = new ArrayList<String>();
+                List<String> checklistItems = new ArrayList<String>();
+                NodeList stateChiledNodes = node.getChildNodes();
+                int nTransitions = stateChiledNodes.getLength();
                 for (int j = 0; j < nTransitions; j++) {
-                    Node transition = transitions.item(j);
+                    Node transition = stateChiledNodes.item(j);
                     // Add transitions
                     if ("transition".equals(transition.getNodeName())) {
                         Node target = transition.getAttributes().getNamedItem("target");
@@ -80,10 +86,34 @@ public class RegistryLCManager {
                             lifeCycleTransition.addTransition(target.getNodeValue().toUpperCase(),
                                     action.getNodeValue());
                             stateTransitionMap.put(action.getNodeValue(), target.getNodeValue().toUpperCase());
+                            actions.add(action.getNodeValue());
+                        }
+                    }
+                    if ("datamodel".equals(transition.getNodeName())) {
+                        NodeList datamodels = transition.getChildNodes();
+                        int nDatamodel = datamodels.getLength();
+                        for (int k = 0; k < nDatamodel; k++) {
+                            Node dataNode = datamodels.item(k);
+                            if (dataNode != null && dataNode.getAttributes() != null && "checkItems"
+                                    .equals(dataNode.getAttributes().getNamedItem("name").getNodeValue())) {
+                                NodeList items = dataNode.getChildNodes();
+                                for (int x = 0; x < items.getLength(); x++) {
+                                    Node item = items.item(x);
+                                    if (item != null && item.getAttributes() != null
+                                            && item.getAttributes().getNamedItem("name") != null) {
+                                        checklistItems.add(item.getAttributes().getNamedItem("name").getNodeValue());
+
+                                    }
+                                }
+                            }
                         }
                     }
                 }
                 stateHashMap.put(id.getNodeValue().toUpperCase(), lifeCycleTransition);
+                StateInfo stateInfo = new StateInfo();
+                stateInfo.setCheckListItems(checklistItems);
+                stateInfo.setTransitions(actions);
+                stateInfoMap.put(id.getNodeValue().toUpperCase(), stateInfo);
             }
         }
 
@@ -134,7 +164,50 @@ public class RegistryLCManager {
             transitions.put(targetStatus, action);
         }
     }
+    
+    class StateInfo {
+        private String state;
+        private List<String> transitions = new ArrayList<String>();
+        private List<String> checkListItems = new ArrayList<String>();
 
+        public List<String> getCheckListItems() {
+            return checkListItems;
+        }
+
+        public void setCheckListItems(List<String> checkListItems) {
+            this.checkListItems = checkListItems;
+        }
+
+        public List<String> getTransitions() {
+            return transitions;
+        }
+
+        public void setTransitions(List<String> transitions) {
+            this.transitions = transitions;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+    }
+    
+    public List<String> getCheckListItemsForState(String state) {
+        if (stateInfoMap.containsKey(state)) {
+            return stateInfoMap.get(state).getCheckListItems();
+        }
+        return null;
+    }
+
+    public List<String> getAllowedActionsForState(String state) {
+        if (stateInfoMap.containsKey(state)) {
+            return stateInfoMap.get(state).getTransitions();
+        }
+        return null;
+    }
     /**
      * Returns a secured DocumentBuilderFactory instance
      *
