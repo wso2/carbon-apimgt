@@ -1,6 +1,10 @@
 package org.wso2.carbon.apimgt.impl.importexport.utils;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -53,8 +57,7 @@ public class APIControllerUtil {
     public static String getParamsDefinitionAsJSON(String pathToArchive) throws IOException {
 
         String jsonContent = null;
-        //        String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_API_PARAMS_FILE_LOCATION;
-        String pathToYamlFile = "/home/chamindu/Desktop/CodeReview/TempClient/api_params.yaml";
+        String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_API_PARAMS_FILE_LOCATION;
         String pathToJsonFile = pathToArchive + APIImportExportConstants.JSON_API_PARAMS_FILE_LOCATION;
 
         // load yaml representation first,if it is present
@@ -99,7 +102,6 @@ public class APIControllerUtil {
             endpointType = APIImportExportConstants.REST_TYPE_ENDPOINT;
 
         }
-
         //Handle multiple end points
         JsonObject configObject = setupMultipleEndpoints(envParams, endpointType);
         importedApi.setEndpointConfig(configObject.toString());
@@ -122,7 +124,7 @@ public class APIControllerUtil {
                         apiSecurity = apiSecurity + "," + APIImportExportConstants.MUTUAL_SSL_ENABLED;
                     }
                 } else {
-                    // if the apiSecurity field is empty, assign the value as mutualssl
+                    // if the apiSecurity field is empty, assign the value as "mutualssl"
                     apiSecurity = APIImportExportConstants.MUTUAL_SSL_ENABLED;
                 }
                 importedApi.setApiSecurity(apiSecurity);
@@ -186,16 +188,13 @@ public class APIControllerUtil {
 
             if (username == null) {
                 throw new APIImportExportException("You have enabled endpoint security but the username is not found "
-                        + "in the api_params.yaml. Please specify username field for" + envParams
-                        .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                        + "in the api_params.yaml. Please specify username field for and continue...");
             } else if (password == null) {
                 throw new APIImportExportException("You have enabled endpoint security but the password is not found "
-                        + "in the api_params.yaml. Please specify password field for" + envParams
-                        .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                        + "in the api_params.yaml. Please specify password field for and continue...");
             } else if (type == null) {
                 throw new APIImportExportException("You have enabled endpoint security but the password is not found "
-                        + "in the api_params.yaml. Please specify password field for" + envParams
-                        .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                        + "in the api_params.yaml. Please specify password field for and continue...");
             } else {
                 importedApi.setEndpointUTUsername(username.getAsString());
                 importedApi.setEndpointUTPassword(password.getAsString());
@@ -208,9 +207,8 @@ public class APIControllerUtil {
                 } else {
                     // If the type is not either basic or digest, return an error
                     throw new APIImportExportException("Invalid endpoint security type found in the api_params.yaml. "
-                            + "Should be either basic or digest" + "Please specify correct security types field for"
-                            + envParams.get(APIImportExportConstants.ENV_NAME_FIELD).getAsString()
-                            + " and continue...");
+                            + "Should be either basic or digest"
+                            + "Please specify correct security types field for and continue...");
                 }
             }
         }
@@ -232,10 +230,10 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to extract endpoint configurations from env params file
+     * This method will be used to extract endpoint configurations from the env params file
      *
      * @param endpointType Endpoint type
-     * @param envParams    Env params object with required parameters
+     * @param envParams    JsonObject of Env params  with required parameters
      * @return JsonObject with Endpoint configs
      * @throws APIImportExportException If an error occurs when extracting endpoint configurations
      */
@@ -317,8 +315,7 @@ public class APIControllerUtil {
         } else if (APIImportExportConstants.AWS_TYPE_ENDPOINT.equals(endpointType)) {// if endpoint type is AWS Lambda
             //if aws config is not provided
             if (envParams.get(APIImportExportConstants.AWS_LAMBDA_ENDPOINT_JSON_PROPERTY) == null) {
-                throw new APIImportExportException("Please specify awsLambdaEndpoints field for " + envParams
-                        .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                throw new APIImportExportException("Please specify awsLambdaEndpoints field for  and continue...");
             }
             JsonObject awsEndpointParams = envParams.get(APIImportExportConstants.AWS_LAMBDA_ENDPOINT_JSON_PROPERTY)
                     .getAsJsonObject();
@@ -358,6 +355,7 @@ public class APIControllerUtil {
      */
     private static JsonObject handleRestEndpoints(String routingPolicy, JsonObject envParams,
             JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIImportExportException {
+
         // if the endpoint routing policy is not specified, but the endpoints field is specified, this is the usual scenario
         JsonObject updatedRESTEndpointParams = new JsonObject();
         JsonObject endpoints = null;
@@ -377,8 +375,7 @@ public class APIControllerUtil {
                     .get(APIImportExportConstants.LOAD_BALANCE_ENDPOINTS_FIELD);
             JsonObject loadBalancedConfigs;
             if (loadBalancedConfigElement == null) {
-                throw new APIImportExportException("Please specify loadBalanceEndpoints field for " + envParams
-                        .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                throw new APIImportExportException("Please specify loadBalanceEndpoints field for and continue...");
             } else {
                 loadBalancedConfigs = loadBalancedConfigElement.getAsJsonObject();
             }
@@ -418,8 +415,7 @@ public class APIControllerUtil {
             JsonElement failoverConfigElement = envParams.get(APIImportExportConstants.FAILOVER_ENDPOINTS_FIELD);
             JsonObject failoverConfigs;
             if (failoverConfigElement == null) {
-                throw new APIImportExportException("Please specify failoverEndpoints field for " + envParams
-                        .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                throw new APIImportExportException("Please specify failoverEndpoints field for and continue...");
             } else {
                 failoverConfigs = failoverConfigElement.getAsJsonObject();
             }
@@ -435,8 +431,7 @@ public class APIControllerUtil {
             if (productionFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (productionEndpoints != null) {
-                    throw new APIImportExportException("Please specify production failover field for " + envParams
-                            .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                    throw new APIImportExportException("Please specify production failover field for and continue...");
                 }
             } else if (!productionFailOvers.isJsonNull()) {
                 updatedRESTEndpointParams
@@ -450,8 +445,7 @@ public class APIControllerUtil {
             if (sandboxFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (sandboxEndpoints != null) {
-                    throw new APIImportExportException("Please specify sandbox failover field for " + envParams
-                            .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                    throw new APIImportExportException("Please specify sandbox failover field for and continue...");
                 }
             } else if (!sandboxFailOvers.isJsonNull()) {
                 updatedRESTEndpointParams
@@ -475,6 +469,7 @@ public class APIControllerUtil {
      */
     private static JsonObject handleSoapEndpoints(String routingPolicy, JsonObject envParams,
             JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIImportExportException {
+
         JsonObject updatedSOAPEndpointParams = new JsonObject();
         JsonObject endpoints = null;
         if (envParams.get(APIImportExportConstants.ENDPOINTS_FIELD) != null) {
@@ -494,11 +489,9 @@ public class APIControllerUtil {
                     .get(APIImportExportConstants.LOAD_BALANCE_ENDPOINTS_FIELD);
             JsonObject loadBalancedConfigs;
             if (loadBalancedConfigElement == null) {
-                throw new APIImportExportException("Please specify loadBalanceEndpoints field for " + envParams
-                        .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                throw new APIImportExportException("Please specify loadBalanceEndpoints field for and continue...");
             } else {
                 loadBalancedConfigs = loadBalancedConfigElement.getAsJsonObject();
-
             }
             updatedSOAPEndpointParams.addProperty(APIImportExportConstants.ENDPOINT_TYPE_PROPERTY,
                     APIImportExportConstants.LOAD_BALANCE_TYPE_ENDPOINT);
@@ -546,8 +539,7 @@ public class APIControllerUtil {
             JsonElement failoverConfigElement = envParams.get(APIImportExportConstants.FAILOVER_ENDPOINTS_FIELD);
             JsonObject failoverConfigs;
             if (failoverConfigElement == null) {
-                throw new APIImportExportException("Please specify failoverEndpoints field for " + envParams
-                        .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                throw new APIImportExportException("Please specify failoverEndpoints field for and continue...");
             } else {
                 failoverConfigs = failoverConfigElement.getAsJsonObject();
             }
@@ -563,8 +555,7 @@ public class APIControllerUtil {
             if (productionFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (productionEndpoints != null) {
-                    throw new APIImportExportException("Please specify production failover field for " + envParams
-                            .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                    throw new APIImportExportException("Please specify production failover field for and continue...");
                 }
             } else if (!productionFailOvers.isJsonNull()) {
                 updatedSOAPEndpointParams.add(APIImportExportConstants.PRODUCTION_FAILOVERS_ENDPOINTS_PROPERTY,
@@ -578,8 +569,7 @@ public class APIControllerUtil {
             if (sandboxFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (sandboxEndpoints != null) {
-                    throw new APIImportExportException("Please specify sandbox failover field for " + envParams
-                            .get(APIImportExportConstants.ENV_NAME_FIELD).getAsString() + " and continue...");
+                    throw new APIImportExportException("Please specify sandbox failover field for and continue...");
                 }
             } else if (!sandboxFailOvers.isJsonNull()) {
                 updatedSOAPEndpointParams.add(APIImportExportConstants.SANDBOX_FAILOVERS_ENDPOINTS_PROPERTY,
@@ -603,6 +593,7 @@ public class APIControllerUtil {
      */
     private static void handleEndpointValues(JsonObject endpointConfigs, JsonObject updatedEndpointParams,
             JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) {
+
         //check api params file to get provided endpoints
         if (endpointConfigs == null) {
             updatedEndpointParams
@@ -680,19 +671,18 @@ public class APIControllerUtil {
             cert.setApiIdentifier(apiIdentifier);
             cert.setAlias(alias);
             cert.setTierName(certObject.get(APIImportExportConstants.CERTIFICATE_TIER_NAME_PROPERTY).getAsString());
-            String certName = certObject.get("path").getAsString();
+            String certName = certObject.get(APIImportExportConstants.CERTIFICATE_PATH_PROPERTY).getAsString();
             cert.setCertificate(certName);
             certs.add(cert);
 
             //check and create a directory
-            //String clientCertificatesDirectory = pathToArchive + APIImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY_PATH;
-            String clientCertificatesDirectory = "/home/chamindu/Desktop/CodeReview/TempServer/Client-certificates";
+            String clientCertificatesDirectory =
+                    pathToArchive + APIImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY_PATH;
             if (!CommonUtil.checkFileExistence(clientCertificatesDirectory)) {
                 CommonUtil.createDirectory(clientCertificatesDirectory);
             }
             //copy certs file from certificates
-            //String userCertificatesTempDirectory = pathToArchive + APIImportExportConstants.CERTIFICATE_DIRECTORY;
-            String userCertificatesTempDirectory = "/home/chamindu/Desktop/CodeReview/TempClient/certificates";
+            String userCertificatesTempDirectory = pathToArchive + APIImportExportConstants.CERTIFICATE_DIRECTORY;
             String sourcePath = userCertificatesTempDirectory + APIImportExportConstants.ZIP_FILE_SEPARATOR + certName;
             String destinationPath =
                     clientCertificatesDirectory + APIImportExportConstants.ZIP_FILE_SEPARATOR + certName;
@@ -708,14 +698,10 @@ public class APIControllerUtil {
         JsonArray updatedCertsArray = jsonElement.getAsJsonArray();
         //generate meta-data yaml file
         JsonObject yamlOutput = new JsonObject();
-        yamlOutput.add("data", updatedCertsArray);
-
-        //generate meta-data yaml file
+        yamlOutput.add(APIImportExportConstants.DATA_PROPERTY, updatedCertsArray);
         String yamlContent = CommonUtil.jsonToYaml(yamlOutput.toString());
-        //        String metadataFilePath = pathToArchive + APIImportExportConstants.CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
-        String MetadataPath =
-                "/home/chamindu/Desktop/CodeReview/TempServer" + "/Client-certificates/client_certificates.yaml";
-        CommonUtil.generateFiles(MetadataPath, yamlContent);
+        String metadataFilePath = pathToArchive + APIImportExportConstants.CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
+        CommonUtil.generateFiles(metadataFilePath, yamlContent);
     }
 
     /**
@@ -742,19 +728,18 @@ public class APIControllerUtil {
             //Add certificate element to cert object
             JsonElement jsonElement = new Gson().toJsonTree(certificateMetadataDTO);
             JsonObject updatedCertObj = jsonElement.getAsJsonObject();
-            String certName = certObject.get("path").getAsString();
-            updatedCertObj.addProperty("certificate", certName);
+            String certName = certObject.get(APIImportExportConstants.CERTIFICATE_PATH_PROPERTY).getAsString();
+            updatedCertObj.addProperty(APIImportExportConstants.CERTIFICATE_CERTIFICATE_CONTENT_PROPERTY, certName);
             updatedCertsArray.add(updatedCertObj);
 
             //check and create a directory
-            //String endpointCertificatesDirectory = pathToArchive + APIImportExportConstants.ENDPOINT_CERTIFICATES_DIRECTORY_PATH;
-            String endpointCertificatesDirectory = "/home/chamindu/Desktop/CodeReview/TempServer/Endpoint-certificates";
+            String endpointCertificatesDirectory =
+                    pathToArchive + APIImportExportConstants.ENDPOINT_CERTIFICATES_DIRECTORY_PATH;
             if (!CommonUtil.checkFileExistence(endpointCertificatesDirectory)) {
                 CommonUtil.createDirectory(endpointCertificatesDirectory);
             }
             //copy certs file from certificates
-            //            String userCertificatesTempDirectory = pathToArchive + APIImportExportConstants.CERTIFICATE_DIRECTORY;
-            String userCertificatesTempDirectory = "/home/chamindu/Desktop/CodeReview/TempClient/certificates";
+            String userCertificatesTempDirectory = pathToArchive + APIImportExportConstants.CERTIFICATE_DIRECTORY;
             String sourcePath = userCertificatesTempDirectory + APIImportExportConstants.ZIP_FILE_SEPARATOR + certName;
             String destinationPath =
                     endpointCertificatesDirectory + APIImportExportConstants.ZIP_FILE_SEPARATOR + certName;
@@ -768,12 +753,10 @@ public class APIControllerUtil {
 
         //generate meta-data yaml file
         JsonObject yamlOutput = new JsonObject();
-        yamlOutput.add("data", updatedCertsArray);
+        yamlOutput.add(APIImportExportConstants.DATA_PROPERTY, updatedCertsArray);
         String yamlContent = CommonUtil.jsonToYaml(yamlOutput.toString());
-        //        String metadataFilePath = pathToArchive + APIImportExportConstants.ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH;
-        String MetadataPath =
-                "/home/chamindu/Desktop/CodeReview/TempServer" + "/Endpoint-certificates/endpoint_certificates.yaml";
-        CommonUtil.generateFiles(MetadataPath, yamlContent);
+        String metadataFilePath = pathToArchive + APIImportExportConstants.ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH;
+        CommonUtil.generateFiles(metadataFilePath, yamlContent);
     }
 
 }

@@ -209,7 +209,8 @@ public final class APIImportExportConstants {
     //Certificate related constants
     public static final String MUTUAL_SSL_ENABLED = "mutualssl";
     public static final String CERTIFICATE_API_IDENTIFIER_PROPERTY = "apiIdentifier";
-    public static final String CERTIFICATE_CERTIFICATE_CONTENT_PROPERTY = "certificate";
+    public static final String CERTIFICATE_PATH_PROPERTY = "path";
+    public static final String CERTIFICATE_CERTIFICATE_CONTENT_PROPERTY = "file";
     public static final String CERTIFICATE_HOST_NAME_PROPERTY = "hostName";
     public static final String CERTIFICATE_TIER_NAME_PROPERTY = "tierName";
     public static final String DATA_PROPERTY = "data";
