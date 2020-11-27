@@ -5181,6 +5181,12 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Retrieves the consumer keys and keymanager in a given application
+     * @param appId application id
+     * @return HashMap<ConsumerKey, keyManager>
+     * @throws APIManagementException
+     */
     public HashMap<String, String> getConsumerKeysForApplication(int appId) throws APIManagementException {
 
         Connection connection = null;
@@ -5198,7 +5204,7 @@ public class ApiMgtDAO {
             rs = prepStmt.executeQuery();
             while (rs.next()) {
                 String consumerKey = rs.getString("CONSUMER_KEY");
-                String keyManager  = rs.getString("KEY_MANAGER");
+                String keyManager = rs.getString("KEY_MANAGER");
                 consumerKeysOfApplication.put(consumerKey, keyManager);
             }
         } catch (SQLException e) {

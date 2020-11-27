@@ -3860,7 +3860,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void removeApplication(Application application, String username) throws APIManagementException {
         String uuid = application.getUUID();
-        HashMap<String,String> consumerKeysOfApplication = null;
+        HashMap<String, String> consumerKeysOfApplication = null;
         if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
             application = apiMgtDAO.getApplicationByUUID(uuid);
         }
@@ -4047,7 +4047,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
 
-        if(consumerKeysOfApplication != null) {
+        if (consumerKeysOfApplication != null) {
             for (Map.Entry<String, String> entry : consumerKeysOfApplication.entrySet()) {
                 String consumerKey = entry.getKey();
                 String keymanager = entry.getValue();
