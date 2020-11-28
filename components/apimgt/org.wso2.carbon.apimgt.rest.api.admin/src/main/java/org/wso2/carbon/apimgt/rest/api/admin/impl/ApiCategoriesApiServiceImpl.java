@@ -28,7 +28,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.ApiCategoriesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.APICategoryMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -43,7 +44,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
     public Response apiCategoriesGet() {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             List<APICategory> categoryList = apiAdmin.getAllAPICategoriesOfTenant(tenantID);
             APICategoryListDTO categoryListDTO =
@@ -60,7 +61,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
         APICategory apiCategory = null;
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String userName = RestApiUtil.getLoggedInUsername();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             apiCategory = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
             APICategoryDTO categoryDTO = APICategoryMappingUtil.
                     fromCategoryToCategoryDTO(apiAdmin.addCategory(apiCategory, userName));
@@ -76,7 +77,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
     public Response apiCategoriesApiCategoryIdPut(String apiCategoryId, APICategoryDTO body) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String userName = RestApiUtil.getLoggedInUsername();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(userName);
             int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             APICategory apiCategoryToUpdate = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
@@ -116,7 +117,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
             String ifUnmodifiedSince) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String userName = RestApiUtil.getLoggedInUsername();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             apiAdmin.deleteCategory(apiCategoryId, userName);
             return Response.ok().build();
         } catch (APIManagementException e) {

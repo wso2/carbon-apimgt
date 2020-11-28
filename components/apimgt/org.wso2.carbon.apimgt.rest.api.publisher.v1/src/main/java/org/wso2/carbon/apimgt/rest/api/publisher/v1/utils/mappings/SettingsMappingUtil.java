@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
@@ -65,7 +66,7 @@ public class SettingsMappingUtil {
             }
             settingsDTO.setEnvironment(environmentListDTO.getList());
             String storeUrl = APIUtil.getStoreUrl();
-            String loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String loggedInUserTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             Map<String, String> domainMappings =
                     APIUtil.getDomainMappings(loggedInUserTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_STORE);
             if (domainMappings.size() != 0) {
@@ -80,7 +81,7 @@ public class SettingsMappingUtil {
             settingsDTO.setMonetizationAttributes(getMonetizationAttributes());
             settingsDTO.setSecurityAuditProperties(getSecurityAuditProperties());
             settingsDTO.setExternalStoresEnabled(
-                    APIUtil.isExternalStoresEnabled(RestApiUtil.getLoggedInUserTenantDomain()));
+                    APIUtil.isExternalStoresEnabled(RestApiCommonUtil.getLoggedInUserTenantDomain()));
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
         }
@@ -147,8 +148,8 @@ public class SettingsMappingUtil {
     private SecurityAuditAttributeDTO getSecurityAuditProperties() throws APIManagementException {
         SecurityAuditAttributeDTO properties = new SecurityAuditAttributeDTO();
 
-        String username = RestApiUtil.getLoggedInUsername();
-        APIProvider apiProvider = RestApiUtil.getProvider(username);
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
         JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
         if (securityAuditPropertyObject != null) {

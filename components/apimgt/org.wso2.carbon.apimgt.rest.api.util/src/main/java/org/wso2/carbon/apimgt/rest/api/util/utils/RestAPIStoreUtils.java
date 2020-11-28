@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
@@ -108,7 +109,7 @@ public class RestAPIStoreUtils {
      * @return true if current logged in consumer is the owner of the specified application
      */
     public static boolean isUserOwnerOfApplication(Application application) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
 
         if (application.getSubscriber().getName().equals(username)) {
             return true;
@@ -131,7 +132,7 @@ public class RestAPIStoreUtils {
      */
     public static boolean isUserAccessAllowedForSubscription(SubscribedAPI subscribedAPI)
             throws APIManagementException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         Application application = subscribedAPI.getApplication();
         APIIdentifier apiIdentifier = subscribedAPI.getApiId();
         APIProductIdentifier productIdentifier = subscribedAPI.getProductId();
@@ -152,7 +153,7 @@ public class RestAPIStoreUtils {
         }
 
         if (productIdentifier != null && application != null) {
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             APIProduct product = apiConsumer.getAPIProduct(productIdentifier);
             if(!isUserAllowedForSubscription(product, username) || !isUserAccessAllowedForAPIProduct(product)) {
                 return false;
@@ -177,8 +178,8 @@ public class RestAPIStoreUtils {
      * @throws APIManagementException
      */
     public static boolean isUserAccessAllowedForAPIByUUID(String apiId, String tenantDomain) throws APIManagementException {
-        String username = RestApiUtil.getLoggedInUsername();
-        APIConsumer consumer = RestApiUtil.getLoggedInUserConsumer();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer consumer = RestApiCommonUtil.getLoggedInUserConsumer();
         //this is just to check whether the user has access to the api or the api exists. 
         try {
             consumer.getLightweightAPIByUUID(apiId, tenantDomain);
@@ -208,10 +209,10 @@ public class RestAPIStoreUtils {
      * @throws APIManagementException
      */
     public static boolean isUserAccessAllowedForAPI(APIIdentifier apiId) throws APIManagementException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         //this is just to check whether the user has access to the api or the api exists. 
         try {
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             apiConsumer.getLightweightAPI(apiId);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -239,8 +240,8 @@ public class RestAPIStoreUtils {
      */
     public static void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper, String tier)
             throws APIManagementException {
-        String username = RestApiUtil.getLoggedInUsername();
-        String userTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String userTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
         Set<Tier> tiers;
         String providerName;
@@ -324,7 +325,7 @@ public class RestAPIStoreUtils {
      */
     public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
             throws APIManagementException {
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
         return  api.getId();
     }
@@ -358,8 +359,8 @@ public class RestAPIStoreUtils {
     public static Set<String> getApplicationAttributeKeys() throws APIManagementException {
         
         Set<String> keySet = new HashSet<>();
-        String username = RestApiUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
         for (Object object : attributeKeysFromConfig) {
             JSONObject jsonObject = (JSONObject) object;
@@ -378,8 +379,8 @@ public class RestAPIStoreUtils {
      */
     public static Set<String> getValidApplicationAttributeKeys(Map<String, String> applicationAttributes)
             throws APIManagementException {
-        String username = RestApiUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
         Set<String> keySet = new HashSet<>();
         Set attributeKeysFromUSer = applicationAttributes.keySet();
@@ -408,8 +409,8 @@ public class RestAPIStoreUtils {
      */
     public static boolean isUserAccessAllowedForAPIProduct(APIProduct product) throws APIManagementException {
         //TODO check whether the username has external domain info as well
-        String username = RestApiUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (log.isDebugEnabled()) {
             log.debug("isUserAccessAllowedForAPIProduct():- productId: " + product.getUuid() + ", visibility: "
                     + product.getVisibility() + " username:" + username + " tenantDomain:" + tenantDomain);
@@ -432,7 +433,7 @@ public class RestAPIStoreUtils {
     public static boolean isUserAllowedForSubscription(APIProduct product, String user) {
         String subscriptionAvailability = product.getSubscriptionAvailability();
         String subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (log.isDebugEnabled()) {
             log.debug("isUserAllowedForSubscription():- productId: " + product.getUuid()
                     + ", subscriptionAvailability: " + subscriptionAvailability + " subscriptionAllowedTenants: "

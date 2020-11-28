@@ -28,12 +28,13 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ScopesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SharedScopeMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
@@ -64,8 +65,8 @@ public class ScopesApiServiceImpl implements ScopesApiService {
         String scopeName = new String(Base64.getUrlDecoder().decode(name));
         if (!APIUtil.isAllowedScope(scopeName)) {
             try {
-                APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                 isScopeExist =
                         apiProvider.isScopeKeyExist(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain));
             } catch (APIManagementException e) {
@@ -93,8 +94,8 @@ public class ScopesApiServiceImpl implements ScopesApiService {
 
         String scopeName = body.getName();
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             if (StringUtils.isEmpty(scopeName)) {
                 throw new APIManagementException("Shared Scope Name cannot be null or empty",
                         ExceptionCodes.SHARED_SCOPE_NAME_NOT_SPECIFIED);
@@ -132,8 +133,8 @@ public class ScopesApiServiceImpl implements ScopesApiService {
     @Override
     public Response deleteSharedScope(String scopeId, MessageContext messageContext) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isEmpty(scopeId)) {
             throw new APIManagementException("Scope Id cannot be null or empty",
                     ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
@@ -158,8 +159,8 @@ public class ScopesApiServiceImpl implements ScopesApiService {
     @Override
     public Response getSharedScope(String scopeId, MessageContext messageContext) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isEmpty(scopeId)) {
             throw new APIManagementException("Scope Id cannot be null or empty",
                     ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
@@ -172,8 +173,8 @@ public class ScopesApiServiceImpl implements ScopesApiService {
     @Override
     public Response getSharedScopeUsages(String scopeId, MessageContext messageContext)
             throws APIManagementException {
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         if (StringUtils.isEmpty(scopeId)) {
             throw new APIManagementException("Scope Id cannot be null or empty",
@@ -199,8 +200,8 @@ public class ScopesApiServiceImpl implements ScopesApiService {
         // setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         List<Scope> scopeList = apiProvider.getAllSharedScopes(tenantDomain);
         ScopeListDTO sharedScopeListDTO = SharedScopeMappingUtil.fromScopeListToDTO(scopeList, offset, limit);
@@ -222,8 +223,8 @@ public class ScopesApiServiceImpl implements ScopesApiService {
     public Response updateSharedScope(String scopeId, ScopeDTO body, MessageContext messageContext)
             throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isEmpty(scopeId)) {
             throw new APIManagementException("Shared Scope Id cannot be null or empty",
                     ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);

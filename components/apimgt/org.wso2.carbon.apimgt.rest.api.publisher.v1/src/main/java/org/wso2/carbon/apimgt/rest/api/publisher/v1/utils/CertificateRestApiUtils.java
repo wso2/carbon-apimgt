@@ -29,8 +29,9 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.ByteArrayInputStream;
@@ -128,7 +129,7 @@ public class CertificateRestApiUtils {
             certificateList.add(certMetadataDTO);
         }
 
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, certCount);
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, certCount);
         String paginatedPrevious = "";
         String paginatedNext = "";
 
@@ -193,7 +194,7 @@ public class CertificateRestApiUtils {
             clientCertMetadataDTO.setTier(clientCertificateDTO.getTierName());
             clientCertificateList.add(clientCertMetadataDTO);
         }
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, certCount);
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, certCount);
         String paginatedPrevious = "";
         String paginatedNext = "";
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
@@ -261,12 +262,12 @@ public class CertificateRestApiUtils {
      */
     public static ClientCertificateDTO preValidateClientCertificate(String alias, APIIdentifier apiIdentifier)
             throws APIManagementException {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         if (StringUtils.isEmpty(alias)) {
             RestApiUtil.handleBadRequest("The alias cannot be empty", log);
         }
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
             RestApiUtil.handleBadRequest(
                     "The client certificate based authentication is not configured for this server", log);

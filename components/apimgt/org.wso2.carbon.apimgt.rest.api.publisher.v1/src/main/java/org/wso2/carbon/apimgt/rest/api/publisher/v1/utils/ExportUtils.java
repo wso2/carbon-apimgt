@@ -54,12 +54,13 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
@@ -79,10 +80,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class ExportUtils {
@@ -108,7 +107,7 @@ public class ExportUtils {
             RestApiUtil.handleBadRequest("'name' (" + name + ") or 'version' (" + version
                     + ") should not be null.", log);
         }
-        String apiRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String apiRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         // If provider name is not given
         if (StringUtils.isBlank(providerName)) {
@@ -382,7 +381,7 @@ public class ExportUtils {
             throws APIImportExportException, APIManagementException {
 
         List<Documentation> docList = apiProvider.getAllDocumentation(identifier);
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (!docList.isEmpty()) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String docDirectoryPath = archivePath + File.separator + ImportExportConstants.DOCUMENT_DIRECTORY;
@@ -1011,7 +1010,7 @@ public class ExportUtils {
 
         List<ProductAPIDTO> apisList = apiProductDtoToReturn.getApis();
         for (ProductAPIDTO productAPIDTO : apisList) {
-            String apiProductRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String apiProductRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api);
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, userName, exportFormat,

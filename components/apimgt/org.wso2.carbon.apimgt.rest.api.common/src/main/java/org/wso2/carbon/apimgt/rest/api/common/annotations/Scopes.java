@@ -16,15 +16,17 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.util.annotations;
+package org.wso2.carbon.apimgt.rest.api.common.annotations;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Repeatable(Scopes.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE})
-public @interface Scope {
-    String description();
-    String value();
-    String name();
+public @interface Scopes {
+    Scope[] value();
 }
+
+

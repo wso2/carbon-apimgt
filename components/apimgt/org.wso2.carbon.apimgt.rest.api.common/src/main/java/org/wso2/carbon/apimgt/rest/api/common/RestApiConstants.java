@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.util;
+package org.wso2.carbon.apimgt.rest.api.common;
 
 import java.io.File;
 import java.util.regex.Pattern;

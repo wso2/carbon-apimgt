@@ -32,8 +32,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -67,7 +67,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -92,7 +92,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         // if no username provided user associated with access token will be used
         if (user == null || StringUtils.isEmpty(user)) {
-            user = RestApiUtil.getLoggedInUsername();
+            user = RestApiCommonUtil.getLoggedInUsername();
         }
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -103,7 +103,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application[] allMatchedApps;
             boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
             if (!migrationMode) { // normal non-migration flow
-                if (!MultitenantUtils.getTenantDomain(user).equals(RestApiUtil.getLoggedInUserTenantDomain())) {
+                if (!MultitenantUtils.getTenantDomain(user).equals(RestApiCommonUtil.getLoggedInUserTenantDomain())) {
                     String errorMsg = "User " + user + " is not available for the current tenant domain";
                     log.error(errorMsg);
                     return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
@@ -128,7 +128,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     appTenantDomain = MultitenantUtils.getTenantDomain(user);
                 }
                 RestApiUtil.handleMigrationSpecificPermissionViolations(appTenantDomain,
-                        RestApiUtil.getLoggedInUsername());
+                        RestApiCommonUtil.getLoggedInUsername());
                 APIAdmin apiAdmin = new APIAdminImpl();
                 allMatchedApps = apiAdmin.getAllApplicationsOfTenantForMigration(appTenantDomain);
             }

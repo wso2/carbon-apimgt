@@ -55,12 +55,10 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
-import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONArray;
@@ -120,7 +118,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
@@ -131,9 +129,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.CertificateMa
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ExternalStoreMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.MediationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
@@ -172,7 +169,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GraphqlQueryAnalysisMappingUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -205,9 +201,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
             }
 
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
 
             /*if (migrationMode) { // migration flow
@@ -257,7 +253,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             boolean isWSAPI = APIDTO.TypeEnum.WS == body.getType();
 
             // validate web socket api endpoint configurations
@@ -284,7 +280,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate API categories
             List<APICategory> apiCategories = apiToAdd.getApiCategories();
             if (apiCategories != null && apiCategories.size() >0) {
-                if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
+                if (!APIUtil.validateAPICategories(apiCategories, RestApiCommonUtil.getLoggedInUserTenantDomain())) {
                     RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
                 }
             }
@@ -334,8 +330,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException Error while creating the API
      */
     private API prepareToCreateAPIByDTO(APIDTO body) throws APIManagementException {
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
         if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
             for (String apiSecurityScheme : apiSecuritySchemes) {
@@ -488,8 +484,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdGraphqlPoliciesComplexityGet(String apiId, MessageContext messageContext) throws APIManagementException {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
@@ -533,10 +529,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "API ID cannot be empty or null.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             GraphqlComplexityInfo graphqlComplexityInfo =
                     GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
@@ -573,8 +569,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdGraphqlSchemaGet(String apiId, String accept, String ifNoneMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
@@ -612,8 +608,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdGraphqlSchemaPut(String apiId, String schemaDefinition, String ifMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
                     tenantDomain);
 
@@ -658,9 +654,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             return null;
         }
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = originalAPI.getId();
             boolean isWSAPI = originalAPI.getType() != null
@@ -668,8 +664,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             boolean isGraphql = originalAPI.getType() != null
                     && APIConstants.APITransportType.GRAPHQL.toString().equals(originalAPI.getType());
 
-            org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes =
-                    APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
+            org.wso2.carbon.apimgt.rest.api.common.annotations.Scope[] apiDtoClassAnnotatedScopes =
+                    APIDTO.class.getAnnotationsByType(
+                            org.wso2.carbon.apimgt.rest.api.common.annotations.Scope.class);
             boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
 
             JSONParser parser = new JSONParser();
@@ -910,7 +907,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate API categories
             List<APICategory> apiCategories = apiToUpdate.getApiCategories();
             if (apiCategories != null && apiCategories.size() >0) {
-                if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
+                if (!APIUtil.validateAPICategories(apiCategories, RestApiCommonUtil.getLoggedInUserTenantDomain())) {
                     RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
                 }
             }
@@ -958,8 +955,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdGraphqlPoliciesComplexityTypesGet(String apiId, MessageContext messageContext) {
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
@@ -993,8 +990,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) {
         JSONObject arns = new JSONObject();
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             String endpointConfigString = api.getEndpointConfig();
             if (!StringUtils.isEmpty(endpointConfigString)) {
@@ -1074,9 +1071,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdAuditapiGet(String apiId, String accept, MessageContext messageContext) {
         boolean isDebugEnabled = log.isDebugEnabled();
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = api.getId();
             String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
@@ -1327,9 +1324,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @return true if the token has APIDTO class level Scope annotation
      */
-    private boolean checkClassScopeAnnotation(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes, String[] tokenScopes) {
+    private boolean checkClassScopeAnnotation(org.wso2.carbon.apimgt.rest.api.common.annotations.Scope[] apiDtoClassAnnotatedScopes, String[] tokenScopes) {
 
-        for (org.wso2.carbon.apimgt.rest.api.util.annotations.Scope classAnnotation : apiDtoClassAnnotatedScopes) {
+        for (org.wso2.carbon.apimgt.rest.api.common.annotations.Scope classAnnotation : apiDtoClassAnnotatedScopes) {
             for (String tokenScope : tokenScopes) {
                 if (classAnnotation.name().equals(tokenScope)) {
                     return true;
@@ -1363,8 +1360,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             JSONObject originalApiDtoJson = (JSONObject) parser.parse(originalApiDtoJsonString);
 
             for (Field field : fields) {
-                org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] fieldAnnotatedScopes =
-                        field.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
+                org.wso2.carbon.apimgt.rest.api.common.annotations.Scope[] fieldAnnotatedScopes =
+                        field.getAnnotationsByType(
+                                org.wso2.carbon.apimgt.rest.api.common.annotations.Scope.class);
                 String originalElementValue = mapper.writeValueAsString(originalApiDtoJson.get(field.getName()));
                 String newElementValue = mapper.writeValueAsString(newApiDtoJson.get(field.getName()));
 
@@ -1389,10 +1387,10 @@ public class ApisApiServiceImpl implements ApisApiService {
      * allowed to update in REST API definition yaml
      */
     private JSONObject overrideDTOValues(JSONObject originalApiDtoJson, JSONObject newApiDtoJson, Field field, String[]
-            tokenScopes, org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] fieldAnnotatedScopes) throws
+            tokenScopes, org.wso2.carbon.apimgt.rest.api.common.annotations.Scope[] fieldAnnotatedScopes) throws
             APIManagementException {
         for (String tokenScope : tokenScopes) {
-            for (org.wso2.carbon.apimgt.rest.api.util.annotations.Scope scopeAnt : fieldAnnotatedScopes) {
+            for (org.wso2.carbon.apimgt.rest.api.common.annotations.Scope scopeAnt : fieldAnnotatedScopes) {
                 if (scopeAnt.name().equals(tokenScope)) {
                     // do the overriding
                     originalApiDtoJson.put(field.getName(), newApiDtoJson.get(field.getName()));
@@ -1407,10 +1405,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdClientCertificatesAliasContentGet(String apiId, String alias,
                                                                MessageContext messageContext) {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String certFileName = alias + ".crt";
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     api.getId());
@@ -1435,14 +1433,15 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdClientCertificatesAliasDelete(String alias, String apiId,
                                                            MessageContext messageContext) {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, RestApiUtil.getLoggedInUserTenantDomain());
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     api.getId());
             int responseCode = apiProvider
-                    .deleteClientCertificate(RestApiUtil.getLoggedInUsername(), clientCertificateDTO.getApiIdentifier(),
+                    .deleteClientCertificate(
+                            RestApiCommonUtil.getLoggedInUsername(), clientCertificateDTO.getApiIdentifier(),
                             alias);
             if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
                 //Handle api product case.
@@ -1483,10 +1482,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdClientCertificatesAliasGet(String alias, String apiId,
                                                         MessageContext messageContext) {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     api.getId());
@@ -1515,9 +1514,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             ContentDisposition contentDisposition;
             String fileName;
             String base64EncodedCert = null;
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, RestApiUtil.getLoggedInUserTenantDomain());
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(userName);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     api.getId());
@@ -1589,12 +1588,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         List<ClientCertificateDTO> certificates = new ArrayList<>();
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         String query = CertificateRestApiUtils.buildQueryString("alias", alias, "apiId", apiId);
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
                 RestApiUtil.handleBadRequest(
                         "The client certificate based authentication is not configured for this " + "server", log);
@@ -1603,7 +1602,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (totalCount > 0) {
                 APIIdentifier apiIdentifier = null;
                 if (StringUtils.isNotEmpty(apiId)) {
-                    API api = apiProvider.getAPIbyUUID(apiId, RestApiUtil.getLoggedInUserTenantDomain());
+                    API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
                     apiIdentifier = api.getId();
                 }
                 certificates = apiProvider.searchClientCertificates(tenantId, alias, apiIdentifier);
@@ -1627,7 +1626,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
         public Response apisApiIdClientCertificatesPost(String apiId, InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
             String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
             if (StringUtils.isEmpty(alias) || StringUtils.isEmpty(apiId)) {
@@ -1641,8 +1640,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "The client certificate based authentication is not configured for this " + "server", log);
             }
-            API api = apiProvider.getAPIbyUUID(apiId, RestApiUtil.getLoggedInUserTenantDomain());
-            String userName = RestApiUtil.getLoggedInUsername();
+            API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider.addClientCertificate(userName, api.getId(), base64EncodedCert, alias, tier);
             if (log.isDebugEnabled()) {
@@ -1704,9 +1703,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdDelete(String apiId, String ifMatch, MessageContext messageContext) {
 
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
 
             //check if the API has subscriptions
@@ -1776,9 +1775,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                            String ifNoneMatch, MessageContext messageContext) {
         Documentation documentation;
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
@@ -1843,8 +1842,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 InputStream inputStream, Attachment fileDetail, String inlineContent,
                                                             MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
             if (inputStream != null && inlineContent != null) {
                 RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
@@ -1915,8 +1914,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                        MessageContext messageContext) {
         Documentation documentation;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
@@ -1946,8 +1945,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                     MessageContext messageContext) {
         Documentation documentation;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if API is not accessible
             APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             documentation = apiProvider.getDocumentation(documentId, tenantDomain);
@@ -1985,8 +1984,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
                                                     String ifMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             String sourceUrl = body.getSourceUrl();
@@ -2052,8 +2051,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiIdentifier);
@@ -2087,10 +2086,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             String documentName = body.getName();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             if (body.getType() == DocumentDTO.TypeEnum.OTHER && org.apache.commons.lang3.StringUtils.isBlank(body.getOtherTypeName())) {
                 //check otherTypeName for not null if doc type is OTHER
                 RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
@@ -2149,8 +2148,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = null;
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         try {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
@@ -2182,8 +2181,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIIdentifier apiIdentifier = originalAPI.getId();
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
@@ -2204,8 +2203,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getWSDLInfoOfAPI(String apiId, MessageContext messageContext)
             throws APIManagementException {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = apiProvider.getLightweightAPIByUUID(apiId, tenantDomain);
         WSDLInfoDTO wsdlInfoDTO = APIMappingUtil.getWsdlInfoDTO(api);
         if (wsdlInfoDTO == null) {
@@ -2227,8 +2226,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(apiIdentifier);
             LifecycleHistoryDTO historyDTO = APIMappingUtil.fromLifecycleHistoryModelToDTO(lifeCycleEvents);
@@ -2272,8 +2271,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         
     private LifecycleStateDTO getLifecycleState(APIIdentifier identifier, String apiId) {
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier;
             if (identifier == null) {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
@@ -2318,8 +2317,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
             apiProvider.deleteWorkflowTask(apiIdentifier);
             return Response.ok().build();
@@ -2339,8 +2338,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         APIIdentifier apiIdentifier;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
             //Getting list of API specific mediation policies
@@ -2372,11 +2371,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String ifMatch, MessageContext messageContext) {
         APIIdentifier apiIdentifier;
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
             API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting the api base path out apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
@@ -2431,10 +2430,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             String ifNoneMatch, MessageContext messageContext) {
         APIIdentifier apiIdentifier;
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting the api base path out of apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
@@ -2489,9 +2488,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         Mediation updatedMediation;
         String resourcePath = "";
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting the api base path out of apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
@@ -2555,9 +2554,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdMediationPoliciesMediationPolicyIdContentGet(String apiId, String mediationPolicyId, String ifNoneMatch, MessageContext messageContext) {
 
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
@@ -2618,10 +2617,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         String mediationPolicyUrl = "";
         String mediationResourcePath = "";
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
             if (fileInputStream != null && inlineContent != null) {
                 RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
@@ -2730,8 +2729,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "API ID cannot be empty or null when retrieving monetized plans.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             API api = apiProvider.getAPI(apiIdentifier);
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
@@ -2765,8 +2764,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "API ID cannot be empty or null when configuring monetization.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             API api = apiProvider.getAPI(apiIdentifier);
             if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
@@ -2837,8 +2836,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String ifMatch,
                                                          MessageContext messageContext) throws APIManagementException {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = null;
         List<String> externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
         try {
@@ -2875,7 +2874,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath,
             String verb, String ifNoneMatch, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             boolean isSoapToRESTApi = SOAPOperationBindingUtils
                     .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
@@ -2941,7 +2940,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId, String resourcePolicyId,
             String ifNoneMatch, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             boolean isSoapToRESTApi = SOAPOperationBindingUtils
                     .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
@@ -2980,7 +2979,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdResourcePoliciesResourcePolicyIdPut(String apiId, String resourcePolicyId,
             ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             boolean isSoapToRESTApi = SOAPOperationBindingUtils
                     .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
@@ -3030,9 +3029,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest(errorMessage, log);
         }
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             API api = apiProvider.getAPI(apiIdentifier);
             if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
@@ -3064,8 +3063,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             String updatedDefinition = RestApiPublisherUtils.retrieveSwaggerDefinition(api, apiProvider);
@@ -3102,7 +3101,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
         try {
             String updatedSwagger;
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             boolean isSoapToRestConvertedAPI = SOAPOperationBindingUtils.isSOAPToRESTApi(apiIdentifier.getApiName(),
                     apiIdentifier.getVersion(), apiIdentifier.getProviderName());
@@ -3171,8 +3170,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private String updateSwagger(String apiId, APIDefinitionValidationResponse response)
             throws APIManagementException, FaultGatewaysException {
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fail if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
@@ -3194,7 +3193,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String roles = scope.getRoles();
             if (roles != null) {
                 for (String aRole : roles.split(",")) {
-                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiUtil.getLoggedInUsername(), aRole);
+                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(), aRole);
                     if (!isValidRole) {
                         String error = "Role '" + aRole + "' Does not exist.";
                         RestApiUtil.handleBadRequest(error, log);
@@ -3235,8 +3234,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             ResourceFile thumbnailResource = apiProvider.getIcon(apiIdentifier);
@@ -3268,8 +3267,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail,
             String ifMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String fileName = fileDetail.getDataHandler().getName();
             String fileContentType = URLConnection.guessContentTypeFromName(fileName);
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -3335,7 +3334,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("The query should not be empty", log);
         }
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             if (query.contains(":")) {
                 String[] queryTokens = query.split(":");
@@ -3367,8 +3366,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("API Id and/ or document name should not be empty", log);
         }
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             return apiProvider.isDocumentationExist(apiIdentifier, name) ? Response.status(Response.Status.OK).build() :
                     Response.status(Response.Status.NOT_FOUND).build();
@@ -3423,8 +3422,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdResourcePathsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
             MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             List<ResourcePath> apiResourcePaths = apiProvider.getResourcePathsOfAPI(apiIdentifier);
 
@@ -3525,7 +3524,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         // Import the API and Definition
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(apiDTOFromProperties);
 
             boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
@@ -3676,7 +3675,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Minimum requirement name, version, context and endpointConfig.
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
-            additionalPropertiesAPI.setProvider(RestApiUtil.getLoggedInUsername());
+            additionalPropertiesAPI.setProvider(RestApiCommonUtil.getLoggedInUsername());
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
             apiToAdd.setWsdlUrl(url);
@@ -3751,7 +3750,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private API importSOAPAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             if (StringUtils.isNotBlank(url)) {
                 apiToAdd.setWsdlUrl(url);
@@ -3811,7 +3810,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private API importSOAPToRESTAPI(InputStream fileInputStream, Attachment fileDetail, String url,
             String wsdlArchiveExtractedPath, API apiToAdd) throws APIManagementException {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
@@ -3852,8 +3851,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getWSDLOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             ResourceFile getWSDLResponse = apiProvider.getWSDL(apiIdentifier);
@@ -3890,8 +3889,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                     String url, MessageContext messageContext) throws APIManagementException {
 
         validateWSDLAndReset(fileInputStream, fileDetail, url);
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         if (StringUtils.isNotBlank(url)) {
             api.setWsdlUrl(url);
@@ -3914,8 +3913,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
             String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
@@ -3967,8 +3966,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         URI newVersionedApiUri;
         APIDTO newVersionedApi;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = api.getId();
             api.setAsDefaultVersion(true);
@@ -4031,8 +4030,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ExportFormat.YAML;
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
 
             // apiId == null means the path from the API Controller
             if (apiId == null) {
@@ -4041,7 +4040,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
                 apiDtoToReturn = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
             } else {
-                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
                 apiDtoToReturn = getAPIByID(apiId);
             }
@@ -4091,7 +4090,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
 
             //adding the api
@@ -4202,8 +4201,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIIdentifier apiIdentifier = originalAPI.getId();
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
@@ -4266,7 +4265,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response deploymentsGetStatus(String apiId,MessageContext messageContext) throws APIManagementException{
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
         //APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         DeploymentStatusListDTO deploymentStatusListDTO = APIMappingUtil.fromDeploymentStatustoDTO(apiIdentifier);
@@ -4275,8 +4274,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     private APIDTO getAPIByID(String apiId) {
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             return APIMappingUtil.fromAPItoDTO(api);
         } catch (APIManagementException e) {
@@ -4482,10 +4481,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     private void validateScopes(API api) throws APIManagementException {
 
         APIIdentifier apiId = api.getId();
-        String username = RestApiUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        APIProvider apiProvider = RestApiUtil.getProvider(username);
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         Set<Scope> sharedAPIScopes = new HashSet<>();
 
         for (Scope scope : api.getScopes()) {

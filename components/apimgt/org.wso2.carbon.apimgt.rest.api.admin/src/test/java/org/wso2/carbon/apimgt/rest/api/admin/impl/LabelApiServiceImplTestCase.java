@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.LabelsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.LabelMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -52,7 +53,7 @@ public class LabelApiServiceImplTestCase {
         labelsApiService = new LabelsApiServiceImpl();
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.mockStatic(LabelMappingUtil.class);
-        PowerMockito.when(RestApiUtil.getLoggedInUserTenantDomain()).thenReturn(TENANT_DOMAIN);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(TENANT_DOMAIN);
     }
 
     /**
@@ -130,7 +131,7 @@ public class LabelApiServiceImplTestCase {
         PowerMockito.mockStatic(APIAdminImpl.class);
         APIAdminImpl apiAdminImpl = PowerMockito.mock(APIAdminImpl.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(userName);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(userName);
         Mockito.when(apiAdminImpl.isAttachedLabel(userName, id)).thenReturn(false);
         apiMgtDAO.deleteLabel(id);
         Response response = labelsApiService.labelsLabelIdDelete(id, null, null);

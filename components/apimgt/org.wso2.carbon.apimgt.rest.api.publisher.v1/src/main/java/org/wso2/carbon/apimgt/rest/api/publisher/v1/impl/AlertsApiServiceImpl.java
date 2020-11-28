@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigManager;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigurator;
 import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.PublisherAlertsAPIUtils;
@@ -46,7 +47,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
     @Override
     public Response addAlertConfig(String alertType, String configurationId, Map<String, String> body,
             MessageContext messageContext) {
-        String tenantAwareUserName = RestApiUtil.getLoggedInUsername();
+        String tenantAwareUserName = RestApiCommonUtil.getLoggedInUsername();
         PublisherAlertsAPIUtils.validateConfigParameters(configurationId);
         if (body == null) {
             RestApiUtil.handleBadRequest("Configuration should not be empty", log);
@@ -65,7 +66,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
     @Override
     public Response deleteAlertConfig(String alertType, String configurationId,
             MessageContext messageContext) {
-        String tenantAwareUserName = RestApiUtil.getLoggedInUsername();
+        String tenantAwareUserName = RestApiCommonUtil.getLoggedInUsername();
         PublisherAlertsAPIUtils.validateConfigParameters(configurationId);
         try {
             publisherAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
@@ -81,7 +82,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
 
     @Override
     public Response getAllAlertConfigs(String alertType, MessageContext messageContext) {
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         try {
             Map<String, List<String>> allowedAPIVersionInfo = AlertsMappingUtil.getAllowedAPIInfo();
             publisherAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);

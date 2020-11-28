@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -101,8 +102,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -375,7 +376,7 @@ public class APIMappingUtil {
     public static APIMonetizationInfoDTO getMonetizationInfoDTO(APIIdentifier apiIdentifier)
             throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = apiProvider.getAPI(apiIdentifier);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         //set the information relatated to monetization to the DTO
@@ -396,7 +397,7 @@ public class APIMappingUtil {
     public static APIMonetizationInfoDTO getMonetizationInfoDTO(APIProductIdentifier apiProductIdentifier)
             throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         //set the information related to monetization to the DTO
@@ -415,7 +416,7 @@ public class APIMappingUtil {
 
     public static DeploymentStatusListDTO fromDeploymentStatustoDTO ( APIIdentifier apiIdentifier) throws APIManagementException{
         //create DTO form the model
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = apiProvider.getAPI(apiIdentifier);
 
         DeploymentStatusListDTO deploymentStatusListDTO = new DeploymentStatusListDTO();
@@ -469,7 +470,7 @@ public class APIMappingUtil {
                                                               Map<String, String> monetizedPoliciesToPlanMapping)
             throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = apiProvider.getAPI(apiIdentifier);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
@@ -481,7 +482,7 @@ public class APIMappingUtil {
                                                               Map<String, String> monetizedPoliciesToPlanMapping)
             throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         apiMonetizationInfoDTO.setEnabled(apiProduct.getMonetizationStatus());
@@ -515,7 +516,7 @@ public class APIMappingUtil {
             throws APIManagementException {
 
         API api;
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
         return api;
     }
@@ -700,18 +701,18 @@ public class APIMappingUtil {
     public static void setPaginationParams(Object apiListDTO, String query, int offset, int limit, int size) {
 
         //acquiring pagination parameters and setting pagination urls
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
         String paginatedPrevious = "";
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiUtil
+            paginatedPrevious = RestApiCommonUtil
                     .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiUtil
+            paginatedNext = RestApiCommonUtil
                     .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
@@ -815,7 +816,7 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String uuid = "uuid";
         String path = "path";
         APIDTO dto = new APIDTO();
@@ -1351,7 +1352,7 @@ public class APIMappingUtil {
             historyItemDTO.setPreviousState(event.getOldStatus());
             historyItemDTO.setUser(event.getUserId());
 
-            String updatedTime = RestApiUtil.getRFC3339Date(event.getDate());
+            String updatedTime = RestApiCommonUtil.getRFC3339Date(event.getDate());
             historyItemDTO.setUpdatedTime(updatedTime);
             historyDTO.getList().add(historyItemDTO);
         }
@@ -1702,8 +1703,8 @@ public class APIMappingUtil {
                 errorDTO.setMessage(elementAt0.getMessage());
                 errorDTO.setDescription(elementAt0.getDescription());
             } else {
-                org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO errorListItemDTO
-                        = new org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO();
+                org.wso2.carbon.apimgt.rest.api.common.dto.ErrorListItemDTO errorListItemDTO
+                        = new org.wso2.carbon.apimgt.rest.api.common.dto.ErrorListItemDTO();
                 errorListItemDTO.setCode(errorListItemDTOs.get(i).getCode() + "");
                 errorListItemDTO.setMessage(errorListItemDTOs.get(i).getMessage());
                 errorListItemDTO.setDescription(errorListItemDTOs.get(i).getDescription());
@@ -1969,7 +1970,7 @@ public class APIMappingUtil {
 
     public static APIProductDTO fromAPIProducttoDTO(APIProduct product) throws APIManagementException {
         APIProductDTO productDto = new APIProductDTO();
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         productDto.setName(product.getId().getName());
         productDto.setProvider(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
         productDto.setId(product.getUuid());
@@ -2400,18 +2401,18 @@ public class APIMappingUtil {
     public static void setPaginationParamsForAPIResourcePathList(ResourcePathListDTO resourcePathListDTO, int offset,
             int limit, int size) {
         //acquiring pagination parameters and setting pagination urls
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
         String paginatedPrevious = "";
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiUtil
+            paginatedPrevious = RestApiCommonUtil
                     .getResourcePathPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiUtil
+            paginatedNext = RestApiCommonUtil
                     .getResourcePathPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
         }
@@ -2433,18 +2434,18 @@ public class APIMappingUtil {
     public static void setPaginationParams(APIProductListDTO apiProductListDTO, String query, int offset, int limit, int size) {
 
         //acquiring pagination parameters and setting pagination urls
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
         String paginatedPrevious = "";
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiUtil
+            paginatedPrevious = RestApiCommonUtil
                     .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiUtil
+            paginatedNext = RestApiCommonUtil
                     .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
@@ -2465,7 +2466,7 @@ public class APIMappingUtil {
     public static APIProductIdentifier getAPIProductIdentifierFromUUID(String productId, String requestedTenantDomain)
             throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         APIProduct product = apiProvider.getAPIProductbyUUID(productId, requestedTenantDomain);
         return product.getId();
     }
@@ -2551,8 +2552,8 @@ public class APIMappingUtil {
     private static List<APIScopeDTO> getAPIScopesFromScopeDTOs(List<ScopeDTO> scopeDTOS) throws APIManagementException {
 
         List<APIScopeDTO> apiScopeDTOS = new ArrayList<>();
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain);
         scopeDTOS.forEach(scopeDTO -> {
             APIScopeDTO apiScopeDTO = new APIScopeDTO();
@@ -2573,8 +2574,8 @@ public class APIMappingUtil {
             throws APIManagementException {
 
         APIIdentifier apiIdentifier;
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-        if (RestApiUtil.isUUID(apiId)) {
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        if (RestApiCommonUtil.isUUID(apiId)) {
             apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
         } else {
             apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId)).getId();
@@ -2629,8 +2630,8 @@ public class APIMappingUtil {
             throws APIManagementException {
 
         API api;
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        if (RestApiUtil.isUUID(apiId)) {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        if (RestApiCommonUtil.isUUID(apiId)) {
             api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
         } else {
             APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
@@ -2669,7 +2670,7 @@ public class APIMappingUtil {
 
         APIIdentifier apiIdentifier = new APIIdentifier(dto.getProvider(), dto.getName(),
                 dto.getVersion());
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
                     getTenantId(tenantDomain);

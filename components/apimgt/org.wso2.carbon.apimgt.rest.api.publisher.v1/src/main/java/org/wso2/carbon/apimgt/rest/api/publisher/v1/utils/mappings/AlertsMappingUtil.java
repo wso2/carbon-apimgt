@@ -22,9 +22,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertTypeDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.*;
 
@@ -101,7 +101,7 @@ public class AlertsMappingUtil {
      * @return A map with [api name, version list]
      * */
     public static Map<String, List<String>> getAllowedAPIInfo() throws APIManagementException {
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<API> allowedAPIs = apiProvider.getAllAPIs();
         Map<String, List<String>> allowedAPINameVersionMap = new HashMap<>();
 

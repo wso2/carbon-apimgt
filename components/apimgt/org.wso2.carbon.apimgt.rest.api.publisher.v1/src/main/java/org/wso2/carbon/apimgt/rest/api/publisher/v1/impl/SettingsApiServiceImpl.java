@@ -23,7 +23,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SettingsMappingUtil;
@@ -45,7 +45,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
     public Response settingsGet(MessageContext messageContext){
 
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiCommonUtil.getLoggedInUsername();
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;

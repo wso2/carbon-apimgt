@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.openjpa.persistence.jest.JSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -32,10 +31,10 @@ import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentClusterInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentsDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -63,7 +62,7 @@ public class DeploymentsMappingUtil {
         //Get cloud environments from tenant-conf.json file
         //Get tenant domain to access tenant conf
         APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //read tenant-conf.json and get details
         if (SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             //get details from deployment.toml

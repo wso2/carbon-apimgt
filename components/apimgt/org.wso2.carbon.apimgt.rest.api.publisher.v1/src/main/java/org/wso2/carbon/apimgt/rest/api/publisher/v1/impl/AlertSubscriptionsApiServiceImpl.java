@@ -21,14 +21,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigManager;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigurator;
-import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtUtils;
 import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
 import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertSubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertDTO;
@@ -40,7 +37,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +51,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
     @Override
     public Response getSubscribedAlertTypes(MessageContext messageContext) {
 
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         String tenantAwareUserName = PublisherAlertsAPIUtils.getTenantAwareUserName(userName);
 
         try {
@@ -116,7 +112,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
         } catch (AlertManagementException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Analytics not Enabled").build();
         }
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         String tenantAwareUserName = PublisherAlertsAPIUtils.getTenantAwareUserName(userName);
 
         List<String> emailsList = body.getEmailList();
@@ -160,7 +156,8 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
     }
 
     public Response unsubscribeAllAlerts(MessageContext messageContext) {
-        String tenantAwareUserName = PublisherAlertsAPIUtils.getTenantAwareUserName(RestApiUtil.getLoggedInUsername());
+        String tenantAwareUserName = PublisherAlertsAPIUtils.getTenantAwareUserName(
+                RestApiCommonUtil.getLoggedInUsername());
         try {
             publisherAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
             publisherAlertConfigurator.unsubscribe(tenantAwareUserName);

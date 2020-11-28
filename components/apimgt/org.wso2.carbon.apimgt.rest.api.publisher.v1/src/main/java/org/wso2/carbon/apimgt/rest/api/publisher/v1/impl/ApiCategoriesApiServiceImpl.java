@@ -19,11 +19,10 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -41,7 +40,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     
     public Response apiCategoriesGet(MessageContext messageContext) {
           try {
-              String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+              String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
               List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfTenant(tenantDomain);
               APICategoryListDTO categoryListDTO =
                       APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);

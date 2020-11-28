@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -53,7 +54,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
      */
     @Override
     public void handleMessage(Message message) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         //by-passes the interceptor if user is an annonymous user
         if (username.equalsIgnoreCase(APIConstants.WSO2_ANONYMOUS_USER)) {
             return;
@@ -68,10 +69,10 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
 
         // check the existence in the database
         String groupId = RestApiUtil.getLoggedInUserGroupId();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
             //takes a consumer object using the user set in thread local carbon context
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             Subscriber subscriber = apiConsumer.getSubscriber(username);
             if (subscriber == null) {
                 synchronized ((username + LOCK_POSTFIX).intern()) {
