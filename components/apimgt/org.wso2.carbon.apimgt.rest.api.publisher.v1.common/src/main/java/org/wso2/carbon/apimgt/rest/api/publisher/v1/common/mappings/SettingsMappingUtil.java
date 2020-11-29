@@ -17,17 +17,13 @@
 */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -35,14 +31,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 public class SettingsMappingUtil {
@@ -85,31 +78,10 @@ public class SettingsMappingUtil {
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
         }
-        settingsDTO.setScopes(GetScopeList());
         return settingsDTO;
     }
 
-    /**
-     * This method returns the scope list from the publisher-api.yaml
-     * @return  List<String> scope list
-     * @throws APIManagementException
-     */
-    private List<String> GetScopeList() throws APIManagementException {
-        String definition = null;
-        try {
-            definition = IOUtils
-                    .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
-        } catch (IOException e) {
-            log.error("Error while reading the swagger definition", e);
-        }
-        APIDefinition parser = OASParserUtil.getOASParser(definition);
-        Set<Scope> scopeSet = parser.getScopes(definition);
-        List<String> scopeList = new ArrayList<>();
-        for (Scope entry : scopeSet) {
-            scopeList.add(entry.getKey());
-        }
-        return scopeList;
-    }
+
 
     /**
      * This method returns the monetization properties from configuration

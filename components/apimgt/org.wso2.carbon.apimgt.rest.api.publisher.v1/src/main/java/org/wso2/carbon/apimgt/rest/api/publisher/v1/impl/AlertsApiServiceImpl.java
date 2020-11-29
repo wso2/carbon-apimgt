@@ -46,7 +46,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
 
     @Override
     public Response addAlertConfig(String alertType, String configurationId, Map<String, String> body,
-            MessageContext messageContext) {
+            MessageContext messageContext) throws APIManagementException {
         String tenantAwareUserName = RestApiCommonUtil.getLoggedInUsername();
         PublisherAlertsAPIUtils.validateConfigParameters(configurationId);
         if (body == null) {
@@ -65,7 +65,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
 
     @Override
     public Response deleteAlertConfig(String alertType, String configurationId,
-            MessageContext messageContext) {
+            MessageContext messageContext) throws APIManagementException {
         String tenantAwareUserName = RestApiCommonUtil.getLoggedInUsername();
         PublisherAlertsAPIUtils.validateConfigParameters(configurationId);
         try {

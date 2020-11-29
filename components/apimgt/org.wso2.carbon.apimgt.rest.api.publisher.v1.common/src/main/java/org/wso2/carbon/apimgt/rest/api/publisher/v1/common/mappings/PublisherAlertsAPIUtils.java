@@ -22,8 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -39,22 +39,21 @@ public class PublisherAlertsAPIUtils {
      * @param configId : The configuration id
      * @return true if the validation is successful. Error response otherwise.
      * */
-    public static boolean validateConfigParameters(String configId) {
+    public static boolean validateConfigParameters(String configId) throws APIManagementException {
         String decodedConfigurationId = new String(Base64.getDecoder().decode(configId.getBytes()));
         String[] parameters = decodedConfigurationId.split("#");
         if (parameters.length < 2) {
-            RestApiUtil.handleBadRequest(
-                    "The configuration id validation failed. Should be {apiName}#{apiVersion}#{tenantDomain}",
-                    log);
+            throw new APIManagementException("The configuration id validation failed. Should be " +
+                    "{apiName}#{apiVersion}#{tenantDomain}", ExceptionCodes.INVALID_CONFIGURATION_ID);
         }
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (!apiProvider.isApiNameExist(parameters[0])) {
-                RestApiUtil.handleBadRequest("Invalid API Name", log);
+                throw new APIManagementException("Invalid API Name", ExceptionCodes.INVALID_API_NAME);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while validating payload", e, log);
+            throw new APIManagementException("Error while validating payload", e, ExceptionCodes.INTERNAL_ERROR);
         }
         return true;
     }

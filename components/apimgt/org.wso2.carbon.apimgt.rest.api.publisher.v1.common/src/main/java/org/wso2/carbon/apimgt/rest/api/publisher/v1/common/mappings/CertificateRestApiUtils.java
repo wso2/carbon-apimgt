@@ -24,15 +24,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -262,16 +267,13 @@ public class CertificateRestApiUtils {
      */
     public static ClientCertificateDTO preValidateClientCertificate(String alias, APIIdentifier apiIdentifier)
             throws APIManagementException {
+
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         if (StringUtils.isEmpty(alias)) {
-            RestApiUtil.handleBadRequest("The alias cannot be empty", log);
+            throw new APIManagementException("The alias cannot be empty", ExceptionCodes.ALIAS_CANNOT_BE_EMPTY);
         }
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
-            RestApiUtil.handleBadRequest(
-                    "The client certificate based authentication is not configured for this server", log);
-        }
         ClientCertificateDTO clientCertificate = apiProvider.getClientCertificate(tenantId, alias, apiIdentifier);
         if (clientCertificate == null) {
             if (log.isDebugEnabled()) {
@@ -279,7 +281,7 @@ public class CertificateRestApiUtils {
                         + "tenant : %d and with alias : %s. Hence the operation is terminated.", tenantId, alias));
             }
             String message = "Certificate for alias '" + alias + "' is not found.";
-            RestApiUtil.handleResourceNotFoundError(message, log);
+            throw new APIMgtResourceNotFoundException(message);
         }
         return clientCertificate;
     }
