@@ -5189,30 +5189,23 @@ public class ApiMgtDAO {
      */
     public HashMap<String, String> getConsumerKeysForApplication(int appId) throws APIManagementException {
 
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
         HashMap<String, String> consumerKeysOfApplication = new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.GET_CONSUMER_KEY_OF_APPLICATION_SQL)) {
+            preparedStatement.setInt(1, appId);
 
-        String getConsumerKeyQuery = SQLConstants.GET_CONSUMER_KEY_OF_APPLICATION_SQL;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(getConsumerKeyQuery);
-            prepStmt.setInt(1, appId);
-            rs = prepStmt.executeQuery();
-            while (rs.next()) {
-                String consumerKey = rs.getString("CONSUMER_KEY");
-                String keyManager = rs.getString("KEY_MANAGER");
-                consumerKeysOfApplication.put(consumerKey, keyManager);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String consumerKey = resultSet.getString("CONSUMER_KEY");
+                    String keyManager = resultSet.getString("KEY_MANAGER");
+                    consumerKeysOfApplication.put(consumerKey, keyManager);
+                }
             }
         } catch (SQLException e) {
-            String msg = "Error occurred while getting consumer keys";
+            String msg = "Error occurred while getting consumer keys for application " + appId;
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return consumerKeysOfApplication;
     }
