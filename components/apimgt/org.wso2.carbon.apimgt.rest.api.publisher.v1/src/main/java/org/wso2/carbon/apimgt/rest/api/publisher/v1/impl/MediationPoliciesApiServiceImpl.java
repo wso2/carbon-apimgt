@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.MediationPoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.MediationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.Resource;

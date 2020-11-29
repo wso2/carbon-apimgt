@@ -42,7 +42,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiUtil.class, APIUtil.class})
+@PrepareForTest({RestApiUtil.class, APIUtil.class, RestApiCommonUtil.class})
 public class ExportApiServiceImplTestCase {
     private final String USER = "admin";
     private ExportApiService exportApiService;
@@ -50,6 +50,9 @@ public class ExportApiServiceImplTestCase {
 
     @Before
     public void init() throws Exception {
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.mockStatic(APIUtil.class);
         exportApiService = new ExportApiServiceImpl();
         apiConsumer = Mockito.mock(APIConsumer.class);
     }
@@ -63,7 +66,6 @@ public class ExportApiServiceImplTestCase {
     @Test
     public void testExportApplicationsGetNotFound() throws Exception {
 
-        PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
         PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
         Response response = exportApiService.exportApplicationsGet(null, null, false);
@@ -78,10 +80,8 @@ public class ExportApiServiceImplTestCase {
      */
     @Test
     public void testExportApplicationsGetCrossTenantError() throws Exception {
-        PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
         PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
-        PowerMockito.mockStatic(APIUtil.class);
         Application testApp = new Application("sampleApp", new Subscriber("admin@hr.lk"));
         Subscriber subscriber = new Subscriber("admin@hr.lk");
         Mockito.when(apiConsumer.getSubscriber("admin@hr.lk")).thenReturn(subscriber);
@@ -99,11 +99,9 @@ public class ExportApiServiceImplTestCase {
      */
     @Test
     public void testExportApplicationsGetCrossTenantAtMigrationMode() throws Exception {
-        PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
         PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
         System.setProperty(RestApiConstants.MIGRATION_MODE, "true");
-        PowerMockito.mockStatic(APIUtil.class);
         Application testApp = new Application("sampleApp", new Subscriber("admin@hr.lk"));
         Subscriber subscriber = new Subscriber("admin@hr.lk");
         when(apiConsumer.getSubscriber("admin@hr.lk")).thenReturn(subscriber);
@@ -133,8 +131,6 @@ public class ExportApiServiceImplTestCase {
         testApp.setCallbackUrl("testURL");
         testApp.setIsBlackListed(false);
         testApp.setTier("Unlimited");
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
         PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
         Subscriber subscriber = new Subscriber("admin");

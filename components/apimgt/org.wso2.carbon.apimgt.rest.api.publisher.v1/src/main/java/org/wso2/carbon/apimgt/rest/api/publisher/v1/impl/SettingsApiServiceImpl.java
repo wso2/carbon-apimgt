@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SettingsMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;

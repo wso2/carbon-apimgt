@@ -24,19 +24,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.xml.sax.InputSource;
@@ -347,15 +344,4 @@ public class RestApiPublisherUtils {
                 "\"security\":[{\"default\":[]}],\"consumes\":[\"text/xml\",\"application/soap+xml\"]}}}";
     }
 
-    /**
-     * This method retrieves the Swagger Definition for an API to be displayed
-     * @param api API
-     * @return String
-     * */
-    public static String retrieveSwaggerDefinition(API api, APIProvider apiProvider)
-            throws APIManagementException {
-        String apiSwagger = apiProvider.getOpenAPIDefinition(api.getId());
-        APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
-        return parser.getOASDefinitionForPublisher(api, apiSwagger);
-    }
 }

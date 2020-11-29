@@ -367,7 +367,10 @@ ExceptionCodes implements ErrorHandler {
 
     //mediation policies related common errors
     MEDIATION_POLICY_NAME_TOO_LONG(900850, "Mediation Policy Name Too Long", 400,
-                                                "The name of the mediation policy exceeds the max length (%s)");
+                                                "The name of the mediation policy exceeds the max length (%s)"),
+    INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
+            "Provided API identifier (%s) is invalid"),
+    API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null");
 
     private final long errorCode;
     private final String errorMessage;

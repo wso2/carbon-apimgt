@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ExternalStoreMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStoreMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.Set;

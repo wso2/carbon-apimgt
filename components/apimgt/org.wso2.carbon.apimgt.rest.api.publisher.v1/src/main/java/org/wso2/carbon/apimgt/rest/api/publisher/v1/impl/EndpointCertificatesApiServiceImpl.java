@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 

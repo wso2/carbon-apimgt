@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.LabelMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.LabelMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;

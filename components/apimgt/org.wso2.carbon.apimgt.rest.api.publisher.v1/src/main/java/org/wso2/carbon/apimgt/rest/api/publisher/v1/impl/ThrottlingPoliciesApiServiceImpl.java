@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ThrottlingPoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ThrottlingPolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ThrottlingPolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 

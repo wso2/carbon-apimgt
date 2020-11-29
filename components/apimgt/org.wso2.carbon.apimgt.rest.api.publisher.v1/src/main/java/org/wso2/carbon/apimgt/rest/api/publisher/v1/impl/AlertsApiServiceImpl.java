@@ -27,8 +27,8 @@ import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertConfigDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.PublisherAlertsAPIUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.AlertsMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherAlertsAPIUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.AlertsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;

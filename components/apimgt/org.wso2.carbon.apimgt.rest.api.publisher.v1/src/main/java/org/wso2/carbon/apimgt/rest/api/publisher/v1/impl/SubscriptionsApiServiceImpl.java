@@ -40,8 +40,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SubscriptionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 

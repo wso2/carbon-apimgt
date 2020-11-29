@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICategoryListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APICategoryMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APICategoryMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;

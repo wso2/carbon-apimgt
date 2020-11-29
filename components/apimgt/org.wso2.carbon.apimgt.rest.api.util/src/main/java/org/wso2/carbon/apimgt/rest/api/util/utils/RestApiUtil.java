@@ -254,26 +254,6 @@ public class RestApiUtil {
     }
 
     /**
-     * Check if the user's tenant and the API's tenant is equal. If it is not this will throw an
-     * APIMgtAuthorizationFailedException
-     *
-     * @param apiIdentifier API Identifier
-     * @throws APIMgtAuthorizationFailedException
-     */
-    public static void validateUserTenantWithAPIIdentifier(APIIdentifier apiIdentifier)
-            throws APIMgtAuthorizationFailedException {
-        String username = RestApiCommonUtil.getLoggedInUsername();
-        String providerName = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
-        String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
-        String loggedInUserTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        if (!providerTenantDomain.equals(loggedInUserTenantDomain)) {
-            String errorMsg = "User " + username + " is not allowed to access " + apiIdentifier.toString()
-                    + " as it belongs to a different tenant : " + providerTenantDomain;
-            throw new APIMgtAuthorizationFailedException(errorMsg);
-        }
-    }
-
-    /**
      * Returns the requested tenant according to the input x-tenant-header
      *
      * @return requested tenant domain

@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -34,13 +35,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.ExportUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExportUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.VisibilityEnum;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -659,7 +660,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
                     .build();
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | APIImportExportException e) {
             RestApiUtil.handleInternalServerError("Error while exporting " +
                     RestApiConstants.RESOURCE_API_PRODUCT, e, log);
         }

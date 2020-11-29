@@ -179,6 +179,11 @@
             <artifactId>awslambda</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -217,6 +222,7 @@
                                 <useBeanValidation>true</useBeanValidation>
                                 <performBeanValidation>true</performBeanValidation>
                             </configOptions>
+                            <generateModels>false</generateModels>
                             <output>.</output>
                             <templateDirectory>
                                 ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates

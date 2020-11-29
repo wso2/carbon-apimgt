@@ -6,10 +6,17 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -346,5 +353,37 @@ public class RestApiCommonUtil {
 
     public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
+    }
+
+    /**
+     * This method retrieves the Swagger Definition for an API to be displayed
+     * @param api API
+     * @return String
+     * */
+    public static String retrieveSwaggerDefinition(API api, APIProvider apiProvider)
+            throws APIManagementException {
+        String apiSwagger = apiProvider.getOpenAPIDefinition(api.getId());
+        APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
+        return parser.getOASDefinitionForPublisher(api, apiSwagger);
+    }
+
+    /**
+     * Check if the user's tenant and the API's tenant is equal. If it is not this will throw an
+     * APIMgtAuthorizationFailedException
+     *
+     * @param apiIdentifier API Identifier
+     * @throws APIMgtAuthorizationFailedException
+     */
+    public static void validateUserTenantWithAPIIdentifier(APIIdentifier apiIdentifier)
+            throws APIMgtAuthorizationFailedException {
+        String username = getLoggedInUsername();
+        String providerName = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
+        String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        String loggedInUserTenantDomain = getLoggedInUserTenantDomain();
+        if (!providerTenantDomain.equals(loggedInUserTenantDomain)) {
+            String errorMsg = "User " + username + " is not allowed to access " + apiIdentifier.toString()
+                    + " as it belongs to a different tenant : " + providerTenantDomain;
+            throw new APIMgtAuthorizationFailedException(errorMsg);
+        }
     }
 }

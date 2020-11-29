@@ -109,6 +109,7 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -121,14 +122,14 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.ExportUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.CertificateMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ExternalStoreMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.MediationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStoreMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -168,7 +169,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GraphqlQueryAnalysisMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -3067,7 +3068,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            String updatedDefinition = RestApiPublisherUtils.retrieveSwaggerDefinition(api, apiProvider);
+            String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"" ).build();
         } catch (APIManagementException e) {
@@ -4051,7 +4052,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
                     .build();
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | APIImportExportException e) {
             RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
         }
         return null;

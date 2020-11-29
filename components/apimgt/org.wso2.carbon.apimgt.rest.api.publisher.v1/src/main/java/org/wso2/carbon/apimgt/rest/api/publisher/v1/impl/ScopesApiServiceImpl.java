@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.ScopesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsageDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SharedScopeMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SharedScopeMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
