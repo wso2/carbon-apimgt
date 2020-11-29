@@ -4047,7 +4047,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
 
-        if (consumerKeysOfApplication != null) {
+        if (consumerKeysOfApplication != null && consumerKeysOfApplication.size() > 0) {
             for (Map.Entry<String, String> entry : consumerKeysOfApplication.entrySet()) {
                 String consumerKey = entry.getKey();
                 String keymanager = entry.getValue();
@@ -4055,7 +4055,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         UUID.randomUUID().toString(), System.currentTimeMillis(),
                         APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(), tenantId, tenantDomain,
                         application.getId(), consumerKey, application.getKeyType(), keymanager);
-                APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION.name());
+                APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
             }
         }
     }
