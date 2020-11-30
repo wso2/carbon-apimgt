@@ -25,6 +25,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
+import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
 import { makeStyles } from '@material-ui/core/styles';
@@ -182,8 +183,6 @@ function Edit(props) {
             </Button>
             <Dialog
                 open={open}
-                disableBackdropClick
-                disableEscapeKeyDown
                 maxWidth='sm'
                 fullWidth
                 aria-labelledby='confirmation-dialog-title'
@@ -195,154 +194,167 @@ function Edit(props) {
                     />
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        name='name'
-                        label={(
-                            <>
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Edit.service.name.label'
-                                    defaultMessage='Service Name'
-                                />
-                                <sup className={classes.mandatoryStar}>*</sup>
-                            </>
-                        )}
-                        value={name}
-                        variant='outlined'
-                        fullWidth
-                        helperText={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Edit.service.name.helper.text'
-                                defaultMessage='Name of the service'
+                    <Grid container spacing={2}>
+                        <Grid item md={12}>
+                            <TextField
+                                name='name'
+                                label={(
+                                    <>
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Edit.service.name.label'
+                                            defaultMessage='Service Name'
+                                        />
+                                        <sup className={classes.mandatoryStar}>*</sup>
+                                    </>
+                                )}
+                                value={name}
+                                variant='outlined'
+                                fullWidth
+                                helperText={(
+                                    <FormattedMessage
+                                        id='ServiceCatalog.Listing.Edit.service.name.helper.text'
+                                        defaultMessage='Name of the service'
+                                    />
+                                )}
+                                disabled
                             />
-                        )}
-                        disabled
-                    />
-                </DialogContent>
-                <DialogContent>
-                    <TextField
-                        name='displayName'
-                        label={(
-                            <>
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Edit.service.display.name.label'
-                                    defaultMessage='Service Display Name'
-                                />
-                                <sup className={classes.mandatoryStar}>*</sup>
-                            </>
-                        )}
-                        value={displayName}
-                        variant='outlined'
-                        error={validity.displayName}
-                        fullWidth
-                        helperText={validity.displayName ? validity.displayName
-                            : (
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Edit.service.display.name.helper.text'
-                                    defaultMessage='Display name of the service'
-                                />
-                            )}
-                        InputProps={{
-                            id: 'itest-id-servicedisplayname-input',
-                            onBlur: ({ target: { value } }) => {
-                                validate('displayName', value);
-                            },
-                        }}
-                        onChange={handleChange}
-                    />
-                </DialogContent>
-                <DialogContent>
-                    <TextField
-                        name='description'
-                        label={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Edit.service.description.label'
-                                defaultMessage='Service description'
+                        </Grid>
+                        <Grid item md={12}>
+                            <TextField
+                                name='displayName'
+                                label={(
+                                    <>
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Edit.service.display.name.label'
+                                            defaultMessage='Service Display Name'
+                                        />
+                                        <sup className={classes.mandatoryStar}>*</sup>
+                                    </>
+                                )}
+                                value={displayName}
+                                variant='outlined'
+                                error={validity.displayName}
+                                fullWidth
+                                helperText={validity.displayName ? validity.displayName
+                                    : (
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Edit.service.display.name.helper.text'
+                                            defaultMessage='Display name of the service'
+                                        />
+                                    )}
+                                InputProps={{
+                                    id: 'itest-id-servicedisplayname-input',
+                                    onBlur: ({ target: { value } }) => {
+                                        validate('displayName', value);
+                                    },
+                                }}
+                                onChange={handleChange}
                             />
-                        )}
-                        value={description}
-                        variant='outlined'
-                        fullWidth
-                        helperText={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Edit.service.description.helper.text'
-                                defaultMessage='Description of the service'
+                        </Grid>
+                        <Grid item md={12}>
+                            <TextField
+                                name='description'
+                                label={(
+                                    <FormattedMessage
+                                        id='ServiceCatalog.Listing.Edit.service.description.label'
+                                        defaultMessage='Service description'
+                                    />
+                                )}
+                                value={description}
+                                variant='outlined'
+                                fullWidth
+                                helperText={(
+                                    <FormattedMessage
+                                        id='ServiceCatalog.Listing.Edit.service.description.helper.text'
+                                        defaultMessage='Description of the service'
+                                    />
+                                )}
+                                onChange={handleChange}
+                                multiline
                             />
-                        )}
-                        onChange={handleChange}
-                        multiline
-                    />
-                </DialogContent>
-                <DialogContent>
-                    <TextField
-                        name='serviceUrl'
-                        label={(
-                            <>
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Edit.service.url.label'
-                                    defaultMessage='Service URL'
-                                />
-                                <sup className={classes.mandatoryStar}>*</sup>
-                            </>
-                        )}
-                        value={serviceUrl}
-                        fullWidth
-                        variant='outlined'
-                        error={validity.serviceUrl}
-                        helperText={validity.serviceUrl ? validity.serviceUrl
-                            : (
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Edit.service.url.text'
-                                    defaultMessage='URL of the Service'
-                                />
-                            )}
-                        InputProps={{
-                            id: 'itest-id-serviceurl-input',
-                            onBlur: ({ target: { value } }) => {
-                                validate('serviceUrl', value);
-                            },
-                        }}
-                        onChange={handleChange}
-                    />
-                </DialogContent>
-                <DialogContent>
-                    <TextField
-                        name='definitionType'
-                        select
-                        label={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Edit.schema.type.label'
-                                defaultMessage='Schema Type'
+                        </Grid>
+                        <Grid item md={12}>
+                            <TextField
+                                name='serviceUrl'
+                                label={(
+                                    <>
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Edit.service.url.label'
+                                            defaultMessage='Service URL'
+                                        />
+                                        <sup className={classes.mandatoryStar}>*</sup>
+                                    </>
+                                )}
+                                value={serviceUrl}
+                                fullWidth
+                                variant='outlined'
+                                error={validity.serviceUrl}
+                                helperText={validity.serviceUrl ? validity.serviceUrl
+                                    : (
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Edit.service.url.text'
+                                            defaultMessage='URL of the Service'
+                                        />
+                                    )}
+                                InputProps={{
+                                    id: 'itest-id-serviceurl-input',
+                                    onBlur: ({ target: { value } }) => {
+                                        validate('serviceUrl', value);
+                                    },
+                                }}
+                                onChange={handleChange}
                             />
-                        )}
-                        value={definitionType}
-                        fullWidth
-                        variant='outlined'
-                        error={validity.definitionType}
-                        helperText={validity.definitionType ? validity.definitionType
-                            : (
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Edit.schema.type.text'
-                                    defaultMessage='Schema Type of the Service'
-                                />
-                            )}
-                        InputProps={{
-                            id: 'itest-id-definitionType-input',
-                            onBlur: ({ target: { value } }) => {
-                                validate('definitionType', value);
-                            },
-                        }}
-                        onChange={handleChange}
-                    >
-                        {schemaTypeList.map((schema) => (
-                            <MenuItem
-                                id={schema}
-                                key={schema}
-                                value={schema}
+                        </Grid>
+                        <Grid item md={12}>
+                            <TextField
+                                name='definitionType'
+                                select
+                                label={(
+                                    <FormattedMessage
+                                        id='ServiceCatalog.Listing.Edit.schema.type.label'
+                                        defaultMessage='Schema Type'
+                                    />
+                                )}
+                                value={definitionType}
+                                fullWidth
+                                variant='outlined'
+                                error={validity.definitionType}
+                                helperText={validity.definitionType ? validity.definitionType
+                                    : (
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Edit.schema.type.text'
+                                            defaultMessage='Schema Type of the Service'
+                                        />
+                                    )}
+                                InputProps={{
+                                    id: 'itest-id-definitionType-input',
+                                    onBlur: ({ target: { value } }) => {
+                                        validate('definitionType', value);
+                                    },
+                                }}
+                                SelectProps={{
+                                    MenuProps: {
+                                        anchorOrigin: {
+                                            vertical: 'bottom',
+                                            horizontal: 'left',
+                                        },
+                                        getContentAnchorEl: null,
+                                    },
+                                }}
+                                onChange={handleChange}
                             >
-                                <ListItemText primary={schema} />
-                            </MenuItem>
-                        ))}
-                    </TextField>
+                                {schemaTypeList.map((schema) => (
+                                    <MenuItem
+                                        id={schema}
+                                        key={schema}
+                                        value={schema}
+                                    >
+                                        <ListItemText primary={schema} />
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                    </Grid>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={toggleOpen} color='primary'>
