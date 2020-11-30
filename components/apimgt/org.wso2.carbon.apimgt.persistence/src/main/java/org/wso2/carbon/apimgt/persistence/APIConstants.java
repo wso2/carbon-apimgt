@@ -318,5 +318,10 @@ public final class APIConstants {
     public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
     public static final String API_OAS_DEFINITION_RESOURCE_NAME = "swagger.json";
     public static final String LC_CACHE_NAME = "lcCache";
+    
+    public enum APITransportType {
+        HTTP, WS, GRAPHQL
+    }
+    public static final String API_STATE_CHANGE_INDICATOR = "registry.api.state.change.indicator";
 
 }

@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+
+import kotlin.jvm.Throws;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -1726,15 +1729,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    public void updateAPINew(API api) throws APIManagementException, FaultGatewaysException {
-
-        boolean isValid = isAPIUpdateValid(api);
+    public API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException {
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        boolean isValid = true;//isAPIUpdateValid(api);//////////////////////// handled from rest api
         if (!isValid) {
             throw new APIManagementException(" User doesn't have permission for update");
         }
         validateKeyManagers(api);
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
-        API oldApi = getAPI(api.getId());
+        API oldApi = existingAPI;
         Gson gson = new Gson();
         Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
                 HashMap.class);
@@ -1759,63 +1763,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         if (oldApi.getStatus().equals(api.getStatus())) {
-
+            
             String previousDefaultVersion = getDefaultVersion(api.getId());
             String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
-
-            if (previousDefaultVersion != null) {
-
-                APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
-                        previousDefaultVersion);
-                if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
-                    // happen
-                    // Remove the previous default API entry from the Registry
-                    updateDefaultAPIInRegistry(defaultAPIId, false);
-                    if (!api.isDefaultVersion()) {// default api tick is removed
-                        // todo: if it is ok, these two variables can be put to the top of the function to remove
-                        // duplication
-                        String gatewayType = getAPIManagerConfiguration()
-                                .getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-                        if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-                            removeDefaultAPIFromGateway(api);
-                        }
-                    }
-                }
-            }
-
-            //Update WSDL in the registry
-            if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {
-                updateWsdlFromUrl(api);
-            }
-
-            if (api.getWsdlResource() != null) {
-                updateWsdlFromResourceFile(api);
-            }
-
-            boolean updatePermissions = false;
-            if (APIUtil.isAccessControlEnabled()) {
-                if (!oldApi.getAccessControl().equals(api.getAccessControl()) || (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getAccessControl()) &&
-                        !api.getAccessControlRoles().equals(oldApi.getAccessControlRoles())) || !oldApi.getVisibility().equals(api.getVisibility()) ||
-                        (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
-                                !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
-                    updatePermissions = true;
-                }
-            } else if (!oldApi.getVisibility().equals(api.getVisibility()) ||
-                    (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
-                            !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
-                updatePermissions = true;
-            }
+            
+            updateOtherAPIversionsForNewDefautlAPIChange(api, previousDefaultVersion);///////////////has registry access /////////////////
 
             updateEndpointSecurity(oldApi, api);
 
-            updateApiArtifact(api, true, updatePermissions);
             if (!oldApi.getContext().equals(api.getContext())) {
                 api.setApiHeaderChanged(true);
             }
 
             int tenantId;
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
@@ -1860,69 +1821,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     isAPIPublished = isAPIPublished(api);
                     if (gatewayExists) {
                         if (isAPIPublished) {
-                            API apiPublished = getAPI(api.getId());
-                            apiPublished.setAsDefaultVersion(api.isDefaultVersion());
-                            if (api.getId().getVersion().equals(previousDefaultVersion) && !api.isDefaultVersion()) {
-                                // default version tick has been removed so a default api for current should not be
-                                // added/updated
-                                apiPublished.setAsPublishedDefaultVersion(false);
-                            } else {
-                                apiPublished.setAsPublishedDefaultVersion(
-                                        api.getId().getVersion().equals(publishedDefaultVersion));
-                            }
-                            apiPublished.setOldInSequence(oldApi.getInSequence());
-                            apiPublished.setOldOutSequence(oldApi.getOutSequence());
-                            //old api contain what environments want to remove
-                            Set<String> environmentsToRemove = new HashSet<String>(oldApi.getEnvironments());
-                            List<Label> labelsToRemove = null;
-                            if (oldApi.getGatewayLabels() != null){
-                                 labelsToRemove = new ArrayList<>(oldApi.getGatewayLabels());
-                            } else {
-                                 labelsToRemove = new ArrayList<>();
-                            }
-
-                            //updated api contain what environments want to add
-                            Set<String> environmentsToPublish = new HashSet<String>(apiPublished.getEnvironments());
-                            List<Label> labelsToPublish;
-                            List<Label> labelsRemoved = null;
-                            if (apiPublished.getGatewayLabels() != null ){
-                                labelsToPublish = new ArrayList<>(apiPublished.getGatewayLabels());
-                                labelsRemoved = new ArrayList<>(oldApi.getGatewayLabels());
-                            } else {
-                                labelsToPublish = new ArrayList<>();
-                                labelsRemoved = new ArrayList<>();
-                            }
-                            Set<String> environmentsRemoved = new HashSet<String>(oldApi.getEnvironments());
-
-                            if (!environmentsToPublish.isEmpty() && !environmentsToRemove.isEmpty()) {
-                                // this block will sort what gateways have to remove and published
-                                environmentsRemoved.retainAll(environmentsToPublish);
-                                environmentsToRemove.removeAll(environmentsRemoved);
-                            }
-
-                            if (!labelsToPublish.isEmpty() && !labelsToRemove.isEmpty()) {
-                                // this block will sort what gateways have to remove and published
-                                labelsRemoved.retainAll(labelsToPublish);
-                                labelsToRemove.removeAll(labelsRemoved);
-                            }
-                            apiPublished.setEnvironments(environmentsToRemove);
-                            apiPublished.setGatewayLabels(labelsToRemove);
-                            // map contain failed to remove Environments
-                            Map<String, String> failedToRemoveEnvironments = removeFromGateway(apiPublished);
-
-                            apiPublished.setEnvironments(environmentsToPublish);
-                            apiPublished.setGatewayLabels(labelsToPublish);
-                            // map contain failed to publish Environments
-                            Map<String, String> failedToPublishEnvironments = publishToGateway(apiPublished);
-
-                            environmentsToPublish.removeAll(failedToPublishEnvironments.keySet());
-                            environmentsToPublish.addAll(failedToRemoveEnvironments.keySet());
-                            apiPublished.setEnvironments(environmentsToPublish);
-                            apiPublished.setGatewayLabels(labelsToPublish);
-                            updateApiArtifact(apiPublished, true, false);
-                            failedGateways.clear();
-                            failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
-                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                            replublish(api, failedGateways, oldApi, previousDefaultVersion, publishedDefaultVersion);
                         } else if (!APIConstants.CREATED.equals(api.getStatus()) && !APIConstants.RETIRED
                                 .equals(api.getStatus())) {
                             if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
@@ -1941,7 +1840,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         new HashSet<String>(api.getEnvironments());
                                 publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
                                 api.setEnvironments(publishedEnvironments);
-                                updateApiArtifact(api, true, false);
                                 failedGateways.clear();
                                 failedGateways.put("PUBLISHED", failedToPublishEnvironments);
                                 failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
@@ -1953,36 +1851,46 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             //If gateway(s) exist, remove resource paths saved on the cache.
-
             if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
                 Set<URITemplate> resourceVerbs = api.getUriTemplates();
-
-
-                    if (resourceVerbs != null) {
-                            invalidateResourceCache(api.getContext(), api.getId().getVersion(),resourceVerbs);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Calling invalidation cache");
-                            }
+                if (resourceVerbs != null) {
+                    invalidateResourceCache(api.getContext(), api.getId().getVersion(), resourceVerbs);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Calling invalidation cache");
                     }
-
+                }
             }
 
+            //Validate Transports
+            validateAndSetTransports(api);
+            validateAndSetAPISecurity(api);
+            //This is a fix for broken APIs after migrating from 1.10 to 2.0.0.
+            //This sets the endpoint security of the APIs based on the old artifact.
+            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+            if (gatewayManager.isAPIPublished(api, tenantDomain)) {
+                if (!api.isEndpointSecured() && !api.isEndpointAuthDigest() && api.getEndpointUTUsername() != null) {
+                    String epAuthType = gatewayManager.getAPIEndpointSecurityType(api, tenantDomain);
+                    if (APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH.equalsIgnoreCase(epAuthType)) {
+                        api.setEndpointSecured(true);
+                        api.setEndpointAuthDigest(true);
+                    } else if (APIConstants.APIEndpointSecurityConstants.BASIC_AUTH.equalsIgnoreCase(epAuthType)) {
+                        api.setEndpointSecured(true);
+                    }
+                }
+            }
+            try {
+                apiPersistenceInstance.updateAPI(new Organization(tenantDomain), APIMapper.INSTANCE.toPublisherApi(api));
+            } catch (APIPersistenceException e) {
+                throw new APIManagementException("Error while updating API details", e);
+            }
+            updateWSDL(oldApi);///////////////has registry access /////////////////
 
+            updateDocumentPermissions(api, oldApi);///////////////has registry access /////////////////
             // update apiContext cache
             if (APIUtil.isAPIManagementEnabled()) {
                 Cache contextCache = APIUtil.getAPIContextCache();
                 contextCache.remove(oldApi.getContext());
                 contextCache.put(api.getContext(), Boolean.TRUE);
-            }
-            //update doc visibility
-            List<Documentation> docsList = getAllDocumentation(api.getId());
-            if (docsList != null) {
-                Iterator it = docsList.iterator();
-                while (it.hasNext()) {
-                    Object docsObject = it.next();
-                    Documentation docs = (Documentation) docsObject;
-                    updateDocVisibility(api,docs);
-                }
             }
 
         } else {
@@ -2005,6 +1913,242 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+        return api;
+    }
+    
+    private void updateOtherAPIversionsForNewDefautlAPIChange(API api, String previousDefaultVersion)
+            throws APIManagementException {
+
+        if (previousDefaultVersion != null) {
+
+            APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
+                    previousDefaultVersion);
+            if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
+                // happen
+                // Remove the previous default API entry from the Registry
+                updateDefaultAPIInRegistry(defaultAPIId, false);
+                if (!api.isDefaultVersion()) {// default api tick is removed
+                    // todo: if it is ok, these two variables can be put to the top of the function to remove
+                    // duplication
+                    String gatewayType = getAPIManagerConfiguration().getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+                    if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                        removeDefaultAPIFromGateway(api);
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateDocumentPermissions(API api, API oldApi) throws APIManagementException {
+        
+        boolean updatePermissions = false;
+        if (APIUtil.isAccessControlEnabled()) {
+            if (!oldApi.getAccessControl().equals(api.getAccessControl()) || (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getAccessControl()) &&
+                    !api.getAccessControlRoles().equals(oldApi.getAccessControlRoles())) || !oldApi.getVisibility().equals(api.getVisibility()) ||
+                    (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
+                            !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
+                updatePermissions = true;
+            }
+        } else if (!oldApi.getVisibility().equals(api.getVisibility()) ||
+                (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
+                        !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
+            updatePermissions = true;
+        }
+        
+        String visibleRolesList = api.getVisibleRoles();
+
+        String[] visibleRoles = new String[0];
+        if (visibleRolesList != null) {
+            visibleRoles = visibleRolesList.split(",");
+        }
+        //TODO check if registry.beginTransaction(); flow is needed
+        List<Documentation> docs = getAllDocumentation(api.getId());
+        if (updatePermissions) {
+            APIManagerConfiguration config = getAPIManagerConfiguration();
+            boolean isSetDocLevelPermissions = Boolean.parseBoolean(
+                    config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS));
+            String docRootPath = APIUtil.getAPIDocPath(api.getId());
+            if (isSetDocLevelPermissions) {
+                // Retain the docs
+               
+
+                for (Documentation doc : docs) {
+                    if ((APIConstants.DOC_API_BASED_VISIBILITY).equalsIgnoreCase(doc.getVisibility().name())) {
+                        String documentationPath = APIUtil.getAPIDocPath(api.getId()) + doc.getName();
+                        APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                                visibleRoles, documentationPath, registry);
+                        if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType()) || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
+
+                            String contentPath = APIUtil.getAPIDocContentPath(api.getId(), doc.getName());
+                            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                                    visibleRoles, contentPath, registry);
+                        } else if (Documentation.DocumentSourceType.FILE.equals(doc.getSourceType()) &&
+                                doc.getFilePath() != null) {
+                            String filePath = APIUtil.getDocumentationFilePath(api.getId(), doc.getFilePath()
+                                    .split("files" + RegistryConstants.PATH_SEPARATOR)[1]);
+                            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                                    visibleRoles, filePath, registry);
+                        }
+                    }
+                }
+            } else {
+                APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                        docRootPath, registry);
+            }
+        } else {
+            //In order to support content search feature - we need to update resource permissions of document resources
+            //if their visibility is set to API level.
+
+            if (docs != null) {
+                for (Documentation doc : docs) {
+                    if ((APIConstants.DOC_API_BASED_VISIBILITY).equalsIgnoreCase(doc.getVisibility().name())) {
+                        String documentationPath = APIUtil.getAPIDocPath(api.getId()) + doc.getName();
+                        APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                                visibleRoles, documentationPath, registry);
+                    }
+                }
+            }
+        }
+        
+        //update doc visibility
+        if (docs != null) {
+            Iterator it = docs.iterator();
+            while (it.hasNext()) {
+                Object docsObject = it.next();
+                Documentation doc = (Documentation) docsObject;
+                updateDocVisibility(api,doc);
+            }
+        }
+    }
+    
+    private void updateWSDL(API api) throws APIManagementException {
+        
+        //Update WSDL in the registry
+        if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {////////////////////////
+            updateWsdlFromUrl(api);
+        }
+
+        if (api.getWsdlResource() != null) {//////////////////////////////////////
+            updateWsdlFromResourceFile(api);
+        }
+        
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            if (artifactManager == null) {
+                String errorMessage = "Artifact manager is null when updating API artifact ID " + api.getId();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+
+            if (api.getEndpointConfig() != null && !api.getEndpointConfig().isEmpty()) {
+                // If WSDL URL get change only we update registry WSDL resource. If its registry resource patch we
+                // will skip registry update. Only if this API created with WSDL end point type we need to update
+                // wsdls for each update.
+                // check for wsdl endpoint
+                org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
+                boolean isWSAPI = APIConstants.APITransportType.WS.toString().equals(api.getType());
+                String wsdlURL;
+                if (!isWSAPI && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString())
+                        && response1.has("production_endpoints")) {
+                    wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
+
+                    if (APIUtil.isValidWSDLURL(wsdlURL, true)) {
+                        String path = APIUtil.createWSDL(registry, api);
+                        if (path != null) {
+                            registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
+                        }
+                    }
+                }
+            }
+            registry.commitTransaction();
+            transactionCommitted = true;
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error from this level will mask the original exception
+                log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error occurred while rolling back the transaction.", ex);
+            }
+        }
+    }
+
+    private void replublish(API api, Map<String, Map<String, String>> failedGateways, API oldApi,
+            String previousDefaultVersion, String publishedDefaultVersion) throws APIManagementException {
+        //API api = getAPI(api.getId());//////////////////////////////////////
+        if (api.getId().getVersion().equals(previousDefaultVersion) && !api.isDefaultVersion()) {
+            // default version tick has been removed so a default api for current should not be
+            // added/updated
+            api.setAsPublishedDefaultVersion(false);
+        } else {
+            api.setAsPublishedDefaultVersion(
+                    api.getId().getVersion().equals(publishedDefaultVersion));
+        }
+        api.setOldInSequence(oldApi.getInSequence());
+        api.setOldOutSequence(oldApi.getOutSequence());
+        //old api contain what environments want to remove
+        Set<String> environmentsToRemove = new HashSet<String>(oldApi.getEnvironments());
+        List<Label> labelsToRemove = null;
+        if (oldApi.getGatewayLabels() != null){
+             labelsToRemove = new ArrayList<>(oldApi.getGatewayLabels());
+        } else {
+             labelsToRemove = new ArrayList<>();
+        }
+
+        //updated api contain what environments want to add
+        Set<String> environmentsToPublish = new HashSet<String>(api.getEnvironments());
+        List<Label> labelsToPublish;
+        List<Label> labelsRemoved = null;
+        if (api.getGatewayLabels() != null ){
+            labelsToPublish = new ArrayList<>(api.getGatewayLabels());
+            labelsRemoved = new ArrayList<>(oldApi.getGatewayLabels());
+        } else {
+            labelsToPublish = new ArrayList<>();
+            labelsRemoved = new ArrayList<>();
+        }
+        Set<String> environmentsRemoved = new HashSet<String>(oldApi.getEnvironments());
+
+        if (!environmentsToPublish.isEmpty() && !environmentsToRemove.isEmpty()) {
+            // this block will sort what gateways have to remove and published
+            environmentsRemoved.retainAll(environmentsToPublish);
+            environmentsToRemove.removeAll(environmentsRemoved);
+        }
+
+        if (!labelsToPublish.isEmpty() && !labelsToRemove.isEmpty()) {
+            // this block will sort what gateways have to remove and published
+            labelsRemoved.retainAll(labelsToPublish);
+            labelsToRemove.removeAll(labelsRemoved);
+        }
+        api.setEnvironments(environmentsToRemove);
+        api.setGatewayLabels(labelsToRemove);
+        // map contain failed to remove Environments
+        Map<String, String> failedToRemoveEnvironments = removeFromGateway(api);
+
+        api.setEnvironments(environmentsToPublish);
+        api.setGatewayLabels(labelsToPublish);
+        // map contain failed to publish Environments
+        Map<String, String> failedToPublishEnvironments = publishToGateway(api);
+
+        environmentsToPublish.removeAll(failedToPublishEnvironments.keySet());
+        environmentsToPublish.addAll(failedToRemoveEnvironments.keySet());
+        api.setEnvironments(environmentsToPublish);
+        api.setGatewayLabels(labelsToPublish);
+        failedGateways.clear();
+        failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
+        failedGateways.put("PUBLISHED", failedToPublishEnvironments);
     }
     private void validateKeyManagers(API api) throws APIManagementException {
 
