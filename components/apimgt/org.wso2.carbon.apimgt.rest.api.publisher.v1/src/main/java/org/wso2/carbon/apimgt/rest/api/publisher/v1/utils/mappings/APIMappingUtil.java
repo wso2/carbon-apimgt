@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
@@ -72,6 +73,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentClusterStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
@@ -2748,5 +2752,29 @@ public class APIMappingUtil {
             }
         }
         return endpointSecurityElement;
+    }
+
+    public static APIRevisionDTO fromAPIRevisiontoDTO(APIRevision model) throws APIManagementException {
+        APIRevisionDTO apiRevisionDTO = new APIRevisionDTO();
+        apiRevisionDTO.setId(model.getId());
+        apiRevisionDTO.setUuid(model.getRevisionUUID());
+        apiRevisionDTO.setDescription(model.getDescription());
+        APIRevisionAPIInfoDTO apiRevisionAPIInfoDTO = new APIRevisionAPIInfoDTO();
+        apiRevisionAPIInfoDTO.setId(model.getApiUUID());
+        apiRevisionDTO.setApiInfo(apiRevisionAPIInfoDTO);
+        return  apiRevisionDTO;
+    }
+
+    public static APIRevisionListDTO fromListAPIRevisiontoDTO(List<APIRevision> apiRevisionList) throws APIManagementException {
+        APIRevisionListDTO apiRevisionListDTO = new APIRevisionListDTO();
+        List<APIRevisionDTO> apiRevisionDTOS = new ArrayList<>();
+        int count = 0;
+        for (APIRevision apiRevision: apiRevisionList) {
+            count++;
+            apiRevisionDTOS.add(fromAPIRevisiontoDTO(apiRevision));
+        }
+        apiRevisionListDTO.setCount(count);
+        apiRevisionListDTO.setList(apiRevisionDTOS);
+        return apiRevisionListDTO;
     }
 }
