@@ -232,6 +232,8 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORES_LOCATION =
             APIMGT_REGISTRY_LOCATION + "/externalstores/external-api-stores.xml";
 
+    public static final String EXTERNAL_API_DEVPORTAL_URL_REGEX = "^./devportal$";
+
     public static final String GA_CONFIGURATION_LOCATION = APIMGT_REGISTRY_LOCATION + "/statistics/ga-config.xml";
 
     public static final String GA_CONF_KEY = "ga-config-key";
