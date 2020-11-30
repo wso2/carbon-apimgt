@@ -254,27 +254,6 @@ public class TokenGenTest {
         Assert.assertTrue(header.contains(encodedThumbprint));
     }
 
-    @Test public void testJTI() throws Exception {
-
-        AbstractJWTGenerator jwtGen = new JWTGenerator();
-        APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
-        TokenValidationContext validationContext = new TokenValidationContext();
-        validationContext.setValidationInfoDTO(dto);
-        validationContext.setContext("testAPI");
-        validationContext.setVersion("1.0.0");
-        validationContext.setAccessToken("DUMMY_TOKEN_STRING");
-        dto.setSubscriber("admin");
-        dto.setApplicationName("application");
-        dto.setApplicationId("1");
-        dto.setApplicationTier("UNLIMITED");
-        dto.setEndUserName("subscriber");
-        dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
-        String token = jwtGen.buildBody(validationContext);
-
-        Assert.assertTrue("Contains JTI value in access token", token.contains("jti"));
-    }
-
-
     /**
      * Helper method to hexify a byte array.
      * TODO:need to verify the logic
